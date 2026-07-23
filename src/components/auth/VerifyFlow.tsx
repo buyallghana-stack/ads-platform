@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react'
 
-import { CheckCircle2, Mail } from 'lucide-react'
+import { CheckCircle2, Mail, ShieldCheck } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { FormHeader } from '@/components/auth/FormHeader'
 import { Button } from '@/components/ui/Button'
 import { CodeInput } from '@/components/ui/CodeInput'
 import { resendCodeAction, verifyCodeAction } from '@/app/[locale]/(auth)/actions'
@@ -79,14 +80,14 @@ export function VerifyFlow({ email }: { email: string }) {
   if (step === 'success') {
     return (
       <div className="text-center">
-        <span className="mx-auto grid size-11 place-items-center rounded-full border border-success-500/25 bg-success-50 text-success-600">
-          <CheckCircle2 aria-hidden className="size-5" />
-        </span>
-        <h2 className="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink-900">
-          {t('success.title')}
-        </h2>
-        <p className="mt-1.5 text-[0.8125rem] text-ink-500">{t('success.subtitle')}</p>
-        <Button fullWidth className="mt-6" onClick={() => router.push('/dashboard')}>
+        <FormHeader
+          icon={<CheckCircle2 />}
+          tone="success"
+          title={t('success.title')}
+          subtitle={t('success.subtitle')}
+          className="mb-6"
+        />
+        <Button size="lg" fullWidth onClick={() => router.push('/dashboard')}>
           {t('success.continue')}
         </Button>
       </div>
@@ -96,16 +97,11 @@ export function VerifyFlow({ email }: { email: string }) {
   /* ------------------------------------------------------------------ */
   if (step === 'check-email') {
     return (
-      <div>
-        <span className="grid size-11 place-items-center rounded-full border border-brand-200 bg-brand-50 text-brand-600">
-          <Mail aria-hidden className="size-5" />
-        </span>
-
-        <h2 className="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink-900">
-          {t('checkEmail.title')}
-        </h2>
-        <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-ink-500">
-          {t.rich('checkEmail.subtitle', {
+      <div className="text-center">
+        <FormHeader
+          icon={<Mail />}
+          title={t('checkEmail.title')}
+          subtitle={t.rich('checkEmail.subtitle', {
             email,
             // A tag pair, not an element-as-value. next-intl types placeholder
             // values as string | number | Date, and returning an unkeyed array
@@ -113,9 +109,10 @@ export function VerifyFlow({ email }: { email: string }) {
             // both: the value stays a string, the styling is a tag function.
             em: (chunks) => <span className="font-medium text-ink-900">{chunks}</span>,
           })}
-        </p>
+          className="mb-6"
+        />
 
-        <Button fullWidth className="mt-6" onClick={() => setStep('enter-code')}>
+        <Button size="lg" fullWidth onClick={() => setStep('enter-code')}>
           {t('enterCode.submit')}
         </Button>
 
@@ -132,11 +129,10 @@ export function VerifyFlow({ email }: { email: string }) {
   /* ------------------------------------------------------------------ */
   return (
     <div>
-      <h2 className="text-xl font-semibold tracking-[-0.02em] text-ink-900">
-        {t('enterCode.title')}
-      </h2>
-      <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-ink-500">
-        {t.rich('enterCode.subtitle', {
+      <FormHeader
+        icon={<ShieldCheck />}
+        title={t('enterCode.title')}
+        subtitle={t.rich('enterCode.subtitle', {
           email,
           // A tag pair, not an element-as-value. next-intl types placeholder
           // values as string | number | Date, and returning an unkeyed array
@@ -144,10 +140,11 @@ export function VerifyFlow({ email }: { email: string }) {
           // both: the value stays a string, the styling is a tag function.
           em: (chunks) => <span className="font-medium text-ink-900">{chunks}</span>,
         })}
-      </p>
+        className="mb-6"
+      />
 
       <form
-        className="mt-6 flex flex-col gap-4"
+        className="flex flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault()
           void verify(code)
@@ -163,12 +160,13 @@ export function VerifyFlow({ email }: { email: string }) {
           onComplete={(v) => void verify(v)}
           label={t('enterCode.codeLabel')}
           digitLabel={(position) => t('enterCode.digitLabel', { position })}
+          labelHidden
           error={error ?? undefined}
           disabled={submitting}
           autoFocus
         />
 
-        <Button type="submit" fullWidth loading={submitting} disabled={code.length !== 6}>
+        <Button type="submit" size="lg" fullWidth loading={submitting} disabled={code.length !== 6}>
           {t('enterCode.submit')}
         </Button>
       </form>

@@ -13,30 +13,17 @@
   },
   "auth": {
     "panel": {
-      "headline": "Gagnez grâce à\nvotre attention.",
-      "body": "Regardez de courtes publicités, répondez à une question rapide et accumulez des points convertibles en argent. Sans frais, sans piège — votre temps, récompensé.",
-      "quotes": [
-        {
-          "text": "Je regarde quelques publicités dans le trajet et cela couvre mon forfait data chaque mois. Dix minutes par jour.",
-          "name": "Rebecca Ankobea",
-          "role": "Étudiante, Kumasi"
-        },
-        {
-          "text": "Les questions garantissent l'honnêteté — il faut vraiment regarder. C'est pour cela que les récompenses ont de la valeur.",
-          "name": "Justice Boateng",
-          "role": "Chauffeur, Accra"
-        },
-        {
-          "text": "Le retrait vers MTN MoMo a été simple. J'ai reçu l'argent la semaine même de ma demande.",
-          "name": "Mohammed Farouk",
-          "role": "Commerçante, Takoradi"
-        }
-      ],
-      "features": [
-        "Gagnez des points pour chaque publicité terminée",
-        "Retirez vers mobile money ou crypto",
-        "Inscription gratuite — sans frais"
-      ]
+      "badge": "Conçu pour le Ghana",
+      "headline1": "Regardez des pubs.",
+      "headline2": "Soyez récompensé.",
+      "body": "Des vidéos courtes, une question rapide, de vrais points. Transformez vos minutes libres en mobile money ou en crypto.",
+      "mockup": {
+        "tier": "Membre depuis 2026",
+        "balance": "Solde de points",
+        "today": "Pubs regardées aujourd'hui",
+        "adCompleted": "Publicité terminée",
+        "payoutSent": "Prêt pour le retrait"
+      }
     },
     "signUp": {
       "title": "Créez votre compte",
@@ -59,7 +46,7 @@
       "ghanaOnly": "Disponible au Ghana uniquement."
     },
     "logIn": {
-      "title": "Bon retour",
+      "title": "Bon retour 👋",
       "subtitle": "Connectez-vous pour continuer à gagner.",
       "submit": "Se connecter",
       "email": "Adresse e-mail",

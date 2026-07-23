@@ -3,10 +3,11 @@
 import { useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, Mail } from 'lucide-react'
+import { ArrowLeft, KeyRound, Mail } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 
+import { FormHeader } from '@/components/auth/FormHeader'
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/TextField'
 import { forgotPasswordAction } from '@/app/[locale]/(auth)/actions'
@@ -44,22 +45,19 @@ export function ForgotPasswordForm() {
 
   if (sentTo) {
     return (
-      <div>
-        <span className="grid size-11 place-items-center rounded-full border border-brand-200 bg-brand-50 text-brand-600">
-          <Mail aria-hidden className="size-5" />
-        </span>
-        <h2 className="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink-900">
-          {t('sentTitle')}
-        </h2>
-        <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-ink-500">
-          {t.rich('sentSubtitle', {
+      <div className="text-center">
+        <FormHeader
+          icon={<Mail />}
+          title={t('sentTitle')}
+          subtitle={t.rich('sentSubtitle', {
             email: sentTo,
             em: (chunks) => <span className="font-medium text-ink-900">{chunks}</span>,
           })}
-        </p>
+          className="mb-6"
+        />
         <Link
           href="/login"
-          className="mt-6 inline-flex items-center gap-1.5 text-[0.8125rem] font-medium text-ink-600 hover:text-brand-700"
+          className="inline-flex items-center gap-1.5 text-[0.8125rem] font-medium text-ink-600 hover:text-brand-700"
         >
           <ArrowLeft aria-hidden className="size-3.5" />
           {t('backToLogin')}
@@ -70,10 +68,7 @@ export function ForgotPasswordForm() {
 
   return (
     <div>
-      <header className="mb-6">
-        <h2 className="text-xl font-semibold tracking-[-0.02em] text-ink-900">{t('title')}</h2>
-        <p className="mt-1 text-[0.8125rem] text-ink-500">{t('subtitle')}</p>
-      </header>
+      <FormHeader icon={<KeyRound />} title={t('title')} subtitle={t('subtitle')} />
 
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-3.5">
         <TextField
@@ -83,10 +78,11 @@ export function ForgotPasswordForm() {
           placeholder="you@example.com"
           autoComplete="email"
           autoFocus
+          leadingIcon={<Mail />}
           error={msg(errors.email?.message)}
           {...register('email')}
         />
-        <Button type="submit" fullWidth loading={isSubmitting} className="mt-1.5">
+        <Button type="submit" size="lg" fullWidth loading={isSubmitting} className="mt-1.5">
           {t('submit')}
         </Button>
       </form>

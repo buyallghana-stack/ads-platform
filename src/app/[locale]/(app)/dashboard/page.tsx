@@ -89,7 +89,7 @@ export default async function DashboardPage({
         {status?.account_disabled && (
           <div
             role="alert"
-            className="rounded-[--radius-card] border border-danger-500/25 bg-danger-50 px-4 py-3 text-[0.8125rem] text-danger-700"
+            className="rounded-(--radius-card) border border-danger-500/25 bg-danger-50 px-4 py-3 text-[0.8125rem] text-danger-700"
           >
             {t('accountDisabled')}
           </div>
@@ -98,7 +98,7 @@ export default async function DashboardPage({
         {status?.earning_paused && !status?.account_disabled && (
           <div
             role="status"
-            className="rounded-[--radius-card] border border-warning-500/25 bg-warning-50 px-4 py-3 text-[0.8125rem] text-warning-600"
+            className="rounded-(--radius-card) border border-warning-500/25 bg-warning-50 px-4 py-3 text-[0.8125rem] text-warning-600"
           >
             {t('earningPaused')}
           </div>

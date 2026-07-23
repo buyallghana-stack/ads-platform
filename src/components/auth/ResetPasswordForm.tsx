@@ -3,10 +3,11 @@
 import { useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, LockKeyhole } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Controller, useForm } from 'react-hook-form'
 
+import { FormHeader } from '@/components/auth/FormHeader'
 import { Button } from '@/components/ui/Button'
 import { PasswordField } from '@/components/ui/PasswordField'
 import { Link } from '@/i18n/navigation'
@@ -46,15 +47,15 @@ export function ResetPasswordForm() {
   if (done) {
     return (
       <div className="text-center">
-        <span className="mx-auto grid size-11 place-items-center rounded-full border border-success-500/25 bg-success-50 text-success-600">
-          <CheckCircle2 aria-hidden className="size-5" />
-        </span>
-        <h2 className="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink-900">
-          {t('successTitle')}
-        </h2>
-        <p className="mt-1.5 text-[0.8125rem] text-ink-500">{t('successSubtitle')}</p>
-        <Link href="/login" className="mt-6 block">
-          <Button fullWidth>{tLogIn('submit')}</Button>
+        <FormHeader
+          icon={<CheckCircle2 />}
+          tone="success"
+          title={t('successTitle')}
+          subtitle={t('successSubtitle')}
+          className="mb-6"
+        />
+        <Link href="/login" className="block">
+          <Button size="lg" fullWidth>{tLogIn('submit')}</Button>
         </Link>
       </div>
     )
@@ -62,15 +63,12 @@ export function ResetPasswordForm() {
 
   return (
     <div>
-      <header className="mb-6">
-        <h2 className="text-xl font-semibold tracking-[-0.02em] text-ink-900">{t('title')}</h2>
-        <p className="mt-1 text-[0.8125rem] text-ink-500">{t('subtitle')}</p>
-      </header>
+      <FormHeader icon={<LockKeyhole />} title={t('title')} subtitle={t('subtitle')} />
 
       {formError && (
         <div
           role="alert"
-          className="mb-5 rounded-[--radius-input] border border-danger-500/25 bg-danger-50 px-3 py-2.5 text-[0.8125rem] text-danger-700"
+          className="mb-5 rounded-(--radius-input) border border-danger-500/25 bg-danger-50 px-3 py-2.5 text-[0.8125rem] text-danger-700"
         >
           {formError}
         </div>
@@ -113,7 +111,7 @@ export function ResetPasswordForm() {
           )}
         />
 
-        <Button type="submit" fullWidth loading={isSubmitting} className="mt-1.5">
+        <Button type="submit" size="lg" fullWidth loading={isSubmitting} className="mt-1.5">
           {t('submit')}
         </Button>
       </form>

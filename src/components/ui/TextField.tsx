@@ -7,11 +7,10 @@ import { cn } from '@/lib/cn'
 /**
  * Labelled text input.
  *
- * Sizing follows the dense, technical convention rather than the roomy
- * marketing-page one: 36px tall, 6px radius, 14px text, a hairline border
- * that darkens on hover, and a thin two-tone focus state — border in brand,
- * plus a low-opacity halo. Tall pill-shaped inputs are the clearest signal of
- * an untouched template.
+ * Sizing follows the operator's consumer-fintech reference: 40px tall on
+ * desktop, 44px on touch, 10px radius, an optional muted leading icon
+ * inside the field, a hairline border that darkens on hover, and a thin
+ * two-tone focus state — border in brand, plus a low-opacity halo.
  *
  * Accessibility, which matters more here than on any other form because the
  * failure mode is being locked out rather than inconvenienced:
@@ -24,6 +23,7 @@ export function TextField({
   hint,
   error,
   optionalLabel,
+  leadingIcon,
   className,
   inputClassName,
   id: providedId,
@@ -33,6 +33,8 @@ export function TextField({
   hint?: string
   error?: string
   optionalLabel?: string
+  /** Muted icon inside the left edge of the field, per the reference. */
+  leadingIcon?: React.ReactNode
   /** Applied to the <input>. Keep presentation off the wrapper — putting
    *  `uppercase` on the wrapper also shouted the label. */
   inputClassName?: string
@@ -56,28 +58,39 @@ export function TextField({
         )}
       </label>
 
-      <input
-        id={id}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy || undefined}
-        className={cn(
-          'h-9 w-full rounded-[--radius-input] bg-white px-3 text-sm text-ink-900',
-          // Taller on touch: 36px is a comfortable mouse target and a poor
-          // thumb one. 16px text on touch also stops iOS Safari zooming the
-          // viewport on focus, which it does below 16px and which is
-          // disorienting mid-form.
-          'pointer-coarse:h-11 pointer-coarse:px-3.5 pointer-coarse:text-base',
-          'border transition-[border-color,box-shadow] duration-150',
-          'placeholder:text-ink-400',
-          'focus:outline-none',
-          error
-            ? 'border-danger-500 focus:border-danger-600 focus:shadow-[0_0_0_3px] focus:shadow-danger-500/12'
-            : 'border-ink-200 hover:border-ink-300 focus:border-brand-600 focus:shadow-[0_0_0_3px] focus:shadow-brand-600/12',
-          'disabled:cursor-not-allowed disabled:bg-ink-50 disabled:text-ink-400',
-          inputClassName,
+      <div className="relative">
+        {leadingIcon && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 [&>svg]:size-4"
+          >
+            {leadingIcon}
+          </span>
         )}
-        {...props}
-      />
+        <input
+          id={id}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy || undefined}
+          className={cn(
+            'h-10 w-full rounded-(--radius-input) bg-white px-3.5 text-sm text-ink-900',
+            // Taller on touch: 40px is a comfortable mouse target and a
+            // tight thumb one. 16px text on touch also stops iOS Safari
+            // zooming the viewport on focus, which it does below 16px and
+            // which is disorienting mid-form.
+            'pointer-coarse:h-11 pointer-coarse:text-base',
+            leadingIcon && 'pl-10',
+            'border transition-[border-color,box-shadow] duration-150',
+            'placeholder:text-ink-400',
+            'focus:outline-none',
+            error
+              ? 'border-danger-500 focus:border-danger-600 focus:shadow-[0_0_0_3px] focus:shadow-danger-500/12'
+              : 'border-ink-200 hover:border-ink-300 focus:border-brand-600 focus:shadow-[0_0_0_3px] focus:shadow-brand-600/12',
+            'disabled:cursor-not-allowed disabled:bg-ink-50 disabled:text-ink-400',
+            inputClassName,
+          )}
+          {...props}
+        />
+      </div>
 
       {hint && !error && (
         <p id={hintId} className="text-[0.75rem] leading-snug text-ink-400">

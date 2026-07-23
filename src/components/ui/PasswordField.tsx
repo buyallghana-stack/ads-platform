@@ -2,7 +2,7 @@
 
 import { useId, useState } from 'react'
 
-import { Check, Eye, EyeOff } from 'lucide-react'
+import { Check, Eye, EyeOff, Lock } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { cn } from '@/lib/cn'
@@ -79,6 +79,12 @@ export function PasswordField({
       </div>
 
       <div className="relative">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400"
+        >
+          <Lock className="size-4" />
+        </span>
         <input
           id={id}
           type={visible ? 'text' : 'password'}
@@ -87,10 +93,10 @@ export function PasswordField({
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy || undefined}
           className={cn(
-            'h-9 w-full rounded-[--radius-input] bg-white pl-3 pr-9 text-sm text-ink-900',
+            'h-10 w-full rounded-(--radius-input) bg-white pl-10 pr-10 text-sm text-ink-900',
             // See TextField: taller on touch, and 16px text stops iOS Safari
             // zooming the viewport on focus.
-            'pointer-coarse:h-11 pointer-coarse:pl-3.5 pointer-coarse:pr-12 pointer-coarse:text-base',
+            'pointer-coarse:h-11 pointer-coarse:pr-12 pointer-coarse:text-base',
             'border transition-[border-color,box-shadow] duration-150',
             'placeholder:text-ink-400 focus:outline-none',
             error
@@ -108,10 +114,10 @@ export function PasswordField({
           aria-label={visible ? tCommon('hidePassword') : tCommon('showPassword')}
           aria-pressed={visible}
           className={cn(
-            'absolute right-1 top-1 grid size-7 place-items-center rounded',
+            'absolute right-1.5 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-md',
             'text-ink-400 transition-colors hover:bg-ink-100 hover:text-ink-600',
             // A 28px hit area is well under the 44px touch minimum.
-            'pointer-coarse:right-1.5 pointer-coarse:top-1.5 pointer-coarse:size-8',
+            'pointer-coarse:size-8',
           )}
         >
           {visible ? <EyeOff aria-hidden className="size-4" /> : <Eye aria-hidden className="size-4" />}

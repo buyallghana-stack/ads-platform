@@ -13,30 +13,17 @@
   },
   "auth": {
     "panel": {
-      "headline": "Start earning\nfrom your attention.",
-      "body": "Watch short ads, answer a quick question, and build up points you can turn into cash. No fees, no catch — just your time, rewarded.",
-      "quotes": [
-        {
-          "text": "I watch a few ads on my commute and it covers my data bundle every month. It takes ten minutes a day.",
-          "name": "Rebecca Ankobea",
-          "role": "Student, Kumasi"
-        },
-        {
-          "text": "The questions keep it honest — you actually have to watch. That is why the rewards are worth something.",
-          "name": "Justice Boateng",
-          "role": "Driver, Accra"
-        },
-        {
-          "text": "Cashing out to MTN MoMo was straightforward. I had the money the same week I asked for it.",
-          "name": "Mohammed Farouk",
-          "role": "Trader, Takoradi"
-        }
-      ],
-      "features": [
-        "Earn points for every ad you finish",
-        "Cash out to mobile money or crypto",
-        "Free to join — no fees, ever"
-      ]
+      "badge": "Made for Ghana",
+      "headline1": "Watch ads.",
+      "headline2": "Get rewarded.",
+      "body": "Short videos, one quick question, real points. Turn your spare minutes into mobile money or crypto.",
+      "mockup": {
+        "tier": "Member since 2026",
+        "balance": "Points balance",
+        "today": "Ads watched today",
+        "adCompleted": "Ad completed",
+        "payoutSent": "Ready for payout"
+      }
     },
     "signUp": {
       "title": "Create your account",
@@ -59,7 +46,7 @@
       "ghanaOnly": "Available in Ghana only."
     },
     "logIn": {
-      "title": "Welcome back",
+      "title": "Welcome back 👋",
       "subtitle": "Log in to keep earning.",
       "submit": "Log in",
       "email": "Email address",

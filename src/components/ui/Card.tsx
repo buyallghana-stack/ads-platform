@@ -30,7 +30,7 @@ export function Card({
   return (
     <div
       className={cn(
-        'overflow-hidden rounded-[--radius-card] border border-ink-200 bg-white',
+        'overflow-hidden rounded-(--radius-card) border border-ink-200 bg-white',
         'shadow-[0_1px_2px_0_rgb(15_23_42/0.04)]',
         interactive &&
           'transition-[border-color,box-shadow] duration-150 hover:border-ink-300 hover:shadow-[0_1px_3px_0_rgb(15_23_42/0.08)]',
@@ -137,7 +137,7 @@ export function StatCard({
 
         <div className="flex shrink-0 flex-col items-end gap-2">
           {icon && (
-            <span className="grid size-8 place-items-center rounded-[--radius-input] border border-ink-200 bg-ink-50 text-ink-500 [&>svg]:size-4">
+            <span className="grid size-8 place-items-center rounded-(--radius-input) border border-ink-200 bg-ink-50 text-ink-500 [&>svg]:size-4">
               {icon}
             </span>
           )}

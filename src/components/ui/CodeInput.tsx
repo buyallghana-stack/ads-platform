@@ -35,6 +35,7 @@ export function CodeInput({
   onComplete,
   label,
   digitLabel,
+  labelHidden = false,
   error,
   disabled,
   autoFocus,
@@ -45,6 +46,9 @@ export function CodeInput({
   label: string
   /** Template containing {position}, e.g. "Digit {position} of 6". */
   digitLabel: (position: number) => string
+  /** Keep the label for screen readers but off the screen — for centered
+   *  layouts where the heading above already says what the boxes are. */
+  labelHidden?: boolean
   error?: string
   disabled?: boolean
   autoFocus?: boolean
@@ -108,7 +112,10 @@ export function CodeInput({
 
   return (
     <div className="flex flex-col gap-2">
-      <span id="code-input-label" className="text-[0.8125rem] font-medium text-ink-700">
+      <span
+        id="code-input-label"
+        className={labelHidden ? 'sr-only' : 'text-[0.8125rem] font-medium text-ink-700'}
+      >
         {label}
       </span>
 
@@ -141,7 +148,7 @@ export function CodeInput({
             }}
             onBlur={() => setFocusedIndex(null)}
             className={cn(
-              'h-12 w-full min-w-0 rounded-[--radius-input] border bg-white text-center',
+              'h-12 w-full min-w-0 rounded-(--radius-input) border bg-white text-center',
               'text-lg font-semibold tabular-nums text-ink-900',
               'transition-[border-color,box-shadow] duration-150 focus:outline-none',
               'pointer-coarse:h-14 pointer-coarse:text-xl',

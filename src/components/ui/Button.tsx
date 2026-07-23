@@ -14,23 +14,27 @@ import { cn } from '@/lib/cn'
  *      reads as a flat coloured rectangle; with one it reads as an object.
  *   2. Filled variants get a 1px inset highlight along the top edge, so they
  *      appear lit from above. Subtle enough to be invisible until removed.
- *   3. Small radius and a single tight shadow. Large radii and soft drop
- *      shadows are the template look this is deliberately not.
+ *   3. Filled variants also cast a soft glow in their own hue — the
+ *      reference's primary buttons sit slightly proud of the page rather
+ *      than flat on it. One coloured shadow, kept tight; anything bigger
+ *      tips into bootstrap territory.
  *
- * Sizes align to the input scale (h-8 / h-9 / h-10) so a button beside a field
- * lines up without per-instance nudging.
+ * Sizes align to the input scale (h-9 / h-10 / h-11) so a button beside a
+ * field lines up without per-instance nudging.
  */
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 type Size = 'sm' | 'md' | 'lg'
 
-const HIGHLIGHT = 'inset_0_1px_0_0_rgb(255_255_255/0.14)'
+const HIGHLIGHT = 'inset_0_1px_0_0_rgb(255_255_255/0.16)'
 const LIFT = '0_1px_2px_0_rgb(15_23_42/0.08)'
+const GLOW_BRAND = '0_4px_12px_-2px_rgb(0_104_248/0.35)'
+const GLOW_DANGER = '0_4px_12px_-2px_rgb(220_38_38/0.3)'
 
 const VARIANTS: Record<Variant, string> = {
   primary: cn(
     'bg-brand-600 text-white border-brand-700',
-    `shadow-[${HIGHLIGHT},${LIFT}]`,
+    `shadow-[${HIGHLIGHT},${LIFT},${GLOW_BRAND}]`,
     'hover:bg-brand-700 hover:border-brand-800',
     'active:bg-brand-800',
     'disabled:hover:bg-brand-600 disabled:hover:border-brand-700',
@@ -50,7 +54,7 @@ const VARIANTS: Record<Variant, string> = {
   ),
   danger: cn(
     'bg-danger-600 text-white border-danger-700',
-    `shadow-[${HIGHLIGHT},${LIFT}]`,
+    `shadow-[${HIGHLIGHT},${LIFT},${GLOW_DANGER}]`,
     'hover:bg-danger-700 hover:border-danger-700',
     'active:bg-danger-700',
     'disabled:hover:bg-danger-600',
@@ -71,15 +75,15 @@ const VARIANTS: Record<Variant, string> = {
  * fiddly ones. Pointer type is the thing that actually matters.
  */
 const SIZES: Record<Size, string> = {
-  sm: 'h-8 gap-1.5 px-2.5 text-[0.8125rem] pointer-coarse:h-10 pointer-coarse:px-3',
-  md: 'h-9 gap-2 px-3 text-[0.8125rem] pointer-coarse:h-11 pointer-coarse:px-3.5 pointer-coarse:text-sm',
-  lg: 'h-10 gap-2 px-4 text-sm pointer-coarse:h-12 pointer-coarse:px-5',
+  sm: 'h-9 gap-1.5 px-3 text-[0.8125rem] pointer-coarse:h-10 pointer-coarse:px-3',
+  md: 'h-10 gap-2 px-3.5 text-sm pointer-coarse:h-11 pointer-coarse:px-4',
+  lg: 'h-11 gap-2 px-4 text-sm pointer-coarse:h-12 pointer-coarse:px-5',
 }
 
 const ICON_ONLY: Record<Size, string> = {
-  sm: 'w-8 px-0 pointer-coarse:w-10 pointer-coarse:px-0',
-  md: 'w-9 px-0 pointer-coarse:w-11 pointer-coarse:px-0',
-  lg: 'w-10 px-0 pointer-coarse:w-12 pointer-coarse:px-0',
+  sm: 'w-9 px-0 pointer-coarse:w-10 pointer-coarse:px-0',
+  md: 'w-10 px-0 pointer-coarse:w-11 pointer-coarse:px-0',
+  lg: 'w-11 px-0 pointer-coarse:w-12 pointer-coarse:px-0',
 }
 
 export function Button({
@@ -112,7 +116,7 @@ export function Button({
       aria-busy={loading || undefined}
       disabled={disabled || loading}
       className={cn(
-        'relative inline-flex shrink-0 items-center justify-center rounded-[--radius-input] border',
+        'relative inline-flex shrink-0 items-center justify-center rounded-(--radius-input) border',
         'font-medium tracking-[-0.006em] whitespace-nowrap',
         'transition-[background-color,border-color,color] duration-150',
         // Offset ring rather than a glow, so it stays legible on any surface.

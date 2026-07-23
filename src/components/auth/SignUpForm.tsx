@@ -3,9 +3,11 @@
 import { useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Mail, Phone, Ticket, UserRound, UserRoundPlus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Controller, useForm } from 'react-hook-form'
 
+import { FormHeader } from '@/components/auth/FormHeader'
 import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { PasswordField } from '@/components/ui/PasswordField'
@@ -83,15 +85,12 @@ export function SignUpForm() {
 
   return (
     <div>
-      <header className="mb-6">
-        <h2 className="text-xl font-semibold tracking-[-0.02em] text-ink-900">{t('title')}</h2>
-        <p className="mt-1 text-[0.8125rem] text-ink-500">{t('subtitle')}</p>
-      </header>
+      <FormHeader icon={<UserRoundPlus />} title={t('title')} subtitle={t('subtitle')} />
 
       {formError && (
         <div
           role="alert"
-          className="mb-5 rounded-[--radius-input] border border-danger-500/25 bg-danger-50 px-3 py-2.5 text-[0.8125rem] text-danger-700"
+          className="mb-5 rounded-(--radius-input) border border-danger-500/25 bg-danger-50 px-3 py-2.5 text-[0.8125rem] text-danger-700"
         >
           {formError}
         </div>
@@ -102,6 +101,7 @@ export function SignUpForm() {
           label={t('fullName')}
           placeholder={t('fullNamePlaceholder')}
           autoComplete="name"
+          leadingIcon={<UserRound />}
           error={msg(errors.fullName?.message)}
           {...register('fullName')}
         />
@@ -112,6 +112,7 @@ export function SignUpForm() {
           inputMode="email"
           placeholder={t('emailPlaceholder')}
           autoComplete="email"
+          leadingIcon={<Mail />}
           error={msg(errors.email?.message)}
           {...register('email')}
         />
@@ -122,6 +123,7 @@ export function SignUpForm() {
           inputMode="tel"
           placeholder={t('phonePlaceholder')}
           autoComplete="tel"
+          leadingIcon={<Phone />}
           hint={t('phoneHint')}
           error={msg(errors.phone?.message)}
           {...register('phone')}
@@ -150,6 +152,7 @@ export function SignUpForm() {
           placeholder={t('referralCodePlaceholder')}
           autoCapitalize="characters"
           autoComplete="off"
+          leadingIcon={<Ticket />}
           maxLength={8}
           // On the input, not the wrapper — putting it on the wrapper also
           // shouted the label.
@@ -185,7 +188,7 @@ export function SignUpForm() {
           )}
         />
 
-        <Button type="submit" fullWidth loading={isSubmitting} className="mt-1.5">
+        <Button type="submit" size="lg" fullWidth loading={isSubmitting} className="mt-1.5">
           {t('submit')}
         </Button>
       </form>

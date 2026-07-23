@@ -33,7 +33,7 @@ export async function LegalPending({ titleKey }: { titleKey: 'terms' | 'privacy'
 
         <Card className="mt-4">
           <CardBody className="flex gap-3.5">
-            <span className="grid size-9 shrink-0 place-items-center rounded-[--radius-input] border border-ink-200 bg-ink-50 text-ink-500">
+            <span className="grid size-9 shrink-0 place-items-center rounded-(--radius-input) border border-ink-200 bg-ink-50 text-ink-500">
               <FileText aria-hidden className="size-4" />
             </span>
             <div>

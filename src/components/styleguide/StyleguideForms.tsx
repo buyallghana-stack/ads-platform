@@ -16,7 +16,7 @@ export function StyleguideForms() {
   const [checked, setChecked] = useState(true)
 
   return (
-    <div className="grid gap-5 rounded-[--radius-card] border border-ink-200 bg-white p-4 md:grid-cols-2">
+    <div className="grid gap-5 rounded-(--radius-card) border border-ink-200 bg-white p-4 md:grid-cols-2">
       <div className="flex flex-col gap-4">
         <TextField label="Default" placeholder="you@example.com" />
         <TextField

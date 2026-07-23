@@ -57,7 +57,7 @@ export default async function StyleguidePage({
           title="Buttons"
           note="Every variant carries a border, including the solid ones — a darker shade of its own fill. Filled variants also get a 1px inset highlight along the top edge. Both are invisible until removed, and removing them is what makes a button look flat."
         >
-          <div className="divide-y divide-ink-200 rounded-[--radius-card] border border-ink-200 bg-white px-4">
+          <div className="divide-y divide-ink-200 rounded-(--radius-card) border border-ink-200 bg-white px-4">
             <Row label="Primary">
               <Button size="sm">Small</Button>
               <Button size="md">Medium</Button>
@@ -102,7 +102,7 @@ export default async function StyleguidePage({
           title="Badges"
           note="Tones are named after meaning rather than colour, so tone=&quot;danger&quot; survives a palette change. Tinted rather than solid — a page of solid pills is louder than the data it describes."
         >
-          <div className="flex flex-wrap items-center gap-2 rounded-[--radius-card] border border-ink-200 bg-white p-4">
+          <div className="flex flex-wrap items-center gap-2 rounded-(--radius-card) border border-ink-200 bg-white p-4">
             <Badge>Draft</Badge>
             <Badge tone="brand" dot>Active</Badge>
             <Badge tone="success" dot>Paid</Badge>
@@ -204,7 +204,7 @@ export default async function StyleguidePage({
 
         {/* ---------------------------------------------------------------- */}
         <Section title="Palette" note="Brand blue sampled from the operator's reference: #0068F8.">
-          <div className="flex flex-col gap-4 rounded-[--radius-card] border border-ink-200 bg-white p-4">
+          <div className="flex flex-col gap-4 rounded-(--radius-card) border border-ink-200 bg-white p-4">
             {/*
               Class names written out in full. Tailwind extracts classes by
               scanning source text, so `bg-${name}-${shade}` produces nothing —
@@ -234,7 +234,7 @@ export default async function StyleguidePage({
             ).map((ramp) => (
               <div key={ramp.name}>
                 <p className="mb-1.5 text-[0.75rem] font-medium text-ink-400">{ramp.name}</p>
-                <div className="flex overflow-hidden rounded-[--radius-input] border border-ink-200">
+                <div className="flex overflow-hidden rounded-(--radius-input) border border-ink-200">
                   {ramp.swatches.map(([shade, cls]) => (
                     <div key={shade} className={`h-10 flex-1 ${cls}`} title={`${ramp.name}-${shade}`} />
                   ))}
