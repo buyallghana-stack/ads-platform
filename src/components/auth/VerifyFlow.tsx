@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-import { CheckCircle2, Mail, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Mail, ShieldCheck } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { FormHeader } from '@/components/auth/FormHeader'
@@ -31,6 +31,7 @@ const RESEND_COOLDOWN_SECONDS = 60
 export function VerifyFlow({ email }: { email: string }) {
   const t = useTranslations('auth.verify')
   const tError = useTranslations('auth.errors')
+  const tCommon = useTranslations('common')
   const router = useRouter()
   const msg = useAuthErrorMessage()
 
@@ -129,6 +130,27 @@ export function VerifyFlow({ email }: { email: string }) {
   /* ------------------------------------------------------------------ */
   return (
     <div>
+      {/*
+        Back to the previous step. Without it the code screen is a trap: the
+        email is only shown, not editable, so someone who mistyped it at
+        signup can see the mistake and has no way to act on it. Standard
+        practice on every OTP screen worth copying — and it must be a real
+        control, not a reliance on the browser back button, which on this
+        flow re-enters the same route.
+      */}
+      <button
+        type="button"
+        onClick={() => {
+          setCode('')
+          setError(null)
+          setStep('check-email')
+        }}
+        className="-ml-1 mb-2 inline-flex items-center gap-1.5 rounded-md px-1 py-1 text-[0.8125rem] font-medium text-ink-500 transition-colors hover:text-ink-900"
+      >
+        <ArrowLeft aria-hidden className="size-4" />
+        {tCommon('back')}
+      </button>
+
       <FormHeader
         icon={<ShieldCheck />}
         title={t('enterCode.title')}
@@ -180,6 +202,19 @@ export function VerifyFlow({ email }: { email: string }) {
         <Button variant="ghost" size="sm" onClick={() => void resend()} disabled={resendIn > 0}>
           {resendIn > 0 ? t('enterCode.resendIn', { seconds: resendIn }) : t('enterCode.resend')}
         </Button>
+
+        {/*
+          The escape hatch for the actual problem: a typo in the address.
+          Resending only sends another code to the same wrong inbox, so the
+          two options belong together — this is where people look once the
+          code never arrives.
+        */}
+        <p className="mt-3 border-t border-ink-100 pt-3 text-[0.8125rem] text-ink-500">
+          {t('enterCode.wrongEmail')}{' '}
+          <Link href="/signup" className="font-medium text-ink-900 hover:text-brand-700">
+            {t('enterCode.changeEmail')}
+          </Link>
+        </p>
       </div>
     </div>
   )

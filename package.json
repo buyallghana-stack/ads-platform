@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "shoot": "node scripts/shoot.mjs",
+    "seed": "node scripts/seed-dev.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
