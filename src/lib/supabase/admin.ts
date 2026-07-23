@@ -2,6 +2,8 @@ import 'server-only'
 
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
+import type { Database } from '@/lib/supabase/database.types'
+
 import { clientEnv, requireSecretKey } from '@/lib/env'
 
 /**
@@ -23,7 +25,7 @@ import { clientEnv, requireSecretKey } from '@/lib/env'
  * from reaching another user's points ledger or payout details here?
  */
 export function createAdminClient() {
-  return createSupabaseClient(clientEnv.NEXT_PUBLIC_SUPABASE_URL, requireSecretKey(), {
+  return createSupabaseClient<Database>(clientEnv.NEXT_PUBLIC_SUPABASE_URL, requireSecretKey(), {
     auth: {
       // No session persistence or token refresh: this client is stateless and
       // request-scoped. Persisting would risk bleeding privileged auth state

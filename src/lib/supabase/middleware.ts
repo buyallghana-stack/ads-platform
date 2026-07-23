@@ -2,6 +2,8 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { createServerClient } from '@supabase/ssr'
 
+import type { Database } from '@/lib/supabase/database.types'
+
 import { clientEnv } from '@/lib/env'
 
 /**
@@ -24,7 +26,7 @@ import { clientEnv } from '@/lib/env'
  *      the extra round trip is the correct trade.
  */
 export async function updateSession(request: NextRequest, response: NextResponse) {
-  const supabase = createServerClient(
+  const supabase = createServerClient<Database>(
     clientEnv.NEXT_PUBLIC_SUPABASE_URL,
     clientEnv.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     {

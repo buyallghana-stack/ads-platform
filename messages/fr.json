@@ -160,5 +160,24 @@
     "pendingBody": "Ce document est en cours de préparation avec l'agrément de la plateforme et n'a pas encore été publié. Il sera disponible ici avant l'ouverture du service au public.",
     "pendingContact": "Pour en obtenir une copie avant cette date, écrivez-nous à <em>{email}</em>.",
     "back": "Retour à l'inscription"
+  },
+  "dashboard": {
+    "greeting": "Bon retour, {name}",
+    "there": "vous",
+    "subtitle": "Voici l’état de votre compte aujourd’hui.",
+    "logOut": "Déconnexion",
+    "balance": "Solde de points",
+    "adsToday": "Publicités aujourd’hui",
+    "remaining": "{count} restantes",
+    "tier": "Votre palier",
+    "referralCode": "Code de parrainage",
+    "referralHint": "Partagez pour gagner des bonus",
+    "accountDisabled": "Ce compte est désactivé et ne peut pas gagner de points. Contactez le support si vous pensez qu’il s’agit d’une erreur.",
+    "earningPaused": "Les gains sont suspendus sur la plateforme. Votre solde n’est pas affecté.",
+    "watchTitle": "Regardez et gagnez",
+    "watchDescription": "Vos publicités du jour apparaîtront ici.",
+    "watchBody": "Le lecteur et les questions d’attention sont construits et testés côté serveur. Cet écran s’y connectera une fois son design validé.",
+    "watchFooter": "Les points sont crédités dès que vous répondez correctement.",
+    "comingSoon": "Bientôt"
   }
 }

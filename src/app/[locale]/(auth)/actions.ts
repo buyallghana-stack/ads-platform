@@ -53,7 +53,7 @@ export async function signUpAction(formData: {
   */
   const { data: precheck, error: precheckError } = await admin.rpc('precheck_signup_fraud', {
     p_email: data.email,
-    p_ip: ip,
+    p_ip: ip ?? undefined,
   })
   if (precheckError) return { ok: false, errorKey: 'generic' }
   if (precheck && precheck.allowed === false) {
@@ -116,32 +116,51 @@ export async function signUpAction(formData: {
     await admin.rpc('record_auth_signal', {
       p_user_id: userId,
       p_event_type: 'signup',
-      p_ip: ip,
-      p_user_agent: userAgent,
-      p_country: country,
+      p_ip: ip ?? undefined,
+      p_user_agent: userAgent ?? undefined,
+      p_country: country ?? undefined,
     })
 
     await admin.rpc('evaluate_signup_fraud', {
       p_user_id: userId,
       p_email: data.email,
       p_phone: data.phone,
-      p_ip: ip,
-      p_fingerprint: null, // ThumbmarkJS lands with the fraud client work
+      p_ip: ip ?? undefined,
+      p_fingerprint: undefined, // ThumbmarkJS lands with the fraud client work
     })
 
     if (referrerId && data.referralCode) {
       await admin.rpc('apply_referral_code', {
         p_referee_id: userId,
         p_code: data.referralCode,
-        p_ip: ip,
-        p_fingerprint: null,
+        p_ip: ip ?? undefined,
+        p_fingerprint: undefined,
       })
     }
   } catch {
     // Intentionally ignored — see above.
   }
 
-  return { ok: true, redirectTo: `/verify?email=${encodeURIComponent(data.email)}` }
+  /*
+    Where to send them depends on the project's "Confirm email" setting, which
+    is Supabase config rather than something this code controls:
+
+      confirmation ON  — signUp returns no session, an email goes out, and the
+                         account cannot earn until verified (§6.1).
+      confirmation OFF — signUp returns a session immediately and /verify would
+                         be a dead end asking for a code that was never sent.
+
+    Reading the returned session rather than assuming means flipping that
+    setting never breaks the flow, in either direction.
+  */
+  const isConfirmed = Boolean(signUp.session)
+
+  return {
+    ok: true,
+    redirectTo: isConfirmed
+      ? '/dashboard'
+      : `/verify?email=${encodeURIComponent(data.email)}`,
+  }
 }
 
 export async function logInAction(formData: {
@@ -182,9 +201,9 @@ export async function logInAction(formData: {
       await createAdminClient().rpc('record_auth_signal', {
         p_user_id: session.user.id,
         p_event_type: 'login',
-        p_ip: ip,
-        p_user_agent: userAgent,
-        p_country: country,
+        p_ip: ip ?? undefined,
+        p_user_agent: userAgent ?? undefined,
+        p_country: country ?? undefined,
       })
     } catch {
       // A missing login signal must never block a login.
