@@ -7,7 +7,9 @@ import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/Button'
 import { CodeInput } from '@/components/ui/CodeInput'
-import { Link } from '@/i18n/navigation'
+import { resendCodeAction, verifyCodeAction } from '@/app/[locale]/(auth)/actions'
+import { Link, useRouter } from '@/i18n/navigation'
+import { useAuthErrorMessage } from '@/lib/useAuthErrorMessage'
 
 type Step = 'check-email' | 'enter-code' | 'success'
 
@@ -28,6 +30,8 @@ const RESEND_COOLDOWN_SECONDS = 60
 export function VerifyFlow({ email }: { email: string }) {
   const t = useTranslations('auth.verify')
   const tError = useTranslations('auth.errors')
+  const router = useRouter()
+  const msg = useAuthErrorMessage()
 
   const [step, setStep] = useState<Step>('check-email')
   const [code, setCode] = useState('')
@@ -49,17 +53,26 @@ export function VerifyFlow({ email }: { email: string }) {
     }
     setSubmitting(true)
     setError(null)
-    // Server action lands with the auth wiring. Until then this fails
-    // honestly rather than pretending to succeed.
-    await new Promise((r) => setTimeout(r, 400))
+
+    const result = await verifyCodeAction({ email, code: submitted })
     setSubmitting(false)
-    setError(tError('generic'))
+
+    if (result.ok) {
+      setStep('success')
+      return
+    }
+    setError(msg(result.errorKey) ?? tError('generic'))
   }
 
-  const resend = () => {
+  const resend = async () => {
     setResendIn(RESEND_COOLDOWN_SECONDS)
-    setResent(true)
-    window.setTimeout(() => setResent(false), 5000)
+    const result = await resendCodeAction(email)
+    if (result.ok) {
+      setResent(true)
+      window.setTimeout(() => setResent(false), 5000)
+    } else {
+      setError(msg(result.errorKey) ?? tError('generic'))
+    }
   }
 
   /* ------------------------------------------------------------------ */
@@ -73,7 +86,7 @@ export function VerifyFlow({ email }: { email: string }) {
           {t('success.title')}
         </h2>
         <p className="mt-1.5 text-[0.8125rem] text-ink-500">{t('success.subtitle')}</p>
-        <Button fullWidth className="mt-6" onClick={() => setStep('check-email')}>
+        <Button fullWidth className="mt-6" onClick={() => router.push('/dashboard')}>
           {t('success.continue')}
         </Button>
       </div>
@@ -166,7 +179,7 @@ export function VerifyFlow({ email }: { email: string }) {
             {t('enterCode.resent')}
           </p>
         )}
-        <Button variant="ghost" size="sm" onClick={resend} disabled={resendIn > 0}>
+        <Button variant="ghost" size="sm" onClick={() => void resend()} disabled={resendIn > 0}>
           {resendIn > 0 ? t('enterCode.resendIn', { seconds: resendIn }) : t('enterCode.resend')}
         </Button>
       </div>

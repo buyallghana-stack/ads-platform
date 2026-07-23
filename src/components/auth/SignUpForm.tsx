@@ -10,7 +10,8 @@ import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { PasswordField } from '@/components/ui/PasswordField'
 import { TextField } from '@/components/ui/TextField'
-import { Link } from '@/i18n/navigation'
+import { signUpAction } from '@/app/[locale]/(auth)/actions'
+import { Link, useRouter } from '@/i18n/navigation'
 import { useAuthErrorMessage } from '@/lib/useAuthErrorMessage'
 import { signUpSchema, type SignUpInput } from '@/lib/validation/auth'
 
@@ -19,6 +20,7 @@ export function SignUpForm() {
   const tError = useTranslations('auth.errors')
   const tCommon = useTranslations('common')
 
+  const router = useRouter()
   const msg = useAuthErrorMessage()
 
   const [formError, setFormError] = useState<string | null>(null)
@@ -28,6 +30,7 @@ export function SignUpForm() {
     handleSubmit,
     control,
     watch,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
@@ -46,12 +49,36 @@ export function SignUpForm() {
 
   const password = watch('password') ?? ''
 
-  const onSubmit = handleSubmit(async () => {
+  const onSubmit = handleSubmit(async (values) => {
     setFormError(null)
-    // Server action lands next. Account creation has to run the fraud checks
-    // and referral attribution server-side, and wiring this to a half-built
-    // endpoint would look like it works while doing nothing.
-    setFormError(tError('generic'))
+
+    const result = await signUpAction({
+      fullName: values.fullName,
+      email: values.email,
+      phone: values.phone,
+      password: values.password,
+      referralCode: values.referralCode || undefined,
+      acceptTerms: true,
+    })
+
+    if (result.ok) {
+      router.push(result.redirectTo ?? '/verify')
+      return
+    }
+
+    // Field-specific problems belong on the field; everything else goes to the
+    // banner. A "referral code does not exist" shown at the top of the form
+    // leaves people hunting for which input is wrong.
+    if (result.field) {
+      setError(result.field as keyof SignUpInput, {
+        message: result.errorKey || 'generic',
+      })
+      return
+    }
+
+    // Some checks return copy the server already phrased — a fraud block
+    // explains itself better than a generic key could.
+    setFormError(result.message ?? msg(result.errorKey) ?? tError('generic'))
   })
 
   return (

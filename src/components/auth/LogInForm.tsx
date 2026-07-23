@@ -10,13 +10,15 @@ import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { PasswordField } from '@/components/ui/PasswordField'
 import { TextField } from '@/components/ui/TextField'
-import { Link } from '@/i18n/navigation'
+import { logInAction } from '@/app/[locale]/(auth)/actions'
+import { Link, useRouter } from '@/i18n/navigation'
 import { logInSchema, type LogInInput } from '@/lib/validation/auth'
 import { useAuthErrorMessage } from '@/lib/useAuthErrorMessage'
 
 export function LogInForm() {
   const t = useTranslations('auth.logIn')
   const tError = useTranslations('auth.errors')
+  const router = useRouter()
   const msg = useAuthErrorMessage()
 
   const [formError, setFormError] = useState<string | null>(null)
@@ -35,10 +37,24 @@ export function LogInForm() {
 
   const password = watch('password') ?? ''
 
-  const onSubmit = handleSubmit(async () => {
+  const onSubmit = handleSubmit(async (values) => {
     setFormError(null)
-    // Server action lands with the auth wiring.
-    setFormError(tError('generic'))
+
+    const result = await logInAction({ email: values.email, password: values.password })
+
+    if (result.ok) {
+      router.push(result.redirectTo ?? '/dashboard')
+      return
+    }
+
+    // An unverified account is not a failed login — send them to finish
+    // verifying rather than showing an error they cannot act on.
+    if (result.errorKey === 'emailNotVerified') {
+      router.push(`/verify?email=${encodeURIComponent(values.email)}`)
+      return
+    }
+
+    setFormError(result.message ?? msg(result.errorKey) ?? tError('generic'))
   })
 
   return (

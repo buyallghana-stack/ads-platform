@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form'
 
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/TextField'
+import { forgotPasswordAction } from '@/app/[locale]/(auth)/actions'
 import { Link } from '@/i18n/navigation'
 import { useAuthErrorMessage } from '@/lib/useAuthErrorMessage'
 import { forgotPasswordSchema, type ForgotPasswordInput } from '@/lib/validation/auth'
@@ -32,13 +33,12 @@ export function ForgotPasswordForm() {
   const onSubmit = handleSubmit(async (data) => {
     /*
       Always reports success, whether or not the account exists. Saying "no
-      account found" turns this form into a free membership oracle — an
-      attacker can enumerate which emails are registered, which is exactly the
-      list worth phishing on a platform that pays out money.
-
-      The copy is worded to match: "if an account exists…".
+      account found" turns this form into a membership oracle — an attacker
+      could enumerate registered emails, which on a platform that pays out
+      money is exactly the list worth phishing. The copy matches: "if an
+      account exists…".
     */
-    await new Promise((r) => setTimeout(r, 400))
+    await forgotPasswordAction({ email: data.email })
     setSentTo(data.email)
   })
 

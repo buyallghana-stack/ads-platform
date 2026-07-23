@@ -142,7 +142,11 @@
       "codeInvalid": "That code is not correct. Check it and try again.",
       "codeExpired": "That code has expired. Request a new one.",
       "generic": "Something went wrong. Please try again.",
-      "network": "We could not reach the server. Check your connection and try again."
+      "network": "We could not reach the server. Check your connection and try again.",
+      "emailTaken": "An account with this email already exists. Log in instead.",
+      "referralNotFound": "That referral code does not exist",
+      "invalidCredentials": "That email or password is not correct",
+      "emailNotVerified": "Please verify your email address first"
     }
   },
   "legal": {

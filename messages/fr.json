@@ -142,7 +142,11 @@
       "codeInvalid": "Ce code est incorrect. Vérifiez-le et réessayez.",
       "codeExpired": "Ce code a expiré. Demandez-en un nouveau.",
       "generic": "Une erreur est survenue. Veuillez réessayer.",
-      "network": "Serveur injoignable. Vérifiez votre connexion et réessayez."
+      "network": "Serveur injoignable. Vérifiez votre connexion et réessayez.",
+      "emailTaken": "Un compte existe déjà avec cet e-mail. Connectez-vous.",
+      "referralNotFound": "Ce code de parrainage n'existe pas",
+      "invalidCredentials": "Cet e-mail ou ce mot de passe n'est pas correct",
+      "emailNotVerified": "Veuillez d'abord vérifier votre adresse e-mail"
     }
   },
   "legal": {
