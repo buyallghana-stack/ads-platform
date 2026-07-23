@@ -57,16 +57,29 @@ const VARIANTS: Record<Variant, string> = {
   ),
 }
 
+/**
+ * Sized by INPUT DEVICE, not screen width.
+ *
+ * The dense 32–36px control is a desktop developer-tool convention, and it is
+ * genuinely too small for a thumb: 44px is the accepted minimum touch target,
+ * and most of this platform's users are on phones. Rather than compromise on a
+ * single middling height, `pointer-coarse` grows every control on touch and
+ * leaves it tight for a mouse.
+ *
+ * Width breakpoints get this wrong in both directions — a tablet with a
+ * trackpad would get fat controls, a small touchscreen laptop would get
+ * fiddly ones. Pointer type is the thing that actually matters.
+ */
 const SIZES: Record<Size, string> = {
-  sm: 'h-8 gap-1.5 px-2.5 text-[0.8125rem]',
-  md: 'h-9 gap-2 px-3 text-[0.8125rem]',
-  lg: 'h-10 gap-2 px-4 text-sm',
+  sm: 'h-8 gap-1.5 px-2.5 text-[0.8125rem] pointer-coarse:h-10 pointer-coarse:px-3',
+  md: 'h-9 gap-2 px-3 text-[0.8125rem] pointer-coarse:h-11 pointer-coarse:px-3.5 pointer-coarse:text-sm',
+  lg: 'h-10 gap-2 px-4 text-sm pointer-coarse:h-12 pointer-coarse:px-5',
 }
 
 const ICON_ONLY: Record<Size, string> = {
-  sm: 'w-8 px-0',
-  md: 'w-9 px-0',
-  lg: 'w-10 px-0',
+  sm: 'w-8 px-0 pointer-coarse:w-10 pointer-coarse:px-0',
+  md: 'w-9 px-0 pointer-coarse:w-11 pointer-coarse:px-0',
+  lg: 'w-10 px-0 pointer-coarse:w-12 pointer-coarse:px-0',
 }
 
 export function Button({

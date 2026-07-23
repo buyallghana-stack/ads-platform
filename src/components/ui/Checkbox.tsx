@@ -30,8 +30,8 @@ export function Checkbox({
 
   return (
     <div className={cn('flex flex-col gap-1', className)}>
-      <div className="flex items-start gap-2">
-        <span className="relative mt-[0.1875rem] flex size-4 shrink-0">
+      <div className="flex items-start gap-2 pointer-coarse:gap-2.5">
+        <span className="relative mt-[0.1875rem] flex size-4 shrink-0 pointer-coarse:mt-0.5 pointer-coarse:size-[1.125rem]">
           <input
             id={id}
             type="checkbox"
@@ -45,17 +45,30 @@ export function Checkbox({
               'focus:outline-none focus-visible:border-brand-600',
               'focus-visible:shadow-[0_0_0_3px] focus-visible:shadow-brand-600/12',
               'aria-[invalid]:border-danger-500',
+              /*
+                A 16-18px box is a poor thumb target, but drawing a 44px box
+                would look clumsy next to 13px text. The pseudo-element
+                extends the TAPPABLE area to 44px without changing anything
+                visible — the standard fix, and the reason the checkbox does
+                not need to grow to be usable.
+              */
+              'pointer-coarse:before:absolute pointer-coarse:before:left-1/2 pointer-coarse:before:top-1/2',
+              'pointer-coarse:before:size-11 pointer-coarse:before:-translate-x-1/2 pointer-coarse:before:-translate-y-1/2',
+              'pointer-coarse:before:content-[""]',
             )}
             {...props}
           />
           <Check
             aria-hidden
-            className="pointer-events-none absolute inset-0 m-auto size-2.5 text-white opacity-0 transition-opacity peer-checked:opacity-100"
+            className="pointer-events-none absolute inset-0 m-auto size-2.5 text-white opacity-0 transition-opacity peer-checked:opacity-100 pointer-coarse:size-3"
             strokeWidth={3.5}
           />
         </span>
 
-        <label htmlFor={id} className="cursor-pointer text-[0.8125rem] leading-[1.45] text-ink-600">
+        <label
+          htmlFor={id}
+          className="cursor-pointer text-[0.8125rem] leading-[1.45] text-ink-600 pointer-coarse:text-sm pointer-coarse:leading-[1.5]"
+        >
           {label}
         </label>
       </div>

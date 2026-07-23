@@ -88,6 +88,9 @@ export function PasswordField({
           aria-describedby={describedBy || undefined}
           className={cn(
             'h-9 w-full rounded-[--radius-input] bg-white pl-3 pr-9 text-sm text-ink-900',
+            // See TextField: taller on touch, and 16px text stops iOS Safari
+            // zooming the viewport on focus.
+            'pointer-coarse:h-11 pointer-coarse:pl-3.5 pointer-coarse:pr-12 pointer-coarse:text-base',
             'border transition-[border-color,box-shadow] duration-150',
             'placeholder:text-ink-400 focus:outline-none',
             error
@@ -104,7 +107,12 @@ export function PasswordField({
           // alone says nothing to a screen reader.
           aria-label={visible ? tCommon('hidePassword') : tCommon('showPassword')}
           aria-pressed={visible}
-          className="absolute right-1 top-1 grid size-7 place-items-center rounded text-ink-400 transition-colors hover:bg-ink-100 hover:text-ink-600"
+          className={cn(
+            'absolute right-1 top-1 grid size-7 place-items-center rounded',
+            'text-ink-400 transition-colors hover:bg-ink-100 hover:text-ink-600',
+            // A 28px hit area is well under the 44px touch minimum.
+            'pointer-coarse:right-1.5 pointer-coarse:top-1.5 pointer-coarse:size-8',
+          )}
         >
           {visible ? <EyeOff aria-hidden className="size-4" /> : <Eye aria-hidden className="size-4" />}
         </button>

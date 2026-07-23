@@ -12,10 +12,15 @@ import path from 'node:path'
 
 import { chromium } from '@playwright/test'
 
+/**
+ * `touch` matters as much as size. Controls are sized by pointer type
+ * (`pointer-coarse`), not width, so a desktop browser resized to 390px
+ * reports a fine pointer and screenshots the wrong variant entirely.
+ */
 const VIEWPORTS = [
-  { name: 'mobile', width: 390, height: 844, scale: 2 }, // iPhone 14 class
-  { name: 'tablet', width: 834, height: 1112, scale: 2 }, // iPad Air portrait
-  { name: 'desktop', width: 1440, height: 900, scale: 1 },
+  { name: 'mobile', width: 390, height: 844, scale: 2, touch: true }, // iPhone 14 class
+  { name: 'tablet', width: 834, height: 1112, scale: 2, touch: true }, // iPad Air portrait
+  { name: 'desktop', width: 1440, height: 900, scale: 1, touch: false },
 ]
 
 const route = process.argv[2] ?? '/'
@@ -33,6 +38,10 @@ for (const vp of VIEWPORTS) {
   const context = await browser.newContext({
     viewport: { width: vp.width, height: vp.height },
     deviceScaleFactor: vp.scale,
+    // Drives the `pointer: coarse` media query, so touch sizing is what gets
+    // captured rather than the mouse variant at a small width.
+    hasTouch: vp.touch,
+    isMobile: vp.touch,
     // Reduced motion so the carousel does not land mid-transition and make
     // two runs of the same page look different.
     reducedMotion: 'reduce',
