@@ -1,0 +1,6 @@
+# Native build scripts explicitly reviewed and approved.
+#   sharp         - image optimization behind next/image (required by the §8 perf standards)
+#   unrs-resolver - native module resolver used by eslint-config-next
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
