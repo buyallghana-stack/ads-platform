@@ -73,12 +73,12 @@
     "verify": {
       "checkEmail": {
         "title": "Vérifiez vos e-mails",
-        "subtitle": "Nous avons envoyé un code à 6 chiffres à {email}. Saisissez-le ci-dessous pour confirmer votre compte.",
+        "subtitle": "Nous avons envoyé un code à 6 chiffres à <em>{email}</em>. Saisissez-le ci-dessous pour confirmer votre compte.",
         "openEmail": "Ouvrir l'application e-mail"
       },
       "enterCode": {
         "title": "Saisissez votre code",
-        "subtitle": "Saisissez le code à 6 chiffres envoyé à {email}.",
+        "subtitle": "Saisissez le code à 6 chiffres envoyé à <em>{email}</em>.",
         "codeLabel": "Code de vérification",
         "digitLabel": "Chiffre {position} sur 6",
         "submit": "Vérifier",
@@ -99,7 +99,7 @@
       "subtitle": "Saisissez votre e-mail et nous vous enverrons un lien de réinitialisation.",
       "submit": "Envoyer le lien",
       "sentTitle": "Vérifiez vos e-mails",
-      "sentSubtitle": "Si un compte existe pour {email}, un lien de réinitialisation est en route.",
+      "sentSubtitle": "Si un compte existe pour <em>{email}</em>, un lien de réinitialisation est en route.",
       "backToLogin": "Retour à la connexion"
     },
     "resetPassword": {
@@ -144,5 +144,17 @@
       "generic": "Une erreur est survenue. Veuillez réessayer.",
       "network": "Serveur injoignable. Vérifiez votre connexion et réessayez."
     }
+  },
+  "legal": {
+    "terms": {
+      "title": "Conditions d'utilisation"
+    },
+    "privacy": {
+      "title": "Politique de confidentialité"
+    },
+    "pendingTitle": "Pas encore publié",
+    "pendingBody": "Ce document est en cours de préparation avec l'agrément de la plateforme et n'a pas encore été publié. Il sera disponible ici avant l'ouverture du service au public.",
+    "pendingContact": "Pour en obtenir une copie avant cette date, écrivez-nous à <em>{email}</em>.",
+    "back": "Retour à l'inscription"
   }
 }

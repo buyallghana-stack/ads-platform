@@ -11,14 +11,12 @@ import { Checkbox } from '@/components/ui/Checkbox'
 import { PasswordField } from '@/components/ui/PasswordField'
 import { TextField } from '@/components/ui/TextField'
 import { Link } from '@/i18n/navigation'
+import { logInSchema, type LogInInput } from '@/lib/validation/auth'
 import { useAuthErrorMessage } from '@/lib/useAuthErrorMessage'
-import { signUpSchema, type SignUpInput } from '@/lib/validation/auth'
 
-export function SignUpForm() {
-  const t = useTranslations('auth.signUp')
+export function LogInForm() {
+  const t = useTranslations('auth.logIn')
   const tError = useTranslations('auth.errors')
-  const tCommon = useTranslations('common')
-
   const msg = useAuthErrorMessage()
 
   const [formError, setFormError] = useState<string | null>(null)
@@ -29,28 +27,17 @@ export function SignUpForm() {
     control,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<SignUpInput>({
-    resolver: zodResolver(signUpSchema),
-    // Validate on blur, then live once a field has errored. Validating from
-    // the first keystroke shouts at people mid-word.
+  } = useForm<LogInInput>({
+    resolver: zodResolver(logInSchema),
     mode: 'onTouched',
-    defaultValues: {
-      fullName: '',
-      email: '',
-      phone: '',
-      password: '',
-      referralCode: '',
-      acceptTerms: false as unknown as true,
-    },
+    defaultValues: { email: '', password: '', rememberMe: true },
   })
 
   const password = watch('password') ?? ''
 
   const onSubmit = handleSubmit(async () => {
     setFormError(null)
-    // Server action lands next. Account creation has to run the fraud checks
-    // and referral attribution server-side, and wiring this to a half-built
-    // endpoint would look like it works while doing nothing.
+    // Server action lands with the auth wiring.
     setFormError(tError('generic'))
   })
 
@@ -72,32 +59,13 @@ export function SignUpForm() {
 
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-3.5">
         <TextField
-          label={t('fullName')}
-          placeholder={t('fullNamePlaceholder')}
-          autoComplete="name"
-          error={msg(errors.fullName?.message)}
-          {...register('fullName')}
-        />
-
-        <TextField
           label={t('email')}
           type="email"
           inputMode="email"
-          placeholder={t('emailPlaceholder')}
+          placeholder="you@example.com"
           autoComplete="email"
           error={msg(errors.email?.message)}
           {...register('email')}
-        />
-
-        <TextField
-          label={t('phone')}
-          type="tel"
-          inputMode="tel"
-          placeholder={t('phonePlaceholder')}
-          autoComplete="tel"
-          hint={t('phoneHint')}
-          error={msg(errors.phone?.message)}
-          {...register('phone')}
         />
 
         <Controller
@@ -107,53 +75,39 @@ export function SignUpForm() {
             <PasswordField
               label={t('password')}
               placeholder={t('passwordPlaceholder')}
-              autoComplete="new-password"
+              autoComplete="current-password"
+              // No rule checklist on login: the password either matches what
+              // was set or it does not, and listing requirements here only
+              // hints at the shape of the stored password.
+              showChecklist={false}
               value={password}
               error={msg(errors.password?.message)}
               onChange={field.onChange}
               onBlur={field.onBlur}
               name={field.name}
+              labelAccessory={
+                <Link
+                  href="/forgot-password"
+                  className="text-[0.75rem] font-medium text-ink-500 hover:text-brand-700"
+                >
+                  {t('forgotPassword')}
+                </Link>
+              }
             />
           )}
         />
 
-        <TextField
-          label={t('referralCode')}
-          optionalLabel={tCommon('optional')}
-          placeholder={t('referralCodePlaceholder')}
-          autoCapitalize="characters"
-          autoComplete="off"
-          maxLength={8}
-          // On the input, not the wrapper — putting it on the wrapper also
-          // shouted the label.
-          inputClassName="uppercase tracking-[0.12em] placeholder:normal-case placeholder:tracking-normal"
-          error={msg(errors.referralCode?.message)}
-          {...register('referralCode')}
-        />
-
         <Controller
           control={control}
-          name="acceptTerms"
+          name="rememberMe"
           render={({ field }) => (
             <Checkbox
               className="mt-0.5"
+              label={t('rememberMe')}
               checked={Boolean(field.value)}
               onChange={(e) => field.onChange(e.target.checked)}
               onBlur={field.onBlur}
               name={field.name}
-              error={msg(errors.acceptTerms?.message)}
-              label={t.rich('terms', {
-                terms: (chunks) => (
-                  <Link href="/terms" className="text-ink-900 underline underline-offset-2 hover:text-brand-700">
-                    {chunks}
-                  </Link>
-                ),
-                privacy: (chunks) => (
-                  <Link href="/privacy" className="text-ink-900 underline underline-offset-2 hover:text-brand-700">
-                    {chunks}
-                  </Link>
-                ),
-              })}
             />
           )}
         />
@@ -164,14 +118,10 @@ export function SignUpForm() {
       </form>
 
       <p className="mt-5 text-center text-[0.8125rem] text-ink-500">
-        {t('haveAccount')}{' '}
-        <Link href="/login" className="font-medium text-ink-900 hover:text-brand-700">
-          {t('logIn')}
+        {t('noAccount')}{' '}
+        <Link href="/signup" className="font-medium text-ink-900 hover:text-brand-700">
+          {t('signUp')}
         </Link>
-      </p>
-
-      <p className="mt-7 border-t border-ink-100 pt-4 text-center text-[0.6875rem] text-ink-400">
-        {t('ghanaOnly')}
       </p>
     </div>
   )

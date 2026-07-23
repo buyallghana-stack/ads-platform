@@ -73,12 +73,12 @@
     "verify": {
       "checkEmail": {
         "title": "Check your email",
-        "subtitle": "We sent a 6-digit code to {email}. Enter it below to confirm your account.",
+        "subtitle": "We sent a 6-digit code to <em>{email}</em>. Enter it below to confirm your account.",
         "openEmail": "Open email app"
       },
       "enterCode": {
         "title": "Enter your code",
-        "subtitle": "Enter the 6-digit code we sent to {email}.",
+        "subtitle": "Enter the 6-digit code we sent to <em>{email}</em>.",
         "codeLabel": "Verification code",
         "digitLabel": "Digit {position} of 6",
         "submit": "Verify",
@@ -99,7 +99,7 @@
       "subtitle": "Enter your email and we will send you a reset link.",
       "submit": "Send reset link",
       "sentTitle": "Check your email",
-      "sentSubtitle": "If an account exists for {email}, a reset link is on its way.",
+      "sentSubtitle": "If an account exists for <em>{email}</em>, a reset link is on its way.",
       "backToLogin": "Back to log in"
     },
     "resetPassword": {
@@ -144,5 +144,17 @@
       "generic": "Something went wrong. Please try again.",
       "network": "We could not reach the server. Check your connection and try again."
     }
+  },
+  "legal": {
+    "terms": {
+      "title": "Terms of Service"
+    },
+    "privacy": {
+      "title": "Privacy Policy"
+    },
+    "pendingTitle": "Not published yet",
+    "pendingBody": "This document is being prepared alongside the platform’s licensing and has not been published. It will be available here before the service opens to the public.",
+    "pendingContact": "If you need a copy before then, contact us at <em>{email}</em>.",
+    "back": "Back to sign up"
   }
 }
