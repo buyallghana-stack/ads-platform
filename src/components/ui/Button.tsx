@@ -4,35 +4,69 @@ import { Loader2 } from 'lucide-react'
 
 import { cn } from '@/lib/cn'
 
-type Variant = 'primary' | 'secondary' | 'ghost'
-type Size = 'sm' | 'md'
-
 /**
- * Buttons sized to match the inputs — 36px, 6px radius, 14px medium text.
+ * Button.
  *
- * The primary is a solid brand fill with a slightly darker inset top edge,
- * which gives it a physical read at 1px rather than relying on a drop shadow.
- * A large soft shadow under a saturated slab is the look this is avoiding.
+ * Three details carry the look, and all three are easy to lose:
+ *
+ *   1. EVERY variant has a border, including the solid ones — a darker shade
+ *      of its own fill rather than a neutral. A solid button with no border
+ *      reads as a flat coloured rectangle; with one it reads as an object.
+ *   2. Filled variants get a 1px inset highlight along the top edge, so they
+ *      appear lit from above. Subtle enough to be invisible until removed.
+ *   3. Small radius and a single tight shadow. Large radii and soft drop
+ *      shadows are the template look this is deliberately not.
+ *
+ * Sizes align to the input scale (h-8 / h-9 / h-10) so a button beside a field
+ * lines up without per-instance nudging.
  */
+
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
+type Size = 'sm' | 'md' | 'lg'
+
+const HIGHLIGHT = 'inset_0_1px_0_0_rgb(255_255_255/0.14)'
+const LIFT = '0_1px_2px_0_rgb(15_23_42/0.08)'
+
 const VARIANTS: Record<Variant, string> = {
   primary: cn(
-    'bg-brand-600 text-white',
-    'shadow-[inset_0_1px_0_0_rgb(255_255_255/0.16),0_1px_2px_0_rgb(0_0_0/0.08)]',
-    'hover:bg-brand-700 active:bg-brand-800',
-    'disabled:hover:bg-brand-600',
+    'bg-brand-600 text-white border-brand-700',
+    `shadow-[${HIGHLIGHT},${LIFT}]`,
+    'hover:bg-brand-700 hover:border-brand-800',
+    'active:bg-brand-800',
+    'disabled:hover:bg-brand-600 disabled:hover:border-brand-700',
   ),
   secondary: cn(
-    'bg-white text-ink-700 border border-ink-200',
-    'shadow-[0_1px_2px_0_rgb(0_0_0/0.04)]',
-    'hover:bg-ink-50 hover:border-ink-300 active:bg-ink-100',
-    'disabled:hover:bg-white',
+    'bg-white text-ink-700 border-ink-200',
+    `shadow-[${LIFT}]`,
+    'hover:bg-ink-50 hover:border-ink-300 hover:text-ink-900',
+    'active:bg-ink-100',
+    'disabled:hover:bg-white disabled:hover:border-ink-200',
   ),
-  ghost: 'bg-transparent text-ink-600 hover:bg-ink-100 hover:text-ink-900 active:bg-ink-200',
+  ghost: cn(
+    'bg-transparent text-ink-600 border-transparent shadow-none',
+    'hover:bg-ink-100 hover:text-ink-900',
+    'active:bg-ink-200',
+    'disabled:hover:bg-transparent',
+  ),
+  danger: cn(
+    'bg-danger-600 text-white border-danger-700',
+    `shadow-[${HIGHLIGHT},${LIFT}]`,
+    'hover:bg-danger-700 hover:border-danger-700',
+    'active:bg-danger-700',
+    'disabled:hover:bg-danger-600',
+  ),
 }
 
 const SIZES: Record<Size, string> = {
-  sm: 'h-8 px-3 text-[0.8125rem]',
-  md: 'h-9 px-3.5 text-sm',
+  sm: 'h-8 gap-1.5 px-2.5 text-[0.8125rem]',
+  md: 'h-9 gap-2 px-3 text-[0.8125rem]',
+  lg: 'h-10 gap-2 px-4 text-sm',
+}
+
+const ICON_ONLY: Record<Size, string> = {
+  sm: 'w-8 px-0',
+  md: 'w-9 px-0',
+  lg: 'w-10 px-0',
 }
 
 export function Button({
@@ -40,6 +74,9 @@ export function Button({
   size = 'md',
   loading = false,
   fullWidth = false,
+  iconOnly = false,
+  leadingIcon,
+  trailingIcon,
   className,
   children,
   disabled,
@@ -49,27 +86,43 @@ export function Button({
   size?: Size
   loading?: boolean
   fullWidth?: boolean
+  /** Square button. Requires aria-label, since there is no text to name it. */
+  iconOnly?: boolean
+  leadingIcon?: React.ReactNode
+  trailingIcon?: React.ReactNode
 }) {
   return (
     <button
       // A loading button keeps focus and its accessible name; only aria-busy
-      // changes. Disabling outright would throw focus to the top of the page
-      // mid-submit.
+      // changes. Disabling outright throws focus to the top of the page
+      // mid-submit, which is disorienting on a form.
       aria-busy={loading || undefined}
       disabled={disabled || loading}
       className={cn(
-        'relative inline-flex items-center justify-center gap-2 rounded-[--radius-input]',
-        'font-medium tracking-[-0.006em] transition-colors duration-150',
-        'disabled:cursor-not-allowed disabled:opacity-55',
+        'relative inline-flex shrink-0 items-center justify-center rounded-[--radius-input] border',
+        'font-medium tracking-[-0.006em] whitespace-nowrap',
+        'transition-[background-color,border-color,color] duration-150',
+        // Offset ring rather than a glow, so it stays legible on any surface.
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2',
+        'disabled:cursor-not-allowed disabled:opacity-50',
         VARIANTS[variant],
         SIZES[size],
+        iconOnly && ICON_ONLY[size],
         fullWidth && 'w-full',
         className,
       )}
       {...props}
     >
-      {loading && <Loader2 aria-hidden className="size-3.5 animate-spin" />}
-      {children}
+      {loading ? (
+        <Loader2 aria-hidden className="size-3.5 animate-spin" />
+      ) : (
+        leadingIcon && <span aria-hidden className="[&>svg]:size-3.5">{leadingIcon}</span>
+      )}
+      {!iconOnly && children}
+      {iconOnly && !loading && <span aria-hidden className="[&>svg]:size-4">{children}</span>}
+      {trailingIcon && !loading && (
+        <span aria-hidden className="[&>svg]:size-3.5">{trailingIcon}</span>
+      )}
     </button>
   )
 }
