@@ -1,0 +1,151 @@
+{
+  "common": {
+    "appName": "AdReward",
+    "back": "Back",
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "loading": "Loading…",
+    "optional": "optional",
+    "show": "Show",
+    "hide": "Hide",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  },
+
+  "auth": {
+    "panel": {
+      "headline": "Start earning\nfrom your attention.",
+      "body": "Watch short ads, answer a quick question, and build up points you can turn into cash. No fees, no catch — just your time, rewarded.",
+      "quotes": [
+        {
+          "text": "I watch a few ads on my commute and it covers my data bundle every month. It takes ten minutes a day.",
+          "name": "Ama Boateng",
+          "role": "Student, Kumasi"
+        },
+        {
+          "text": "The questions keep it honest — you actually have to watch. That is why the rewards are worth something.",
+          "name": "Kwame Mensah",
+          "role": "Driver, Accra"
+        },
+        {
+          "text": "Cashing out to MTN MoMo was straightforward. I had the money the same week I asked for it.",
+          "name": "Efua Darko",
+          "role": "Trader, Takoradi"
+        }
+      ]
+    },
+
+    "signUp": {
+      "title": "Create your account",
+      "subtitle": "Join free and start earning points today.",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "logIn": "Log in",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Kwame Mensah",
+      "email": "Email address",
+      "emailPlaceholder": "you@example.com",
+      "phone": "Phone number",
+      "phonePlaceholder": "024 123 4567",
+      "phoneHint": "Used to keep accounts secure. We will not call you.",
+      "password": "Password",
+      "passwordPlaceholder": "Create a strong password",
+      "referralCode": "Referral code",
+      "referralCodePlaceholder": "8 characters",
+      "terms": "I agree to the <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
+      "ghanaOnly": "Available in Ghana only."
+    },
+
+    "logIn": {
+      "title": "Welcome back",
+      "subtitle": "Log in to keep earning.",
+      "submit": "Log in",
+      "email": "Email address",
+      "password": "Password",
+      "passwordPlaceholder": "Your password",
+      "rememberMe": "Keep me signed in",
+      "forgotPassword": "Forgot password?",
+      "noAccount": "New here?",
+      "signUp": "Create an account"
+    },
+
+    "verify": {
+      "checkEmail": {
+        "title": "Check your email",
+        "subtitle": "We sent a 6-digit code to {email}. Enter it below to confirm your account.",
+        "openEmail": "Open email app"
+      },
+      "enterCode": {
+        "title": "Enter your code",
+        "subtitle": "Enter the 6-digit code we sent to {email}.",
+        "codeLabel": "Verification code",
+        "digitLabel": "Digit {position} of 6",
+        "submit": "Verify",
+        "resend": "Resend code",
+        "resendIn": "Resend code in {seconds}s",
+        "resent": "A new code is on its way.",
+        "wrongEmail": "Wrong email address?",
+        "changeEmail": "Change it"
+      },
+      "success": {
+        "title": "You're verified",
+        "subtitle": "Your account is ready. Time to start earning.",
+        "continue": "Go to dashboard"
+      }
+    },
+
+    "forgotPassword": {
+      "title": "Reset your password",
+      "subtitle": "Enter your email and we will send you a reset link.",
+      "submit": "Send reset link",
+      "sentTitle": "Check your email",
+      "sentSubtitle": "If an account exists for {email}, a reset link is on its way.",
+      "backToLogin": "Back to log in"
+    },
+
+    "resetPassword": {
+      "title": "Choose a new password",
+      "subtitle": "Pick something you have not used before.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "submit": "Update password",
+      "successTitle": "Password updated",
+      "successSubtitle": "You can now log in with your new password."
+    },
+
+    "password": {
+      "strength": "Password strength",
+      "veryWeak": "Very weak",
+      "weak": "Weak",
+      "fair": "Fair",
+      "strong": "Strong",
+      "veryStrong": "Very strong",
+      "rules": {
+        "length": "At least 8 characters",
+        "uppercase": "One uppercase letter",
+        "lowercase": "One lowercase letter",
+        "number": "One number",
+        "symbol": "One symbol (e.g. !@#$%^&*)"
+      }
+    },
+
+    "errors": {
+      "fullNameRequired": "Enter your full name",
+      "fullNameTooShort": "That name looks too short",
+      "emailRequired": "Enter your email address",
+      "emailInvalid": "That does not look like a valid email address",
+      "phoneRequired": "Enter your phone number",
+      "phoneInvalid": "Enter a valid Ghanaian number, e.g. 024 123 4567",
+      "passwordRequired": "Enter a password",
+      "passwordTooWeak": "Your password does not meet all the requirements yet",
+      "passwordMismatch": "Passwords do not match",
+      "termsRequired": "You need to accept the terms to continue",
+      "referralInvalid": "Referral codes are 8 characters, letters and numbers",
+      "codeRequired": "Enter the 6-digit code",
+      "codeInvalid": "That code is not correct. Check it and try again.",
+      "codeExpired": "That code has expired. Request a new one.",
+      "generic": "Something went wrong. Please try again.",
+      "network": "We could not reach the server. Check your connection and try again."
+    }
+  }
+}

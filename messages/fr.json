@@ -1,0 +1,151 @@
+{
+  "common": {
+    "appName": "AdReward",
+    "back": "Retour",
+    "continue": "Continuer",
+    "cancel": "Annuler",
+    "loading": "Chargement…",
+    "optional": "facultatif",
+    "show": "Afficher",
+    "hide": "Masquer",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe"
+  },
+
+  "auth": {
+    "panel": {
+      "headline": "Gagnez grâce à\nvotre attention.",
+      "body": "Regardez de courtes publicités, répondez à une question rapide et accumulez des points convertibles en argent. Sans frais, sans piège — votre temps, récompensé.",
+      "quotes": [
+        {
+          "text": "Je regarde quelques publicités dans le trajet et cela couvre mon forfait data chaque mois. Dix minutes par jour.",
+          "name": "Ama Boateng",
+          "role": "Étudiante, Kumasi"
+        },
+        {
+          "text": "Les questions garantissent l'honnêteté — il faut vraiment regarder. C'est pour cela que les récompenses ont de la valeur.",
+          "name": "Kwame Mensah",
+          "role": "Chauffeur, Accra"
+        },
+        {
+          "text": "Le retrait vers MTN MoMo a été simple. J'ai reçu l'argent la semaine même de ma demande.",
+          "name": "Efua Darko",
+          "role": "Commerçante, Takoradi"
+        }
+      ]
+    },
+
+    "signUp": {
+      "title": "Créez votre compte",
+      "subtitle": "Inscrivez-vous gratuitement et commencez à gagner des points dès aujourd'hui.",
+      "submit": "Créer un compte",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "logIn": "Se connecter",
+      "fullName": "Nom complet",
+      "fullNamePlaceholder": "Kwame Mensah",
+      "email": "Adresse e-mail",
+      "emailPlaceholder": "vous@exemple.com",
+      "phone": "Numéro de téléphone",
+      "phonePlaceholder": "024 123 4567",
+      "phoneHint": "Utilisé pour sécuriser les comptes. Nous ne vous appellerons pas.",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Créez un mot de passe fort",
+      "referralCode": "Code de parrainage",
+      "referralCodePlaceholder": "8 caractères",
+      "terms": "J'accepte les <terms>conditions d'utilisation</terms> et la <privacy>politique de confidentialité</privacy>.",
+      "ghanaOnly": "Disponible au Ghana uniquement."
+    },
+
+    "logIn": {
+      "title": "Bon retour",
+      "subtitle": "Connectez-vous pour continuer à gagner.",
+      "submit": "Se connecter",
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Votre mot de passe",
+      "rememberMe": "Rester connecté",
+      "forgotPassword": "Mot de passe oublié ?",
+      "noAccount": "Nouveau ici ?",
+      "signUp": "Créer un compte"
+    },
+
+    "verify": {
+      "checkEmail": {
+        "title": "Vérifiez vos e-mails",
+        "subtitle": "Nous avons envoyé un code à 6 chiffres à {email}. Saisissez-le ci-dessous pour confirmer votre compte.",
+        "openEmail": "Ouvrir l'application e-mail"
+      },
+      "enterCode": {
+        "title": "Saisissez votre code",
+        "subtitle": "Saisissez le code à 6 chiffres envoyé à {email}.",
+        "codeLabel": "Code de vérification",
+        "digitLabel": "Chiffre {position} sur 6",
+        "submit": "Vérifier",
+        "resend": "Renvoyer le code",
+        "resendIn": "Renvoyer le code dans {seconds} s",
+        "resent": "Un nouveau code est en route.",
+        "wrongEmail": "Mauvaise adresse e-mail ?",
+        "changeEmail": "La modifier"
+      },
+      "success": {
+        "title": "Compte vérifié",
+        "subtitle": "Votre compte est prêt. À vous de gagner.",
+        "continue": "Aller au tableau de bord"
+      }
+    },
+
+    "forgotPassword": {
+      "title": "Réinitialiser votre mot de passe",
+      "subtitle": "Saisissez votre e-mail et nous vous enverrons un lien de réinitialisation.",
+      "submit": "Envoyer le lien",
+      "sentTitle": "Vérifiez vos e-mails",
+      "sentSubtitle": "Si un compte existe pour {email}, un lien de réinitialisation est en route.",
+      "backToLogin": "Retour à la connexion"
+    },
+
+    "resetPassword": {
+      "title": "Choisissez un nouveau mot de passe",
+      "subtitle": "Choisissez-en un que vous n'avez pas déjà utilisé.",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmez le nouveau mot de passe",
+      "submit": "Mettre à jour",
+      "successTitle": "Mot de passe mis à jour",
+      "successSubtitle": "Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
+    },
+
+    "password": {
+      "strength": "Robustesse du mot de passe",
+      "veryWeak": "Très faible",
+      "weak": "Faible",
+      "fair": "Moyenne",
+      "strong": "Forte",
+      "veryStrong": "Très forte",
+      "rules": {
+        "length": "Au moins 8 caractères",
+        "uppercase": "Une lettre majuscule",
+        "lowercase": "Une lettre minuscule",
+        "number": "Un chiffre",
+        "symbol": "Un symbole (par ex. !@#$%^&*)"
+      }
+    },
+
+    "errors": {
+      "fullNameRequired": "Saisissez votre nom complet",
+      "fullNameTooShort": "Ce nom semble trop court",
+      "emailRequired": "Saisissez votre adresse e-mail",
+      "emailInvalid": "Cette adresse e-mail ne semble pas valide",
+      "phoneRequired": "Saisissez votre numéro de téléphone",
+      "phoneInvalid": "Saisissez un numéro ghanéen valide, par ex. 024 123 4567",
+      "passwordRequired": "Saisissez un mot de passe",
+      "passwordTooWeak": "Votre mot de passe ne remplit pas encore toutes les conditions",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "termsRequired": "Vous devez accepter les conditions pour continuer",
+      "referralInvalid": "Les codes de parrainage comportent 8 caractères alphanumériques",
+      "codeRequired": "Saisissez le code à 6 chiffres",
+      "codeInvalid": "Ce code est incorrect. Vérifiez-le et réessayez.",
+      "codeExpired": "Ce code a expiré. Demandez-en un nouveau.",
+      "generic": "Une erreur est survenue. Veuillez réessayer.",
+      "network": "Serveur injoignable. Vérifiez votre connexion et réessayez."
+    }
+  }
+}

@@ -1,26 +1,146 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ===========================================================================
+   Design tokens
+   ---------------------------------------------------------------------------
+   The brand blue is sampled from the operator's reference: #0068F8 is the
+   dominant panel colour, with the panel itself running toward #0090F8. That
+   pair is the whole palette — blue and white — so everything else here is
+   neutral greys carrying the layout.
+
+   The scale is generated around brand-600 (#0068F8) rather than picked by eye,
+   so hovers, focus rings and disabled states stay in the same hue family
+   instead of drifting.
+   =========================================================================== */
+
+@theme {
+  /* --- Brand ------------------------------------------------------------ */
+  --color-brand-50:  #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c2fd;
+  --color-brand-400: #5fa3fb;
+  --color-brand-500: #2b83f9;
+  --color-brand-600: #0068f8; /* measured from the reference */
+  --color-brand-700: #0052c9;
+  --color-brand-800: #0043a3;
+  --color-brand-900: #003a86;
+  --color-brand-950: #00245c;
+
+  /* Lighter end of the panel gradient, also measured. */
+  --color-brand-accent: #0090f8;
+
+  /* --- Neutrals --------------------------------------------------------- */
+  --color-ink-50:  #f8fafc;
+  --color-ink-100: #f1f5f9;
+  --color-ink-200: #e2e8f0;
+  --color-ink-300: #cbd5e1;
+  --color-ink-400: #94a3b8;
+  --color-ink-500: #64748b;
+  --color-ink-600: #475569;
+  --color-ink-700: #334155;
+  --color-ink-800: #1e293b;
+  --color-ink-900: #0f172a;
+
+  /* --- Feedback --------------------------------------------------------- */
+  --color-success-50:  #f0fdf4;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+
+  --color-danger-50:  #fef2f2;
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+  --color-danger-700: #b91c1c;
+
+  --color-warning-50:  #fffbeb;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+
+  /* --- Type ------------------------------------------------------------- */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  /* --- Radii ------------------------------------------------------------ */
+  --radius-input: 0.625rem;
+  --radius-card: 1.25rem;
+  --radius-panel: 1.5rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ===========================================================================
+   Base
+   =========================================================================== */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* Anchor navigation should not slam content under a sticky header. */
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    background-color: var(--color-ink-100);
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /*
+    Focus is never removed, only replaced. Keyboard users on an auth form have
+    no other way to tell where they are, and this platform will be used on
+    cheap Android handsets with hardware keyboards more often than the average
+    western product assumes.
+  */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Respect a user's reduced-motion setting rather than overriding it. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ===========================================================================
+   Utilities
+   =========================================================================== */
+
+@layer utilities {
+  /* Visible to screen readers, not to sighted users. */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* The brand panel gradient, matching the reference. */
+  .bg-brand-panel {
+    background:
+      radial-gradient(
+        120% 100% at 100% 0%,
+        var(--color-brand-accent) 0%,
+        transparent 55%
+      ),
+      linear-gradient(
+        160deg,
+        var(--color-brand-600) 0%,
+        var(--color-brand-700) 100%
+      );
+  }
 }

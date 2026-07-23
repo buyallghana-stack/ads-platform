@@ -1,6 +1,10 @@
 # Native build scripts explicitly reviewed and approved.
-#   sharp         - image optimization behind next/image (required by the §8 perf standards)
-#   unrs-resolver - native module resolver used by eslint-config-next
+#   sharp            - image optimization behind next/image (required by the §8 perf standards)
+#   unrs-resolver    - native module resolver used by eslint-config-next
+#   @swc/core        - native compiler used by next-intl's plugin
+#   @parcel/watcher  - native file watcher; dev-only, safe to skip
 allowBuilds:
+  '@parcel/watcher': false
+  '@swc/core': true
   sharp: true
   unrs-resolver: true
