@@ -40,11 +40,11 @@ const VARIANTS: Record<Variant, string> = {
     'disabled:hover:bg-brand-600 disabled:hover:border-brand-700',
   ),
   secondary: cn(
-    'bg-white text-ink-700 border-ink-200',
+    'bg-surface text-ink-700 border-ink-200',
     `shadow-[${LIFT}]`,
     'hover:bg-ink-50 hover:border-ink-300 hover:text-ink-900',
     'active:bg-ink-100',
-    'disabled:hover:bg-white disabled:hover:border-ink-200',
+    'disabled:hover:bg-surface disabled:hover:border-ink-200',
   ),
   ghost: cn(
     'bg-transparent text-ink-600 border-transparent shadow-none',

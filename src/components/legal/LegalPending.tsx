@@ -21,7 +21,7 @@ export async function LegalPending({ titleKey }: { titleKey: 'terms' | 'privacy'
   const t = await getTranslations('legal')
 
   return (
-    <div className="flex min-h-dvh flex-col items-center bg-ink-100 px-5 py-10 sm:px-8">
+    <div className="flex min-h-dvh flex-col items-center bg-canvas px-5 py-10 sm:px-8">
       <div className="w-full max-w-xl">
         <Link href="/signup" className="inline-flex">
           <Logo variant="dark" />

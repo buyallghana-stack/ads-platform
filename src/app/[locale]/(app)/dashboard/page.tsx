@@ -65,8 +65,8 @@ export default async function DashboardPage({
   const remaining = status?.ads_remaining_today ?? 0
 
   return (
-    <div className="min-h-dvh bg-ink-100">
-      <header className="border-b border-ink-200 bg-white">
+    <div className="min-h-dvh bg-canvas">
+      <header className="border-b border-ink-200 bg-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3.5 sm:px-8">
           <Logo variant="dark" />
           <div className="flex items-center gap-3">

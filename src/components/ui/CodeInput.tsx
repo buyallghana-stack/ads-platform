@@ -148,7 +148,7 @@ export function CodeInput({
             }}
             onBlur={() => setFocusedIndex(null)}
             className={cn(
-              'h-12 w-full min-w-0 rounded-(--radius-input) border bg-white text-center',
+              'h-12 w-full min-w-0 rounded-(--radius-input) border bg-surface text-center',
               'text-lg font-semibold tabular-nums text-ink-900',
               'transition-[border-color,box-shadow] duration-150 focus:outline-none',
               'pointer-coarse:h-14 pointer-coarse:text-xl',

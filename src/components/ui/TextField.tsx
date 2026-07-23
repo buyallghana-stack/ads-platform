@@ -72,7 +72,7 @@ export function TextField({
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy || undefined}
           className={cn(
-            'h-10 w-full rounded-(--radius-input) bg-white px-3.5 text-sm text-ink-900',
+            'h-10 w-full rounded-(--radius-input) bg-surface px-3.5 text-sm text-ink-900',
             // Taller on touch: 40px is a comfortable mouse target and a
             // tight thumb one. 16px text on touch also stops iOS Safari
             // zooming the viewport on focus, which it does below 16px and

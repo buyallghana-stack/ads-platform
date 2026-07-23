@@ -1,6 +1,21 @@
 @import 'tailwindcss';
 
 /* ===========================================================================
+   Dark mode strategy
+   ---------------------------------------------------------------------------
+   Theme is driven by a `dark` class on <html>, set by next-themes
+   (defaultTheme="system"). This custom variant teaches Tailwind's `dark:`
+   utilities to key off that class rather than the OS media query directly, so
+   a later in-app light/dark/system toggle can override the OS preference.
+
+   Most of the platform never needs a `dark:` utility, though: the neutral
+   `ink-*` ramp and the surface tokens below are REMAPPED wholesale inside the
+   `.dark { }` block near the end of this file, so components keep referencing
+   the same token and flip automatically.
+   =========================================================================== */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ===========================================================================
    Design tokens
    ---------------------------------------------------------------------------
    The brand blue is sampled from the operator's reference: #0068F8 is the
@@ -29,6 +44,21 @@
 
   /* Lighter end of the panel gradient, also measured. */
   --color-brand-accent: #0090f8;
+
+  /* --- Semantic surfaces ------------------------------------------------
+     Two tokens the neutral ramp cannot express, because both are pure white
+     in light mode and the `ink` scale bottoms out at #f8fafc:
+
+       canvas   the page field a layout sits on
+       surface  a raised sheet — cards, inputs, the auth card, headers
+
+     In light these are the values the design already used (page = ink-100,
+     sheets = white). In dark they are overridden in the `.dark` block to a
+     deep slate canvas with a slightly lifted surface, which is what gives
+     dark its front-to-back layering. Use `bg-canvas` / `bg-surface` instead
+     of a bare white so a sheet knows how to be dark.                         */
+  --color-canvas:  #f1f5f9; /* = ink-100, the established page tone */
+  --color-surface: #ffffff;
 
   /* --- Neutrals --------------------------------------------------------- */
   --color-ink-50:  #f8fafc;
@@ -80,10 +110,13 @@
     -webkit-text-size-adjust: 100%;
     /* Anchor navigation should not slam content under a sticky header. */
     scroll-padding-top: 5rem;
+    /* Tells the UA to render form controls, scrollbars and the like in the
+       active scheme. Overridden per-theme in the `.dark` block. */
+    color-scheme: light;
   }
 
   body {
-    background-color: var(--color-ink-100);
+    background-color: var(--color-canvas);
     color: var(--color-ink-900);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
@@ -141,6 +174,8 @@
     2x screen can round away entirely; an inset shadow does not.
   */
   .ring-hairline {
+    /* ink-200 is remapped to a dark hairline in the .dark block, so this
+       stays correct in both themes without a dark: variant. */
     box-shadow: inset 0 0 0 1px var(--color-ink-200);
   }
 }
@@ -155,26 +190,110 @@
   card sits, saturating to brand blue at the bottom edge. Sampled from the
   operator's reference — the card must feel like it floats on light, not
   sit in a void.
+
+  The gradient itself is a variable (defined in @layer base below and swapped
+  in the .dark block) so the dark theme gets a deep-navy field instead of an
+  inverted-looking light one.
 */
 @utility bg-auth-ambient {
-  background: linear-gradient(
-    178deg,
-    #f4f8ff 0%,
-    #e3eefe 38%,
-    #b7d4fc 72%,
-    #5fa3fb 100%
-  );
+  background: var(--gradient-auth-ambient);
 }
 
 /*
   Promo panel inside the auth card. Light and airy — dark navy headline
   type on a soft blue wash, per the reference — replacing the earlier
   solid deep-blue panel. Two radial pools keep it from reading as a flat
-  tint without becoming noise.
+  tint without becoming noise. Also variable-driven for the dark variant.
 */
 @utility bg-promo-panel {
-  background:
-    radial-gradient(110% 90% at 85% 0%, #ffffff 0%, transparent 55%),
-    radial-gradient(120% 100% at 15% 100%, #a7cbfb 0%, transparent 60%),
-    linear-gradient(160deg, #eaf2fe 0%, #d3e4fd 100%);
+  background: var(--gradient-promo-panel);
+}
+
+/* ===========================================================================
+   Themeable gradients + dark overrides
+   =========================================================================== */
+
+@layer base {
+  :root {
+    --gradient-auth-ambient: linear-gradient(
+      178deg,
+      #f4f8ff 0%,
+      #e3eefe 38%,
+      #b7d4fc 72%,
+      #5fa3fb 100%
+    );
+    --gradient-promo-panel:
+      radial-gradient(110% 90% at 85% 0%, #ffffff 0%, transparent 55%),
+      radial-gradient(120% 100% at 15% 100%, #a7cbfb 0%, transparent 60%),
+      linear-gradient(160deg, #eaf2fe 0%, #d3e4fd 100%);
+  }
+
+  /* -------------------------------------------------------------------------
+     DARK THEME
+     -------------------------------------------------------------------------
+     Derived from the existing blue/white brand, not a mechanical inversion.
+     The neutral ramp is slate (Tailwind's slate family), so dark is a deep
+     slate/navy that sits naturally beside brand blue.
+
+     The `ink-*` scale is redefined by MEANING, exploiting that the design
+     uses low numbers for surfaces/fills and high numbers for text:
+       50-100  recessed fills / hover tints
+       200-300 borders
+       400-700 text, muted -> strong
+       900     primary text (near-white, never pure #fff — softer on OLED)
+
+     Brand blue stays vivid; its 600 base is untouched so primary buttons keep
+     their colour. Only the shades used as tinted feedback backgrounds and
+     on-tint text are lifted, so alerts and badges read on dark.
+     ------------------------------------------------------------------------- */
+  .dark {
+    color-scheme: dark;
+
+    /* Surfaces */
+    --color-canvas:  #0a0f1c; /* page — the darkest plane */
+    --color-surface: #141c2e; /* raised sheets: cards, inputs, headers */
+
+    /* Neutral ramp, remapped by role */
+    --color-ink-50:  #101827; /* recessed fill: card footer tint, disabled */
+    --color-ink-100: #1e2740; /* hover fill on a surface, progress track */
+    --color-ink-200: #28324c; /* hairline border */
+    --color-ink-300: #38445f; /* stronger / hover border */
+    --color-ink-400: #8492ac; /* subtle text, placeholders, dots */
+    --color-ink-500: #9aa7c0; /* muted text */
+    --color-ink-600: #b8c3d8; /* secondary text */
+    --color-ink-700: #d0dae9; /* labels, strong secondary */
+    --color-ink-800: #e2e9f3;
+    --color-ink-900: #eef2f9; /* primary text */
+
+    /* Feedback: lift the tint backgrounds and their on-tint text so alerts
+       and badges stay legible. The vivid -500/-600 fills are left alone. */
+    --color-brand-50:   #12233f;
+    --color-brand-100:  #172c4d;
+    --color-brand-200:  #294a76;
+    --color-brand-700:  #5fa3fb; /* on-tint text + button hover (lifts nicely) */
+    --color-brand-800:  #7cb3fb; /* button active */
+
+    --color-success-50:  #0f2418;
+    --color-success-700: #5ee29a;
+
+    --color-warning-50:  #2a1e08;
+    --color-warning-600: #fbbf24;
+
+    --color-danger-50:   #2a1417;
+    --color-danger-600:  #ef4444; /* error text a touch brighter on dark */
+    --color-danger-700:  #f87171;
+
+    /* Gradients */
+    --gradient-auth-ambient: linear-gradient(
+      176deg,
+      #0b1220 0%,
+      #0d1730 42%,
+      #12224a 74%,
+      #1b3a6e 100%
+    );
+    --gradient-promo-panel:
+      radial-gradient(120% 95% at 85% 0%, #21365f 0%, transparent 55%),
+      radial-gradient(120% 100% at 12% 100%, #12224a 0%, transparent 60%),
+      linear-gradient(160deg, #121b30 0%, #0f1728 100%);
+  }
 }

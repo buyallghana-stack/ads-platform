@@ -25,7 +25,7 @@ export async function PromoPanel() {
 
       <div className="flex flex-1 flex-col items-center justify-center py-6 text-center">
         {/* Status pill, per the reference's "guard active" badge. */}
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-success-500/30 bg-white/80 px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-success-700">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-success-500/30 bg-surface/80 px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-success-700">
           <span aria-hidden className="size-1.5 rounded-full bg-success-500" />
           {t('badge')}
         </span>
@@ -44,7 +44,7 @@ export async function PromoPanel() {
         {/* ------------------------------------------------------------ */}
         <div aria-hidden className="relative mt-8 w-full max-w-[19rem] select-none">
           {/* Central card: a miniature of the points dashboard. */}
-          <div className="rounded-2xl border border-white/70 bg-white/95 p-4 text-left shadow-[0_2px_4px_rgb(15_23_42/0.04),0_24px_48px_-16px_rgb(0_58_134/0.28)]">
+          <div className="rounded-2xl border border-ink-200 bg-surface/95 p-4 text-left shadow-[0_2px_4px_rgb(15_23_42/0.04),0_24px_48px_-16px_rgb(0_58_134/0.28)]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <span className="grid size-8 place-items-center rounded-full bg-brand-100 text-[0.6875rem] font-bold text-brand-700">
@@ -82,7 +82,7 @@ export async function PromoPanel() {
           </div>
 
           {/* Success toast drifting off the top-right corner. */}
-          <div className="absolute -right-3 -top-8 flex rotate-2 items-center gap-2 rounded-xl border border-white/70 bg-white/95 py-2 pl-2 pr-3 shadow-[0_12px_28px_-10px_rgb(0_58_134/0.3)] xl:-right-6">
+          <div className="absolute -right-3 -top-8 flex rotate-2 items-center gap-2 rounded-xl border border-ink-200 bg-surface/95 py-2 pl-2 pr-3 shadow-[0_12px_28px_-10px_rgb(0_58_134/0.3)] xl:-right-6">
             <span className="grid size-6 shrink-0 place-items-center rounded-full bg-success-50 text-success-600">
               <svg viewBox="0 0 16 16" className="size-3.5" fill="none">
                 <path
@@ -101,7 +101,7 @@ export async function PromoPanel() {
           </div>
 
           {/* Payout chip drifting off the bottom-left corner. */}
-          <div className="absolute -bottom-7 -left-3 flex -rotate-2 items-center gap-2 rounded-xl border border-white/70 bg-white/95 py-2 pl-2 pr-3 shadow-[0_12px_28px_-10px_rgb(0_58_134/0.3)] xl:-left-6">
+          <div className="absolute -bottom-7 -left-3 flex -rotate-2 items-center gap-2 rounded-xl border border-ink-200 bg-surface/95 py-2 pl-2 pr-3 shadow-[0_12px_28px_-10px_rgb(0_58_134/0.3)] xl:-left-6">
             <span className="grid size-6 shrink-0 place-items-center rounded-full bg-warning-50 text-warning-600">
               <svg viewBox="0 0 16 16" className="size-3.5" fill="none">
                 <rect x="2.5" y="1.5" width="11" height="13" rx="2" stroke="currentColor" strokeWidth="1.5" />

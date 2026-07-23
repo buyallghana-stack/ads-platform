@@ -4,6 +4,7 @@ import { ArrowRight, Coins, Plus, TrendingUp, Wallet } from 'lucide-react'
 import { setRequestLocale } from 'next-intl/server'
 
 import { StyleguideForms } from '@/components/styleguide/StyleguideForms'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardFooter, CardHeader, StatCard } from '@/components/ui/Card'
@@ -41,15 +42,21 @@ export default async function StyleguidePage({
   setRequestLocale(locale)
 
   return (
-    <div className="min-h-dvh bg-ink-100 px-5 py-10 sm:px-8">
+    <div className="min-h-dvh bg-canvas px-5 py-10 sm:px-8">
       <div className="mx-auto flex max-w-4xl flex-col gap-8">
-        <header>
-          <h1 className="text-xl font-semibold tracking-[-0.02em] text-ink-900">Styleguide</h1>
-          <p className="mt-1 max-w-2xl text-[0.8125rem] leading-relaxed text-ink-500">
-            Every primitive the platform is built from. If a screen needs something not on this
-            page, it belongs here first — that is what keeps eleven dashboard surfaces looking
-            like one product.
-          </p>
+        <header className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-xl font-semibold tracking-[-0.02em] text-ink-900">Styleguide</h1>
+            <p className="mt-1 max-w-2xl text-[0.8125rem] leading-relaxed text-ink-500">
+              Every primitive the platform is built from. If a screen needs something not on this
+              page, it belongs here first — that is what keeps eleven dashboard surfaces looking
+              like one product.
+            </p>
+          </div>
+          {/* The theme choice persists app-wide, so flipping it here also
+              switches signup, login and the dashboard. This lives on the
+              styleguide until the user/admin dashboards ship their own copy. */}
+          <ThemeToggle className="shrink-0" />
         </header>
 
         {/* ---------------------------------------------------------------- */}
@@ -57,7 +64,7 @@ export default async function StyleguidePage({
           title="Buttons"
           note="Every variant carries a border, including the solid ones — a darker shade of its own fill. Filled variants also get a 1px inset highlight along the top edge. Both are invisible until removed, and removing them is what makes a button look flat."
         >
-          <div className="divide-y divide-ink-200 rounded-(--radius-card) border border-ink-200 bg-white px-4">
+          <div className="divide-y divide-ink-200 rounded-(--radius-card) border border-ink-200 bg-surface px-4">
             <Row label="Primary">
               <Button size="sm">Small</Button>
               <Button size="md">Medium</Button>
@@ -102,7 +109,7 @@ export default async function StyleguidePage({
           title="Badges"
           note="Tones are named after meaning rather than colour, so tone=&quot;danger&quot; survives a palette change. Tinted rather than solid — a page of solid pills is louder than the data it describes."
         >
-          <div className="flex flex-wrap items-center gap-2 rounded-(--radius-card) border border-ink-200 bg-white p-4">
+          <div className="flex flex-wrap items-center gap-2 rounded-(--radius-card) border border-ink-200 bg-surface p-4">
             <Badge>Draft</Badge>
             <Badge tone="brand" dot>Active</Badge>
             <Badge tone="success" dot>Paid</Badge>
@@ -204,7 +211,7 @@ export default async function StyleguidePage({
 
         {/* ---------------------------------------------------------------- */}
         <Section title="Palette" note="Brand blue sampled from the operator's reference: #0068F8.">
-          <div className="flex flex-col gap-4 rounded-(--radius-card) border border-ink-200 bg-white p-4">
+          <div className="flex flex-col gap-4 rounded-(--radius-card) border border-ink-200 bg-surface p-4">
             {/*
               Class names written out in full. Tailwind extracts classes by
               scanning source text, so `bg-${name}-${shade}` produces nothing —

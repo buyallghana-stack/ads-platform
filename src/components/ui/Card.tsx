@@ -30,7 +30,7 @@ export function Card({
   return (
     <div
       className={cn(
-        'overflow-hidden rounded-(--radius-card) border border-ink-200 bg-white',
+        'overflow-hidden rounded-(--radius-card) border border-ink-200 bg-surface',
         'shadow-[0_1px_2px_0_rgb(15_23_42/0.04)]',
         interactive &&
           'transition-[border-color,box-shadow] duration-150 hover:border-ink-300 hover:shadow-[0_1px_3px_0_rgb(15_23_42/0.08)]',

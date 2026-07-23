@@ -29,7 +29,7 @@ export function FormHeader({
           'grid size-12 place-items-center rounded-[0.875rem]',
           tone === 'success'
             ? 'border border-success-500/25 bg-success-50 text-success-600'
-            : 'border border-ink-200 bg-white text-brand-600',
+            : 'border border-ink-200 bg-surface text-brand-600',
           'shadow-[0_1px_2px_rgb(15_23_42/0.05),0_4px_10px_-4px_rgb(15_23_42/0.1)]',
           // Descendant selector so it reaches both a bare lucide icon and
           // the svg inside the Logo glyph's wrapping span.

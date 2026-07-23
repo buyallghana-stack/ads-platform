@@ -38,7 +38,7 @@ export function Checkbox({
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? errorId : undefined}
             className={cn(
-              'peer size-full cursor-pointer appearance-none rounded-[4px] border bg-white',
+              'peer size-full cursor-pointer appearance-none rounded-[4px] border bg-surface',
               'transition-colors duration-150',
               'border-ink-300 hover:border-ink-400',
               'checked:border-brand-600 checked:bg-brand-600 checked:hover:bg-brand-700',

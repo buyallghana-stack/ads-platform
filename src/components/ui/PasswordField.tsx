@@ -93,7 +93,7 @@ export function PasswordField({
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy || undefined}
           className={cn(
-            'h-10 w-full rounded-(--radius-input) bg-white pl-10 pr-10 text-sm text-ink-900',
+            'h-10 w-full rounded-(--radius-input) bg-surface pl-10 pr-10 text-sm text-ink-900',
             // See TextField: taller on touch, and 16px text stops iOS Safari
             // zooming the viewport on focus.
             'pointer-coarse:h-11 pointer-coarse:pr-12 pointer-coarse:text-base',

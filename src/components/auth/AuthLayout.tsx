@@ -27,11 +27,11 @@ export function AuthLayout({
   compact?: boolean
 }) {
   return (
-    <div className="flex min-h-dvh flex-col bg-white md:items-center md:justify-center md:bg-auth-ambient md:p-6 lg:p-10">
+    <div className="flex min-h-dvh flex-col bg-surface md:items-center md:justify-center md:bg-auth-ambient md:p-6 lg:p-10">
       <div
         className={cn(
           'flex w-full flex-1 flex-col md:flex-none md:flex-row',
-          'md:max-w-[68rem] md:min-h-[41rem] md:overflow-hidden md:rounded-(--radius-panel) md:bg-white',
+          'md:max-w-[68rem] md:min-h-[41rem] md:overflow-hidden md:rounded-(--radius-panel) md:bg-surface',
           'md:shadow-[0_1px_2px_rgb(15_23_42/0.05),0_32px_64px_-24px_rgb(0_36_92/0.35)]',
         )}
       >

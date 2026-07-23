@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
+import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { routing } from '@/i18n/routing'
 
 import '../globals.css'
@@ -52,9 +53,14 @@ export default async function LocaleLayout({
   setRequestLocale(locale)
 
   return (
-    <html lang={locale} className={`${inter.variable} h-full`}>
+    // suppressHydrationWarning: next-themes writes the resolved theme class
+    // onto <html> before React hydrates, so the server/client class lists
+    // differ by design on the first paint.
+    <html lang={locale} className={`${inter.variable} h-full`} suppressHydrationWarning>
       <body className="min-h-full antialiased">
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <ThemeProvider>
+          <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
