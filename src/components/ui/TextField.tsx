@@ -2,22 +2,22 @@
 
 import { useId } from 'react'
 
-import { AlertCircle } from 'lucide-react'
-
 import { cn } from '@/lib/cn'
 
 /**
- * Labelled text input with hint and error.
+ * Labelled text input.
  *
- * Three accessibility details that matter more on an auth form than anywhere
- * else, because failing them locks people out rather than merely annoying them:
+ * Sizing follows the dense, technical convention rather than the roomy
+ * marketing-page one: 36px tall, 6px radius, 14px text, a hairline border
+ * that darkens on hover, and a thin two-tone focus state — border in brand,
+ * plus a low-opacity halo. Tall pill-shaped inputs are the clearest signal of
+ * an untouched template.
  *
- *   - the label is a real <label>, not a placeholder. Placeholder-as-label
- *     disappears the moment typing starts, which strands anyone who looks away.
- *   - errors are wired through aria-describedby and announced via role="alert",
- *     so a screen reader hears the problem instead of silently failing to submit.
- *   - the error is never colour-only: it carries an icon and text, for the
- *     roughly 8% of men with colour-vision deficiency.
+ * Accessibility, which matters more here than on any other form because the
+ * failure mode is being locked out rather than inconvenienced:
+ *   - a real <label>, never placeholder-as-label
+ *   - errors wired through aria-describedby and announced via role="alert"
+ *   - error state never carried by colour alone
  */
 export function TextField({
   label,
@@ -25,6 +25,7 @@ export function TextField({
   error,
   optionalLabel,
   className,
+  inputClassName,
   id: providedId,
   ...props
 }: Omit<React.ComponentProps<'input'>, 'aria-describedby' | 'aria-invalid'> & {
@@ -32,6 +33,9 @@ export function TextField({
   hint?: string
   error?: string
   optionalLabel?: string
+  /** Applied to the <input>. Keep presentation off the wrapper — putting
+   *  `uppercase` on the wrapper also shouted the label. */
+  inputClassName?: string
 }) {
   const generatedId = useId()
   const id = providedId ?? generatedId
@@ -42,10 +46,13 @@ export function TextField({
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <label htmlFor={id} className="flex items-baseline gap-2 text-sm font-medium text-ink-700">
-        {label}
+      <label
+        htmlFor={id}
+        className="flex items-baseline justify-between text-[0.8125rem] font-medium text-ink-700"
+      >
+        <span>{label}</span>
         {optionalLabel && (
-          <span className="text-xs font-normal text-ink-400">{optionalLabel}</span>
+          <span className="text-[0.75rem] font-normal text-ink-400">{optionalLabel}</span>
         )}
       </label>
 
@@ -54,31 +61,27 @@ export function TextField({
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy || undefined}
         className={cn(
-          'h-12 w-full rounded-[--radius-input] bg-white px-3.5 text-[0.9375rem] text-ink-900',
-          'ring-1 ring-inset transition-shadow duration-150',
+          'h-9 w-full rounded-[--radius-input] bg-white px-3 text-sm text-ink-900',
+          'border transition-[border-color,box-shadow] duration-150',
           'placeholder:text-ink-400',
-          'focus:outline-none focus-visible:ring-2',
+          'focus:outline-none',
           error
-            ? 'ring-danger-500 focus-visible:ring-danger-600'
-            : 'ring-ink-300 hover:ring-ink-400 focus-visible:ring-brand-600',
+            ? 'border-danger-500 focus:border-danger-600 focus:shadow-[0_0_0_3px] focus:shadow-danger-500/12'
+            : 'border-ink-200 hover:border-ink-300 focus:border-brand-600 focus:shadow-[0_0_0_3px] focus:shadow-brand-600/12',
           'disabled:cursor-not-allowed disabled:bg-ink-50 disabled:text-ink-400',
+          inputClassName,
         )}
         {...props}
       />
 
       {hint && !error && (
-        <p id={hintId} className="text-xs text-ink-500">
+        <p id={hintId} className="text-[0.75rem] leading-snug text-ink-400">
           {hint}
         </p>
       )}
 
       {error && (
-        <p
-          id={errorId}
-          role="alert"
-          className="flex items-start gap-1.5 text-xs font-medium text-danger-600"
-        >
-          <AlertCircle aria-hidden className="mt-px size-3.5 shrink-0" />
+        <p id={errorId} role="alert" className="text-[0.75rem] font-medium text-danger-600">
           {error}
         </p>
       )}

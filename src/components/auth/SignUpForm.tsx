@@ -3,7 +3,6 @@
 import { useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { AlertCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Controller, useForm } from 'react-hook-form'
 
@@ -29,8 +28,8 @@ export function SignUpForm() {
     formState: { errors, isSubmitting },
   } = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
-    // Validate on blur, then live once a field has errored. Validating on
-    // every keystroke from the start shouts at people mid-word.
+    // Validate on blur, then live once a field has errored. Validating from
+    // the first keystroke shouts at people mid-word.
     mode: 'onTouched',
     defaultValues: {
       fullName: '',
@@ -45,9 +44,9 @@ export function SignUpForm() {
   const password = watch('password') ?? ''
 
   /**
-   * Schema messages are translation keys, resolved here against the active
-   * locale. Falling back to the raw key would show `emailInvalid` to a user,
-   * so anything unrecognised degrades to the generic message instead.
+   * Schema messages are translation keys, resolved here. Anything
+   * unrecognised degrades to the generic message rather than showing a user
+   * the raw key.
    */
   const msg = (key?: string) => {
     if (!key) return undefined
@@ -61,32 +60,29 @@ export function SignUpForm() {
 
   const onSubmit = handleSubmit(async () => {
     setFormError(null)
-    // Server action lands in the next commit — the account creation path has to
-    // run the fraud checks and referral attribution server-side, and wiring it
-    // to a half-built endpoint would look like it works while doing nothing.
+    // Server action lands next. Account creation has to run the fraud checks
+    // and referral attribution server-side, and wiring this to a half-built
+    // endpoint would look like it works while doing nothing.
     setFormError(tError('generic'))
   })
 
   return (
     <div>
-      <header className="mb-7">
-        <h2 className="text-[1.75rem] font-semibold tracking-[-0.025em] text-ink-900">
-          {t('title')}
-        </h2>
-        <p className="mt-1.5 text-[0.9375rem] text-ink-500">{t('subtitle')}</p>
+      <header className="mb-6">
+        <h2 className="text-xl font-semibold tracking-[-0.02em] text-ink-900">{t('title')}</h2>
+        <p className="mt-1 text-[0.8125rem] text-ink-500">{t('subtitle')}</p>
       </header>
 
       {formError && (
         <div
           role="alert"
-          className="mb-5 flex items-start gap-2.5 rounded-[--radius-input] bg-danger-50 p-3.5 text-sm text-danger-700 ring-1 ring-inset ring-danger-500/20"
+          className="mb-5 rounded-[--radius-input] border border-danger-500/25 bg-danger-50 px-3 py-2.5 text-[0.8125rem] text-danger-700"
         >
-          <AlertCircle aria-hidden className="mt-px size-4 shrink-0" />
           {formError}
         </div>
       )}
 
-      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
+      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-3.5">
         <TextField
           label={t('fullName')}
           placeholder={t('fullNamePlaceholder')}
@@ -140,7 +136,9 @@ export function SignUpForm() {
           autoCapitalize="characters"
           autoComplete="off"
           maxLength={8}
-          className="uppercase"
+          // On the input, not the wrapper — putting it on the wrapper also
+          // shouted the label.
+          inputClassName="uppercase tracking-[0.12em] placeholder:normal-case placeholder:tracking-normal"
           error={msg(errors.referralCode?.message)}
           {...register('referralCode')}
         />
@@ -150,7 +148,7 @@ export function SignUpForm() {
           name="acceptTerms"
           render={({ field }) => (
             <Checkbox
-              className="mt-1"
+              className="mt-0.5"
               checked={Boolean(field.value)}
               onChange={(e) => field.onChange(e.target.checked)}
               onBlur={field.onBlur}
@@ -158,12 +156,12 @@ export function SignUpForm() {
               error={msg(errors.acceptTerms?.message)}
               label={t.rich('terms', {
                 terms: (chunks) => (
-                  <Link href="/terms" className="font-medium text-brand-700 hover:underline">
+                  <Link href="/terms" className="text-ink-900 underline underline-offset-2 hover:text-brand-700">
                     {chunks}
                   </Link>
                 ),
                 privacy: (chunks) => (
-                  <Link href="/privacy" className="font-medium text-brand-700 hover:underline">
+                  <Link href="/privacy" className="text-ink-900 underline underline-offset-2 hover:text-brand-700">
                     {chunks}
                   </Link>
                 ),
@@ -172,19 +170,21 @@ export function SignUpForm() {
           )}
         />
 
-        <Button type="submit" fullWidth loading={isSubmitting} className="mt-2">
+        <Button type="submit" fullWidth loading={isSubmitting} className="mt-1.5">
           {t('submit')}
         </Button>
       </form>
 
-      <p className="mt-5 text-center text-sm text-ink-500">
+      <p className="mt-5 text-center text-[0.8125rem] text-ink-500">
         {t('haveAccount')}{' '}
-        <Link href="/login" className="font-semibold text-brand-700 hover:underline">
+        <Link href="/login" className="font-medium text-ink-900 hover:text-brand-700">
           {t('logIn')}
         </Link>
       </p>
 
-      <p className="mt-6 text-center text-xs text-ink-400">{t('ghanaOnly')}</p>
+      <p className="mt-7 border-t border-ink-100 pt-4 text-center text-[0.6875rem] text-ink-400">
+        {t('ghanaOnly')}
+      </p>
     </div>
   )
 }

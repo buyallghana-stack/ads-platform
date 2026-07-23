@@ -11,7 +11,6 @@
     "showPassword": "Afficher le mot de passe",
     "hidePassword": "Masquer le mot de passe"
   },
-
   "auth": {
     "panel": {
       "headline": "Gagnez grâce à\nvotre attention.",
@@ -32,9 +31,13 @@
           "name": "Efua Darko",
           "role": "Commerçante, Takoradi"
         }
+      ],
+      "features": [
+        "Gagnez des points pour chaque publicité terminée",
+        "Retirez vers mobile money ou crypto",
+        "Inscription gratuite — sans frais"
       ]
     },
-
     "signUp": {
       "title": "Créez votre compte",
       "subtitle": "Inscrivez-vous gratuitement et commencez à gagner des points dès aujourd'hui.",
@@ -55,7 +58,6 @@
       "terms": "J'accepte les <terms>conditions d'utilisation</terms> et la <privacy>politique de confidentialité</privacy>.",
       "ghanaOnly": "Disponible au Ghana uniquement."
     },
-
     "logIn": {
       "title": "Bon retour",
       "subtitle": "Connectez-vous pour continuer à gagner.",
@@ -68,7 +70,6 @@
       "noAccount": "Nouveau ici ?",
       "signUp": "Créer un compte"
     },
-
     "verify": {
       "checkEmail": {
         "title": "Vérifiez vos e-mails",
@@ -93,7 +94,6 @@
         "continue": "Aller au tableau de bord"
       }
     },
-
     "forgotPassword": {
       "title": "Réinitialiser votre mot de passe",
       "subtitle": "Saisissez votre e-mail et nous vous enverrons un lien de réinitialisation.",
@@ -102,7 +102,6 @@
       "sentSubtitle": "Si un compte existe pour {email}, un lien de réinitialisation est en route.",
       "backToLogin": "Retour à la connexion"
     },
-
     "resetPassword": {
       "title": "Choisissez un nouveau mot de passe",
       "subtitle": "Choisissez-en un que vous n'avez pas déjà utilisé.",
@@ -112,7 +111,6 @@
       "successTitle": "Mot de passe mis à jour",
       "successSubtitle": "Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
     },
-
     "password": {
       "strength": "Robustesse du mot de passe",
       "veryWeak": "Très faible",
@@ -128,7 +126,6 @@
         "symbol": "Un symbole (par ex. !@#$%^&*)"
       }
     },
-
     "errors": {
       "fullNameRequired": "Saisissez votre nom complet",
       "fullNameTooShort": "Ce nom semble trop court",

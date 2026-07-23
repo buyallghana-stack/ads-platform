@@ -5,26 +5,39 @@ import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/cn'
 
 type Variant = 'primary' | 'secondary' | 'ghost'
-type Size = 'md' | 'lg'
+type Size = 'sm' | 'md'
 
+/**
+ * Buttons sized to match the inputs — 36px, 6px radius, 14px medium text.
+ *
+ * The primary is a solid brand fill with a slightly darker inset top edge,
+ * which gives it a physical read at 1px rather than relying on a drop shadow.
+ * A large soft shadow under a saturated slab is the look this is avoiding.
+ */
 const VARIANTS: Record<Variant, string> = {
-  primary:
-    'bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 ' +
-    'shadow-sm shadow-brand-600/20 disabled:hover:bg-brand-600',
-  secondary:
-    'bg-white text-ink-700 ring-1 ring-inset ring-ink-300 hover:bg-ink-50 ' +
-    'active:bg-ink-100 disabled:hover:bg-white',
-  ghost: 'bg-transparent text-brand-700 hover:bg-brand-50 active:bg-brand-100',
+  primary: cn(
+    'bg-brand-600 text-white',
+    'shadow-[inset_0_1px_0_0_rgb(255_255_255/0.16),0_1px_2px_0_rgb(0_0_0/0.08)]',
+    'hover:bg-brand-700 active:bg-brand-800',
+    'disabled:hover:bg-brand-600',
+  ),
+  secondary: cn(
+    'bg-white text-ink-700 border border-ink-200',
+    'shadow-[0_1px_2px_0_rgb(0_0_0/0.04)]',
+    'hover:bg-ink-50 hover:border-ink-300 active:bg-ink-100',
+    'disabled:hover:bg-white',
+  ),
+  ghost: 'bg-transparent text-ink-600 hover:bg-ink-100 hover:text-ink-900 active:bg-ink-200',
 }
 
 const SIZES: Record<Size, string> = {
-  md: 'h-11 px-4 text-sm',
-  lg: 'h-12 px-5 text-[0.9375rem]',
+  sm: 'h-8 px-3 text-[0.8125rem]',
+  md: 'h-9 px-3.5 text-sm',
 }
 
 export function Button({
   variant = 'primary',
-  size = 'lg',
+  size = 'md',
   loading = false,
   fullWidth = false,
   className,
@@ -39,15 +52,15 @@ export function Button({
 }) {
   return (
     <button
-      // A loading button stays focusable and keeps its accessible name; only
-      // `aria-busy` changes. Disabling it outright would move focus to the top
-      // of the page mid-submit, which is disorienting on a form.
+      // A loading button keeps focus and its accessible name; only aria-busy
+      // changes. Disabling outright would throw focus to the top of the page
+      // mid-submit.
       aria-busy={loading || undefined}
       disabled={disabled || loading}
       className={cn(
         'relative inline-flex items-center justify-center gap-2 rounded-[--radius-input]',
-        'font-semibold tracking-[-0.01em] transition-colors duration-150',
-        'disabled:cursor-not-allowed disabled:opacity-60',
+        'font-medium tracking-[-0.006em] transition-colors duration-150',
+        'disabled:cursor-not-allowed disabled:opacity-55',
         VARIANTS[variant],
         SIZES[size],
         fullWidth && 'w-full',
@@ -55,7 +68,7 @@ export function Button({
       )}
       {...props}
     >
-      {loading && <Loader2 aria-hidden className="size-4 animate-spin" />}
+      {loading && <Loader2 aria-hidden className="size-3.5 animate-spin" />}
       {children}
     </button>
   )

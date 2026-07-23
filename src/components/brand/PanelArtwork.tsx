@@ -1,90 +1,59 @@
 /**
- * Decorative artwork for the brand panel.
+ * Decorative texture for the brand panel.
  *
- * Inline SVG rather than a photograph, deliberately:
+ * Deliberately quiet. The previous version put hard concentric rings and a
+ * large play triangle behind the headline, which competed with the type
+ * instead of supporting it — the panel read as busy rather than considered.
+ * This is a fine grid with two soft blooms: visible enough that the panel is
+ * not flat, faint enough that you notice the words first.
  *
- *   - Licensing. This is a commercial product that will handle real money.
- *     Stock imagery pulled off the web carries real exposure, and "we found it
- *     on Google" is not a licence. Everything here is drawn in this file.
- *   - Weight. Roughly 2 KB gzipped against 200 KB+ for a hero photograph.
- *     Users are on Ghanaian mobile data, and this is the first screen they
- *     ever load (§8).
- *   - Colour. It is drawn in currentColor and brand tokens, so it can never
- *     clash with the palette the way a stock photo would.
- *
- * Motif: concentric rings radiating from a play mark — attention going out,
- * value coming back. Purely decorative, so it is hidden from assistive
- * technology.
+ * Inline SVG rather than a photograph, on purpose:
+ *   - Licensing. This product will handle real money; "found on Google" is
+ *     not a licence, and reverse image search makes it trivially checkable.
+ *   - Weight. Around 1 KB gzipped against 200 KB+ for a hero image, on the
+ *     first screen a user ever loads over Ghanaian mobile data (§8).
+ *   - Colour. Drawn in brand tokens, so it cannot drift out of palette.
  */
 export function PanelArtwork({ className }: { className?: string }) {
   return (
     <svg
       aria-hidden
-      viewBox="0 0 480 480"
+      viewBox="0 0 600 600"
+      preserveAspectRatio="xMidYMid slice"
       className={className}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <radialGradient id="pa-fade" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#fff" stopOpacity="0.28" />
-          <stop offset="70%" stopColor="#fff" stopOpacity="0.06" />
+        <pattern id="pa-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M40 0H0v40" stroke="#fff" strokeOpacity="0.06" strokeWidth="1" fill="none" />
+        </pattern>
+
+        <radialGradient id="pa-bloom-a" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#fff" stopOpacity="0.16" />
           <stop offset="100%" stopColor="#fff" stopOpacity="0" />
         </radialGradient>
 
-        <linearGradient id="pa-ring" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#fff" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="#fff" stopOpacity="0.05" />
-        </linearGradient>
+        <radialGradient id="pa-bloom-b" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#7cc4ff" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="#7cc4ff" stopOpacity="0" />
+        </radialGradient>
 
-        <pattern id="pa-dots" width="26" height="26" patternUnits="userSpaceOnUse">
-          <circle cx="1.5" cy="1.5" r="1.5" fill="#fff" fillOpacity="0.14" />
-        </pattern>
+        {/* Fade the grid out toward the bottom so it never fights the copy. */}
+        <linearGradient id="pa-grid-fade" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#fff" stopOpacity="0.9" />
+          <stop offset="55%" stopColor="#fff" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+        <mask id="pa-grid-mask">
+          <rect width="600" height="600" fill="url(#pa-grid-fade)" />
+        </mask>
       </defs>
 
-      {/* Dot field, faded out at the edges so it reads as texture not tiling */}
-      <rect width="480" height="480" fill="url(#pa-dots)" mask="url(#pa-mask)" />
-      <mask id="pa-mask">
-        <rect width="480" height="480" fill="url(#pa-fade)" />
-      </mask>
+      <rect width="600" height="600" fill="url(#pa-grid)" mask="url(#pa-grid-mask)" />
 
-      {/* Radiating rings */}
-      <circle cx="240" cy="240" r="212" stroke="url(#pa-ring)" strokeWidth="1" />
-      <circle cx="240" cy="240" r="168" stroke="url(#pa-ring)" strokeWidth="1.25" />
-      <circle cx="240" cy="240" r="124" stroke="url(#pa-ring)" strokeWidth="1.5" />
-
-      {/* Soft core */}
-      <circle cx="240" cy="240" r="92" fill="url(#pa-fade)" />
-      <circle cx="240" cy="240" r="72" fill="#fff" fillOpacity="0.12" />
-      <circle cx="240" cy="240" r="72" stroke="#fff" strokeOpacity="0.35" strokeWidth="1.5" />
-
-      {/* Play mark */}
-      <path d="M223 212v56l46-28z" fill="#fff" fillOpacity="0.92" />
-
-      {/* Orbiting tokens — the reward side of the exchange */}
-      <g fill="#fff">
-        <circle cx="240" cy="72" r="9" fillOpacity="0.85" />
-        <circle cx="393" cy="167" r="6.5" fillOpacity="0.55" />
-        <circle cx="357" cy="357" r="11" fillOpacity="0.7" />
-        <circle cx="112" cy="330" r="7.5" fillOpacity="0.5" />
-        <circle cx="76" cy="176" r="5.5" fillOpacity="0.4" />
-      </g>
-
-      {/* Arc accents */}
-      <path
-        d="M240 28a212 212 0 0 1 184 106"
-        stroke="#fff"
-        strokeOpacity="0.5"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M56 346a212 212 0 0 0 128 100"
-        stroke="#fff"
-        strokeOpacity="0.3"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+      <circle cx="520" cy="70" r="240" fill="url(#pa-bloom-b)" />
+      <circle cx="90" cy="470" r="200" fill="url(#pa-bloom-a)" />
     </svg>
   )
 }

@@ -9,17 +9,18 @@ import { cn } from '@/lib/cn'
 type Quote = { text: string; name: string; role: string }
 
 /**
- * Rotating testimonial, matching the reference layout.
+ * Rotating testimonial.
  *
- * Two things it deliberately does not do:
+ * No card around it — the earlier translucent panel-within-a-panel added a
+ * second edge inside an already-bounded space. A hairline rule above the
+ * quote separates it just as clearly and keeps the panel calm.
  *
- *   - It does not autoplay for anyone who has asked for reduced motion.
- *     Content that changes under you is a genuine accessibility problem, not
- *     a stylistic one.
- *   - It does not use avatar photographs. Stock headshots attached to invented
- *     names read as fake the moment anyone reverse-image-searches them, and on
- *     a product asking people to trust it with money that is a bad trade.
- *     Initials in a tinted circle until real testimonials exist.
+ * Two deliberate omissions:
+ *   - No autoplay for anyone who has asked for reduced motion. Content that
+ *     changes under you is an accessibility problem, not a stylistic one.
+ *   - No avatar photographs. Stock headshots on invented names read as fake
+ *     the moment anyone reverse-image-searches them, which is a poor trade on
+ *     a product asking to be trusted with money.
  */
 export function QuoteCarousel({ className }: { className?: string }) {
   const t = useTranslations('auth.panel')
@@ -36,49 +37,46 @@ export function QuoteCarousel({ className }: { className?: string }) {
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduced) return
 
-    const id = window.setInterval(() => {
-      setIndex((i) => (i + 1) % quotes.length)
-    }, 7000)
+    const id = window.setInterval(() => setIndex((i) => (i + 1) % quotes.length), 7000)
     return () => window.clearInterval(id)
   }, [paused, quotes.length])
 
   const quote = quotes[index]
   const initials = quote.name
     .split(' ')
-    .map((part) => part[0])
+    .map((p) => p[0])
     .slice(0, 2)
     .join('')
 
   return (
     <div
-      className={cn('rounded-2xl bg-white/10 p-5 backdrop-blur-sm', className)}
+      className={cn('border-t border-white/15 pt-5', className)}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
-      {/* Announce changes politely rather than interrupting. */}
       <figure aria-live="polite" aria-atomic>
-        <blockquote className="text-[0.9375rem] leading-relaxed text-white/90">
-          {quote.text}
+        <blockquote className="text-[0.8125rem] leading-relaxed text-white/80">
+          “{quote.text}”
         </blockquote>
 
-        <figcaption className="mt-4 flex items-center gap-3">
+        <figcaption className="mt-3.5 flex items-center gap-2.5">
           <span
             aria-hidden
-            className="grid size-10 shrink-0 place-items-center rounded-full bg-white/20 text-sm font-semibold text-white"
+            className="grid size-7 shrink-0 place-items-center rounded-full bg-white/15 text-[0.6875rem] font-semibold text-white"
           >
             {initials}
           </span>
-          <span className="flex flex-col">
-            <span className="text-sm font-semibold text-white">{quote.name}</span>
-            <span className="text-xs text-white/70">{quote.role}</span>
+          <span className="flex flex-col leading-tight">
+            <span className="text-[0.8125rem] font-medium text-white">{quote.name}</span>
+            <span className="text-[0.6875rem] text-white/55">{quote.role}</span>
           </span>
         </figcaption>
       </figure>
 
       {quotes.length > 1 && (
-        <div className="mt-5 flex items-center gap-2">
+        <div className="mt-4 flex items-center gap-1.5">
           {quotes.map((q, i) => (
             <button
               key={q.name}
@@ -87,8 +85,8 @@ export function QuoteCarousel({ className }: { className?: string }) {
               aria-label={`Testimonial ${i + 1} of ${quotes.length}`}
               aria-current={i === index || undefined}
               className={cn(
-                'h-1.5 rounded-full transition-all duration-300',
-                i === index ? 'w-6 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/70',
+                'h-[3px] rounded-full transition-all duration-300',
+                i === index ? 'w-5 bg-white/90' : 'w-[3px] bg-white/35 hover:bg-white/60',
               )}
             />
           ))}

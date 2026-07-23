@@ -11,7 +11,6 @@
     "showPassword": "Show password",
     "hidePassword": "Hide password"
   },
-
   "auth": {
     "panel": {
       "headline": "Start earning\nfrom your attention.",
@@ -32,9 +31,13 @@
           "name": "Efua Darko",
           "role": "Trader, Takoradi"
         }
+      ],
+      "features": [
+        "Earn points for every ad you finish",
+        "Cash out to mobile money or crypto",
+        "Free to join — no fees, ever"
       ]
     },
-
     "signUp": {
       "title": "Create your account",
       "subtitle": "Join free and start earning points today.",
@@ -55,7 +58,6 @@
       "terms": "I agree to the <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
       "ghanaOnly": "Available in Ghana only."
     },
-
     "logIn": {
       "title": "Welcome back",
       "subtitle": "Log in to keep earning.",
@@ -68,7 +70,6 @@
       "noAccount": "New here?",
       "signUp": "Create an account"
     },
-
     "verify": {
       "checkEmail": {
         "title": "Check your email",
@@ -93,7 +94,6 @@
         "continue": "Go to dashboard"
       }
     },
-
     "forgotPassword": {
       "title": "Reset your password",
       "subtitle": "Enter your email and we will send you a reset link.",
@@ -102,7 +102,6 @@
       "sentSubtitle": "If an account exists for {email}, a reset link is on its way.",
       "backToLogin": "Back to log in"
     },
-
     "resetPassword": {
       "title": "Choose a new password",
       "subtitle": "Pick something you have not used before.",
@@ -112,7 +111,6 @@
       "successTitle": "Password updated",
       "successSubtitle": "You can now log in with your new password."
     },
-
     "password": {
       "strength": "Password strength",
       "veryWeak": "Very weak",
@@ -128,7 +126,6 @@
         "symbol": "One symbol (e.g. !@#$%^&*)"
       }
     },
-
     "errors": {
       "fullNameRequired": "Enter your full name",
       "fullNameTooShort": "That name looks too short",

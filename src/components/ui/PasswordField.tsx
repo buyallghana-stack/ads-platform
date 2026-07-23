@@ -2,37 +2,39 @@
 
 import { useId, useState } from 'react'
 
-import { AlertCircle, Check, Eye, EyeOff, X } from 'lucide-react'
+import { Check, Eye, EyeOff } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { cn } from '@/lib/cn'
 import { evaluatePassword, PASSWORD_RULES, STRENGTH_LABEL_KEY } from '@/lib/password'
 
-const STRENGTH_BAR: Record<number, string> = {
-  0: 'w-0',
-  1: 'w-1/5 bg-danger-500',
-  2: 'w-2/5 bg-danger-500',
-  3: 'w-3/5 bg-warning-500',
-  4: 'w-4/5 bg-success-500',
-  5: 'w-full bg-success-600',
+const SEGMENT_ACTIVE: Record<number, string> = {
+  0: 'bg-ink-200',
+  1: 'bg-danger-500',
+  2: 'bg-danger-500',
+  3: 'bg-warning-500',
+  4: 'bg-success-500',
+  5: 'bg-success-600',
 }
 
 /**
  * Password input with a live rule checklist (§6.1).
  *
- * The checklist is always rendered once the field has been touched, rather
- * than appearing only on failure. Telling someone what is still missing while
- * they type is the difference between one attempt and four, and on a platform
- * whose users are often on metered mobile data, four attempts is a real cost.
+ * The meter is five discrete segments rather than one sliding bar: segments
+ * map one-to-one onto the five rules, so the bar and the list below it are
+ * telling the same story instead of two loosely-related ones.
  *
- * `showChecklist` is off for login, where the rules are irrelevant — the
- * password either matches what was set or it does not.
+ * The checklist appears once the field is engaged rather than only on failure.
+ * Telling someone what is still missing while they type is the difference
+ * between one attempt and four — and four attempts is a real cost to a user
+ * on metered mobile data.
  */
 export function PasswordField({
   label,
   error,
   value,
   showChecklist = true,
+  labelAccessory,
   className,
   id: providedId,
   ...props
@@ -41,12 +43,14 @@ export function PasswordField({
   error?: string
   value: string
   showChecklist?: boolean
+  /** e.g. a "Forgot password?" link sitting opposite the label. */
+  labelAccessory?: React.ReactNode
 }) {
   const t = useTranslations('auth.password')
   const tCommon = useTranslations('common')
 
   const [visible, setVisible] = useState(false)
-  const [touched, setTouched] = useState(false)
+  const [engaged, setEngaged] = useState(false)
 
   const generatedId = useId()
   const id = providedId ?? generatedId
@@ -55,7 +59,7 @@ export function PasswordField({
   const strengthId = `${id}-strength`
 
   const { results, strength } = evaluatePassword(value)
-  const checklistVisible = showChecklist && (touched || value.length > 0)
+  const checklistVisible = showChecklist && (engaged || value.length > 0)
 
   const describedBy = [
     error ? errorId : null,
@@ -67,26 +71,28 @@ export function PasswordField({
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <label htmlFor={id} className="text-sm font-medium text-ink-700">
-        {label}
-      </label>
+      <div className="flex items-baseline justify-between">
+        <label htmlFor={id} className="text-[0.8125rem] font-medium text-ink-700">
+          {label}
+        </label>
+        {labelAccessory}
+      </div>
 
       <div className="relative">
         <input
           id={id}
           type={visible ? 'text' : 'password'}
           value={value}
-          onBlur={() => setTouched(true)}
+          onFocus={() => setEngaged(true)}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy || undefined}
           className={cn(
-            'h-12 w-full rounded-[--radius-input] bg-white pl-3.5 pr-12 text-[0.9375rem] text-ink-900',
-            'ring-1 ring-inset transition-shadow duration-150',
-            'placeholder:text-ink-400',
-            'focus:outline-none focus-visible:ring-2',
+            'h-9 w-full rounded-[--radius-input] bg-white pl-3 pr-9 text-sm text-ink-900',
+            'border transition-[border-color,box-shadow] duration-150',
+            'placeholder:text-ink-400 focus:outline-none',
             error
-              ? 'ring-danger-500 focus-visible:ring-danger-600'
-              : 'ring-ink-300 hover:ring-ink-400 focus-visible:ring-brand-600',
+              ? 'border-danger-500 focus:border-danger-600 focus:shadow-[0_0_0_3px] focus:shadow-danger-500/12'
+              : 'border-ink-200 hover:border-ink-300 focus:border-brand-600 focus:shadow-[0_0_0_3px] focus:shadow-brand-600/12',
           )}
           {...props}
         />
@@ -94,87 +100,85 @@ export function PasswordField({
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          // Toggling visibility must not submit the form, and the control needs
-          // its own name because the icon alone says nothing to a screen reader.
+          // Must not submit the form, and needs its own name because the icon
+          // alone says nothing to a screen reader.
           aria-label={visible ? tCommon('hidePassword') : tCommon('showPassword')}
           aria-pressed={visible}
-          className={cn(
-            'absolute right-1.5 top-1.5 grid size-9 place-items-center rounded-md',
-            'text-ink-400 transition-colors hover:bg-ink-100 hover:text-ink-600',
-          )}
+          className="absolute right-1 top-1 grid size-7 place-items-center rounded text-ink-400 transition-colors hover:bg-ink-100 hover:text-ink-600"
         >
-          {visible ? (
-            <EyeOff aria-hidden className="size-[1.125rem]" />
-          ) : (
-            <Eye aria-hidden className="size-[1.125rem]" />
-          )}
+          {visible ? <EyeOff aria-hidden className="size-4" /> : <Eye aria-hidden className="size-4" />}
         </button>
       </div>
 
       {checklistVisible && (
-        <>
-          <div id={strengthId} className="mt-1 flex items-center gap-2.5">
+        <div className="mt-1 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
             <div
-              className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-200"
+              className="flex flex-1 gap-1"
               role="progressbar"
               aria-valuenow={strength}
               aria-valuemin={0}
               aria-valuemax={5}
               aria-label={t('strength')}
             >
-              <div
-                className={cn(
-                  'h-full rounded-full transition-all duration-300',
-                  STRENGTH_BAR[strength],
-                )}
-              />
+              {[1, 2, 3, 4, 5].map((seg) => (
+                <span
+                  key={seg}
+                  className={cn(
+                    'h-[3px] flex-1 rounded-full transition-colors duration-200',
+                    seg <= strength ? SEGMENT_ACTIVE[strength] : 'bg-ink-200',
+                  )}
+                />
+              ))}
             </div>
             <span
               className={cn(
-                'w-20 shrink-0 text-right text-xs font-medium tabular-nums',
-                strength >= 4 ? 'text-success-700' : strength >= 3 ? 'text-warning-600' : 'text-ink-500',
+                'shrink-0 text-[0.6875rem] font-medium tabular-nums',
+                strength >= 4 ? 'text-success-700' : strength >= 3 ? 'text-warning-600' : 'text-ink-400',
               )}
             >
               {t(STRENGTH_LABEL_KEY[strength])}
             </span>
           </div>
 
-          <ul id={checklistId} className="mt-1.5 grid gap-1">
+          <ul id={checklistId} className="grid grid-cols-2 gap-x-3 gap-y-1">
             {PASSWORD_RULES.map((rule) => {
               const passed = results[rule.id]
               return (
                 <li
                   key={rule.id}
                   className={cn(
-                    'flex items-center gap-1.5 text-xs transition-colors',
-                    passed ? 'text-success-700' : 'text-ink-500',
+                    'flex items-center gap-1.5 text-[0.75rem] transition-colors',
+                    passed ? 'text-ink-600' : 'text-ink-400',
                   )}
                 >
-                  {passed ? (
-                    <Check aria-hidden className="size-3.5 shrink-0" />
-                  ) : (
-                    <X aria-hidden className="size-3.5 shrink-0 text-ink-300" />
-                  )}
+                  <span
+                    aria-hidden
+                    className={cn(
+                      'grid size-3 shrink-0 place-items-center rounded-full transition-colors',
+                      passed ? 'bg-success-600 text-white' : 'bg-ink-200',
+                    )}
+                  >
+                    {passed && <Check className="size-2" strokeWidth={4} />}
+                  </span>
                   {t(`rules.${rule.id}`)}
-                  {/* State in text as well as icon, for screen readers. */}
                   <span className="sr-only">{passed ? ' — met' : ' — not met'}</span>
                 </li>
               )
             })}
           </ul>
-        </>
+        </div>
       )}
 
       {error && (
-        <p
-          id={errorId}
-          role="alert"
-          className="flex items-start gap-1.5 text-xs font-medium text-danger-600"
-        >
-          <AlertCircle aria-hidden className="mt-px size-3.5 shrink-0" />
+        <p id={errorId} role="alert" className="text-[0.75rem] font-medium text-danger-600">
           {error}
         </p>
       )}
+
+      <span id={strengthId} className="sr-only">
+        {t('strength')}: {t(STRENGTH_LABEL_KEY[strength])}
+      </span>
     </div>
   )
 }
