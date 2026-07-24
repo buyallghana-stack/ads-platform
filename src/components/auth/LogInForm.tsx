@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Mail, UserRound } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Controller, useForm } from 'react-hook-form'
 
 import { FormHeader } from '@/components/auth/FormHeader'
@@ -21,6 +21,7 @@ export function LogInForm() {
   const t = useTranslations('auth.logIn')
   const tError = useTranslations('auth.errors')
   const router = useRouter()
+  const locale = useLocale()
   const msg = useAuthErrorMessage()
 
   const [formError, setFormError] = useState<string | null>(null)
@@ -45,7 +46,18 @@ export function LogInForm() {
     const result = await logInAction({ email: values.email, password: values.password })
 
     if (result.ok) {
-      router.push(result.redirectTo ?? '/dashboard')
+      /*
+       * FULL document navigation, deliberately not router.push. A client-side
+       * transition can be dropped by flaky mobile networks and low-end
+       * WebViews AFTER the session cookie is already set — which strands a
+       * signed-in user on the login form (seen in production, 2026-07-24).
+       * A location change is a plain HTTP request the oldest browser cannot
+       * half-do, it always carries the fresh cookies, and if it ever fails
+       * the /login session-redirect now forwards them anyway.
+       * `as-needed` locale prefix: default locale is bare, others prefixed.
+       */
+      const target = result.redirectTo ?? '/dashboard'
+      window.location.assign(locale === 'en' ? target : `/${locale}${target}`)
       return
     }
 

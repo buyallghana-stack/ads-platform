@@ -4,6 +4,8 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { AuthLayout } from '@/components/auth/AuthLayout'
 import { SignUpForm } from '@/components/auth/SignUpForm'
+import { redirect } from '@/i18n/navigation'
+import { createClient } from '@/lib/supabase/server'
 
 export async function generateMetadata({
   params,
@@ -22,6 +24,14 @@ export default async function SignUpPage({
 }) {
   const { locale } = await params
   setRequestLocale(locale)
+
+  // Already signed in — the dashboard is where they belong, not a signup
+  // form. Same guard as /login (see the note there).
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (user) redirect({ href: '/dashboard', locale })
 
   return (
     <AuthLayout>
