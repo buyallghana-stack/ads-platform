@@ -1,8 +1,3 @@
-/**
- * Generated from the live database schema. Do not edit by hand.
- *
- * Regenerate: mcp Supabase generate_typescript_types (or the supabase CLI).
- */
 export type Json =
   | string
   | number
@@ -480,6 +475,42 @@ export type Database = {
             referencedColumns: ["code"]
           },
         ]
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_clearable: boolean | null
+          read_at: string | null
+          reference: Json | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_clearable?: boolean | null
+          read_at?: string | null
+          reference?: Json | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_clearable?: boolean | null
+          read_at?: string | null
+          reference?: Json | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: []
       }
       payout_coin_networks: {
         Row: {
@@ -1459,6 +1490,7 @@ export type Database = {
         Args: { p_referee_id: string }
         Returns: boolean
       }
+      clear_notifications: { Args: never; Returns: undefined }
       config_bool: { Args: { p_key: string }; Returns: boolean }
       config_decimal: { Args: { p_key: string }; Returns: number }
       config_int: { Args: { p_key: string }; Returns: number }
@@ -1482,6 +1514,16 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      create_notification: {
+        Args: {
+          p_body: string
+          p_reference?: Json
+          p_title: string
+          p_type: Database["public"]["Enums"]["notification_type"]
+          p_user_id: string
+        }
+        Returns: string
       }
       credit_points: {
         Args: {
@@ -1655,6 +1697,8 @@ export type Database = {
       }
       has_withdrawal_pin: { Args: { p_user_id: string }; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      mark_all_notifications_read: { Args: never; Returns: undefined }
+      mark_notification_read: { Args: { p_id: string }; Returns: undefined }
       mark_redemption_failed: {
         Args: { p_admin_id: string; p_reason: string; p_redemption_id: string }
         Returns: {
@@ -2019,6 +2063,7 @@ export type Database = {
         | "redemption_request"
         | "redemption_refund"
         | "admin_adjustment"
+      notification_type: "announcement" | "payout" | "flag"
       payout_method: "crypto" | "mobile_money"
       redemption_status:
         | "held"
@@ -2222,6 +2267,7 @@ export const Constants = {
         "redemption_refund",
         "admin_adjustment",
       ],
+      notification_type: ["announcement", "payout", "flag"],
       payout_method: ["crypto", "mobile_money"],
       redemption_status: [
         "held",
