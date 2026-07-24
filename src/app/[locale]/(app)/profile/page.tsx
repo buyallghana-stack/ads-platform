@@ -13,7 +13,6 @@ import {
   Palette,
   ScrollText,
   ShieldCheck,
-  Smartphone,
   Trash2,
   UserRound,
   Wallet,
@@ -21,24 +20,17 @@ import {
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { LogOutButton } from '@/components/app/LogOutButton'
+import { Avatar } from '@/components/profile/Avatar'
 import { LanguageToggle } from '@/components/profile/LanguageToggle'
 import { SettingsGroup, SettingsRow } from '@/components/profile/SettingsRow'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
-import { Badge } from '@/components/ui/Badge'
 import { Link, redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser } from '@/lib/auth/session'
+import { avatarPublicUrl } from '@/lib/profile/avatar'
 
 export const metadata: Metadata = {
   title: 'Profile',
   robots: { index: false, follow: false },
-}
-
-/** Two-letter initials from the full name, for the avatar. */
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return '·'
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
 /**
@@ -81,9 +73,11 @@ export default async function ProfilePage({
         style={{ '--rise-delay': '0.05s' } as React.CSSProperties}
         className="animate-rise flex items-center gap-3.5 rounded-(--radius-card) border border-ink-200 bg-surface p-4 shadow-[0_1px_2px_0_rgb(15_23_42/0.04)]"
       >
-        <span className="grid size-12 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-600 to-(--color-brand-accent) text-[0.9375rem] font-bold text-white">
-          {initials(fullName)}
-        </span>
+        <Avatar
+          name={fullName}
+          src={avatarPublicUrl(profile?.avatar_path)}
+          className="size-12 text-[0.9375rem]"
+        />
         <div className="min-w-0 flex-1">
           <p className="truncate text-[0.9375rem] font-semibold text-ink-900">
             {profile?.full_name ?? t('noName')}
@@ -114,7 +108,7 @@ export default async function ProfilePage({
       >
         {/* Account ------------------------------------------------------- */}
         <SettingsGroup title={t('groups.account')}>
-          <SettingsRow icon={<UserRound />} tone="brand" label={t('account.personal')} description={t('account.personalHint')} soon={soon} />
+          <SettingsRow href="/profile/personal" icon={<UserRound />} tone="brand" label={t('account.personal')} description={t('account.personalHint')} />
           <SettingsRow href="/profile/payout" icon={<Wallet />} tone="teal" label={t('account.payout')} description={t('account.payoutHint')} />
           <SettingsRow href="/profile/pin" icon={<KeyRound />} tone="orange" label={t('account.pin')} description={t('account.pinHint')} />
         </SettingsGroup>

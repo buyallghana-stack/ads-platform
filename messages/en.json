@@ -491,5 +491,37 @@
       "readAll": "Read all",
       "clearAll": "Clear all"
     }
+  },
+  "personal": {
+    "title": "Personal information",
+    "subtitle": "Your name, phone and profile picture.",
+    "back": "Back",
+    "save": "Save changes",
+    "saved": "Saved",
+    "fields": {
+      "name": "Full name",
+      "phone": "Phone number",
+      "optional": "Optional",
+      "phonePlaceholder": "e.g. 024 123 4567",
+      "phoneHint": "Used to reach you about your account. This is not your payout number.",
+      "email": "Email",
+      "emailHint": "Your email is managed under Security."
+    },
+    "avatar": {
+      "change": "Change profile picture",
+      "remove": "Remove photo",
+      "badType": "Please choose a JPG, PNG or WebP image.",
+      "tooBig": "That image is over 5 MB. Please choose a smaller one.",
+      "failed": "Could not update your photo. Please try again."
+    },
+    "errors": {
+      "nameTooShort": "Please enter your name.",
+      "nameTooLong": "That name is too long.",
+      "phoneTooLong": "That phone number is too long.",
+      "phoneInvalid": "That phone number doesn't look right.",
+      "notSignedIn": "Please sign in again.",
+      "invalidPath": "Something went wrong. Please try again.",
+      "generic": "Could not save your changes. Please try again."
+    }
   }
 }

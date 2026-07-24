@@ -491,5 +491,37 @@
       "readAll": "Tout lire",
       "clearAll": "Tout effacer"
     }
+  },
+  "personal": {
+    "title": "Informations personnelles",
+    "subtitle": "Votre nom, téléphone et photo de profil.",
+    "back": "Retour",
+    "save": "Enregistrer",
+    "saved": "Enregistré",
+    "fields": {
+      "name": "Nom complet",
+      "phone": "Numéro de téléphone",
+      "optional": "Facultatif",
+      "phonePlaceholder": "ex. 024 123 4567",
+      "phoneHint": "Pour vous joindre au sujet de votre compte. Ce n'est pas votre numéro de paiement.",
+      "email": "E-mail",
+      "emailHint": "Votre e-mail est géré dans Sécurité."
+    },
+    "avatar": {
+      "change": "Changer la photo de profil",
+      "remove": "Supprimer la photo",
+      "badType": "Veuillez choisir une image JPG, PNG ou WebP.",
+      "tooBig": "Cette image dépasse 5 Mo. Veuillez en choisir une plus petite.",
+      "failed": "Impossible de mettre à jour votre photo. Veuillez réessayer."
+    },
+    "errors": {
+      "nameTooShort": "Veuillez saisir votre nom.",
+      "nameTooLong": "Ce nom est trop long.",
+      "phoneTooLong": "Ce numéro de téléphone est trop long.",
+      "phoneInvalid": "Ce numéro de téléphone semble incorrect.",
+      "notSignedIn": "Veuillez vous reconnecter.",
+      "invalidPath": "Une erreur s'est produite. Veuillez réessayer.",
+      "generic": "Impossible d'enregistrer vos modifications. Veuillez réessayer."
+    }
   }
 }

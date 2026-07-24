@@ -717,6 +717,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_path: string | null
           created_at: string
           disabled_at: string | null
           disabled_by: string | null
@@ -733,6 +734,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          avatar_path?: string | null
           created_at?: string
           disabled_at?: string | null
           disabled_by?: string | null
@@ -749,6 +751,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          avatar_path?: string | null
           created_at?: string
           disabled_at?: string | null
           disabled_by?: string | null
@@ -1512,6 +1515,7 @@ export type Database = {
       clear_user_flag: {
         Args: { p_admin_id: string; p_user_id: string }
         Returns: {
+          avatar_path: string | null
           created_at: string
           disabled_at: string | null
           disabled_by: string | null
@@ -1657,6 +1661,7 @@ export type Database = {
       flag_user_account: {
         Args: { p_admin_id: string; p_reason: string; p_user_id: string }
         Returns: {
+          avatar_path: string | null
           created_at: string
           disabled_at: string | null
           disabled_by: string | null
