@@ -387,5 +387,43 @@
       "deleteHint": "Permanently close your account",
       "logOut": "Log out"
     }
+  },
+  "payout": {
+    "title": "Payout accounts",
+    "subtitle": "Where your withdrawals are sent.",
+    "back": "Back",
+    "add": "Add",
+    "change": "Change",
+    "save": "Save",
+    "cancel": "Cancel",
+    "coolOffNote": "Changing a payout account starts a 48-hour security hold before your next withdrawal.",
+    "momo": {
+      "title": "Mobile Money",
+      "provider": "Provider",
+      "providerPlaceholder": "Choose a network",
+      "number": "Mobile Money number",
+      "name": "Name on the account",
+      "namePlaceholder": "e.g. Kwame Mensah",
+      "nameHint": "This must match the name registered on the Mobile Money account."
+    },
+    "crypto": {
+      "title": "Crypto wallet",
+      "coin": "Coin",
+      "coinPlaceholder": "Choose a coin",
+      "network": "Network",
+      "networkPlaceholder": "Choose a network",
+      "networkWarn": "Sending to the wrong network can lose your funds permanently.",
+      "wallet": "Wallet address",
+      "walletPlaceholder": "Paste your wallet address"
+    },
+    "errors": {
+      "providerRequired": "Choose a provider.",
+      "numberRequired": "Enter your Mobile Money number.",
+      "nameRequired": "Enter the name on the account.",
+      "coinRequired": "Choose a coin.",
+      "walletRequired": "Enter your wallet address.",
+      "notSignedIn": "Please sign in again.",
+      "generic": "Could not save. Please try again."
+    }
   }
 }

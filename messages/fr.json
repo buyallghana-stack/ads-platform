@@ -387,5 +387,43 @@
       "deleteHint": "Fermer définitivement votre compte",
       "logOut": "Se déconnecter"
     }
+  },
+  "payout": {
+    "title": "Comptes de paiement",
+    "subtitle": "Où vos retraits sont envoyés.",
+    "back": "Retour",
+    "add": "Ajouter",
+    "change": "Modifier",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "coolOffNote": "Modifier un compte de paiement déclenche une retenue de sécurité de 48 heures avant votre prochain retrait.",
+    "momo": {
+      "title": "Mobile Money",
+      "provider": "Opérateur",
+      "providerPlaceholder": "Choisir un réseau",
+      "number": "Numéro Mobile Money",
+      "name": "Nom sur le compte",
+      "namePlaceholder": "ex. Kwame Mensah",
+      "nameHint": "Il doit correspondre au nom enregistré sur le compte Mobile Money."
+    },
+    "crypto": {
+      "title": "Portefeuille crypto",
+      "coin": "Pièce",
+      "coinPlaceholder": "Choisir une pièce",
+      "network": "Réseau",
+      "networkPlaceholder": "Choisir un réseau",
+      "networkWarn": "Envoyer sur le mauvais réseau peut faire perdre vos fonds définitivement.",
+      "wallet": "Adresse du portefeuille",
+      "walletPlaceholder": "Collez votre adresse de portefeuille"
+    },
+    "errors": {
+      "providerRequired": "Choisissez un opérateur.",
+      "numberRequired": "Saisissez votre numéro Mobile Money.",
+      "nameRequired": "Saisissez le nom sur le compte.",
+      "coinRequired": "Choisissez une pièce.",
+      "walletRequired": "Saisissez votre adresse de portefeuille.",
+      "notSignedIn": "Veuillez vous reconnecter.",
+      "generic": "Enregistrement impossible. Veuillez réessayer."
+    }
   }
 }
