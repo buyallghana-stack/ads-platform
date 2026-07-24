@@ -721,6 +721,9 @@ export type Database = {
           disabled_at: string | null
           disabled_by: string | null
           disabled_reason: string | null
+          flagged_at: string | null
+          flagged_by: string | null
+          flagged_reason: string | null
           full_name: string
           id: string
           phone: string | null
@@ -734,6 +737,9 @@ export type Database = {
           disabled_at?: string | null
           disabled_by?: string | null
           disabled_reason?: string | null
+          flagged_at?: string | null
+          flagged_by?: string | null
+          flagged_reason?: string | null
           full_name: string
           id: string
           phone?: string | null
@@ -747,6 +753,9 @@ export type Database = {
           disabled_at?: string | null
           disabled_by?: string | null
           disabled_reason?: string | null
+          flagged_at?: string | null
+          flagged_by?: string | null
+          flagged_reason?: string | null
           full_name?: string
           id?: string
           phone?: string | null
@@ -1427,6 +1436,15 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      broadcast_notification: {
+        Args: {
+          p_body: string
+          p_reference?: Json
+          p_title: string
+          p_type: Database["public"]["Enums"]["notification_type"]
+        }
+        Returns: number
+      }
       cancel_redemption: {
         Args: { p_redemption_id: string; p_user_id: string }
         Returns: {
@@ -1491,6 +1509,31 @@ export type Database = {
         Returns: boolean
       }
       clear_notifications: { Args: never; Returns: undefined }
+      clear_user_flag: {
+        Args: { p_admin_id: string; p_user_id: string }
+        Returns: {
+          created_at: string
+          disabled_at: string | null
+          disabled_by: string | null
+          disabled_reason: string | null
+          flagged_at: string | null
+          flagged_by: string | null
+          flagged_reason: string | null
+          full_name: string
+          id: string
+          phone: string | null
+          referral_code: string
+          referred_by: string | null
+          signup_country: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       config_bool: { Args: { p_key: string }; Returns: boolean }
       config_decimal: { Args: { p_key: string }; Returns: number }
       config_int: { Args: { p_key: string }; Returns: number }
@@ -1610,6 +1653,31 @@ export type Database = {
           to_expired: number
           to_grace: number
         }[]
+      }
+      flag_user_account: {
+        Args: { p_admin_id: string; p_reason: string; p_user_id: string }
+        Returns: {
+          created_at: string
+          disabled_at: string | null
+          disabled_by: string | null
+          disabled_reason: string | null
+          flagged_at: string | null
+          flagged_by: string | null
+          flagged_reason: string | null
+          full_name: string
+          id: string
+          phone: string | null
+          referral_code: string
+          referred_by: string | null
+          signup_country: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       fraud_fingerprint_account_count: {
         Args: { p_exclude?: string; p_fingerprint: string }
