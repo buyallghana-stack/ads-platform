@@ -9,9 +9,9 @@ import { TransactionHistory } from '@/components/dashboard/TransactionHistory'
 import { Card, CardHeader, StatCard as Stat } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Link, redirect } from '@/i18n/navigation'
+import { getProfile, getSessionUser } from '@/lib/auth/session'
 import { getHomeData } from '@/lib/dashboard/home-data'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
   title: 'Home',
@@ -33,24 +33,22 @@ export default async function HomePage({
   const { locale } = await params
   setRequestLocale(locale)
 
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Deduplicated with the (app) layout: same request, so getUser and the
+  // profile fetch resolve from React's cache rather than repeating.
+  const user = await getSessionUser()
   if (!user) redirect({ href: '/login', locale })
 
   const t = await getTranslations('dashboard')
   const format = await getFormatter()
 
   const admin = createAdminClient()
-  const [{ data: status }, { data: profile }, { data: balances }, { feed, daily }] =
-    await Promise.all([
-      // SECURITY DEFINER with its own authorisation check (§8).
-      admin.rpc('get_user_earning_status', { p_user_id: user!.id }).maybeSingle(),
-      supabase.from('profiles').select('full_name, referral_code').eq('id', user!.id).maybeSingle(),
-      supabase.from('user_balances').select('lifetime_earned').eq('user_id', user!.id).maybeSingle(),
-      getHomeData(user!.id),
-    ])
+  const [{ data: status }, profile, { data: balances }, { feed, daily }] = await Promise.all([
+    // SECURITY DEFINER with its own authorisation check (§8).
+    admin.rpc('get_user_earning_status', { p_user_id: user!.id }).maybeSingle(),
+    getProfile(user!.id),
+    admin.from('user_balances').select('lifetime_earned').eq('user_id', user!.id).maybeSingle(),
+    getHomeData(user!.id),
+  ])
 
   const balance = status?.balance ?? 0
   const currency = Number(status?.currency_value ?? 0)

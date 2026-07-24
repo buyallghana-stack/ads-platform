@@ -4,8 +4,8 @@ import { setRequestLocale } from 'next-intl/server'
 
 import { WithdrawWizard } from '@/components/withdraw/WithdrawWizard'
 import { redirect } from '@/i18n/navigation'
+import { getSessionUser } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
   title: 'Withdraw',
@@ -28,10 +28,7 @@ export default async function WithdrawPage({
   const { locale } = await params
   setRequestLocale(locale)
 
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getSessionUser()
   if (!user) redirect({ href: '/login', locale })
 
   const admin = createAdminClient()
@@ -40,7 +37,7 @@ export default async function WithdrawPage({
     // The demo accounts are all on the default tier; resolve_user_tier is
     // internal-only, so the default tier's minimum is the honest source
     // until the Upgrade tab makes tiers switchable.
-    supabase
+    admin
       .from('tiers')
       .select('redemption_minimum_points')
       .eq('is_default', true)

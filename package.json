@@ -39,14 +39,16 @@
     "tailwindcss": "^4",
     "typescript": "^5"
   },
-  "//browserslist": "Next 16's default target drops iOS/Safari 15, shipping class static blocks (Safari 16.4+ syntax) that crash hydration on an iPhone 7 / iOS 15 — the exact audience this platform serves. This widens the target to the old, cheap handsets we actually expect, forcing SWC to transpile that syntax down. Verify after changes: built chunks must contain no `static{` blocks.",
+  "//browserslist": "This platform serves old, cheap handsets in Ghana, so the build must transpile down to them. Next 16's default target drops everything below Safari 16, shipping syntax those phones cannot even parse (class static blocks -> iOS 15 crash; optional chaining/nullish -> iOS 12 crash). This target forces SWC to downlevel. Verify after any change: built .next/static/chunks/*.js must contain no `static{` blocks, no `??` nullish operators, and no `?.` optional chaining. iOS 12 is the practical floor for a Next 16 / React 19 app; older than that is not realistically supported.",
   "browserslist": [
-    "iOS >= 15",
-    "Safari >= 15",
-    "Chrome >= 90",
-    "Firefox >= 90",
-    "Edge >= 90",
-    "Android >= 8",
+    "iOS >= 12",
+    "Safari >= 12",
+    "Chrome >= 60",
+    "Firefox >= 60",
+    "Edge >= 79",
+    "Opera >= 50",
+    "Samsung >= 8",
+    "Android >= 6",
     "not dead"
   ]
 }

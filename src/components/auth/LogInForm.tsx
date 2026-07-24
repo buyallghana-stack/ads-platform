@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Mail, UserRound } from 'lucide-react'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { Controller, useForm } from 'react-hook-form'
 
 import { FormHeader } from '@/components/auth/FormHeader'
@@ -21,7 +21,6 @@ export function LogInForm() {
   const t = useTranslations('auth.logIn')
   const tError = useTranslations('auth.errors')
   const router = useRouter()
-  const locale = useLocale()
   const msg = useAuthErrorMessage()
 
   const [formError, setFormError] = useState<string | null>(null)
@@ -47,17 +46,23 @@ export function LogInForm() {
 
     if (result.ok) {
       /*
-       * FULL document navigation, deliberately not router.push. A client-side
-       * transition can be dropped by flaky mobile networks and low-end
-       * WebViews AFTER the session cookie is already set — which strands a
-       * signed-in user on the login form (seen in production, 2026-07-24).
-       * A location change is a plain HTTP request the oldest browser cannot
-       * half-do, it always carries the fresh cookies, and if it ever fails
-       * the /login session-redirect now forwards them anyway.
-       * `as-needed` locale prefix: default locale is bare, others prefixed.
+       * Client-side navigation, not a full document reload. The login page has
+       * already downloaded the framework and React, so moving to the dashboard
+       * only streams its RSC payload — near-instant, and the dashboard's
+       * loading.tsx shows a skeleton immediately, instead of the 10-15s blank
+       * a full reload cost on slow mobile (reported 2026-07-24).
+       *
+       * This was briefly a window.location.assign to dodge a "stuck on login"
+       * bug — but that bug was the iOS 15 hydration CRASH (fixed by the
+       * browserslist transpile), not the client transition. With JS running,
+       * router.replace is reliable, and the /login session guard remains the
+       * safety net if any transition is ever dropped.
+       *
+       * refresh() drops the cached Server Component tree so the dashboard
+       * renders against the just-established session, not a signed-out cache.
        */
-      const target = result.redirectTo ?? '/dashboard'
-      window.location.assign(locale === 'en' ? target : `/${locale}${target}`)
+      router.replace(result.redirectTo ?? '/dashboard')
+      router.refresh()
       return
     }
 

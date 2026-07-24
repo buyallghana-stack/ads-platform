@@ -5,7 +5,7 @@ import { LogOutButton } from '@/components/app/LogOutButton'
 import { Logo } from '@/components/brand/Logo'
 import { Link } from '@/i18n/navigation'
 import { redirect } from '@/i18n/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { getProfile, getSessionUser } from '@/lib/auth/session'
 
 /**
  * Shell for every signed-in screen: Home, Ads, Upgrade, Profile.
@@ -28,22 +28,13 @@ export default async function AppLayout({
   const { locale } = await params
   setRequestLocale(locale)
 
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
+  const user = await getSessionUser()
   if (!user) redirect({ href: '/login', locale })
 
   const t = await getTranslations('nav')
   const tDash = await getTranslations('dashboard')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name')
-    .eq('id', user!.id)
-    .maybeSingle()
-
+  const profile = await getProfile(user!.id)
   const displayName = profile?.full_name ?? user!.email ?? ''
 
   return (

@@ -38,9 +38,16 @@ export const STRENGTH_LABEL_KEY: Record<PasswordStrength, string> = {
 
 export function evaluatePassword(value: string) {
   const passed = PASSWORD_RULES.filter((rule) => rule.test(value)).map((rule) => rule.id)
-  const results = Object.fromEntries(
-    PASSWORD_RULES.map((rule) => [rule.id, rule.test(value)]),
-  ) as Record<PasswordRuleId, boolean>
+  // Plain reduce rather than Object.fromEntries: the latter is only iOS 12.2+,
+  // and this runs on the signup/reset password field which must work on the
+  // oldest handsets we support (browserslist floor is iOS 12.0).
+  const results = PASSWORD_RULES.reduce(
+    (acc, rule) => {
+      acc[rule.id] = rule.test(value)
+      return acc
+    },
+    {} as Record<PasswordRuleId, boolean>,
+  )
 
   return {
     results,
