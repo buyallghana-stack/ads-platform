@@ -4,6 +4,7 @@ import { BottomTabBar, Sidebar } from '@/components/app/AppNav'
 import { Link } from '@/i18n/navigation'
 import { redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser } from '@/lib/auth/session'
+import { avatarPublicUrl } from '@/lib/profile/avatar'
 
 /**
  * Shell for every signed-in screen: Home, Ads, Upgrade, Profile, Withdraw.
@@ -32,9 +33,18 @@ export default async function AppLayout({
 
   const t = await getTranslations('nav')
 
+  // Cached alongside the page's own call, so the Profile tab wearing the
+  // user's photo costs no extra query.
+  const profile = await getProfile(user!.id)
+  const navUser = {
+    avatarUrl: avatarPublicUrl(profile?.avatar_path),
+    name: profile?.full_name ?? null,
+  }
+
   return (
     <div className="flex min-h-dvh bg-canvas">
       <Sidebar
+        user={navUser}
         upgradeSlot={
           <Link
             href="/upgrade"
@@ -55,7 +65,7 @@ export default async function AppLayout({
         <main className="flex-1 pb-24 md:pb-0">{children}</main>
       </div>
 
-      <BottomTabBar />
+      <BottomTabBar user={navUser} />
     </div>
   )
 }

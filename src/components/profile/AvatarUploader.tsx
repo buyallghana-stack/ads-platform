@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from 'react'
 
-import { Camera, Loader2, Trash2 } from 'lucide-react'
+import { Camera, Check, Loader2, Trash2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { setAvatarPath } from '@/app/[locale]/(app)/profile/personal/actions'
@@ -28,6 +28,13 @@ const EXT: Record<string, string> = {
  *
  * The upload runs on the browser client (RLS lets a user write only inside
  * {uid}/…); the path is persisted through a server action.
+ *
+ * The photo saves the moment it is chosen, independently of the name/phone
+ * form below — deliberate, because on a flaky mobile connection the worst
+ * outcome is uploading a photo and losing it to a navigation before pressing
+ * Save. That makes it essential to SAY so: without confirmation the untouched
+ * "Save changes" button (correctly disabled, nothing pending) reads as "your
+ * photo could not be saved". Hence the explicit saved-state below.
  */
 export function AvatarUploader({
   userId,
@@ -44,10 +51,12 @@ export function AvatarUploader({
   const [path, setPath] = useState<string | null>(initialPath)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [done, setDone] = useState<'updated' | 'removed' | null>(null)
   const [, startTransition] = useTransition()
 
   const onPick = () => {
     setError(null)
+    setDone(null)
     fileRef.current?.click()
   }
 
@@ -60,6 +69,7 @@ export function AvatarUploader({
     if (file.size > MAX_BYTES) return setError(t('tooBig'))
 
     setError(null)
+    setDone(null)
     setBusy(true)
     const supabase = createClient()
     const previous = path
@@ -85,6 +95,7 @@ export function AvatarUploader({
     if (previous) await supabase.storage.from('avatars').remove([previous])
 
     setPath(next)
+    setDone('updated')
     setBusy(false)
     startTransition(() => router.refresh())
   }
@@ -92,6 +103,7 @@ export function AvatarUploader({
   const onRemove = () => {
     if (!path) return
     setError(null)
+    setDone(null)
     setBusy(true)
     const previous = path
     startTransition(async () => {
@@ -103,6 +115,7 @@ export function AvatarUploader({
       const supabase = createClient()
       await supabase.storage.from('avatars').remove([previous])
       setPath(null)
+      setDone('removed')
       setBusy(false)
       router.refresh()
     })
@@ -156,6 +169,15 @@ export function AvatarUploader({
           <Trash2 aria-hidden className="size-3.5" />
           {t('remove')}
         </button>
+      )}
+
+      {/* The photo is already saved at this point — say it plainly, so the
+          disabled "Save changes" button below is not read as a failure. */}
+      {done && !busy && !error && (
+        <p className="inline-flex items-center gap-1.5 text-[0.75rem] font-medium text-success-600">
+          <Check aria-hidden className="size-3.5" />
+          {t(done)}
+        </p>
       )}
 
       {error && (

@@ -510,6 +510,8 @@
     "avatar": {
       "change": "Change profile picture",
       "remove": "Remove photo",
+      "updated": "Photo saved",
+      "removed": "Photo removed",
       "badType": "Please choose a JPG, PNG or WebP image.",
       "tooBig": "That image is over 5 MB. Please choose a smaller one.",
       "failed": "Could not update your photo. Please try again."
