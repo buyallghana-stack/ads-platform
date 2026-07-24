@@ -278,26 +278,29 @@ for (const { ad, question } of ADS) {
   console.log(`  created ad "${ad.title}"`)
 }
 
-/* --- demo transaction history (user account) ------------------------------
+/* --- demo transaction history (both accounts) -----------------------------
  *
  * Backdated rows so the Home tab's chart and statement have something real
- * to render. Direct inserts rather than credit_points/debit_points because
+ * to render — for BOTH demo accounts, so whichever one the operator opens
+ * looks alive. Direct inserts rather than credit_points/debit_points because
  * those functions stamp now() and cannot backdate; the append-only trigger
- * permits INSERT, and user_balances is upserted below to stay consistent
- * with the rows (same guarantee the functions provide, done by hand).
+ * permits INSERT, and user_balances is upserted to stay consistent with the
+ * rows (same guarantee the functions provide, done by hand).
  * Dev-only, removed wholesale by --drop via the account cascade.
  */
-{
+async function seedHistory(userId, email, { days, referral, withdrawal }) {
   // Idempotence: a reused account already carries seeded history — adding a
   // second copy would double every balance, so detect and skip.
   const { data: existingSeed } = await db
     .from('points_ledger')
     .select('id')
-    .eq('user_id', created.user)
+    .eq('user_id', userId)
     .limit(1)
   if (existingSeed?.length) {
-    console.log('  ledger history already present — skipping history seed')
-  } else {
+    console.log(`  ${email}: history already present — skipping`)
+    return
+  }
+
   const RATE = 1000 // points per GHS, matching the seeded config
   const DAY = 24 * 60 * 60 * 1000
   const events = []
@@ -310,9 +313,12 @@ for (const { ad, question } of ADS) {
   const push = (daysAgo, hour, entry_type, amount, extra = {}) =>
     events.push({ when: at(daysAgo, hour), entry_type, amount, extra })
 
-  // Three weeks of ad watching, quieter at the start, busier lately.
-  for (let daysAgo = 21; daysAgo >= 0; daysAgo--) {
-    const views = daysAgo > 14 ? 1 + (daysAgo % 3) : daysAgo > 7 ? 3 + (daysAgo % 3) : 4 + (daysAgo % 4)
+  // Ad watching, quieter at the start, busier lately.
+  for (let daysAgo = days; daysAgo >= 0; daysAgo--) {
+    const views =
+      daysAgo > days * 0.66 ? 1 + (daysAgo % 3)
+      : daysAgo > days * 0.33 ? 3 + (daysAgo % 3)
+      : 4 + (daysAgo % 4)
     for (let v = 0; v < views; v++) {
       const reward = [50, 50, 35, 80][v % 4]
       push(daysAgo, 8 + v * 2, 'ad_view', reward, {
@@ -321,14 +327,17 @@ for (const { ad, question } of ADS) {
       })
     }
   }
-  // A referral converting, then activating.
-  push(12, 19, 'referral_signup', 200, { reference_type: 'referral', reference_id: 'seed-ref-1' })
-  push(5, 20, 'referral_activation', 800, { reference_type: 'referral', reference_id: 'seed-ref-1' })
-  // One payout request.
-  push(3, 17, 'redemption_request', -2000, {
-    reference_type: 'redemption',
-    reference_id: '00000000-0000-4000-8000-00000000feed',
-  })
+  if (referral) {
+    // A referral converting, then activating.
+    push(Math.min(12, days), 19, 'referral_signup', 200, { reference_type: 'referral', reference_id: 'seed-ref-1' })
+    push(5, 20, 'referral_activation', 800, { reference_type: 'referral', reference_id: 'seed-ref-1' })
+  }
+  if (withdrawal) {
+    push(3, 17, 'redemption_request', -withdrawal, {
+      reference_type: 'redemption',
+      reference_id: '00000000-0000-4000-8000-00000000feed',
+    })
+  }
 
   // balance_after must follow TIME order, not push order — otherwise the
   // statement's running balance contradicts itself around the withdrawal.
@@ -341,7 +350,7 @@ for (const { ad, question } of ADS) {
     if (e.amount > 0) lifetimeEarned += e.amount
     else lifetimeSpent += -e.amount
     return {
-      user_id: created.user,
+      user_id: userId,
       entry_type: e.entry_type,
       amount: e.amount,
       balance_after: balance,
@@ -356,13 +365,13 @@ for (const { ad, question } of ADS) {
   if (ledgerError) throw ledgerError
 
   const { error: balanceError } = await db.from('user_balances').upsert({
-    user_id: created.user,
+    user_id: userId,
     balance,
     lifetime_earned: lifetimeEarned,
     lifetime_spent: lifetimeSpent,
   })
   if (balanceError) throw balanceError
-  console.log(`  seeded ${rows.length} ledger entries for user@email.com (balance ${balance})`)
+  console.log(`  ${email}: seeded ${rows.length} ledger entries (balance ${balance})`)
 
   // One confirmed plan payment, if a paid tier exists to hang it on.
   const { data: paidTier } = await db
@@ -375,21 +384,24 @@ for (const { ad, question } of ADS) {
   if (paidTier) {
     const paidAt = new Date(Date.now() - 6 * DAY).toISOString()
     const { error: subError } = await db.from('subscription_payments').insert({
-      user_id: created.user,
+      user_id: userId,
       tier_id: paidTier.id,
       method: 'korapay',
       status: 'confirmed',
       amount_minor: paidTier.price_minor,
       period_days: 30,
-      external_reference: 'seed-sub-1',
+      external_reference: `seed-sub-${userId.slice(0, 8)}`,
       created_at: paidAt,
       confirmed_at: paidAt,
     })
     if (subError) throw subError
-    console.log(`  seeded 1 confirmed subscription payment`)
+    console.log(`  ${email}: seeded 1 confirmed subscription payment`)
   }
-  } // end history seed (skipped when already present)
 }
+
+// The user account gets the fuller story; the admin a lighter recent one.
+await seedHistory(created.user, 'user@email.com', { days: 21, referral: true, withdrawal: 2000 })
+await seedHistory(created.admin, 'admin@email.com', { days: 10, referral: false, withdrawal: 500 })
 
 console.log(`
 Done.
