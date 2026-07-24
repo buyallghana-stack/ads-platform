@@ -116,7 +116,7 @@ export default async function ProfilePage({
         <SettingsGroup title={t('groups.account')}>
           <SettingsRow icon={<UserRound />} tone="brand" label={t('account.personal')} description={t('account.personalHint')} soon={soon} />
           <SettingsRow href="/profile/payout" icon={<Wallet />} tone="teal" label={t('account.payout')} description={t('account.payoutHint')} />
-          <SettingsRow icon={<KeyRound />} tone="orange" label={t('account.pin')} description={t('account.pinHint')} soon={soon} />
+          <SettingsRow href="/profile/pin" icon={<KeyRound />} tone="orange" label={t('account.pin')} description={t('account.pinHint')} />
         </SettingsGroup>
 
         {/* Security ------------------------------------------------------ */}

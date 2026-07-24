@@ -1,14 +1,8 @@
 /**
  * Generated from the live database schema. Do not edit by hand.
  *
- * Regenerate after any migration that changes a table or function signature:
- *   supabase gen types typescript --project-id mjivgeojeejaszcrkbbo
- *
- * These give the RPCs real return and parameter types. Without them every
- * `rpc(...)` returns `{}`, and reading a field off it is a type error —
- * which is exactly what happened building the dashboard.
+ * Regenerate: mcp Supabase generate_typescript_types (or the supabase CLI).
  */
-
 export type Json =
   | string
   | number
@@ -1249,6 +1243,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_security: {
+        Row: {
+          pin_failed_attempts: number
+          pin_hash: string | null
+          pin_locked_until: string | null
+          pin_set_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          pin_failed_attempts?: number
+          pin_hash?: string | null
+          pin_locked_until?: string | null
+          pin_set_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          pin_failed_attempts?: number
+          pin_hash?: string | null
+          pin_locked_until?: string | null
+          pin_set_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_subscriptions: {
         Row: {
           cancelled_at: string | null
@@ -1632,6 +1653,7 @@ export type Database = {
           tier_slug: string
         }[]
       }
+      has_withdrawal_pin: { Args: { p_user_id: string }; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
       mark_redemption_failed: {
         Args: { p_admin_id: string; p_reason: string; p_redemption_id: string }
@@ -1852,6 +1874,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      reset_withdrawal_pin: {
+        Args: { p_new_pin: string; p_user_id: string }
+        Returns: undefined
+      }
       resolve_user_tier: {
         Args: { p_user_id: string }
         Returns: {
@@ -1913,6 +1939,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      set_withdrawal_pin: {
+        Args: { p_current_pin?: string; p_new_pin: string; p_user_id: string }
+        Returns: undefined
+      }
       start_subscription_payment: {
         Args: {
           p_method: Database["public"]["Enums"]["subscription_payment_method"]
@@ -1952,6 +1982,10 @@ export type Database = {
         }
       }
       utc_today: { Args: never; Returns: string }
+      verify_withdrawal_pin: {
+        Args: { p_pin: string; p_user_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       ad_answer_outcome:
@@ -2213,4 +2247,3 @@ export const Constants = {
     },
   },
 } as const
-

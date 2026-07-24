@@ -425,5 +425,37 @@
       "notSignedIn": "Please sign in again.",
       "generic": "Could not save. Please try again."
     }
+  },
+  "pin": {
+    "title": "Withdrawal PIN",
+    "back": "Back",
+    "menu": {
+      "isSet": "Your withdrawal PIN is set.",
+      "change": "Change PIN",
+      "forgot": "Forgot your PIN?"
+    },
+    "setNew": "Choose a 4-digit PIN",
+    "setNewSub": "You'll enter this to confirm every withdrawal.",
+    "chooseNew": "Choose a new PIN",
+    "confirm": "Re-enter your PIN",
+    "changeCurrent": "Enter your current PIN",
+    "resetPassword": "Confirm your password",
+    "resetPasswordSub": "For your security, confirm your account password before resetting your PIN.",
+    "resetPasswordPlaceholder": "Account password",
+    "continue": "Continue",
+    "saving": "Saving…",
+    "done": {
+      "title": "PIN saved",
+      "body": "You'll use this PIN to confirm withdrawals.",
+      "button": "Back to profile"
+    },
+    "errors": {
+      "mismatch": "Those PINs don't match. Try again.",
+      "wrongCurrent": "That current PIN is incorrect.",
+      "wrongPassword": "That password is incorrect.",
+      "pinFormat": "Your PIN must be 4 digits.",
+      "notSignedIn": "Please sign in again.",
+      "generic": "Something went wrong. Please try again."
+    }
   }
 }

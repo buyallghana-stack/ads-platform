@@ -425,5 +425,37 @@
       "notSignedIn": "Veuillez vous reconnecter.",
       "generic": "Enregistrement impossible. Veuillez réessayer."
     }
+  },
+  "pin": {
+    "title": "Code PIN de retrait",
+    "back": "Retour",
+    "menu": {
+      "isSet": "Votre code PIN de retrait est défini.",
+      "change": "Modifier le PIN",
+      "forgot": "PIN oublié ?"
+    },
+    "setNew": "Choisissez un PIN à 4 chiffres",
+    "setNewSub": "Vous le saisirez pour confirmer chaque retrait.",
+    "chooseNew": "Choisissez un nouveau PIN",
+    "confirm": "Ressaisissez votre PIN",
+    "changeCurrent": "Saisissez votre PIN actuel",
+    "resetPassword": "Confirmez votre mot de passe",
+    "resetPasswordSub": "Pour votre sécurité, confirmez le mot de passe de votre compte avant de réinitialiser votre PIN.",
+    "resetPasswordPlaceholder": "Mot de passe du compte",
+    "continue": "Continuer",
+    "saving": "Enregistrement…",
+    "done": {
+      "title": "PIN enregistré",
+      "body": "Vous utiliserez ce PIN pour confirmer les retraits.",
+      "button": "Retour au profil"
+    },
+    "errors": {
+      "mismatch": "Ces PIN ne correspondent pas. Réessayez.",
+      "wrongCurrent": "Ce PIN actuel est incorrect.",
+      "wrongPassword": "Ce mot de passe est incorrect.",
+      "pinFormat": "Votre PIN doit comporter 4 chiffres.",
+      "notSignedIn": "Veuillez vous reconnecter.",
+      "generic": "Une erreur s'est produite. Veuillez réessayer."
+    }
   }
 }
