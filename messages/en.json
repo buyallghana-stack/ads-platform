@@ -338,5 +338,54 @@
     "system": "System",
     "light": "Light",
     "dark": "Dark"
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Your account, security and preferences.",
+    "noName": "Your account",
+    "soon": "Soon",
+    "version": "SidePerks v{version}",
+    "upgrade": {
+      "title": "Upgrade your plan",
+      "body": "Raise your daily earning cap and unlock more perks."
+    },
+    "groups": {
+      "account": "Account",
+      "security": "Security",
+      "preferences": "Preferences",
+      "support": "Support"
+    },
+    "account": {
+      "personal": "Personal information",
+      "personalHint": "Name and phone number",
+      "payout": "Payout accounts",
+      "payoutHint": "Mobile Money and crypto wallets",
+      "pin": "Withdrawal PIN",
+      "pinHint": "Required to confirm every payout"
+    },
+    "security": {
+      "twoFactor": "Two-factor authentication",
+      "twoFactorHint": "Verify changes with an authenticator app, not email",
+      "backupCodes": "Backup codes",
+      "backupCodesHint": "Get back in if you lose your authenticator",
+      "password": "Change password",
+      "email": "Change email",
+      "sessions": "Active sessions",
+      "sessionsHint": "See where you're signed in, sign out other devices"
+    },
+    "preferences": {
+      "appearance": "Appearance",
+      "language": "Language"
+    },
+    "support": {
+      "help": "Help & Support",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
+    },
+    "danger": {
+      "delete": "Delete account",
+      "deleteHint": "Permanently close your account",
+      "logOut": "Log out"
+    }
   }
 }

@@ -1,15 +1,13 @@
 import { cn } from '@/lib/cn'
 
 /**
- * SidePerks wordmark.
+ * SidePerks wordmark, using the operator's supplied logo (2026-07-24).
  *
- * The mark is a four-point sparkle in a rounded tile — "perks", the little
- * extra you earn on the side — replacing the earlier play-button glyph from
- * when the product was called AdReward. The wordmark is two-tone on light
- * surfaces (Side in ink, Perks in brand) and solid white on the blue panel.
- *
- * Placeholder-quality but intentional; a real brand asset drops in as a
- * single-file change here.
+ * The mark is a full-colour raster, so it rides inside a small white tile —
+ * an app-icon treatment that keeps it legible on a light surface, on the dark
+ * app shell, and on the blue auth panel alike, without needing a separate
+ * transparent asset per background. The wordmark is two-tone on light (Side in
+ * ink, Perks in brand) and solid white on the blue panel.
  */
 export function Logo({
   className,
@@ -24,31 +22,23 @@ export function Logo({
   const isLight = variant === 'light'
 
   return (
-    <span className={cn('inline-flex items-center gap-2.5', className)}>
-      <svg
-        viewBox="0 0 32 32"
-        className="size-8 shrink-0"
-        role="img"
-        aria-label="SidePerks"
-      >
-        {/* Rounded tile. Brand fill on light surfaces; a soft translucent
-            white on the blue panel so the mark reads either way. */}
-        <rect
-          x="1"
-          y="1"
-          width="30"
-          height="30"
-          rx="9"
-          className={isLight ? 'fill-white/15' : 'fill-brand-600'}
-          stroke={isLight ? 'currentColor' : 'none'}
-          strokeOpacity={isLight ? 0.5 : 0}
+    <span
+      className={cn('inline-flex items-center gap-2.5', className)}
+      role="img"
+      aria-label="SidePerks"
+    >
+      <span className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-[0.5rem] bg-white shadow-[0_1px_2px_rgb(15_23_42/0.12)] ring-1 ring-ink-900/5">
+        {/* Plain img (not next/image): a tiny static mark, and it avoids the
+            optimizer config for the sake of one asset. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/sideperks-mark.png"
+          alt=""
+          width={32}
+          height={32}
+          className="size-full object-contain"
         />
-        {/* Four-point sparkle, concave sides pulled toward the centre. */}
-        <path
-          d="M16 5.2C16.7 11.6 20.4 15.3 26.8 16 20.4 16.7 16.7 20.4 16 26.8 15.3 20.4 11.6 16.7 5.2 16 11.6 15.3 15.3 11.6 16 5.2Z"
-          className="fill-white"
-        />
-      </svg>
+      </span>
 
       {showWordmark &&
         (isLight ? (

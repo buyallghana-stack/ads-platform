@@ -338,5 +338,54 @@
     "system": "Système",
     "light": "Clair",
     "dark": "Sombre"
+  },
+  "profile": {
+    "title": "Profil",
+    "subtitle": "Votre compte, sécurité et préférences.",
+    "noName": "Votre compte",
+    "soon": "Bientôt",
+    "version": "SidePerks v{version}",
+    "upgrade": {
+      "title": "Améliorer votre forfait",
+      "body": "Augmentez votre plafond de gains quotidien et débloquez plus d'avantages."
+    },
+    "groups": {
+      "account": "Compte",
+      "security": "Sécurité",
+      "preferences": "Préférences",
+      "support": "Assistance"
+    },
+    "account": {
+      "personal": "Informations personnelles",
+      "personalHint": "Nom et numéro de téléphone",
+      "payout": "Comptes de paiement",
+      "payoutHint": "Mobile Money et portefeuilles crypto",
+      "pin": "Code PIN de retrait",
+      "pinHint": "Requis pour confirmer chaque paiement"
+    },
+    "security": {
+      "twoFactor": "Authentification à deux facteurs",
+      "twoFactorHint": "Vérifiez les changements avec une application d'authentification, pas l'e-mail",
+      "backupCodes": "Codes de secours",
+      "backupCodesHint": "Reprenez la main si vous perdez votre authentificateur",
+      "password": "Changer le mot de passe",
+      "email": "Changer l'e-mail",
+      "sessions": "Sessions actives",
+      "sessionsHint": "Voyez où vous êtes connecté, déconnectez d'autres appareils"
+    },
+    "preferences": {
+      "appearance": "Apparence",
+      "language": "Langue"
+    },
+    "support": {
+      "help": "Aide et assistance",
+      "privacy": "Politique de confidentialité",
+      "terms": "Conditions d'utilisation"
+    },
+    "danger": {
+      "delete": "Supprimer le compte",
+      "deleteHint": "Fermer définitivement votre compte",
+      "logOut": "Se déconnecter"
+    }
   }
 }
