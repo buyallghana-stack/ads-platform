@@ -123,6 +123,37 @@ const STAT_CHIP: Record<StatTone, string> = {
   orange: 'border-orange-500/25 bg-orange-50 text-orange-600',
 }
 
+const STAT_BAR: Record<StatTone, string> = {
+  neutral: 'bg-ink-400',
+  brand: 'bg-brand-600',
+  success: 'bg-success-600',
+  violet: 'bg-violet-600',
+  teal: 'bg-teal-600',
+  orange: 'bg-orange-600',
+}
+
+/** Tiny inline sparkline: 60×20 viewBox, stroke only, no axes — a texture
+ *  of the trend, not a chart. Uses the tone's fill colour. */
+function Sparkline({ data, className }: { data: number[]; className?: string }) {
+  if (data.length < 2) return null
+  const max = Math.max(...data, 1)
+  const pts = data
+    .map((v, i) => `${((i / (data.length - 1)) * 58 + 1).toFixed(1)},${(19 - (v / max) * 16).toFixed(1)}`)
+    .join(' ')
+  return (
+    <svg viewBox="0 0 60 20" aria-hidden className={cn('h-5 w-[3.75rem]', className)}>
+      <polyline
+        points={pts}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 export function StatCard({
   label,
   value,
@@ -130,6 +161,8 @@ export function StatCard({
   icon,
   tone = 'neutral',
   trend,
+  progress,
+  spark,
   className,
 }: {
   label: string
@@ -138,11 +171,21 @@ export function StatCard({
   icon?: React.ReactNode
   tone?: StatTone
   trend?: { value: string; direction: 'up' | 'down' | 'flat' }
+  /** 0–1: renders a thin progress bar under the value (e.g. daily cap). */
+  progress?: number
+  /** Small series rendered as a sparkline beside the sublabel. */
+  spark?: number[]
 }& { className?: string }) {
   return (
-    <Card className={className}>
+    <Card
+      className={cn(
+        // Depth on hover only — transform+shadow, cheap to composite.
+        'transition-shadow duration-200 hover:shadow-[0_1px_3px_0_rgb(15_23_42/0.06),0_10px_24px_-12px_rgb(15_23_42/0.14)]',
+        className,
+      )}
+    >
       <div className="flex items-start justify-between gap-3 px-4 py-3.5">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-[0.8125rem] font-medium text-ink-500">{label}</p>
           {/*
             Tabular figures so a value changing from 1,999 to 2,000 does not
@@ -151,7 +194,30 @@ export function StatCard({
           <p className="mt-1.5 text-2xl font-semibold tracking-[-0.02em] tabular-nums text-ink-900">
             {value}
           </p>
-          {sublabel && <p className="mt-1 text-[0.75rem] text-ink-400">{sublabel}</p>}
+          {progress !== undefined && (
+            <div className="mt-2 h-1 overflow-hidden rounded-full bg-ink-100" role="presentation">
+              <div
+                className={cn('h-full rounded-full', STAT_BAR[tone])}
+                style={{ width: `${Math.min(Math.max(progress, 0), 1) * 100}%` }}
+              />
+            </div>
+          )}
+          <div className="mt-1 flex items-center justify-between gap-2">
+            {sublabel && <p className="text-[0.75rem] text-ink-400">{sublabel}</p>}
+            {spark && (
+              <Sparkline
+                data={spark}
+                className={cn(
+                  tone === 'success' ? 'text-success-600'
+                  : tone === 'brand' ? 'text-brand-600'
+                  : tone === 'violet' ? 'text-violet-600'
+                  : tone === 'teal' ? 'text-teal-600'
+                  : tone === 'orange' ? 'text-orange-600'
+                  : 'text-ink-400',
+                )}
+              />
+            )}
+          </div>
         </div>
 
         <div className="flex shrink-0 flex-col items-end gap-2">

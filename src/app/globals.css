@@ -219,6 +219,30 @@
 }
 
 /*
+  Entry animation for dashboard sections: a short rise + fade, staggered per
+  section via --rise-delay set inline. transform+opacity only, so it
+  composites on the GPU and stays smooth on low-end handsets; the global
+  prefers-reduced-motion rule in @layer base flattens it to nothing for
+  users who ask. `both` keeps the pre-delay state at opacity 0 so staggered
+  sections do not flash before their turn.
+*/
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-rise {
+  animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--rise-delay, 0s);
+}
+
+/*
   Registered as real utilities (not @layer classes) so responsive variants
   work — `md:bg-auth-ambient` only compiles for utilities Tailwind knows.
 */

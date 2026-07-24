@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 
-import { Gift, PlayCircle, TrendingUp, Trophy } from 'lucide-react'
+import { PlayCircle, TrendingUp, Trophy } from 'lucide-react'
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { PerformanceChart } from '@/components/dashboard/PerformanceChart'
+import { ReferralCard } from '@/components/dashboard/ReferralCard'
 import { TransactionHistory } from '@/components/dashboard/TransactionHistory'
 import { Card, CardHeader, StatCard as Stat } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -58,9 +59,16 @@ export default async function HomePage({
   const remaining = status?.ads_remaining_today ?? 0
   const firstName = (profile?.full_name ?? '').split(' ')[0] || t('there')
 
+  // "This week" rail summary, computed from the same daily aggregates the
+  // chart uses — one source of truth, no second query.
+  const week = daily.slice(-7)
+  const weekEarned = week.reduce((sum, d) => sum + d.earned, 0)
+  const weekAds = week.reduce((sum, d) => sum + d.adsWatched, 0)
+  const bestDay = week.reduce((best, d) => (d.earned > best.earned ? d : best), week[0])
+
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-5 sm:px-6 md:px-8 md:py-7">
-      <div>
+      <div className="animate-rise">
         <h1 className="text-lg font-semibold tracking-[-0.02em] text-ink-900">
           {t('greeting', { name: firstName })}
         </h1>
@@ -89,7 +97,8 @@ export default async function HomePage({
       {/* ------------------------------------------------------------------ */}
       <section
         aria-label={t('balance')}
-        className="relative isolate overflow-hidden rounded-(--radius-panel) bg-gradient-to-br from-brand-600 to-(--color-brand-accent) px-5 py-6 text-white shadow-[0_1px_2px_rgb(15_23_42/0.06),0_16px_40px_-16px_rgb(0_58_134/0.5)] sm:px-7"
+        style={{ '--rise-delay': '0.06s' } as React.CSSProperties}
+        className="animate-rise relative isolate overflow-hidden rounded-(--radius-panel) bg-gradient-to-br from-brand-600 to-(--color-brand-accent) px-5 py-6 text-white shadow-[0_1px_2px_rgb(15_23_42/0.06),0_16px_40px_-16px_rgb(0_58_134/0.5)] sm:px-7"
       >
         {/* Decorative field, echoing the auth panel's treatment: two soft
             light pools plus a hairline ring drifting off the corner — the
@@ -140,15 +149,20 @@ export default async function HomePage({
       </section>
 
       {/* ------------------------------------------------------------------ */}
-      {/* Stat row                                                            */}
+      {/* Stat row — three cards carrying real data visuals: the cap as a    */}
+      {/* progress bar, lifetime earnings as a sparkline of the last 14 days */}
       {/* ------------------------------------------------------------------ */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div
+        style={{ '--rise-delay': '0.12s' } as React.CSSProperties}
+        className="animate-rise grid grid-cols-2 gap-3 lg:grid-cols-3"
+      >
         <Stat
           label={t('adsToday')}
           value={`${done} / ${cap}`}
-          sublabel={t('remaining', { count: remaining })}
+          sublabel={t('capResets')}
           icon={<PlayCircle />}
           tone="brand"
+          progress={cap > 0 ? done / cap : 0}
         />
         <Stat label={t('tier')} value={status?.tier_name ?? '—'} icon={<Trophy />} tone="violet" />
         <Stat
@@ -157,28 +171,74 @@ export default async function HomePage({
           sublabel={t('lifetimeEarnedHint')}
           icon={<TrendingUp />}
           tone="success"
-        />
-        <Stat
-          label={t('referralCode')}
-          value={<span className="tracking-[0.12em]">{profile?.referral_code ?? '—'}</span>}
-          sublabel={t('referralHint')}
-          icon={<Gift />}
-          tone="orange"
+          spark={daily.slice(-14).map((d) => d.earned)}
+          className="col-span-2 lg:col-span-1"
         />
       </div>
 
       {/* ------------------------------------------------------------------ */}
-      {/* Performance chart — tablet and desktop only (2026-07-24 decision)  */}
+      {/* Main working area.                                                  */}
+      {/*   mobile   rail cards only (no chart — 2026-07-24 decision)         */}
+      {/*   tablet   chart full width, rail cards side by side beneath        */}
+      {/*   desktop  chart 2/3, rail 1/3 beside it — the reference layout     */}
       {/* ------------------------------------------------------------------ */}
-      <Card className="hidden md:block">
-        <CardHeader title={t('chart.title')} description={t('chart.description')} />
-        <PerformanceChart daily={daily} />
-      </Card>
+      <div
+        style={{ '--rise-delay': '0.18s' } as React.CSSProperties}
+        className="animate-rise grid items-start gap-5 xl:grid-cols-3"
+      >
+        <Card className="hidden md:block xl:col-span-2">
+          <CardHeader title={t('chart.title')} description={t('chart.description')} />
+          <PerformanceChart daily={daily} />
+        </Card>
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-1">
+          {/* This week, from the same aggregates the chart plots. */}
+          <Card>
+            <CardHeader title={t('week.title')} description={t('week.description')} />
+            <div className="flex flex-col gap-2.5 px-4 py-3.5">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-[0.8125rem] text-ink-500">
+                  <span aria-hidden className="size-1.5 rounded-full bg-success-500" />
+                  {t('week.earned')}
+                </span>
+                <span className="text-[0.8125rem] font-semibold tabular-nums text-ink-900">
+                  {format.number(weekEarned)} pts
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-[0.8125rem] text-ink-500">
+                  <span aria-hidden className="size-1.5 rounded-full bg-violet-500" />
+                  {t('week.adsWatched')}
+                </span>
+                <span className="text-[0.8125rem] font-semibold tabular-nums text-ink-900">
+                  {weekAds}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-[0.8125rem] text-ink-500">
+                  <span aria-hidden className="size-1.5 rounded-full bg-brand-500" />
+                  {t('week.bestDay')}
+                </span>
+                <span className="text-[0.8125rem] font-semibold tabular-nums text-ink-900">
+                  {bestDay && bestDay.earned > 0
+                    ? format.dateTime(new Date(bestDay.day + 'T00:00:00Z'), { weekday: 'long' })
+                    : '—'}
+                </span>
+              </div>
+            </div>
+          </Card>
+
+          <ReferralCard code={profile?.referral_code ?? null} />
+        </div>
+      </div>
 
       {/* ------------------------------------------------------------------ */}
       {/* Transaction history                                                 */}
       {/* ------------------------------------------------------------------ */}
-      <Card>
+      <Card
+        style={{ '--rise-delay': '0.24s' } as React.CSSProperties}
+        className="animate-rise"
+      >
         <CardHeader title={t('history.title')} description={t('history.description')} />
         <TransactionHistory rows={feed} />
       </Card>

@@ -43,7 +43,8 @@
       "referralCode": "Referral code",
       "referralCodePlaceholder": "8 characters",
       "terms": "I agree to the <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
-      "ghanaOnly": "Available in Ghana only."
+      "ghanaOnly": "Available in Ghana only.",
+      "referralApplied": "Applied from your invite link."
     },
     "logIn": {
       "title": "Welcome back 👋",
@@ -230,6 +231,23 @@
         "crypto": "Crypto",
         "korapay": "Korapay"
       }
+    },
+    "capResets": "Resets at midnight",
+    "week": {
+      "title": "This week",
+      "description": "Your last 7 days at a glance.",
+      "earned": "Points earned",
+      "adsWatched": "Ads watched",
+      "bestDay": "Best day"
+    },
+    "referral": {
+      "title": "Invite & earn",
+      "hint": "Share your link — you earn a bonus when a friend joins and starts watching.",
+      "copy": "Copy link",
+      "share": "Share",
+      "copiedDone": "Copied",
+      "sharedDone": "Shared",
+      "inviteMessage": "Join me on AdReward — watch short ads and earn real money in Ghana. Sign up with my link: {url}"
     }
   },
   "nav": {

@@ -43,7 +43,8 @@
       "referralCode": "Code de parrainage",
       "referralCodePlaceholder": "8 caractères",
       "terms": "J'accepte les <terms>conditions d'utilisation</terms> et la <privacy>politique de confidentialité</privacy>.",
-      "ghanaOnly": "Disponible au Ghana uniquement."
+      "ghanaOnly": "Disponible au Ghana uniquement.",
+      "referralApplied": "Appliqué depuis votre lien d'invitation."
     },
     "logIn": {
       "title": "Bon retour 👋",
@@ -230,6 +231,23 @@
         "crypto": "Crypto",
         "korapay": "Korapay"
       }
+    },
+    "capResets": "Réinitialisé à minuit",
+    "week": {
+      "title": "Cette semaine",
+      "description": "Vos 7 derniers jours en un coup d'œil.",
+      "earned": "Points gagnés",
+      "adsWatched": "Pubs vues",
+      "bestDay": "Meilleur jour"
+    },
+    "referral": {
+      "title": "Invitez et gagnez",
+      "hint": "Partagez votre lien — vous gagnez un bonus quand un ami s'inscrit et commence à regarder.",
+      "copy": "Copier le lien",
+      "share": "Partager",
+      "copiedDone": "Copié",
+      "sharedDone": "Partagé",
+      "inviteMessage": "Rejoins-moi sur AdReward — regarde de courtes pubs et gagne de l'argent réel au Ghana. Inscris-toi avec mon lien : {url}"
     }
   },
   "nav": {

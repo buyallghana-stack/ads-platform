@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Mail, Phone, Ticket, UserRound, UserRoundPlus } from 'lucide-react'
+import { Lock, Mail, Phone, Ticket, UserRound, UserRoundPlus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Controller, useForm } from 'react-hook-form'
 
@@ -26,6 +26,9 @@ export function SignUpForm() {
   const msg = useAuthErrorMessage()
 
   const [formError, setFormError] = useState<string | null>(null)
+  // True when the referral code arrived via an invite link (?ref=) or a
+  // previous visit's stored invite — the field is then read-only.
+  const [refLocked, setRefLocked] = useState(false)
 
   const {
     register,
@@ -33,6 +36,7 @@ export function SignUpForm() {
     control,
     watch,
     setError,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
@@ -50,6 +54,44 @@ export function SignUpForm() {
   })
 
   const password = watch('password') ?? ''
+
+  /*
+   * Invite-link referral (operator spec 2026-07-24): /signup?ref=CODE
+   * auto-fills the code, locks the field, and SURVIVES refresh — the code is
+   * persisted the moment the link is opened, so losing the query string
+   * (refresh, back-forward, retyping the URL) loses nothing. A newer invite
+   * link overwrites an older stored one; the invitee's latest tap wins.
+   *
+   * Read via window.location in an effect rather than useSearchParams():
+   * the page stays fully static, and there is no Suspense boundary to
+   * mis-handle on old WebViews. localStorage access is wrapped — Safari
+   * private mode throws on setItem, and the URL path must keep working there.
+   */
+  useEffect(() => {
+    const KEY = 'adreward.ref'
+    const VALID = /^[0-9ABCDEFGHJKMNPQRSTVWXYZ]{8}$/
+    let code: string | null = null
+    try {
+      const fromUrl = new URLSearchParams(window.location.search).get('ref')?.trim().toUpperCase()
+      if (fromUrl && VALID.test(fromUrl)) {
+        code = fromUrl
+        try {
+          localStorage.setItem(KEY, fromUrl)
+        } catch {
+          /* storage unavailable — the URL still fills this visit */
+        }
+      } else {
+        const stored = localStorage.getItem(KEY)
+        if (stored && VALID.test(stored)) code = stored
+      }
+    } catch {
+      /* URLSearchParams/localStorage missing on some ancient WebViews */
+    }
+    if (code) {
+      setValue('referralCode', code, { shouldValidate: false })
+      setRefLocked(true)
+    }
+  }, [setValue])
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null)
@@ -148,15 +190,23 @@ export function SignUpForm() {
 
         <TextField
           label={t('referralCode')}
-          optionalLabel={tCommon('optional')}
+          optionalLabel={refLocked ? undefined : tCommon('optional')}
           placeholder={t('referralCodePlaceholder')}
           autoCapitalize="characters"
           autoComplete="off"
-          leadingIcon={<Ticket />}
+          leadingIcon={refLocked ? <Lock /> : <Ticket />}
           maxLength={8}
+          // A code applied from an invite link is not editable: the invite
+          // decided it, and it must not be deletable by accident.
+          readOnly={refLocked}
+          hint={refLocked ? t('referralApplied') : undefined}
           // On the input, not the wrapper — putting it on the wrapper also
           // shouted the label.
-          inputClassName="uppercase tracking-[0.12em] placeholder:normal-case placeholder:tracking-normal"
+          inputClassName={
+            refLocked
+              ? 'uppercase tracking-[0.12em] bg-ink-50 text-ink-700 cursor-default'
+              : 'uppercase tracking-[0.12em] placeholder:normal-case placeholder:tracking-normal'
+          }
           error={msg(errors.referralCode?.message)}
           {...register('referralCode')}
         />
