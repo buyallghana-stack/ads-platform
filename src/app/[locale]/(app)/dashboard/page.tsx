@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { PlayCircle, TrendingUp, Trophy } from 'lucide-react'
+import { ArrowUpRight, PlayCircle, TrendingUp, Trophy } from 'lucide-react'
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { PerformanceChart } from '@/components/dashboard/PerformanceChart'
@@ -140,6 +140,15 @@ export default async function HomePage({
               leadingIcon={<PlayCircle />}
             >
               {t('watchCta')}
+            </Button>
+          </Link>
+          <Link href="/withdraw">
+            <Button
+              size="md"
+              className="border-white/30 bg-white/10 text-white shadow-none hover:border-white/60 hover:bg-white/15 hover:text-white active:bg-white/20"
+              leadingIcon={<ArrowUpRight />}
+            >
+              {t('withdrawCta')}
             </Button>
           </Link>
           <span className="text-[0.8125rem] text-white/75">

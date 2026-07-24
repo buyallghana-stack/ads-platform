@@ -248,7 +248,8 @@
       "copiedDone": "Copied",
       "sharedDone": "Shared",
       "inviteMessage": "Join me on AdReward — watch short ads and earn real money in Ghana. Sign up with my link: {url}"
-    }
+    },
+    "withdrawCta": "Withdraw"
   },
   "nav": {
     "label": "Main navigation",
@@ -276,5 +277,60 @@
     "description": "Account, payout details and settings.",
     "comingSoon": "Coming soon",
     "body": "Payout details, language and appearance settings will live here."
+  },
+  "withdraw": {
+    "title": "Withdraw",
+    "demoBadge": "Demo",
+    "back": "Back",
+    "next": "Continue",
+    "account": {
+      "title": "Withdraw to",
+      "manageHint": "Withdrawal accounts and your PIN are managed in the Profile tab (coming soon). These are demo accounts."
+    },
+    "amount": {
+      "title": "Amount",
+      "unitLabel": "Enter amount in",
+      "points": "pts",
+      "ptsSymbol": "pts",
+      "asPoints": "= {points} pts",
+      "minHint": "Minimum {min} pts (GHS {ghs})",
+      "balance": "Balance: {balance} pts",
+      "quick": {
+        "min": "Min",
+        "half": "Half",
+        "max": "Max"
+      },
+      "usdtEstimate": "≈ {usd} USDT at today's indicative rate (GHS {rate} / USD)."
+    },
+    "usdtNotice": "USDT amounts are estimates. Your points convert to cedis at the fixed rate; the cedi–dollar rate updates daily, and the final USDT amount is calculated when your payout is sent — it may differ slightly from this estimate.",
+    "errors": {
+      "belowMin": "The minimum withdrawal is {min} pts (GHS {ghs}).",
+      "aboveBalance": "That is more than your balance."
+    },
+    "confirm": {
+      "title": "Confirm withdrawal",
+      "to": "To",
+      "amount": "Amount",
+      "value": "Value",
+      "estimate": "Estimated payout",
+      "fee": "Fee",
+      "feeFree": "Free",
+      "holdNote": "Withdrawals are reviewed for security and typically complete within 72 hours.",
+      "edit": "Edit",
+      "confirm": "Confirm"
+    },
+    "pin": {
+      "title": "Enter your withdrawal PIN",
+      "demoHint": "Demo — any 4 digits work. PIN setup arrives with the Profile tab.",
+      "delete": "Delete last digit",
+      "submitting": "Submitting your request…"
+    },
+    "success": {
+      "title": "Withdrawal requested",
+      "body": "{points} pts on their way to {account}.",
+      "holdNote": "This is a demo — nothing was withdrawn. Real requests are reviewed and typically complete within 72 hours.",
+      "home": "Back to Home",
+      "history": "View in history"
+    }
   }
 }

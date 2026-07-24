@@ -248,7 +248,8 @@
       "copiedDone": "Copié",
       "sharedDone": "Partagé",
       "inviteMessage": "Rejoins-moi sur AdReward — regarde de courtes pubs et gagne de l'argent réel au Ghana. Inscris-toi avec mon lien : {url}"
-    }
+    },
+    "withdrawCta": "Retirer"
   },
   "nav": {
     "label": "Navigation principale",
@@ -276,5 +277,60 @@
     "description": "Compte, coordonnées de paiement et réglages.",
     "comingSoon": "Bientôt disponible",
     "body": "Les coordonnées de paiement, la langue et l'apparence se règleront ici."
+  },
+  "withdraw": {
+    "title": "Retirer",
+    "demoBadge": "Démo",
+    "back": "Retour",
+    "next": "Continuer",
+    "account": {
+      "title": "Retirer vers",
+      "manageHint": "Les comptes de retrait et votre code PIN se gèrent dans l'onglet Profil (bientôt disponible). Ceci sont des comptes de démonstration."
+    },
+    "amount": {
+      "title": "Montant",
+      "unitLabel": "Saisir le montant en",
+      "points": "pts",
+      "ptsSymbol": "pts",
+      "asPoints": "= {points} pts",
+      "minHint": "Minimum {min} pts (GHS {ghs})",
+      "balance": "Solde : {balance} pts",
+      "quick": {
+        "min": "Min",
+        "half": "Moitié",
+        "max": "Max"
+      },
+      "usdtEstimate": "≈ {usd} USDT au taux indicatif du jour (GHS {rate} / USD)."
+    },
+    "usdtNotice": "Les montants en USDT sont des estimations. Vos points se convertissent en cédis au taux fixe ; le taux cédi–dollar est mis à jour quotidiennement, et le montant final en USDT est calculé à l'envoi du paiement — il peut différer légèrement de cette estimation.",
+    "errors": {
+      "belowMin": "Le retrait minimum est de {min} pts (GHS {ghs}).",
+      "aboveBalance": "C'est plus que votre solde."
+    },
+    "confirm": {
+      "title": "Confirmer le retrait",
+      "to": "Vers",
+      "amount": "Montant",
+      "value": "Valeur",
+      "estimate": "Paiement estimé",
+      "fee": "Frais",
+      "feeFree": "Gratuit",
+      "holdNote": "Les retraits sont vérifiés par sécurité et aboutissent généralement sous 72 heures.",
+      "edit": "Modifier",
+      "confirm": "Confirmer"
+    },
+    "pin": {
+      "title": "Saisissez votre code PIN de retrait",
+      "demoHint": "Démo — 4 chiffres au choix. La configuration du PIN arrive avec l'onglet Profil.",
+      "delete": "Effacer le dernier chiffre",
+      "submitting": "Envoi de votre demande…"
+    },
+    "success": {
+      "title": "Retrait demandé",
+      "body": "{points} pts en route vers {account}.",
+      "holdNote": "Ceci est une démo — rien n'a été retiré. Les vraies demandes sont vérifiées et aboutissent généralement sous 72 heures.",
+      "home": "Retour à l'accueil",
+      "history": "Voir dans l'historique"
+    }
   }
 }
