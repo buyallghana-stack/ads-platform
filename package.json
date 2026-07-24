@@ -38,5 +38,15 @@
     "sharp": "^0.35.3",
     "tailwindcss": "^4",
     "typescript": "^5"
-  }
+  },
+  "//browserslist": "Next 16's default target drops iOS/Safari 15, shipping class static blocks (Safari 16.4+ syntax) that crash hydration on an iPhone 7 / iOS 15 — the exact audience this platform serves. This widens the target to the old, cheap handsets we actually expect, forcing SWC to transpile that syntax down. Verify after changes: built chunks must contain no `static{` blocks.",
+  "browserslist": [
+    "iOS >= 15",
+    "Safari >= 15",
+    "Chrome >= 90",
+    "Firefox >= 90",
+    "Edge >= 90",
+    "Android >= 8",
+    "not dead"
+  ]
 }
