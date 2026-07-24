@@ -285,7 +285,9 @@
     "next": "Continue",
     "account": {
       "title": "Withdraw to",
-      "manageHint": "Withdrawal accounts and your PIN are managed in the Profile tab (coming soon). These are demo accounts."
+      "manageHint": "Manage your payout accounts in your Profile.",
+      "empty": "You haven't added a payout account yet. Add one to withdraw.",
+      "addAccount": "Add payout account"
     },
     "amount": {
       "title": "Amount",
@@ -323,7 +325,14 @@
       "title": "Enter your withdrawal PIN",
       "demoHint": "Demo — any 4 digits work. PIN setup arrives with the Profile tab.",
       "delete": "Delete last digit",
-      "submitting": "Submitting your request…"
+      "submitting": "Submitting your request…",
+      "hint": "Enter your withdrawal PIN",
+      "wrong": "{count, plural, =0 {Incorrect PIN.} =1 {Incorrect PIN — 1 try left.} other {Incorrect PIN — # tries left.}}",
+      "locked": "Too many attempts. Try again in {minutes} min.",
+      "error": "Could not verify your PIN. Please try again.",
+      "noPinTitle": "Set a withdrawal PIN first",
+      "noPinBody": "You need a withdrawal PIN before you can cash out. Set one up in your profile.",
+      "setUp": "Set up PIN"
     },
     "success": {
       "title": "Withdrawal requested",

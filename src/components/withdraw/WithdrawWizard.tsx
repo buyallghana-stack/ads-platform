@@ -1,22 +1,25 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 
 import {
   ArrowLeft,
   Check,
   ChevronRight,
   Coins,
-  Delete,
+  KeyRound,
   ShieldCheck,
   Smartphone,
   TriangleAlert,
+  Wallet,
 } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
+import { verifyWithdrawalPin } from '@/app/[locale]/(app)/withdraw/actions'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { useRouter } from '@/i18n/navigation'
+import { PinPad } from '@/components/ui/PinPad'
+import { Link, useRouter } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
 
 /**
@@ -26,35 +29,25 @@ import { cn } from '@/lib/cn'
  *     (account → amount → confirm → PIN → success): money moves one decision
  *     per screen. On md+ the same steps sit in a centered card.
  *   - Amount is a NATIVE input (numeric keyboard, accessible, reliable on
- *     old Androids) with a points↔GHS toggle; the PIN step is the custom
- *     4-dot pad — the one place the app-like ceremony earns its keep.
- *   - PURE DEMO, badged as such: payout accounts and the PIN are set up in
- *     the Profile tab (not built yet), so the accounts below are demo data
- *     and submission writes NOTHING. The real request_redemption pipeline
- *     is wired when Profile ships.
+ *     old Androids) with a points↔GHS toggle; the PIN step is the shared
+ *     PinPad — the one place the app-like ceremony earns its keep.
+ *   - The account choice and the PIN are now REAL: the accounts are the
+ *     user's saved payout details, and the PIN is verified against
+ *     verify_withdrawal_pin (rate-limited). Only the final SUBMISSION is
+ *     still demo-badged — nothing is written; the real request_redemption
+ *     pipeline waits on PAYOUTS_ENABLED.
  *
  * The USDT path shows the fluctuation notice agreed at kickoff: the points
  * → GHS leg is pegged; the GHS → USD leg updates daily and the final coin
  * amount is computed at disbursement — estimates are labelled as estimates.
  */
 
-/** Demo payout accounts — the schema allows ONE saved detail per method
- *  (PK user_id+method), so exactly one MoMo and one crypto entry. Shapes
- *  mirror user_payout_details so swapping in real rows is mechanical. */
-const DEMO_ACCOUNTS = [
-  {
-    id: 'momo',
-    method: 'mobile_money' as const,
-    title: 'MTN Mobile Money',
-    detail: '024 000 0002 · Demo User',
-  },
-  {
-    id: 'usdt',
-    method: 'crypto' as const,
-    title: 'USDT · Tron (TRC20)',
-    detail: 'TQrfDemo…3kF9',
-  },
-]
+export type WithdrawAccount = {
+  id: 'mobile_money' | 'crypto'
+  method: 'mobile_money' | 'crypto'
+  title: string
+  detail: string
+}
 
 /** Demo indicative rate for the GHS→USD leg. Labelled indicative in the UI —
  *  the real quote comes from the two-hop pricing service at request time. */
@@ -67,13 +60,16 @@ const STEPS: Step[] = ['account', 'amount', 'confirm', 'pin']
 export function WithdrawWizard({
   balance,
   minPoints,
+  accounts,
 }: {
   balance: number
   minPoints: number
+  accounts: WithdrawAccount[]
 }) {
   const t = useTranslations('withdraw')
   const format = useFormatter()
   const router = useRouter()
+  const [, startTransition] = useTransition()
 
   const [step, setStep] = useState<Step>('account')
   const [accountId, setAccountId] = useState<string | null>(null)
@@ -82,8 +78,10 @@ export function WithdrawWizard({
   const [amountError, setAmountError] = useState<string | null>(null)
   const [pin, setPin] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [pinError, setPinError] = useState<string | null>(null)
+  const [pinBlocked, setPinBlocked] = useState<null | 'locked' | 'no_pin'>(null)
 
-  const account = DEMO_ACCOUNTS.find((a) => a.id === accountId) ?? null
+  const account = accounts.find((a) => a.id === accountId) ?? null
   const isCrypto = account?.method === 'crypto'
 
   // Points are the unit of record; the GHS entry is convenience at the peg.
@@ -115,23 +113,38 @@ export function WithdrawWizard({
     if (!err) setStep('confirm')
   }
 
-  const pressPin = (digit: string) => {
+  // Real PIN verification (rate-limited server-side). On success the demo
+  // submission "completes" — nothing is written until PAYOUTS_ENABLED.
+  const onPin = (next: string) => {
     if (submitting) return
-    if (digit === 'back') {
-      setPin((p) => p.slice(0, -1))
-      return
-    }
-    const next = (pin + digit).slice(0, 4)
+    setPinError(null)
     setPin(next)
-    if (next.length === 4) {
-      // DEMO: no PIN exists server-side yet (Profile tab ships it), so any
-      // 4 digits complete the flow and nothing is written anywhere.
-      setSubmitting(true)
-      setTimeout(() => {
+    if (next.length < 4) return
+
+    setSubmitting(true)
+    startTransition(async () => {
+      const res = await verifyWithdrawalPin(next)
+      if (res.ok) {
         setSubmitting(false)
         setStep('success')
-      }, 900)
-    }
+        return
+      }
+      setPin('')
+      setSubmitting(false)
+      if (res.reason === 'no_pin') {
+        setPinBlocked('no_pin')
+      } else if (res.reason === 'locked') {
+        const mins = res.retryAfter
+          ? Math.max(1, Math.ceil((new Date(res.retryAfter).getTime() - Date.now()) / 60000))
+          : 15
+        setPinBlocked('locked')
+        setPinError(t('pin.locked', { minutes: mins }))
+      } else if (res.reason === 'wrong') {
+        setPinError(t('pin.wrong', { count: res.attemptsLeft }))
+      } else {
+        setPinError(t('pin.error'))
+      }
+    })
   }
 
   const fluctuationNotice = (compact: boolean) => (
@@ -187,56 +200,76 @@ export function WithdrawWizard({
       {step === 'account' && (
         <div className="animate-rise mt-6">
           <h2 className="text-sm font-medium text-ink-700">{t('account.title')}</h2>
-          <div className="mt-3 flex flex-col gap-2.5" role="radiogroup" aria-label={t('account.title')}>
-            {DEMO_ACCOUNTS.map((a) => {
-              const selected = accountId === a.id
-              const Icon = a.method === 'crypto' ? Coins : Smartphone
-              return (
-                <button
-                  key={a.id}
-                  type="button"
-                  role="radio"
-                  aria-checked={selected}
-                  onClick={() => setAccountId(a.id)}
-                  className={cn(
-                    'flex items-center gap-3 rounded-(--radius-card) border bg-surface p-3.5 text-left',
-                    'transition-[border-color,box-shadow] duration-150',
-                    selected
-                      ? 'border-brand-600 shadow-[0_0_0_3px] shadow-brand-600/12'
-                      : 'border-ink-200 hover:border-ink-300',
-                  )}
-                >
-                  <span
-                    className={cn(
-                      'grid size-10 shrink-0 place-items-center rounded-full',
-                      a.method === 'crypto' ? 'bg-teal-50 text-teal-600' : 'bg-brand-50 text-brand-600',
-                    )}
-                  >
-                    <Icon aria-hidden className="size-4.5" />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[0.875rem] font-semibold text-ink-900">{a.title}</span>
-                    <span className="block truncate text-[0.75rem] text-ink-500">{a.detail}</span>
-                  </span>
-                  <span
-                    aria-hidden
-                    className={cn(
-                      'grid size-5 shrink-0 place-items-center rounded-full border transition-colors',
-                      selected ? 'border-brand-600 bg-brand-600 text-white' : 'border-ink-300',
-                    )}
-                  >
-                    {selected && <Check className="size-3" strokeWidth={3} />}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
 
-          <p className="mt-3 text-[0.75rem] leading-relaxed text-ink-400">{t('account.manageHint')}</p>
+          {accounts.length === 0 ? (
+            // No saved payout accounts — send them to set one up.
+            <div className="mt-3 flex flex-col items-center gap-3 rounded-(--radius-card) border border-ink-200 bg-surface px-4 py-8 text-center">
+              <span className="grid size-11 place-items-center rounded-full bg-teal-50 text-teal-600">
+                <Wallet aria-hidden className="size-5" />
+              </span>
+              <p className="max-w-[30ch] text-[0.8125rem] leading-relaxed text-ink-500">
+                {t('account.empty')}
+              </p>
+              <Link href="/profile/payout">
+                <Button size="md">{t('account.addAccount')}</Button>
+              </Link>
+            </div>
+          ) : (
+            <>
+              <div className="mt-3 flex flex-col gap-2.5" role="radiogroup" aria-label={t('account.title')}>
+                {accounts.map((a) => {
+                  const selected = accountId === a.id
+                  const Icon = a.method === 'crypto' ? Coins : Smartphone
+                  return (
+                    <button
+                      key={a.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      onClick={() => setAccountId(a.id)}
+                      className={cn(
+                        'flex items-center gap-3 rounded-(--radius-card) border bg-surface p-3.5 text-left',
+                        'transition-[border-color,box-shadow] duration-150',
+                        selected
+                          ? 'border-brand-600 shadow-[0_0_0_3px] shadow-brand-600/12'
+                          : 'border-ink-200 hover:border-ink-300',
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'grid size-10 shrink-0 place-items-center rounded-full',
+                          a.method === 'crypto' ? 'bg-teal-50 text-teal-600' : 'bg-brand-50 text-brand-600',
+                        )}
+                      >
+                        <Icon aria-hidden className="size-4.5" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[0.875rem] font-semibold text-ink-900">{a.title}</span>
+                        <span className="block truncate font-mono text-[0.75rem] text-ink-500">{a.detail}</span>
+                      </span>
+                      <span
+                        aria-hidden
+                        className={cn(
+                          'grid size-5 shrink-0 place-items-center rounded-full border transition-colors',
+                          selected ? 'border-brand-600 bg-brand-600 text-white' : 'border-ink-300',
+                        )}
+                      >
+                        {selected && <Check className="size-3" strokeWidth={3} />}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
 
-          <Button size="lg" fullWidth className="mt-5" disabled={!account} onClick={() => setStep('amount')}>
-            {t('next')}
-          </Button>
+              <Link href="/profile/payout" className="mt-3 block text-[0.75rem] text-ink-400 hover:text-ink-600">
+                {t('account.manageHint')}
+              </Link>
+
+              <Button size="lg" fullWidth className="mt-5" disabled={!account} onClick={() => setStep('amount')}>
+                {t('next')}
+              </Button>
+            </>
+          )}
         </div>
       )}
 
@@ -388,7 +421,11 @@ export function WithdrawWizard({
             <Button variant="secondary" size="lg" className="flex-1" onClick={() => setStep('amount')}>
               {t('confirm.edit')}
             </Button>
-            <Button size="lg" className="flex-1" onClick={() => { setPin(''); setStep('pin') }}>
+            <Button
+              size="lg"
+              className="flex-1"
+              onClick={() => { setPin(''); setPinError(null); setPinBlocked(null); setStep('pin') }}
+            >
               {t('confirm.confirm')}
             </Button>
           </div>
@@ -396,56 +433,48 @@ export function WithdrawWizard({
       )}
 
       {/* ---------------------------------------------------------------- */}
-      {/* Step 4 — PIN (custom pad, the reference's ceremony)              */}
+      {/* Step 4 — PIN, verified for real against verify_withdrawal_pin     */}
       {/* ---------------------------------------------------------------- */}
       {step === 'pin' && (
         <div className="animate-rise mt-8 flex flex-col items-center">
-          <h2 className="text-sm font-medium text-ink-700">{t('pin.title')}</h2>
-          <p className="mt-1 text-[0.75rem] text-ink-400">{t('pin.demoHint')}</p>
+          {pinBlocked === 'no_pin' ? (
+            // Reached withdraw without a PIN set — send them to set one.
+            <div className="flex flex-col items-center gap-3 text-center">
+              <span className="grid size-12 place-items-center rounded-full bg-orange-50 text-orange-600">
+                <KeyRound aria-hidden className="size-6" />
+              </span>
+              <h2 className="text-[1.0625rem] font-semibold text-ink-900">{t('pin.noPinTitle')}</h2>
+              <p className="max-w-[30ch] text-[0.8125rem] leading-relaxed text-ink-500">
+                {t('pin.noPinBody')}
+              </p>
+              <Link href="/profile/pin">
+                <Button size="md">{t('pin.setUp')}</Button>
+              </Link>
+            </div>
+          ) : (
+            <>
+              <h2 className="text-[1.0625rem] font-semibold text-ink-900">{t('pin.title')}</h2>
+              <p className="mt-1 text-[0.8125rem] text-ink-500">{t('pin.hint')}</p>
 
-          <div className="mt-6 flex gap-3" aria-label={t('pin.title')} role="status">
-            {[0, 1, 2, 3].map((i) => (
-              <span
-                key={i}
+              <div className="mt-6">
+                <PinPad
+                  value={pin}
+                  onChange={onPin}
+                  disabled={submitting || pinBlocked === 'locked'}
+                  ariaLabel={t('pin.title')}
+                />
+              </div>
+
+              <p
                 className={cn(
-                  'size-3.5 rounded-full border transition-colors duration-150',
-                  i < pin.length ? 'border-brand-600 bg-brand-600' : 'border-ink-300',
+                  'mt-4 h-4 text-center text-[0.8125rem] font-medium',
+                  pinError ? 'text-danger-600' : 'text-ink-500',
                 )}
-              />
-            ))}
-          </div>
-
-          {/* Dialer: each digit in its own circle, the delete key a bare
-              icon. Generous, evenly spaced, thumb-sized on touch. */}
-          <div className="mt-8 grid grid-cols-3 justify-items-center gap-x-5 gap-y-4">
-            {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'back'].map((key, i) =>
-              key === '' ? (
-                // Keeps the grid aligned so 0 sits centre-bottom.
-                <span key={i} className="size-16 pointer-coarse:size-[4.25rem]" />
-              ) : (
-                <button
-                  key={i}
-                  type="button"
-                  disabled={submitting}
-                  onClick={() => pressPin(key)}
-                  aria-label={key === 'back' ? t('pin.delete') : key}
-                  className={cn(
-                    'grid size-16 place-items-center rounded-full text-[1.625rem] font-semibold tabular-nums text-ink-900',
-                    'transition-[background-color,border-color,transform] duration-100 active:scale-90',
-                    'pointer-coarse:size-[4.25rem]',
-                    key === 'back'
-                      ? // Delete: no circle, just the glyph.
-                        'text-ink-500 hover:text-ink-900 disabled:opacity-40'
-                      : 'border border-ink-200 bg-surface hover:border-ink-300 hover:bg-ink-100 disabled:opacity-40',
-                  )}
-                >
-                  {key === 'back' ? <Delete aria-hidden className="size-6" /> : key}
-                </button>
-              ),
-            )}
-          </div>
-
-          {submitting && <p className="mt-6 text-[0.8125rem] text-ink-500">{t('pin.submitting')}</p>}
+              >
+                {pinError ?? (submitting ? t('pin.submitting') : '')}
+              </p>
+            </>
+          )}
         </div>
       )}
 

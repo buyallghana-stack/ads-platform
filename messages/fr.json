@@ -285,7 +285,9 @@
     "next": "Continuer",
     "account": {
       "title": "Retirer vers",
-      "manageHint": "Les comptes de retrait et votre code PIN se gèrent dans l'onglet Profil (bientôt disponible). Ceci sont des comptes de démonstration."
+      "manageHint": "Gérez vos comptes de paiement dans votre profil.",
+      "empty": "Vous n'avez pas encore ajouté de compte de paiement. Ajoutez-en un pour retirer.",
+      "addAccount": "Ajouter un compte"
     },
     "amount": {
       "title": "Montant",
@@ -323,7 +325,14 @@
       "title": "Saisissez votre code PIN de retrait",
       "demoHint": "Démo — 4 chiffres au choix. La configuration du PIN arrive avec l'onglet Profil.",
       "delete": "Effacer le dernier chiffre",
-      "submitting": "Envoi de votre demande…"
+      "submitting": "Envoi de votre demande…",
+      "hint": "Saisissez votre PIN de retrait",
+      "wrong": "{count, plural, =0 {PIN incorrect.} =1 {PIN incorrect — 1 essai restant.} other {PIN incorrect — # essais restants.}}",
+      "locked": "Trop de tentatives. Réessayez dans {minutes} min.",
+      "error": "Impossible de vérifier votre PIN. Veuillez réessayer.",
+      "noPinTitle": "Définissez d'abord un PIN de retrait",
+      "noPinBody": "Vous devez définir un PIN de retrait avant de pouvoir encaisser. Configurez-le dans votre profil.",
+      "setUp": "Configurer le PIN"
     },
     "success": {
       "title": "Retrait demandé",
