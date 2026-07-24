@@ -165,6 +165,98 @@
     "watchDescription": "Vos publicités du jour apparaîtront ici.",
     "watchBody": "Le lecteur et les questions d’attention sont construits et testés côté serveur. Cet écran s’y connectera une fois son design validé.",
     "watchFooter": "Les points sont crédités dès que vous répondez correctement.",
-    "comingSoon": "Bientôt"
+    "comingSoon": "Bientôt",
+    "pointsAccumulated": "{points} points accumulés",
+    "watchCta": "Regarder des pubs",
+    "lifetimeEarned": "Gains cumulés",
+    "lifetimeEarnedHint": "Total des points gagnés",
+    "chart": {
+      "title": "Vos performances",
+      "description": "Gains et publicités vues au fil du temps.",
+      "metricLabel": "Mesure",
+      "earned": "Gains",
+      "adsWatched": "Pubs vues",
+      "days": "{count} jours",
+      "empty": "Rien pour l'instant — regardez votre première pub pour lancer le graphique.",
+      "tooltipEarned": "{points} pts",
+      "tooltipAds": "{count, plural, =1 {1 pub} other {# pubs}}",
+      "dateColumn": "Date"
+    },
+    "history": {
+      "title": "Historique des transactions",
+      "description": "Chaque point entré et sorti, et vos paiements de forfait.",
+      "searchPlaceholder": "Rechercher une transaction",
+      "sortLabel": "Trier",
+      "filterLabel": "Filtrer par type",
+      "allTypes": "Tout",
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "pending": "En attente",
+      "failed": "Échoué",
+      "balanceShort": "solde {balance}",
+      "showMore": "Afficher {count} de plus",
+      "emptyAll": "Aucune transaction pour l'instant. Vos points gagnés apparaîtront ici dès leur arrivée.",
+      "emptyFiltered": "Rien ne correspond à votre recherche ou filtre.",
+      "sort": {
+        "newest": "Plus récent d'abord",
+        "oldest": "Plus ancien d'abord",
+        "largest": "Montant le plus élevé",
+        "smallest": "Montant le plus faible"
+      },
+      "columns": {
+        "transaction": "Transaction",
+        "date": "Date",
+        "amount": "Montant",
+        "balance": "Solde"
+      },
+      "kind": {
+        "earned": "Gagné",
+        "bonus": "Bonus",
+        "withdrawal": "Retrait",
+        "refund": "Remboursement",
+        "subscription": "Abonnement",
+        "adjustment": "Ajustement"
+      },
+      "kindHint": {
+        "earned": "Récompense de pub",
+        "bonus": "Bonus de parrainage",
+        "withdrawal": "Demande de paiement",
+        "refund": "Retourné au solde",
+        "subscription": "Paiement de forfait",
+        "adjustment": "Correction de compte"
+      },
+      "method": {
+        "mobile_money": "Mobile Money",
+        "crypto": "Crypto",
+        "korapay": "Korapay"
+      }
+    }
+  },
+  "nav": {
+    "label": "Navigation principale",
+    "home": "Accueil",
+    "ads": "Pubs",
+    "upgrade": "Forfaits",
+    "profile": "Profil",
+    "upgradeTeaserTitle": "Allez plus loin",
+    "upgradeTeaserBody": "Passez à un forfait supérieur pour augmenter votre plafond de gains quotidien."
+  },
+  "adsTab": {
+    "title": "Regarder et gagner",
+    "description": "Vos publicités du jour apparaîtront ici.",
+    "comingSoon": "Bientôt disponible",
+    "body": "Le lecteur de publicités et les questions d'attention sont prêts côté serveur. Cet écran s'y connectera une fois son design validé."
+  },
+  "upgradeTab": {
+    "title": "Améliorer votre forfait",
+    "description": "Les forfaits supérieurs augmentent votre plafond de gains quotidien.",
+    "comingSoon": "Bientôt disponible",
+    "body": "Les forfaits et paiements sont prêts en coulisses. Cet écran arrivera avec son propre design."
+  },
+  "profileTab": {
+    "title": "Votre profil",
+    "description": "Compte, coordonnées de paiement et réglages.",
+    "comingSoon": "Bientôt disponible",
+    "body": "Les coordonnées de paiement, la langue et l'apparence se règleront ici."
   }
 }

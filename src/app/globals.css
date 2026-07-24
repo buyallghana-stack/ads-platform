@@ -60,6 +60,13 @@
   --color-canvas:  #f1f5f9; /* = ink-100, the established page tone */
   --color-surface: #ffffff;
 
+  /* Chart series hues (light). Overridden in .dark — every step validated
+     against its surface with the dataviz palette checks. The two series
+     never share a plot (they are toggled), so each simply owns its hue:
+     earnings = brand blue, ads watched = violet. */
+  --chart-series: #0068f8;
+  --chart-series-alt: #7c3aed;
+
   /* --- Neutrals --------------------------------------------------------- */
   --color-ink-50:  #f8fafc;
   --color-ink-100: #f1f5f9;
@@ -86,6 +93,37 @@
   --color-warning-50:  #fffbeb;
   --color-warning-500: #f59e0b;
   --color-warning-600: #d97706;
+
+  /* --- Accents (2026-07-24) --------------------------------------------
+     Meaning-coded hues for the dashboard surfaces, added at the operator's
+     direction: blue-and-grey alone read cold next to the fintech products
+     users know. Each family follows the feedback-colour pattern — a -50
+     tint for chips, -600 for icons/fills, -700 for on-tint text — and gets
+     lifted dark variants in the .dark block.
+
+     Assignments are FIXED so colour follows meaning platform-wide:
+       brand blue   ads / watching (the product act itself)
+       success      money in, earnings
+       violet       tiers, plans, upgrade — the "premium" hue
+       teal         refunds, profile/account
+       orange       referrals & bonuses (warmer than warning amber)      */
+  --color-violet-50:  #f5f3ff;
+  --color-violet-100: #ede9fe;
+  --color-violet-500: #8b5cf6;
+  --color-violet-600: #7c3aed;
+  --color-violet-700: #6d28d9;
+
+  --color-teal-50:  #f0fdfa;
+  --color-teal-100: #ccfbf1;
+  --color-teal-500: #14b8a6;
+  --color-teal-600: #0d9488;
+  --color-teal-700: #0f766e;
+
+  --color-orange-50:  #fff7ed;
+  --color-orange-100: #ffedd5;
+  --color-orange-500: #f97316;
+  --color-orange-600: #ea580c;
+  --color-orange-700: #c2410c;
 
   /* --- Type ------------------------------------------------------------- */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
@@ -282,6 +320,28 @@
     --color-danger-50:   #2a1417;
     --color-danger-600:  #ef4444; /* error text a touch brighter on dark */
     --color-danger-700:  #f87171;
+
+    /* Accents: tint backgrounds deepen, icon/text steps lift. */
+    --color-violet-50:  #221a3a;
+    --color-violet-100: #2c2150;
+    --color-violet-600: #a78bfa;
+    --color-violet-700: #c4b5fd;
+
+    --color-teal-50:  #0c2724;
+    --color-teal-100: #113632;
+    --color-teal-600: #2dd4bf;
+    --color-teal-700: #5eead4;
+
+    --color-orange-50:  #2c1a0c;
+    --color-orange-100: #3c2410;
+    --color-orange-600: #fb923c;
+    --color-orange-700: #fdba74;
+
+    /* Chart series hues — lifted steps for the dark surface. brand-600 and
+       violet-600 sit outside the dark lightness band (validated with the
+       dataviz palette checks). */
+    --chart-series: #2b83f9;
+    --chart-series-alt: #8b5cf6;
 
     /* Gradients */
     --gradient-auth-ambient: linear-gradient(

@@ -165,6 +165,98 @@
     "watchDescription": "Your daily ads will appear here.",
     "watchBody": "The ad player and attention questions are built and tested on the server. This screen connects to them once its design is agreed.",
     "watchFooter": "Points are credited the moment you answer correctly.",
-    "comingSoon": "Coming soon"
+    "comingSoon": "Coming soon",
+    "pointsAccumulated": "{points} points accumulated",
+    "watchCta": "Watch ads",
+    "lifetimeEarned": "Lifetime earned",
+    "lifetimeEarnedHint": "Total points ever earned",
+    "chart": {
+      "title": "Your performance",
+      "description": "Earnings and ads watched over time.",
+      "metricLabel": "Metric",
+      "earned": "Earnings",
+      "adsWatched": "Ads watched",
+      "days": "{count} days",
+      "empty": "Nothing here yet — watch your first ad to start the chart.",
+      "tooltipEarned": "{points} pts",
+      "tooltipAds": "{count, plural, =1 {1 ad} other {# ads}}",
+      "dateColumn": "Date"
+    },
+    "history": {
+      "title": "Transaction history",
+      "description": "Every point in and out, and your plan payments.",
+      "searchPlaceholder": "Search transactions",
+      "sortLabel": "Sort",
+      "filterLabel": "Filter by type",
+      "allTypes": "All",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "pending": "Pending",
+      "failed": "Failed",
+      "balanceShort": "bal {balance}",
+      "showMore": "Show {count} more",
+      "emptyAll": "No transactions yet. Points you earn will appear here the moment they land.",
+      "emptyFiltered": "Nothing matches your search or filter.",
+      "sort": {
+        "newest": "Newest first",
+        "oldest": "Oldest first",
+        "largest": "Largest amount",
+        "smallest": "Smallest amount"
+      },
+      "columns": {
+        "transaction": "Transaction",
+        "date": "Date",
+        "amount": "Amount",
+        "balance": "Balance"
+      },
+      "kind": {
+        "earned": "Earned",
+        "bonus": "Bonus",
+        "withdrawal": "Withdrawal",
+        "refund": "Refund",
+        "subscription": "Subscription",
+        "adjustment": "Adjustment"
+      },
+      "kindHint": {
+        "earned": "Ad reward",
+        "bonus": "Referral bonus",
+        "withdrawal": "Payout request",
+        "refund": "Returned to balance",
+        "subscription": "Plan payment",
+        "adjustment": "Account correction"
+      },
+      "method": {
+        "mobile_money": "Mobile Money",
+        "crypto": "Crypto",
+        "korapay": "Korapay"
+      }
+    }
+  },
+  "nav": {
+    "label": "Main navigation",
+    "home": "Home",
+    "ads": "Ads",
+    "upgrade": "Upgrade",
+    "profile": "Profile",
+    "upgradeTeaserTitle": "Go further",
+    "upgradeTeaserBody": "Upgrade your plan to raise your daily earning cap."
+  },
+  "adsTab": {
+    "title": "Watch and earn",
+    "description": "Your daily ads will appear here.",
+    "comingSoon": "Coming soon",
+    "body": "The ad player and attention questions are built and tested on the server. This screen connects to them once its design is agreed."
+  },
+  "upgradeTab": {
+    "title": "Upgrade your plan",
+    "description": "Higher tiers raise your daily earning cap.",
+    "comingSoon": "Coming soon",
+    "body": "Plans and payments are ready behind the scenes. This screen arrives with its own design."
+  },
+  "profileTab": {
+    "title": "Your profile",
+    "description": "Account, payout details and settings.",
+    "comingSoon": "Coming soon",
+    "body": "Payout details, language and appearance settings will live here."
   }
 }

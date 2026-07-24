@@ -1,0 +1,133 @@
+'use client'
+
+import { Gem, House, PlayCircle, UserRound } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+
+import { Logo } from '@/components/brand/Logo'
+import { Link, usePathname } from '@/i18n/navigation'
+import { cn } from '@/lib/cn'
+
+/**
+ * App navigation, one component per breakpoint convention (2026-07-24
+ * decision):
+ *
+ *   mobile  (<768px)  Fixed bottom tab bar — thumb-reach placement, the
+ *                     pattern both platform HIGs recommend for 3–5 primary
+ *                     destinations. Safe-area padding for gesture-nav phones.
+ *   768px+            Slim left sidebar, per the operator's two references.
+ *
+ * Same four destinations either way, so muscle memory transfers between a
+ * phone and a laptop. Active state is by route prefix, not equality, so
+ * /profile/payout-details still lights up Profile.
+ */
+
+const DESTINATIONS = [
+  { href: '/dashboard', key: 'home', Icon: House },
+  { href: '/ads', key: 'ads', Icon: PlayCircle },
+  { href: '/upgrade', key: 'upgrade', Icon: Gem },
+  { href: '/profile', key: 'profile', Icon: UserRound },
+] as const
+
+function useActive() {
+  const pathname = usePathname()
+  return (href: string) => pathname === href || pathname.startsWith(href + '/')
+}
+
+/** Fixed bottom tab bar. Rendered on every app screen below md. */
+export function BottomTabBar() {
+  const t = useTranslations('nav')
+  const isActive = useActive()
+
+  return (
+    <nav
+      aria-label={t('label')}
+      className={cn(
+        'fixed inset-x-0 bottom-0 z-40 border-t border-ink-200 bg-surface md:hidden',
+        // Gesture-nav phones reserve space below the bar; without this the
+        // tabs sit under the home indicator.
+        'pb-[env(safe-area-inset-bottom)]',
+      )}
+    >
+      <ul className="mx-auto flex max-w-md">
+        {DESTINATIONS.map(({ href, key, Icon }) => {
+          const active = isActive(href)
+          return (
+            <li key={key} className="flex-1">
+              <Link
+                href={href}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'flex flex-col items-center gap-1 pb-2 pt-2.5 text-[0.6875rem] font-medium',
+                  'transition-colors',
+                  active ? 'text-brand-600' : 'text-ink-500 active:text-ink-700',
+                )}
+              >
+                <Icon
+                  aria-hidden
+                  className="size-5"
+                  // Filled-feel weight on the active tab without a second
+                  // icon set: thicker stroke reads as "on" at this size.
+                  strokeWidth={active ? 2.4 : 2}
+                />
+                {t(key)}
+              </Link>
+            </li>
+          )
+        })}
+      </ul>
+    </nav>
+  )
+}
+
+/** Slim sidebar for md+. The parent grid reserves its column. */
+export function Sidebar({
+  userSlot,
+  upgradeSlot,
+}: {
+  /** Signed-in identity + log out, supplied by the server layout. */
+  userSlot?: React.ReactNode
+  /** Upgrade teaser card, pinned above the user block like the references. */
+  upgradeSlot?: React.ReactNode
+}) {
+  const t = useTranslations('nav')
+  const isActive = useActive()
+
+  return (
+    <aside className="sticky top-0 hidden h-dvh w-56 shrink-0 flex-col border-r border-ink-200 bg-surface px-3 py-5 md:flex xl:w-60">
+      <div className="px-2">
+        <Logo variant="dark" />
+      </div>
+
+      <nav aria-label={t('label')} className="mt-7 flex flex-1 flex-col">
+        <ul className="flex flex-col gap-1">
+          {DESTINATIONS.map(({ href, key, Icon }) => {
+            const active = isActive(href)
+            return (
+              <li key={key}>
+                <Link
+                  href={href}
+                  aria-current={active ? 'page' : undefined}
+                  className={cn(
+                    'flex items-center gap-2.5 rounded-(--radius-input) px-3 py-2 text-sm font-medium',
+                    'transition-colors',
+                    active
+                      ? 'bg-brand-50 text-brand-700'
+                      : 'text-ink-600 hover:bg-ink-100 hover:text-ink-900',
+                  )}
+                >
+                  <Icon aria-hidden className="size-4.5" strokeWidth={active ? 2.2 : 2} />
+                  {t(key)}
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+
+        <div className="mt-auto flex flex-col gap-3">
+          {upgradeSlot}
+          {userSlot}
+        </div>
+      </nav>
+    </aside>
+  )
+}

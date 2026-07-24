@@ -164,10 +164,19 @@ async function removeSeed() {
   for (const account of ACCOUNTS) {
     const existing = await findUser(account.email)
     if (existing) {
-      // Cascades to profiles, roles, ledger and every other user-scoped row.
+      // Cascades to profiles, roles and every other user-scoped row — EXCEPT
+      // the points ledger, which is RESTRICT by design (migration 007): an
+      // account with financial history cannot be hard-deleted. When that
+      // bites, keep the account and its history; the run below skips
+      // re-seeding history it finds already present. Full purge stays the
+      // documented owner-only SQL recipe in migration 007.
       const { error } = await db.auth.admin.deleteUser(existing.id)
-      if (error) throw error
-      console.log(`  removed account ${account.email}`)
+      if (error) {
+        account.reuseId = existing.id
+        console.log(`  keeping ${account.email} (has ledger history; delete is blocked by design)`)
+      } else {
+        console.log(`  removed account ${account.email}`)
+      }
     }
   }
 
@@ -197,6 +206,11 @@ if (drop) {
 /* Accounts. */
 const created = {}
 for (const account of ACCOUNTS) {
+  if (account.reuseId) {
+    created[account.role] = account.reuseId
+    console.log(`  reusing ${account.email}`)
+    continue
+  }
   const { data, error } = await db.auth.admin.createUser({
     email: account.email,
     password: PASSWORD,
@@ -262,6 +276,119 @@ for (const { ad, question } of ADS) {
   }
 
   console.log(`  created ad "${ad.title}"`)
+}
+
+/* --- demo transaction history (user account) ------------------------------
+ *
+ * Backdated rows so the Home tab's chart and statement have something real
+ * to render. Direct inserts rather than credit_points/debit_points because
+ * those functions stamp now() and cannot backdate; the append-only trigger
+ * permits INSERT, and user_balances is upserted below to stay consistent
+ * with the rows (same guarantee the functions provide, done by hand).
+ * Dev-only, removed wholesale by --drop via the account cascade.
+ */
+{
+  // Idempotence: a reused account already carries seeded history — adding a
+  // second copy would double every balance, so detect and skip.
+  const { data: existingSeed } = await db
+    .from('points_ledger')
+    .select('id')
+    .eq('user_id', created.user)
+    .limit(1)
+  if (existingSeed?.length) {
+    console.log('  ledger history already present — skipping history seed')
+  } else {
+  const RATE = 1000 // points per GHS, matching the seeded config
+  const DAY = 24 * 60 * 60 * 1000
+  const events = []
+
+  const at = (daysAgo, hour) => {
+    const d = new Date(Date.now() - daysAgo * DAY)
+    d.setUTCHours(hour, Math.floor(Math.random() * 55), 0, 0)
+    return d
+  }
+  const push = (daysAgo, hour, entry_type, amount, extra = {}) =>
+    events.push({ when: at(daysAgo, hour), entry_type, amount, extra })
+
+  // Three weeks of ad watching, quieter at the start, busier lately.
+  for (let daysAgo = 21; daysAgo >= 0; daysAgo--) {
+    const views = daysAgo > 14 ? 1 + (daysAgo % 3) : daysAgo > 7 ? 3 + (daysAgo % 3) : 4 + (daysAgo % 4)
+    for (let v = 0; v < views; v++) {
+      const reward = [50, 50, 35, 80][v % 4]
+      push(daysAgo, 8 + v * 2, 'ad_view', reward, {
+        reference_type: 'ad',
+        reference_id: `seed-ad-${daysAgo}-${v}`,
+      })
+    }
+  }
+  // A referral converting, then activating.
+  push(12, 19, 'referral_signup', 200, { reference_type: 'referral', reference_id: 'seed-ref-1' })
+  push(5, 20, 'referral_activation', 800, { reference_type: 'referral', reference_id: 'seed-ref-1' })
+  // One payout request.
+  push(3, 17, 'redemption_request', -2000, {
+    reference_type: 'redemption',
+    reference_id: '00000000-0000-4000-8000-00000000feed',
+  })
+
+  // balance_after must follow TIME order, not push order — otherwise the
+  // statement's running balance contradicts itself around the withdrawal.
+  events.sort((a, b) => a.when - b.when)
+  let balance = 0
+  let lifetimeEarned = 0
+  let lifetimeSpent = 0
+  const rows = events.map((e) => {
+    balance += e.amount
+    if (e.amount > 0) lifetimeEarned += e.amount
+    else lifetimeSpent += -e.amount
+    return {
+      user_id: created.user,
+      entry_type: e.entry_type,
+      amount: e.amount,
+      balance_after: balance,
+      points_per_currency_unit: RATE,
+      metadata: { seed: true },
+      created_at: e.when.toISOString(),
+      ...e.extra,
+    }
+  })
+
+  const { error: ledgerError } = await db.from('points_ledger').insert(rows)
+  if (ledgerError) throw ledgerError
+
+  const { error: balanceError } = await db.from('user_balances').upsert({
+    user_id: created.user,
+    balance,
+    lifetime_earned: lifetimeEarned,
+    lifetime_spent: lifetimeSpent,
+  })
+  if (balanceError) throw balanceError
+  console.log(`  seeded ${rows.length} ledger entries for user@email.com (balance ${balance})`)
+
+  // One confirmed plan payment, if a paid tier exists to hang it on.
+  const { data: paidTier } = await db
+    .from('tiers')
+    .select('id, price_minor')
+    .gt('price_minor', 0)
+    .order('price_minor')
+    .limit(1)
+    .maybeSingle()
+  if (paidTier) {
+    const paidAt = new Date(Date.now() - 6 * DAY).toISOString()
+    const { error: subError } = await db.from('subscription_payments').insert({
+      user_id: created.user,
+      tier_id: paidTier.id,
+      method: 'korapay',
+      status: 'confirmed',
+      amount_minor: paidTier.price_minor,
+      period_days: 30,
+      external_reference: 'seed-sub-1',
+      created_at: paidAt,
+      confirmed_at: paidAt,
+    })
+    if (subError) throw subError
+    console.log(`  seeded 1 confirmed subscription payment`)
+  }
+  } // end history seed (skipped when already present)
 }
 
 console.log(`

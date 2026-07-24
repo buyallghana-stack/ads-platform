@@ -105,12 +105,30 @@ export function CardFooter({
  * Stat tile. The single most repeated shape on the dashboards — balance,
  * cedi value, ads remaining, pending redemptions — so it is a named
  * component rather than a pattern everyone re-derives slightly differently.
+ *
+ * The icon chip takes a meaning-coded tone (see the accent tokens in
+ * globals.css): colour identifies the stat's category at a glance, the way
+ * every fintech home screen the operator's users know does it. Neutral grey
+ * remains the default so nothing is forced to pick a colour.
  */
+
+type StatTone = 'neutral' | 'brand' | 'success' | 'violet' | 'teal' | 'orange'
+
+const STAT_CHIP: Record<StatTone, string> = {
+  neutral: 'border-ink-200 bg-ink-50 text-ink-500',
+  brand: 'border-brand-600/20 bg-brand-50 text-brand-600',
+  success: 'border-success-500/25 bg-success-50 text-success-600',
+  violet: 'border-violet-600/20 bg-violet-50 text-violet-600',
+  teal: 'border-teal-500/25 bg-teal-50 text-teal-600',
+  orange: 'border-orange-500/25 bg-orange-50 text-orange-600',
+}
+
 export function StatCard({
   label,
   value,
   sublabel,
   icon,
+  tone = 'neutral',
   trend,
   className,
 }: {
@@ -118,6 +136,7 @@ export function StatCard({
   value: React.ReactNode
   sublabel?: React.ReactNode
   icon?: React.ReactNode
+  tone?: StatTone
   trend?: { value: string; direction: 'up' | 'down' | 'flat' }
 }& { className?: string }) {
   return (
@@ -137,7 +156,12 @@ export function StatCard({
 
         <div className="flex shrink-0 flex-col items-end gap-2">
           {icon && (
-            <span className="grid size-8 place-items-center rounded-(--radius-input) border border-ink-200 bg-ink-50 text-ink-500 [&>svg]:size-4">
+            <span
+              className={cn(
+                'grid size-9 place-items-center rounded-(--radius-input) border [&>svg]:size-4',
+                STAT_CHIP[tone],
+              )}
+            >
               {icon}
             </span>
           )}
