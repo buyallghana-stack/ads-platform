@@ -8,6 +8,7 @@ import { Logo } from '@/components/brand/Logo'
 import { PerformanceChart } from '@/components/dashboard/PerformanceChart'
 import { ReferralCard } from '@/components/dashboard/ReferralCard'
 import { TransactionHistory } from '@/components/dashboard/TransactionHistory'
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { ThemeSwitchButton } from '@/components/theme/ThemeSwitchButton'
 import { Card, CardHeader, StatCard as Stat } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -15,6 +16,7 @@ import { Link, redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser } from '@/lib/auth/session'
 import { pickDisplayName } from '@/lib/dashboard/display-name'
 import { getHomeData } from '@/lib/dashboard/home-data'
+import { getNotifications, getUnreadCount } from '@/lib/notifications/data'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { cn } from '@/lib/cn'
 
@@ -47,13 +49,18 @@ export default async function HomePage({
   const format = await getFormatter()
 
   const admin = createAdminClient()
-  const [{ data: status }, profile, { data: balances }, { feed, daily }] = await Promise.all([
-    // SECURITY DEFINER with its own authorisation check (§8).
-    admin.rpc('get_user_earning_status', { p_user_id: user!.id }).maybeSingle(),
-    getProfile(user!.id),
-    admin.from('user_balances').select('lifetime_earned').eq('user_id', user!.id).maybeSingle(),
-    getHomeData(user!.id),
-  ])
+  const [{ data: status }, profile, { data: balances }, { feed, daily }, notifications, unreadCount] =
+    await Promise.all([
+      // SECURITY DEFINER with its own authorisation check (§8).
+      admin.rpc('get_user_earning_status', { p_user_id: user!.id }).maybeSingle(),
+      getProfile(user!.id),
+      admin.from('user_balances').select('lifetime_earned').eq('user_id', user!.id).maybeSingle(),
+      getHomeData(user!.id),
+      // Own rows via RLS (user client); recent slice feeds the dropdown panel.
+      getNotifications(30),
+      getUnreadCount(),
+    ])
+  const now = Date.now()
 
   const balance = status?.balance ?? 0
   const currency = Number(status?.currency_value ?? 0)
@@ -78,6 +85,7 @@ export default async function HomePage({
       <header className="flex items-center gap-3">
         <Logo variant="dark" className="md:hidden" />
         <div className="ml-auto flex items-center gap-0.5">
+          <NotificationBell notifications={notifications} unreadCount={unreadCount} now={now} />
           <ThemeSwitchButton />
           <LogOutButton />
         </div>
