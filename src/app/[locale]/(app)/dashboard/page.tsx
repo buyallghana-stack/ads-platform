@@ -3,15 +3,20 @@ import type { Metadata } from 'next'
 import { ArrowUpRight, PlayCircle, TrendingUp, Trophy } from 'lucide-react'
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server'
 
+import { LogOutButton } from '@/components/app/LogOutButton'
+import { Logo } from '@/components/brand/Logo'
 import { PerformanceChart } from '@/components/dashboard/PerformanceChart'
 import { ReferralCard } from '@/components/dashboard/ReferralCard'
 import { TransactionHistory } from '@/components/dashboard/TransactionHistory'
+import { ThemeSwitchButton } from '@/components/theme/ThemeSwitchButton'
 import { Card, CardHeader, StatCard as Stat } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Link, redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser } from '@/lib/auth/session'
+import { pickDisplayName } from '@/lib/dashboard/display-name'
 import { getHomeData } from '@/lib/dashboard/home-data'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { cn } from '@/lib/cn'
 
 export const metadata: Metadata = {
   title: 'Home',
@@ -55,7 +60,8 @@ export default async function HomePage({
   const cap = status?.daily_ad_cap ?? 0
   const done = status?.ads_completed_today ?? 0
   const remaining = status?.ads_remaining_today ?? 0
-  const firstName = (profile?.full_name ?? '').split(' ')[0] || t('there')
+  const { name: pickedName, sizeClass } = pickDisplayName(profile?.full_name)
+  const greetName = pickedName ?? t('there')
 
   // "This week" rail summary, computed from the same daily aggregates the
   // chart uses — one source of truth, no second query.
@@ -66,9 +72,26 @@ export default async function HomePage({
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-5 sm:px-6 md:px-8 md:py-7">
+      {/* Home-only header: brand (mobile — the sidebar carries it on md+),
+          theme switch and the red icon-only logout. Other tabs get none of
+          this chrome (operator direction 2026-07-24). */}
+      <header className="flex items-center gap-3">
+        <Logo variant="dark" className="md:hidden" />
+        <div className="ml-auto flex items-center gap-0.5">
+          <ThemeSwitchButton />
+          <LogOutButton />
+        </div>
+      </header>
+
       <div className="animate-rise">
-        <h1 className="text-lg font-semibold tracking-[-0.02em] text-ink-900">
-          {t('greeting', { name: firstName })}
+        <h1
+          className={cn(
+            'font-semibold tracking-[-0.02em] break-words text-ink-900',
+            sizeClass,
+          )}
+        >
+          {t('greeting', { name: greetName })}{' '}
+          <span aria-hidden>🤗</span>
         </h1>
         <p className="mt-0.5 text-[0.8125rem] text-ink-500">{t('subtitle')}</p>
       </div>

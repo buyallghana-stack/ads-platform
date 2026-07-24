@@ -415,10 +415,13 @@ export function WithdrawWizard({
             ))}
           </div>
 
-          <div className="mt-8 grid w-full max-w-[16rem] grid-cols-3 gap-2">
+          {/* Dialer: each digit in its own circle, the delete key a bare
+              icon. Generous, evenly spaced, thumb-sized on touch. */}
+          <div className="mt-8 grid grid-cols-3 justify-items-center gap-x-5 gap-y-4">
             {['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'back'].map((key, i) =>
               key === '' ? (
-                <span key={i} />
+                // Keeps the grid aligned so 0 sits centre-bottom.
+                <span key={i} className="size-16 pointer-coarse:size-[4.25rem]" />
               ) : (
                 <button
                   key={i}
@@ -427,12 +430,16 @@ export function WithdrawWizard({
                   onClick={() => pressPin(key)}
                   aria-label={key === 'back' ? t('pin.delete') : key}
                   className={cn(
-                    'grid h-14 place-items-center rounded-(--radius-input) text-[1.25rem] font-semibold text-ink-900',
-                    'transition-[background-color,transform] duration-100 active:scale-95',
-                    'hover:bg-ink-100 disabled:opacity-40',
+                    'grid size-16 place-items-center rounded-full text-[1.625rem] font-semibold tabular-nums text-ink-900',
+                    'transition-[background-color,border-color,transform] duration-100 active:scale-90',
+                    'pointer-coarse:size-[4.25rem]',
+                    key === 'back'
+                      ? // Delete: no circle, just the glyph.
+                        'text-ink-500 hover:text-ink-900 disabled:opacity-40'
+                      : 'border border-ink-200 bg-surface hover:border-ink-300 hover:bg-ink-100 disabled:opacity-40',
                   )}
                 >
-                  {key === 'back' ? <Delete aria-hidden className="size-5 text-ink-500" /> : key}
+                  {key === 'back' ? <Delete aria-hidden className="size-6" /> : key}
                 </button>
               ),
             )}

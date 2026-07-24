@@ -79,14 +79,15 @@ export function BottomTabBar() {
   )
 }
 
-/** Slim sidebar for md+. The parent grid reserves its column. */
+/** Slim sidebar for md+. The parent grid reserves its column.
+ *
+ *  Carries only navigation and the upgrade teaser. The brand logo anchors the
+ *  nav; the theme switch and logout live in the Home header, not here
+ *  (operator direction 2026-07-24: that chrome is Home-only). */
 export function Sidebar({
-  userSlot,
   upgradeSlot,
 }: {
-  /** Signed-in identity + log out, supplied by the server layout. */
-  userSlot?: React.ReactNode
-  /** Upgrade teaser card, pinned above the user block like the references. */
+  /** Upgrade teaser card, pinned to the bottom like the references. */
   upgradeSlot?: React.ReactNode
 }) {
   const t = useTranslations('nav')
@@ -123,10 +124,7 @@ export function Sidebar({
           })}
         </ul>
 
-        <div className="mt-auto flex flex-col gap-3">
-          {upgradeSlot}
-          {userSlot}
-        </div>
+        <div className="mt-auto flex flex-col gap-3">{upgradeSlot}</div>
       </nav>
     </aside>
   )

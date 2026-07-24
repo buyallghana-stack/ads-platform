@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "AdReward",
+    "appName": "SidePerks",
     "back": "Retour",
     "continue": "Continuer",
     "cancel": "Annuler",
@@ -247,7 +247,7 @@
       "share": "Partager",
       "copiedDone": "Copié",
       "sharedDone": "Partagé",
-      "inviteMessage": "Rejoins-moi sur AdReward — regarde de courtes pubs et gagne de l'argent réel au Ghana. Inscris-toi avec mon lien : {url}"
+      "inviteMessage": "Rejoins-moi sur SidePerks — regarde de courtes pubs et gagne de l'argent réel au Ghana. Inscris-toi avec mon lien : {url}"
     },
     "withdrawCta": "Retirer"
   },
@@ -332,5 +332,11 @@
       "home": "Retour à l'accueil",
       "history": "Voir dans l'historique"
     }
+  },
+  "theme": {
+    "switch": "Changer de thème (actuellement {mode})",
+    "system": "Système",
+    "light": "Clair",
+    "dark": "Sombre"
   }
 }
