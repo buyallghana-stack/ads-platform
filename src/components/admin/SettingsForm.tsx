@@ -162,10 +162,20 @@ function Row({
 }) {
   const id = `setting-${field.key}`
 
+  /*
+    A switch belongs opposite the thing it switches, at every width — it is
+    one glyph wide and reading "off" costs nothing when it sits on the right.
+    A number or a select does not: shrunk into a corner of a 390px row it
+    leaves the label two words per line, so those drop full-width underneath
+    instead. Hence two layouts rather than one compromise.
+  */
+  const inlineOnMobile = field.kind === 'toggle'
+
   return (
     <div
       className={cn(
-        'flex flex-col gap-3 px-4 py-3.5 transition-colors sm:flex-row sm:items-center',
+        'gap-3 px-4 py-3.5 transition-colors sm:flex sm:flex-row sm:items-center',
+        inlineOnMobile ? 'flex flex-row items-center' : 'flex flex-col',
         dirty && 'bg-brand-50/40',
       )}
     >
@@ -197,7 +207,7 @@ function Row({
         </code>
       </div>
 
-      <div className="shrink-0 sm:w-52 sm:text-right">
+      <div className={cn('shrink-0 sm:w-52 sm:text-right', !inlineOnMobile && 'w-full sm:w-52')}>
         {field.kind === 'toggle' && (
           <Toggle
             id={id}

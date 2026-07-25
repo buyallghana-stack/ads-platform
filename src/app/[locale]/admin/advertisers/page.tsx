@@ -68,8 +68,10 @@ export default async function AdminAdvertisersPage({
         />
       </SummaryStrip>
 
-      <div className="overflow-x-auto rounded-(--radius-card) border border-ink-200 bg-surface">
-        <table className="w-full min-w-[46rem]">
+      {/* Cards below lg — see the finance screen for why a five-column money
+          table is not something a phone can usefully scroll sideways. */}
+      <div className="hidden overflow-hidden rounded-(--radius-card) border border-ink-200 bg-surface md:block">
+        <table className="w-full">
           <thead>
             <tr className="border-b border-ink-200">
               {(['advertiser', 'contract', 'delivery', 'ends', 'status'] as const).map((c, i) => (
@@ -156,6 +158,71 @@ export default async function AdminAdvertisersPage({
           </tbody>
         </table>
       </div>
+
+      <ul className="flex flex-col gap-2 md:hidden">
+        {rows.map((a) => {
+          const pct =
+            a.contractGhs === 0 ? 0 : Math.min(100, Math.round((a.spentGhs / a.contractGhs) * 100))
+          const left = daysLeft(a.endsAt)
+          const urgent = a.status === 'active' && (pct >= 90 || (left !== null && left <= 7))
+          return (
+            <li
+              key={a.id}
+              className="rounded-(--radius-card) border border-ink-200 bg-surface p-3.5"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate text-[0.875rem] font-semibold text-ink-900">{a.name}</p>
+                  <p className="mt-0.5 truncate text-[0.6875rem] text-ink-400">{a.contact}</p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="text-[0.875rem] font-semibold text-ink-900 tabular-nums">
+                    {ghs(a.contractGhs)}
+                  </p>
+                  <p className="text-[0.6875rem] text-ink-400 tabular-nums">
+                    {t('spent', { amount: ghs(a.spentGhs) })}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-3 border-t border-ink-200 pt-2.5">
+                <div className="h-1.5 overflow-hidden rounded-full bg-ink-100">
+                  <div
+                    className={`h-full rounded-full ${urgent ? 'bg-warning-500' : 'bg-brand-600'}`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <p className="mt-1 text-[0.6875rem] text-ink-500 tabular-nums">
+                  {t('deliveredPct', { pct })}
+                </p>
+              </div>
+
+              <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                <StatusDot tone={TONE[a.status]}>{t(`status.${a.status}`)}</StatusDot>
+                {/* Suppressed once the contract has ended — the status dot
+                    beside it already says so, and "Ended Ended" reads as a
+                    bug rather than as emphasis. */}
+                {a.status !== 'ended' && (
+                  <span
+                    className={`text-[0.6875rem] tabular-nums ${
+                      left !== null && left >= 0 && left <= 7
+                        ? 'font-medium text-warning-600'
+                        : 'text-ink-400'
+                    }`}
+                  >
+                    {left === null ? t('noEnd') : t('daysLeft', { days: left })}
+                  </span>
+                )}
+                {urgent && (
+                  <span className="text-[0.6875rem] font-medium text-warning-600">
+                    {t('needsAttention')}
+                  </span>
+                )}
+              </div>
+            </li>
+          )
+        })}
+      </ul>
 
       <p className="mt-3 max-w-[80ch] text-[0.75rem] leading-relaxed text-ink-400">
         {t('manualNote')}

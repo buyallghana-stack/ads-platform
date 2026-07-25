@@ -91,8 +91,13 @@ export default async function AdminFinancePage({
         </p>
       </div>
 
-      <div className="overflow-x-auto rounded-(--radius-card) border border-ink-200 bg-surface">
-        <table className="w-full min-w-[40rem]">
+      {/* ---- Statement, lg and up --------------------------------------
+          Below lg this becomes cards. A six-column money table on a 390px
+          screen is not a table with a scrollbar, it is a table cut off
+          mid-figure — the numbers wrapped to "GHS / 21,750" and the profit
+          column, the one the screen exists for, fell off the right edge. */}
+      <div className="hidden overflow-hidden rounded-(--radius-card) border border-ink-200 bg-surface md:block">
+        <table className="w-full">
           <thead>
             <tr className="border-b border-ink-200">
               {(['month', 'subscriptions', 'advertisers', 'in', 'out', 'profit'] as const).map(
@@ -162,6 +167,76 @@ export default async function AdminFinancePage({
           </tfoot>
         </table>
       </div>
+
+      {/* ---- Statement, below lg ---------------------------------------
+          One card per month, the two inputs on top and the profit on its own
+          line underneath — so the arithmetic still reads top to bottom. */}
+      <ul className="flex flex-col gap-2 md:hidden">
+        {[...rows]
+          .map((r) => ({
+            ...r,
+            inTotal: r.subscriptionsGhs + r.advertisersGhs,
+          }))
+          .map((r) => (
+            <li
+              key={r.month}
+              className="rounded-(--radius-card) border border-ink-200 bg-surface p-3.5"
+            >
+              <p className="text-[0.875rem] font-semibold text-ink-900">{monthLabel(r.month)}</p>
+
+              <dl className="mt-2.5 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-ink-200 pt-2.5">
+                <div>
+                  <dt className="text-[0.6875rem] text-ink-400">{t('columns.subscriptions')}</dt>
+                  <dd className="mt-0.5 text-[0.8125rem] text-ink-700 tabular-nums">
+                    {ghs(r.subscriptionsGhs)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[0.6875rem] text-ink-400">{t('columns.advertisers')}</dt>
+                  <dd className="mt-0.5 text-[0.8125rem] text-ink-700 tabular-nums">
+                    {ghs(r.advertisersGhs)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[0.6875rem] text-ink-400">{t('columns.in')}</dt>
+                  <dd className="mt-0.5 text-[0.8125rem] font-medium text-success-700 tabular-nums">
+                    {ghs(r.inTotal)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[0.6875rem] text-ink-400">{t('columns.out')}</dt>
+                  <dd className="mt-0.5 text-[0.8125rem] font-medium text-brand-700 tabular-nums">
+                    {ghs(r.withdrawalsGhs)}
+                  </dd>
+                </div>
+              </dl>
+
+              <div className="mt-2.5 flex items-baseline justify-between gap-3 border-t border-ink-200 pt-2.5">
+                <span className="text-[0.75rem] font-medium text-ink-500">
+                  {t('columns.profit')}
+                </span>
+                <span className="text-[1rem] font-semibold text-ink-900 tabular-nums">
+                  {ghs(r.inTotal - r.withdrawalsGhs)}
+                </span>
+              </div>
+            </li>
+          ))}
+
+        <li className="rounded-(--radius-card) border border-ink-300 bg-ink-50 p-3.5">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-[0.8125rem] font-semibold text-ink-900">
+              {t('columns.total')}
+            </span>
+            <span className="text-[1.125rem] font-bold text-ink-900 tabular-nums">
+              {ghs(totalProfit)}
+            </span>
+          </div>
+          <p className="mt-1 text-[0.6875rem] text-ink-500 tabular-nums">
+            {ghs(totalIn)} {t('columns.in').toLowerCase()} · {ghs(totals.withdrawals)}{' '}
+            {t('columns.out').toLowerCase()}
+          </p>
+        </li>
+      </ul>
 
       <p className="mt-3 text-[0.75rem] leading-relaxed text-ink-400">{t('exportNote')}</p>
     </>

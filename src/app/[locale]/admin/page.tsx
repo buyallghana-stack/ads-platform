@@ -61,8 +61,12 @@ export default async function AdminOverviewPage({
     <>
       <PageHeader title={t('title')} description={t('description')} />
 
-      {/* ---- The three numbers, plus what we owe ---------------------- */}
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      {/* ---- The three numbers, plus what we owe ----------------------
+          Two-up on a phone, not stacked. One full-width card per number made
+          each one ~250px tall with the whole right half empty, and four of
+          them filled the screen before the operator saw a single decision.
+          The figures are short enough to pair. */}
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
         <MetricCard
           label={t('deposits')}
           value={ghsTotal(m.deposits.value)}

@@ -47,11 +47,14 @@ export function MetricCard({
   return (
     <div
       className={cn(
-        'flex flex-col rounded-(--radius-card) border border-ink-200 bg-surface px-4 py-3.5',
+        'flex flex-col rounded-(--radius-card) border border-ink-200 bg-surface',
+        'px-3 py-3 sm:px-4 sm:py-3.5',
         className,
       )}
     >
-      <p className="truncate text-[0.8125rem] font-medium text-ink-600">{label}</p>
+      <p className="truncate text-[0.75rem] font-medium text-ink-600 sm:text-[0.8125rem]">
+        {label}
+      </p>
 
       {/* Clamped rather than truncated: "GHS 21,750 plans · GHS 26,500
           advertisers" is two facts, and cutting it at one and a half was
@@ -62,7 +65,9 @@ export function MetricCard({
         </p>
       )}
 
-      <p className="mt-2.5 text-[1.5rem] leading-none font-semibold tracking-[-0.02em] text-ink-900 tabular-nums sm:text-[1.75rem]">
+      {/* Sized so "GHS 48,250" fits a half-width phone card on one line.
+          A headline number that wraps stops being a headline. */}
+      <p className="mt-2 text-[1.125rem] leading-none font-semibold tracking-[-0.02em] text-ink-900 tabular-nums sm:mt-2.5 sm:text-[1.75rem]">
         {value}
       </p>
 

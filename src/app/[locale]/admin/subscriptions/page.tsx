@@ -68,8 +68,10 @@ export default async function AdminSubscriptionsPage({
         />
       </SummaryStrip>
 
-      <div className="overflow-x-auto rounded-(--radius-card) border border-ink-200 bg-surface">
-        <table className="w-full min-w-[44rem]">
+      {/* Cards below lg — see the finance screen for why a six-column money
+          table is not something a phone can usefully scroll sideways. */}
+      <div className="hidden overflow-hidden rounded-(--radius-card) border border-ink-200 bg-surface md:block">
+        <table className="w-full">
           <thead>
             <tr className="border-b border-ink-200">
               {(['plan', 'price', 'benefits', 'active', 'change', 'revenue'] as const).map(
@@ -138,6 +140,58 @@ export default async function AdminSubscriptionsPage({
           </tbody>
         </table>
       </div>
+
+      <ul className="flex flex-col gap-2 md:hidden">
+        {rows.map((p) => {
+          const delta = p.active - p.activeLastMonth
+          const pct =
+            p.activeLastMonth === 0 ? 0 : Math.round((delta / p.activeLastMonth) * 1000) / 10
+          const up = delta >= 0
+          const Arrow = up ? TrendingUp : TrendingDown
+          return (
+            <li
+              key={p.id}
+              className="rounded-(--radius-card) border border-ink-200 bg-surface p-3.5"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[0.875rem] font-semibold text-ink-900">{p.name}</p>
+                  <p className="mt-0.5 text-[0.75rem] text-ink-500">
+                    {p.priceGhs === 0
+                      ? t('benefits.none')
+                      : t('benefits.value', { multiplier: p.multiplier, ads: p.dailyAdsBonus })}
+                  </p>
+                </div>
+                <p className="shrink-0 text-[0.9375rem] font-semibold text-ink-900 tabular-nums">
+                  {p.priceGhs === 0 ? t('freeLabel') : ghs(p.priceGhs)}
+                </p>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-ink-200 pt-2.5">
+                <span className="text-[0.75rem] text-ink-500">
+                  {t('columns.active')}{' '}
+                  <span className="font-semibold text-ink-900 tabular-nums">
+                    {p.active.toLocaleString()}
+                  </span>
+                </span>
+                <span
+                  className={`inline-flex items-center gap-1 text-[0.75rem] font-medium tabular-nums ${
+                    up ? 'text-success-700' : 'text-danger-700'
+                  }`}
+                >
+                  <Arrow aria-hidden className="size-3" />
+                  {Math.abs(pct)}%
+                </span>
+                {p.monthlyGhs > 0 && (
+                  <span className="ml-auto text-[0.8125rem] font-semibold text-ink-900 tabular-nums">
+                    {ghs(p.monthlyGhs)}
+                  </span>
+                )}
+              </div>
+            </li>
+          )
+        })}
+      </ul>
 
       <p className="mt-3 max-w-[80ch] text-[0.75rem] leading-relaxed text-ink-400">
         {t('editNote')}

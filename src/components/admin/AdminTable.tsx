@@ -37,12 +37,22 @@ export function SummaryStrip({
   return (
     <div
       className={cn(
-        'grid divide-x divide-ink-200 overflow-hidden rounded-(--radius-card) border border-ink-200 bg-surface',
-        /* Four cells stay two-up on a phone rather than shrinking to a
-           quarter of 390px, where the labels wrap to three lines each. */
-        cols === 2 && 'grid-cols-2',
-        cols === 3 && 'grid-cols-3',
-        cols === 4 && 'grid-cols-2 divide-y sm:grid-cols-4 sm:divide-y-0',
+        'grid overflow-hidden rounded-(--radius-card) border border-ink-200 bg-surface',
+        /*
+          ONE COLUMN ON A PHONE, ALWAYS.
+          Three cells across 390px leaves each about 110px, and "GHS 184,220"
+          does not fit in 110px — it wrapped onto two lines, which is what
+          made the finance and payout summaries look broken. Stacked, each
+          cell becomes a label-left/value-right row that cannot wrap at any
+          value length, and three rows cost less height than three wrapped
+          cells did. The horizontal grid returns at `sm`, where the cells are
+          genuinely wide enough for it.
+        */
+        'grid-cols-1 divide-y divide-ink-200',
+        'sm:divide-x sm:divide-y-0',
+        cols === 2 && 'sm:grid-cols-2',
+        cols === 3 && 'sm:grid-cols-3',
+        cols === 4 && 'sm:grid-cols-4',
         className,
       )}
     >
@@ -65,23 +75,37 @@ export function SummaryCell({
   emphasis?: boolean
 }) {
   return (
-    <div className="px-3 py-3 sm:px-4 sm:py-3.5">
-      <p className="text-[0.6875rem] leading-snug font-medium text-ink-500">{label}</p>
-      <p className="mt-1 flex flex-wrap items-baseline gap-x-2">
+    <div
+      className={cn(
+        // Phone: label and value on one line, pushed apart. Tablet up: the
+        // label sits above the number, which is the shape the wide layout
+        // wants and the narrow one cannot afford.
+        'flex items-center justify-between gap-3 px-4 py-2.5',
+        'sm:block sm:px-4 sm:py-3.5',
+      )}
+    >
+      <p className="text-[0.75rem] leading-snug font-medium text-ink-500 sm:text-[0.6875rem]">
+        {label}
+      </p>
+      {/* On a phone the detail stacks UNDER the value rather than beside it.
+          It is not decoration — on the payout summary it is the money — so
+          hiding it was not an option, and setting it beside a value like
+          "GHS 184,220" is what ran the row off the edge in the first place. */}
+      <div className="flex shrink-0 flex-col items-end gap-0.5 text-right sm:mt-1 sm:items-start sm:text-left lg:flex-row lg:items-baseline lg:gap-2">
         <span
           className={cn(
-            'text-[1.25rem] leading-none font-semibold tabular-nums sm:text-[1.375rem]',
+            'text-[1rem] leading-none font-semibold tabular-nums sm:text-[1.375rem]',
             emphasis ? 'text-warning-600' : 'text-ink-900',
           )}
         >
           {value}
         </span>
         {detail && (
-          <span className="text-[0.6875rem] text-ink-400 tabular-nums sm:text-[0.75rem]">
+          <span className="text-[0.6875rem] leading-snug text-ink-400 tabular-nums sm:text-[0.75rem]">
             {detail}
           </span>
         )}
-      </p>
+      </div>
     </div>
   )
 }
