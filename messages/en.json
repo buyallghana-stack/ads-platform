@@ -491,7 +491,8 @@
       "account": "Account",
       "security": "Security",
       "preferences": "Preferences",
-      "support": "Support"
+      "support": "Support",
+      "admin": "Administration"
     },
     "account": {
       "personal": "Personal information",
@@ -527,6 +528,10 @@
       "delete": "Delete account",
       "deleteHint": "Permanently close your account",
       "logOut": "Log out"
+    },
+    "admin": {
+      "dashboard": "Admin dashboard",
+      "dashboardHint": "Payouts, users, ads and platform settings"
     }
   },
   "payout": {
@@ -982,7 +987,8 @@
         "config": "Platform settings",
         "audit": "Audit log",
         "settings": "Admin settings"
-      }
+      },
+      "viewUserApp": "View user app"
     },
     "overview": {
       "title": "Overview",

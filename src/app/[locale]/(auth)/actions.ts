@@ -4,6 +4,7 @@ import { clearLoginVerified, isTwoFactorEnabled } from '@/lib/security/login-2fa
 import { recordSessionContext } from '@/lib/security/session-record'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { landingFor } from '@/lib/auth/landing'
 import { getOrigin, getRequestContext } from '@/lib/request-context'
 import {
   forgotPasswordSchema,
@@ -276,7 +277,9 @@ export async function logInAction(formData: {
     }
   }
 
-  return { ok: true, redirectTo: '/dashboard' }
+  // Administrators land in the admin dashboard: it is what they signed in to
+  // do, and until this existed /admin was unreachable without typing it.
+  return { ok: true, redirectTo: await landingFor(session.user!.id) }
 }
 
 /**

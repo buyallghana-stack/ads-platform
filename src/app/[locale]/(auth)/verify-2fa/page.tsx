@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { AuthLayout } from '@/components/auth/AuthLayout'
 import { LoginChallengeForm } from '@/components/auth/LoginChallengeForm'
 import { redirect } from '@/i18n/navigation'
+import { landingFor } from '@/lib/auth/landing'
 import { getSessionUser } from '@/lib/auth/session'
 import { hasPassedLoginChallenge, isTwoFactorEnabled } from '@/lib/security/login-2fa'
 
@@ -36,8 +37,11 @@ export default async function VerifyTwoFactorPage({
   const user = await getSessionUser()
   if (!user) redirect({ href: '/login', locale })
 
-  if (!(await isTwoFactorEnabled(user!.id))) redirect({ href: '/dashboard', locale })
-  if (await hasPassedLoginChallenge(user!.id)) redirect({ href: '/dashboard', locale })
+  // Both of these mean "nothing to challenge here" — send them wherever they
+  // belong rather than always to the user app.
+  const home = await landingFor(user!.id)
+  if (!(await isTwoFactorEnabled(user!.id))) redirect({ href: home, locale })
+  if (await hasPassedLoginChallenge(user!.id)) redirect({ href: home, locale })
 
   return (
     <AuthLayout compact>

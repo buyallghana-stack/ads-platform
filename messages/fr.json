@@ -491,7 +491,8 @@
       "account": "Compte",
       "security": "Sécurité",
       "preferences": "Préférences",
-      "support": "Assistance"
+      "support": "Assistance",
+      "admin": "Administration"
     },
     "account": {
       "personal": "Informations personnelles",
@@ -527,6 +528,10 @@
       "delete": "Supprimer le compte",
       "deleteHint": "Fermer définitivement votre compte",
       "logOut": "Se déconnecter"
+    },
+    "admin": {
+      "dashboard": "Tableau de bord admin",
+      "dashboardHint": "Retraits, utilisateurs, annonces et paramètres"
     }
   },
   "payout": {
@@ -982,7 +987,8 @@
         "config": "Paramètres plateforme",
         "audit": "Journal",
         "settings": "Paramètres admin"
-      }
+      },
+      "viewUserApp": "Voir l’app utilisateur"
     },
     "overview": {
       "title": "Aperçu",

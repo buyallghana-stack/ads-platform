@@ -1,5 +1,6 @@
 'use server'
 
+import { landingFor } from '@/lib/auth/landing'
 import { getSessionUser } from '@/lib/auth/session'
 import { clearLoginVerified, markLoginVerified } from '@/lib/security/login-2fa'
 import { decryptSecret, normaliseBackupCode, verifyCode } from '@/lib/security/totp'
@@ -17,7 +18,14 @@ import { createAdminClient } from '@/lib/supabase/admin'
  * the same counter as authenticator codes.
  */
 export type ChallengeResult =
-  | { ok: true; usedBackupCode?: boolean; backupCodesRemaining?: number }
+  | {
+      ok: true
+      usedBackupCode?: boolean
+      backupCodesRemaining?: number
+      /** Where to go now — /admin for an administrator. Decided on the server
+       *  so the browser never has to know what a role is. */
+      redirectTo: string
+    }
   | { ok: false; errorKey: string; retryAfter?: string; attemptsLeft?: number }
 
 export async function verifyLoginChallenge(input: {
@@ -40,7 +48,7 @@ export async function verifyLoginChallenge(input: {
     if (cipher && (await verifyCode(decryptSecret(cipher as string), entered))) {
       await admin.rpc('clear_totp_failures', { p_user_id: user.id })
       await markLoginVerified(user.id)
-      return { ok: true }
+      return { ok: true, redirectTo: await landingFor(user.id) }
     }
     return registerFailure(user.id)
   }
@@ -53,7 +61,12 @@ export async function verifyLoginChallenge(input: {
   if (result.ok) {
     await admin.rpc('clear_totp_failures', { p_user_id: user.id })
     await markLoginVerified(user.id)
-    return { ok: true, usedBackupCode: true, backupCodesRemaining: result.remaining ?? 0 }
+    return {
+      ok: true,
+      usedBackupCode: true,
+      backupCodesRemaining: result.remaining ?? 0,
+      redirectTo: await landingFor(user.id),
+    }
   }
   return registerFailure(user.id)
 }

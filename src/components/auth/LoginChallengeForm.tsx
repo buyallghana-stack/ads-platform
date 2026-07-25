@@ -39,7 +39,7 @@ export function LoginChallengeForm() {
     startTransition(async () => {
       const res = await verifyLoginChallenge({ code: value })
       if (res.ok) {
-        router.replace('/dashboard')
+        router.replace(res.redirectTo)
         router.refresh()
         return
       }

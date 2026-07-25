@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import {
   ChevronRight,
   FileText,
+  Gauge,
   Gem,
   KeyRound,
   Languages,
@@ -30,6 +31,7 @@ import { getProfile, getSessionUser } from '@/lib/auth/session'
 import { avatarPublicUrl } from '@/lib/profile/avatar'
 import { getDeletionStatus } from '@/lib/security/deletion-data'
 import { getTwoFactorStatus } from '@/lib/security/two-factor-data'
+import { isAdminUser } from '@/lib/auth/landing'
 import { getPlanStanding } from '@/lib/subscriptions/data'
 
 export const metadata: Metadata = {
@@ -65,6 +67,7 @@ export default async function ProfilePage({
   const twoFactor = await getTwoFactorStatus()
   // Plans STACK, so "upgrade" is only the right word before you own one.
   const planStanding = await getPlanStanding(user!.id)
+  const isAdmin = await isAdminUser(user!.id)
   const deletion = await getDeletionStatus()
   const fullName = profile?.full_name ?? user!.email ?? ''
   const soon = t('soon')
@@ -131,6 +134,21 @@ export default async function ProfilePage({
         className="animate-rise flex flex-col gap-5"
       >
         {/* Account ------------------------------------------------------- */}
+        {/* Administrators use this same account to check the user experience,
+            so the two dashboards need a door between them in both directions.
+            Without this the admin area was reachable only by typing /admin. */}
+        {isAdmin && (
+          <SettingsGroup title={t('groups.admin')}>
+            <SettingsRow
+              href="/admin"
+              icon={<Gauge />}
+              tone="violet"
+              label={t('admin.dashboard')}
+              description={t('admin.dashboardHint')}
+            />
+          </SettingsGroup>
+        )}
+
         <SettingsGroup title={t('groups.account')}>
           <SettingsRow href="/profile/personal" icon={<UserRound />} tone="brand" label={t('account.personal')} description={t('account.personalHint')} />
           <SettingsRow href="/profile/payout" icon={<Wallet />} tone="teal" label={t('account.payout')} description={t('account.payoutHint')} />

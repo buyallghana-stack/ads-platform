@@ -15,6 +15,7 @@ import {
   ScrollText,
   Settings,
   ShieldAlert,
+  SquareArrowOutUpRight,
   Users,
   Wallet,
   X,
@@ -205,6 +206,15 @@ function AdminIdentity({ admin }: { admin: AdminChip }) {
   const t = useTranslations('admin.nav')
   return (
     <div className="border-t border-ink-200 p-3">
+      {/* The operator uses one account for both, and checks the user
+          experience from it. A dashboard with no way out is a trap. */}
+      <Link
+        href="/dashboard"
+        className="mb-1 flex items-center gap-2.5 rounded-(--radius-input) px-2.5 py-2 text-[0.8125rem] font-medium text-ink-600 transition-colors hover:bg-ink-100 hover:text-ink-900"
+      >
+        <SquareArrowOutUpRight aria-hidden className="size-4 shrink-0 text-ink-400" />
+        {t('viewUserApp')}
+      </Link>
       <div className="flex items-center gap-2.5 rounded-(--radius-input) px-2 py-1.5">
         <span
           aria-hidden
