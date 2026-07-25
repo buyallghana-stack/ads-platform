@@ -287,6 +287,16 @@
   }
 }
 
+/* The admin nav drawer, which comes in from the left rather than the right. */
+@keyframes drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
 /*
   Registered as real utilities (not @layer classes) so responsive variants
   work — `md:bg-auth-ambient` only compiles for utilities Tailwind knows.
