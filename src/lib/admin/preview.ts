@@ -59,57 +59,131 @@ export function moneySeries(days = 30): DailyMoney[] {
 export function payoutRequests(): PayoutRequest[] {
   const now = Date.now()
   const at = (h: number) => new Date(now - h * HOURS).toISOString()
+  const days = (d: number) => new Date(now - d * 24 * HOURS).toISOString()
 
+  /* Destinations are stored WHOLE here, exactly as the real column will hold
+     them, and masked at render by maskDestination(). Storing them pre-masked
+     would have made the mask untestable and the reveal impossible. */
   return [
     {
       id: 'r1', reference: 'RDM-4821',
-      user: { name: 'Ama Boateng', email: 'ama.boateng@gmail.com', avatarUrl: null },
-      points: 8500, ghs: 8.5, method: 'mobile_money', destination: '••••4567 · MTN',
-      status: 'pending_approval', requestedAt: at(5), statusChangedAt: at(5), risk: 'low',
+      user: {
+        name: 'Ama Boateng', email: 'ama.boateng@gmail.com', avatarUrl: null,
+        joinedAt: days(96), paidBefore: 4, paidBeforeGhs: 61,
+      },
+      points: 8500, ghs: 8.5,
+      method: 'mobile_money', provider: 'MTN MoMo',
+      destination: '0244567891', accountName: 'Ama Boateng',
+      reuse: 0,
+      status: 'pending_approval', requestedAt: at(5), statusChangedAt: at(5),
+      risk: 'low',
     },
     {
+      // The one that should stop an operator: big, crypto, brand-new account,
+      // and the wallet has already been used by somebody else.
       id: 'r2', reference: 'RDM-4820',
-      user: { name: 'Kwabena Mensah', email: 'k.mensah@gmail.com', avatarUrl: null },
-      points: 42000, ghs: 42, method: 'crypto', destination: 'TR7NHq…gjLj6t · USDT',
-      status: 'pending_approval', requestedAt: at(9), statusChangedAt: at(9), risk: 'high',
+      user: {
+        name: 'Kwabena Mensah', email: 'k.mensah@gmail.com', avatarUrl: null,
+        joinedAt: days(6), paidBefore: 0, paidBeforeGhs: 0,
+      },
+      points: 42000, ghs: 42,
+      method: 'crypto', provider: 'USDT · TRC-20',
+      destination: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t', accountName: 'K. Mensah',
+      reuse: 2,
+      status: 'pending_approval', requestedAt: at(9), statusChangedAt: at(9),
+      risk: 'high',
+      riskReasons: [
+        'Wallet already used by 2 other accounts',
+        'Account is 6 days old',
+        'First payout, and 4.9× this user\u2019s average daily earning',
+      ],
     },
     {
       id: 'r3', reference: 'RDM-4816',
-      user: { name: 'Efua Sarpong', email: 'efua.s@gmail.com', avatarUrl: null },
-      points: 12000, ghs: 12, method: 'mobile_money', destination: '••••1180 · Telecel',
-      status: 'held', requestedAt: at(26), statusChangedAt: at(26), risk: 'medium',
+      user: {
+        name: 'Efua Sarpong', email: 'efua.s@gmail.com', avatarUrl: null,
+        joinedAt: days(41), paidBefore: 2, paidBeforeGhs: 27,
+      },
+      points: 12000, ghs: 12,
+      method: 'mobile_money', provider: 'Telecel Cash',
+      destination: '0201180043', accountName: 'Efua Sarpong Mensimah',
+      reuse: 0,
+      status: 'held', requestedAt: at(26), statusChangedAt: at(26),
+      risk: 'medium',
+      riskReasons: ['Payout account changed 2 days ago'],
     },
     {
       id: 'r4', reference: 'RDM-4809',
-      user: { name: 'Yaw Antwi', email: 'yaw.antwi@gmail.com', avatarUrl: null },
-      points: 30000, ghs: 30, method: 'mobile_money', destination: '••••9032 · MTN',
-      status: 'approved', requestedAt: at(40), statusChangedAt: at(11), risk: 'low',
+      user: {
+        name: 'Yaw Antwi', email: 'yaw.antwi@gmail.com', avatarUrl: null,
+        joinedAt: days(150), paidBefore: 9, paidBeforeGhs: 214,
+      },
+      points: 30000, ghs: 30,
+      method: 'mobile_money', provider: 'MTN MoMo',
+      destination: '0249032117', accountName: 'Yaw Antwi',
+      reuse: 0,
+      status: 'approved', requestedAt: at(40), statusChangedAt: at(11),
+      risk: 'low',
     },
     {
       // Paid 6 hours ago — inside the 48-hour window, so a dispute is offered.
       id: 'r5', reference: 'RDM-4802',
-      user: { name: 'Adwoa Nyarko', email: 'adwoa.n@gmail.com', avatarUrl: null },
-      points: 25000, ghs: 25, method: 'mobile_money', destination: '••••7741 · AirtelTigo',
-      status: 'paid', requestedAt: at(70), statusChangedAt: at(6), risk: 'low',
+      user: {
+        name: 'Adwoa Nyarko', email: 'adwoa.n@gmail.com', avatarUrl: null,
+        joinedAt: days(88), paidBefore: 6, paidBeforeGhs: 133,
+      },
+      points: 25000, ghs: 25,
+      method: 'mobile_money', provider: 'AirtelTigo Money',
+      destination: '0267741905', accountName: 'Adwoa Nyarko',
+      reuse: 0,
+      status: 'paid', requestedAt: at(70), statusChangedAt: at(6),
+      risk: 'low',
     },
     {
       // Paid 3 days ago — window closed, so no dispute action is shown.
       id: 'r6', reference: 'RDM-4788',
-      user: { name: 'Kojo Asare', email: 'kojo.asare@gmail.com', avatarUrl: null },
-      points: 15000, ghs: 15, method: 'crypto', destination: 'TQm3xB…7pLk2w · USDT',
-      status: 'paid', requestedAt: at(96), statusChangedAt: at(74), risk: 'low',
+      user: {
+        name: 'Kojo Asare', email: 'kojo.asare@gmail.com', avatarUrl: null,
+        joinedAt: days(210), paidBefore: 14, paidBeforeGhs: 402,
+      },
+      points: 15000, ghs: 15,
+      method: 'crypto', provider: 'USDT · TRC-20',
+      destination: 'TQm3xBv7YHsWpEc2gKfN9dRa4LuZ7pLk2w', accountName: 'Kojo Asare',
+      reuse: 0,
+      status: 'paid', requestedAt: at(96), statusChangedAt: at(74),
+      risk: 'low',
     },
     {
       id: 'r7', reference: 'RDM-4771',
-      user: { name: 'Abena Owusu', email: 'abena.owusu@gmail.com', avatarUrl: null },
-      points: 60000, ghs: 60, method: 'crypto', destination: 'TXk9pW…3nVc8s · USDT',
-      status: 'disputed', requestedAt: at(140), statusChangedAt: at(20), risk: 'critical',
+      user: {
+        name: 'Abena Owusu', email: 'abena.owusu@gmail.com', avatarUrl: null,
+        joinedAt: days(19), paidBefore: 1, paidBeforeGhs: 12,
+      },
+      points: 60000, ghs: 60,
+      method: 'crypto', provider: 'USDT · TRC-20',
+      destination: 'TXk9pWqLm4CzVb8NdRt6HyU2sFa3nVc8s1', accountName: 'A. O.',
+      reuse: 3,
+      status: 'disputed', requestedAt: at(140), statusChangedAt: at(20),
+      risk: 'critical',
+      riskReasons: [
+        'Wallet already used by 3 other accounts',
+        'Name on wallet does not match the profile',
+        'Device shared with 4 flagged accounts',
+      ],
     },
     {
       id: 'r8', reference: 'RDM-4760',
-      user: { name: 'Kofi Danso', email: 'kofi.danso@gmail.com', avatarUrl: null },
-      points: 9000, ghs: 9, method: 'mobile_money', destination: '••••2214 · MTN',
-      status: 'rejected', requestedAt: at(190), statusChangedAt: at(160), risk: 'high',
+      user: {
+        name: 'Kofi Danso', email: 'kofi.danso@gmail.com', avatarUrl: null,
+        joinedAt: days(12), paidBefore: 0, paidBeforeGhs: 0,
+      },
+      points: 9000, ghs: 9,
+      method: 'mobile_money', provider: 'MTN MoMo',
+      destination: '0592214760', accountName: 'Mavis Danso',
+      reuse: 1,
+      status: 'rejected', requestedAt: at(190), statusChangedAt: at(160),
+      risk: 'high',
+      riskReasons: ['Name on the MoMo account does not match the profile'],
     },
   ]
 }

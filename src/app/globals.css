@@ -243,6 +243,51 @@
 }
 
 /*
+  Overflow menus and the payout review panel. Short and transform-only for the
+  same reason as rise-in; the global prefers-reduced-motion rule flattens both.
+  The panel slides from the right on a wide screen and up from the bottom on a
+  phone, which is why there are two rather than one parameterised keyframe —
+  the axis differs, not just the distance.
+*/
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes panel-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes panel-in-bottom {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/*
   Registered as real utilities (not @layer classes) so responsive variants
   work — `md:bg-auth-ambient` only compiles for utilities Tailwind knows.
 */

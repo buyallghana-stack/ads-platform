@@ -1036,31 +1036,90 @@
     },
     "payouts": {
       "title": "Retraits",
-      "description": "Approuvez, mettez en attente ou refusez les demandes de retrait. Les utilisateurs voient votre décision immédiatement dans leurs notifications. Après avoir marqué un retrait comme terminé, vous avez {hours} heures pour le contester ; ensuite l'option disparaît.",
+      "description": "Approuvez, mettez en attente ou refusez les demandes de retrait. Les numéros de compte et portefeuilles sont masqués — ouvrez une demande pour en révéler un. Un retrait terminé peut être contesté pendant {hours} heures.",
       "filterLabel": "Filtrer par statut",
       "filters": {
         "queue": "Décision requise",
         "all": "Tous"
       },
-      "searchPlaceholder": "Rechercher un retrait",
+      "searchPlaceholder": "Nom, référence, derniers chiffres",
       "empty": "Aucun résultat.",
-      "noActions": "Aucune action disponible",
+      "emptyQueue": "Rien ne vous attend. Toutes les demandes ont été traitées.",
       "disputeWindow": "Contestation ouverte {hours} h",
+      "selectAll": "Sélectionner toutes les demandes traitables",
+      "selectRow": "Sélectionner {reference}",
+      "reviewRow": "Examiner {reference} de {name}",
+      "menuLabel": "Actions pour {reference}",
       "columns": {
-        "reference": "Référence",
-        "user": "Utilisateur",
+        "user": "Demandeur",
         "amount": "Montant",
         "destination": "Destination",
         "status": "Statut",
         "requested": "Demandé",
-        "action": "Action"
+        "action": "Actions"
+      },
+      "summary": {
+        "waiting": "En attente de vous",
+        "approved": "Prêt à envoyer",
+        "paidToday": "Terminé aujourd'hui"
+      },
+      "riskLevel": {
+        "low": "Risque faible",
+        "medium": "À regarder",
+        "high": "Risque élevé",
+        "critical": "Ne pas payer sans vérifier"
       },
       "actions": {
+        "review": "Examiner la demande",
         "approve": "Approuver",
-        "hold": "En attente",
+        "hold": "Mettre en attente",
         "decline": "Refuser",
         "markPaid": "Marquer terminé",
-        "dispute": "Contester"
+        "dispute": "Contester",
+        "opensPanel": "Ouvre la demande"
+      },
+      "bulk": {
+        "selected": "{count, plural, one {# sélectionné} other {# sélectionnés}} · {total}",
+        "approve": "Approuver {count}",
+        "clear": "Vider la sélection"
+      },
+      "drawer": {
+        "title": "Retrait {reference}",
+        "close": "Fermer",
+        "requested": "Demandé {when}",
+        "pointsRate": "{points} pts · {rate} pts = 1,00 GHS",
+        "destination": "Versement vers",
+        "reveal": "Révéler le compte complet",
+        "hide": "Masquer à nouveau",
+        "copy": "Copier le compte complet",
+        "revealNotice": "Visible {seconds} secondes, puis masqué à nouveau.",
+        "maskNotice": "Masqué. Ne le révélez ou copiez qu'au moment d'envoyer.",
+        "accountName": "Nom sur le compte",
+        "nameMatch": "Correspond au profil",
+        "nameCheck": "À vérifier",
+        "requester": "Demandeur",
+        "joined": "Inscrit le",
+        "paidBefore": "Déjà payé",
+        "paidBeforeValue": "{count}× · {total}",
+        "firstPayout": "Premier retrait",
+        "risk": "Risque",
+        "reuse": "{count, plural, one {Ce compte a aussi été utilisé par # autre utilisateur.} other {Ce compte a aussi été utilisé par # autres utilisateurs.}}",
+        "note": "Note envoyée à l'utilisateur"
+      },
+      "confirm": {
+        "approve": "Approuver {amount} pour {name} ?",
+        "hold": "Mettre {amount} en attente pour {name}. La personne est informée du motif, écrivez quelque chose d'actionnable.",
+        "decline": "Refuser {amount} pour {name} ? La demande s'arrête ici et les points retournent au solde.",
+        "markPaid": "Confirmez que vous avez envoyé {amount} vers {destination}. Cette action est irréversible.",
+        "dispute": "Contester {amount} versé vers {destination} ?",
+        "reasonLabel": "Motif — visible par l'utilisateur",
+        "reasonPlaceholder": {
+          "hold": "ex. Vérifiez que le numéro MoMo correspond à votre pièce d'identité",
+          "decline": "ex. Le compte de retrait appartient à quelqu'un d'autre",
+          "dispute": "ex. Le destinataire dit n'avoir rien reçu"
+        },
+        "reasonHint": "Écrit simplement. Cela part directement dans ses notifications.",
+        "cancel": "Annuler"
       }
     },
     "people": {

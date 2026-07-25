@@ -1036,31 +1036,90 @@
     },
     "payouts": {
       "title": "Payouts",
-      "description": "Approve, hold or decline withdrawal requests. Users see your decision in their notifications straight away. After a payout is marked completed you have {hours} hours to raise a dispute; after that the option goes.",
+      "description": "Approve, hold or decline withdrawal requests. Account numbers and wallets are masked — open a request to reveal one. A completed payout can be disputed for {hours} hours.",
       "filterLabel": "Filter by status",
       "filters": {
         "queue": "Needs a decision",
         "all": "All"
       },
-      "searchPlaceholder": "Search payouts",
+      "searchPlaceholder": "Name, reference, last digits",
       "empty": "Nothing matches.",
-      "noActions": "No action available",
+      "emptyQueue": "Nothing waiting on you. Every request has been decided.",
       "disputeWindow": "Dispute open for {hours}h",
+      "selectAll": "Select every request that can be decided",
+      "selectRow": "Select {reference}",
+      "reviewRow": "Review {reference} from {name}",
+      "menuLabel": "Actions for {reference}",
       "columns": {
-        "reference": "Reference",
-        "user": "User",
+        "user": "Requester",
         "amount": "Amount",
         "destination": "Destination",
         "status": "Status",
         "requested": "Requested",
-        "action": "Action"
+        "action": "Actions"
+      },
+      "summary": {
+        "waiting": "Waiting on you",
+        "approved": "Ready to send",
+        "paidToday": "Completed today"
+      },
+      "riskLevel": {
+        "low": "Low risk",
+        "medium": "Worth a look",
+        "high": "High risk",
+        "critical": "Do not pay without checking"
       },
       "actions": {
+        "review": "Review request",
         "approve": "Approve",
         "hold": "Hold",
         "decline": "Decline",
         "markPaid": "Mark completed",
-        "dispute": "Dispute"
+        "dispute": "Dispute",
+        "opensPanel": "Opens the request"
+      },
+      "bulk": {
+        "selected": "{count, plural, one {# selected} other {# selected}} · {total}",
+        "approve": "Approve {count}",
+        "clear": "Clear selection"
+      },
+      "drawer": {
+        "title": "Payout {reference}",
+        "close": "Close",
+        "requested": "Requested {when}",
+        "pointsRate": "{points} pts · {rate} pts = GHS 1.00",
+        "destination": "Paying to",
+        "reveal": "Reveal the full account",
+        "hide": "Hide it again",
+        "copy": "Copy the full account",
+        "revealNotice": "Visible for {seconds} seconds, then hidden again.",
+        "maskNotice": "Masked. Reveal or copy it only when you are about to send.",
+        "accountName": "Name on the account",
+        "nameMatch": "Matches profile",
+        "nameCheck": "Check this",
+        "requester": "Requester",
+        "joined": "Joined",
+        "paidBefore": "Paid before",
+        "paidBeforeValue": "{count}× · {total}",
+        "firstPayout": "First payout",
+        "risk": "Risk",
+        "reuse": "{count, plural, one {This account has also been used by # other user.} other {This account has also been used by # other users.}}",
+        "note": "Note sent to the user"
+      },
+      "confirm": {
+        "approve": "Approve {amount} for {name}?",
+        "hold": "Hold {amount} for {name}. They are told why, so write something they can act on.",
+        "decline": "Decline {amount} for {name}? The request ends here and the points go back to their balance.",
+        "markPaid": "Confirm you have sent {amount} to {destination}. This cannot be undone.",
+        "dispute": "Raise a dispute on {amount} paid to {destination}?",
+        "reasonLabel": "Reason — the user sees this",
+        "reasonPlaceholder": {
+          "hold": "e.g. Confirm the MoMo number matches your ID",
+          "decline": "e.g. Payout account belongs to someone else",
+          "dispute": "e.g. Recipient says the money never arrived"
+        },
+        "reasonHint": "Written plainly. It goes straight into their notifications.",
+        "cancel": "Cancel"
       }
     },
     "people": {

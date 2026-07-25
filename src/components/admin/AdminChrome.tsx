@@ -138,6 +138,47 @@ export function StatusPill({
 }
 
 /**
+ * Status as a dot plus plain text, for dense tables.
+ *
+ * Same tone vocabulary as StatusPill — the operator learns one set of
+ * colours — but without the border and tint, because eight tinted capsules
+ * stacked down a column compete with the money for attention and the money
+ * should win. The pill stays for places where a status sits alone and needs
+ * to hold its own; the dot is for a row that already has six other things
+ * in it. Colour is never the only carrier: the label is always there.
+ */
+const DOT: Record<PillTone, string> = {
+  neutral: 'bg-ink-400',
+  success: 'bg-success-500',
+  warning: 'bg-warning-500',
+  danger: 'bg-danger-500',
+  brand: 'bg-brand-600',
+  violet: 'bg-violet-600',
+}
+
+export function StatusDot({
+  tone = 'neutral',
+  children,
+  className,
+}: {
+  tone?: PillTone
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 text-[0.75rem] font-medium whitespace-nowrap text-ink-700',
+        className,
+      )}
+    >
+      <span aria-hidden className={cn('size-1.5 shrink-0 rounded-full', DOT[tone])} />
+      {children}
+    </span>
+  )
+}
+
+/**
  * Identity cell: avatar, name, secondary line. Used by the table rows and the
  * people cards alike (both references show the same two-line person block),
  * so the two views of a person never drift apart.

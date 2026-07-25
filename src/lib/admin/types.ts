@@ -57,16 +57,54 @@ export type PayoutStatus =
 export type PayoutRequest = {
   id: string
   reference: string
-  user: { name: string; email: string; avatarUrl: string | null }
+  user: {
+    name: string
+    email: string
+    avatarUrl: string | null
+    joinedAt: string
+    /** How many payouts this person has already been paid, and for how much. */
+    paidBefore: number
+    paidBeforeGhs: number
+  }
   points: number
   ghs: number
   method: 'mobile_money' | 'crypto'
+  /** MTN, Telecel, AirtelTigo, or the chain: "USDT · TRC-20". */
+  provider: string
+  /**
+   * The destination IN FULL — the phone number or wallet address.
+   *
+   * Stored whole and masked at the point of render by `maskDestination`,
+   * never pre-masked into a display string. Masking in the data means the
+   * value cannot be revealed when somebody legitimately needs it, cannot be
+   * compared for reuse, and cannot be copied to actually send the money —
+   * so the mask belongs in the view and the rule belongs in one function.
+   */
   destination: string
+  /** The name registered on that MoMo account / labelled on that wallet. */
+  accountName: string
+  /**
+   * How many OTHER users have requested a payout to this same destination.
+   * 0 is the normal case. Anything above it is the single cheapest fraud
+   * signal a watch-to-earn platform has, so it is on the request itself
+   * rather than something the operator has to go and search for.
+   */
+  reuse: number
   status: PayoutStatus
   requestedAt: string
   /** When the status last moved. The 48-hour dispute window runs from here. */
   statusChangedAt: string
   risk: 'low' | 'medium' | 'high' | 'critical'
+  /** Why the risk is what it is. Empty on a clean request. */
+  riskReasons?: string[]
+  /**
+   * The note the operator gave when they last held, declined or disputed it.
+   * The user is shown this verbatim in their notifications, which is why it
+   * is required for those three actions and stored on the request rather
+   * than only in the audit log — the next operator to open this needs to see
+   * what the last one told them.
+   */
+  decisionNote?: string
 }
 
 export type Person = {
