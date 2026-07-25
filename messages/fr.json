@@ -952,5 +952,182 @@
       "soonTitle": "Le chat d’assistance arrive",
       "soonBody": "Nous mettons en place le chat en direct. En attendant, tout message urgent concernant votre solde ou un retrait vous parviendra dans vos notifications."
     }
+  },
+  "admin": {
+    "previewBadge": "Données de démonstration",
+    "search": {
+      "placeholder": "Recherche — arrive avec le backend"
+    },
+    "nav": {
+      "label": "Sections admin",
+      "open": "Ouvrir le menu",
+      "close": "Fermer le menu",
+      "roleAdmin": "Administrateur",
+      "groups": {
+        "money": "Argent",
+        "people": "Personnes",
+        "content": "Contenu",
+        "system": "Système"
+      },
+      "items": {
+        "overview": "Aperçu",
+        "payouts": "Retraits",
+        "finance": "Finances",
+        "advertisers": "Annonceurs",
+        "subscriptions": "Abonnements",
+        "users": "Utilisateurs",
+        "messages": "Messages",
+        "flagged": "Signalés",
+        "ads": "Annonces et sondages",
+        "config": "Paramètres plateforme",
+        "audit": "Journal",
+        "settings": "Paramètres admin"
+      }
+    },
+    "overview": {
+      "title": "Aperçu",
+      "description": "L'état de la trésorerie aujourd'hui. Les dépôts regroupent les abonnements et les paiements des annonceurs ; le profit est ce qui reste après les retraits.",
+      "deposits": "Total des dépôts",
+      "depositsSplit": "{subs} offres · {ads} annonceurs",
+      "withdrawals": "Retraits",
+      "withdrawalsHint": "Versés aux utilisateurs",
+      "profit": "Profit",
+      "profitHint": "Dépôts moins retraits",
+      "liability": "Dû aux utilisateurs",
+      "liabilityHint": "{points} points pas encore retirés",
+      "users": "Utilisateurs",
+      "usersToday": "{count} inscrits aujourd'hui",
+      "subscriptions": "Abonnements actifs",
+      "subscriptionsHint": "Toutes offres confondues",
+      "pending": "En attente de décision",
+      "reviewQueue": "Voir la file",
+      "adsLive": "Annonces actives",
+      "adsSplit": "{videos} vidéos · {surveys} sondages",
+      "managePool": "Gérer le pool",
+      "status": {
+        "held": "En attente",
+        "pending_approval": "À examiner",
+        "approved": "Approuvé",
+        "paid": "Terminé",
+        "rejected": "Refusé",
+        "cancelled": "Annulé",
+        "failed": "Échec",
+        "disputed": "Contesté"
+      },
+      "chart": {
+        "title": "Entrées et sorties",
+        "subtitle": "GHS {in} entrés · GHS {out} sortis",
+        "deposits": "Dépôts",
+        "withdrawals": "Retraits",
+        "days": "{count} j"
+      },
+      "queue": {
+        "title": "Décision requise",
+        "subtitle": "Les plus anciens en premier",
+        "all": "Tout voir",
+        "empty": "Rien en attente. Tout est réglé."
+      }
+    },
+    "payouts": {
+      "title": "Retraits",
+      "description": "Approuvez, mettez en attente ou refusez les demandes de retrait. Les utilisateurs voient votre décision immédiatement dans leurs notifications. Après avoir marqué un retrait comme terminé, vous avez {hours} heures pour le contester ; ensuite l'option disparaît.",
+      "filterLabel": "Filtrer par statut",
+      "filters": {
+        "queue": "Décision requise",
+        "all": "Tous"
+      },
+      "searchPlaceholder": "Rechercher un retrait",
+      "empty": "Aucun résultat.",
+      "noActions": "Aucune action disponible",
+      "disputeWindow": "Contestation ouverte {hours} h",
+      "columns": {
+        "reference": "Référence",
+        "user": "Utilisateur",
+        "amount": "Montant",
+        "destination": "Destination",
+        "status": "Statut",
+        "requested": "Demandé",
+        "action": "Action"
+      },
+      "actions": {
+        "approve": "Approuver",
+        "hold": "En attente",
+        "decline": "Refuser",
+        "markPaid": "Marquer terminé",
+        "dispute": "Contester"
+      }
+    },
+    "people": {
+      "tabsLabel": "Filtrer les personnes",
+      "tabs": {
+        "all": "Tous",
+        "new": "Nouveaux",
+        "flagged": "Signalés",
+        "unread": "Non lus"
+      },
+      "searchPlaceholder": "Rechercher un nom, un e-mail ou un téléphone",
+      "empty": "Aucune personne trouvée.",
+      "open": "Ouvrir",
+      "noMessages": "Aucun message",
+      "status": {
+        "flagged": "Signalé",
+        "disabled": "Désactivé"
+      },
+      "flaggedBy": {
+        "system": "Système",
+        "admin": "Vous"
+      },
+      "closeThread": "Fermer la conversation",
+      "chatSoonTitle": "La discussion s’ouvrira ici",
+      "chatSoonBody": "C'est ici que la conversation se déroulera une fois votre chatbot connecté. Rien ne s'affiche tant que ce n'est pas réel.",
+      "lastHeard": "Dernier message {when}"
+    },
+    "users": {
+      "title": "Utilisateurs",
+      "description": "Tout le monde sur la plateforme. Sélectionnez quelqu’un pour ouvrir son compte."
+    },
+    "flagged": {
+      "title": "Comptes signalés",
+      "description": "Signalés automatiquement par les contrôles antifraude, ou par vous. Même vue que les utilisateurs, filtrée sur ceux à examiner."
+    },
+    "messages": {
+      "title": "Messages",
+      "description": "Toute personne qui écrit apparaît ici. Sélectionnez-la pour ouvrir la conversation."
+    },
+    "ads": {
+      "title": "Annonces et sondages",
+      "description": "Le pool que les utilisateurs regardent. Alimenté une fois, servi au hasard, ciblé par offre.",
+      "note": "Tout le pool existe déjà dans la base de données — création, édition, ciblage, branchement et suppression fonctionnent aujourd'hui. Cet onglet est l'écran qui manque ; en attendant, les annonces sont ajoutées via pnpm seed:ads."
+    },
+    "advertisers": {
+      "title": "Annonceurs",
+      "description": "Qui paie pour les annonces, et ce qu’ils ont payé.",
+      "note": "Rien n'existe encore : ni table, ni fonctions. C'est la seule partie de la trésorerie entièrement manuelle aujourd'hui, et le total des dépôts en dépend."
+    },
+    "subscriptions": {
+      "title": "Abonnements",
+      "description": "Revenus par offre, qui détient quoi, et comment les offres se cumulent.",
+      "note": "Les offres, le cumul, les paiements et l'expiration sont construits et éprouvés avec de vrais achats Paystack. Cet onglet ajoute le reporting et les interventions."
+    },
+    "finance": {
+      "title": "Finances",
+      "description": "Dépôts, retraits et profit, expliqués et pas seulement additionnés.",
+      "note": "Les éléments existent séparément — le grand livre de points, les paiements d'abonnement, les retraits — mais rien ne les réunit en un relevé. Cet onglet montrera le détail des chiffres de l'aperçu."
+    },
+    "config": {
+      "title": "Paramètres plateforme",
+      "description": "Les limites et interrupteurs qui régissent l’économie des gains.",
+      "note": "Chaque réglage est déjà actif dans app_config et appliqué par la base de données. Aujourd'hui ils se changent en SQL ; cet onglet est un formulaire sur les mêmes lignes, avec un journal d'audit déjà rattaché."
+    },
+    "audit": {
+      "title": "Journal",
+      "description": "Qui a fait quoi, et quand.",
+      "note": "Les actions admin sont déjà enregistrées — chaque changement de configuration et chaque modification d'annonce depuis le début est dans la table. Il n'a simplement jamais existé de moyen de la lire."
+    },
+    "settings": {
+      "title": "Paramètres admin",
+      "description": "L’administration des administrateurs.",
+      "note": "L'administration des administrateurs, plutôt que de la plateforme. Rien n'existe encore au-delà de la table des rôles."
+    }
   }
 }

@@ -952,5 +952,182 @@
       "soonTitle": "Chat support is on the way",
       "soonBody": "We're setting up live chat. In the meantime, anything urgent about your balance or a payout will reach you in your notifications."
     }
+  },
+  "admin": {
+    "previewBadge": "Preview data",
+    "search": {
+      "placeholder": "Search — coming with the backend"
+    },
+    "nav": {
+      "label": "Admin sections",
+      "open": "Open menu",
+      "close": "Close menu",
+      "roleAdmin": "Administrator",
+      "groups": {
+        "money": "Money",
+        "people": "People",
+        "content": "Content",
+        "system": "System"
+      },
+      "items": {
+        "overview": "Overview",
+        "payouts": "Payouts",
+        "finance": "Finance",
+        "advertisers": "Advertisers",
+        "subscriptions": "Subscriptions",
+        "users": "Users",
+        "messages": "Messages",
+        "flagged": "Flagged",
+        "ads": "Ads & surveys",
+        "config": "Platform settings",
+        "audit": "Audit log",
+        "settings": "Admin settings"
+      }
+    },
+    "overview": {
+      "title": "Overview",
+      "description": "Where the money stands today. Deposits are plan purchases plus advertiser payments; profit is what is left after withdrawals.",
+      "deposits": "Total deposits",
+      "depositsSplit": "{subs} plans · {ads} advertisers",
+      "withdrawals": "Withdrawals",
+      "withdrawalsHint": "Paid out to users",
+      "profit": "Profit",
+      "profitHint": "Deposits less withdrawals",
+      "liability": "Owed to users",
+      "liabilityHint": "{points} points not yet cashed out",
+      "users": "Total users",
+      "usersToday": "{count} joined today",
+      "subscriptions": "Active subscriptions",
+      "subscriptionsHint": "Across all plans",
+      "pending": "Awaiting your decision",
+      "reviewQueue": "Review queue",
+      "adsLive": "Ads live",
+      "adsSplit": "{videos} videos · {surveys} surveys",
+      "managePool": "Manage pool",
+      "status": {
+        "held": "On hold",
+        "pending_approval": "Awaiting review",
+        "approved": "Approved",
+        "paid": "Completed",
+        "rejected": "Declined",
+        "cancelled": "Cancelled",
+        "failed": "Failed",
+        "disputed": "Disputed"
+      },
+      "chart": {
+        "title": "Money in and out",
+        "subtitle": "GHS {in} in · GHS {out} out",
+        "deposits": "Deposits",
+        "withdrawals": "Withdrawals",
+        "days": "{count}d"
+      },
+      "queue": {
+        "title": "Needs a decision",
+        "subtitle": "Oldest first",
+        "all": "See all",
+        "empty": "Nothing waiting. Everything is settled."
+      }
+    },
+    "payouts": {
+      "title": "Payouts",
+      "description": "Approve, hold or decline withdrawal requests. Users see your decision in their notifications straight away. After a payout is marked completed you have {hours} hours to raise a dispute; after that the option goes.",
+      "filterLabel": "Filter by status",
+      "filters": {
+        "queue": "Needs a decision",
+        "all": "All"
+      },
+      "searchPlaceholder": "Search payouts",
+      "empty": "Nothing matches.",
+      "noActions": "No action available",
+      "disputeWindow": "Dispute open for {hours}h",
+      "columns": {
+        "reference": "Reference",
+        "user": "User",
+        "amount": "Amount",
+        "destination": "Destination",
+        "status": "Status",
+        "requested": "Requested",
+        "action": "Action"
+      },
+      "actions": {
+        "approve": "Approve",
+        "hold": "Hold",
+        "decline": "Decline",
+        "markPaid": "Mark completed",
+        "dispute": "Dispute"
+      }
+    },
+    "people": {
+      "tabsLabel": "Filter people",
+      "tabs": {
+        "all": "All",
+        "new": "New",
+        "flagged": "Flagged",
+        "unread": "Unread"
+      },
+      "searchPlaceholder": "Search name, email or phone",
+      "empty": "Nobody matches.",
+      "open": "Open",
+      "noMessages": "No messages",
+      "status": {
+        "flagged": "Flagged",
+        "disabled": "Disabled"
+      },
+      "flaggedBy": {
+        "system": "System",
+        "admin": "You"
+      },
+      "closeThread": "Close conversation",
+      "chatSoonTitle": "Chat opens here",
+      "chatSoonBody": "This is where the conversation will run once your chatbot is connected. Nothing is shown until it is real.",
+      "lastHeard": "Last message {when}"
+    },
+    "users": {
+      "title": "Users",
+      "description": "Everyone on the platform. Select somebody to open their account."
+    },
+    "flagged": {
+      "title": "Flagged accounts",
+      "description": "Raised automatically by the fraud checks, or by you. Same view as Users, filtered to the ones that need looking at."
+    },
+    "messages": {
+      "title": "Messages",
+      "description": "Anybody who writes in appears here. Select them to open the conversation."
+    },
+    "ads": {
+      "title": "Ads & surveys",
+      "description": "The pool users watch and answer. Stocked once, served at random, targeted by plan.",
+      "note": "The whole ad pool already exists in the database — creating, editing, targeting, branching and deleting all work today. This tab is the screen in front of them; until it exists ads are stocked by running pnpm seed:ads."
+    },
+    "advertisers": {
+      "title": "Advertisers",
+      "description": "Who is paying for the ads, and what they have paid.",
+      "note": "Nothing exists for this yet — no table, no functions. It is the one part of the money picture that is entirely manual today, and the deposits figure on the overview depends on it."
+    },
+    "subscriptions": {
+      "title": "Subscriptions",
+      "description": "Plan revenue, who holds what, and how the plans stack.",
+      "note": "Plans, stacking, payments and expiry are all built and proven with real Paystack purchases. This tab is reporting and intervention on top of them."
+    },
+    "finance": {
+      "title": "Finance",
+      "description": "Deposits, withdrawals and profit, explained rather than just totalled.",
+      "note": "The pieces exist separately — the points ledger, subscription payments, redemptions — but nothing joins them into a statement. This tab is where the overview numbers get their working shown."
+    },
+    "config": {
+      "title": "Platform settings",
+      "description": "The limits and switches the earning economy runs on.",
+      "note": "Every setting here is already live in app_config and enforced by the database. Today they are changed by running SQL; this tab is a form over the same rows, with an audit trail already attached."
+    },
+    "audit": {
+      "title": "Audit log",
+      "description": "Who did what, and when.",
+      "note": "Admin actions are already being recorded — every config change and every ad edit since the platform was built is in the table. There has simply never been a way to read it."
+    },
+    "settings": {
+      "title": "Admin settings",
+      "description": "Administration of the administrators.",
+      "note": "Administration of the administrators, rather than of the platform. Nothing here exists yet beyond the roles table."
+    }
   }
 }
