@@ -314,7 +314,8 @@
       "next": "Suivant",
       "resume": "Continuer la lecture",
       "finish": "Valider",
-      "noWrongAnswer": "Il n'y a ni bonne ni mauvaise réponse — dites-nous simplement ce que vous pensez."
+      "noWrongAnswer": "Il n'y a ni bonne ni mauvaise réponse — dites-nous simplement ce que vous pensez.",
+      "stepOpen": "Question {n}"
     },
     "result": {
       "checking": "Vérification de votre réponse",

@@ -1,6 +1,7 @@
 'use server'
 
 import { getSessionUser } from '@/lib/auth/session'
+import type { QuestionRule } from '@/lib/ads/visibility'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
@@ -28,6 +29,17 @@ export type AdQuestion = {
   format: 'multiple_choice' | 'short_text'
   /** Shuffled server-side on every call. Empty for short-text questions. */
   options: { id: string; text: string }[]
+  /**
+   * Skip logic. Empty means the question is always asked, which is the
+   * straight-through survey every respondent sees identically.
+   *
+   * Safe to send: a rule names an option the client already has, and knowing
+   * "question 4 appears if you answered Female" says nothing about which
+   * answer earns points — the answer key never leaves the database.
+   */
+  rules: QuestionRule[]
+  /** How this question's rules combine when there is more than one. */
+  conditionMode: 'all' | 'any'
 }
 
 export type StartAdResult =
@@ -56,26 +68,19 @@ export async function startAd(adId: string): Promise<StartAdResult> {
   })
   if (qError) return { ok: false, reason: 'error' }
 
-  // One row per option (or one row with a null option for short text), so
-  // fold them back into questions while preserving the shuffled option order.
-  const byId = new Map<string, AdQuestion>()
-  for (const row of rows ?? []) {
-    let q = byId.get(row.question_id)
-    if (!q) {
-      q = {
-        id: row.question_id,
-        index: row.question_index,
-        showAtSeconds: row.show_at_seconds,
-        text: row.question_text,
-        format: row.answer_format,
-        options: [],
-      }
-      byId.set(row.question_id, q)
-    }
-    if (row.option_id) q.options.push({ id: row.option_id, text: row.option_text })
-  }
-
-  const questions = [...byId.values()].sort((a, b) => a.index - b.index)
+  // One row per QUESTION now (migration 045): options and rules arrive as
+  // jsonb, so there is nothing to fold — just parse and keep the order the
+  // database sent, which is the admin's question order.
+  const questions: AdQuestion[] = (rows ?? []).map((row) => ({
+    id: row.question_id,
+    index: row.question_index,
+    showAtSeconds: row.show_at_seconds,
+    text: row.question_text,
+    format: row.answer_format,
+    conditionMode: row.condition_mode,
+    options: (row.options as { id: string; text: string }[] | null) ?? [],
+    rules: (row.rules as QuestionRule[] | null) ?? [],
+  }))
 
   return { ok: true, questions, startedAt: startedAt as string }
 }

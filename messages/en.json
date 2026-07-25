@@ -314,7 +314,8 @@
       "next": "Next",
       "resume": "Continue watching",
       "finish": "Submit",
-      "noWrongAnswer": "There are no right or wrong answers — just tell us what you think."
+      "noWrongAnswer": "There are no right or wrong answers — just tell us what you think.",
+      "stepOpen": "Question {n}"
     },
     "result": {
       "checking": "Checking your answer",

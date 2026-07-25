@@ -20,7 +20,8 @@
  *   - an uploaded video with one mid-roll question
  *   - an uploaded video with a short-text answer
  *   - a WATCH-ONLY video with no questions at all
- *   - a short survey and a longer multi-question survey
+ *   - a short survey, a longer multi-question survey, and a BRANCHING one
+ *     whose later questions depend on an earlier answer
  *
  * The videos are public test clips and the thumbnails are placeholder
  * photography. They stand in for advertiser artwork, which in production
@@ -343,6 +344,58 @@ const ADS = [
       },
     ],
   },
+  {
+    /*
+      A BRANCHING survey (migration 044). `rules` gate a question on an earlier
+      answer: dependsOnIndex is the question's position in this array, and
+      optionIndex is the option within THAT question. Both are indexes rather
+      than ids because on a first insert no ids exist yet.
+
+      Read it as the operator's own example: do not ask somebody how they feel
+      about being a woman after they told you they are a man.
+    */
+    ad: {
+      title: 'Shopping habits',
+      description: 'A branching survey: later questions depend on earlier answers.',
+      advertiser_name: 'SidePerks Research',
+      format: 'survey',
+      points_reward: 90,
+      max_completions: 500,
+      weight: 100,
+      thumbnail_path: 'seed/thumb-payments-survey.jpg',
+    },
+    questions: [
+      {
+        question_text: 'Which best describes you?',
+        answer_format: 'multiple_choice',
+        options: [
+          { option_text: 'Woman' },
+          { option_text: 'Man' },
+          { option_text: 'Prefer not to say' },
+        ],
+      },
+      {
+        question_text: 'Do you buy beauty products online?',
+        answer_format: 'multiple_choice',
+        options: [{ option_text: 'Yes' }, { option_text: 'No' }],
+        // only when question 0 was answered "Woman" (option 0)
+        rules: [{ dependsOnIndex: 0, optionIndex: 0 }],
+      },
+      {
+        question_text: 'How often do you buy them?',
+        answer_format: 'multiple_choice',
+        options: [{ option_text: 'Monthly' }, { option_text: 'Rarely' }],
+        // Chained behind a question that is itself conditional: answer "Man"
+        // at the top and this stays hidden too, because a rule whose subject
+        // was never shown cannot pass.
+        rules: [{ dependsOnIndex: 1, optionIndex: 0 }],
+      },
+      {
+        question_text: 'Anything you wish shops did better?',
+        answer_format: 'short_text',
+      },
+    ],
+  },
 ]
 
 /* --- seed ---------------------------------------------------------------- */
@@ -370,8 +423,14 @@ for (const { ad, questions } of ADS) {
     .single()
   if (error) throw error
 
+  // Two passes: questions and options first, then the rules, which need the
+  // ids the first pass created.
+  const questionIds = []
+  const optionIds = new Map() // "qIndex.oIndex" -> uuid
+
   for (const [position, question] of questions.entries()) {
-    const { options, showAt, ...row } = question
+    const { options, showAt, rules, ...row } = question
+    void rules
     const { data: q, error: questionError } = await db
       .from('ad_questions')
       .insert({
@@ -384,13 +443,34 @@ for (const { ad, questions } of ADS) {
       .single()
     if (questionError) throw questionError
 
+    questionIds.push(q.id)
+
     if (options) {
-      const { error: optionError } = await db
+      const { data: inserted, error: optionError } = await db
         .from('ad_question_options')
         // is_correct defaults to false, so an option that does not name it is
         // simply not an answer key — which is what an opinion question is.
         .insert(options.map((o, i) => ({ ...o, question_id: q.id, sort_order: i })))
+        .select('id, sort_order')
       if (optionError) throw optionError
+      for (const o of inserted ?? []) optionIds.set(`${position}.${o.sort_order}`, o.id)
+    }
+  }
+
+  for (const [position, question] of questions.entries()) {
+    for (const rule of question.rules ?? []) {
+      const { error: ruleError } = await db.from('ad_question_rules').insert({
+        question_id: questionIds[position],
+        depends_on_question_id: questionIds[rule.dependsOnIndex],
+        // The option belongs to the question being depended on.
+        option_id:
+          rule.optionIndex === undefined
+            ? null
+            : optionIds.get(`${rule.dependsOnIndex}.${rule.optionIndex}`),
+        value_text: rule.valueText ?? null,
+        negate: rule.negate ?? false,
+      })
+      if (ruleError) throw ruleError
     }
   }
 

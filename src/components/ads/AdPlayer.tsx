@@ -13,6 +13,7 @@ import {
 } from '@/app/[locale]/(app)/ads/actions'
 import { Button } from '@/components/ui/Button'
 import type { FeedAd } from '@/lib/ads/data'
+import { hasBranching, visibleQuestions } from '@/lib/ads/visibility'
 import { cn } from '@/lib/cn'
 
 import { AdResult } from './AdResult'
@@ -111,6 +112,14 @@ export function AdPlayer({
     setPhase(next)
   }, [])
 
+  /*
+    Skip logic. Recomputed from the answers so far on every render, because
+    answering one question can reveal or hide later ones. The database does
+    the same sum independently when grading — see lib/ads/visibility.ts.
+  */
+  const visible = useMemo(() => visibleQuestions(questions, answers), [questions, answers])
+  const branching = useMemo(() => hasBranching(questions), [questions])
+
   const current = questions.find((q) => q.id === currentId) ?? null
 
   /** Questions with a cue, soonest first. */
@@ -171,7 +180,9 @@ export function AdPlayer({
   /** Questions still unanswered once the video is over. */
   const askNextPending = useCallback(
     (collected: Record<string, string>) => {
-      const pending = questions.find((q) => !askedRef.current.has(q.id))
+      const pending = visibleQuestions(questions, collected).find(
+        (q) => !askedRef.current.has(q.id),
+      )
       if (pending) {
         askedRef.current.add(pending.id)
         setAskedIds([...askedRef.current])
@@ -213,7 +224,10 @@ export function AdPlayer({
       }
 
       const due = cued.find(
-        (q) => !askedRef.current.has(q.id) && seconds >= (q.showAtSeconds ?? 0),
+        (q) =>
+          !askedRef.current.has(q.id) &&
+          seconds >= (q.showAtSeconds ?? 0) &&
+          visible.some((v) => v.id === q.id),
       )
       if (!due) return
       askedRef.current.add(due.id)
@@ -222,7 +236,7 @@ export function AdPlayer({
       setDraft('')
       setPhaseNow('question')
     },
-    [cued, questions.length, requiredWatch, submit, setPhaseNow],
+    [cued, questions.length, requiredWatch, submit, setPhaseNow, visible],
   )
 
   const handleEnded = useCallback(() => {
@@ -243,7 +257,9 @@ export function AdPlayer({
     setAnswers(collected)
 
     if (isVideo) {
-      const unanswered = questions.some((q) => !askedRef.current.has(q.id))
+      const unanswered = visibleQuestions(questions, collected).some(
+        (q) => !askedRef.current.has(q.id),
+      )
       if (unanswered) {
         // More cues to come — back to the video.
         setCurrentId(null)
@@ -271,9 +287,14 @@ export function AdPlayer({
       return
     }
 
-    // Survey: straight through the list in the admin's order.
-    const index = questions.findIndex((q) => q.id === current.id)
-    const next = questions[index + 1]
+    /*
+      Survey: walk the visible list, recomputed WITH the answer just given —
+      that answer is exactly what may have opened or closed a branch, so the
+      next question has to be chosen from the new list, not the old one.
+    */
+    const nextVisible = visibleQuestions(questions, collected)
+    const index = nextVisible.findIndex((q) => q.id === current.id)
+    const next = nextVisible[index + 1]
     if (next) {
       setCurrentId(next.id)
       setDraft(answers[next.id] ?? '')
@@ -284,8 +305,8 @@ export function AdPlayer({
 
   function goBack() {
     if (!current) return
-    const index = questions.findIndex((q) => q.id === current.id)
-    const previous = questions[index - 1]
+    const index = visible.findIndex((q) => q.id === current.id)
+    const previous = visible[index - 1]
     if (!previous) return
     setAnswers({ ...answers, [current.id]: draft })
     setCurrentId(previous.id)
@@ -518,10 +539,14 @@ export function AdPlayer({
             <QuestionSheet
               question={current}
               step={
-                questions.length > 1
+                visible.length > 1 || branching
                   ? {
-                      n: questions.findIndex((q) => q.id === current.id) + 1,
-                      total: questions.length,
+                      n: visible.findIndex((q) => q.id === current.id) + 1,
+                      // A branching survey has no honest total: how many
+                      // questions remain depends on answers not given yet.
+                      // Better to count up than to promise a number that
+                      // moves under the respondent.
+                      total: branching ? undefined : visible.length,
                     }
                   : undefined
               }
@@ -533,9 +558,7 @@ export function AdPlayer({
               opinionOnly={ad.gradedCount === 0 && ad.questionCount > 0}
               onSubmit={answerCurrent}
               onBack={
-                !isVideo && questions.findIndex((q) => q.id === current.id) > 0
-                  ? goBack
-                  : undefined
+                !isVideo && visible.findIndex((q) => q.id === current.id) > 0 ? goBack : undefined
               }
               submitLabel={
                 isVideo
@@ -548,7 +571,7 @@ export function AdPlayer({
                     elapsed < requiredWatch
                     ? t('question.resume')
                     : t('question.finish')
-                  : questions.findIndex((q) => q.id === current.id) === questions.length - 1
+                  : visible.findIndex((q) => q.id === current.id) === visible.length - 1
                     ? t('question.finish')
                     : t('question.next')
               }

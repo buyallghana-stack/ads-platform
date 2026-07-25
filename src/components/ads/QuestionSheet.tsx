@@ -39,8 +39,10 @@ export function QuestionSheet({
   onBack,
 }: {
   question: AdQuestion
-  /** Position in a multi-question run. Omitted for a single mid-roll pop. */
-  step?: { n: number; total: number }
+  /** Position in a multi-question run. Omitted for a single mid-roll pop.
+   *  `total` is absent on a branching survey, where the number of questions
+   *  left genuinely depends on answers that have not been given yet. */
+  step?: { n: number; total?: number }
   value: string
   onChange: (value: string) => void
   onSubmit: () => void
@@ -71,19 +73,28 @@ export function QuestionSheet({
             {/* Segment per question rather than a single bar: on a five-part
                 survey "which one am I on" is the question being asked, and
                 segments answer it at a glance. */}
-            <div className="flex flex-1 gap-1" aria-hidden>
-              {Array.from({ length: step.total }, (_, i) => (
-                <span
-                  key={i}
-                  className={cn(
-                    'h-1 flex-1 rounded-full transition-colors duration-300',
-                    i < step.n ? 'bg-brand-600' : 'bg-ink-200',
-                  )}
-                />
-              ))}
-            </div>
+            {/* Segments only when the length is known. On a branching survey
+                a bar that grows extra segments as you answer reads as the
+                finish line moving away, so it just counts up instead. */}
+            {step.total ? (
+              <div className="flex flex-1 gap-1" aria-hidden>
+                {Array.from({ length: step.total }, (_, i) => (
+                  <span
+                    key={i}
+                    className={cn(
+                      'h-1 flex-1 rounded-full transition-colors duration-300',
+                      i < step.n ? 'bg-brand-600' : 'bg-ink-200',
+                    )}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="flex-1" />
+            )}
             <span className="shrink-0 text-[0.6875rem] font-semibold text-ink-500 tabular-nums">
-              {t('question.step', { n: step.n, total: step.total })}
+              {step.total
+                ? t('question.step', { n: step.n, total: step.total })
+                : t('question.stepOpen', { n: step.n })}
             </span>
           </div>
         )}

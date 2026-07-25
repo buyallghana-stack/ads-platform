@@ -100,10 +100,63 @@ export type Database = {
           },
         ]
       }
+      ad_question_rules: {
+        Row: {
+          created_at: string
+          depends_on_question_id: string
+          id: string
+          negate: boolean
+          option_id: string | null
+          question_id: string
+          value_text: string | null
+        }
+        Insert: {
+          created_at?: string
+          depends_on_question_id: string
+          id?: string
+          negate?: boolean
+          option_id?: string | null
+          question_id: string
+          value_text?: string | null
+        }
+        Update: {
+          created_at?: string
+          depends_on_question_id?: string
+          id?: string
+          negate?: boolean
+          option_id?: string | null
+          question_id?: string
+          value_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_question_rules_depends_on_question_id_fkey"
+            columns: ["depends_on_question_id"]
+            isOneToOne: false
+            referencedRelation: "ad_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_question_rules_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "ad_question_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_question_rules_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "ad_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ad_questions: {
         Row: {
           ad_id: string
           answer_format: Database["public"]["Enums"]["answer_format"]
+          condition_mode: Database["public"]["Enums"]["question_condition_mode"]
           correct_answer: string | null
           created_at: string
           id: string
@@ -115,6 +168,7 @@ export type Database = {
         Insert: {
           ad_id: string
           answer_format: Database["public"]["Enums"]["answer_format"]
+          condition_mode?: Database["public"]["Enums"]["question_condition_mode"]
           correct_answer?: string | null
           created_at?: string
           id?: string
@@ -126,6 +180,7 @@ export type Database = {
         Update: {
           ad_id?: string
           answer_format?: Database["public"]["Enums"]["answer_format"]
+          condition_mode?: Database["public"]["Enums"]["question_condition_mode"]
           correct_answer?: string | null
           created_at?: string
           id?: string
@@ -140,6 +195,36 @@ export type Database = {
             columns: ["ad_id"]
             isOneToOne: false
             referencedRelation: "ads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ad_tiers: {
+        Row: {
+          ad_id: string
+          tier_id: string
+        }
+        Insert: {
+          ad_id: string
+          tier_id: string
+        }
+        Update: {
+          ad_id?: string
+          tier_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_tiers_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "ads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_tiers_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "tiers"
             referencedColumns: ["id"]
           },
         ]
@@ -1470,6 +1555,40 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_ad: {
+        Args: { p_ad_id: string; p_admin_id: string }
+        Returns: string
+      }
+      admin_list_ads: {
+        Args: { p_status?: Database["public"]["Enums"]["ad_status"] }
+        Returns: {
+          advertiser_name: string
+          branching_count: number
+          completions_count: number
+          created_at: string
+          ends_at: string
+          format: Database["public"]["Enums"]["ad_format"]
+          graded_count: number
+          id: string
+          max_completions: number
+          points_reward: number
+          question_count: number
+          starts_at: string
+          status: Database["public"]["Enums"]["ad_status"]
+          tier_slugs: string[]
+          title: string
+          updated_at: string
+        }[]
+      }
+      admin_save_ad: {
+        Args: {
+          p_ad: Json
+          p_admin_id: string
+          p_questions?: Json
+          p_tier_ids?: string[]
+        }
+        Returns: string
+      }
       apply_referral_code: {
         Args: {
           p_code: string
@@ -1544,6 +1663,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      assert_admin: { Args: { p_admin_id: string }; Returns: undefined }
       broadcast_notification: {
         Args: {
           p_body: string
@@ -1883,11 +2003,12 @@ export type Database = {
         Args: { p_ad_id: string }
         Returns: {
           answer_format: Database["public"]["Enums"]["answer_format"]
-          option_id: string
-          option_text: string
+          condition_mode: Database["public"]["Enums"]["question_condition_mode"]
+          options: Json
           question_id: string
           question_index: number
           question_text: string
+          rules: Json
           show_at_seconds: number
         }[]
       }
@@ -2312,10 +2433,24 @@ export type Database = {
         }
       }
       totp_lock_state: { Args: { p_user_id: string }; Returns: Json }
+      user_target_tiers: {
+        Args: { p_user_id: string }
+        Returns: {
+          sort_order: number
+          tier_id: string
+        }[]
+      }
       utc_today: { Args: never; Returns: string }
       verify_withdrawal_pin: {
         Args: { p_pin: string; p_user_id: string }
         Returns: Json
+      }
+      visible_ad_questions: {
+        Args: { p_ad_id: string; p_answers: Json }
+        Returns: {
+          question_id: string
+          question_position: number
+        }[]
       }
     }
     Enums: {
@@ -2354,6 +2489,7 @@ export type Database = {
         | "admin_adjustment"
       notification_type: "announcement" | "payout" | "flag"
       payout_method: "crypto" | "mobile_money"
+      question_condition_mode: "all" | "any"
       redemption_status:
         | "held"
         | "pending_approval"
@@ -2560,6 +2696,7 @@ export const Constants = {
       ],
       notification_type: ["announcement", "payout", "flag"],
       payout_method: ["crypto", "mobile_money"],
+      question_condition_mode: ["all", "any"],
       redemption_status: [
         "held",
         "pending_approval",
