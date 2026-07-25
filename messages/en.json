@@ -1200,37 +1200,376 @@
     "ads": {
       "title": "Ads & surveys",
       "description": "The pool users watch and answer. Stocked once, served at random, targeted by plan.",
-      "note": "The whole ad pool already exists in the database — creating, editing, targeting, branching and deleting all work today. This tab is the screen in front of them; until it exists ads are stocked by running pnpm seed:ads."
+      "filterLabel": "Filter by status",
+      "filters": {
+        "live": "Live",
+        "paused": "Paused",
+        "draft": "Draft",
+        "archived": "Archived",
+        "all": "All"
+      },
+      "searchPlaceholder": "Title or advertiser",
+      "empty": "Nothing matches.",
+      "reviewRow": "Open {title}",
+      "menuLabel": "Actions for {title}",
+      "everyone": "Everyone",
+      "ptsEach": "each",
+      "ptsEachValue": "{points} pts each",
+      "delivered": "{done} of {budget} · {pct}%",
+      "status": {
+        "live": "Live",
+        "paused": "Paused",
+        "draft": "Draft",
+        "archived": "Archived"
+      },
+      "format": {
+        "video": "Video",
+        "survey": "Survey"
+      },
+      "meta": {
+        "video": "{seconds}s · {questions, plural, one {# question} other {# questions}}",
+        "survey": "{questions, plural, one {# question} other {# questions}}"
+      },
+      "columns": {
+        "ad": "Ad",
+        "reward": "Reward",
+        "delivery": "Delivery",
+        "audience": "Audience",
+        "status": "Status",
+        "action": "Actions"
+      },
+      "summary": {
+        "live": "Live now",
+        "liveSplit": "{videos, plural, one {# video} other {# videos}} · {surveys, plural, one {# survey} other {# surveys}}",
+        "remaining": "Completions left",
+        "remainingHint": "across every live ad",
+        "liability": "Still to pay out",
+        "liabilityHint": "if every slot fills"
+      },
+      "actions": {
+        "review": "Open ad",
+        "edit": "Edit ad",
+        "duplicate": "Duplicate",
+        "pause": "Pause",
+        "resume": "Set live",
+        "archive": "Archive",
+        "archiveHint": "Kept, not deleted"
+      },
+      "panel": {
+        "title": "Ad · {title}",
+        "close": "Close",
+        "delivery": "Delivery",
+        "nearlyDone": "Only {remaining} completions left. Top the budget up or it stops serving.",
+        "cost": "What it costs",
+        "reward": "Reward",
+        "remaining": "Slots left",
+        "liability": "Still to pay out",
+        "perCompletion": "Per completion",
+        "liabilityNote": "Slots left × reward, at the current rate of 1,000 pts = GHS 1.00. This is what the platform owes if every remaining slot is filled — before any plan multiplier.",
+        "setup": "Setup",
+        "length": "Video length",
+        "noVideo": "No video",
+        "questions": "Questions",
+        "audience": "Audience",
+        "created": "Created",
+        "editorNote": "Editing the questions, cue points and branching rules opens the ad editor — that screen is not built yet. Everything shown here is live and can be paused or archived now."
+      }
     },
     "advertisers": {
       "title": "Advertisers",
-      "description": "Who is paying for the ads, and what they have paid.",
-      "note": "Nothing exists for this yet — no table, no functions. It is the one part of the money picture that is entirely manual today, and the deposits figure on the overview depends on it."
+      "description": "Who is paying, how much of it has been delivered, and which contracts are about to run out.",
+      "summary": {
+        "active": "Active contracts",
+        "activeHint": "of {total} total",
+        "contracted": "Contracted",
+        "contractedHint": "active contracts",
+        "remaining": "Left to deliver",
+        "remainingHint": "against those contracts"
+      },
+      "columns": {
+        "advertiser": "Advertiser",
+        "contract": "Contract",
+        "delivery": "Delivered",
+        "ends": "Ends",
+        "status": "Status"
+      },
+      "status": {
+        "active": "Active",
+        "pending": "Not started",
+        "ended": "Ended"
+      },
+      "spent": "{amount} spent",
+      "deliveredPct": "{pct}% delivered",
+      "daysLeft": "in {days} days",
+      "noEnd": "No end date",
+      "ended": "Ended",
+      "needsAttention": "Needs attention",
+      "manualNote": "Contracts are keyed in by hand — there is no self-serve advertiser portal, and this screen does not pretend there is. Adding and editing them is backend work."
     },
     "subscriptions": {
       "title": "Subscriptions",
-      "description": "Plan revenue, who holds what, and how the plans stack.",
-      "note": "Plans, stacking, payments and expiry are all built and proven with real Paystack purchases. This tab is reporting and intervention on top of them."
+      "description": "The plans, what they cost, and whether they are selling. Free is listed too — it is the denominator.",
+      "summary": {
+        "paying": "Paying subscribers",
+        "payingHint": "of {total} accounts",
+        "monthly": "Monthly revenue",
+        "monthlyHint": "from plans",
+        "conversion": "Conversion",
+        "conversionHint": "free to paid"
+      },
+      "columns": {
+        "plan": "Plan",
+        "price": "Price",
+        "benefits": "What they get",
+        "active": "Active",
+        "change": "vs last month",
+        "revenue": "Revenue"
+      },
+      "status": {
+        "live": "On sale",
+        "hidden": "Hidden"
+      },
+      "freeLabel": "Free",
+      "benefits": {
+        "none": "Base earning rate",
+        "value": "{multiplier}× earning · +{ads} ads a day"
+      },
+      "editNote": "Prices, multipliers and daily ad bonuses are edited in Platform settings, so there is nothing to change here — this screen is for reading whether a plan is worth keeping."
     },
     "finance": {
       "title": "Finance",
-      "description": "Deposits, withdrawals and profit, explained rather than just totalled.",
-      "note": "The pieces exist separately — the points ledger, subscription payments, redemptions — but nothing joins them into a statement. This tab is where the overview numbers get their working shown."
+      "description": "Money in against money out, month by month. Deposits are plan purchases plus advertiser contracts.",
+      "summary": {
+        "in": "Money in",
+        "out": "Paid to users",
+        "profit": "Profit",
+        "period": "last 6 months"
+      },
+      "liability": {
+        "label": "Owed to users",
+        "body": "{points} points are held but not yet cashed out. This is not a cost yet, so it is not in the profit column — but profit read without it looks better than it is."
+      },
+      "columns": {
+        "month": "Month",
+        "subscriptions": "Plans",
+        "advertisers": "Advertisers",
+        "in": "In",
+        "out": "Out",
+        "profit": "Profit",
+        "total": "Total"
+      },
+      "exportNote": "Exporting a statement as CSV for your accountant is backend work and is not wired up yet."
     },
     "config": {
       "title": "Platform settings",
-      "description": "The limits and switches the earning economy runs on.",
-      "note": "Every setting here is already live in app_config and enforced by the database. Today they are changed by running SQL; this tab is a form over the same rows, with an audit trail already attached."
+      "description": "The numbers that decide how much money leaves. Every field maps to a live column — the name is printed under each one.",
+      "units": {
+        "points": "points",
+        "seconds": "sec",
+        "attempts": "tries",
+        "hours": "hours",
+        "perCedi": "per GHS 1",
+        "times": "×",
+        "ads": "ads"
+      },
+      "groups": {
+        "earning": {
+          "title": "Earning limits",
+          "description": "What one person can earn in a day, and how fast."
+        },
+        "pool": {
+          "title": "Reward pool",
+          "description": "The platform-wide daily ceiling, across everybody."
+        },
+        "payouts": {
+          "title": "Payout rules",
+          "description": "When money is allowed to leave, and how long it waits first."
+        },
+        "rate": {
+          "title": "Points and plans",
+          "description": "What a point is worth, and how plan benefits combine."
+        },
+        "referrals": {
+          "title": "Referrals",
+          "description": "What an invite is worth, and when it pays."
+        },
+        "fraud": {
+          "title": "Fraud thresholds",
+          "description": "The risk scores at which an account is rated medium, high or critical. These drive the risk labels on the payout queue."
+        },
+        "killswitch": {
+          "title": "Kill switch",
+          "description": "One switch, for when something is badly wrong."
+        }
+      },
+      "fields": {
+        "dailyCap": {
+          "label": "Daily points cap per user",
+          "description": "The most any one account can earn in a UTC day, before plan multipliers."
+        },
+        "cooldown": {
+          "label": "Cooldown between ads",
+          "description": "How long somebody waits after finishing one ad before the next can start."
+        },
+        "retryCap": {
+          "label": "Attempts per ad",
+          "description": "How many times somebody may re-attempt an ad they got wrong."
+        },
+        "poolCeiling": {
+          "label": "Daily ceiling for the whole platform",
+          "description": "Total points that may be minted across all users in a day."
+        },
+        "poolBlocks": {
+          "label": "Stop earning at the ceiling",
+          "description": "On, reaching the ceiling halts earning for everyone until midnight UTC. Off, it only raises an alert and earning continues.",
+          "warning": "With this on, a busy day stops every user earning at once. Most operators leave it off and watch the alert instead."
+        },
+        "payoutsEnabled": {
+          "label": "Payouts open",
+          "description": "The master switch. Off, users can still request but nothing can be approved or sent."
+        },
+        "holdingHours": {
+          "label": "Holding window",
+          "description": "How long a request waits before it can be approved. Time for the fraud checks to catch up."
+        },
+        "cooloffHours": {
+          "label": "Cool-off after changing payout details",
+          "description": "How long after somebody changes their MoMo number or wallet before they can withdraw to it."
+        },
+        "pointsRate": {
+          "label": "Points per cedi",
+          "description": "How many points make GHS 1.00.",
+          "warning": "Forward-only. Changing this does not revalue points already earned — history keeps the rate it was written at. Raising it makes every future point worth less."
+        },
+        "combineMode": {
+          "label": "How plan benefits combine",
+          "description": "When somebody holds more than one plan.",
+          "sumBonus": "Add the bonuses up",
+          "highest": "Take the highest only",
+          "multiply": "Multiply them together"
+        },
+        "multiplierCeiling": {
+          "label": "Hard ceiling on the combined rate",
+          "description": "No stack of plans may exceed this, whatever the combine mode works out to."
+        },
+        "referralSignup": {
+          "label": "Bonus on signup",
+          "description": "Paid to the referrer the moment somebody signs up with their code."
+        },
+        "referralActivation": {
+          "label": "Bonus on activation",
+          "description": "Paid once the referred person has actually watched some ads — the anti-farming half."
+        },
+        "referralAds": {
+          "label": "Ads that count as activation",
+          "description": "How many completed ads before the activation bonus pays."
+        },
+        "fraudMedium": {
+          "label": "Medium risk at",
+          "description": "Score at or above which a payout is labelled worth a look."
+        },
+        "fraudHigh": {
+          "label": "High risk at",
+          "description": "Score at or above which a payout is labelled high risk."
+        },
+        "fraudCritical": {
+          "label": "Critical risk at",
+          "description": "Score at or above which a payout says do not pay without checking."
+        },
+        "earningPaused": {
+          "label": "Pause all earning, platform-wide",
+          "description": "Nobody earns anything from any ad until this is switched back off.",
+          "warning": "This stops every user on the platform immediately. Ads keep playing but award nothing, which users notice within minutes."
+        }
+      }
     },
     "audit": {
       "title": "Audit log",
-      "description": "Who did what, and when.",
-      "note": "Admin actions are already being recorded — every config change and every ad edit since the platform was built is in the table. There has simply never been a way to read it."
+      "description": "Who changed what, when, and what it was before. Newest first.",
+      "filterLabel": "Filter by kind",
+      "filters": {
+        "all": "Everything",
+        "money": "Money",
+        "accounts": "Accounts",
+        "config": "Settings & ads",
+        "system": "System"
+      },
+      "searchPlaceholder": "Who, what, or why",
+      "empty": "Nothing matches.",
+      "unchanged": "(reviewed, no change)",
+      "actions": {
+        "payout_approved": "Payout approved",
+        "payout_declined": "Payout declined",
+        "payout_paid": "Payout marked completed",
+        "account_flagged": "Account flagged",
+        "account_disabled": "Account disabled",
+        "config_changed": "Setting changed",
+        "ad_created": "Ad created",
+        "ad_paused": "Ad paused",
+        "alert_raised": "System alert"
+      }
     },
     "settings": {
       "title": "Admin settings",
       "description": "Administration of the administrators.",
       "note": "Administration of the administrators, rather than of the platform. Nothing here exists yet beyond the roles table."
+    },
+    "settingsForm": {
+      "unsaved": "{count, plural, one {# unsaved change} other {# unsaved changes}}",
+      "save": "Save changes",
+      "discard": "Discard",
+      "savedPreview": "Nothing was written — this dashboard is running on preview data. Wiring the save is backend work."
+    },
+    "adminSettings": {
+      "title": "Admin settings",
+      "description": "Who can get into this area, and how it behaves for you. Settings that affect users live under Platform settings.",
+      "units": {
+        "hours": "hours"
+      },
+      "administrators": {
+        "title": "Administrators",
+        "description": "Everyone who can reach this area, approve a payout or disable an account.",
+        "twoFactorOn": "Two-factor on",
+        "twoFactorOff": "No two-factor",
+        "note": "Granting and revoking the admin role is not wired up yet. It is the one action here that cannot be undone from here — a mis-grant hands somebody the payout queue — so it waits for the backend rather than shipping half-working."
+      },
+      "appearance": {
+        "title": "Appearance",
+        "description": "Light, dark, or follow your device. Applies to your account only."
+      },
+      "groups": {
+        "security": {
+          "title": "Security",
+          "description": "How administrators sign in and stay signed in."
+        },
+        "alerts": {
+          "title": "What reaches you",
+          "description": "Which events are worth interrupting you for."
+        }
+      },
+      "fields": {
+        "require2fa": {
+          "label": "Require two-factor for administrators",
+          "description": "Every admin must enrol an authenticator before they can reach this area.",
+          "warning": "Worth turning on before payouts go live. One administrator currently has no authenticator enrolled and would be locked out until they set one up."
+        },
+        "sessionHours": {
+          "label": "Admin session length",
+          "description": "How long an administrator stays signed in before being asked again."
+        },
+        "alertPayout": {
+          "label": "New payout request",
+          "description": "Whenever somebody asks to withdraw."
+        },
+        "alertCeiling": {
+          "label": "Reward pool near its ceiling",
+          "description": "When the platform-wide daily ceiling is close to being reached."
+        },
+        "alertRisk": {
+          "label": "Critical-risk payout",
+          "description": "When a request scores high enough to say do not pay without checking."
+        }
+      }
     }
   }
 }

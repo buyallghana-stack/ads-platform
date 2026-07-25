@@ -3,40 +3,239 @@ import type { Metadata } from 'next'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { PageHeader } from '@/components/admin/AdminChrome'
-import { Planned, PlannedNote } from '@/components/admin/Planned'
+import { SettingsForm, type FieldGroup } from '@/components/admin/SettingsForm'
+import { platformConfig } from '@/lib/admin/preview'
 
 export const metadata: Metadata = {
-  title: 'Admin · Config',
+  title: 'Admin · Platform settings',
   robots: { index: false, follow: false },
 }
 
 /**
- * Config — screen not built yet, scope written down.
+ * Platform settings — the numbers that decide how much money leaves.
  *
- * Listed rather than hidden so the operator can point at a line and say
- * "build that next", the way the Profile hub was worked through.
+ * Every field here maps to a real column the database already reads, and the
+ * column name is printed under each label rather than hidden: an operator
+ * debugging with the database open should not have to guess which key
+ * "Daily points cap" writes to.
+ *
+ * The groups are ordered by how often they are touched, not by how the
+ * database happens to store them — earning limits weekly, the kill switch
+ * hopefully never. The two that can quietly cost real money (the points rate
+ * and the kill switch) carry a warning stating the consequence in terms of
+ * users rather than of columns.
  */
-export default async function AdminPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function AdminConfigPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
   const { locale } = await params
   setRequestLocale(locale)
   const t = await getTranslations('admin.config')
 
+  const groups: FieldGroup[] = [
+    {
+      key: 'earning',
+      title: t('groups.earning.title'),
+      description: t('groups.earning.description'),
+      fields: [
+        {
+          key: 'per_user_daily_points_cap',
+          label: t('fields.dailyCap.label'),
+          description: t('fields.dailyCap.description'),
+          kind: 'number',
+          min: 0,
+          suffix: t('units.points'),
+        },
+        {
+          key: 'ad_cooldown_seconds',
+          label: t('fields.cooldown.label'),
+          description: t('fields.cooldown.description'),
+          kind: 'number',
+          min: 0,
+          suffix: t('units.seconds'),
+        },
+        {
+          key: 'ad_retry_cap',
+          label: t('fields.retryCap.label'),
+          description: t('fields.retryCap.description'),
+          kind: 'number',
+          min: 0,
+          suffix: t('units.attempts'),
+        },
+      ],
+    },
+    {
+      key: 'pool',
+      title: t('groups.pool.title'),
+      description: t('groups.pool.description'),
+      fields: [
+        {
+          key: 'reward_pool_daily_ceiling_points',
+          label: t('fields.poolCeiling.label'),
+          description: t('fields.poolCeiling.description'),
+          kind: 'number',
+          min: 0,
+          suffix: t('units.points'),
+        },
+        {
+          key: 'reward_pool_ceiling_blocks',
+          label: t('fields.poolBlocks.label'),
+          description: t('fields.poolBlocks.description'),
+          warning: t('fields.poolBlocks.warning'),
+          kind: 'toggle',
+        },
+      ],
+    },
+    {
+      key: 'payouts',
+      title: t('groups.payouts.title'),
+      description: t('groups.payouts.description'),
+      fields: [
+        {
+          key: 'payouts_enabled',
+          label: t('fields.payoutsEnabled.label'),
+          description: t('fields.payoutsEnabled.description'),
+          kind: 'toggle',
+        },
+        {
+          key: 'redemption_holding_hours',
+          label: t('fields.holdingHours.label'),
+          description: t('fields.holdingHours.description'),
+          kind: 'number',
+          min: 0,
+          suffix: t('units.hours'),
+        },
+        {
+          key: 'payout_details_cooloff_hours',
+          label: t('fields.cooloffHours.label'),
+          description: t('fields.cooloffHours.description'),
+          kind: 'number',
+          min: 0,
+          suffix: t('units.hours'),
+        },
+      ],
+    },
+    {
+      key: 'rate',
+      title: t('groups.rate.title'),
+      description: t('groups.rate.description'),
+      fields: [
+        {
+          key: 'points_per_currency_unit',
+          label: t('fields.pointsRate.label'),
+          description: t('fields.pointsRate.description'),
+          warning: t('fields.pointsRate.warning'),
+          kind: 'number',
+          min: 1,
+          suffix: t('units.perCedi'),
+        },
+        {
+          key: 'subscription_multiplier_combine_mode',
+          label: t('fields.combineMode.label'),
+          description: t('fields.combineMode.description'),
+          kind: 'select',
+          options: [
+            { value: 'sum_bonus', label: t('fields.combineMode.sumBonus') },
+            { value: 'highest', label: t('fields.combineMode.highest') },
+            { value: 'multiply', label: t('fields.combineMode.multiply') },
+          ],
+        },
+        {
+          key: 'subscription_multiplier_ceiling',
+          label: t('fields.multiplierCeiling.label'),
+          description: t('fields.multiplierCeiling.description'),
+          kind: 'number',
+          min: 1,
+          step: 0.5,
+          suffix: t('units.times'),
+        },
+      ],
+    },
+    {
+      key: 'referrals',
+      title: t('groups.referrals.title'),
+      description: t('groups.referrals.description'),
+      fields: [
+        {
+          key: 'referral_signup_bonus_points',
+          label: t('fields.referralSignup.label'),
+          description: t('fields.referralSignup.description'),
+          kind: 'number',
+          min: 0,
+          suffix: t('units.points'),
+        },
+        {
+          key: 'referral_activation_bonus_points',
+          label: t('fields.referralActivation.label'),
+          description: t('fields.referralActivation.description'),
+          kind: 'number',
+          min: 0,
+          suffix: t('units.points'),
+        },
+        {
+          key: 'referral_activation_ads',
+          label: t('fields.referralAds.label'),
+          description: t('fields.referralAds.description'),
+          kind: 'number',
+          min: 1,
+          suffix: t('units.ads'),
+        },
+      ],
+    },
+    {
+      key: 'fraud',
+      title: t('groups.fraud.title'),
+      description: t('groups.fraud.description'),
+      fields: [
+        {
+          key: 'fraud_threshold_medium',
+          label: t('fields.fraudMedium.label'),
+          description: t('fields.fraudMedium.description'),
+          kind: 'number',
+          min: 0,
+          max: 100,
+        },
+        {
+          key: 'fraud_threshold_high',
+          label: t('fields.fraudHigh.label'),
+          description: t('fields.fraudHigh.description'),
+          kind: 'number',
+          min: 0,
+          max: 100,
+        },
+        {
+          key: 'fraud_threshold_critical',
+          label: t('fields.fraudCritical.label'),
+          description: t('fields.fraudCritical.description'),
+          kind: 'number',
+          min: 0,
+          max: 100,
+        },
+      ],
+    },
+    {
+      key: 'killswitch',
+      title: t('groups.killswitch.title'),
+      description: t('groups.killswitch.description'),
+      fields: [
+        {
+          key: 'earning_paused_globally',
+          label: t('fields.earningPaused.label'),
+          description: t('fields.earningPaused.description'),
+          warning: t('fields.earningPaused.warning'),
+          danger: true,
+          kind: 'toggle',
+        },
+      ],
+    },
+  ]
+
   return (
     <>
       <PageHeader title={t('title')} description={t('description')} />
-      <PlannedNote ready={true}>{t('note')}</PlannedNote>
-      <Planned
-        items={[
-          { title: 'Earning limits', body: 'Per-user daily points ceiling, cooldown between ads, retry cap per ad.', backend: 'per_user_daily_points_cap, ad_retry_cap' },
-          { title: 'Reward pool', body: 'Platform-wide daily ceiling, and whether reaching it alerts or stops earning.', backend: 'reward_pool_daily_ceiling_points, reward_pool_ceiling_blocks' },
-          { title: 'Payout rules', body: 'Holding window, payout-details cool-off, and the master payouts switch.', backend: 'redemption_holding_hours, payouts_enabled' },
-          { title: 'Kill switch', body: 'Pause all earning platform-wide.', backend: 'earning_paused_globally' },
-          { title: 'Referral bonuses', body: 'Signup and activation bonus points, and how many ads count as activation.', backend: 'referral_signup_bonus_points' },
-          { title: 'Fraud thresholds', body: 'Risk scores at which an account is rated medium, high or critical.', backend: 'fraud_threshold_*' },
-          { title: 'Points rate', body: 'How many points make one cedi. Forward-only — history keeps the rate it was written at.', backend: 'points_per_currency_unit' },
-          { title: 'Stacking', body: 'Whether plans stack, how multipliers combine, and the hard ceiling on the combined rate.', backend: 'subscription_multiplier_combine_mode' },
-        ]}
-      />
+      <SettingsForm groups={groups} initial={platformConfig()} />
     </>
   )
 }

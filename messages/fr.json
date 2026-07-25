@@ -1198,39 +1198,378 @@
       "description": "Toute personne qui écrit apparaît ici. Sélectionnez-la pour ouvrir la conversation."
     },
     "ads": {
-      "title": "Annonces et sondages",
-      "description": "Le pool que les utilisateurs regardent. Alimenté une fois, servi au hasard, ciblé par offre.",
-      "note": "Tout le pool existe déjà dans la base de données — création, édition, ciblage, branchement et suppression fonctionnent aujourd'hui. Cet onglet est l'écran qui manque ; en attendant, les annonces sont ajoutées via pnpm seed:ads."
+      "title": "Publicités & sondages",
+      "description": "Le pool que les utilisateurs regardent et complètent. Approvisionné une fois, servi aléatoirement, ciblé par formule.",
+      "filterLabel": "Filtrer par statut",
+      "filters": {
+        "live": "En ligne",
+        "paused": "En pause",
+        "draft": "Brouillon",
+        "archived": "Archivé",
+        "all": "Tous"
+      },
+      "searchPlaceholder": "Titre ou annonceur",
+      "empty": "Aucun résultat.",
+      "reviewRow": "Ouvrir {title}",
+      "menuLabel": "Actions pour {title}",
+      "everyone": "Tout le monde",
+      "ptsEach": "chacun",
+      "ptsEachValue": "{points} pts chacun",
+      "delivered": "{done} sur {budget} · {pct} %",
+      "status": {
+        "live": "En ligne",
+        "paused": "En pause",
+        "draft": "Brouillon",
+        "archived": "Archivé"
+      },
+      "format": {
+        "video": "Vidéo",
+        "survey": "Sondage"
+      },
+      "meta": {
+        "video": "{seconds} s · {questions, plural, one {# question} other {# questions}}",
+        "survey": "{questions, plural, one {# question} other {# questions}}"
+      },
+      "columns": {
+        "ad": "Publicité",
+        "reward": "Récompense",
+        "delivery": "Diffusion",
+        "audience": "Audience",
+        "status": "Statut",
+        "action": "Actions"
+      },
+      "summary": {
+        "live": "En ligne",
+        "liveSplit": "{videos, plural, one {# vidéo} other {# vidéos}} · {surveys, plural, one {# sondage} other {# sondages}}",
+        "remaining": "Complétions restantes",
+        "remainingHint": "sur toutes les publicités en ligne",
+        "liability": "Reste à verser",
+        "liabilityHint": "si tout est complété"
+      },
+      "actions": {
+        "review": "Ouvrir la publicité",
+        "edit": "Modifier",
+        "duplicate": "Dupliquer",
+        "pause": "Mettre en pause",
+        "resume": "Mettre en ligne",
+        "archive": "Archiver",
+        "archiveHint": "Conservé, pas supprimé"
+      },
+      "panel": {
+        "title": "Publicité · {title}",
+        "close": "Fermer",
+        "delivery": "Diffusion",
+        "nearlyDone": "Plus que {remaining} complétions. Rechargez le budget ou la diffusion s'arrête.",
+        "cost": "Ce que cela coûte",
+        "reward": "Récompense",
+        "remaining": "Places restantes",
+        "liability": "Reste à verser",
+        "perCompletion": "Par complétion",
+        "liabilityNote": "Places restantes × récompense, au taux actuel de 1 000 pts = 1,00 GHS. C'est ce que la plateforme doit si toutes les places restantes sont utilisées — avant tout multiplicateur de formule.",
+        "setup": "Configuration",
+        "length": "Durée de la vidéo",
+        "noVideo": "Pas de vidéo",
+        "questions": "Questions",
+        "audience": "Audience",
+        "created": "Créé le",
+        "editorNote": "La modification des questions, des points d'interruption et des règles de branchement se fait dans l'éditeur — cet écran n'est pas encore construit. Tout ce qui est affiché ici est réel et peut être mis en pause ou archivé dès maintenant."
+      }
     },
     "advertisers": {
       "title": "Annonceurs",
-      "description": "Qui paie pour les annonces, et ce qu’ils ont payé.",
-      "note": "Rien n'existe encore : ni table, ni fonctions. C'est la seule partie de la trésorerie entièrement manuelle aujourd'hui, et le total des dépôts en dépend."
+      "description": "Qui paie, quelle part a été livrée, et quels contrats arrivent à leur terme.",
+      "summary": {
+        "active": "Contrats actifs",
+        "activeHint": "sur {total} au total",
+        "contracted": "Sous contrat",
+        "contractedHint": "contrats actifs",
+        "remaining": "Reste à livrer",
+        "remainingHint": "sur ces contrats"
+      },
+      "columns": {
+        "advertiser": "Annonceur",
+        "contract": "Contrat",
+        "delivery": "Livré",
+        "ends": "Fin",
+        "status": "Statut"
+      },
+      "status": {
+        "active": "Actif",
+        "pending": "Pas démarré",
+        "ended": "Terminé"
+      },
+      "spent": "{amount} dépensés",
+      "deliveredPct": "{pct} % livré",
+      "daysLeft": "dans {days} jours",
+      "noEnd": "Pas de date de fin",
+      "ended": "Terminé",
+      "needsAttention": "À surveiller",
+      "manualNote": "Les contrats sont saisis à la main — il n'y a pas de portail annonceur en libre-service, et cet écran ne fait pas semblant du contraire. Leur ajout et leur modification restent à faire côté serveur."
     },
     "subscriptions": {
       "title": "Abonnements",
-      "description": "Revenus par offre, qui détient quoi, et comment les offres se cumulent.",
-      "note": "Les offres, le cumul, les paiements et l'expiration sont construits et éprouvés avec de vrais achats Paystack. Cet onglet ajoute le reporting et les interventions."
+      "description": "Les formules, leur prix, et si elles se vendent. La formule gratuite est incluse — c'est le dénominateur.",
+      "summary": {
+        "paying": "Abonnés payants",
+        "payingHint": "sur {total} comptes",
+        "monthly": "Revenu mensuel",
+        "monthlyHint": "issu des formules",
+        "conversion": "Conversion",
+        "conversionHint": "gratuit vers payant"
+      },
+      "columns": {
+        "plan": "Formule",
+        "price": "Prix",
+        "benefits": "Ce qu'ils obtiennent",
+        "active": "Actifs",
+        "change": "vs mois dernier",
+        "revenue": "Revenu"
+      },
+      "status": {
+        "live": "En vente",
+        "hidden": "Masquée"
+      },
+      "freeLabel": "Gratuit",
+      "benefits": {
+        "none": "Taux de gain de base",
+        "value": "Gains ×{multiplier} · +{ads} pubs/jour"
+      },
+      "editNote": "Les prix, multiplicateurs et bonus de publicités quotidiennes se modifient dans les paramètres de la plateforme. Cet écran sert à juger si une formule vaut la peine d'être gardée."
     },
     "finance": {
       "title": "Finances",
-      "description": "Dépôts, retraits et profit, expliqués et pas seulement additionnés.",
-      "note": "Les éléments existent séparément — le grand livre de points, les paiements d'abonnement, les retraits — mais rien ne les réunit en un relevé. Cet onglet montrera le détail des chiffres de l'aperçu."
+      "description": "Entrées et sorties, mois par mois. Les dépôts sont les achats de formules plus les contrats annonceurs.",
+      "summary": {
+        "in": "Entrées",
+        "out": "Versé aux utilisateurs",
+        "profit": "Bénéfice",
+        "period": "6 derniers mois"
+      },
+      "liability": {
+        "label": "Dû aux utilisateurs",
+        "body": "{points} points sont détenus mais pas encore encaissés. Ce n'est pas encore un coût, donc absent de la colonne bénéfice — mais un bénéfice lu sans cela paraît meilleur qu'il ne l'est."
+      },
+      "columns": {
+        "month": "Mois",
+        "subscriptions": "Formules",
+        "advertisers": "Annonceurs",
+        "in": "Entrées",
+        "out": "Sorties",
+        "profit": "Bénéfice",
+        "total": "Total"
+      },
+      "exportNote": "L'export d'un relevé en CSV pour votre comptable reste à brancher côté serveur."
     },
     "config": {
-      "title": "Paramètres plateforme",
-      "description": "Les limites et interrupteurs qui régissent l’économie des gains.",
-      "note": "Chaque réglage est déjà actif dans app_config et appliqué par la base de données. Aujourd'hui ils se changent en SQL ; cet onglet est un formulaire sur les mêmes lignes, avec un journal d'audit déjà rattaché."
+      "title": "Paramètres de la plateforme",
+      "description": "Les chiffres qui décident de combien d'argent sort. Chaque champ correspond à une colonne réelle — son nom est indiqué en dessous.",
+      "units": {
+        "points": "points",
+        "seconds": "s",
+        "attempts": "essais",
+        "hours": "heures",
+        "perCedi": "pour 1 GHS",
+        "times": "×",
+        "ads": "pubs"
+      },
+      "groups": {
+        "earning": {
+          "title": "Limites de gain",
+          "description": "Ce qu'une personne peut gagner en une journée, et à quelle vitesse."
+        },
+        "pool": {
+          "title": "Cagnotte de récompenses",
+          "description": "Le plafond quotidien pour l'ensemble de la plateforme."
+        },
+        "payouts": {
+          "title": "Règles de retrait",
+          "description": "Quand l'argent peut sortir, et combien de temps il attend d'abord."
+        },
+        "rate": {
+          "title": "Points et formules",
+          "description": "Ce que vaut un point, et comment les avantages se combinent."
+        },
+        "referrals": {
+          "title": "Parrainage",
+          "description": "Ce que vaut une invitation, et quand elle est payée."
+        },
+        "fraud": {
+          "title": "Seuils de fraude",
+          "description": "Les scores à partir desquels un compte est classé moyen, élevé ou critique. Ils pilotent les étiquettes de risque de la file des retraits."
+        },
+        "killswitch": {
+          "title": "Arrêt d'urgence",
+          "description": "Un seul interrupteur, pour quand quelque chose va vraiment mal."
+        }
+      },
+      "fields": {
+        "dailyCap": {
+          "label": "Plafond de points par jour et par utilisateur",
+          "description": "Le maximum qu'un compte peut gagner dans une journée UTC, avant multiplicateurs."
+        },
+        "cooldown": {
+          "label": "Délai entre deux publicités",
+          "description": "Le temps d'attente après une publicité avant de pouvoir en lancer une autre."
+        },
+        "retryCap": {
+          "label": "Tentatives par publicité",
+          "description": "Combien de fois une personne peut réessayer une publicité ratée."
+        },
+        "poolCeiling": {
+          "label": "Plafond quotidien de la plateforme",
+          "description": "Total de points pouvant être créés pour tous les utilisateurs en une journée."
+        },
+        "poolBlocks": {
+          "label": "Arrêter les gains au plafond",
+          "description": "Activé, atteindre le plafond arrête les gains pour tout le monde jusqu'à minuit UTC. Désactivé, cela déclenche seulement une alerte.",
+          "warning": "Activé, une journée chargée arrête tous les utilisateurs d'un coup. La plupart des opérateurs le laissent désactivé et surveillent l'alerte."
+        },
+        "payoutsEnabled": {
+          "label": "Retraits ouverts",
+          "description": "L'interrupteur principal. Désactivé, les demandes restent possibles mais rien ne peut être approuvé ni envoyé."
+        },
+        "holdingHours": {
+          "label": "Fenêtre de rétention",
+          "description": "Durée d'attente d'une demande avant approbation possible. Le temps que les contrôles anti-fraude suivent."
+        },
+        "cooloffHours": {
+          "label": "Délai après changement des coordonnées",
+          "description": "Temps après un changement de numéro MoMo ou de portefeuille avant de pouvoir y retirer."
+        },
+        "pointsRate": {
+          "label": "Points par cedi",
+          "description": "Combien de points font 1,00 GHS.",
+          "warning": "Sans effet rétroactif. Les points déjà gagnés gardent le taux auquel ils ont été écrits. Augmenter ce nombre rend chaque point futur moins précieux."
+        },
+        "combineMode": {
+          "label": "Combinaison des avantages",
+          "description": "Quand une personne détient plusieurs formules.",
+          "sumBonus": "Additionner les bonus",
+          "highest": "Garder le plus élevé",
+          "multiply": "Multiplier entre eux"
+        },
+        "multiplierCeiling": {
+          "label": "Plafond absolu du taux combiné",
+          "description": "Aucun cumul de formules ne peut dépasser ce chiffre, quel que soit le mode."
+        },
+        "referralSignup": {
+          "label": "Bonus à l'inscription",
+          "description": "Versé au parrain dès qu'une personne s'inscrit avec son code."
+        },
+        "referralActivation": {
+          "label": "Bonus à l'activation",
+          "description": "Versé une fois que la personne parrainée a réellement regardé des publicités — le volet anti-fraude."
+        },
+        "referralAds": {
+          "label": "Publicités valant activation",
+          "description": "Combien de publicités complétées avant le versement du bonus d'activation."
+        },
+        "fraudMedium": {
+          "label": "Risque moyen à partir de",
+          "description": "Score à partir duquel un retrait est marqué à regarder."
+        },
+        "fraudHigh": {
+          "label": "Risque élevé à partir de",
+          "description": "Score à partir duquel un retrait est marqué à risque élevé."
+        },
+        "fraudCritical": {
+          "label": "Risque critique à partir de",
+          "description": "Score à partir duquel un retrait indique de ne pas payer sans vérifier."
+        },
+        "earningPaused": {
+          "label": "Suspendre tous les gains",
+          "description": "Plus personne ne gagne quoi que ce soit tant que ce n'est pas rétabli.",
+          "warning": "Cela arrête immédiatement tous les utilisateurs. Les publicités continuent de se lancer mais ne rapportent rien, ce que les utilisateurs remarquent en quelques minutes."
+        }
+      }
     },
     "audit": {
-      "title": "Journal",
-      "description": "Qui a fait quoi, et quand.",
-      "note": "Les actions admin sont déjà enregistrées — chaque changement de configuration et chaque modification d'annonce depuis le début est dans la table. Il n'a simplement jamais existé de moyen de la lire."
+      "title": "Journal d'audit",
+      "description": "Qui a changé quoi, quand, et quelle était la valeur avant. Du plus récent au plus ancien.",
+      "filterLabel": "Filtrer par type",
+      "filters": {
+        "all": "Tout",
+        "money": "Argent",
+        "accounts": "Comptes",
+        "config": "Réglages & pubs",
+        "system": "Système"
+      },
+      "searchPlaceholder": "Qui, quoi ou pourquoi",
+      "empty": "Aucun résultat.",
+      "unchanged": "(vérifié, inchangé)",
+      "actions": {
+        "payout_approved": "Retrait approuvé",
+        "payout_declined": "Retrait refusé",
+        "payout_paid": "Retrait marqué terminé",
+        "account_flagged": "Compte signalé",
+        "account_disabled": "Compte désactivé",
+        "config_changed": "Réglage modifié",
+        "ad_created": "Publicité créée",
+        "ad_paused": "Publicité mise en pause",
+        "alert_raised": "Alerte système"
+      }
     },
     "settings": {
       "title": "Paramètres admin",
       "description": "L’administration des administrateurs.",
       "note": "L'administration des administrateurs, plutôt que de la plateforme. Rien n'existe encore au-delà de la table des rôles."
+    },
+    "settingsForm": {
+      "unsaved": "{count, plural, one {# modification non enregistrée} other {# modifications non enregistrées}}",
+      "save": "Enregistrer",
+      "discard": "Annuler",
+      "savedPreview": "Rien n'a été écrit — ce tableau de bord fonctionne sur des données de démonstration. Le branchement de l'enregistrement reste à faire côté serveur."
+    },
+    "adminSettings": {
+      "title": "Paramètres d'administration",
+      "description": "Qui peut accéder à cette zone, et comment elle se comporte pour vous. Les réglages qui touchent les utilisateurs sont dans les paramètres de la plateforme.",
+      "units": {
+        "hours": "heures"
+      },
+      "administrators": {
+        "title": "Administrateurs",
+        "description": "Toutes les personnes pouvant accéder à cette zone, approuver un retrait ou désactiver un compte.",
+        "twoFactorOn": "Double authentification active",
+        "twoFactorOff": "Pas de double authentification",
+        "note": "L'attribution et le retrait du rôle d'administrateur ne sont pas encore branchés. C'est la seule action ici qui ne peut pas être annulée depuis cet écran — une erreur donnerait à quelqu'un la file des retraits — elle attend donc le serveur plutôt que d'être livrée à moitié."
+      },
+      "appearance": {
+        "title": "Apparence",
+        "description": "Clair, sombre, ou selon votre appareil. Ne s'applique qu'à votre compte."
+      },
+      "groups": {
+        "security": {
+          "title": "Sécurité",
+          "description": "Comment les administrateurs se connectent et restent connectés."
+        },
+        "alerts": {
+          "title": "Ce qui vous parvient",
+          "description": "Les événements qui méritent de vous interrompre."
+        }
+      },
+      "fields": {
+        "require2fa": {
+          "label": "Exiger la double authentification",
+          "description": "Chaque administrateur doit enrôler une application d'authentification avant d'accéder à cette zone.",
+          "warning": "À activer avant l'ouverture des retraits. Un administrateur n'a actuellement aucune application enrôlée et serait bloqué jusqu'à ce qu'il en configure une."
+        },
+        "sessionHours": {
+          "label": "Durée de session administrateur",
+          "description": "Combien de temps un administrateur reste connecté avant qu'on lui redemande."
+        },
+        "alertPayout": {
+          "label": "Nouvelle demande de retrait",
+          "description": "Dès que quelqu'un demande à retirer."
+        },
+        "alertCeiling": {
+          "label": "Cagnotte proche du plafond",
+          "description": "Quand le plafond quotidien de la plateforme est près d'être atteint."
+        },
+        "alertRisk": {
+          "label": "Retrait à risque critique",
+          "description": "Quand une demande atteint un score justifiant de ne pas payer sans vérifier."
+        }
+      }
     }
   }
 }

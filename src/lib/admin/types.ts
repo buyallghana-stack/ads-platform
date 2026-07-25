@@ -156,3 +156,95 @@ export function canDispute(request: PayoutRequest, now: number): boolean {
   const elapsed = now - new Date(request.statusChangedAt).getTime()
   return elapsed < DISPUTE_WINDOW_HOURS * 3_600_000
 }
+
+/* ------------------------------------------------------------------ */
+/* Content, money and system records                                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * One item in the pool users watch and answer.
+ *
+ * `completions` against `budget` is the number that decides whether an ad is
+ * about to stop serving, so the two travel together rather than being looked
+ * up separately. `tiers` empty means everyone — inclusive by default, which
+ * is the rule the database already enforces (upgrading never shrinks a
+ * user's pool).
+ */
+export type AdItem = {
+  id: string
+  title: string
+  advertiser: string
+  format: 'video' | 'survey'
+  status: 'live' | 'paused' | 'draft' | 'archived'
+  /** Points a Free-tier user earns. Higher plans multiply this. */
+  points: number
+  durationSeconds: number
+  questions: number
+  /** How many completions are paid for, and how many have happened. */
+  budget: number
+  completions: number
+  /** Plan names this is limited to. Empty = the whole platform. */
+  tiers: string[]
+  createdAt: string
+}
+
+/** A plan, and how it is actually selling. */
+export type PlanRow = {
+  id: string
+  name: string
+  priceGhs: number
+  /** What a subscriber gets, as the operator words it. */
+  multiplier: number
+  dailyAdsBonus: number
+  active: number
+  /** Active subscribers a month ago, for the trend. */
+  activeLastMonth: number
+  monthlyGhs: number
+  status: 'live' | 'hidden'
+}
+
+/** An advertiser contract, keyed in by hand until self-serve exists. */
+export type Advertiser = {
+  id: string
+  name: string
+  contact: string
+  status: 'active' | 'ended' | 'pending'
+  /** What they have paid, and what has been delivered against it. */
+  contractGhs: number
+  spentGhs: number
+  adsLive: number
+  startedAt: string
+  endsAt: string | null
+}
+
+/** One line of the admin audit log. */
+export type AuditEntry = {
+  id: string
+  at: string
+  actor: string
+  /** Machine name of what happened — drives the label and the colour. */
+  action:
+    | 'payout_approved'
+    | 'payout_declined'
+    | 'payout_paid'
+    | 'account_flagged'
+    | 'account_disabled'
+    | 'config_changed'
+    | 'ad_created'
+    | 'ad_paused'
+    | 'alert_raised'
+  /** What it happened to, in the operator's words. */
+  target: string
+  /** Only on config changes, and only when there genuinely was a before. */
+  before?: string
+  after?: string
+  note?: string
+}
+
+/** One row of the money statement. */
+export type FinanceRow = {
+  month: string
+  subscriptionsGhs: number
+  advertisersGhs: number
+  withdrawalsGhs: number
+}

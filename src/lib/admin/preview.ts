@@ -1,6 +1,16 @@
 import 'server-only'
 
-import type { DailyMoney, OverviewMetrics, PayoutRequest, Person } from './types'
+import type {
+  AdItem,
+  Advertiser,
+  AuditEntry,
+  DailyMoney,
+  FinanceRow,
+  OverviewMetrics,
+  PayoutRequest,
+  Person,
+  PlanRow,
+} from './types'
 
 /**
  * PREVIEW DATA FOR THE ADMIN DASHBOARD — nothing here is real.
@@ -249,4 +259,157 @@ export function people(): Person[] {
     { id: 'u12', name: 'Selorm Agbeko', email: 'selorm.a@gmail.com', phone: '020 231 9091',
       avatarUrl: null, joinedAt: at(3000), balancePoints: 55400, tier: 'Platinum', status: 'active' },
   ] as const).map(withActivity)
+}
+
+/* ------------------------------------------------------------------ */
+/* Content, money and system records                                   */
+/* ------------------------------------------------------------------ */
+
+export function adItems(): AdItem[] {
+  const now = Date.now()
+  const days = (d: number) => new Date(now - d * 24 * HOURS).toISOString()
+
+  return [
+    { id: 'a1', title: 'MTN Ghana — 5G is here', advertiser: 'MTN Ghana', format: 'video',
+      status: 'live', points: 55, durationSeconds: 45, questions: 2,
+      budget: 20000, completions: 14820, tiers: [], createdAt: days(22) },
+    { id: 'a2', title: 'How do you send money?', advertiser: 'Fido Microcredit', format: 'survey',
+      status: 'live', points: 90, durationSeconds: 0, questions: 6,
+      budget: 5000, completions: 4870, tiers: [], createdAt: days(15) },
+    { id: 'a3', title: 'Melcom mid-year sale', advertiser: 'Melcom', format: 'video',
+      status: 'live', points: 40, durationSeconds: 30, questions: 1,
+      budget: 12000, completions: 3110, tiers: [], createdAt: days(9) },
+    // Platinum-only, so it exercises the tier chips.
+    { id: 'a4', title: 'Which bank do you use most?', advertiser: 'Absa Ghana', format: 'survey',
+      status: 'live', points: 120, durationSeconds: 0, questions: 8,
+      budget: 2500, completions: 640, tiers: ['Gold', 'Platinum'], createdAt: days(6) },
+    // 98% delivered — the one about to stop serving, which is the whole
+    // reason budget and completions travel together.
+    { id: 'a5', title: 'Hollard car insurance', advertiser: 'Hollard', format: 'video',
+      status: 'live', points: 65, durationSeconds: 60, questions: 2,
+      budget: 8000, completions: 7860, tiers: [], createdAt: days(31) },
+    { id: 'a6', title: 'Voltic — stay hydrated', advertiser: 'Voltic Ghana', format: 'video',
+      status: 'paused', points: 35, durationSeconds: 20, questions: 1,
+      budget: 15000, completions: 5240, tiers: [], createdAt: days(40) },
+    { id: 'a7', title: 'Your data bundle habits', advertiser: 'Telecel Ghana', format: 'survey',
+      status: 'draft', points: 80, durationSeconds: 0, questions: 5,
+      budget: 6000, completions: 0, tiers: [], createdAt: days(2) },
+    { id: 'a8', title: 'Glo — old campaign', advertiser: 'Glo Ghana', format: 'video',
+      status: 'archived', points: 30, durationSeconds: 30, questions: 1,
+      budget: 10000, completions: 10000, tiers: [], createdAt: days(120) },
+  ]
+}
+
+export function plans(): PlanRow[] {
+  return [
+    { id: 'p0', name: 'Free', priceGhs: 0, multiplier: 1, dailyAdsBonus: 0,
+      active: 2423, activeLastMonth: 2260, monthlyGhs: 0, status: 'live' },
+    { id: 'p1', name: 'Bronze', priceGhs: 20, multiplier: 1.25, dailyAdsBonus: 3,
+      active: 186, activeLastMonth: 171, monthlyGhs: 3720, status: 'live' },
+    { id: 'p2', name: 'Silver', priceGhs: 50, multiplier: 1.5, dailyAdsBonus: 6,
+      active: 124, activeLastMonth: 118, monthlyGhs: 6200, status: 'live' },
+    { id: 'p3', name: 'Gold', priceGhs: 100, multiplier: 2, dailyAdsBonus: 10,
+      active: 78, activeLastMonth: 66, monthlyGhs: 7800, status: 'live' },
+    { id: 'p4', name: 'Platinum', priceGhs: 200, multiplier: 3, dailyAdsBonus: 20,
+      active: 30, activeLastMonth: 21, monthlyGhs: 6000, status: 'live' },
+  ]
+}
+
+export function advertisers(): Advertiser[] {
+  const now = Date.now()
+  const days = (d: number) => new Date(now - d * 24 * HOURS).toISOString()
+  const ahead = (d: number) => new Date(now + d * 24 * HOURS).toISOString()
+
+  return [
+    { id: 'ad1', name: 'MTN Ghana', contact: 'brand@mtn.com.gh', status: 'active',
+      contractGhs: 12000, spentGhs: 8892, adsLive: 1, startedAt: days(22), endsAt: ahead(38) },
+    { id: 'ad2', name: 'Fido Microcredit', contact: 'growth@fido.com.gh', status: 'active',
+      contractGhs: 6500, spentGhs: 6331, adsLive: 1, startedAt: days(15), endsAt: ahead(4) },
+    { id: 'ad3', name: 'Melcom', contact: 'marketing@melcom.com', status: 'active',
+      contractGhs: 4800, spentGhs: 1244, adsLive: 1, startedAt: days(9), endsAt: ahead(51) },
+    { id: 'ad4', name: 'Absa Ghana', contact: 'digital@absa.com.gh', status: 'active',
+      contractGhs: 3000, spentGhs: 768, adsLive: 1, startedAt: days(6), endsAt: ahead(54) },
+    { id: 'ad5', name: 'Hollard', contact: 'ads@hollard.com.gh', status: 'active',
+      contractGhs: 5200, spentGhs: 5109, adsLive: 1, startedAt: days(31), endsAt: ahead(2) },
+    { id: 'ad6', name: 'Voltic Ghana', contact: 'media@voltic.com', status: 'pending',
+      contractGhs: 2400, spentGhs: 0, adsLive: 0, startedAt: days(1), endsAt: null },
+    { id: 'ad7', name: 'Glo Ghana', contact: 'ads@gloghana.com', status: 'ended',
+      contractGhs: 3000, spentGhs: 3000, adsLive: 0, startedAt: days(120), endsAt: days(30) },
+  ]
+}
+
+export function auditEntries(): AuditEntry[] {
+  const now = Date.now()
+  const at = (h: number) => new Date(now - h * HOURS).toISOString()
+
+  return [
+    { id: 'l1', at: at(0.4), actor: 'Demo Admin', action: 'payout_approved', target: 'RDM-4809 · Yaw Antwi' },
+    { id: 'l2', at: at(2), actor: 'Demo Admin', action: 'config_changed',
+      target: 'per_user_daily_points_cap', before: '400', after: '500',
+      note: 'Raised after the reward pool held under ceiling all week' },
+    { id: 'l3', at: at(5), actor: 'System', action: 'alert_raised',
+      target: 'Reward pool at 82% of the daily ceiling' },
+    { id: 'l4', at: at(9), actor: 'System', action: 'account_flagged',
+      target: 'Kwabena Mensah', note: 'Six accounts share this device fingerprint' },
+    { id: 'l5', at: at(20), actor: 'Demo Admin', action: 'payout_paid', target: 'RDM-4802 · Adwoa Nyarko' },
+    { id: 'l6', at: at(26), actor: 'Demo Admin', action: 'ad_paused',
+      target: 'Voltic — stay hydrated', note: 'Advertiser asked to hold until the new creative lands' },
+    { id: 'l7', at: at(40), actor: 'Demo Admin', action: 'account_disabled',
+      target: 'Kofi Danso', note: 'Repeated failed attention questions' },
+    { id: 'l8', at: at(52), actor: 'Demo Admin', action: 'payout_declined',
+      target: 'RDM-4760 · Kofi Danso', note: 'Name on the MoMo account does not match the profile' },
+    { id: 'l9', at: at(70), actor: 'Demo Admin', action: 'ad_created', target: 'Which bank do you use most?' },
+    { id: 'l10', at: at(96), actor: 'Demo Admin', action: 'config_changed',
+      target: 'points_per_currency_unit', before: '1000', after: '1000',
+      note: 'Reviewed, left unchanged' },
+  ]
+}
+
+export function financeRows(): FinanceRow[] {
+  return [
+    { month: '2026-07', subscriptionsGhs: 21750, advertisersGhs: 26500, withdrawalsGhs: 19430 },
+    { month: '2026-06', subscriptionsGhs: 19420, advertisersGhs: 21800, withdrawalsGhs: 17330 },
+    { month: '2026-05', subscriptionsGhs: 16100, advertisersGhs: 18200, withdrawalsGhs: 14980 },
+    { month: '2026-04', subscriptionsGhs: 12900, advertisersGhs: 15400, withdrawalsGhs: 11220 },
+    { month: '2026-03', subscriptionsGhs: 9450, advertisersGhs: 11000, withdrawalsGhs: 7640 },
+    { month: '2026-02', subscriptionsGhs: 5200, advertisersGhs: 6500, withdrawalsGhs: 3910 },
+  ]
+}
+
+/**
+ * Current platform configuration.
+ *
+ * Keys are the real column names from `platform_config`, so wiring this to
+ * the database later is replacing the function body with a select — the
+ * screen above does not change.
+ */
+export function platformConfig(): Record<string, string | number | boolean> {
+  return {
+    per_user_daily_points_cap: 500,
+    ad_cooldown_seconds: 30,
+    ad_retry_cap: 2,
+    reward_pool_daily_ceiling_points: 400000,
+    reward_pool_ceiling_blocks: false,
+    payouts_enabled: true,
+    redemption_holding_hours: 24,
+    payout_details_cooloff_hours: 48,
+    points_per_currency_unit: 1000,
+    subscription_multiplier_combine_mode: 'sum_bonus',
+    subscription_multiplier_ceiling: 3,
+    referral_signup_bonus_points: 200,
+    referral_activation_bonus_points: 500,
+    referral_activation_ads: 10,
+    fraud_threshold_medium: 40,
+    fraud_threshold_high: 65,
+    fraud_threshold_critical: 85,
+    earning_paused_globally: false,
+  }
+}
+
+/** Who currently holds the admin role. */
+export function administrators(): { id: string; name: string; email: string; twoFactor: boolean }[] {
+  return [
+    { id: 'ad-1', name: 'Demo Admin', email: 'admin@email.com', twoFactor: true },
+    { id: 'ad-2', name: 'Operations', email: 'ops@sideperks.app', twoFactor: false },
+  ]
 }
