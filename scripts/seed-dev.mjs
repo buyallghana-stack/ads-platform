@@ -73,83 +73,17 @@ const ACCOUNTS = [
   },
 ]
 
-/**
- * Sample ads so the earning loop has something to serve. One of each format
- * and question type, because those are the branches worth clicking through:
- * a YouTube video with a multiple-choice question, an uploaded-URL video with
- * a short-text answer, and a survey.
- */
-const ADS = [
-  {
-    ad: {
-      title: 'MTN 4G data bundles',
-      description: 'Sample seeded ad — a YouTube-hosted video with a multiple-choice question.',
-      advertiser_name: 'MTN Ghana',
-      format: 'video',
-      points_reward: 50,
-      video_source: 'youtube',
-      // The 11-char id, not a full URL — the column stores the id.
-      youtube_video_id: 'aqz-KE-bpKQ',
-      duration_seconds: 60,
-      min_watch_seconds: 15,
-      max_completions: 500,
-    },
-    question: {
-      question_text: 'Which network was advertised?',
-      answer_format: 'multiple_choice',
-      options: [
-        { option_text: 'MTN', is_correct: true },
-        { option_text: 'Telecel', is_correct: false },
-        { option_text: 'AirtelTigo', is_correct: false },
-        { option_text: 'Glo', is_correct: false },
-      ],
-    },
-  },
-  {
-    ad: {
-      title: 'Fresh produce, delivered',
-      description: 'Sample seeded ad — an uploaded video with a short-text answer.',
-      advertiser_name: 'AccraFresh',
-      format: 'video',
-      points_reward: 35,
-      video_source: 'upload',
-      // Storage object path. Nothing is uploaded here: the row exercises the
-      // upload branch of the schema and the admin editor. The player will not
-      // resolve it until a real object exists at this path.
-      storage_path: 'seed/accrafresh-sample.mp4',
-      duration_seconds: 30,
-      min_watch_seconds: 10,
-      max_completions: 500,
-    },
-    question: {
-      question_text: 'Type the name of the company in the advert.',
-      answer_format: 'short_text',
-      correct_answer: 'AccraFresh',
-    },
-  },
-  {
-    ad: {
-      title: 'How do you pay for things?',
-      description: 'Sample seeded survey — no video, question only.',
-      advertiser_name: 'AdReward Research',
-      format: 'survey',
-      points_reward: 80,
-      max_completions: 500,
-    },
-    question: {
-      question_text: 'Which do you use most often to pay?',
-      answer_format: 'multiple_choice',
-      options: [
-        { option_text: 'Mobile money', is_correct: true },
-        { option_text: 'Bank card', is_correct: false },
-        { option_text: 'Cash', is_correct: false },
-        { option_text: 'Crypto', is_correct: false },
-      ],
-    },
-  },
+/* The advertiser labels used by seed-ads.mjs. Duplicated here rather than
+ * imported because importing that module RUNS it (top-level await), and
+ * `--drop` must be able to delete the sample ads without first recreating
+ * them. Keep in step with the catalogue in seed-ads.mjs. */
+const SEED_ADVERTISERS = [
+  'MTN Ghana',
+  'AccraFresh',
+  'Kumasi Tiles',
+  'Gold Coast Water',
+  'SidePerks Research',
 ]
-
-const SEED_ADVERTISERS = [...new Set(ADS.map((entry) => entry.ad.advertiser_name))]
 
 /* --- helpers ------------------------------------------------------------- */
 
@@ -251,32 +185,14 @@ for (const account of ACCOUNTS) {
   }
 }
 
-/* Sample ads. */
-for (const { ad, question } of ADS) {
-  const { data: inserted, error } = await db
-    .from('ads')
-    .insert({ ...ad, status: 'active', created_by: created.admin })
-    .select('id')
-    .single()
-  if (error) throw error
-
-  const { options, ...questionRow } = question
-  const { data: q, error: questionError } = await db
-    .from('ad_questions')
-    .insert({ ...questionRow, ad_id: inserted.id, position: 0 })
-    .select('id')
-    .single()
-  if (questionError) throw questionError
-
-  if (options) {
-    const { error: optionError } = await db.from('ad_question_options').insert(
-      options.map((option, index) => ({ ...option, question_id: q.id, sort_order: index })),
-    )
-    if (optionError) throw optionError
-  }
-
-  console.log(`  created ad "${ad.title}"`)
-}
+/* Sample ads.
+ *
+ * Delegated to seed-ads.mjs, which owns the catalogue and is idempotent by
+ * title. Importing it runs it (top-level await), so `pnpm seed` still leaves a
+ * fully populated ads tab — but the ads can also be reseeded on their own,
+ * without going anywhere near these known-password accounts.
+ */
+await import('./seed-ads.mjs')
 
 /* --- demo transaction history (both accounts) -----------------------------
  *

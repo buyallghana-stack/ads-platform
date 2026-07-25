@@ -265,11 +265,114 @@
     "upgradeTeaserTitle": "Allez plus loin",
     "upgradeTeaserBody": "Passez à un forfait supérieur pour augmenter votre plafond de gains quotidien."
   },
-  "adsTab": {
-    "title": "Regarder et gagner",
-    "description": "Vos publicités du jour apparaîtront ici.",
-    "comingSoon": "Bientôt disponible",
-    "body": "Le lecteur de publicités et les questions d'attention sont prêts côté serveur. Cet écran s'y connectera une fois son design validé."
+  "ads": {
+    "tabs": {
+      "label": "Type d'annonce",
+      "video": "Vidéos",
+      "survey": "Sondages"
+    },
+    "allowance": {
+      "label": "Annonces aujourd'hui",
+      "balance": "Solde",
+      "points": "pts",
+      "remaining": "{count, plural, one {# annonce restante aujourd'hui sur votre offre {tier}} other {# annonces restantes aujourd'hui sur votre offre {tier}}}",
+      "spent": "Vous avez utilisé toutes les annonces de votre offre {tier} aujourd'hui."
+    },
+    "card": {
+      "reward": "+{points} pts",
+      "sponsored": "Sponsorisé",
+      "questions": "{count, plural, one {# question} other {# questions}}",
+      "watchOnly": "À regarder",
+      "quick": "Rapide",
+      "triesLeft": "{count, plural, one {# essai restant} other {# essais restants}}"
+    },
+    "caughtUp": {
+      "title": "Vous êtes à jour",
+      "cappedBody": "Vous avez terminé les {cap} annonces de votre offre {tier} aujourd'hui. Votre quota se recharge automatiquement.",
+      "emptyVideoBody": "Vous avez regardé toutes les vidéos disponibles pour l'instant. D'autres arrivent au fil de la journée.",
+      "emptySurveyBody": "Vous avez répondu à tous les sondages disponibles pour l'instant. D'autres arrivent au fil de la journée.",
+      "resetLabel": "Nouvelles annonces dans",
+      "resetHint": "Votre quota quotidien se recharge à minuit UTC.",
+      "recheckLabel": "Nouvelle vérification dans",
+      "recheckHint": "Nous cherchons de nouvelles annonces automatiquement — vous pouvez laisser cette page ouverte.",
+      "checkNow": "Vérifier maintenant",
+      "raiseLimit": "Augmenter ma limite quotidienne",
+      "switchToSurveys": "{count, plural, one {Répondre à # sondage à la place} other {Répondre à # sondages à la place}}",
+      "switchToVideos": "{count, plural, one {Regarder # vidéo à la place} other {Regarder # vidéos à la place}}"
+    },
+    "player": {
+      "close": "Fermer",
+      "loading": "Préparation de votre annonce",
+      "tapToPlay": "Appuyez pour lancer",
+      "questionsAhead": "{count, plural, one {# question pendant cette annonce} other {# questions pendant cette annonce}}",
+      "watchOnlyHint": "Aucune question — regardez simplement jusqu’au bout",
+      "answeredCount": "{done} sur {total} répondues",
+      "unavailableTitle": "Cette annonce n'est plus disponible",
+      "unavailableBody": "Elle vient d'être mise en pause ou complète. Rien ne vous a été décompté — choisissez-en une autre."
+    },
+    "question": {
+      "step": "{n} sur {total}",
+      "placeholder": "Saisissez votre réponse",
+      "back": "Retour",
+      "next": "Suivant",
+      "resume": "Continuer la lecture",
+      "finish": "Valider"
+    },
+    "result": {
+      "checking": "Vérification de votre réponse",
+      "pointsAdded": "points ajoutés",
+      "newBalance": "Nouveau solde : {balance} pts",
+      "next": "Annonce suivante",
+      "done": "Terminé",
+      "watchAgain": "Revoir",
+      "raiseLimit": "Augmenter ma limite quotidienne",
+      "correct": {
+        "title": "Bien joué",
+        "body": "Vos points sont déjà sur votre solde."
+      },
+      "incorrect": {
+        "title": "Pas tout à fait",
+        "body": "{count, plural, one {Revoyez l’annonce et réessayez. # essai restant.} other {Revoyez l’annonce et réessayez. # essais restants.}}"
+      },
+      "locked": {
+        "title": "Plus d’essais",
+        "body": "Cette annonce est désormais fermée pour vous. Beaucoup d’autres vous attendent."
+      },
+      "alreadyDone": {
+        "title": "Déjà validée",
+        "body": "Vous avez déjà terminé cette annonce : elle ne peut pas payer deux fois."
+      },
+      "gone": {
+        "title": "Annonce plus disponible",
+        "body": "Elle a été mise en pause ou complétée pendant que vous la regardiez. Aucun essai n’a été utilisé."
+      },
+      "notWatched": {
+        "title": "Regardez-la d’abord",
+        "body": "Lancez l’annonce jusqu’au bout avant de répondre."
+      },
+      "tooFast": {
+        "title": "Quelques secondes de plus",
+        "body": "Laissez l’annonce tourner encore un peu, puis répondez."
+      },
+      "cap": {
+        "title": "C’est votre limite du jour",
+        "body": "Votre quota quotidien est épuisé : celle-ci n’a pas été comptée. Il se réinitialise à minuit UTC."
+      },
+      "blocked": {
+        "title": "Les gains sont en pause",
+        "body": "Les gains sont en pause pour le moment, rien n’a été compté. Réessayez plus tard."
+      },
+      "error": {
+        "title": "Une erreur est survenue",
+        "body": "Rien ne vous a été décompté. Veuillez réessayer."
+      }
+    },
+    "blocked": {
+      "pausedTitle": "Les gains sont en pause",
+      "pausedBody": "Les gains sont en pause sur toute la plateforme pour le moment. Votre solde est intact et les annonces reviendront bientôt.",
+      "disabledTitle": "Votre compte est suspendu",
+      "disabledBody": "Les gains sont désactivés sur ce compte. Consultez vos notifications ou contactez le support si vous pensez qu’il s’agit d’une erreur."
+    }
   },
   "upgradeTab": {
     "title": "Améliorer votre forfait",

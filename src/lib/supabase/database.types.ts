@@ -109,6 +109,7 @@ export type Database = {
           id: string
           position: number
           question_text: string
+          show_at_seconds: number | null
           updated_at: string
         }
         Insert: {
@@ -119,6 +120,7 @@ export type Database = {
           id?: string
           position?: number
           question_text: string
+          show_at_seconds?: number | null
           updated_at?: string
         }
         Update: {
@@ -129,6 +131,7 @@ export type Database = {
           id?: string
           position?: number
           question_text?: string
+          show_at_seconds?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -200,6 +203,7 @@ export type Database = {
           starts_at: string | null
           status: Database["public"]["Enums"]["ad_status"]
           storage_path: string | null
+          thumbnail_path: string | null
           title: string
           updated_at: string
           video_source: Database["public"]["Enums"]["video_source"] | null
@@ -222,6 +226,7 @@ export type Database = {
           starts_at?: string | null
           status?: Database["public"]["Enums"]["ad_status"]
           storage_path?: string | null
+          thumbnail_path?: string | null
           title: string
           updated_at?: string
           video_source?: Database["public"]["Enums"]["video_source"] | null
@@ -244,6 +249,7 @@ export type Database = {
           starts_at?: string | null
           status?: Database["public"]["Enums"]["ad_status"]
           storage_path?: string | null
+          thumbnail_path?: string | null
           title?: string
           updated_at?: string
           video_source?: Database["public"]["Enums"]["video_source"] | null
@@ -1837,6 +1843,31 @@ export type Database = {
           user_agent: string
         }[]
       }
+      get_ad_feed: {
+        Args: {
+          p_format?: Database["public"]["Enums"]["ad_format"]
+          p_limit?: number
+          p_user_id: string
+        }
+        Returns: {
+          advertiser_name: string
+          attempts_remaining: number
+          attempts_used: number
+          description: string
+          duration_seconds: number
+          format: Database["public"]["Enums"]["ad_format"]
+          id: string
+          min_watch_seconds: number
+          points_award: number
+          points_reward: number
+          question_count: number
+          storage_path: string
+          thumbnail_path: string
+          title: string
+          video_source: Database["public"]["Enums"]["video_source"]
+          youtube_video_id: string
+        }[]
+      }
       get_ad_question_for_user: {
         Args: { p_ad_id: string; p_position?: number }
         Returns: {
@@ -1845,6 +1876,18 @@ export type Database = {
           option_text: string
           question_id: string
           question_text: string
+        }[]
+      }
+      get_ad_questions_for_user: {
+        Args: { p_ad_id: string }
+        Returns: {
+          answer_format: Database["public"]["Enums"]["answer_format"]
+          option_id: string
+          option_text: string
+          question_id: string
+          question_index: number
+          question_text: string
+          show_at_seconds: number
         }[]
       }
       get_deletion_status: { Args: never; Returns: Json }
@@ -1866,6 +1909,7 @@ export type Database = {
           starts_at: string | null
           status: Database["public"]["Enums"]["ad_status"]
           storage_path: string | null
+          thumbnail_path: string | null
           title: string
           updated_at: string
           video_source: Database["public"]["Enums"]["video_source"] | null

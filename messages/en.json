@@ -265,11 +265,114 @@
     "upgradeTeaserTitle": "Go further",
     "upgradeTeaserBody": "Upgrade your plan to raise your daily earning cap."
   },
-  "adsTab": {
-    "title": "Watch and earn",
-    "description": "Your daily ads will appear here.",
-    "comingSoon": "Coming soon",
-    "body": "The ad player and attention questions are built and tested on the server. This screen connects to them once its design is agreed."
+  "ads": {
+    "tabs": {
+      "label": "Ad type",
+      "video": "Videos",
+      "survey": "Surveys"
+    },
+    "allowance": {
+      "label": "Ads today",
+      "balance": "Balance",
+      "points": "pts",
+      "remaining": "{count, plural, one {# ad left on your {tier} plan today} other {# ads left on your {tier} plan today}}",
+      "spent": "You've used every ad on your {tier} plan today."
+    },
+    "card": {
+      "reward": "+{points} pts",
+      "sponsored": "Sponsored",
+      "questions": "{count, plural, one {# question} other {# questions}}",
+      "watchOnly": "Just watch",
+      "quick": "Quick",
+      "triesLeft": "{count, plural, one {# try left} other {# tries left}}"
+    },
+    "caughtUp": {
+      "title": "You're all caught up",
+      "cappedBody": "You've finished all {cap} ads on your {tier} plan today. Your allowance refills automatically.",
+      "emptyVideoBody": "You've watched every video available to you right now. New ones are added through the day.",
+      "emptySurveyBody": "You've answered every survey available to you right now. New ones are added through the day.",
+      "resetLabel": "New ads in",
+      "resetHint": "Your daily allowance refills at midnight UTC.",
+      "recheckLabel": "Checking again in",
+      "recheckHint": "We look for new ads automatically — you can leave this open.",
+      "checkNow": "Check now",
+      "raiseLimit": "Raise my daily limit",
+      "switchToSurveys": "{count, plural, one {Answer # survey instead} other {Answer # surveys instead}}",
+      "switchToVideos": "{count, plural, one {Watch # video instead} other {Watch # videos instead}}"
+    },
+    "player": {
+      "close": "Close",
+      "loading": "Getting your ad ready",
+      "tapToPlay": "Tap to play",
+      "questionsAhead": "{count, plural, one {# question during this ad} other {# questions during this ad}}",
+      "watchOnlyHint": "No questions — just watch it through",
+      "answeredCount": "{done} of {total} answered",
+      "unavailableTitle": "This ad is no longer available",
+      "unavailableBody": "It was paused or fully booked just now. Nothing was counted against you — pick another one."
+    },
+    "question": {
+      "step": "{n} of {total}",
+      "placeholder": "Type your answer",
+      "back": "Back",
+      "next": "Next",
+      "resume": "Continue watching",
+      "finish": "Submit"
+    },
+    "result": {
+      "checking": "Checking your answer",
+      "pointsAdded": "points added",
+      "newBalance": "New balance: {balance} pts",
+      "next": "Next ad",
+      "done": "Done",
+      "watchAgain": "Watch again",
+      "raiseLimit": "Raise my daily limit",
+      "correct": {
+        "title": "Nice one",
+        "body": "Your points are in your balance already."
+      },
+      "incorrect": {
+        "title": "Not quite",
+        "body": "{count, plural, one {Watch the ad again and try once more. # try left.} other {Watch the ad again and try once more. # tries left.}}"
+      },
+      "locked": {
+        "title": "No tries left",
+        "body": "This ad is closed for you now. There are plenty of others waiting."
+      },
+      "alreadyDone": {
+        "title": "Already earned",
+        "body": "You've completed this ad before, so it cannot pay twice."
+      },
+      "gone": {
+        "title": "Ad no longer available",
+        "body": "It was paused or fully booked while you were watching. No try was used."
+      },
+      "notWatched": {
+        "title": "Watch it first",
+        "body": "Play the ad through before answering."
+      },
+      "tooFast": {
+        "title": "A few seconds more",
+        "body": "Keep the ad playing a little longer, then answer."
+      },
+      "cap": {
+        "title": "That's your limit for today",
+        "body": "Your daily allowance is spent, so this one was not counted. It resets at midnight UTC."
+      },
+      "blocked": {
+        "title": "Earning is paused",
+        "body": "Earning is paused right now, so nothing was counted. Please try again later."
+      },
+      "error": {
+        "title": "Something went wrong",
+        "body": "Nothing was counted against you. Please try again."
+      }
+    },
+    "blocked": {
+      "pausedTitle": "Earning is paused",
+      "pausedBody": "Earning is paused across the platform right now. Your balance is safe and ads will return shortly.",
+      "disabledTitle": "Your account is on hold",
+      "disabledBody": "Earning is disabled on this account. Check your notifications, or contact support if you think this is a mistake."
+    }
   },
   "upgradeTab": {
     "title": "Upgrade your plan",

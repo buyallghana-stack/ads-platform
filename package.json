@@ -9,6 +9,7 @@
     "lint": "eslint",
     "shoot": "node scripts/shoot.mjs",
     "seed": "node scripts/seed-dev.mjs",
+    "seed:ads": "node scripts/seed-ads.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

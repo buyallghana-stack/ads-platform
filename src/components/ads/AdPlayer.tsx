@@ -1,0 +1,573 @@
+'use client'
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+import { Loader2, Play, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+
+import {
+  startAd,
+  submitAd,
+  type AdQuestion,
+  type SubmitAdResult,
+} from '@/app/[locale]/(app)/ads/actions'
+import { Button } from '@/components/ui/Button'
+import type { FeedAd } from '@/lib/ads/data'
+import { cn } from '@/lib/cn'
+
+import { AdResult } from './AdResult'
+import { QuestionSheet } from './QuestionSheet'
+import { VideoStage } from './VideoStage'
+
+/**
+ * The watching surface: a full-screen overlay rather than its own route.
+ *
+ * A route change would unmount the feed, lose the scroll position and cost a
+ * navigation on a slow connection every time someone opens an ad — and people
+ * open a lot of them in a row. An overlay keeps the feed alive underneath, so
+ * finishing an ad returns straight to where they were with one fewer card.
+ *
+ * It drives both formats because they are the same transaction with the
+ * timeline removed: a survey is a video ad whose questions all happen at
+ * second zero. Sharing the component keeps answer collection and submission
+ * identical for both.
+ *
+ * WHERE THE QUESTIONS COME FROM
+ * -----------------------------
+ * The admin sets a cue second per question (`show_at_seconds`). A question
+ * with a cue interrupts playback at that second; a question without one is
+ * asked when the video finishes. An ad may have many of either, or none at
+ * all — a watch-only ad, which is credited on watch time alone. The player
+ * takes no view on which arrangement is "normal": it renders what the admin
+ * configured.
+ *
+ * WHY ANSWERS ARE HELD AND SENT ONCE
+ * ----------------------------------
+ * Grading is one server call for the whole ad. Sending answers one at a time
+ * would tell a user which single question they got wrong, which is exactly the
+ * information needed to brute-force a survey. So answers accumulate locally —
+ * including the mid-roll ones — and go up together at the end.
+ */
+
+type Phase =
+  | 'starting'
+  | 'unavailable'
+  | 'intro' // waiting for the tap that starts playback
+  | 'playing'
+  | 'question'
+  | 'submitting'
+  | 'result'
+
+export function AdPlayer({
+  ad,
+  onClose,
+  onResolved,
+}: {
+  ad: FeedAd
+  onClose: () => void
+  /** Fired once the server has ruled on the attempt, so the feed can drop the
+   *  card and move the counters. */
+  onResolved: (adId: string, result: SubmitAdResult) => void
+}) {
+  const t = useTranslations('ads')
+  const isVideo = ad.format === 'video'
+
+  const [phase, setPhase] = useState<Phase>('starting')
+  const [questions, setQuestions] = useState<AdQuestion[]>([])
+  const [answers, setAnswers] = useState<Record<string, string>>({})
+  const [askedIds, setAskedIds] = useState<string[]>([])
+  const [currentId, setCurrentId] = useState<string | null>(null)
+  const [draft, setDraft] = useState('')
+  const [result, setResult] = useState<SubmitAdResult | null>(null)
+
+  const [elapsed, setElapsed] = useState(0)
+  const [duration, setDuration] = useState(ad.durationSeconds ?? 0)
+
+  /* Guards a race the polling loop makes easy: two ticks 250ms apart can both
+     see the same cue before React has re-rendered with the new askedIds, which
+     would open the same question twice. A ref is read synchronously, so it
+     cannot be stale. The same reason applies to the phase — the 4 Hz tick has
+     to know whether a sheet is already up, and state would lag it. */
+  const askedRef = useRef<Set<string>>(new Set())
+  const submittedRef = useRef(false)
+  const phaseRef = useRef<Phase>('starting')
+  /* Answers waiting on the clock: every question is done but the admin's
+     minimum watch time is not up yet, so playback continues and submission
+     happens on the tick that satisfies it. */
+  const pendingSubmitRef = useRef<Record<string, string> | null>(null)
+
+  /*
+    The server's rule, mirrored exactly (see submit_ad_answers): the required
+    watch is min_watch_seconds, falling back to the full duration ONLY when the
+    ad has no questions — with nothing to grade, time watched is the whole
+    test. Mirroring it here is what stops the client submitting into a
+    guaranteed 'too_fast'; the server still decides.
+  */
+  const requiredWatch =
+    ad.minWatchSeconds ?? (ad.questionCount === 0 ? (ad.durationSeconds ?? 0) : 0)
+
+  const setPhaseNow = useCallback((next: Phase) => {
+    phaseRef.current = next
+    setPhase(next)
+  }, [])
+
+  const current = questions.find((q) => q.id === currentId) ?? null
+
+  /** Questions with a cue, soonest first. */
+  const cued = useMemo(
+    () =>
+      questions
+        .filter((q) => q.showAtSeconds !== null)
+        .sort((a, b) => (a.showAtSeconds ?? 0) - (b.showAtSeconds ?? 0)),
+    [questions],
+  )
+
+  /* Bumped by a retry. A wrong answer clears the server's watch stamp, so
+     retrying has to call register_ad_view again — re-running this effect is
+     exactly that, and keeps one code path for "begin an attempt". */
+  const [runKey, setRunKey] = useState(0)
+
+  // ---- Start: register the view, then fetch the questions ----------------
+  useEffect(() => {
+    let cancelled = false
+    startAd(ad.id).then((res) => {
+      if (cancelled) return
+      if (!res.ok) {
+        setPhaseNow('unavailable')
+        return
+      }
+      setQuestions(res.questions)
+      // A survey has no timeline to wait through, so it opens on its first
+      // question. A video waits for the tap that satisfies the browser's
+      // autoplay rules.
+      const first = res.questions[0]
+      if (!isVideo && first) {
+        setCurrentId(first.id)
+        setPhaseNow('question')
+      } else {
+        setPhaseNow('intro')
+      }
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [ad.id, isVideo, runKey, setPhaseNow])
+
+  // ---- Submitting --------------------------------------------------------
+  const submit = useCallback(
+    (finalAnswers: Record<string, string>) => {
+      if (submittedRef.current) return
+      submittedRef.current = true
+      setPhaseNow('submitting')
+      submitAd(ad.id, finalAnswers).then((res) => {
+        setResult(res)
+        setPhaseNow('result')
+        onResolved(ad.id, res)
+      })
+    },
+    [ad.id, onResolved, setPhaseNow],
+  )
+
+  /** Questions still unanswered once the video is over. */
+  const askNextPending = useCallback(
+    (collected: Record<string, string>) => {
+      const pending = questions.find((q) => !askedRef.current.has(q.id))
+      if (pending) {
+        askedRef.current.add(pending.id)
+        setAskedIds([...askedRef.current])
+        setCurrentId(pending.id)
+        setDraft('')
+        setPhaseNow('question')
+        return
+      }
+      submit(collected)
+    },
+    [questions, submit, setPhaseNow],
+  )
+
+  // ---- Playback ----------------------------------------------------------
+  const handleTime = useCallback(
+    (seconds: number) => {
+      setElapsed(seconds)
+      // Only act while actually playing; a tick can land after the question
+      // sheet is already up, or after the ad has been submitted.
+      if (phaseRef.current !== 'playing') return
+
+      // The clock has caught up with the answers.
+      const waiting = pendingSubmitRef.current
+      if (waiting && seconds >= requiredWatch) {
+        pendingSubmitRef.current = null
+        submit(waiting)
+        return
+      }
+
+      /*
+        A watch-only ad has no cue to end on and no reliable end event: an
+        admin may declare a 30-second spot on a video that runs for ten
+        minutes, and waiting for onEnded would strand the user there. The watch
+        requirement is the finish line, exactly as the server sees it.
+      */
+      if (!waiting && questions.length === 0 && requiredWatch > 0 && seconds >= requiredWatch) {
+        submit({})
+        return
+      }
+
+      const due = cued.find(
+        (q) => !askedRef.current.has(q.id) && seconds >= (q.showAtSeconds ?? 0),
+      )
+      if (!due) return
+      askedRef.current.add(due.id)
+      setAskedIds([...askedRef.current])
+      setCurrentId(due.id)
+      setDraft('')
+      setPhaseNow('question')
+    },
+    [cued, questions.length, requiredWatch, submit, setPhaseNow],
+  )
+
+  const handleEnded = useCallback(() => {
+    if (phaseRef.current !== 'playing') return
+    const waiting = pendingSubmitRef.current
+    if (waiting) {
+      pendingSubmitRef.current = null
+      submit(waiting)
+      return
+    }
+    askNextPending(answers)
+  }, [answers, askNextPending, submit])
+
+  // ---- Answering ---------------------------------------------------------
+  function answerCurrent() {
+    if (!current) return
+    const collected = { ...answers, [current.id]: draft }
+    setAnswers(collected)
+
+    if (isVideo) {
+      const unanswered = questions.some((q) => !askedRef.current.has(q.id))
+      if (unanswered) {
+        // More cues to come — back to the video.
+        setCurrentId(null)
+        setPhaseNow('playing')
+        return
+      }
+
+      /*
+        Every question the admin configured has been answered, so the ad is
+        finished — the last cue is the end of the required watch, not the end
+        of the video file. Waiting for the file to finish would strand a user
+        on a ten-minute video whose questions were all in the first minute.
+
+        The one exception is a minimum watch time that has not elapsed yet:
+        then playback continues and the answers submit the moment it does,
+        rather than being sent into a certain 'too_fast'.
+      */
+      if (elapsed >= requiredWatch) {
+        submit(collected)
+      } else {
+        pendingSubmitRef.current = collected
+        setCurrentId(null)
+        setPhaseNow('playing')
+      }
+      return
+    }
+
+    // Survey: straight through the list in the admin's order.
+    const index = questions.findIndex((q) => q.id === current.id)
+    const next = questions[index + 1]
+    if (next) {
+      setCurrentId(next.id)
+      setDraft(answers[next.id] ?? '')
+    } else {
+      submit(collected)
+    }
+  }
+
+  function goBack() {
+    if (!current) return
+    const index = questions.findIndex((q) => q.id === current.id)
+    const previous = questions[index - 1]
+    if (!previous) return
+    setAnswers({ ...answers, [current.id]: draft })
+    setCurrentId(previous.id)
+    setDraft(answers[previous.id] ?? '')
+  }
+
+  /** Start the ad over. Nothing here is optional: the server cleared the
+   *  watch stamp on the wrong answer, so every local trace of the last
+   *  attempt has to go with it, and the fresh options arrive reshuffled. */
+  function retry() {
+    submittedRef.current = false
+    askedRef.current = new Set()
+    setAskedIds([])
+    setAnswers({})
+    setDraft('')
+    setCurrentId(null)
+    setResult(null)
+    setElapsed(0)
+    setPhaseNow('starting')
+    setRunKey((k) => k + 1)
+  }
+
+  // Escape closes, and the body must not scroll behind a full-screen overlay.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = previousOverflow
+    }
+  }, [onClose])
+
+  const progress = duration > 0 ? Math.min(elapsed / duration, 1) : 0
+  const answeredCount = askedIds.length
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={ad.title}
+      className={cn(
+        'fixed inset-0 z-50 flex flex-col',
+        isVideo ? 'bg-black' : 'bg-canvas',
+      )}
+    >
+      {/* ---- Top bar ------------------------------------------------------ */}
+      <header
+        className={cn(
+          'flex shrink-0 items-center gap-3 px-3 py-3 sm:px-5',
+          isVideo ? 'text-white' : 'border-b border-ink-200 bg-surface text-ink-900',
+        )}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={t('player.close')}
+          className={cn(
+            'grid size-9 shrink-0 place-items-center rounded-full transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600',
+            isVideo ? 'bg-white/10 hover:bg-white/20' : 'hover:bg-ink-100',
+          )}
+        >
+          <X aria-hidden className="size-5" />
+        </button>
+
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[0.875rem] font-semibold">{ad.title}</p>
+          <p
+            className={cn(
+              'truncate text-[0.75rem]',
+              isVideo ? 'text-white/60' : 'text-ink-500',
+            )}
+          >
+            {ad.advertiser ?? t('card.sponsored')}
+          </p>
+        </div>
+
+        <span
+          className={cn(
+            'shrink-0 rounded-full px-2.5 py-1 text-[0.75rem] font-bold tabular-nums',
+            isVideo
+              ? 'bg-white/12 text-white ring-1 ring-white/25'
+              : 'border border-success-500/25 bg-success-50 text-success-700',
+          )}
+        >
+          {t('card.reward', { points: ad.points })}
+        </span>
+      </header>
+
+      {/* ---- Stage -------------------------------------------------------- */}
+      {/* The question sheet slides up from the bottom on a phone, so while one
+          is open the video moves to the top of the stage rather than staying
+          centred with its lower half behind the sheet. From md up the sheet is
+          a centred dialog and the video stays put. */}
+      <div
+        className={cn(
+          'relative flex min-h-0 flex-1 justify-center',
+          phase === 'question' ? 'items-start md:items-center' : 'items-center',
+        )}
+      >
+        {phase === 'starting' && (
+          <div className={cn('flex flex-col items-center gap-3', isVideo && 'text-white/70')}>
+            <Loader2 aria-hidden className="size-6 animate-spin" />
+            <p className="text-[0.8125rem]">{t('player.loading')}</p>
+          </div>
+        )}
+
+        {phase === 'unavailable' && (
+          <div className="flex max-w-[26rem] flex-col items-center gap-4 px-6 text-center">
+            <p className={cn('text-[0.9375rem] font-semibold', isVideo && 'text-white')}>
+              {t('player.unavailableTitle')}
+            </p>
+            <p className={cn('text-[0.8125rem]', isVideo ? 'text-white/60' : 'text-ink-500')}>
+              {t('player.unavailableBody')}
+            </p>
+            <Button onClick={onClose}>{t('result.done')}</Button>
+          </div>
+        )}
+
+        {/* The video stays mounted while a question is up: unmounting it would
+            drop the buffered stream and restart YouTube from scratch every
+            time a cue fires. */}
+        {isVideo && phase !== 'starting' && phase !== 'unavailable' && (
+          <div className="relative aspect-video w-full max-w-[64rem] bg-black">
+            <VideoStage
+              ad={ad}
+              playing={phase === 'playing'}
+              onTime={handleTime}
+              onEnded={handleEnded}
+              onReady={(d) => setDuration((prev) => (d > 0 ? d : prev))}
+              // Nothing has been consumed at this point — the attempt is only
+              // spent on submission — so the ad simply stays in the feed.
+              onError={() => setPhaseNow('unavailable')}
+            />
+
+            {phase === 'intro' && (
+              <button
+                type="button"
+                onClick={() => setPhaseNow('playing')}
+                className="absolute inset-0 grid place-items-center bg-black/45 text-white"
+              >
+                <span className="flex flex-col items-center gap-3">
+                  <span className="grid size-20 place-items-center rounded-full bg-white/15 ring-1 ring-white/40 backdrop-blur-[2px]">
+                    <Play className="size-8 translate-x-[2px] fill-current" strokeWidth={0} />
+                  </span>
+                  <span className="text-[0.875rem] font-semibold">{t('player.tapToPlay')}</span>
+                  {questions.length > 0 && (
+                    <span className="max-w-[24ch] text-center text-[0.75rem] text-white/70">
+                      {t('player.questionsAhead', { count: questions.length })}
+                    </span>
+                  )}
+                  {questions.length === 0 && (
+                    <span className="text-[0.75rem] text-white/70">
+                      {t('player.watchOnlyHint')}
+                    </span>
+                  )}
+                </span>
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Survey stage: no video, so the question owns the screen. */}
+        {!isVideo && phase === 'intro' && (
+          <div className="px-6 text-center text-[0.8125rem] text-ink-500">
+            {t('player.loading')}
+          </div>
+        )}
+      </div>
+
+      {/* ---- Progress ----------------------------------------------------- */}
+      {isVideo && (phase === 'playing' || phase === 'question') && (
+        <div className="shrink-0 px-3 pb-4 sm:px-5">
+          <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-white/20">
+            <span
+              className="absolute inset-y-0 left-0 rounded-full bg-brand-500 transition-[width] duration-200 ease-linear"
+              style={{ width: `${progress * 100}%` }}
+            />
+            {/* Cue markers, the way a video platform marks chapters. Seeing
+                that a question is coming is fairer than being ambushed by it,
+                and it does not weaken the check — the question is still
+                unknown until it opens. */}
+            {duration > 0 &&
+              cued.map((q) => (
+                <span
+                  key={q.id}
+                  aria-hidden
+                  className={cn(
+                    'absolute top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-black/40',
+                    askedIds.includes(q.id) ? 'bg-success-500' : 'bg-white',
+                  )}
+                  style={{
+                    left: `${Math.min(((q.showAtSeconds ?? 0) / duration) * 100, 100)}%`,
+                  }}
+                />
+              ))}
+          </div>
+          {questions.length > 0 && (
+            <p className="mt-2 text-center text-[0.6875rem] text-white/50 tabular-nums">
+              {t('player.answeredCount', { done: answeredCount, total: questions.length })}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* ---- Question sheet ----------------------------------------------
+          Bottom sheet on a phone (over the paused video, thumb-reachable) and
+          a centred card from md up, which is the same split the rest of the
+          app uses. */}
+      {phase === 'question' && current && (
+        <div
+          className={cn(
+            'absolute inset-x-0 bottom-0 z-10 md:inset-0 md:grid md:place-items-center md:p-6',
+            isVideo && 'md:bg-black/60',
+          )}
+        >
+          <div
+            className={cn(
+              'w-full bg-surface p-5 shadow-[0_-8px_32px_-8px_rgb(15_23_42/0.3)]',
+              'rounded-t-(--radius-panel) md:max-w-[28rem] md:rounded-(--radius-panel)',
+              'md:shadow-[0_16px_48px_-12px_rgb(15_23_42/0.45)]',
+              // Clears the phone's home indicator.
+              'pb-[calc(1.25rem+env(safe-area-inset-bottom))] md:pb-5',
+            )}
+          >
+            <QuestionSheet
+              question={current}
+              step={
+                questions.length > 1
+                  ? {
+                      n: questions.findIndex((q) => q.id === current.id) + 1,
+                      total: questions.length,
+                    }
+                  : undefined
+              }
+              value={draft}
+              onChange={setDraft}
+              onSubmit={answerCurrent}
+              onBack={
+                !isVideo && questions.findIndex((q) => q.id === current.id) > 0
+                  ? goBack
+                  : undefined
+              }
+              submitLabel={
+                isVideo
+                  ? // "Continue watching" only when the video genuinely has
+                    // more to show: another cue, or a minimum watch still to
+                    // run down. Otherwise this button ends the ad.
+                    // askedIds, not askedRef: the ref exists to beat the 4 Hz
+                    // tick, and refs must not be read during render.
+                    questions.some((q) => q.id !== current.id && !askedIds.includes(q.id)) ||
+                    elapsed < requiredWatch
+                    ? t('question.resume')
+                    : t('question.finish')
+                  : questions.findIndex((q) => q.id === current.id) === questions.length - 1
+                    ? t('question.finish')
+                    : t('question.next')
+              }
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ---- Submitting / result ------------------------------------------ */}
+      {(phase === 'submitting' || phase === 'result') && (
+        <div className="absolute inset-0 z-20 grid place-items-center bg-black/55 p-4 md:p-6">
+          <div className="w-full max-w-[26rem] rounded-(--radius-panel) bg-surface shadow-[0_16px_48px_-12px_rgb(15_23_42/0.5)]">
+            {phase === 'submitting' ? (
+              <div className="flex flex-col items-center gap-3 px-6 py-12 text-ink-500">
+                <Loader2 aria-hidden className="size-6 animate-spin text-brand-600" />
+                <p className="text-[0.8125rem]">{t('result.checking')}</p>
+              </div>
+            ) : (
+              result && <AdResult result={result} onNext={onClose} onRetry={retry} />
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

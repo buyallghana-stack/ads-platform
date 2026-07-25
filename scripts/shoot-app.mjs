@@ -18,6 +18,8 @@ const THEMES = ['light', 'dark']
 const route = process.argv[2] ?? '/dashboard'
 const fullPage = process.argv.includes('--full')
 const base = process.env.BASE_URL ?? 'http://localhost:3000'
+const email = process.env.SHOOT_EMAIL ?? 'user@email.com'
+const password = process.env.SHOOT_PASSWORD ?? '1234'
 const outDir = path.resolve(process.env.OUT_DIR ?? '.screenshots')
 await mkdir(outDir, { recursive: true })
 
@@ -27,13 +29,15 @@ const browser = await chromium.launch()
 const loginContext = await browser.newContext()
 const loginPage = await loginContext.newPage()
 await loginPage.goto(`${base}/login`, { waitUntil: 'networkidle' })
-await loginPage.getByLabel(/email/i).fill('user@email.com')
-await loginPage.locator('input[type="password"]').fill('1234')
+// The demo user has a real authenticator enrolled, so signing in as them
+// stops at the 2FA challenge. Override with SHOOT_EMAIL when that matters.
+await loginPage.getByLabel(/email/i).fill(email)
+await loginPage.locator('input[type="password"]').fill(password)
 await loginPage.getByRole('button', { name: /log in|connexion/i }).click()
 await loginPage.waitForURL('**/dashboard', { timeout: 15000 })
 const state = await loginContext.storageState()
 await loginContext.close()
-console.log('logged in as user@email.com')
+console.log(`logged in as ${email}`)
 
 const slug = route.replace(/^\//, '').replace(/\//g, '-') || 'home'
 
