@@ -2,43 +2,46 @@
 
 import { useEffect, useState } from 'react'
 
-import { ArrowLeft, CheckCircle2, Mail, ShieldCheck } from 'lucide-react'
+import { AlertTriangle, Mail } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { FormHeader } from '@/components/auth/FormHeader'
 import { Button } from '@/components/ui/Button'
-import { CodeInput } from '@/components/ui/CodeInput'
-import { resendCodeAction, verifyCodeAction } from '@/app/[locale]/(auth)/actions'
-import { Link, useRouter } from '@/i18n/navigation'
+import { resendConfirmationAction } from '@/app/[locale]/(auth)/actions'
+import { Link } from '@/i18n/navigation'
 import { useAuthErrorMessage } from '@/lib/useAuthErrorMessage'
-
-type Step = 'check-email' | 'enter-code' | 'success'
 
 const RESEND_COOLDOWN_SECONDS = 60
 
 /**
- * Email verification, all three steps (§6.1).
+ * "Check your email" — the whole of email verification on this side.
  *
- * One component rather than three routes: it is a single journey, the steps
- * share state, and a browser back button landing someone on "check your email"
- * after they have already entered a code would be confusing. The URL carries
- * the email so a refresh does not lose it.
+ * It used to be three steps ending in a six-digit code box. The operator's
+ * direction (2026-07-25) is that these emails are LINKS, so there is nothing
+ * to type: the person clicks the link, /auth/confirm redeems the token and
+ * signs them in. That is also the safer arrangement — a code is something a
+ * user can be talked into reading out to somebody claiming to be support, and
+ * a link they click themselves cannot be.
  *
- * The resend cooldown is a client-side courtesy, not a control. Rate limiting
- * belongs on the server — this only stops honest users hammering the button
- * (§2.4).
+ * All this screen does is say where to look and let them ask for another. The
+ * cooldown is a courtesy against honest double-tapping; the real rate limit is
+ * Supabase's, server-side (§2.4).
  */
-export function VerifyFlow({ email }: { email: string }) {
+export function VerifyFlow({
+  email,
+  linkError,
+}: {
+  email: string
+  /** Set when somebody arrives back here from a link that did not work:
+   *  'expired' — already used, or too old; 'link' — arrived without a token. */
+  linkError?: 'expired' | 'link'
+}) {
   const t = useTranslations('auth.verify')
   const tError = useTranslations('auth.errors')
-  const tCommon = useTranslations('common')
-  const router = useRouter()
   const msg = useAuthErrorMessage()
 
-  const [step, setStep] = useState<Step>('check-email')
-  const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [submitting, setSubmitting] = useState(false)
+  const [sending, setSending] = useState(false)
   const [resendIn, setResendIn] = useState(0)
   const [resent, setResent] = useState(false)
 
@@ -48,113 +51,26 @@ export function VerifyFlow({ email }: { email: string }) {
     return () => window.clearInterval(id)
   }, [resendIn])
 
-  const verify = async (submitted: string) => {
-    if (submitted.length !== 6) {
-      setError(tError('codeRequired'))
-      return
-    }
-    setSubmitting(true)
-    setError(null)
-
-    const result = await verifyCodeAction({ email, code: submitted })
-    setSubmitting(false)
-
-    if (result.ok) {
-      setStep('success')
-      return
-    }
-    setError(msg(result.errorKey) ?? tError('generic'))
-  }
-
   const resend = async () => {
-    setResendIn(RESEND_COOLDOWN_SECONDS)
-    const result = await resendCodeAction(email)
-    if (result.ok) {
-      setResent(true)
-      window.setTimeout(() => setResent(false), 5000)
-    } else {
+    setSending(true)
+    setError(null)
+    const result = await resendConfirmationAction(email)
+    setSending(false)
+
+    if (!result.ok) {
       setError(msg(result.errorKey) ?? tError('generic'))
+      return
     }
+    setResent(true)
+    setResendIn(RESEND_COOLDOWN_SECONDS)
   }
 
-  /* ------------------------------------------------------------------ */
-  if (step === 'success') {
-    return (
-      <div className="text-center">
-        <FormHeader
-          icon={<CheckCircle2 />}
-          tone="success"
-          title={t('success.title')}
-          subtitle={t('success.subtitle')}
-          className="mb-6"
-        />
-        <Button size="lg" fullWidth onClick={() => router.push('/dashboard')}>
-          {t('success.continue')}
-        </Button>
-      </div>
-    )
-  }
-
-  /* ------------------------------------------------------------------ */
-  if (step === 'check-email') {
-    return (
-      <div className="text-center">
-        <FormHeader
-          icon={<Mail />}
-          title={t('checkEmail.title')}
-          subtitle={t.rich('checkEmail.subtitle', {
-            email,
-            // A tag pair, not an element-as-value. next-intl types placeholder
-            // values as string | number | Date, and returning an unkeyed array
-            // from t.rich also tripped React's missing-key warning. Tags solve
-            // both: the value stays a string, the styling is a tag function.
-            em: (chunks) => <span className="font-medium text-ink-900">{chunks}</span>,
-          })}
-          className="mb-6"
-        />
-
-        <Button size="lg" fullWidth onClick={() => setStep('enter-code')}>
-          {t('enterCode.submit')}
-        </Button>
-
-        <p className="mt-4 text-center text-[0.8125rem] text-ink-500">
-          {t('enterCode.wrongEmail')}{' '}
-          <Link href="/signup" className="font-medium text-ink-900 hover:text-brand-700">
-            {t('enterCode.changeEmail')}
-          </Link>
-        </p>
-      </div>
-    )
-  }
-
-  /* ------------------------------------------------------------------ */
   return (
-    <div>
-      {/*
-        Back to the previous step. Without it the code screen is a trap: the
-        email is only shown, not editable, so someone who mistyped it at
-        signup can see the mistake and has no way to act on it. Standard
-        practice on every OTP screen worth copying — and it must be a real
-        control, not a reliance on the browser back button, which on this
-        flow re-enters the same route.
-      */}
-      <button
-        type="button"
-        onClick={() => {
-          setCode('')
-          setError(null)
-          setStep('check-email')
-        }}
-        className="-ml-1 mb-2 inline-flex items-center gap-1.5 rounded-md px-1 py-1 text-[0.8125rem] font-medium text-ink-500 transition-colors hover:text-ink-900"
-      >
-        <ArrowLeft aria-hidden className="size-4" />
-        {tCommon('back')}
-      </button>
-
+    <div className="text-center">
       <FormHeader
-        icon={<ShieldCheck />}
-        title={t('enterCode.title')}
-        subtitle={t.rich('enterCode.subtitle', {
+        icon={<Mail />}
+        title={t('checkEmail.title')}
+        subtitle={t.rich('checkEmail.subtitle', {
           email,
           // A tag pair, not an element-as-value. next-intl types placeholder
           // values as string | number | Date, and returning an unkeyed array
@@ -162,60 +78,53 @@ export function VerifyFlow({ email }: { email: string }) {
           // both: the value stays a string, the styling is a tag function.
           em: (chunks) => <span className="font-medium text-ink-900">{chunks}</span>,
         })}
-        className="mb-6"
+        className="mb-5"
       />
 
-      <form
-        className="flex flex-col gap-4"
-        onSubmit={(e) => {
-          e.preventDefault()
-          void verify(code)
-        }}
-        noValidate
+      {/* A link that failed is the one thing worth interrupting for. Without
+          this the screen looks identical to a fresh arrival, and the person
+          goes back to their inbox and clicks the same dead link again. */}
+      {linkError && (
+        <div
+          role="alert"
+          className="mb-5 flex gap-2.5 rounded-(--radius-input) border border-warning-500/25 bg-warning-50 px-3.5 py-3 text-left text-[0.8125rem] text-warning-600"
+        >
+          <AlertTriangle aria-hidden className="mt-0.5 size-4 shrink-0" />
+          <span className="leading-relaxed">
+            {t(linkError === 'expired' ? 'linkExpired' : 'linkInvalid')}
+          </span>
+        </div>
+      )}
+
+      <p className="mb-6 text-[0.8125rem] leading-relaxed text-ink-500">{t('checkEmail.hint')}</p>
+
+      <Button
+        size="lg"
+        fullWidth
+        onClick={() => void resend()}
+        loading={sending}
+        disabled={resendIn > 0}
       >
-        <CodeInput
-          value={code}
-          onChange={(v) => {
-            setCode(v)
-            if (error) setError(null)
-          }}
-          onComplete={(v) => void verify(v)}
-          label={t('enterCode.codeLabel')}
-          digitLabel={(position) => t('enterCode.digitLabel', { position })}
-          labelHidden
-          error={error ?? undefined}
-          disabled={submitting}
-          autoFocus
-        />
+        {resendIn > 0 ? t('resendIn', { seconds: resendIn }) : t('resend')}
+      </Button>
 
-        <Button type="submit" size="lg" fullWidth loading={submitting} disabled={code.length !== 6}>
-          {t('enterCode.submit')}
-        </Button>
-      </form>
-
-      <div className="mt-5 text-center">
-        {resent && (
-          <p role="status" className="mb-2 text-[0.8125rem] text-success-700">
-            {t('enterCode.resent')}
-          </p>
-        )}
-        <Button variant="ghost" size="sm" onClick={() => void resend()} disabled={resendIn > 0}>
-          {resendIn > 0 ? t('enterCode.resendIn', { seconds: resendIn }) : t('enterCode.resend')}
-        </Button>
-
-        {/*
-          The escape hatch for the actual problem: a typo in the address.
-          Resending only sends another code to the same wrong inbox, so the
-          two options belong together — this is where people look once the
-          code never arrives.
-        */}
-        <p className="mt-3 border-t border-ink-100 pt-3 text-[0.8125rem] text-ink-500">
-          {t('enterCode.wrongEmail')}{' '}
-          <Link href="/signup" className="font-medium text-ink-900 hover:text-brand-700">
-            {t('enterCode.changeEmail')}
-          </Link>
+      {resent && !error && (
+        <p role="status" className="mt-3 text-[0.8125rem] font-medium text-success-700">
+          {t('resent')}
         </p>
-      </div>
+      )}
+      {error && (
+        <p role="alert" className="mt-3 text-[0.8125rem] font-medium text-danger-600">
+          {error}
+        </p>
+      )}
+
+      <p className="mt-6 text-center text-[0.8125rem] text-ink-500">
+        {t('wrongEmail')}{' '}
+        <Link href="/signup" className="font-medium text-ink-900 hover:text-brand-700">
+          {t('changeEmail')}
+        </Link>
+      </p>
     </div>
   )
 }

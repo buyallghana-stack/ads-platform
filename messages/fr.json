@@ -60,27 +60,17 @@
     },
     "verify": {
       "checkEmail": {
-        "title": "Vérifiez vos e-mails",
-        "subtitle": "Nous avons envoyé un code à 6 chiffres à <em>{email}</em>. Saisissez-le ci-dessous pour confirmer votre compte.",
-        "openEmail": "Ouvrir l'application e-mail"
+        "title": "Consultez vos e-mails",
+        "subtitle": "Nous avons envoyé un lien de confirmation à <em>{email}</em>. Ouvrez-le pour terminer la création de votre compte.",
+        "hint": "Le lien ne fonctionne qu'une fois et reste valable une heure. S'il n'y est pas, regardez dans vos spams ou vos promotions."
       },
-      "enterCode": {
-        "title": "Saisissez votre code",
-        "subtitle": "Saisissez le code à 6 chiffres envoyé à <em>{email}</em>.",
-        "codeLabel": "Code de vérification",
-        "digitLabel": "Chiffre {position} sur 6",
-        "submit": "Vérifier",
-        "resend": "Renvoyer le code",
-        "resendIn": "Renvoyer le code dans {seconds} s",
-        "resent": "Un nouveau code est en route.",
-        "wrongEmail": "Mauvaise adresse e-mail ?",
-        "changeEmail": "La modifier"
-      },
-      "success": {
-        "title": "Compte vérifié",
-        "subtitle": "Votre compte est prêt. À vous de gagner.",
-        "continue": "Aller au tableau de bord"
-      }
+      "resend": "Renvoyer le lien",
+      "resendIn": "Renvoyer dans {seconds}s",
+      "resent": "Un nouveau lien est en route.",
+      "linkExpired": "Ce lien a déjà été utilisé ou a expiré. Envoyez-vous-en un nouveau ci-dessous.",
+      "linkInvalid": "Ce lien était incomplet. Envoyez-vous-en un nouveau ci-dessous.",
+      "wrongEmail": "Mauvaise adresse e-mail ?",
+      "changeEmail": "La modifier"
     },
     "forgotPassword": {
       "title": "Réinitialiser votre mot de passe",

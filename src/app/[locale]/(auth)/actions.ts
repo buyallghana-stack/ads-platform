@@ -4,12 +4,11 @@ import { clearLoginVerified, isTwoFactorEnabled } from '@/lib/security/login-2fa
 import { recordSessionContext } from '@/lib/security/session-record'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
-import { getRequestContext } from '@/lib/request-context'
+import { getOrigin, getRequestContext } from '@/lib/request-context'
 import {
   forgotPasswordSchema,
   logInSchema,
   signUpSchema,
-  verifyCodeSchema,
 } from '@/lib/validation/auth'
 
 /**
@@ -99,10 +98,18 @@ export async function signUpAction(formData: {
   }
 
   const supabase = await createClient()
+  const origin = await getOrigin()
   const { data: signUp, error: signUpError } = await supabase.auth.signUp({
     email: data.email,
     password: data.password,
     options: {
+      /*
+        Where the link in the confirmation email points. Without it Supabase
+        falls back to the project's Site URL — which is a single fixed value,
+        still set to localhost, and would have emailed every real user a link
+        to their own machine.
+      */
+      emailRedirectTo: `${origin}/auth/confirm?next=/dashboard`,
       // Read by the handle_new_user trigger (migration 001) to populate the
       // profile in the same transaction as the auth user.
       data: {
@@ -272,38 +279,27 @@ export async function logInAction(formData: {
   return { ok: true, redirectTo: '/dashboard' }
 }
 
-export async function verifyCodeAction(formData: {
-  email: string
-  code: string
-}): Promise<ActionResult> {
-  const parsed = verifyCodeSchema.safeParse({ code: formData.code })
-  if (!parsed.success) return { ok: false, errorKey: parsed.error.issues[0].message }
-
+/**
+ * Send the confirmation email again.
+ *
+ * The only action /verify offers now. Verification itself happens when the
+ * person clicks the link, which lands on /auth/confirm — there is no code to
+ * type and therefore nothing to get wrong, mistype, or phish out of somebody
+ * over the phone.
+ *
+ * Supabase rate-limits this server-side; the screen's countdown is a courtesy
+ * on top, not the control.
+ */
+export async function resendConfirmationAction(email: string): Promise<ActionResult> {
   const supabase = await createClient()
-  const { data: verified, error } = await supabase.auth.verifyOtp({
-    email: formData.email,
-    token: parsed.data.code,
+  const origin = await getOrigin()
+
+  const { error } = await supabase.auth.resend({
     type: 'signup',
+    email,
+    options: { emailRedirectTo: `${origin}/auth/confirm?next=/dashboard` },
   })
 
-  if (!error && verified.user) {
-    // Verifying the code signs the user in, so this session needs its context
-    // recorded too.
-    await recordSessionContext(verified.session?.access_token, verified.user.id)
-  }
-
-  if (error) {
-    const message = error.message.toLowerCase()
-    if (message.includes('expired')) return { ok: false, errorKey: 'codeExpired' }
-    return { ok: false, errorKey: 'codeInvalid' }
-  }
-
-  return { ok: true, redirectTo: '/dashboard' }
-}
-
-export async function resendCodeAction(email: string): Promise<ActionResult> {
-  const supabase = await createClient()
-  const { error } = await supabase.auth.resend({ type: 'signup', email })
   if (error) return { ok: false, errorKey: 'generic', message: error.message }
   return { ok: true }
 }
@@ -321,7 +317,15 @@ export async function forgotPasswordAction(formData: { email: string }): Promise
     no action the person could take to learn the same fact. Always reports
     success; the copy says "if an account exists".
   */
-  await supabase.auth.resetPasswordForEmail(parsed.data.email)
+  const origin = await getOrigin()
+  /*
+    The reset mail is a link as well, and it needs somewhere to go: without a
+    redirectTo it lands on the Site URL with the token attached, which is not
+    the reset form and cannot complete the reset.
+  */
+  await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: `${origin}/auth/confirm?next=/reset-password`,
+  })
   return { ok: true }
 }
 

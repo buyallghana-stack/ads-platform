@@ -30,6 +30,11 @@ export const config = {
     Skip API routes, Next.js internals and anything that looks like a static
     file. Running a session refresh on every image request would add a network
     round trip to the ad-view path for no benefit (§8).
+
+    `auth` is skipped too, and that one is load-bearing: /auth/confirm is the
+    address printed inside every verification email. Locale negotiation would
+    rewrite it to /en/auth/confirm — not a route — and every link already sent
+    would 404. An emailed URL has to stay exactly what was emailed.
   */
-  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)'],
+  matcher: ['/((?!api|auth|_next|_vercel|.*\\..*).*)'],
 }

@@ -8,6 +8,7 @@ import { clientEnv } from '@/lib/env'
 import { isTwoFactorEnabled } from '@/lib/security/login-2fa'
 import { decryptSecret, normaliseBackupCode, verifyCode } from '@/lib/security/totp'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getOrigin } from '@/lib/request-context'
 import { createClient } from '@/lib/supabase/server'
 
 /**
@@ -111,7 +112,17 @@ export async function changeEmail(input: {
   if (!stepUp.ok) return stepUp
 
   const supabase = await createClient()
-  const { error } = await supabase.auth.updateUser({ email: next })
+  const origin = await getOrigin()
+  /*
+    The NEW address gets a link, and it has to come back to us — without
+    emailRedirectTo it lands on the project's Site URL, which is a single
+    fixed value and still points at localhost. `next` sends them to Profile,
+    where the address they just proved is now the one shown.
+  */
+  const { error } = await supabase.auth.updateUser(
+    { email: next },
+    { emailRedirectTo: `${origin}/auth/confirm?next=/profile` },
+  )
   if (error) {
     // Supabase reports an address already in use; do not confirm it exists.
     if (/already/i.test(error.message)) return { ok: false, errorKey: 'emailTaken' }

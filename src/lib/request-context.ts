@@ -2,6 +2,8 @@ import 'server-only'
 
 import { headers } from 'next/headers'
 
+import { clientEnv } from '@/lib/env'
+
 /**
  * Per-request signals the fraud layer needs (§7).
  *
@@ -10,6 +12,29 @@ import { headers } from 'next/headers'
  * one with real weight, and even that is shared by everyone behind a campus
  * or café connection — which is why §7 forbids hard-blocking on it.
  */
+/**
+ * The origin this request actually arrived on, for links we ask Supabase to
+ * put in an email.
+ *
+ * Read from the request rather than from NEXT_PUBLIC_SITE_URL because that
+ * variable is one value per environment and gets forgotten: a preview
+ * deployment would email people a link to production, and a stale value would
+ * email a link to localhost — which is exactly what the project's Supabase
+ * Site URL still says. Deriving it means the link always points back to the
+ * deployment the person was actually using.
+ *
+ * x-forwarded-host is the client-visible host on Vercel; `host` is the
+ * fallback for local development.
+ */
+export async function getOrigin(): Promise<string> {
+  const h = await headers()
+  const host = h.get('x-forwarded-host') ?? h.get('host')
+  if (!host) return clientEnv.NEXT_PUBLIC_SITE_URL
+
+  const proto = h.get('x-forwarded-proto') ?? (host.startsWith('localhost') ? 'http' : 'https')
+  return `${proto}://${host}`
+}
+
 export async function getRequestContext() {
   const h = await headers()
 

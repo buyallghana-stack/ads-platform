@@ -61,26 +61,16 @@
     "verify": {
       "checkEmail": {
         "title": "Check your email",
-        "subtitle": "We sent a 6-digit code to <em>{email}</em>. Enter it below to confirm your account.",
-        "openEmail": "Open email app"
+        "subtitle": "We sent a confirmation link to <em>{email}</em>. Open it to finish setting up your account.",
+        "hint": "The link works once and lasts an hour. If it isn't there, look in your spam or promotions folder."
       },
-      "enterCode": {
-        "title": "Enter your code",
-        "subtitle": "Enter the 6-digit code we sent to <em>{email}</em>.",
-        "codeLabel": "Verification code",
-        "digitLabel": "Digit {position} of 6",
-        "submit": "Verify",
-        "resend": "Resend code",
-        "resendIn": "Resend code in {seconds}s",
-        "resent": "A new code is on its way.",
-        "wrongEmail": "Wrong email address?",
-        "changeEmail": "Change it"
-      },
-      "success": {
-        "title": "You're verified",
-        "subtitle": "Your account is ready. Time to start earning.",
-        "continue": "Go to dashboard"
-      }
+      "resend": "Send the link again",
+      "resendIn": "Send again in {seconds}s",
+      "resent": "A new link is on its way.",
+      "linkExpired": "That link has already been used or has expired. Send yourself a fresh one below.",
+      "linkInvalid": "That link was incomplete. Send yourself a fresh one below.",
+      "wrongEmail": "Wrong email address?",
+      "changeEmail": "Change it"
     },
     "forgotPassword": {
       "title": "Reset your password",

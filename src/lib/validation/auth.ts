@@ -74,15 +74,7 @@ export const resetPasswordSchema = z
     path: ['confirmPassword'],
   })
 
-export const verifyCodeSchema = z.object({
-  code: z
-    .string()
-    .min(1, 'codeRequired')
-    .refine((v) => /^\d{6}$/.test(v), 'codeRequired'),
-})
-
 export type SignUpInput = z.input<typeof signUpSchema>
 export type LogInInput = z.input<typeof logInSchema>
 export type ForgotPasswordInput = z.input<typeof forgotPasswordSchema>
 export type ResetPasswordInput = z.input<typeof resetPasswordSchema>
-export type VerifyCodeInput = z.input<typeof verifyCodeSchema>
