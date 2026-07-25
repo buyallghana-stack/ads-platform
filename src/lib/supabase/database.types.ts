@@ -1856,6 +1856,7 @@ export type Database = {
           description: string
           duration_seconds: number
           format: Database["public"]["Enums"]["ad_format"]
+          graded_count: number
           id: string
           min_watch_seconds: number
           points_award: number

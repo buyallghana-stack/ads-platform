@@ -40,6 +40,13 @@ export type FeedAd = {
   minWatchSeconds: number | null
   /** How many questions are coming. Zero is a legitimate watch-only ad. */
   questionCount: number
+  /**
+   * How many of those have a right answer. Zero on a survey means every
+   * question is an opinion and nothing the user says can be wrong — which the
+   * player says out loud, because being quietly graded on your own opinion is
+   * exactly the experience this platform must not give.
+   */
+  gradedCount: number
   attemptsRemaining: number
   attemptsUsed: number
 }
@@ -69,9 +76,14 @@ export type AdsData = {
   status: EarningStatus
   videos: FeedAd[]
   surveys: FeedAd[]
-  /** Epoch ms of the next daily reset. The counters key off utc_today(), so
-   *  the allowance refills at UTC midnight, not the user's local midnight. */
+  /** Epoch ms of the next daily reset. The counters key off utc_today(), and
+   *  Ghana keeps GMT all year, so this is local midnight for this audience. */
   resetAt: number
+  /** Server clock at render time. The countdown seeds from this so the first
+   *  client render produces the same string the server sent — computing it
+   *  from Date.now() on both sides is a guaranteed hydration mismatch, which
+   *  is exactly what React #418 was complaining about. */
+  now: number
 }
 
 /** Public URL for an object in the `ad-media` bucket. */
@@ -130,6 +142,7 @@ export async function getAdsData(userId: string): Promise<AdsData> {
     durationSeconds: r.duration_seconds,
     minWatchSeconds: r.min_watch_seconds,
     questionCount: r.question_count,
+    gradedCount: r.graded_count,
     attemptsRemaining: r.attempts_remaining,
     attemptsUsed: r.attempts_used,
   }))
@@ -155,5 +168,6 @@ export async function getAdsData(userId: string): Promise<AdsData> {
     videos: ads.filter((a) => a.format === 'video'),
     surveys: ads.filter((a) => a.format === 'survey'),
     resetAt: nextDailyReset(),
+    now: Date.now(),
   }
 }

@@ -124,6 +124,36 @@ export const getResolvedBenefits = cache(
 )
 
 /**
+ * Where the user stands against the plans on sale — the only thing the
+ * "upgrade" promos need to know.
+ *
+ *   none  owns nothing        -> offer the upgrade
+ *   some  owns 1..n-1         -> offer to ADD, because plans stack; calling it
+ *                               an "upgrade" is wrong once they already hold
+ *                               one, and implies replacing what they bought
+ *   all   owns every plan     -> say nothing at all. There is nothing left to
+ *                               sell, and a permanent nag to a customer who
+ *                               has bought everything is the worst version of
+ *                               this component.
+ *
+ * Both reads are React-cached, so the layout and the profile page asking the
+ * same question in one request costs one pair of queries.
+ */
+export type PlanStanding = 'none' | 'some' | 'all'
+
+export const getPlanStanding = cache(async (userId: string): Promise<PlanStanding> => {
+  const [plans, held] = await Promise.all([getPlans(), getHeldPlans(userId)])
+  // No purchasable plans configured is not an upsell opportunity either.
+  if (plans.length === 0) return 'all'
+
+  const heldIds = new Set(held.map((h) => h.tierId))
+  const owned = plans.filter((p) => heldIds.has(p.id)).length
+
+  if (owned === 0) return 'none'
+  return owned >= plans.length ? 'all' : 'some'
+})
+
+/**
  * Reference values the Upgrade screen needs to explain a plan in plain terms:
  * the free allowance a plan is measured against, and what a point is worth.
  * Both are operator config, so neither is hardcoded in the UI.

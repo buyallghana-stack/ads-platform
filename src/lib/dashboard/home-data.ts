@@ -16,15 +16,21 @@ import { createClient } from '@/lib/supabase/server'
  *                          amount and no running points balance.
  */
 
-/** Display grouping agreed 2026-07-24: Earned / Bonus / Withdrawal /
- *  Refund / Subscription / Adjustment, plus Survey.
+/** Display grouping: Ads / Survey / Bonus / Withdrawal / Refund /
+ *  Subscription / Adjustment.
+ *
+ *  The video kind was called "Earned" (operator, 2026-07-25: "the transaction
+ *  history ads is called earn, change it to ads"). Every credit row is
+ *  earnings, so "Earned" named the wrong axis — it said what happened to the
+ *  balance instead of what the user did. The key is `ad`, not `earned`, so the
+ *  code and the label cannot drift apart again.
  *
  *  Survey was folded into `earned` and therefore labelled "Ad reward", which
  *  stopped being true once surveys became their own thing users choose on the
  *  Ads tab. It is its own kind now so the row says what actually happened and
  *  the filter chips can separate the two. */
 export type TxKind =
-  | 'earned'
+  | 'ad'
   | 'survey'
   | 'bonus'
   | 'withdrawal'
@@ -53,7 +59,7 @@ export type TxRow = {
 }
 
 const LEDGER_KIND: Record<string, TxKind> = {
-  ad_view: 'earned',
+  ad_view: 'ad',
   survey: 'survey',
   referral_signup: 'bonus',
   referral_activation: 'bonus',

@@ -35,6 +35,7 @@ export function QuestionSheet({
   onSubmit,
   submitting = false,
   submitLabel,
+  opinionOnly = false,
   onBack,
 }: {
   question: AdQuestion
@@ -45,6 +46,10 @@ export function QuestionSheet({
   onSubmit: () => void
   submitting?: boolean
   submitLabel: string
+  /** Nothing on this ad is graded, so no answer can be wrong. Shown to the
+   *  respondent, because a survey that feels like a test gets test answers
+   *  rather than honest ones. */
+  opinionOnly?: boolean
   /** Survey only — a mid-video pop has nowhere to go back to. */
   onBack?: () => void
 }) {
@@ -89,6 +94,12 @@ export function QuestionSheet({
         >
           {question.text}
         </h2>
+
+        {opinionOnly && (
+          <p className="mt-1.5 text-[0.75rem] leading-snug text-ink-400">
+            {t('question.noWrongAnswer')}
+          </p>
+        )}
       </div>
 
       {question.format === 'multiple_choice' ? (

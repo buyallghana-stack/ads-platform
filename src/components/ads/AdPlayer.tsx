@@ -527,6 +527,10 @@ export function AdPlayer({
               }
               value={draft}
               onChange={setDraft}
+              // Say it on the question itself, not just once at the start:
+              // reassurance that arrives before you have seen the question is
+              // reassurance nobody remembers.
+              opinionOnly={ad.gradedCount === 0 && ad.questionCount > 0}
               onSubmit={answerCurrent}
               onBack={
                 !isVideo && questions.findIndex((q) => q.id === current.id) > 0

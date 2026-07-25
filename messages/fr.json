@@ -216,22 +216,22 @@
         "balance": "Solde"
       },
       "kind": {
-        "earned": "Gagné",
         "bonus": "Bonus",
         "withdrawal": "Retrait",
         "refund": "Remboursement",
         "subscription": "Abonnement",
         "adjustment": "Ajustement",
-        "survey": "Sondage"
+        "survey": "Sondage",
+        "ad": "Annonces"
       },
       "kindHint": {
-        "earned": "Récompense de pub",
         "bonus": "Bonus de parrainage",
         "withdrawal": "Demande de paiement",
         "refund": "Retourné au solde",
         "subscription": "Paiement de forfait",
         "adjustment": "Correction de compte",
-        "survey": "Récompense de sondage"
+        "survey": "Récompense de sondage",
+        "ad": "Récompense publicitaire"
       },
       "method": {
         "mobile_money": "Mobile Money",
@@ -265,7 +265,9 @@
     "upgrade": "Forfaits",
     "profile": "Profil",
     "upgradeTeaserTitle": "Allez plus loin",
-    "upgradeTeaserBody": "Passez à un forfait supérieur pour augmenter votre plafond de gains quotidien."
+    "upgradeTeaserBody": "Passez à un forfait supérieur pour augmenter votre plafond de gains quotidien.",
+    "addTeaserTitle": "Ajouter une offre",
+    "addTeaserBody": "Les offres se cumulent — chacune augmente votre limite quotidienne."
   },
   "ads": {
     "tabs": {
@@ -295,16 +297,15 @@
       "emptyVideoBody": "Vous avez regardé toutes les vidéos disponibles pour l'instant. D'autres arrivent au fil de la journée.",
       "emptySurveyBody": "Vous avez répondu à tous les sondages disponibles pour l'instant. D'autres arrivent au fil de la journée.",
       "resetLabel": "Nouvelles annonces dans",
-      "resetHint": "Votre quota quotidien se recharge à minuit UTC.",
-      "recheckLabel": "Nouvelle vérification dans",
-      "recheckHint": "Nous cherchons de nouvelles annonces automatiquement — vous pouvez laisser cette page ouverte.",
+      "resetHint": "Votre quota quotidien se recharge à minuit.",
       "checkNow": "Vérifier maintenant",
       "raiseLimit": "Augmenter ma limite quotidienne",
       "switchToSurveys": "{count, plural, one {Répondre à # sondage à la place} other {Répondre à # sondages à la place}}",
       "switchToVideos": "{count, plural, one {Regarder # vidéo à la place} other {Regarder # vidéos à la place}}",
       "blockedTitle": "Les gains sont en pause",
       "blockedBody": "Les gains sont en pause pour le moment : les annonces ne rapporteraient rien. Votre solde est intact. Réessayez sous peu.",
-      "pointsCappedBody": "Vous avez atteint le maximum de points qu'il est possible de gagner en une journée. Il reste des annonces ici, mais elles ne rapporteraient rien jusqu'à la réinitialisation de votre total quotidien."
+      "pointsCappedBody": "Vous avez atteint le maximum de points qu'il est possible de gagner en une journée. Il reste des annonces ici, mais elles ne rapporteraient rien jusqu'à la réinitialisation de votre total quotidien.",
+      "newAdsHint": "De nouvelles annonces paraissent chaque jour. Nous continuons de vérifier pendant que vous attendez."
     },
     "player": {
       "close": "Fermer",
@@ -322,7 +323,8 @@
       "back": "Retour",
       "next": "Suivant",
       "resume": "Continuer la lecture",
-      "finish": "Valider"
+      "finish": "Valider",
+      "noWrongAnswer": "Il n'y a ni bonne ni mauvaise réponse — dites-nous simplement ce que vous pensez."
     },
     "result": {
       "checking": "Vérification de votre réponse",
@@ -362,7 +364,7 @@
       },
       "cap": {
         "title": "C’est votre limite du jour",
-        "body": "Votre quota quotidien est épuisé : celle-ci n’a pas été comptée. Il se réinitialise à minuit UTC."
+        "body": "Votre quota quotidien est épuisé : celle-ci n'a pas été comptée. Il se réinitialise à minuit."
       },
       "blocked": {
         "title": "Les gains sont en pause",
@@ -374,7 +376,7 @@
       },
       "tryAgain": "Réessayer",
       "incorrectSurvey": {
-        "body": "{count, plural, one {Refaites le sondage et réessayez. # essai restant.} other {Refaites le sondage et réessayez. # essais restants.}}"
+        "body": "{count, plural, one {Une des questions de contrôle ne correspond pas. Refaites le sondage — # essai restant.} other {Une des questions de contrôle ne correspond pas. Refaites le sondage — # essais restants.}}"
       },
       "notWatchedSurvey": {
         "body": "Répondez à toutes les questions avant de valider."
@@ -385,7 +387,7 @@
       },
       "pointsCap": {
         "title": "C'est le maximum pour aujourd'hui",
-        "body": "Vous avez atteint le maximum de points qu'il est possible de gagner en une journée : celle-ci n'a pas été comptée. Réinitialisation à minuit UTC."
+        "body": "Vous avez atteint le maximum de points qu'il est possible de gagner en une journée : celle-ci n'a pas été comptée. Réinitialisation à minuit."
       }
     },
     "blocked": {
@@ -490,7 +492,9 @@
     "version": "SidePerks v{version}",
     "upgrade": {
       "title": "Améliorer votre forfait",
-      "body": "Augmentez votre plafond de gains quotidien et débloquez plus d'avantages."
+      "body": "Augmentez votre plafond de gains quotidien et débloquez plus d'avantages.",
+      "addTitle": "Ajouter d'autres offres",
+      "addBody": "Les offres se cumulent. En ajouter une augmente encore votre limite quotidienne et votre taux de gain."
     },
     "groups": {
       "account": "Compte",

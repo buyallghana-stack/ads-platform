@@ -30,6 +30,7 @@ import { getProfile, getSessionUser } from '@/lib/auth/session'
 import { avatarPublicUrl } from '@/lib/profile/avatar'
 import { getDeletionStatus } from '@/lib/security/deletion-data'
 import { getTwoFactorStatus } from '@/lib/security/two-factor-data'
+import { getPlanStanding } from '@/lib/subscriptions/data'
 
 export const metadata: Metadata = {
   title: 'Profile',
@@ -62,6 +63,8 @@ export default async function ProfilePage({
   const t = await getTranslations('profile')
   const profile = await getProfile(user!.id)
   const twoFactor = await getTwoFactorStatus()
+  // Plans STACK, so "upgrade" is only the right word before you own one.
+  const planStanding = await getPlanStanding(user!.id)
   const deletion = await getDeletionStatus()
   const fullName = profile?.full_name ?? user!.email ?? ''
   const soon = t('soon')
@@ -98,21 +101,30 @@ export default async function ProfilePage({
         </div>
       </div>
 
-      {/* Upgrade promo --------------------------------------------------- */}
-      <Link
-        href="/upgrade"
-        style={{ '--rise-delay': '0.1s' } as React.CSSProperties}
-        className="animate-rise flex items-center gap-3.5 rounded-(--radius-card) border border-violet-600/20 bg-violet-50 p-4 transition-colors hover:border-violet-600/45"
-      >
-        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-violet-600/10 text-violet-600">
-          <Gem aria-hidden className="size-5" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-[0.875rem] font-semibold text-violet-700">{t('upgrade.title')}</p>
-          <p className="mt-0.5 text-[0.75rem] leading-snug text-ink-600">{t('upgrade.body')}</p>
-        </div>
-        <ChevronRight aria-hidden className="size-4 shrink-0 text-violet-600/60" />
-      </Link>
+      {/* Upgrade promo ----------------------------------------------------
+          Hidden outright once every plan is held: there is nothing left to
+          sell, and continuing to advertise at a customer who has bought the
+          lot is the one version of this card that cannot be justified. */}
+      {planStanding !== 'all' && (
+        <Link
+          href="/upgrade"
+          style={{ '--rise-delay': '0.1s' } as React.CSSProperties}
+          className="animate-rise flex items-center gap-3.5 rounded-(--radius-card) border border-violet-600/20 bg-violet-50 p-4 transition-colors hover:border-violet-600/45"
+        >
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-violet-600/10 text-violet-600">
+            <Gem aria-hidden className="size-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[0.875rem] font-semibold text-violet-700">
+              {t(planStanding === 'some' ? 'upgrade.addTitle' : 'upgrade.title')}
+            </p>
+            <p className="mt-0.5 text-[0.75rem] leading-snug text-ink-600">
+              {t(planStanding === 'some' ? 'upgrade.addBody' : 'upgrade.body')}
+            </p>
+          </div>
+          <ChevronRight aria-hidden className="size-4 shrink-0 text-violet-600/60" />
+        </Link>
+      )}
 
       <div
         style={{ '--rise-delay': '0.15s' } as React.CSSProperties}

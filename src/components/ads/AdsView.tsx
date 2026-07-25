@@ -296,6 +296,7 @@ export function AdsView({ data }: { data: AdsData }) {
             variant={caughtUpVariant}
             format={tab}
             resetAt={data.resetAt}
+            serverNow={data.now}
             dailyCap={data.status.dailyAdCap}
             tierName={data.status.tierName}
             otherCount={otherCount}

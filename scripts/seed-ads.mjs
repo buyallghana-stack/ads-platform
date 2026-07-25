@@ -112,6 +112,12 @@ async function uploadMedia() {
  * means "ask at the end". A missing questions array means a watch-only ad,
  * credited on watch time alone.
  *
+ * SURVEY questions carry NO is_correct and NO correct_answer, and that is the
+ * point: a question with no answer key is an opinion question, so any answer
+ * is accepted (migration 043). Ticking a "right" answer on "Which do you use
+ * most often to pay?" is how the first version of this seed told honest
+ * respondents they were wrong.
+ *
  * min_watch_seconds is what the server enforces. On a question ad it can be
  * generous, because the question is the real gate; on the watch-only ad it is
  * the ONLY gate, so it is set deliberately rather than left to default.
@@ -250,30 +256,30 @@ const ADS = [
         question_text: 'Which do you use most often to pay?',
         answer_format: 'multiple_choice',
         options: [
-          { option_text: 'Mobile money', is_correct: true },
-          { option_text: 'Bank card', is_correct: false },
-          { option_text: 'Cash', is_correct: false },
-          { option_text: 'Crypto', is_correct: false },
+          { option_text: 'Mobile money' },
+          { option_text: 'Bank card' },
+          { option_text: 'Cash' },
+          { option_text: 'Crypto' },
         ],
       },
       {
         question_text: 'Which mobile money service do you use most?',
         answer_format: 'multiple_choice',
         options: [
-          { option_text: 'MTN MoMo', is_correct: true },
-          { option_text: 'Telecel Cash', is_correct: false },
-          { option_text: 'AirtelTigo Money', is_correct: false },
-          { option_text: 'I do not use mobile money', is_correct: false },
+          { option_text: 'MTN MoMo' },
+          { option_text: 'Telecel Cash' },
+          { option_text: 'AirtelTigo Money' },
+          { option_text: 'I do not use mobile money' },
         ],
       },
       {
         question_text: 'Roughly how often do you send money to someone else?',
         answer_format: 'multiple_choice',
         options: [
-          { option_text: 'Weekly', is_correct: true },
-          { option_text: 'Daily', is_correct: false },
-          { option_text: 'Monthly', is_correct: false },
-          { option_text: 'Almost never', is_correct: false },
+          { option_text: 'Weekly' },
+          { option_text: 'Daily' },
+          { option_text: 'Monthly' },
+          { option_text: 'Almost never' },
         ],
       },
     ],
@@ -294,46 +300,46 @@ const ADS = [
         question_text: 'How do you usually travel to work or school?',
         answer_format: 'multiple_choice',
         options: [
-          { option_text: 'Trotro', is_correct: true },
-          { option_text: 'Taxi', is_correct: false },
-          { option_text: 'Own car', is_correct: false },
-          { option_text: 'On foot', is_correct: false },
+          { option_text: 'Trotro' },
+          { option_text: 'Taxi' },
+          { option_text: 'Own car' },
+          { option_text: 'On foot' },
         ],
       },
       {
         question_text: 'How long is that journey, one way?',
         answer_format: 'multiple_choice',
         options: [
-          { option_text: 'Under 30 minutes', is_correct: true },
-          { option_text: '30 to 60 minutes', is_correct: false },
-          { option_text: 'Over an hour', is_correct: false },
-          { option_text: 'It varies a lot', is_correct: false },
+          { option_text: 'Under 30 minutes' },
+          { option_text: '30 to 60 minutes' },
+          { option_text: 'Over an hour' },
+          { option_text: 'It varies a lot' },
         ],
       },
       {
         question_text: 'Do you book rides through an app?',
         answer_format: 'multiple_choice',
         options: [
-          { option_text: 'Sometimes', is_correct: true },
-          { option_text: 'Every day', is_correct: false },
-          { option_text: 'Never', is_correct: false },
-          { option_text: 'I did once', is_correct: false },
+          { option_text: 'Sometimes' },
+          { option_text: 'Every day' },
+          { option_text: 'Never' },
+          { option_text: 'I did once' },
         ],
       },
       {
         question_text: 'What would most improve your journey?',
         answer_format: 'multiple_choice',
         options: [
-          { option_text: 'Lower fares', is_correct: true },
-          { option_text: 'Fewer stops', is_correct: false },
-          { option_text: 'Better roads', is_correct: false },
-          { option_text: 'More shade at stops', is_correct: false },
+          { option_text: 'Lower fares' },
+          { option_text: 'Fewer stops' },
+          { option_text: 'Better roads' },
+          { option_text: 'More shade at stops' },
         ],
       },
       {
+        // No correct_answer: an open answer, recorded as given.
         question_text: 'Type the city or town you travel in most.',
         answer_format: 'short_text',
-        correct_answer: 'Accra',
       },
     ],
   },
@@ -381,6 +387,8 @@ for (const { ad, questions } of ADS) {
     if (options) {
       const { error: optionError } = await db
         .from('ad_question_options')
+        // is_correct defaults to false, so an option that does not name it is
+        // simply not an answer key — which is what an opinion question is.
         .insert(options.map((o, i) => ({ ...o, question_id: q.id, sort_order: i })))
       if (optionError) throw optionError
     }

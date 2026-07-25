@@ -6,6 +6,7 @@ import { redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser } from '@/lib/auth/session'
 import { avatarPublicUrl } from '@/lib/profile/avatar'
 import { needsLoginChallenge } from '@/lib/security/login-2fa'
+import { getPlanStanding } from '@/lib/subscriptions/data'
 
 /**
  * Shell for every signed-in screen: Home, Ads, Upgrade, Profile, Withdraw.
@@ -42,9 +43,21 @@ export default async function AppLayout({
 
   const t = await getTranslations('nav')
 
-  // Cached alongside the page's own call, so the Profile tab wearing the
-  // user's photo costs no extra query.
-  const profile = await getProfile(user!.id)
+  /*
+    In parallel, because this layout runs on EVERY signed-in screen and the
+    audience is on mobile data — two awaits in a row would add a round trip to
+    every page for no reason.
+
+    profile      cached alongside the page's own call, so the Profile tab
+                 wearing the user's photo costs no extra query
+    planStanding same rule as the Profile promo: "upgrade" only before they
+                 own a plan, "add more" while some are left, and nothing at
+                 all once they hold them every one
+  */
+  const [profile, planStanding] = await Promise.all([
+    getProfile(user!.id),
+    getPlanStanding(user!.id),
+  ])
   const navUser = {
     avatarUrl: avatarPublicUrl(profile?.avatar_path),
     name: profile?.full_name ?? null,
@@ -55,17 +68,19 @@ export default async function AppLayout({
       <Sidebar
         user={navUser}
         upgradeSlot={
-          <Link
-            href="/upgrade"
-            className="block rounded-(--radius-card) border border-violet-600/20 bg-violet-50 p-3 transition-colors hover:border-violet-600/45"
-          >
-            <p className="text-[0.8125rem] font-semibold text-violet-700">
-              {t('upgradeTeaserTitle')}
-            </p>
-            <p className="mt-0.5 text-[0.75rem] leading-snug text-ink-600">
-              {t('upgradeTeaserBody')}
-            </p>
-          </Link>
+          planStanding === 'all' ? null : (
+            <Link
+              href="/upgrade"
+              className="block rounded-(--radius-card) border border-violet-600/20 bg-violet-50 p-3 transition-colors hover:border-violet-600/45"
+            >
+              <p className="text-[0.8125rem] font-semibold text-violet-700">
+                {t(planStanding === 'some' ? 'addTeaserTitle' : 'upgradeTeaserTitle')}
+              </p>
+              <p className="mt-0.5 text-[0.75rem] leading-snug text-ink-600">
+                {t(planStanding === 'some' ? 'addTeaserBody' : 'upgradeTeaserBody')}
+              </p>
+            </Link>
+          )
         }
       />
 

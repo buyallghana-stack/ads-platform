@@ -216,22 +216,22 @@
         "balance": "Balance"
       },
       "kind": {
-        "earned": "Earned",
         "bonus": "Bonus",
         "withdrawal": "Withdrawal",
         "refund": "Refund",
         "subscription": "Subscription",
         "adjustment": "Adjustment",
-        "survey": "Survey"
+        "survey": "Survey",
+        "ad": "Ads"
       },
       "kindHint": {
-        "earned": "Ad reward",
         "bonus": "Referral bonus",
         "withdrawal": "Payout request",
         "refund": "Returned to balance",
         "subscription": "Plan payment",
         "adjustment": "Account correction",
-        "survey": "Survey reward"
+        "survey": "Survey reward",
+        "ad": "Ad reward"
       },
       "method": {
         "mobile_money": "Mobile Money",
@@ -265,7 +265,9 @@
     "upgrade": "Upgrade",
     "profile": "Profile",
     "upgradeTeaserTitle": "Go further",
-    "upgradeTeaserBody": "Upgrade your plan to raise your daily earning cap."
+    "upgradeTeaserBody": "Upgrade your plan to raise your daily earning cap.",
+    "addTeaserTitle": "Add another plan",
+    "addTeaserBody": "Plans stack — every one you hold adds to your daily limit."
   },
   "ads": {
     "tabs": {
@@ -295,16 +297,15 @@
       "emptyVideoBody": "You've watched every video available to you right now. New ones are added through the day.",
       "emptySurveyBody": "You've answered every survey available to you right now. New ones are added through the day.",
       "resetLabel": "New ads in",
-      "resetHint": "Your daily allowance refills at midnight UTC.",
-      "recheckLabel": "Checking again in",
-      "recheckHint": "We look for new ads automatically — you can leave this open.",
+      "resetHint": "Your daily allowance refills at midnight.",
       "checkNow": "Check now",
       "raiseLimit": "Raise my daily limit",
       "switchToSurveys": "{count, plural, one {Answer # survey instead} other {Answer # surveys instead}}",
       "switchToVideos": "{count, plural, one {Watch # video instead} other {Watch # videos instead}}",
       "blockedTitle": "Earning is paused",
       "blockedBody": "Earning is paused right now, so ads would not pay. Your balance is safe. Try again shortly.",
-      "pointsCappedBody": "You've reached the most points anyone can earn in a day. There are still ads here, but they would pay nothing until your daily total resets."
+      "pointsCappedBody": "You've reached the most points anyone can earn in a day. There are still ads here, but they would pay nothing until your daily total resets.",
+      "newAdsHint": "New ads are released daily. We'll keep checking while you wait."
     },
     "player": {
       "close": "Close",
@@ -322,7 +323,8 @@
       "back": "Back",
       "next": "Next",
       "resume": "Continue watching",
-      "finish": "Submit"
+      "finish": "Submit",
+      "noWrongAnswer": "There are no right or wrong answers — just tell us what you think."
     },
     "result": {
       "checking": "Checking your answer",
@@ -362,7 +364,7 @@
       },
       "cap": {
         "title": "That's your limit for today",
-        "body": "Your daily allowance is spent, so this one was not counted. It resets at midnight UTC."
+        "body": "Your daily allowance is spent, so this one was not counted. It resets at midnight."
       },
       "blocked": {
         "title": "Earning is paused",
@@ -374,7 +376,7 @@
       },
       "tryAgain": "Try again",
       "incorrectSurvey": {
-        "body": "{count, plural, one {Take the survey again and try once more. # try left.} other {Take the survey again and try once more. # tries left.}}"
+        "body": "{count, plural, one {One of the check questions did not match. Take the survey again — # try left.} other {One of the check questions did not match. Take the survey again — # tries left.}}"
       },
       "notWatchedSurvey": {
         "body": "Answer every question before submitting."
@@ -385,7 +387,7 @@
       },
       "pointsCap": {
         "title": "That's the most for today",
-        "body": "You've reached the maximum points anyone can earn in a day, so this one was not counted. It resets at midnight UTC."
+        "body": "You have reached the maximum points anyone can earn in a day, so this one was not counted. It resets at midnight."
       }
     },
     "blocked": {
@@ -490,7 +492,9 @@
     "version": "SidePerks v{version}",
     "upgrade": {
       "title": "Upgrade your plan",
-      "body": "Raise your daily earning cap and unlock more perks."
+      "body": "Raise your daily earning cap and unlock more perks.",
+      "addTitle": "Add more plans",
+      "addBody": "Plans stack. Adding another raises your daily limit and your earning rate again."
     },
     "groups": {
       "account": "Account",

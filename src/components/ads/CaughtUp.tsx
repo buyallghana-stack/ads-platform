@@ -30,11 +30,17 @@ import { cn } from '@/lib/cn'
  *               truth and a way to re-check.
  *
  *   empty       There is allowance left but no ad of this format waiting.
- *               Nobody can say when the next campaign lands, so inventing a
- *               time would be a lie. Instead the screen re-checks the server on
- *               a short loop and counts down to that check — a countdown to the
- *               next ads that is literally true, and which makes a new campaign
- *               appear without the user having to think about refreshing.
+ *               Counts down to the same midnight rollover (operator decision
+ *               2026-07-25). An earlier version counted down 60 seconds to its
+ *               own background re-check, which was literally true and read as
+ *               nonsense: "new ads in 58s" promises ads that usually are not
+ *               coming. The daily reset is the milestone a user actually plans
+ *               around. The re-check still runs, quietly, so a campaign added
+ *               mid-day still appears without anyone pressing anything.
+ *
+ * Ghana keeps GMT all year, so midnight UTC IS local midnight for this
+ * audience — the countdown needs no timezone caveat and the copy no longer
+ * carries one.
  */
 
 const RECHECK_SECONDS = 60
@@ -43,9 +49,17 @@ function pad(n: number) {
   return String(n).padStart(2, '0')
 }
 
-/** Live HH:MM:SS remaining until `target`. */
-function useCountdown(target: number) {
-  const [remaining, setRemaining] = useState(() => Math.max(target - Date.now(), 0))
+/**
+ * Live HH:MM:SS remaining until `target`.
+ *
+ * `serverNow` is not a nicety: seeding from Date.now() makes the server and
+ * the client compute different first values, React reports a hydration
+ * mismatch (#418) and throws the markup away. Seeding from the server's clock
+ * makes the first paint identical on both sides; the interval takes over
+ * afterwards, when only the client is running.
+ */
+function useCountdown(target: number, serverNow: number) {
+  const [remaining, setRemaining] = useState(() => Math.max(target - serverNow, 0))
 
   useEffect(() => {
     const id = setInterval(() => setRemaining(Math.max(target - Date.now(), 0)), 1000)
@@ -82,6 +96,7 @@ export function CaughtUp({
   variant,
   format,
   resetAt,
+  serverNow,
   dailyCap,
   tierName,
   otherCount,
@@ -89,8 +104,10 @@ export function CaughtUp({
 }: {
   variant: CaughtUpVariant
   format: 'video' | 'survey'
-  /** Epoch ms of the next UTC midnight — when the daily allowance refills. */
+  /** Epoch ms of the next midnight — when the daily allowance refills. */
   resetAt: number
+  /** Server clock at render time; keeps the first countdown frame in step. */
+  serverNow: number
   dailyCap: number
   tierName: string
   /** How many ads wait on the other tab, so the offer to switch is only made
@@ -100,27 +117,21 @@ export function CaughtUp({
 }) {
   const t = useTranslations('ads')
   const router = useRouter()
-  const { text } = useCountdown(resetAt)
+  const { text } = useCountdown(resetAt, serverNow)
 
-  // The re-check loop, for the "no ads of this format" case.
-  const [tick, setTick] = useState(RECHECK_SECONDS)
+  /* Background re-check for the "out of ads" case. Deliberately invisible:
+     it exists so a campaign published mid-day appears on its own, not as
+     something for the user to watch. */
   useEffect(() => {
     if (variant !== 'empty') return
-    const id = setInterval(() => {
-      setTick((s) => {
-        if (s > 1) return s - 1
-        router.refresh()
-        return RECHECK_SECONDS
-      })
-    }, 1000)
+    const id = setInterval(() => router.refresh(), RECHECK_SECONDS * 1000)
     return () => clearInterval(id)
   }, [variant, router])
 
   const capped = variant === 'capped'
   const pointsCapped = variant === 'pointsCapped'
   const blocked = variant === 'blocked'
-  // Both cap flavours wait for the same UTC-midnight rollover.
-  const waitsForMidnight = capped || pointsCapped
+  const empty = variant === 'empty'
 
   return (
     <div className="animate-rise flex flex-col items-center px-5 py-12 text-center sm:py-16">
@@ -129,9 +140,9 @@ export function CaughtUp({
           'grid size-16 place-items-center rounded-full ring-8',
           blocked
             ? 'bg-warning-50 text-warning-600 ring-warning-500/15'
-            : waitsForMidnight
-              ? 'bg-brand-50 text-brand-600 ring-brand-600/15'
-              : 'bg-success-50 text-success-600 ring-success-500/15',
+            : empty
+              ? 'bg-success-50 text-success-600 ring-success-500/15'
+              : 'bg-brand-50 text-brand-600 ring-brand-600/15',
         )}
       >
         <CheckCheck aria-hidden className="size-7" strokeWidth={2.4} />
@@ -157,16 +168,13 @@ export function CaughtUp({
       {!blocked && (
         <div className="mt-7 w-full max-w-[22rem] rounded-(--radius-panel) border border-ink-200 bg-surface px-5 py-5">
           <p className="text-[0.6875rem] font-semibold tracking-[0.08em] text-ink-400 uppercase">
-            {waitsForMidnight ? t('caughtUp.resetLabel') : t('caughtUp.recheckLabel')}
+            {t('caughtUp.resetLabel')}
           </p>
           <div className="mt-2">
-            {/* HH:MM:SS for the wait until midnight, bare seconds for the
-                re-check. "00:00:58" spends most of its width on zeros and makes
-                a one-minute loop look like a long one. */}
-            <Digits value={waitsForMidnight ? text : `${tick}s`} />
+            <Digits value={text} />
           </div>
           <p className="mt-2 text-[0.75rem] text-ink-400">
-            {waitsForMidnight ? t('caughtUp.resetHint') : t('caughtUp.recheckHint')}
+            {t(empty ? 'caughtUp.newAdsHint' : 'caughtUp.resetHint')}
           </p>
         </div>
       )}
@@ -189,7 +197,7 @@ export function CaughtUp({
           </Button>
         )}
 
-        {(!waitsForMidnight || blocked) && (
+        {(empty || blocked) && (
           <Button
             variant="secondary"
             fullWidth
