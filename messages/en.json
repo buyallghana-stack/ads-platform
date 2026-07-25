@@ -795,10 +795,31 @@
       "payWith": "Pay with",
       "momo": "Mobile Money",
       "crypto": "Cryptocurrency",
-      "notYet": "Checkout is not switched on yet. Mobile money and crypto payment are being set up — your plan will be purchasable here as soon as they are live.",
+      "notYet": "Payments are not switched on yet. Your plan will be purchasable here as soon as they are live.",
       "ready": "Choose a payment method to continue.",
       "close": "Close",
-      "back": "Back to plans"
+      "back": "Back to plans",
+      "card": "Card or bank",
+      "pay": "Pay {amount}",
+      "failed": "Could not start this payment. Please try again."
+    },
+    "result": {
+      "help": "Something wrong? Get help",
+      "success": {
+        "title": "Payment received",
+        "body": "Your plan is active. Your new daily limit and earning rate apply from now.",
+        "cta": "See my plans"
+      },
+      "pending": {
+        "title": "Payment not completed",
+        "body": "We have not received this payment. If money left your account, it will be confirmed automatically within a few minutes.",
+        "cta": "Back to plans"
+      },
+      "failed": {
+        "title": "We could not confirm this payment",
+        "body": "Nothing has been charged to your plan. If money left your account, contact support with the date and amount and we will sort it out.",
+        "cta": "Back to plans"
+      }
     }
   }
 }

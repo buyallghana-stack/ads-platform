@@ -5,6 +5,7 @@ import { setRequestLocale } from 'next-intl/server'
 import { UpgradeView } from '@/components/upgrade/UpgradeView'
 import { redirect } from '@/i18n/navigation'
 import { getSessionUser } from '@/lib/auth/session'
+import { serverEnv } from '@/lib/env'
 import {
   getHeldPlans,
   getPlanReferences,
@@ -22,8 +23,8 @@ export const metadata: Metadata = {
  * pricing and benefits from the admin dashboard later without this screen
  * being touched.
  *
- * Checkout is off: mobile money and crypto payment are not wired up yet, and
- * the sheet says so rather than taking a tap that cannot complete.
+ * Checkout turns itself on when Paystack is configured. Without the key the
+ * sheet says so plainly rather than offering a button that cannot complete.
  */
 export default async function UpgradePage({
   params,
@@ -50,7 +51,7 @@ export default async function UpgradePage({
       benefits={benefits}
       freeDailyAdCap={references.freeDailyAdCap}
       pointsPerCurrencyUnit={references.pointsPerCurrencyUnit}
-      checkoutEnabled={false}
+      checkoutEnabled={Boolean(serverEnv().PAYSTACK_SECRET_KEY)}
     />
   )
 }

@@ -69,6 +69,14 @@ const serverSchema = z.object({
    * rather than running unguarded.
    */
   CRON_SECRET: z.string().optional(),
+
+  /**
+   * Paystack secret key (sk_test_… or sk_live_…). Signs charge requests and
+   * verifies webhook signatures, so it is server-only and must never reach the
+   * browser. Optional so the app boots without payments configured; the
+   * checkout path asserts it at point of use.
+   */
+  PAYSTACK_SECRET_KEY: z.string().optional(),
 })
 
 /**
@@ -114,6 +122,7 @@ export function serverEnv(): z.infer<typeof serverSchema> {
     GEO_RESTRICTION_ENABLED: process.env.GEO_RESTRICTION_ENABLED,
     TOTP_SECRET_KEY: process.env.TOTP_SECRET_KEY || undefined,
     CRON_SECRET: process.env.CRON_SECRET || undefined,
+    PAYSTACK_SECRET_KEY: process.env.PAYSTACK_SECRET_KEY || undefined,
   })
 
   if (!parsed.success) {
@@ -158,6 +167,29 @@ export function requireTotpKey(): Buffer {
     throw new Error(
       `TOTP_SECRET_KEY must decode to exactly 32 bytes, got ${key.length}. ` +
         'It should be base64 of 32 random bytes.',
+    )
+  }
+  return key
+}
+
+/**
+ * Asserts Paystack is configured, and that the key is a SECRET key. Pasting
+ * the public key here is an easy mistake — it looks similar, and it fails
+ * later with an opaque "invalid key" from the API rather than at the point the
+ * mistake was made.
+ */
+export function requirePaystackKey(): string {
+  const key = serverEnv().PAYSTACK_SECRET_KEY
+  if (!key) {
+    throw new Error(
+      'PAYSTACK_SECRET_KEY is not set. Add the secret key from Paystack ' +
+        '(Settings > API Keys & Webhooks) to the environment.',
+    )
+  }
+  if (!key.startsWith('sk_')) {
+    throw new Error(
+      'PAYSTACK_SECRET_KEY looks wrong: it must start with "sk_". A key ' +
+        'starting with "pk_" is the PUBLIC key and cannot authorise charges.',
     )
   }
   return key

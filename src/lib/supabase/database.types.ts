@@ -2315,7 +2315,7 @@ export type Database = {
         | "failed"
       referral_status: "pending" | "activated" | "rejected"
       risk_level: "low" | "medium" | "high" | "critical"
-      subscription_payment_method: "korapay" | "crypto"
+      subscription_payment_method: "korapay" | "crypto" | "paystack"
       subscription_payment_status:
         | "pending"
         | "confirmed"
@@ -2520,7 +2520,7 @@ export const Constants = {
       ],
       referral_status: ["pending", "activated", "rejected"],
       risk_level: ["low", "medium", "high", "critical"],
-      subscription_payment_method: ["korapay", "crypto"],
+      subscription_payment_method: ["korapay", "crypto", "paystack"],
       subscription_payment_status: [
         "pending",
         "confirmed",

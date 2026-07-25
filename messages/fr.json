@@ -795,10 +795,31 @@
       "payWith": "Payer avec",
       "momo": "Mobile Money",
       "crypto": "Cryptomonnaie",
-      "notYet": "Le paiement n'est pas encore activé. Le mobile money et la crypto sont en cours de mise en place — votre forfait pourra être acheté ici dès qu'ils seront disponibles.",
+      "notYet": "Les paiements ne sont pas encore activés. Votre forfait pourra être acheté ici dès qu'ils seront disponibles.",
       "ready": "Choisissez un moyen de paiement pour continuer.",
       "close": "Fermer",
-      "back": "Retour aux forfaits"
+      "back": "Retour aux forfaits",
+      "card": "Carte ou banque",
+      "pay": "Payer {amount}",
+      "failed": "Impossible de démarrer ce paiement. Veuillez réessayer."
+    },
+    "result": {
+      "help": "Un problème ? Obtenir de l'aide",
+      "success": {
+        "title": "Paiement reçu",
+        "body": "Votre forfait est actif. Votre nouvelle limite quotidienne et votre taux de gain s'appliquent dès maintenant.",
+        "cta": "Voir mes forfaits"
+      },
+      "pending": {
+        "title": "Paiement non finalisé",
+        "body": "Nous n'avons pas reçu ce paiement. Si votre compte a été débité, la confirmation se fera automatiquement d'ici quelques minutes.",
+        "cta": "Retour aux forfaits"
+      },
+      "failed": {
+        "title": "Impossible de confirmer ce paiement",
+        "body": "Rien n'a été imputé à votre forfait. Si votre compte a été débité, contactez le support avec la date et le montant et nous régulariserons.",
+        "cta": "Retour aux forfaits"
+      }
     }
   }
 }

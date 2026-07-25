@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 
 import { Gem, Layers, Smartphone, Wallet, X } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
+import { startPaystackCheckout } from '@/app/[locale]/(app)/upgrade/actions'
 import { PlanCard } from '@/components/upgrade/PlanCard'
 import { Button } from '@/components/ui/Button'
 import type { HeldPlan, Plan, ResolvedBenefits } from '@/lib/subscriptions/data'
@@ -42,6 +43,24 @@ export function UpgradeView({
   const t = useTranslations('upgrade')
   const format = useFormatter()
   const [selected, setSelected] = useState<Plan | null>(null)
+  const [pending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+
+  /*
+    Hands off to Paystack's hosted page. A full document navigation, not the
+    client router — we are leaving the app for another origin.
+  */
+  const pay = (plan: Plan) => {
+    setError(null)
+    startTransition(async () => {
+      const res = await startPaystackCheckout(plan.id)
+      if (!res.ok) {
+        setError(res.message ?? t('checkout.failed'))
+        return
+      }
+      window.location.assign(res.authorizationUrl)
+    })
+  }
 
   const heldByTier = new Map(held.map((h) => [h.tierId, h]))
   const heldCount = held.length
@@ -182,11 +201,14 @@ export function UpgradeView({
             <div className="mt-2 flex flex-col gap-2">
               {[
                 { icon: Smartphone, label: t('checkout.momo') },
-                { icon: Wallet, label: t('checkout.crypto') },
+                { icon: Wallet, label: t('checkout.card') },
               ].map(({ icon: Icon, label }) => (
                 <div
                   key={label}
-                  className="flex items-center gap-3 rounded-(--radius-card) border border-ink-200 bg-surface px-4 py-3 opacity-60"
+                  className={cn(
+                    'flex items-center gap-3 rounded-(--radius-card) border border-ink-200 bg-surface px-4 py-3',
+                    !checkoutEnabled && 'opacity-60',
+                  )}
                 >
                   <span className="grid size-9 place-items-center rounded-full bg-ink-100 text-ink-500">
                     <Icon aria-hidden className="size-4.5" />
@@ -196,23 +218,49 @@ export function UpgradeView({
               ))}
             </div>
 
-            {/* Honest about the one thing that cannot happen yet. */}
-            <div
-              className={cn(
-                'mt-4 rounded-(--radius-card) border px-4 py-3',
-                'border-warning-500/25 bg-warning-50',
-              )}
-            >
-              <p className="text-[0.8125rem] leading-relaxed text-warning-700">
-                {checkoutEnabled ? t('checkout.ready') : t('checkout.notYet')}
+            {!checkoutEnabled && (
+              <div
+                className={cn(
+                  'mt-4 rounded-(--radius-card) border px-4 py-3',
+                  'border-warning-500/25 bg-warning-50',
+                )}
+              >
+                <p className="text-[0.8125rem] leading-relaxed text-warning-700">
+                  {t('checkout.notYet')}
+                </p>
+              </div>
+            )}
+
+            {error && (
+              <p role="alert" className="mt-4 text-[0.8125rem] font-medium text-danger-600">
+                {error}
               </p>
-            </div>
+            )}
+
+            {checkoutEnabled && (
+              <Button
+                size="lg"
+                fullWidth
+                className="mt-4"
+                loading={pending}
+                onClick={() => pay(selected)}
+              >
+                {t('checkout.pay', {
+                  amount: format.number(selected.priceMinor / 100, {
+                    style: 'currency',
+                    currency: selected.currencyCode,
+                    maximumFractionDigits: 0,
+                  }),
+                })}
+              </Button>
+            )}
 
             <Button
               variant="secondary"
               size="lg"
               fullWidth
-              className="mt-4"
+              className="mt-2.5"
+              disabled={pending}
               onClick={() => setSelected(null)}
             >
               {t('checkout.back')}
