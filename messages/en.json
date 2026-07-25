@@ -148,7 +148,11 @@
     "pendingTitle": "Not published yet",
     "pendingBody": "This document is being prepared alongside the platform’s licensing and has not been published. It will be available here before the service opens to the public.",
     "pendingContact": "If you need a copy before then, contact us at <em>{email}</em>.",
-    "back": "Back to sign up"
+    "back": "Back to sign up",
+    "updated": "Last updated {date}",
+    "contents": "Contents",
+    "backHome": "Back to SidePerks",
+    "draftNotice": "This document is a draft prepared for review. It has not yet been reviewed by a qualified lawyer and is not in force. Contact us if you need the final version."
   },
   "dashboard": {
     "greeting": "Welcome back, {name}",
@@ -728,5 +732,22 @@
       "body": "Your account is deleted permanently, and this email address and phone number can never be used to open a new account."
     },
     "signInCta": "Sign in to cancel"
+  },
+  "sessions": {
+    "title": "Active sessions",
+    "subtitle": "Where your account is signed in.",
+    "back": "Back",
+    "thisDevice": "This device",
+    "lastActive": "Last active {when}",
+    "signOut": "Sign out",
+    "signingOut": "Signing out…",
+    "signOutAll": "{count, plural, one {Sign out the other device} other {Sign out all # other devices}}",
+    "delayNote": "Signing out a device stops it from staying signed in. If it is using the app right now, it can take up to an hour to be locked out completely.",
+    "errors": {
+      "isCurrent": "That is the device you are using. Use Log out instead.",
+      "notFound": "That session has already ended.",
+      "notSignedIn": "Please sign in again.",
+      "generic": "Could not sign that device out. Please try again."
+    }
   }
 }

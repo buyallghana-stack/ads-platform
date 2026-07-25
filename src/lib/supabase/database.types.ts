@@ -1795,6 +1795,17 @@ export type Database = {
         Returns: number
       }
       generate_referral_code: { Args: never; Returns: string }
+      get_active_sessions: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          ip: string
+          is_current: boolean
+          last_seen: string
+          user_agent: string
+        }[]
+      }
       get_ad_question_for_user: {
         Args: { p_ad_id: string; p_position?: number }
         Returns: {
@@ -2132,6 +2143,8 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      revoke_other_sessions: { Args: never; Returns: number }
+      revoke_session: { Args: { p_session_id: string }; Returns: boolean }
       set_payout_details: {
         Args: {
           p_account_name?: string

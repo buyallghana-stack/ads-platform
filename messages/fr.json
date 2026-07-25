@@ -148,7 +148,11 @@
     "pendingTitle": "Pas encore publié",
     "pendingBody": "Ce document est en cours de préparation avec l'agrément de la plateforme et n'a pas encore été publié. Il sera disponible ici avant l'ouverture du service au public.",
     "pendingContact": "Pour en obtenir une copie avant cette date, écrivez-nous à <em>{email}</em>.",
-    "back": "Retour à l'inscription"
+    "back": "Retour à l'inscription",
+    "updated": "Dernière mise à jour : {date}",
+    "contents": "Sommaire",
+    "backHome": "Retour à SidePerks",
+    "draftNotice": "Ce document est un projet préparé pour relecture. Il n'a pas encore été revu par un juriste qualifié et n'est pas en vigueur. Contactez-nous si vous avez besoin de la version définitive."
   },
   "dashboard": {
     "greeting": "Bon retour, {name}",
@@ -728,5 +732,22 @@
       "body": "Votre compte sera définitivement supprimé, et cette adresse e-mail et ce numéro de téléphone ne pourront plus jamais servir à créer un compte."
     },
     "signInCta": "Se connecter pour annuler"
+  },
+  "sessions": {
+    "title": "Sessions actives",
+    "subtitle": "Les appareils connectés à votre compte.",
+    "back": "Retour",
+    "thisDevice": "Cet appareil",
+    "lastActive": "Dernière activité {when}",
+    "signOut": "Déconnecter",
+    "signingOut": "Déconnexion…",
+    "signOutAll": "{count, plural, one {Déconnecter l'autre appareil} other {Déconnecter les # autres appareils}}",
+    "delayNote": "La déconnexion empêche l'appareil de rester connecté. S'il utilise l'application en ce moment, cela peut prendre jusqu'à une heure pour qu'il soit totalement déconnecté.",
+    "errors": {
+      "isCurrent": "C'est l'appareil que vous utilisez. Utilisez plutôt Déconnexion.",
+      "notFound": "Cette session est déjà terminée.",
+      "notSignedIn": "Veuillez vous reconnecter.",
+      "generic": "Impossible de déconnecter cet appareil. Veuillez réessayer."
+    }
   }
 }

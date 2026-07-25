@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
-import { LegalPending } from '@/components/legal/LegalPending'
+import { LegalDocument } from '@/components/legal/LegalDocument'
 
 export async function generateMetadata({
   params,
@@ -17,5 +17,5 @@ export async function generateMetadata({
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   setRequestLocale(locale)
-  return <LegalPending titleKey="terms" />
+  return <LegalDocument kind="terms" locale={locale} />
 }

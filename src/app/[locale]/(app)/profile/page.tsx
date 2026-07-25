@@ -131,7 +131,7 @@ export default async function ProfilePage({
           <SettingsRow href="/profile/backup-codes" icon={<ListChecks />} tone="success" label={t('security.backupCodes')} description={t('security.backupCodesHint')} value={twoFactor.enabled ? t('security.backupCodesLeft', { count: twoFactor.backupCodesRemaining }) : undefined} />
           <SettingsRow href="/profile/password" icon={<Lock />} tone="brand" label={t('security.password')} />
           <SettingsRow href="/profile/email" icon={<Mail />} tone="brand" label={t('security.email')} value={user!.email} />
-          <SettingsRow icon={<MonitorSmartphone />} tone="neutral" label={t('security.sessions')} description={t('security.sessionsHint')} soon={soon} />
+          <SettingsRow href="/profile/sessions" icon={<MonitorSmartphone />} tone="neutral" label={t('security.sessions')} description={t('security.sessionsHint')} />
         </SettingsGroup>
 
         {/* Preferences (working) ---------------------------------------- */}
