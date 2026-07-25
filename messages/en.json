@@ -1132,20 +1132,58 @@
       },
       "searchPlaceholder": "Search name, email or phone",
       "empty": "Nobody matches.",
-      "open": "Open",
       "noMessages": "No messages",
+      "reviewRow": "Review {name}",
+      "menuLabel": "Actions for {name}",
       "status": {
+        "active": "Active",
         "flagged": "Flagged",
         "disabled": "Disabled"
       },
       "flaggedBy": {
-        "system": "System",
-        "admin": "You"
+        "system": "Raised by the system",
+        "admin": "Raised by you"
       },
-      "closeThread": "Close conversation",
-      "chatSoonTitle": "Chat opens here",
-      "chatSoonBody": "This is where the conversation will run once your chatbot is connected. Nothing is shown until it is real.",
-      "lastHeard": "Last message {when}"
+      "chatSoonBody": "Replying opens here once your chatbot is connected. Nothing is shown until it is real.",
+      "actions": {
+        "review": "Open account",
+        "flag": "Flag account",
+        "clear": "Clear flag",
+        "disable": "Disable account",
+        "enable": "Enable account",
+        "opensPanel": "Opens the account"
+      },
+      "panel": {
+        "title": "Account · {name}",
+        "close": "Close",
+        "unread": "{count, plural, one {# unread} other {# unread}}",
+        "balance": "Balance",
+        "points": "pts",
+        "plan": "On the {tier} plan",
+        "activity": "Activity",
+        "joined": "Joined",
+        "lastActive": "Last active",
+        "lifetime": "Earned all time",
+        "lifetimeValue": "{points} pts · {perDay}/day",
+        "adsWatched": "Ads watched",
+        "referrals": "Referrals",
+        "paidOut": "Paid out",
+        "contact": "Contact",
+        "email": "Email",
+        "phone": "Phone",
+        "conversation": "Latest message"
+      },
+      "confirm": {
+        "flag": "Flag {name}. They keep earning, but every payout of theirs stops for review first.",
+        "disable": "Disable {name}? They stop earning and cannot withdraw. Their {points} points stay on the account.",
+        "reasonLabel": "Reason — the next operator sees this",
+        "reasonPlaceholder": {
+          "flag": "e.g. Six accounts share this device fingerprint",
+          "disable": "e.g. Confirmed answer-farming across three accounts"
+        },
+        "reasonHint": "Written for whoever picks this up next, including you in a month.",
+        "cancel": "Cancel"
+      }
     },
     "users": {
       "title": "Users",

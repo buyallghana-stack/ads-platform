@@ -124,6 +124,19 @@ export type Person = {
   unread?: number
   lastMessageAt?: string
   lastMessage?: string
+  /**
+   * What the account has actually done. The balance alone cannot tell an
+   * operator whether somebody is a real user or a farm — 90,000 points earned
+   * over five months reads very differently from the same 90,000 in nine
+   * days, and the flag review is the screen where that difference decides
+   * whether money leaves.
+   */
+  lifetimePoints: number
+  adsWatched: number
+  referrals: number
+  lastActiveAt: string
+  /** How much has already been paid out to them, in cedis. */
+  paidOutGhs: number
 }
 
 /**

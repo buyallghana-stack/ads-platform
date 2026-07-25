@@ -2,13 +2,16 @@
 
 import { useMemo, useState } from 'react'
 
-import { Flag, Mail, MessageSquare, Phone, Search, ShieldOff, X } from 'lucide-react'
+import { Flag, Mail, MessageSquare, PanelRight, Phone, ShieldCheck, ShieldOff } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
+import { MoreMenu, type MenuItem } from '@/components/ui/MoreMenu'
 import type { Person } from '@/lib/admin/types'
 import { cn } from '@/lib/cn'
 
-import { PersonCell, StatusPill } from './AdminChrome'
+import { PersonCell, StatusDot } from './AdminChrome'
+import { EmptyState, RowOpener, Toolbar, type Tab } from './AdminTable'
+import { PERSON_RULES, personActions, type PersonAction } from './person-actions'
 
 /**
  * The stacked card layout from reference 2, and the operator's own plan for
@@ -36,14 +39,20 @@ export function PeopleGrid({
   mode,
   serverNow,
   onOpen,
+  onDecide,
+  openId,
 }: {
   people: Person[]
   mode: PeopleMode
   /** The server's clock at render, so "joined this week" is decided once and
    *  the same on both sides of hydration. */
   serverNow: number
-  /** Selecting a person. On Messages this is what opens the chat pane. */
-  onOpen?: (person: Person) => void
+  /** Opening a person's review panel. */
+  onOpen: (person: Person) => void
+  /** Firing an action straight from the card's overflow menu. */
+  onDecide: (id: string, action: PersonAction, reason: string) => void
+  /** Highlights the row whose panel is open. */
+  openId?: string | null
 }) {
   const t = useTranslations('admin.people')
   const format = useFormatter()
@@ -79,131 +88,138 @@ export function PeopleGrid({
       .filter((p) => !q || [p.name, p.email, p.phone ?? ''].join(' ').toLowerCase().includes(q))
   }, [people, tab, query, serverNow])
 
+  /** The card's menu: review first, then the decisions, destructive last. */
+  const menuFor = (p: Person): MenuItem[] => {
+    const items: MenuItem[] = [
+      { key: 'open', label: t('actions.review'), icon: <PanelRight />, onSelect: () => onOpen(p) },
+    ]
+    personActions(p).forEach((a, i) => {
+      const rule = PERSON_RULES[a]
+      items.push({
+        key: a,
+        label: t(`actions.${a}`),
+        icon:
+          a === 'flag' ? <Flag /> : a === 'disable' ? <ShieldOff /> : <ShieldCheck />,
+        tone: rule.destructive ? 'danger' : 'default',
+        separated: i === 0 || rule.destructive,
+        /* Anything needing a reason opens the panel instead of firing here.
+           A flag with no reason is an account somebody re-investigates from
+           scratch, and a menu item is one mis-aim away from the row above. */
+        hint: rule.confirm || rule.reason ? t('actions.opensPanel') : undefined,
+        onSelect: () => (rule.confirm || rule.reason ? onOpen(p) : onDecide(p.id, a, '')),
+      })
+    })
+    return items
+  }
+
+  const tabList: Tab<(typeof tabs)[number]>[] = tabs.map((key) => ({
+    key,
+    label: t(`tabs.${key}`),
+    count: counted[key],
+  }))
+
   return (
     <div>
-      {/* ---- Tabs with counts + search (reference 2) ------------------ */}
-      <div className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-3 border-b border-ink-200">
-        <div className="flex gap-5" role="tablist" aria-label={t('tabsLabel')}>
-          {tabs.map((key) => (
-            <button
-              key={key}
-              role="tab"
-              aria-selected={tab === key}
-              onClick={() => setTab(key)}
-              className={cn(
-                'relative -mb-px border-b-2 px-0.5 pb-2.5 text-[0.8125rem] font-medium transition-colors',
-                tab === key
-                  ? 'border-brand-600 text-ink-900'
-                  : 'border-transparent text-ink-500 hover:text-ink-700',
-              )}
-            >
-              {t(`tabs.${key}`)}{' '}
-              <span className="ml-0.5 text-ink-400 tabular-nums">{counted[key]}</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="relative ml-auto mb-2.5 w-full sm:w-64">
-          <Search
-            aria-hidden
-            className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-ink-400"
-          />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t('searchPlaceholder')}
-            aria-label={t('searchPlaceholder')}
-            className="h-9 w-full rounded-(--radius-input) border border-ink-200 bg-surface pl-9 pr-3 text-[0.8125rem] text-ink-900 placeholder:text-ink-400 focus:border-brand-600 focus:outline-none"
-          />
-        </div>
-      </div>
+      <Toolbar
+        tabs={tabList}
+        active={tab}
+        onSelect={setTab}
+        tabsLabel={t('tabsLabel')}
+        query={query}
+        onQuery={setQuery}
+        searchPlaceholder={t('searchPlaceholder')}
+      />
 
       {visible.length === 0 ? (
-        <p className="rounded-(--radius-card) border border-ink-200 bg-surface px-4 py-12 text-center text-[0.8125rem] text-ink-400">
-          {t('empty')}
-        </p>
+        <EmptyState>{t('empty')}</EmptyState>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {visible.map((p) => (
-            <li key={p.id}>
-              <button
-                type="button"
-                onClick={() => onOpen?.(p)}
-                className={cn(
-                  'flex h-full w-full flex-col rounded-(--radius-card) border border-ink-200 bg-surface p-3.5 text-left',
-                  'shadow-[0_1px_2px_0_rgb(15_23_42/0.04)] transition-[border-color,box-shadow]',
-                  'hover:border-ink-300 hover:shadow-[0_2px_10px_-2px_rgb(15_23_42/0.12)]',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2',
-                )}
-              >
-                <div className="flex items-start justify-between gap-2">
+            <li
+              key={p.id}
+              className={cn(
+                'relative flex h-full flex-col rounded-(--radius-card) border bg-surface p-3.5',
+                'transition-colors',
+                openId === p.id
+                  ? 'border-brand-600 bg-brand-50/40'
+                  : 'border-ink-200 hover:border-ink-300',
+              )}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <RowOpener rounded label={t('reviewRow', { name: p.name })} onClick={() => onOpen(p)}>
                   <PersonCell name={p.name} secondary={p.email} avatarUrl={p.avatarUrl} size="md" />
-                  {p.status !== 'active' && (
-                    <StatusPill tone={p.status === 'disabled' ? 'danger' : 'warning'}>
-                      {p.status === 'disabled' ? (
-                        <ShieldOff aria-hidden className="size-3" />
-                      ) : (
-                        <Flag aria-hidden className="size-3" />
-                      )}
-                      {t(`status.${p.status}`)}
-                    </StatusPill>
-                  )}
-                  {p.status === 'active' && (p.unread ?? 0) > 0 && mode === 'messages' && (
-                    <StatusPill tone="brand">{p.unread}</StatusPill>
-                  )}
-                </div>
+                </RowOpener>
+                {/* The card carries its own ⋯, exactly as the operator's
+                    reference does. z-10 keeps it above the stretched opener. */}
+                <span className="relative z-10 shrink-0">
+                  <MoreMenu label={t('menuLabel', { name: p.name })} items={menuFor(p)} />
+                </span>
+              </div>
 
-                {/* The line that differs per tab — what the operator opened
-                    this list to find out. */}
-                <div className="mt-3 min-h-[2.25rem] border-t border-ink-200 pt-2.5">
+              {/* The line that differs per tab — what the operator opened
+                  this list to find out. */}
+              <div className="mt-3 min-h-[2.25rem] border-t border-ink-200 pt-2.5">
+                {mode === 'messages' ? (
+                  <p className="line-clamp-2 text-[0.75rem] leading-relaxed text-ink-600">
+                    {p.lastMessage ?? t('noMessages')}
+                  </p>
+                ) : mode === 'flagged' ? (
+                  <p className="line-clamp-2 text-[0.75rem] leading-relaxed text-ink-600">
+                    <span className="font-medium text-ink-700">
+                      {t(`flaggedBy.${p.flaggedBy ?? 'system'}`)}:
+                    </span>{' '}
+                    {p.flagReason ?? '—'}
+                  </p>
+                ) : (
+                  <div className="flex items-center justify-between gap-2 text-[0.75rem]">
+                    <span className="text-ink-500">{p.tier}</span>
+                    <span className="font-semibold text-ink-900 tabular-nums">
+                      {p.balancePoints.toLocaleString()} pts
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-2.5 flex items-center justify-between gap-2 text-[0.6875rem] text-ink-400">
+                <span className="inline-flex min-w-0 items-center gap-1.5">
                   {mode === 'messages' ? (
-                    <p className="line-clamp-2 text-[0.75rem] leading-relaxed text-ink-600">
-                      {p.lastMessage ?? t('noMessages')}
-                    </p>
-                  ) : mode === 'flagged' ? (
-                    <p className="line-clamp-2 text-[0.75rem] leading-relaxed text-ink-600">
-                      <span className="font-medium text-ink-700">
-                        {t(`flaggedBy.${p.flaggedBy ?? 'system'}`)}:
-                      </span>{' '}
-                      {p.flagReason ?? '—'}
-                    </p>
-                  ) : (
-                    <div className="flex items-center justify-between gap-2 text-[0.75rem]">
-                      <span className="text-ink-500">{p.tier}</span>
-                      <span className="font-semibold text-ink-900 tabular-nums">
-                        {p.balancePoints.toLocaleString()} pts
+                    <>
+                      <MessageSquare aria-hidden className="size-3" />
+                      <span className="truncate">
+                        {p.lastMessageAt
+                          ? format.relativeTime(new Date(p.lastMessageAt), serverNow)
+                          : t('noMessages')}
                       </span>
-                    </div>
+                    </>
+                  ) : p.phone ? (
+                    <>
+                      <Phone aria-hidden className="size-3" />
+                      <span className="truncate">{p.phone}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Mail aria-hidden className="size-3" />
+                      <span className="truncate">{p.email}</span>
+                    </>
                   )}
-                </div>
+                </span>
 
-                <div className="mt-2.5 flex items-center justify-between gap-2 text-[0.6875rem] text-ink-400">
-                  <span className="inline-flex min-w-0 items-center gap-1.5">
-                    {mode === 'messages' ? (
-                      <>
-                        <MessageSquare aria-hidden className="size-3" />
-                        <span className="truncate">
-                          {p.lastMessageAt
-                            ? format.relativeTime(new Date(p.lastMessageAt), serverNow)
-                            : t('noMessages')}
-                        </span>
-                      </>
-                    ) : p.phone ? (
-                      <>
-                        <Phone aria-hidden className="size-3" />
-                        <span className="truncate">{p.phone}</span>
-                      </>
-                    ) : (
-                      <>
-                        <Mail aria-hidden className="size-3" />
-                        <span className="truncate">{p.email}</span>
-                      </>
-                    )}
+                {/* Status sits here rather than beside the name, so the ⋯ has
+                    the top-right corner to itself and every card is the same
+                    shape whether or not it is flagged. */}
+                {p.status !== 'active' ? (
+                  <StatusDot
+                    tone={p.status === 'disabled' ? 'danger' : 'warning'}
+                    className="shrink-0 text-[0.6875rem]"
+                  >
+                    {t(`status.${p.status}`)}
+                  </StatusDot>
+                ) : (p.unread ?? 0) > 0 && mode === 'messages' ? (
+                  <span className="shrink-0 rounded-full bg-brand-600 px-1.5 py-px text-[0.625rem] font-semibold text-white tabular-nums">
+                    {p.unread}
                   </span>
-                  <span className="shrink-0 font-medium text-brand-700">{t('open')} ›</span>
-                </div>
-              </button>
+                ) : null}
+              </div>
             </li>
           ))}
         </ul>
@@ -212,54 +228,11 @@ export function PeopleGrid({
   )
 }
 
-/**
- * The panel that opens when a message thread is selected.
- *
- * A shell only: the operator is supplying the chatbot later, so this holds its
- * place, shows who the conversation is with, and says plainly that replying is
- * not wired yet. It does not render a fake transcript — an operator reading
- * invented messages from a real-looking user is worse than an empty panel.
- */
-export function ConversationPanel({
-  person,
-  serverNow,
-  onClose,
-}: {
-  person: Person
-  serverNow: number
-  onClose: () => void
-}) {
-  const t = useTranslations('admin.people')
-  const format = useFormatter()
-
-  return (
-    <aside className="flex h-full flex-col rounded-(--radius-card) border border-ink-200 bg-surface shadow-[0_1px_2px_0_rgb(15_23_42/0.04)]">
-      <div className="flex items-center gap-3 border-b border-ink-200 px-4 py-3">
-        <PersonCell name={person.name} secondary={person.email} avatarUrl={person.avatarUrl} />
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t('closeThread')}
-          className="ml-auto grid size-8 shrink-0 place-items-center rounded-full text-ink-500 hover:bg-ink-100"
-        >
-          <X aria-hidden className="size-4" />
-        </button>
-      </div>
-
-      <div className="flex min-h-[14rem] flex-1 flex-col items-center justify-center gap-2 px-6 py-10 text-center">
-        <span className="grid size-11 place-items-center rounded-full bg-brand-50 text-brand-600">
-          <MessageSquare aria-hidden className="size-5" />
-        </span>
-        <p className="text-[0.875rem] font-semibold text-ink-900">{t('chatSoonTitle')}</p>
-        <p className="max-w-[34ch] text-[0.75rem] leading-relaxed text-ink-500">
-          {t('chatSoonBody')}
-        </p>
-        {person.lastMessageAt && (
-          <p className="mt-1 text-[0.6875rem] text-ink-400">
-            {t('lastHeard', { when: format.relativeTime(new Date(person.lastMessageAt), serverNow) })}
-          </p>
-        )}
-      </div>
-    </aside>
-  )
-}
+/*
+  ConversationPanel used to live here — a separate pane, only on Messages,
+  that no other tab could reach. It has been folded into PersonPanel as a
+  section: the same account should not have two different panels depending on
+  which list you found it in, and the operator asking "why is this person
+  messaging me" almost always wants the balance and the flag in the same
+  view as the message.
+*/

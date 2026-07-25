@@ -1,22 +1,15 @@
 import type { Metadata } from 'next'
 
-import {
-  ArrowDownLeft,
-  ArrowUpRight,
-  LayoutGrid,
-  PiggyBank,
-  Scale,
-  Users,
-  Wallet,
-} from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
-import { PageHeader, PersonCell, StatusPill } from '@/components/admin/AdminChrome'
+import { PageHeader, PersonCell, StatusDot } from '@/components/admin/AdminChrome'
+import { SummaryCell, SummaryStrip } from '@/components/admin/AdminTable'
 import { MetricCard } from '@/components/admin/MetricCard'
 import { MoneyChart } from '@/components/admin/MoneyChart'
+import { PAYOUT_TONE } from '@/components/admin/payout-status'
 import { Link } from '@/i18n/navigation'
 import { moneySeries, overviewMetrics, payoutRequests } from '@/lib/admin/preview'
-import { PAYOUT_TONE } from '@/components/admin/payout-status'
 
 export const metadata: Metadata = {
   title: 'Admin · Overview',
@@ -78,7 +71,6 @@ export default async function AdminOverviewPage({
             ads: ghsTotal(m.deposits.advertisers),
           })}
           changePct={m.deposits.changePct}
-          icon={<ArrowDownLeft />}
         />
         <MetricCard
           label={t('withdrawals')}
@@ -87,72 +79,61 @@ export default async function AdminOverviewPage({
           changePct={m.withdrawals.changePct}
           // More money leaving is not a win, even though the arrow points up.
           positiveIsGood={false}
-          icon={<ArrowUpRight />}
         />
         <MetricCard
           label={t('profit')}
           value={ghsTotal(m.profit.value)}
           comparison={t('profitHint')}
           changePct={m.profit.changePct}
-          icon={<PiggyBank />}
         />
         <MetricCard
           label={t('liability')}
           value={ghsTotal(m.liability.ghs)}
           comparison={t('liabilityHint', { points: m.liability.points.toLocaleString() })}
-          icon={<Scale />}
         />
       </div>
 
-      {/* ---- Second row: who and what ---------------------------------- */}
-      <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard
+      {/* ---- Second row: the operating picture -------------------------
+          Deliberately NOT four more cards. The money above is what the
+          operator is accountable for; this is context — how many people, how
+          many plans, how much work is queued, how much is playing. Giving it
+          the same weight as the money made the overview eight equal boxes
+          with no answer to "what do I look at first". A hairline strip says
+          "these are related, and they are smaller than the row above" without
+          a word of explanation. */}
+      <SummaryStrip cols={4} className="mt-3">
+        <SummaryCell
           label={t('users')}
           value={m.users.value.toLocaleString()}
-          comparison={t('usersToday', { count: m.users.newToday })}
-          changePct={m.users.changePct}
-          icon={<Users />}
+          detail={t('usersToday', { count: m.users.newToday })}
         />
-        <MetricCard
+        <SummaryCell
           label={t('subscriptions')}
           value={m.subscriptions.active.toLocaleString()}
-          comparison={t('subscriptionsHint')}
-          changePct={m.subscriptions.changePct}
-          icon={<Wallet />}
+          detail={t('subscriptionsHint')}
         />
-        <MetricCard
+        <SummaryCell
           label={t('pending')}
           value={m.pendingPayouts.count.toLocaleString()}
-          comparison={ghsTotal(m.pendingPayouts.ghs)}
-          icon={<Wallet />}
-          footer={
-            <Link href="/admin/payouts" className="font-medium text-brand-700 hover:underline">
-              {t('reviewQueue')}
-            </Link>
-          }
+          detail={ghsTotal(m.pendingPayouts.ghs)}
+          emphasis={m.pendingPayouts.count > 0}
         />
-        <MetricCard
+        <SummaryCell
           label={t('adsLive')}
           value={m.adsLive.total.toLocaleString()}
-          comparison={t('adsSplit', { videos: m.adsLive.videos, surveys: m.adsLive.surveys })}
-          icon={<LayoutGrid />}
-          footer={
-            <Link href="/admin/ads" className="font-medium text-brand-700 hover:underline">
-              {t('managePool')}
-            </Link>
-          }
+          detail={t('adsSplit', { videos: m.adsLive.videos, surveys: m.adsLive.surveys })}
         />
-      </div>
+      </SummaryStrip>
 
       {/* ---- Chart + queue --------------------------------------------
           The chart is md-and-up only, per the operator. On a phone the
           screen goes straight from the numbers to the decisions. */}
       <div className="mt-5 grid gap-4 xl:grid-cols-3">
-        <div className="hidden rounded-(--radius-card) border border-ink-200 bg-surface shadow-[0_1px_2px_0_rgb(15_23_42/0.04)] md:block xl:col-span-2">
+        <div className="hidden rounded-(--radius-card) border border-ink-200 bg-surface md:block xl:col-span-2">
           <MoneyChart data={series} />
         </div>
 
-        <section className="rounded-(--radius-card) border border-ink-200 bg-surface shadow-[0_1px_2px_0_rgb(15_23_42/0.04)]">
+        <section className="rounded-(--radius-card) border border-ink-200 bg-surface">
           <div className="flex items-center justify-between gap-3 border-b border-ink-200 px-4 py-3.5">
             <div>
               <h2 className="text-sm font-semibold tracking-[-0.01em] text-ink-900">
@@ -162,9 +143,10 @@ export default async function AdminOverviewPage({
             </div>
             <Link
               href="/admin/payouts"
-              className="shrink-0 text-[0.75rem] font-medium text-brand-700 hover:underline"
+              className="inline-flex shrink-0 items-center gap-1 text-[0.75rem] font-medium text-brand-700 hover:underline"
             >
               {t('queue.all')}
+              <ArrowRight aria-hidden className="size-3" />
             </Link>
           </div>
 
@@ -183,9 +165,9 @@ export default async function AdminOverviewPage({
                     <p className="text-[0.8125rem] font-semibold text-ink-900 tabular-nums">
                       {ghsExact(r.ghs)}
                     </p>
-                    <StatusPill tone={PAYOUT_TONE[r.status]} className="mt-1">
+                    <StatusDot tone={PAYOUT_TONE[r.status]} className="mt-1">
                       {t(`status.${r.status}`)}
-                    </StatusPill>
+                    </StatusDot>
                   </div>
                 </li>
               ))}

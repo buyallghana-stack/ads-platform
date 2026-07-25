@@ -1130,22 +1130,60 @@
         "flagged": "Signalés",
         "unread": "Non lus"
       },
-      "searchPlaceholder": "Rechercher un nom, un e-mail ou un téléphone",
-      "empty": "Aucune personne trouvée.",
-      "open": "Ouvrir",
+      "searchPlaceholder": "Rechercher nom, e-mail ou téléphone",
+      "empty": "Aucun résultat.",
       "noMessages": "Aucun message",
+      "reviewRow": "Examiner {name}",
+      "menuLabel": "Actions pour {name}",
       "status": {
+        "active": "Actif",
         "flagged": "Signalé",
         "disabled": "Désactivé"
       },
       "flaggedBy": {
-        "system": "Système",
-        "admin": "Vous"
+        "system": "Signalé par le système",
+        "admin": "Signalé par vous"
       },
-      "closeThread": "Fermer la conversation",
-      "chatSoonTitle": "La discussion s’ouvrira ici",
-      "chatSoonBody": "C'est ici que la conversation se déroulera une fois votre chatbot connecté. Rien ne s'affiche tant que ce n'est pas réel.",
-      "lastHeard": "Dernier message {when}"
+      "chatSoonBody": "La réponse s'ouvrira ici une fois votre chatbot connecté. Rien n'est affiché tant que ce n'est pas réel.",
+      "actions": {
+        "review": "Ouvrir le compte",
+        "flag": "Signaler le compte",
+        "clear": "Retirer le signalement",
+        "disable": "Désactiver le compte",
+        "enable": "Réactiver le compte",
+        "opensPanel": "Ouvre le compte"
+      },
+      "panel": {
+        "title": "Compte · {name}",
+        "close": "Fermer",
+        "unread": "{count, plural, one {# non lu} other {# non lus}}",
+        "balance": "Solde",
+        "points": "pts",
+        "plan": "Formule {tier}",
+        "activity": "Activité",
+        "joined": "Inscrit le",
+        "lastActive": "Dernière activité",
+        "lifetime": "Gains totaux",
+        "lifetimeValue": "{points} pts · {perDay}/jour",
+        "adsWatched": "Publicités vues",
+        "referrals": "Parrainages",
+        "paidOut": "Déjà versé",
+        "contact": "Contact",
+        "email": "E-mail",
+        "phone": "Téléphone",
+        "conversation": "Dernier message"
+      },
+      "confirm": {
+        "flag": "Signaler {name}. La personne continue de gagner, mais chacun de ses retraits passe d'abord en révision.",
+        "disable": "Désactiver {name} ? La personne ne gagne plus et ne peut plus retirer. Ses {points} points restent sur le compte.",
+        "reasonLabel": "Motif — visible par le prochain opérateur",
+        "reasonPlaceholder": {
+          "flag": "ex. Six comptes partagent cette empreinte d'appareil",
+          "disable": "ex. Fraude aux réponses confirmée sur trois comptes"
+        },
+        "reasonHint": "Écrit pour la personne qui reprendra le dossier, y compris vous dans un mois.",
+        "cancel": "Annuler"
+      }
     },
     "users": {
       "title": "Utilisateurs",

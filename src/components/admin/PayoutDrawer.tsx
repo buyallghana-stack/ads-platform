@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import {
   AlertTriangle,
@@ -23,6 +23,14 @@ import type { PayoutRequest } from '@/lib/admin/types'
 import { cn } from '@/lib/cn'
 
 import { PersonCell, StatusDot } from './AdminChrome'
+import {
+  DetailPanel,
+  Fact,
+  PanelFacts,
+  PanelFooter,
+  PanelIconButton,
+  PanelSection as Section,
+} from './DetailPanel'
 import { ACTION_RULES, availableActions, type PayoutAction } from './payout-actions'
 import { PAYOUT_TONE } from './payout-status'
 
@@ -64,7 +72,9 @@ export function PayoutDrawer({
      tidiness point: carrying a revealed account number or a half-typed
      decline reason across from the previous payout is how the wrong person
      gets declined. React guarantees the reset; an effect only promises it. */
-  return <Panel key={request.id} request={request} now={now} onClose={onClose} onDecide={onDecide} />
+  return (
+    <Panel key={request.id} request={request} now={now} onClose={onClose} onDecide={onDecide} />
+  )
 }
 
 function Panel({
@@ -81,9 +91,6 @@ function Panel({
   const t = useTranslations('admin.payouts')
   const ts = useTranslations('admin.overview.status')
   const format = useFormatter()
-
-  const panelRef = useRef<HTMLDivElement>(null)
-  const restoreFocusTo = useRef<HTMLElement | null>(null)
 
   const [revealed, setRevealed] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -103,32 +110,6 @@ function Panel({
     const id = setTimeout(() => setCopied(false), 2000)
     return () => clearTimeout(id)
   }, [copied])
-
-  /* Escape closes; the confirmation step eats the first Escape so it cancels
-     the decision rather than throwing away the whole panel underneath it.
-     The scroll lock and the focus restore are torn down together because
-     they are the same concern: the page is exactly as it was before. */
-  useEffect(() => {
-    restoreFocusTo.current = document.activeElement as HTMLElement
-    document.body.style.overflow = 'hidden'
-    /* Focus lands inside the panel, so a keyboard operator is not tabbing
-       through the whole queue to reach the decision. */
-    panelRef.current?.focus()
-    return () => {
-      document.body.style.overflow = ''
-      restoreFocusTo.current?.focus?.()
-    }
-  }, [])
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return
-      if (pending) setPending(null)
-      else onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [pending, onClose])
 
   const actions = availableActions(r, now)
   const ghs = (n: number) =>
@@ -155,6 +136,11 @@ function Panel({
     setReason('')
   }
 
+  /* Escape and the scrim both route through here, so a half-typed decline
+     reason is never thrown away by a stray click or a reflexive Escape: the
+     first one cancels the decision, the second closes the panel. */
+  const requestClose = () => (pending ? setPending(null) : onClose())
+
   const start = (action: PayoutAction) => {
     const rule = ACTION_RULES[action]
     if (rule.confirm || rule.reason) {
@@ -166,233 +152,28 @@ function Panel({
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex justify-end">
-      {/* Scrim. Clicking it closes, but not while a decision is half-made —
-          losing a typed decline reason to a stray click is a real loss. */}
-      <button
-        type="button"
-        aria-label={t('drawer.close')}
-        onClick={() => (pending ? setPending(null) : onClose())}
-        className="absolute inset-0 bg-ink-900/40 animate-[scrim-in_150ms_ease-out] backdrop-blur-[1px]"
-      />
-
-      <div
-        ref={panelRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label={t('drawer.title', { reference: r.reference })}
-        tabIndex={-1}
-        className={cn(
-          'relative flex max-h-full w-full flex-col bg-surface focus:outline-none',
-          // Phone: a sheet off the bottom, capped so the queue stays visible.
-          'mt-auto max-h-[92dvh] rounded-t-(--radius-panel) animate-[panel-in-bottom_220ms_cubic-bezier(0.22,1,0.36,1)]',
-          // Tablet up: a full-height side panel.
-          'sm:mt-0 sm:h-full sm:max-h-full sm:w-[27.5rem] sm:rounded-none sm:border-l sm:border-ink-200',
-          'sm:animate-[panel-in-right_220ms_cubic-bezier(0.22,1,0.36,1)]',
-        )}
-      >
-        {/* ---- Header ------------------------------------------------- */}
-        <div className="flex shrink-0 items-start gap-3 border-b border-ink-200 px-5 py-4">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2.5">
-              <span className="font-mono text-[0.8125rem] font-medium text-ink-900">
-                {r.reference}
-              </span>
-              <StatusDot tone={PAYOUT_TONE[r.status]}>{ts(r.status)}</StatusDot>
-            </div>
-            <p className="mt-1 text-[0.75rem] text-ink-400">
-              {t('drawer.requested', {
-                when: format.relativeTime(new Date(r.requestedAt), now),
-              })}
-            </p>
+    <DetailPanel
+      title={t('drawer.title', { reference: r.reference })}
+      closeLabel={t('drawer.close')}
+      onClose={requestClose}
+      header={
+        <>
+          <div className="flex items-center gap-2.5">
+            <span className="font-mono text-[0.8125rem] font-medium text-ink-900">
+              {r.reference}
+            </span>
+            <StatusDot tone={PAYOUT_TONE[r.status]}>{ts(r.status)}</StatusDot>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t('drawer.close')}
-            className="-mr-1 grid size-8 shrink-0 place-items-center rounded-(--radius-input) text-ink-400 transition-colors hover:bg-ink-100 hover:text-ink-900"
-          >
-            <X aria-hidden className="size-4" />
-          </button>
-        </div>
-
-        {/* ---- Body --------------------------------------------------- */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-          {/* Amount. The largest thing in the panel, because it is the number
-              the decision is actually about. */}
-          <p className="text-[2rem] leading-none font-semibold tracking-[-0.02em] text-ink-900 tabular-nums">
-            {ghs(r.ghs)}
-          </p>
-          <p className="mt-1.5 text-[0.75rem] text-ink-500 tabular-nums">
-            {t('drawer.pointsRate', {
-              points: r.points.toLocaleString(),
-              rate: format.number(r.points / r.ghs, { maximumFractionDigits: 0 }),
+          <p className="mt-1 text-[0.75rem] text-ink-400">
+            {t('drawer.requested', {
+              when: format.relativeTime(new Date(r.requestedAt), now),
             })}
           </p>
-
-          {/* ---- Destination ----------------------------------------- */}
-          <Section label={t('drawer.destination')}>
-            <div className="rounded-(--radius-card) border border-ink-200 bg-ink-50/50 p-3.5">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-[0.75rem] font-medium text-ink-600">{r.provider}</span>
-                <div className="flex items-center gap-1">
-                  <IconButton
-                    label={revealed ? t('drawer.hide') : t('drawer.reveal')}
-                    onClick={() => setRevealed((v) => !v)}
-                  >
-                    {revealed ? <EyeOff /> : <Eye />}
-                  </IconButton>
-                  <IconButton label={t('drawer.copy')} onClick={copy}>
-                    {copied ? <Check className="text-success-600" /> : <Copy />}
-                  </IconButton>
-                </div>
-              </div>
-
-              <p
-                className={cn(
-                  'mt-2 font-mono text-[0.9375rem] break-all text-ink-900',
-                  // The mask is wide-tracked so the dots read as redaction
-                  // rather than as an ellipsis or a loading state.
-                  !revealed && 'tracking-[0.08em]',
-                )}
-              >
-                {revealed ? r.destination : masked}
-              </p>
-
-              <p className="mt-2 text-[0.6875rem] text-ink-400">
-                {revealed ? t('drawer.revealNotice', { seconds: REVEAL_SECONDS }) : t('drawer.maskNotice')}
-              </p>
-
-              {/* Name on the account, against the name on the profile. The
-                  cheapest check there is and the one people skip. */}
-              <div className="mt-3 border-t border-ink-200 pt-3">
-                <p className="text-[0.6875rem] text-ink-400">{t('drawer.accountName')}</p>
-                <div className="mt-1 flex flex-wrap items-center gap-2">
-                  <span className="text-[0.8125rem] font-medium text-ink-900">{r.accountName}</span>
-                  <span
-                    className={cn(
-                      'inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[0.625rem] font-semibold',
-                      nameOk
-                        ? 'bg-success-50 text-success-700'
-                        : 'bg-warning-50 text-warning-600',
-                    )}
-                  >
-                    {nameOk ? <Check aria-hidden className="size-3" /> : <AlertTriangle aria-hidden className="size-3" />}
-                    {nameOk ? t('drawer.nameMatch') : t('drawer.nameCheck')}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </Section>
-
-          {/* ---- Who ------------------------------------------------- */}
-          <Section label={t('drawer.requester')}>
-            <PersonCell
-              name={r.user.name}
-              secondary={r.user.email}
-              avatarUrl={r.user.avatarUrl}
-              size="md"
-            />
-            <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3">
-              <Fact
-                label={t('drawer.joined')}
-                value={format.dateTime(new Date(r.user.joinedAt), {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric',
-                })}
-              />
-              <Fact
-                label={t('drawer.paidBefore')}
-                value={
-                  r.user.paidBefore === 0
-                    ? t('drawer.firstPayout')
-                    : t('drawer.paidBeforeValue', {
-                        count: r.user.paidBefore,
-                        total: ghs(r.user.paidBeforeGhs),
-                      })
-                }
-              />
-            </dl>
-          </Section>
-
-          {/* ---- Risk ------------------------------------------------- */}
-          {(r.riskReasons?.length || r.reuse > 0 || r.risk !== 'low') && (
-            <Section label={t('drawer.risk')}>
-              <div
-                className={cn(
-                  'rounded-(--radius-card) border p-3.5',
-                  r.risk === 'critical' || r.risk === 'high'
-                    ? 'border-danger-500/25 bg-danger-50'
-                    : 'border-warning-500/30 bg-warning-50',
-                )}
-              >
-                <p
-                  className={cn(
-                    'flex items-center gap-1.5 text-[0.8125rem] font-semibold',
-                    r.risk === 'critical' || r.risk === 'high'
-                      ? 'text-danger-700'
-                      : 'text-warning-600',
-                  )}
-                >
-                  <ShieldAlert aria-hidden className="size-4 shrink-0" />
-                  {t(`riskLevel.${r.risk}`)}
-                </p>
-                {r.riskReasons && r.riskReasons.length > 0 && (
-                  <ul className="mt-2 space-y-1">
-                    {r.riskReasons.map((reasonText) => (
-                      <li
-                        key={reasonText}
-                        className={cn(
-                          'flex gap-1.5 text-[0.75rem] leading-relaxed',
-                          r.risk === 'critical' || r.risk === 'high'
-                            ? 'text-danger-700/90'
-                            : 'text-warning-600/90',
-                        )}
-                      >
-                        <span aria-hidden>·</span>
-                        {reasonText}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </Section>
-          )}
-
-          {/* Only when the risk block has not already said it. A shared wallet
-              stated twice in two different tones reads as two findings. */}
-          {r.reuse > 0 && !r.riskReasons?.length && (
-            <p className="mt-3 flex items-start gap-2 rounded-(--radius-input) border border-ink-200 bg-surface px-3 py-2.5 text-[0.75rem] text-ink-600">
-              <Users aria-hidden className="mt-px size-3.5 shrink-0 text-ink-400" />
-              {t('drawer.reuse', { count: r.reuse })}
-            </p>
-          )}
-
-          {/* What the last operator told the user. Shown here so a second
-              operator picking up a held payout does not repeat the question
-              the user has already been asked. */}
-          {r.decisionNote && (
-            <Section label={t('drawer.note')}>
-              <blockquote className="border-l-2 border-ink-300 pl-3 text-[0.8125rem] leading-relaxed text-ink-600">
-                {r.decisionNote}
-              </blockquote>
-            </Section>
-          )}
-        </div>
-
-        {/* ---- Decision ------------------------------------------------ */}
-        {actions.length > 0 && (
-          <div
-            className={cn(
-              'shrink-0 border-t border-ink-200 bg-surface px-5 py-4',
-              'pb-[max(1rem,env(safe-area-inset-bottom))]',
-              // The confirmation step grows this bar over the content behind
-              // it; the lift makes it read as a bar that rose rather than as
-              // a second panel that appeared.
-              pending && 'shadow-[0_-10px_24px_-14px_rgb(15_23_42/0.35)]',
-            )}
-          >
+        </>
+      }
+      footer={
+        actions.length > 0 && (
+          <PanelFooter raised={Boolean(pending)}>
             {pending ? (
               <ConfirmStep
                 action={pending}
@@ -425,10 +206,176 @@ function Panel({
                 ))}
               </div>
             )}
+          </PanelFooter>
+        )
+      }
+    >
+      {/* Amount. The largest thing in the panel, because it is the number
+              the decision is actually about. */}
+      <p className="text-[2rem] leading-none font-semibold tracking-[-0.02em] text-ink-900 tabular-nums">
+        {ghs(r.ghs)}
+      </p>
+      <p className="mt-1.5 text-[0.75rem] text-ink-500 tabular-nums">
+        {t('drawer.pointsRate', {
+          points: r.points.toLocaleString(),
+          rate: format.number(r.points / r.ghs, { maximumFractionDigits: 0 }),
+        })}
+      </p>
+
+      {/* ---- Destination ----------------------------------------- */}
+      <Section label={t('drawer.destination')}>
+        <div className="rounded-(--radius-card) border border-ink-200 bg-ink-50/50 p-3.5">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-[0.75rem] font-medium text-ink-600">{r.provider}</span>
+            <div className="flex items-center gap-1">
+              <PanelIconButton
+                label={revealed ? t('drawer.hide') : t('drawer.reveal')}
+                onClick={() => setRevealed((v) => !v)}
+              >
+                {revealed ? <EyeOff /> : <Eye />}
+              </PanelIconButton>
+              <PanelIconButton label={t('drawer.copy')} onClick={copy}>
+                {copied ? <Check className="text-success-600" /> : <Copy />}
+              </PanelIconButton>
+            </div>
           </div>
-        )}
-      </div>
-    </div>
+
+          <p
+            className={cn(
+              'mt-2 font-mono text-[0.9375rem] break-all text-ink-900',
+              // The mask is wide-tracked so the dots read as redaction
+              // rather than as an ellipsis or a loading state.
+              !revealed && 'tracking-[0.08em]',
+            )}
+          >
+            {revealed ? r.destination : masked}
+          </p>
+
+          <p className="mt-2 text-[0.6875rem] text-ink-400">
+            {revealed
+              ? t('drawer.revealNotice', { seconds: REVEAL_SECONDS })
+              : t('drawer.maskNotice')}
+          </p>
+
+          {/* Name on the account, against the name on the profile. The
+                  cheapest check there is and the one people skip. */}
+          <div className="mt-3 border-t border-ink-200 pt-3">
+            <p className="text-[0.6875rem] text-ink-400">{t('drawer.accountName')}</p>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <span className="text-[0.8125rem] font-medium text-ink-900">{r.accountName}</span>
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[0.625rem] font-semibold',
+                  nameOk ? 'bg-success-50 text-success-700' : 'bg-warning-50 text-warning-600',
+                )}
+              >
+                {nameOk ? (
+                  <Check aria-hidden className="size-3" />
+                ) : (
+                  <AlertTriangle aria-hidden className="size-3" />
+                )}
+                {nameOk ? t('drawer.nameMatch') : t('drawer.nameCheck')}
+              </span>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* ---- Who ------------------------------------------------- */}
+      <Section label={t('drawer.requester')}>
+        <PersonCell
+          name={r.user.name}
+          secondary={r.user.email}
+          avatarUrl={r.user.avatarUrl}
+          size="md"
+        />
+        <div className="mt-3">
+          <PanelFacts>
+            <Fact
+              label={t('drawer.joined')}
+              value={format.dateTime(new Date(r.user.joinedAt), {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              })}
+            />
+            <Fact
+              label={t('drawer.paidBefore')}
+              value={
+                r.user.paidBefore === 0
+                  ? t('drawer.firstPayout')
+                  : t('drawer.paidBeforeValue', {
+                      count: r.user.paidBefore,
+                      total: ghs(r.user.paidBeforeGhs),
+                    })
+              }
+            />
+          </PanelFacts>
+        </div>
+      </Section>
+
+      {/* ---- Risk ------------------------------------------------- */}
+      {(r.riskReasons?.length || r.reuse > 0 || r.risk !== 'low') && (
+        <Section label={t('drawer.risk')}>
+          <div
+            className={cn(
+              'rounded-(--radius-card) border p-3.5',
+              r.risk === 'critical' || r.risk === 'high'
+                ? 'border-danger-500/25 bg-danger-50'
+                : 'border-warning-500/30 bg-warning-50',
+            )}
+          >
+            <p
+              className={cn(
+                'flex items-center gap-1.5 text-[0.8125rem] font-semibold',
+                r.risk === 'critical' || r.risk === 'high' ? 'text-danger-700' : 'text-warning-600',
+              )}
+            >
+              <ShieldAlert aria-hidden className="size-4 shrink-0" />
+              {t(`riskLevel.${r.risk}`)}
+            </p>
+            {r.riskReasons && r.riskReasons.length > 0 && (
+              <ul className="mt-2 space-y-1">
+                {r.riskReasons.map((reasonText) => (
+                  <li
+                    key={reasonText}
+                    className={cn(
+                      'flex gap-1.5 text-[0.75rem] leading-relaxed',
+                      r.risk === 'critical' || r.risk === 'high'
+                        ? 'text-danger-700/90'
+                        : 'text-warning-600/90',
+                    )}
+                  >
+                    <span aria-hidden>·</span>
+                    {reasonText}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </Section>
+      )}
+
+      {/* Only when the risk block has not already said it. A shared wallet
+              stated twice in two different tones reads as two findings. */}
+      {r.reuse > 0 && !r.riskReasons?.length && (
+        <p className="mt-3 flex items-start gap-2 rounded-(--radius-input) border border-ink-200 bg-surface px-3 py-2.5 text-[0.75rem] text-ink-600">
+          <Users aria-hidden className="mt-px size-3.5 shrink-0 text-ink-400" />
+          {t('drawer.reuse', { count: r.reuse })}
+        </p>
+      )}
+
+      {/* What the last operator told the user. Shown here so a second
+              operator picking up a held payout does not repeat the question
+              the user has already been asked. */}
+      {r.decisionNote && (
+        <Section label={t('drawer.note')}>
+          <blockquote className="border-l-2 border-ink-300 pl-3 text-[0.8125rem] leading-relaxed text-ink-600">
+            {r.decisionNote}
+          </blockquote>
+        </Section>
+      )}
+    </DetailPanel>
   )
 }
 
@@ -440,48 +387,6 @@ function ActionIcon({ action }: { action: PayoutAction }) {
   if (action === 'decline') return <X aria-hidden className={cls} />
   if (action === 'dispute') return <Gavel aria-hidden className={cls} />
   return <Check aria-hidden className={cls} />
-}
-
-function Section({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <section className="mt-5">
-      <h3 className="mb-2 text-[0.6875rem] font-semibold tracking-[0.05em] text-ink-400 uppercase">
-        {label}
-      </h3>
-      {children}
-    </section>
-  )
-}
-
-function Fact({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-w-0">
-      <dt className="text-[0.6875rem] text-ink-400">{label}</dt>
-      <dd className="mt-0.5 text-[0.8125rem] font-medium text-ink-900">{value}</dd>
-    </div>
-  )
-}
-
-function IconButton({
-  label,
-  onClick,
-  children,
-}: {
-  label: string
-  onClick: () => void
-  children: React.ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      title={label}
-      className="grid size-7 place-items-center rounded-[0.5rem] text-ink-500 transition-colors hover:bg-ink-200/60 hover:text-ink-900 [&>svg]:size-3.5"
-    >
-      {children}
-    </button>
-  )
 }
 
 /**
@@ -520,7 +425,11 @@ function ConfirmStep({
   return (
     <div>
       <p className="text-[0.8125rem] leading-relaxed font-medium text-ink-900">
-        {t(`confirm.${action}`, { amount: ghs, destination: masked, name: request.user.name })}
+        {t(`confirm.${action}`, {
+          amount: ghs,
+          destination: masked,
+          name: request.user.name,
+        })}
       </p>
 
       {rule.reason && (

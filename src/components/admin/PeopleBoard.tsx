@@ -4,18 +4,22 @@ import { useState } from 'react'
 
 import type { Person } from '@/lib/admin/types'
 
-import { ConversationPanel, PeopleGrid, type PeopleMode } from './PeopleGrid'
+import { PeopleGrid, type PeopleMode } from './PeopleGrid'
+import { PersonPanel } from './PersonPanel'
+import { PERSON_RULES, type PersonAction } from './person-actions'
 
 /**
- * Holds the selection state for the stacked people layout.
+ * Holds the account list and the selection for Users, Flagged and Messages.
  *
  * Split from PeopleGrid so the grid stays a presentational list and the three
- * pages (Users, Flagged, Messages) share one behaviour: pick somebody, a
- * panel opens beside them on a wide screen and over them on a narrow one.
+ * pages share one behaviour: pick somebody, their review panel opens over the
+ * list. It used to be that only Messages opened anything at all — the two
+ * screens an operator actually investigates on could be read but not acted
+ * on. Now all three open the same panel.
  *
- * On Messages that panel is the conversation. On the other two it is not
- * rendered yet — the person detail view is its own screen and its own piece
- * of work, so selecting there is a no-op rather than a half-built drawer.
+ * Decisions are local state only, as everywhere else in this preview. When
+ * the backend lands, `decide` becomes a server action and nothing else here
+ * changes.
  */
 export function PeopleBoard({
   people,
@@ -26,36 +30,47 @@ export function PeopleBoard({
   mode: PeopleMode
   serverNow: number
 }) {
-  const [selected, setSelected] = useState<Person | null>(null)
-  const showPanel = mode === 'messages' && selected !== null
+  const [rows, setRows] = useState(people)
+  const [openId, setOpenId] = useState<string | null>(null)
+
+  const decide = (id: string, action: PersonAction, reason: string) => {
+    const rule = PERSON_RULES[action]
+    setRows((all) =>
+      all.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              status: rule.next,
+              /* Clearing a flag clears the note with it. Leaving last month's
+                 reason on a now-active account is how a resolved case gets
+                 re-opened by the next person who reads it. */
+              flaggedBy: rule.next === 'active' ? undefined : 'admin',
+              flagReason: rule.next === 'active' ? undefined : reason || p.flagReason,
+            }
+          : p,
+      ),
+    )
+  }
+
+  const open = rows.find((p) => p.id === openId) ?? null
 
   return (
-    <div className={showPanel ? 'grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]' : undefined}>
-      <div className="min-w-0">
-        <PeopleGrid
-          people={people}
-          mode={mode}
-          serverNow={serverNow}
-          onOpen={mode === 'messages' ? setSelected : undefined}
-        />
-      </div>
-
-      {showPanel && selected && (
-        <>
-          {/* Beside the list from xl, where there is room for both. */}
-          <div className="hidden xl:block">
-            <ConversationPanel person={selected} serverNow={serverNow} onClose={() => setSelected(null)} />
-          </div>
-
-          {/* Over it below xl — a 22rem rail beside a one-column grid on a
-              tablet would leave neither usable. */}
-          <div className="fixed inset-0 z-40 flex items-end bg-ink-900/40 p-3 xl:hidden">
-            <div className="max-h-[80dvh] w-full overflow-y-auto">
-              <ConversationPanel person={selected} serverNow={serverNow} onClose={() => setSelected(null)} />
-            </div>
-          </div>
-        </>
-      )}
-    </div>
+    <>
+      <PeopleGrid
+        people={rows}
+        mode={mode}
+        serverNow={serverNow}
+        openId={openId}
+        onOpen={(p) => setOpenId(p.id)}
+        onDecide={decide}
+      />
+      <PersonPanel
+        person={open}
+        mode={mode}
+        now={serverNow}
+        onClose={() => setOpenId(null)}
+        onDecide={decide}
+      />
+    </>
   )
 }

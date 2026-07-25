@@ -192,7 +192,29 @@ export function people(): Person[] {
   const now = Date.now()
   const at = (h: number) => new Date(now - h * HOURS).toISOString()
 
-  return [
+  /*
+    Activity is DERIVED from the balance and the join date rather than typed
+    out per person, so the numbers stay internally consistent: a flagged
+    account that earned 46,800 points in thirteen days looks wrong here for
+    the same arithmetic reason it would look wrong in production, instead of
+    because somebody hand-picked a scary figure. Points-per-ad is the seeded
+    average; referrals hash off the id so they are stable between renders.
+  */
+  const withActivity = (p: Omit<Person, 'lifetimePoints' | 'adsWatched' | 'referrals' | 'lastActiveAt' | 'paidOutGhs'>): Person => {
+    const paidOutPoints = Math.round(p.balancePoints * 0.6)
+    const lifetimePoints = p.balancePoints + paidOutPoints
+    const hash = [...p.id].reduce((n, c) => n + c.charCodeAt(0), 0)
+    return {
+      ...p,
+      lifetimePoints,
+      adsWatched: Math.round(lifetimePoints / 55),
+      referrals: hash % 7,
+      lastActiveAt: at((hash % 40) + 1),
+      paidOutGhs: Math.round(paidOutPoints / 1000),
+    }
+  }
+
+  return ([
     { id: 'u1', name: 'Ama Boateng', email: 'ama.boateng@gmail.com', phone: '024 123 4567',
       avatarUrl: null, joinedAt: at(600), balancePoints: 12400, tier: 'Gold', status: 'active',
       unread: 2, lastMessageAt: at(1), lastMessage: 'My withdrawal has been pending for two days…' },
@@ -226,5 +248,5 @@ export function people(): Person[] {
       unread: 1, lastMessageAt: at(9), lastMessage: 'How long does a payout take?' },
     { id: 'u12', name: 'Selorm Agbeko', email: 'selorm.a@gmail.com', phone: '020 231 9091',
       avatarUrl: null, joinedAt: at(3000), balancePoints: 55400, tier: 'Platinum', status: 'active' },
-  ]
+  ] as const).map(withActivity)
 }
