@@ -134,7 +134,8 @@
       "emailTaken": "Un compte existe déjà avec cet e-mail. Connectez-vous.",
       "referralNotFound": "Ce code de parrainage n'existe pas",
       "invalidCredentials": "Cet e-mail ou ce mot de passe n'est pas correct",
-      "emailNotVerified": "Veuillez d'abord vérifier votre adresse e-mail"
+      "emailNotVerified": "Veuillez d'abord vérifier votre adresse e-mail",
+      "identityBlocked": "Cette adresse e-mail ou ce numéro de téléphone ne peut pas servir à créer un compte."
     }
   },
   "legal": {
@@ -668,5 +669,64 @@
       "notSignedIn": "Veuillez vous reconnecter.",
       "generic": "Une erreur s'est produite. Veuillez réessayer."
     }
+  },
+  "deleteAccount": {
+    "title": "Supprimer le compte",
+    "back": "Retour",
+    "step": "Étape {current} sur {total}",
+    "continue": "Continuer",
+    "keepAccount": "Conserver mon compte",
+    "warning": {
+      "title": "Ceci supprime votre compte",
+      "body": "Votre profil, vos coordonnées de paiement et votre historique de gains seront supprimés. Cette action est irréversible une fois terminée.",
+      "grace": "Rien ne se passe immédiatement. Votre compte sera supprimé 15 jours après votre confirmation.",
+      "cancel": "Vous changez d'avis ? Reconnectez-vous pendant ces 15 jours et la demande est annulée automatiquement.",
+      "noReuse": "Ensuite, cette adresse e-mail et ce numéro de téléphone ne pourront plus jamais servir à créer un compte.",
+      "balance": "Tout solde de points restant sera perdu. Retirez ce que vous pouvez avant de continuer.",
+      "cta": "Continuer vers la suppression"
+    },
+    "password": {
+      "title": "Saisissez votre mot de passe",
+      "body": "Confirmez qu'il s'agit bien de vous avant d'aller plus loin.",
+      "label": "Mot de passe"
+    },
+    "code": {
+      "title": "Saisissez votre code d'authentification",
+      "body": "La double authentification est activée. Saisissez le code à 6 chiffres actuel ou l'un de vos codes de secours."
+    },
+    "phrase": {
+      "title": "Saisissez la phrase de confirmation",
+      "body": "Pour confirmer, saisissez <phrase>delete my account</phrase> ci-dessous.",
+      "label": "Phrase de confirmation",
+      "placeholder": "delete my account",
+      "cta": "Supprimer mon compte"
+    },
+    "pending": {
+      "title": "Votre compte sera supprimé dans {days, plural, =0 {moins d'un jour} one {# jour} other {# jours}}",
+      "body": "Suppression prévue le {date}. Une nouvelle connexion annule automatiquement la demande — ou annulez-la maintenant.",
+      "cta": "Annuler la suppression"
+    },
+    "errors": {
+      "wrongPassword": "Ce mot de passe est incorrect.",
+      "passwordRequired": "Saisissez votre mot de passe.",
+      "codeRequired": "Saisissez le code de votre application d'authentification.",
+      "phraseMismatch": "Cela ne correspond pas. Saisissez : delete my account",
+      "notSignedIn": "Veuillez vous reconnecter.",
+      "generic": "Une erreur s'est produite. Veuillez réessayer."
+    }
+  },
+  "deletionScheduled": {
+    "title": "Votre compte est programmé pour suppression",
+    "subtitle": "Vous avez 15 jours pour changer d'avis.",
+    "subtitleDated": "Il sera supprimé le {date}.",
+    "cancel": {
+      "title": "Vous pouvez encore l'arrêter",
+      "body": "Reconnectez-vous avant cette date et votre demande de suppression sera annulée automatiquement. Rien n'est perdu."
+    },
+    "after": {
+      "title": "Après cette date",
+      "body": "Votre compte sera définitivement supprimé, et cette adresse e-mail et ce numéro de téléphone ne pourront plus jamais servir à créer un compte."
+    },
+    "signInCta": "Se connecter pour annuler"
   }
 }

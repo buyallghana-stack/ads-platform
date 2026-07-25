@@ -68,6 +68,17 @@ export async function signUpAction(formData: {
   if (taken) return { ok: false, errorKey: 'emailTaken', field: 'email' }
 
   /*
+    A deleted account's email and phone may never come back (operator spec
+    2026-07-25). Checked against hashes, so nothing here reveals WHO left —
+    and the message stays generic for the same reason.
+  */
+  const { data: blocked } = await admin.rpc('is_identity_blocked', {
+    p_email: data.email,
+    p_phone: data.phone,
+  })
+  if (blocked) return { ok: false, errorKey: 'identityBlocked', field: 'email' }
+
+  /*
     Referral code validated before the account is created. Creating a user and
     then failing on a mistyped code would leave them with an account and no
     referral, and no obvious way to fix it.
@@ -216,6 +227,31 @@ export async function logInAction(formData: {
       })
     } catch {
       // A missing login signal must never block a login.
+    }
+
+    /*
+      Signing in IS the cancel gesture for a pending deletion (operator spec
+      2026-07-25). Done here rather than behind the 2FA challenge on purpose:
+      the person has proved the password on an account they asked to delete,
+      and the kind reading — they came back — is also the reversible one. The
+      request can always be made again.
+    */
+    try {
+      const { data: cancelled } = await createAdminClient().rpc('cancel_account_deletion', {
+        p_user_id: session.user.id,
+      })
+      if (cancelled) {
+        await createAdminClient().rpc('create_notification', {
+          p_user_id: session.user.id,
+          p_type: 'announcement',
+          p_title: 'Account deletion cancelled',
+          p_body:
+            'Welcome back. Because you signed in, your account is no longer scheduled for deletion.',
+          p_reference: {},
+        })
+      }
+    } catch {
+      // Never block a sign-in on this.
     }
 
     // Enrolled accounts finish signing in on the challenge screen.

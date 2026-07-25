@@ -22,11 +22,13 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { LogOutButton } from '@/components/app/LogOutButton'
 import { Avatar } from '@/components/profile/Avatar'
 import { LanguageToggle } from '@/components/profile/LanguageToggle'
+import { DeletionPendingBanner } from '@/components/profile/DeletionPendingBanner'
 import { SettingsGroup, SettingsRow } from '@/components/profile/SettingsRow'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { Link, redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser } from '@/lib/auth/session'
 import { avatarPublicUrl } from '@/lib/profile/avatar'
+import { getDeletionStatus } from '@/lib/security/deletion-data'
 import { getTwoFactorStatus } from '@/lib/security/two-factor-data'
 
 export const metadata: Metadata = {
@@ -60,6 +62,7 @@ export default async function ProfilePage({
   const t = await getTranslations('profile')
   const profile = await getProfile(user!.id)
   const twoFactor = await getTwoFactorStatus()
+  const deletion = await getDeletionStatus()
   const fullName = profile?.full_name ?? user!.email ?? ''
   const soon = t('soon')
 
@@ -69,6 +72,13 @@ export default async function ProfilePage({
         <h1 className="text-lg font-semibold tracking-[-0.02em] text-ink-900">{t('title')}</h1>
         <p className="mt-0.5 text-[0.8125rem] text-ink-500">{t('subtitle')}</p>
       </header>
+
+      {deletion.pending && deletion.effectiveAt && (
+        <DeletionPendingBanner
+          effectiveAt={deletion.effectiveAt}
+          daysLeft={deletion.daysLeft ?? 0}
+        />
+      )}
 
       {/* Profile card ---------------------------------------------------- */}
       <div
@@ -149,7 +159,7 @@ export default async function ProfilePage({
 
         {/* Danger + logout ---------------------------------------------- */}
         <SettingsGroup>
-          <SettingsRow icon={<Trash2 />} danger label={t('danger.delete')} description={t('danger.deleteHint')} soon={soon} />
+          <SettingsRow href="/profile/delete" icon={<Trash2 />} danger label={t('danger.delete')} description={t('danger.deleteHint')} />
           <LogOutButton row />
         </SettingsGroup>
 

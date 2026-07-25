@@ -134,7 +134,8 @@
       "emailTaken": "An account with this email already exists. Log in instead.",
       "referralNotFound": "That referral code does not exist",
       "invalidCredentials": "That email or password is not correct",
-      "emailNotVerified": "Please verify your email address first"
+      "emailNotVerified": "Please verify your email address first",
+      "identityBlocked": "This email address or phone number cannot be used to open an account."
     }
   },
   "legal": {
@@ -668,5 +669,64 @@
       "notSignedIn": "Please sign in again.",
       "generic": "Something went wrong. Please try again."
     }
+  },
+  "deleteAccount": {
+    "title": "Delete account",
+    "back": "Back",
+    "step": "Step {current} of {total}",
+    "continue": "Continue",
+    "keepAccount": "Keep my account",
+    "warning": {
+      "title": "This deletes your account",
+      "body": "Your profile, payout details and earning history are removed. This cannot be undone once it completes.",
+      "grace": "Nothing happens straight away. Your account is deleted 15 days after you confirm.",
+      "cancel": "Changed your mind? Just sign in again during those 15 days and the request is cancelled automatically.",
+      "noReuse": "Afterwards, this email address and phone number can never be used to open a new account.",
+      "balance": "Any remaining points balance is forfeited. Withdraw what you can before you continue.",
+      "cta": "Continue to delete"
+    },
+    "password": {
+      "title": "Enter your password",
+      "body": "Confirm it is really you before we go any further.",
+      "label": "Password"
+    },
+    "code": {
+      "title": "Enter your authenticator code",
+      "body": "Two-factor is on for your account. Enter the current 6-digit code, or one of your backup codes."
+    },
+    "phrase": {
+      "title": "Type the confirmation phrase",
+      "body": "To confirm, type <phrase>delete my account</phrase> below.",
+      "label": "Confirmation phrase",
+      "placeholder": "delete my account",
+      "cta": "Delete my account"
+    },
+    "pending": {
+      "title": "Your account is scheduled for deletion in {days, plural, =0 {less than a day} one {# day} other {# days}}",
+      "body": "It will be deleted on {date}. Signing in again cancels this automatically — or cancel it now.",
+      "cta": "Cancel deletion"
+    },
+    "errors": {
+      "wrongPassword": "That password isn't right.",
+      "passwordRequired": "Enter your password.",
+      "codeRequired": "Enter the code from your authenticator app.",
+      "phraseMismatch": "That does not match. Type: delete my account",
+      "notSignedIn": "Please sign in again.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "deletionScheduled": {
+    "title": "Your account is scheduled for deletion",
+    "subtitle": "You have 15 days to change your mind.",
+    "subtitleDated": "It will be deleted on {date}.",
+    "cancel": {
+      "title": "You can still stop this",
+      "body": "Sign in again before that date and your deletion request is cancelled automatically. Nothing is lost."
+    },
+    "after": {
+      "title": "After that date",
+      "body": "Your account is deleted permanently, and this email address and phone number can never be used to open a new account."
+    },
+    "signInCta": "Sign in to cancel"
   }
 }

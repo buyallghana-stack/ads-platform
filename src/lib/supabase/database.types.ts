@@ -339,6 +339,30 @@ export type Database = {
         }
         Relationships: []
       }
+      blocked_identities: {
+        Row: {
+          blocked_at: string
+          email_hash: string
+          id: string
+          phone_hash: string | null
+          reason: string
+        }
+        Insert: {
+          blocked_at?: string
+          email_hash: string
+          id?: string
+          phone_hash?: string | null
+          reason?: string
+        }
+        Update: {
+          blocked_at?: string
+          email_hash?: string
+          id?: string
+          phone_hash?: string | null
+          reason?: string
+        }
+        Relationships: []
+      }
       blocked_ip_ranges: {
         Row: {
           added_at: string
@@ -719,6 +743,9 @@ export type Database = {
         Row: {
           avatar_path: string | null
           created_at: string
+          deleted_at: string | null
+          deletion_effective_at: string | null
+          deletion_requested_at: string | null
           disabled_at: string | null
           disabled_by: string | null
           disabled_reason: string | null
@@ -736,6 +763,9 @@ export type Database = {
         Insert: {
           avatar_path?: string | null
           created_at?: string
+          deleted_at?: string | null
+          deletion_effective_at?: string | null
+          deletion_requested_at?: string | null
           disabled_at?: string | null
           disabled_by?: string | null
           disabled_reason?: string | null
@@ -753,6 +783,9 @@ export type Database = {
         Update: {
           avatar_path?: string | null
           created_at?: string
+          deleted_at?: string | null
+          deletion_effective_at?: string | null
+          deletion_requested_at?: string | null
           disabled_at?: string | null
           disabled_by?: string | null
           disabled_reason?: string | null
@@ -1484,6 +1517,7 @@ export type Database = {
         }
         Returns: number
       }
+      cancel_account_deletion: { Args: { p_user_id: string }; Returns: boolean }
       cancel_redemption: {
         Args: { p_redemption_id: string; p_user_id: string }
         Returns: {
@@ -1554,6 +1588,9 @@ export type Database = {
         Returns: {
           avatar_path: string | null
           created_at: string
+          deleted_at: string | null
+          deletion_effective_at: string | null
+          deletion_requested_at: string | null
           disabled_at: string | null
           disabled_by: string | null
           disabled_reason: string | null
@@ -1680,6 +1717,12 @@ export type Database = {
         }
       }
       disable_totp: { Args: { p_user_id: string }; Returns: undefined }
+      due_account_deletions: {
+        Args: never
+        Returns: {
+          user_id: string
+        }[]
+      }
       email_is_registered: { Args: { p_email: string }; Returns: boolean }
       evaluate_signup_fraud: {
         Args: {
@@ -1704,11 +1747,15 @@ export type Database = {
           to_grace: number
         }[]
       }
+      finalise_account_deletion: { Args: { p_user_id: string }; Returns: Json }
       flag_user_account: {
         Args: { p_admin_id: string; p_reason: string; p_user_id: string }
         Returns: {
           avatar_path: string | null
           created_at: string
+          deleted_at: string | null
+          deletion_effective_at: string | null
+          deletion_requested_at: string | null
           disabled_at: string | null
           disabled_by: string | null
           disabled_reason: string | null
@@ -1758,6 +1805,7 @@ export type Database = {
           question_text: string
         }[]
       }
+      get_deletion_status: { Args: never; Returns: Json }
       get_eligible_ads: {
         Args: { p_limit?: number; p_user_id: string }
         Returns: {
@@ -1817,7 +1865,12 @@ export type Database = {
         }[]
       }
       has_withdrawal_pin: { Args: { p_user_id: string }; Returns: boolean }
+      identity_hash: { Args: { p_value: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
+      is_identity_blocked: {
+        Args: { p_email: string; p_phone: string }
+        Returns: boolean
+      }
       mark_all_notifications_read: { Args: never; Returns: undefined }
       mark_notification_read: { Args: { p_id: string }; Returns: undefined }
       mark_redemption_failed: {
@@ -1901,6 +1954,7 @@ export type Database = {
         }
       }
       mask_payout_value: { Args: { p_value: string }; Returns: string }
+      normalise_phone: { Args: { p_phone: string }; Returns: string }
       precheck_signup_fraud: {
         Args: { p_email: string; p_ip?: unknown }
         Returns: Database["public"]["CompositeTypes"]["fraud_decision"]
@@ -2029,6 +2083,7 @@ export type Database = {
         Args: { p_codes: string[]; p_user_id: string }
         Returns: number
       }
+      request_account_deletion: { Args: { p_user_id: string }; Returns: string }
       request_redemption: {
         Args: {
           p_ip?: unknown

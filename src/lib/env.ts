@@ -61,6 +61,14 @@ const serverSchema = z.object({
    * Rotating it invalidates every enrolled authenticator.
    */
   TOTP_SECRET_KEY: z.string().optional(),
+
+  /**
+   * Bearer token guarding the scheduled deletion-purge route, which would
+   * otherwise be an unauthenticated endpoint that erases accounts. Optional so
+   * the app boots without it; the route refuses to run when it is missing
+   * rather than running unguarded.
+   */
+  CRON_SECRET: z.string().optional(),
 })
 
 /**
@@ -105,6 +113,7 @@ export function serverEnv(): z.infer<typeof serverSchema> {
     PAYOUTS_ENABLED: process.env.PAYOUTS_ENABLED,
     GEO_RESTRICTION_ENABLED: process.env.GEO_RESTRICTION_ENABLED,
     TOTP_SECRET_KEY: process.env.TOTP_SECRET_KEY || undefined,
+    CRON_SECRET: process.env.CRON_SECRET || undefined,
   })
 
   if (!parsed.success) {
