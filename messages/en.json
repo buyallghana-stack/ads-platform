@@ -757,5 +757,45 @@
       "signedIn": "Signed in",
       "lastActive": "Last active"
     }
+  },
+  "upgrade": {
+    "title": "Upgrade",
+    "subtitle": "Raise your daily limit and earn at a better rate.",
+    "stacking": "Plans stack. Hold more than one and the daily limits add up, while the best rate and the lowest payout threshold apply. You can hold each plan once.",
+    "footnote": "Every plan runs for three months. Prices are one-off for that period — nothing renews automatically.",
+    "current": {
+      "free": "You're on the Free plan",
+      "freeHint": "Buy a plan to watch more ads a day and earn at a better rate.",
+      "holding": "{count, plural, one {You hold # plan} other {You hold # plans}}",
+      "holdingHint": "These are your combined benefits right now.",
+      "dailyAds": "Ads a day",
+      "rate": "Earning rate",
+      "payoutFrom": "Payout from"
+    },
+    "benefits": {
+      "ads": "{count} ads a day",
+      "rate": "×{multiplier} points on every ad",
+      "payout": "Withdraw from {points} points",
+      "referral": "×{multiplier} referral bonuses"
+    },
+    "card": {
+      "period": "for {months} months",
+      "choose": "Get {plan}",
+      "held": "Active",
+      "popular": "Most popular",
+      "endsOn": "Runs until {date}"
+    },
+    "checkout": {
+      "title": "{plan} plan",
+      "subtitle": "One payment, {months} months of benefits.",
+      "total": "Total to pay",
+      "payWith": "Pay with",
+      "momo": "Mobile Money",
+      "crypto": "Cryptocurrency",
+      "notYet": "Checkout is not switched on yet. Mobile money and crypto payment are being set up — your plan will be purchasable here as soon as they are live.",
+      "ready": "Choose a payment method to continue.",
+      "close": "Close",
+      "back": "Back to plans"
+    }
   }
 }

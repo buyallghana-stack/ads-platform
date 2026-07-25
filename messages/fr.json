@@ -757,5 +757,45 @@
       "signedIn": "Connexion",
       "lastActive": "Dernière activité"
     }
+  },
+  "upgrade": {
+    "title": "Passer à un forfait",
+    "subtitle": "Augmentez votre limite quotidienne et gagnez à un meilleur taux.",
+    "stacking": "Les forfaits se cumulent. Si vous en détenez plusieurs, les limites quotidiennes s'additionnent, et le meilleur taux ainsi que le seuil de retrait le plus bas s'appliquent. Chaque forfait ne peut être détenu qu'une fois.",
+    "footnote": "Chaque forfait dure trois mois. Le prix est unique pour cette période — rien ne se renouvelle automatiquement.",
+    "current": {
+      "free": "Vous êtes sur le forfait Gratuit",
+      "freeHint": "Prenez un forfait pour regarder plus de publicités par jour et gagner à un meilleur taux.",
+      "holding": "{count, plural, one {Vous détenez # forfait} other {Vous détenez # forfaits}}",
+      "holdingHint": "Voici vos avantages cumulés actuels.",
+      "dailyAds": "Pubs par jour",
+      "rate": "Taux de gain",
+      "payoutFrom": "Retrait dès"
+    },
+    "benefits": {
+      "ads": "{count} publicités par jour",
+      "rate": "×{multiplier} points sur chaque publicité",
+      "payout": "Retrait dès {points} points",
+      "referral": "×{multiplier} sur les bonus de parrainage"
+    },
+    "card": {
+      "period": "pour {months} mois",
+      "choose": "Prendre {plan}",
+      "held": "Actif",
+      "popular": "Le plus choisi",
+      "endsOn": "Valable jusqu'au {date}"
+    },
+    "checkout": {
+      "title": "Forfait {plan}",
+      "subtitle": "Un seul paiement, {months} mois d'avantages.",
+      "total": "Total à payer",
+      "payWith": "Payer avec",
+      "momo": "Mobile Money",
+      "crypto": "Cryptomonnaie",
+      "notYet": "Le paiement n'est pas encore activé. Le mobile money et la crypto sont en cours de mise en place — votre forfait pourra être acheté ici dès qu'ils seront disponibles.",
+      "ready": "Choisissez un moyen de paiement pour continuer.",
+      "close": "Fermer",
+      "back": "Retour aux forfaits"
+    }
   }
 }
