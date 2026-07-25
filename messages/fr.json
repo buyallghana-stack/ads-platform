@@ -761,22 +761,25 @@
   "upgrade": {
     "title": "Passer à un forfait",
     "subtitle": "Augmentez votre limite quotidienne et gagnez à un meilleur taux.",
-    "stacking": "Les forfaits se cumulent. Si vous en détenez plusieurs, les limites quotidiennes s'additionnent, et le meilleur taux ainsi que le seuil de retrait le plus bas s'appliquent. Chaque forfait ne peut être détenu qu'une fois.",
+    "stacking": "Les forfaits se cumulent. Si vous en détenez plusieurs, vos limites quotidiennes s'additionnent et vos taux de gain s'additionnent également, et le seuil de retrait le plus bas s'applique. Chaque forfait détenu compte. Chaque forfait ne peut être détenu qu'une fois.",
     "footnote": "Chaque forfait dure trois mois. Le prix est unique pour cette période — rien ne se renouvelle automatiquement.",
     "current": {
       "free": "Vous êtes sur le forfait Gratuit",
       "freeHint": "Prenez un forfait pour regarder plus de publicités par jour et gagner à un meilleur taux.",
       "holding": "{count, plural, one {Vous détenez # forfait} other {Vous détenez # forfaits}}",
-      "holdingHint": "Voici vos avantages cumulés actuels.",
+      "holdingHint": "Vos forfaits sont cumulés ci-dessous — chacun d'eux est pris en compte.",
       "dailyAds": "Pubs par jour",
-      "rate": "Taux de gain",
+      "rate": "Bonus de gain",
       "payoutFrom": "Retrait dès"
     },
     "benefits": {
       "ads": "{count} publicités par jour",
-      "rate": "×{multiplier} points sur chaque publicité",
+      "adsHint": "{extra} de plus que le forfait gratuit",
+      "rate": "+{percent}% de points sur chaque publicité",
+      "rateHint": "une publicité à {base} points vous en rapporte {paid}",
       "payout": "Retrait dès {points} points",
-      "referral": "×{multiplier} sur les bonus de parrainage"
+      "payoutHint": "environ {money}",
+      "referral": "+{percent}% sur les bonus de parrainage"
     },
     "card": {
       "period": "pour {months} mois",

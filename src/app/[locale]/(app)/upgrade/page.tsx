@@ -5,7 +5,12 @@ import { setRequestLocale } from 'next-intl/server'
 import { UpgradeView } from '@/components/upgrade/UpgradeView'
 import { redirect } from '@/i18n/navigation'
 import { getSessionUser } from '@/lib/auth/session'
-import { getHeldPlans, getPlans, getResolvedBenefits } from '@/lib/subscriptions/data'
+import {
+  getHeldPlans,
+  getPlanReferences,
+  getPlans,
+  getResolvedBenefits,
+} from '@/lib/subscriptions/data'
 
 export const metadata: Metadata = {
   title: 'Upgrade',
@@ -31,13 +36,21 @@ export default async function UpgradePage({
   const user = await getSessionUser()
   if (!user) redirect({ href: '/login', locale })
 
-  const [plans, held, benefits] = await Promise.all([
+  const [plans, held, benefits, references] = await Promise.all([
     getPlans(),
     getHeldPlans(user!.id),
     getResolvedBenefits(user!.id),
+    getPlanReferences(),
   ])
 
   return (
-    <UpgradeView plans={plans} held={held} benefits={benefits} checkoutEnabled={false} />
+    <UpgradeView
+      plans={plans}
+      held={held}
+      benefits={benefits}
+      freeDailyAdCap={references.freeDailyAdCap}
+      pointsPerCurrencyUnit={references.pointsPerCurrencyUnit}
+      checkoutEnabled={false}
+    />
   )
 }

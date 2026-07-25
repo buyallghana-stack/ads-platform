@@ -25,11 +25,17 @@ export function UpgradeView({
   plans,
   held,
   benefits,
+  freeDailyAdCap,
+  pointsPerCurrencyUnit,
   checkoutEnabled,
 }: {
   plans: Plan[]
   held: HeldPlan[]
   benefits: ResolvedBenefits | null
+  /** The free allowance, so plans can say how many MORE ads they buy. */
+  freeDailyAdCap: number
+  /** Points to one cedi, for showing thresholds in money. */
+  pointsPerCurrencyUnit: number
   /** False until mobile money and crypto checkout are wired up. */
   checkoutEnabled: boolean
 }) {
@@ -82,11 +88,15 @@ export function UpgradeView({
             />
             <Stat
               label={t('current.rate')}
-              value={`×${benefits.rewardMultiplier.toFixed(2)}`}
+              value={`+${Math.round((benefits.rewardMultiplier - 1) * 100)}%`}
             />
             <Stat
               label={t('current.payoutFrom')}
-              value={format.number(benefits.redemptionMinimumPoints)}
+              value={format.number(benefits.redemptionMinimumPoints / pointsPerCurrencyUnit, {
+                style: 'currency',
+                currency: 'GHS',
+                maximumFractionDigits: 0,
+              })}
             />
           </dl>
         )}
@@ -115,6 +125,8 @@ export function UpgradeView({
             // The middle plan carries the badge: it is the one most people
             // should land on, and an unmarked grid makes everyone hesitate.
             recommended={!heldByTier.has(plan.id) && plan.slug === 'silver'}
+            freeDailyAdCap={freeDailyAdCap}
+            pointsPerCurrencyUnit={pointsPerCurrencyUnit}
             onChoose={() => setSelected(plan)}
           />
         ))}

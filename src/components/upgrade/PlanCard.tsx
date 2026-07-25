@@ -23,12 +23,18 @@ export function PlanCard({
   held,
   endsAt,
   recommended,
+  freeDailyAdCap,
+  pointsPerCurrencyUnit,
   onChoose,
 }: {
   plan: Plan
   held: boolean
   endsAt: string | null
   recommended: boolean
+  /** The free allowance, so a plan can say how many MORE ads it buys. */
+  freeDailyAdCap: number
+  /** Points to one cedi, for showing the payout threshold in money. */
+  pointsPerCurrencyUnit: number
   onChoose: () => void
 }) {
   const t = useTranslations('upgrade')
@@ -40,16 +46,45 @@ export function PlanCard({
     maximumFractionDigits: 0,
   })
 
+  /*
+    Expressed as percentages with a worked example rather than "x1.10".
+    A multiplier is an abstraction; "+10% — a 50-point ad pays 55" is the same
+    fact in a form someone can check against the ad they just watched.
+    EXAMPLE_AD_POINTS sits in the middle of the seeded ads (35–80 points).
+  */
+  const EXAMPLE_AD_POINTS = 50
+  const ratePercent = Math.round((plan.rewardMultiplier - 1) * 100)
+  const referralPercent = Math.round((plan.referralBonusMultiplier - 1) * 100)
+  const examplePays = Math.round(EXAMPLE_AD_POINTS * plan.rewardMultiplier)
+  const extraAds = plan.dailyAdCap - freeDailyAdCap
+
   const benefits = [
-    { icon: Zap, text: t('benefits.ads', { count: plan.dailyAdCap }) },
-    { icon: Gem, text: t('benefits.rate', { multiplier: plan.rewardMultiplier.toFixed(2) }) },
+    {
+      icon: Zap,
+      text: t('benefits.ads', { count: plan.dailyAdCap }),
+      hint: extraAds > 0 ? t('benefits.adsHint', { extra: extraAds }) : null,
+    },
+    {
+      icon: Gem,
+      text: t('benefits.rate', { percent: ratePercent }),
+      hint: t('benefits.rateHint', { base: EXAMPLE_AD_POINTS, paid: examplePays }),
+    },
     {
       icon: Check,
-      text: t('benefits.payout', {
-        points: format.number(plan.redemptionMinimumPoints),
+      text: t('benefits.payout', { points: format.number(plan.redemptionMinimumPoints) }),
+      hint: t('benefits.payoutHint', {
+        money: format.number(plan.redemptionMinimumPoints / pointsPerCurrencyUnit, {
+          style: 'currency',
+          currency: plan.currencyCode,
+          maximumFractionDigits: 0,
+        }),
       }),
     },
-    { icon: Layers, text: t('benefits.referral', { multiplier: plan.referralBonusMultiplier.toFixed(2) }) },
+    {
+      icon: Layers,
+      text: t('benefits.referral', { percent: referralPercent }),
+      hint: null,
+    },
   ]
 
   return (
@@ -91,12 +126,17 @@ export function PlanCard({
       )}
 
       <ul className="mt-4 flex flex-1 flex-col gap-2">
-        {benefits.map(({ icon: Icon, text }) => (
+        {benefits.map(({ icon: Icon, text, hint }) => (
           <li key={text} className="flex items-start gap-2.5">
             <span className="mt-0.5 grid size-4.5 shrink-0 place-items-center rounded-full bg-violet-50 text-violet-600">
               <Icon aria-hidden className="size-3" />
             </span>
-            <span className="text-[0.8125rem] leading-relaxed text-ink-700">{text}</span>
+            <span className="min-w-0">
+              <span className="block text-[0.8125rem] leading-relaxed text-ink-700">{text}</span>
+              {hint && (
+                <span className="block text-[0.75rem] leading-snug text-ink-400">{hint}</span>
+              )}
+            </span>
           </li>
         ))}
       </ul>

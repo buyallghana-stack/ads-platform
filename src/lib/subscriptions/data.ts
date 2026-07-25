@@ -122,3 +122,24 @@ export const getResolvedBenefits = cache(
     }
   },
 )
+
+/**
+ * Reference values the Upgrade screen needs to explain a plan in plain terms:
+ * the free allowance a plan is measured against, and what a point is worth.
+ * Both are operator config, so neither is hardcoded in the UI.
+ */
+export const getPlanReferences = cache(
+  async (): Promise<{ freeDailyAdCap: number; pointsPerCurrencyUnit: number }> => {
+    const supabase = await createClient()
+
+    const [{ data: free }, { data: rate }] = await Promise.all([
+      supabase.from('tiers').select('daily_ad_cap').eq('is_default', true).maybeSingle(),
+      supabase.from('app_config').select('value').eq('key', 'points_per_currency_unit').maybeSingle(),
+    ])
+
+    return {
+      freeDailyAdCap: free?.daily_ad_cap ?? 20,
+      pointsPerCurrencyUnit: Number(rate?.value ?? 1000),
+    }
+  },
+)
