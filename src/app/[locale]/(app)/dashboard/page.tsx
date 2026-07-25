@@ -3,12 +3,12 @@ import type { Metadata } from 'next'
 import { ArrowUpRight, PlayCircle, TrendingUp, Trophy } from 'lucide-react'
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server'
 
-import { LogOutButton } from '@/components/app/LogOutButton'
 import { Logo } from '@/components/brand/Logo'
 import { PerformanceChart } from '@/components/dashboard/PerformanceChart'
 import { ReferralCard } from '@/components/dashboard/ReferralCard'
 import { TransactionHistory } from '@/components/dashboard/TransactionHistory'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
+import { SupportChatButton } from '@/components/support/SupportChatButton'
 import { ThemeSwitchButton } from '@/components/theme/ThemeSwitchButton'
 import { Card, CardHeader, StatCard as Stat } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -80,14 +80,20 @@ export default async function HomePage({
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-5 sm:px-6 md:px-8 md:py-7">
       {/* Home-only header: brand (mobile — the sidebar carries it on md+),
-          theme switch and the red icon-only logout. Other tabs get none of
-          this chrome (operator direction 2026-07-24). */}
+          then notifications, theme and support chat. Other tabs get none of
+          this chrome (operator direction 2026-07-24).
+
+          Logout was removed from here (operator, 2026-07-25). It still lives
+          on Profile, as the red row at the bottom of the settings list, which
+          is where every app this audience uses keeps it — and a one-tap sign
+          out sitting beside the theme switch is a mis-tap that costs somebody
+          their session on a phone. */}
       <header className="flex items-center gap-3">
         <Logo variant="dark" className="md:hidden" />
         <div className="ml-auto flex items-center gap-0.5">
           <NotificationBell notifications={notifications} unreadCount={unreadCount} now={now} />
           <ThemeSwitchButton />
-          <LogOutButton />
+          <SupportChatButton />
         </div>
       </header>
 

@@ -944,5 +944,12 @@
         "cta": "Retour aux forfaits"
       }
     }
+  },
+  "support": {
+    "chat": {
+      "label": "Chat d’assistance",
+      "soonTitle": "Le chat d’assistance arrive",
+      "soonBody": "Nous mettons en place le chat en direct. En attendant, tout message urgent concernant votre solde ou un retrait vous parviendra dans vos notifications."
+    }
   }
 }

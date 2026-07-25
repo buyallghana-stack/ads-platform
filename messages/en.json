@@ -944,5 +944,12 @@
         "cta": "Back to plans"
       }
     }
+  },
+  "support": {
+    "chat": {
+      "label": "Support chat",
+      "soonTitle": "Chat support is on the way",
+      "soonBody": "We're setting up live chat. In the meantime, anything urgent about your balance or a payout will reach you in your notifications."
+    }
   }
 }
