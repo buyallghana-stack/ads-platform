@@ -380,7 +380,10 @@
       "password": "Changer le mot de passe",
       "email": "Changer l'e-mail",
       "sessions": "Sessions actives",
-      "sessionsHint": "Voyez où vous êtes connecté, déconnectez d'autres appareils"
+      "sessionsHint": "Voyez où vous êtes connecté, déconnectez d'autres appareils",
+      "twoFactorOn": "Activée",
+      "twoFactorOff": "Désactivée",
+      "backupCodesLeft": "{count, plural, =0 {Aucun restant} other {# restants}}"
     },
     "preferences": {
       "appearance": "Apparence",
@@ -524,6 +527,90 @@
       "notSignedIn": "Veuillez vous reconnecter.",
       "invalidPath": "Une erreur s'est produite. Veuillez réessayer.",
       "generic": "Impossible d'enregistrer vos modifications. Veuillez réessayer."
+    }
+  },
+  "twoFactor": {
+    "title": "Authentification à deux facteurs",
+    "subtitle": "Une vérification supplémentaire pour les changements sensibles.",
+    "back": "Retour",
+    "digit": "Chiffre {position} sur 6",
+    "off": {
+      "title": "Ajouter une deuxième étape",
+      "body": "Utilisez une application d'authentification pour approuver les changements sensibles — mot de passe, e-mail et réinitialisation du code PIN de retrait. Aucun code ne sera demandé pour vous connecter ni pour regarder des publicités.",
+      "cta": "Configurer la double authentification"
+    },
+    "on": {
+      "title": "Double authentification activée",
+      "since": "Protège votre compte depuis le {date}",
+      "codesLeft": "{count, plural, =0 {Aucun code de secours restant} one {# code de secours restant} other {# codes de secours restants}}",
+      "regenerate": "Obtenir de nouveaux codes de secours",
+      "turnOff": "Désactiver la double authentification"
+    },
+    "scan": {
+      "title": "Scannez ce code",
+      "body": "Ouvrez Google Authenticator (ou une autre application d'authentification), choisissez Ajouter, puis scannez.",
+      "qrAlt": "Code QR pour votre application d'authentification",
+      "manual": "Impossible de scanner ? Saisissez plutôt cette clé",
+      "next": "Je l'ai ajouté"
+    },
+    "verify": {
+      "title": "Saisissez le code à 6 chiffres",
+      "body": "Votre application affiche un nouveau code toutes les 30 secondes. Saisissez celui affiché maintenant.",
+      "cta": "Activer la double authentification"
+    },
+    "codes": {
+      "title": "Enregistrez vos codes de secours",
+      "body": "Ils vous permettent de revenir si vous perdez votre téléphone. Chaque code ne fonctionne qu'une fois.",
+      "replaced": "Vos anciens codes ne fonctionnent plus. Enregistrez ceux-ci.",
+      "warning": "C'est la seule fois où ces codes s'affichent. Conservez-les en lieu sûr — pas au même endroit que votre téléphone.",
+      "copy": "Copier",
+      "copied": "Copié",
+      "download": "Télécharger",
+      "fileHeading": "Codes de secours SidePerks — chaque code ne fonctionne qu'une fois.",
+      "acknowledge": "J'ai enregistré ces codes en lieu sûr.",
+      "done": "Terminé"
+    },
+    "regen": {
+      "title": "Confirmez votre identité",
+      "body": "Saisissez le code actuel de votre application d'authentification pour obtenir de nouveaux codes.",
+      "cta": "Générer de nouveaux codes"
+    },
+    "disable": {
+      "title": "Désactiver la double authentification ?",
+      "body": "Saisissez le code actuel de votre application d'authentification pour confirmer.",
+      "bodyPassword": "Saisissez le mot de passe de votre compte pour confirmer.",
+      "passwordPlaceholder": "Votre mot de passe",
+      "usePassword": "Téléphone perdu ? Utilisez votre mot de passe",
+      "useCode": "Utiliser un code de mon application d'authentification",
+      "cta": "Désactiver la double authentification"
+    },
+    "offDone": {
+      "title": "Double authentification désactivée",
+      "body": "Vos codes de secours ont été supprimés. Vous pouvez la réactiver à tout moment.",
+      "button": "Retour au profil"
+    },
+    "backup": {
+      "title": "Codes de secours",
+      "subtitle": "Revenez si vous perdez votre application d'authentification.",
+      "remaining": "{remaining} codes restants sur {total}",
+      "hint": "Chaque code ne fonctionne qu'une fois. Générez-en de nouveaux quand il en reste peu.",
+      "lowWarning": "Il ne vous en reste presque plus. Générez-en de nouveaux pour ne pas perdre l'accès.",
+      "regenerate": "Obtenir de nouveaux codes de secours",
+      "regenerateHint": "Remplace tous les codes existants",
+      "offTitle": "Aucun code pour l'instant",
+      "offBody": "Les codes de secours accompagnent la double authentification. Activez-la pour en recevoir.",
+      "offCta": "Configurer la double authentification"
+    },
+    "errors": {
+      "wrongCode": "Ce code est incorrect. Vérifiez votre application et réessayez.",
+      "wrongCodeAttempts": "{attempts, plural, =0 {Ce code est incorrect.} one {Ce code est incorrect. # essai restant.} other {Ce code est incorrect. # essais restants.}}",
+      "locked": "Trop de codes incorrects. Réessayez dans {minutes, plural, one {# minute} other {# minutes}}.",
+      "wrongPassword": "Ce mot de passe est incorrect.",
+      "notEnabled": "La double authentification n'est pas activée sur ce compte.",
+      "noEnrollment": "Cette configuration a expiré. Recommencez.",
+      "stepUpRequired": "Saisissez un code ou votre mot de passe pour confirmer.",
+      "notSignedIn": "Veuillez vous reconnecter.",
+      "generic": "Une erreur s'est produite. Veuillez réessayer."
     }
   }
 }

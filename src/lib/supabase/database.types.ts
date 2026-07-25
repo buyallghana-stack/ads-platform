@@ -1117,6 +1117,30 @@ export type Database = {
           },
         ]
       }
+      user_backup_codes: {
+        Row: {
+          code_hash: string
+          created_at: string
+          id: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          code_hash: string
+          created_at?: string
+          id?: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          code_hash?: string
+          created_at?: string
+          id?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_balances: {
         Row: {
           balance: number
@@ -1292,6 +1316,10 @@ export type Database = {
           pin_hash: string | null
           pin_locked_until: string | null
           pin_set_at: string | null
+          totp_confirmed_at: string | null
+          totp_failed_attempts: number
+          totp_locked_until: string | null
+          totp_secret_cipher: string | null
           updated_at: string
           user_id: string
         }
@@ -1300,6 +1328,10 @@ export type Database = {
           pin_hash?: string | null
           pin_locked_until?: string | null
           pin_set_at?: string | null
+          totp_confirmed_at?: string | null
+          totp_failed_attempts?: number
+          totp_locked_until?: string | null
+          totp_secret_cipher?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1308,6 +1340,10 @@ export type Database = {
           pin_hash?: string | null
           pin_locked_until?: string | null
           pin_set_at?: string | null
+          totp_confirmed_at?: string | null
+          totp_failed_attempts?: number
+          totp_locked_until?: string | null
+          totp_secret_cipher?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1512,6 +1548,7 @@ export type Database = {
         Returns: boolean
       }
       clear_notifications: { Args: never; Returns: undefined }
+      clear_totp_failures: { Args: { p_user_id: string }; Returns: undefined }
       clear_user_flag: {
         Args: { p_admin_id: string; p_user_id: string }
         Returns: {
@@ -1561,6 +1598,14 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      confirm_totp_enrollment: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      consume_backup_code: {
+        Args: { p_code: string; p_user_id: string }
+        Returns: Json
       }
       create_notification: {
         Args: {
@@ -1634,6 +1679,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      disable_totp: { Args: { p_user_id: string }; Returns: undefined }
       email_is_registered: { Args: { p_email: string }; Returns: boolean }
       evaluate_signup_fraud: {
         Args: {
@@ -1754,6 +1800,8 @@ export type Database = {
           total_referred: number
         }[]
       }
+      get_totp_secret_cipher: { Args: { p_user_id: string }; Returns: string }
+      get_totp_status: { Args: never; Returns: Json }
       get_user_earning_status: {
         Args: { p_user_id: string }
         Returns: {
@@ -1912,6 +1960,7 @@ export type Database = {
         Args: { p_ad_id: string; p_user_id: string }
         Returns: string
       }
+      register_totp_failure: { Args: { p_user_id: string }; Returns: Json }
       reject_redemption: {
         Args: { p_admin_id: string; p_reason: string; p_redemption_id: string }
         Returns: {
@@ -1976,6 +2025,10 @@ export type Database = {
         }
       }
       release_matured_holds: { Args: never; Returns: number }
+      replace_backup_codes: {
+        Args: { p_codes: string[]; p_user_id: string }
+        Returns: number
+      }
       request_redemption: {
         Args: {
           p_ip?: unknown
@@ -2088,6 +2141,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      start_totp_enrollment: {
+        Args: { p_cipher: string; p_user_id: string }
+        Returns: undefined
+      }
       submit_ad_answers: {
         Args: { p_ad_id: string; p_answers: Json; p_user_id: string }
         Returns: Database["public"]["CompositeTypes"]["ad_answer_result"]
@@ -2098,6 +2155,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      totp_lock_state: { Args: { p_user_id: string }; Returns: Json }
       utc_today: { Args: never; Returns: string }
       verify_withdrawal_pin: {
         Args: { p_pin: string; p_user_id: string }

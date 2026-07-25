@@ -380,7 +380,10 @@
       "password": "Change password",
       "email": "Change email",
       "sessions": "Active sessions",
-      "sessionsHint": "See where you're signed in, sign out other devices"
+      "sessionsHint": "See where you're signed in, sign out other devices",
+      "twoFactorOn": "On",
+      "twoFactorOff": "Off",
+      "backupCodesLeft": "{count, plural, =0 {None left} other {# left}}"
     },
     "preferences": {
       "appearance": "Appearance",
@@ -524,6 +527,90 @@
       "notSignedIn": "Please sign in again.",
       "invalidPath": "Something went wrong. Please try again.",
       "generic": "Could not save your changes. Please try again."
+    }
+  },
+  "twoFactor": {
+    "title": "Two-factor authentication",
+    "subtitle": "An extra check on sensitive changes.",
+    "back": "Back",
+    "digit": "Digit {position} of 6",
+    "off": {
+      "title": "Add a second step",
+      "body": "Use an authenticator app to approve sensitive changes — your password, your email, and resetting your withdrawal PIN. You will not need a code to sign in or to watch ads.",
+      "cta": "Set up two-factor"
+    },
+    "on": {
+      "title": "Two-factor is on",
+      "since": "Protecting your account since {date}",
+      "codesLeft": "{count, plural, =0 {No backup codes left} one {# backup code left} other {# backup codes left}}",
+      "regenerate": "Get new backup codes",
+      "turnOff": "Turn off two-factor"
+    },
+    "scan": {
+      "title": "Scan this code",
+      "body": "Open Google Authenticator (or any authenticator app), choose Add, and scan.",
+      "qrAlt": "QR code for your authenticator app",
+      "manual": "Can't scan? Enter this key instead",
+      "next": "I've added it"
+    },
+    "verify": {
+      "title": "Enter the 6-digit code",
+      "body": "Your app shows a new code every 30 seconds. Type the one showing now.",
+      "cta": "Turn on two-factor"
+    },
+    "codes": {
+      "title": "Save your backup codes",
+      "body": "These get you back in if you lose your phone. Each one works once.",
+      "replaced": "Your old codes no longer work. Save these instead.",
+      "warning": "This is the only time these are shown. Store them somewhere safe — not in the same place as your phone.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "download": "Download",
+      "fileHeading": "SidePerks backup codes — each code works once.",
+      "acknowledge": "I have saved these codes somewhere safe.",
+      "done": "Done"
+    },
+    "regen": {
+      "title": "Confirm it's you",
+      "body": "Enter the current code from your authenticator app to get a new set.",
+      "cta": "Generate new codes"
+    },
+    "disable": {
+      "title": "Turn off two-factor?",
+      "body": "Enter the current code from your authenticator app to confirm.",
+      "bodyPassword": "Enter your account password to confirm.",
+      "passwordPlaceholder": "Your password",
+      "usePassword": "Lost your phone? Use your password instead",
+      "useCode": "Use a code from my authenticator app",
+      "cta": "Turn off two-factor"
+    },
+    "offDone": {
+      "title": "Two-factor is off",
+      "body": "Your backup codes have been deleted. You can turn two-factor back on at any time.",
+      "button": "Back to Profile"
+    },
+    "backup": {
+      "title": "Backup codes",
+      "subtitle": "Get back in if you lose your authenticator.",
+      "remaining": "{remaining} of {total} codes left",
+      "hint": "Each code works once. Generate a new set when you are running low.",
+      "lowWarning": "You are almost out. Generate a new set so you do not get locked out.",
+      "regenerate": "Get new backup codes",
+      "regenerateHint": "Replaces every existing code",
+      "offTitle": "No codes yet",
+      "offBody": "Backup codes come with two-factor authentication. Turn it on and you will get a set to save.",
+      "offCta": "Set up two-factor"
+    },
+    "errors": {
+      "wrongCode": "That code isn't right. Check your app and try again.",
+      "wrongCodeAttempts": "{attempts, plural, =0 {That code isn't right.} one {That code isn't right. # try left.} other {That code isn't right. # tries left.}}",
+      "locked": "Too many wrong codes. Try again in {minutes, plural, one {# minute} other {# minutes}}.",
+      "wrongPassword": "That password isn't right.",
+      "notEnabled": "Two-factor isn't turned on for this account.",
+      "noEnrollment": "That setup expired. Start again.",
+      "stepUpRequired": "Enter a code or your password to confirm.",
+      "notSignedIn": "Please sign in again.",
+      "generic": "Something went wrong. Please try again."
     }
   }
 }

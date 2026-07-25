@@ -51,6 +51,16 @@ const serverSchema = z.object({
    * checklist (§10) verifies it.
    */
   GEO_RESTRICTION_ENABLED: envBool(false),
+
+  /**
+   * AES-256-GCM key (base64, 32 bytes) encrypting stored TOTP secrets, so a
+   * database dump alone cannot yield anyone's second factor. Optional here,
+   * asserted at point of use (`requireTotpKey`), so the app still boots for
+   * everything unrelated to 2FA when it is missing.
+   *
+   * Rotating it invalidates every enrolled authenticator.
+   */
+  TOTP_SECRET_KEY: z.string().optional(),
 })
 
 /**
@@ -94,6 +104,7 @@ export function serverEnv(): z.infer<typeof serverSchema> {
     SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY || undefined,
     PAYOUTS_ENABLED: process.env.PAYOUTS_ENABLED,
     GEO_RESTRICTION_ENABLED: process.env.GEO_RESTRICTION_ENABLED,
+    TOTP_SECRET_KEY: process.env.TOTP_SECRET_KEY || undefined,
   })
 
   if (!parsed.success) {
@@ -114,6 +125,30 @@ export function requireSecretKey(): string {
     throw new Error(
       'SUPABASE_SECRET_KEY is not set. Copy it from the Supabase dashboard ' +
         '(Project Settings > API Keys > secret key) into .env.local.',
+    )
+  }
+  return key
+}
+
+/**
+ * Asserts the 2FA encryption key is configured, and that it really is 32
+ * bytes — a short key would otherwise fail deep inside `createCipheriv` with
+ * an opaque message, or worse, be silently padded by a future refactor.
+ */
+export function requireTotpKey(): Buffer {
+  const raw = serverEnv().TOTP_SECRET_KEY
+  if (!raw) {
+    throw new Error(
+      'TOTP_SECRET_KEY is not set. Generate one with ' +
+        `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))" ` +
+        'and add it to .env.local (and every deployment environment).',
+    )
+  }
+  const key = Buffer.from(raw, 'base64')
+  if (key.length !== 32) {
+    throw new Error(
+      `TOTP_SECRET_KEY must decode to exactly 32 bytes, got ${key.length}. ` +
+        'It should be base64 of 32 random bytes.',
     )
   }
   return key

@@ -27,6 +27,7 @@ import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { Link, redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser } from '@/lib/auth/session'
 import { avatarPublicUrl } from '@/lib/profile/avatar'
+import { getTwoFactorStatus } from '@/lib/security/two-factor-data'
 
 export const metadata: Metadata = {
   title: 'Profile',
@@ -58,6 +59,7 @@ export default async function ProfilePage({
 
   const t = await getTranslations('profile')
   const profile = await getProfile(user!.id)
+  const twoFactor = await getTwoFactorStatus()
   const fullName = profile?.full_name ?? user!.email ?? ''
   const soon = t('soon')
 
@@ -115,8 +117,8 @@ export default async function ProfilePage({
 
         {/* Security ------------------------------------------------------ */}
         <SettingsGroup title={t('groups.security')}>
-          <SettingsRow icon={<ShieldCheck />} tone="success" label={t('security.twoFactor')} description={t('security.twoFactorHint')} soon={soon} />
-          <SettingsRow icon={<ListChecks />} tone="success" label={t('security.backupCodes')} description={t('security.backupCodesHint')} soon={soon} />
+          <SettingsRow href="/profile/2fa" icon={<ShieldCheck />} tone="success" label={t('security.twoFactor')} description={t('security.twoFactorHint')} value={twoFactor.enabled ? t('security.twoFactorOn') : t('security.twoFactorOff')} />
+          <SettingsRow href="/profile/backup-codes" icon={<ListChecks />} tone="success" label={t('security.backupCodes')} description={t('security.backupCodesHint')} value={twoFactor.enabled ? t('security.backupCodesLeft', { count: twoFactor.backupCodesRemaining }) : undefined} />
           <SettingsRow icon={<Lock />} tone="brand" label={t('security.password')} soon={soon} />
           <SettingsRow icon={<Mail />} tone="brand" label={t('security.email')} value={user!.email} soon={soon} showChevron={false} />
           <SettingsRow icon={<MonitorSmartphone />} tone="neutral" label={t('security.sessions')} description={t('security.sessionsHint')} soon={soon} />
