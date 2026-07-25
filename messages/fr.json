@@ -748,6 +748,14 @@
       "notFound": "Cette session est déjà terminée.",
       "notSignedIn": "Veuillez vous reconnecter.",
       "generic": "Impossible de déconnecter cet appareil. Veuillez réessayer."
+    },
+    "signedInAt": "Connecté le {when}",
+    "unknownIp": "Localisation non enregistrée",
+    "labels": {
+      "os": "Système d'exploitation",
+      "location": "Localisation",
+      "signedIn": "Connexion",
+      "lastActive": "Dernière activité"
     }
   }
 }

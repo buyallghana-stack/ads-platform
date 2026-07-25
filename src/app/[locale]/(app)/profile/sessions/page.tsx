@@ -33,14 +33,16 @@ export default async function SessionsPage({
   const { data } = await supabase.rpc('get_active_sessions')
 
   const sessions: SessionRow[] = (data ?? []).map((row) => {
-    const { device, browser } = describeUserAgent(row.user_agent)
+    const { device, browser, os } = describeUserAgent(row.user_agent)
     return {
       id: row.id,
-      createdAt: row.created_at,
+      signedInAt: row.signed_in_at,
       lastSeen: row.last_seen,
       device,
       browser,
+      os,
       ip: row.ip,
+      country: row.country,
       isCurrent: Boolean(row.is_current),
     }
   })

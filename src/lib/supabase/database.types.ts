@@ -1382,6 +1382,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_session_records: {
+        Row: {
+          country: string | null
+          ip: unknown
+          last_seen_at: string
+          session_id: string
+          signed_in_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          country?: string | null
+          ip?: unknown
+          last_seen_at?: string
+          session_id: string
+          signed_in_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          country?: string | null
+          ip?: unknown
+          last_seen_at?: string
+          session_id?: string
+          signed_in_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_subscriptions: {
         Row: {
           cancelled_at: string | null
@@ -1798,11 +1828,12 @@ export type Database = {
       get_active_sessions: {
         Args: never
         Returns: {
-          created_at: string
+          country: string
           id: string
           ip: string
           is_current: boolean
           last_seen: string
+          signed_in_at: string
           user_agent: string
         }[]
       }
@@ -2020,6 +2051,16 @@ export type Database = {
       record_fraud_signal: {
         Args: { p_check_code: string; p_details?: Json; p_user_id: string }
         Returns: boolean
+      }
+      record_session_context: {
+        Args: {
+          p_country: string
+          p_ip: string
+          p_session_id: string
+          p_user_agent: string
+          p_user_id: string
+        }
+        Returns: undefined
       }
       register_ad_view: {
         Args: { p_ad_id: string; p_user_id: string }

@@ -15,11 +15,14 @@ import { cn } from '@/lib/cn'
 
 export type SessionRow = {
   id: string
-  createdAt: string
+  /** When this device signed in — captured from the real request, not GoTrue. */
+  signedInAt: string
   lastSeen: string
   device: string
   browser: string | null
+  os: string | null
   ip: string | null
+  country: string | null
   isCurrent: boolean
 }
 
@@ -116,21 +119,51 @@ export function SessionsList({
                   session.isCurrent ? 'text-success-700' : 'text-ink-900',
                 )}
               >
-                {session.browser ? `${session.device} · ${session.browser}` : session.device}
+                {[session.device, session.browser].filter(Boolean).join(' · ')}
               </p>
-              <p
+
+              {/* Everything needed to answer "was this me?": the OS, where it
+                  connected from, when it signed in, and when it was last used. */}
+              <dl
                 className={cn(
-                  'mt-0.5 text-[0.75rem] leading-relaxed',
+                  'mt-1 flex flex-col gap-0.5 text-[0.75rem] leading-relaxed',
                   session.isCurrent ? 'text-success-700/85' : 'text-ink-500',
                 )}
               >
-                {session.isCurrent
-                  ? t('thisDevice')
-                  : t('lastActive', {
-                      when: format.relativeTime(new Date(session.lastSeen), now),
+                {session.os && (
+                  <div className="flex gap-1.5">
+                    <dt className="sr-only">{t('labels.os')}</dt>
+                    <dd>{session.os}</dd>
+                  </div>
+                )}
+                <div className="flex gap-1.5">
+                  <dt className="sr-only">{t('labels.location')}</dt>
+                  <dd>{[session.ip, session.country].filter(Boolean).join(' · ') || t('unknownIp')}</dd>
+                </div>
+                <div className="flex gap-1.5">
+                  <dt className="sr-only">{t('labels.signedIn')}</dt>
+                  <dd>
+                    {t('signedInAt', {
+                      when: format.dateTime(new Date(session.signedInAt), {
+                        day: 'numeric',
+                        month: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      }),
                     })}
-                {session.ip ? ` · ${session.ip}` : ''}
-              </p>
+                  </dd>
+                </div>
+                <div className="flex gap-1.5">
+                  <dt className="sr-only">{t('labels.lastActive')}</dt>
+                  <dd className={session.isCurrent ? 'font-medium' : undefined}>
+                    {session.isCurrent
+                      ? t('thisDevice')
+                      : t('lastActive', {
+                          when: format.relativeTime(new Date(session.lastSeen), now),
+                        })}
+                  </dd>
+                </div>
+              </dl>
             </div>
 
             {!session.isCurrent && (

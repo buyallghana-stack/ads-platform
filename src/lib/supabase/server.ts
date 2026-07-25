@@ -1,4 +1,4 @@
-import { cookies, headers } from 'next/headers'
+import { cookies } from 'next/headers'
 
 import { createServerClient } from '@supabase/ssr'
 
@@ -21,27 +21,16 @@ export async function createClient() {
   const cookieStore = await cookies()
 
   /*
-    Sign-in happens in a Server Action, so without this Supabase Auth sees OUR
-    request and records the Node runtime as the device — every entry in the
-    user's Active sessions list then reads "Unknown device", which is worse
-    than useless on a screen whose whole job is "do you recognise this?".
-    Forwarding the browser's own identifiers makes the session record describe
-    the actual device.
+    NOTE: forwarding the browser's User-Agent and X-Forwarded-For from here was
+    tried and does NOT work — Supabase's gateway overrides both, so GoTrue
+    stored "node" and our Vercel egress IP for a phone in Ghana. Session device
+    and IP are captured by `recordSessionContext` at sign-in instead. Do not
+    reintroduce header forwarding expecting auth.sessions to improve.
   */
-  const requestHeaders = await headers()
-  const userAgent = requestHeaders.get('user-agent')
-  const forwardedFor =
-    requestHeaders.get('x-real-ip')?.trim() || requestHeaders.get('x-forwarded-for')?.trim()
-
-  const globalHeaders: Record<string, string> = {}
-  if (userAgent) globalHeaders['User-Agent'] = userAgent
-  if (forwardedFor) globalHeaders['X-Forwarded-For'] = forwardedFor
-
   return createServerClient<Database>(
     clientEnv.NEXT_PUBLIC_SUPABASE_URL,
     clientEnv.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     {
-      global: { headers: globalHeaders },
       cookies: {
         getAll() {
           return cookieStore.getAll()

@@ -748,6 +748,14 @@
       "notFound": "That session has already ended.",
       "notSignedIn": "Please sign in again.",
       "generic": "Could not sign that device out. Please try again."
+    },
+    "signedInAt": "Signed in {when}",
+    "unknownIp": "Location not recorded",
+    "labels": {
+      "os": "Operating system",
+      "location": "Location",
+      "signedIn": "Signed in",
+      "lastActive": "Last active"
     }
   }
 }

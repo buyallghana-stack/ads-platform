@@ -1,6 +1,7 @@
 'use server'
 
 import { clearLoginVerified, isTwoFactorEnabled } from '@/lib/security/login-2fa'
+import { recordSessionContext } from '@/lib/security/session-record'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { getRequestContext } from '@/lib/request-context'
@@ -118,6 +119,10 @@ export async function signUpAction(formData: {
 
   const userId = signUp.user.id
 
+  // Signing up may issue a session immediately (when email confirmation is
+  // off); record its device context if so.
+  await recordSessionContext(signUp.session?.access_token, userId)
+
   /*
     Everything below is best-effort. The account exists and the user is
     waiting; failing their signup because a fraud signal could not be recorded
@@ -216,6 +221,10 @@ export async function logInAction(formData: {
   await clearLoginVerified()
 
   if (session.user) {
+    // Capture the real device/IP for this session while we still have the
+    // browser's request context — auth.sessions only ever sees our server.
+    await recordSessionContext(session.session?.access_token, session.user.id)
+
     const { ip, userAgent, country } = await getRequestContext()
     try {
       await createAdminClient().rpc('record_auth_signal', {
@@ -271,11 +280,17 @@ export async function verifyCodeAction(formData: {
   if (!parsed.success) return { ok: false, errorKey: parsed.error.issues[0].message }
 
   const supabase = await createClient()
-  const { error } = await supabase.auth.verifyOtp({
+  const { data: verified, error } = await supabase.auth.verifyOtp({
     email: formData.email,
     token: parsed.data.code,
     type: 'signup',
   })
+
+  if (!error && verified.user) {
+    // Verifying the code signs the user in, so this session needs its context
+    // recorded too.
+    await recordSessionContext(verified.session?.access_token, verified.user.id)
+  }
 
   if (error) {
     const message = error.message.toLowerCase()
