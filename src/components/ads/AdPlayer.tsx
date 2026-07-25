@@ -359,7 +359,10 @@ export function AdPlayer({
       {/* ---- Top bar ------------------------------------------------------ */}
       <header
         className={cn(
-          'flex shrink-0 items-center gap-3 px-3 py-3 sm:px-5',
+          /* z-20 puts the close button above the question sheet's z-10. From
+             md the sheet spans the whole overlay, and it was covering the X —
+             so on a tablet or a desktop there was no way out of an ad. */
+          'relative z-20 flex shrink-0 items-center gap-3 px-3 py-3 sm:px-5',
           isVideo ? 'text-white' : 'border-b border-ink-200 bg-surface text-ink-900',
         )}
       >
@@ -405,6 +408,11 @@ export function AdPlayer({
           is open the video moves to the top of the stage rather than staying
           centred with its lower half behind the sheet. From md up the sheet is
           a centred dialog and the video stays put. */}
+      {/* Skipped entirely for a survey that is asking a question: a survey has
+          no video, so the stage would be an empty band with the card floating
+          below it. Handing the space to the card instead is what makes the
+          screen look composed rather than half-loaded. */}
+      {!(!isVideo && phase === 'question') && (
       <div
         className={cn(
           'relative flex min-h-0 flex-1 justify-center',
@@ -480,6 +488,7 @@ export function AdPlayer({
           </div>
         )}
       </div>
+      )}
 
       {/* ---- Progress ----------------------------------------------------- */}
       {isVideo && (phase === 'playing' || phase === 'question') && (
@@ -523,15 +532,33 @@ export function AdPlayer({
       {phase === 'question' && current && (
         <div
           className={cn(
-            'absolute inset-x-0 bottom-0 z-10 md:inset-0 md:grid md:place-items-center md:p-6',
-            isVideo && 'md:bg-black/60',
+            'z-10',
+            // Phone: a sheet off the bottom, over the paused video, thumb
+            // reachable. Identical for both formats.
+            'absolute inset-x-0 bottom-0',
+            isVideo
+              ? /* Video, md+: a centred dialog over the still-visible frame.
+                   pointer-events-none on the wrapper so the dead area around
+                   the card cannot swallow a click meant for the chrome
+                   underneath — which is how the close button got blocked. */
+                'pointer-events-none md:inset-0 md:grid md:place-items-center md:bg-black/60 md:p-6'
+              : /* Survey, md+: in the layout, not over it. It is the only
+                   thing on the screen, so it takes the space the stage would
+                   have used instead of hovering in the middle of a void. The
+                   bottom bias sits it just above dead centre — on a portrait
+                   tablet a small card centred in a 1,100px column reads as
+                   having sunk to the bottom of the page. */
+                'md:static md:grid md:min-h-0 md:flex-1 md:place-items-center md:p-6 md:pb-[8vh]',
           )}
         >
           <div
             className={cn(
-              'w-full bg-surface p-5 shadow-[0_-8px_32px_-8px_rgb(15_23_42/0.3)]',
-              'rounded-t-(--radius-panel) md:max-w-[28rem] md:rounded-(--radius-panel)',
+              'pointer-events-auto w-full bg-surface p-5 shadow-[0_-8px_32px_-8px_rgb(15_23_42/0.3)]',
+              'rounded-t-(--radius-panel) md:rounded-(--radius-panel)',
               'md:shadow-[0_16px_48px_-12px_rgb(15_23_42/0.45)]',
+              // A survey card carries the whole screen, so it is allowed to be
+              // wider than one floating over a video frame.
+              isVideo ? 'md:max-w-[28rem]' : 'md:max-w-[32rem] md:p-6',
               // Clears the phone's home indicator.
               'pb-[calc(1.25rem+env(safe-area-inset-bottom))] md:pb-5',
             )}

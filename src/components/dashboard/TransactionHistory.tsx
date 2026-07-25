@@ -206,7 +206,7 @@ export function TransactionHistory({ rows }: { rows: TxRow[] }) {
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t('searchPlaceholder')}
               aria-label={t('searchPlaceholder')}
-              className="h-8 w-full rounded-(--radius-input) border border-ink-200 bg-surface pl-8 pr-3 text-[0.8125rem] text-ink-900 placeholder:text-ink-400 hover:border-ink-300 focus:border-brand-600 focus:outline-none focus:shadow-[0_0_0_3px] focus:shadow-brand-600/12 pointer-coarse:h-9"
+              className="h-8 w-full rounded-(--radius-input) border border-ink-200 bg-surface pl-8 pr-3 text-[0.8125rem] text-ink-900 placeholder:text-ink-400 hover:border-ink-300 focus:border-brand-600 focus:outline-none focus:shadow-[0_0_0_3px] focus:shadow-brand-600/12 pointer-coarse:h-10 pointer-coarse:text-base"
             />
           </div>
 
@@ -216,7 +216,7 @@ export function TransactionHistory({ rows }: { rows: TxRow[] }) {
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as SortKey)}
-              className="h-8 rounded-(--radius-input) border border-ink-200 bg-surface px-2 text-[0.8125rem] text-ink-700 hover:border-ink-300 focus:border-brand-600 focus:outline-none pointer-coarse:h-9"
+              className="h-8 rounded-(--radius-input) border border-ink-200 bg-surface px-2 text-[0.8125rem] text-ink-700 hover:border-ink-300 focus:border-brand-600 focus:outline-none pointer-coarse:h-10 pointer-coarse:text-base"
             >
               {(['newest', 'oldest', 'largest', 'smallest'] as const).map((s) => (
                 <option key={s} value={s}>{t(`sort.${s}`)}</option>

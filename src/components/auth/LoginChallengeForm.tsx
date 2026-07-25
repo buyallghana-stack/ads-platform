@@ -99,7 +99,7 @@ export function LoginChallengeForm() {
               setError(null)
             }}
             placeholder="XXXX-XXXX"
-            className="mt-1.5 h-11 w-full rounded-(--radius-input) border border-ink-200 bg-surface px-3.5 font-mono text-sm tracking-[0.08em] text-ink-900 uppercase placeholder:font-sans placeholder:tracking-normal placeholder:text-ink-400 focus:border-brand-600 focus:outline-none focus:shadow-[0_0_0_3px] focus:shadow-brand-600/12"
+            className="mt-1.5 h-11 w-full rounded-(--radius-input) border border-ink-200 bg-surface px-3.5 font-mono text-sm tracking-[0.08em] text-ink-900 uppercase pointer-coarse:text-base placeholder:font-sans placeholder:tracking-normal placeholder:text-ink-400 focus:border-brand-600 focus:outline-none focus:shadow-[0_0_0_3px] focus:shadow-brand-600/12"
           />
           {error && (
             <p role="alert" className="mt-2 text-[0.75rem] font-medium text-danger-600">

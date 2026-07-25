@@ -443,7 +443,7 @@ function ConfirmStep({
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder={t(`confirm.reasonPlaceholder.${action}`)}
-            className="mt-1 w-full resize-none rounded-(--radius-input) border border-ink-200 bg-canvas px-3 py-2 text-[0.8125rem] text-ink-900 placeholder:text-ink-400 focus:border-brand-600 focus:outline-none"
+            className="mt-1 w-full resize-none rounded-(--radius-input) border border-ink-200 bg-canvas px-3 py-2 text-[0.8125rem] text-ink-900 placeholder:text-ink-400 focus:border-brand-600 focus:outline-none pointer-coarse:text-base"
           />
           <span className="mt-1 block text-[0.625rem] text-ink-400">{t('confirm.reasonHint')}</span>
         </label>

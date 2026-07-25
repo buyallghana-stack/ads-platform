@@ -397,7 +397,7 @@ export function TwoFactorFlow({
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); setError(null) }}
                 placeholder={t('disable.passwordPlaceholder')}
-                className="h-11 w-full rounded-(--radius-input) border border-ink-200 bg-surface px-3.5 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-600 focus:outline-none focus:shadow-[0_0_0_3px] focus:shadow-brand-600/12"
+                className="h-11 w-full rounded-(--radius-input) border border-ink-200 bg-surface px-3.5 text-sm text-ink-900 placeholder:text-ink-400 pointer-coarse:text-base focus:border-brand-600 focus:outline-none focus:shadow-[0_0_0_3px] focus:shadow-brand-600/12"
               />
               {error && (
                 <p role="alert" className="mt-2 text-[0.75rem] font-medium text-danger-600">

@@ -228,7 +228,7 @@ function Row({
               step={field.step}
               value={String(value)}
               onChange={(e) => onChange(e.target.value === '' ? '' : Number(e.target.value))}
-              className="h-9 w-28 rounded-(--radius-input) border border-ink-200 bg-canvas px-2.5 text-right text-[0.8125rem] text-ink-900 tabular-nums focus:border-brand-600 focus:outline-none"
+              className="h-9 w-28 rounded-(--radius-input) border border-ink-200 bg-canvas px-2.5 text-right text-[0.8125rem] text-ink-900 tabular-nums focus:border-brand-600 focus:outline-none pointer-coarse:h-10 pointer-coarse:text-base"
             />
             {field.suffix && (
               <span className="text-[0.75rem] whitespace-nowrap text-ink-400">{field.suffix}</span>
@@ -241,7 +241,7 @@ function Row({
             id={id}
             value={String(value)}
             onChange={(e) => onChange(e.target.value)}
-            className="h-9 w-full rounded-(--radius-input) border border-ink-200 bg-canvas px-2.5 text-[0.8125rem] text-ink-900 focus:border-brand-600 focus:outline-none sm:w-52"
+            className="h-9 w-full rounded-(--radius-input) border border-ink-200 bg-canvas px-2.5 text-[0.8125rem] text-ink-900 focus:border-brand-600 focus:outline-none pointer-coarse:h-10 pointer-coarse:text-base sm:w-52"
           >
             {field.options.map((o) => (
               <option key={o.value} value={o.value}>

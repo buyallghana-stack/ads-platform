@@ -201,7 +201,7 @@ export function Toolbar<T extends string>({
                 onChange={(e) => onQuery(e.target.value)}
                 placeholder={searchPlaceholder}
                 aria-label={searchPlaceholder}
-                className="h-9 w-full rounded-(--radius-input) border border-ink-200 bg-surface pr-3 pl-8 text-[0.8125rem] text-ink-900 placeholder:text-ink-400 focus:border-brand-600 focus:outline-none"
+                className="h-9 w-full rounded-(--radius-input) border border-ink-200 bg-surface pr-3 pl-8 text-[0.8125rem] text-ink-900 placeholder:text-ink-400 focus:border-brand-600 focus:outline-none pointer-coarse:h-10 pointer-coarse:text-base"
               />
             </div>
           )}

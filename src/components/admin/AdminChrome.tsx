@@ -47,7 +47,7 @@ export function AdminTopBar({
           aria-label={t('search.placeholder')}
           className={cn(
             'h-9 w-full rounded-(--radius-input) border border-ink-200 bg-canvas pl-9 pr-3',
-            'text-[0.8125rem] text-ink-900 placeholder:text-ink-400',
+            'text-[0.8125rem] text-ink-900 placeholder:text-ink-400 pointer-coarse:text-base',
             'disabled:cursor-not-allowed disabled:opacity-70',
           )}
         />

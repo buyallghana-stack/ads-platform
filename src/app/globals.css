@@ -162,6 +162,30 @@
   }
 
   /*
+    NO ZOOM-ON-FOCUS.
+
+    Mobile Safari zooms the page when a focused control's text is smaller than
+    16px, and it does not zoom back out — so tapping a search field left the
+    operator pinching to get the screen back. Every control on a touch device
+    therefore renders at 16px, whatever its desktop size.
+
+    This is the safety net, not the mechanism: Tailwind utilities beat base
+    styles, so a component that sets its own `text-[0.8125rem]` still needs an
+    explicit `pointer-coarse:text-base` beside it. What this catches is the
+    control somebody adds later without thinking about it.
+
+    Checkboxes and radios are excluded — they have no text to size, and
+    changing their font-size moves the layout around them.
+  */
+  @media (pointer: coarse) {
+    input:not([type='checkbox']):not([type='radio']),
+    select,
+    textarea {
+      font-size: 1rem;
+    }
+  }
+
+  /*
     Focus is never removed, only replaced. Keyboard users on an auth form have
     no other way to tell where they are, and this platform will be used on
     cheap Android handsets with hardware keyboards more often than the average

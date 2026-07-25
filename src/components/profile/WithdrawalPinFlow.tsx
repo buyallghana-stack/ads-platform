@@ -175,7 +175,7 @@ export function WithdrawalPinFlow({ hasPin }: { hasPin: boolean }) {
             value={password}
             onChange={(e) => { setPassword(e.target.value); setError(null) }}
             placeholder={t('resetPasswordPlaceholder')}
-            className="mt-5 h-11 w-full rounded-(--radius-input) border border-ink-200 bg-surface px-3.5 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-600 focus:outline-none focus:shadow-[0_0_0_3px] focus:shadow-brand-600/12"
+            className="mt-5 h-11 w-full rounded-(--radius-input) border border-ink-200 bg-surface px-3.5 text-sm text-ink-900 placeholder:text-ink-400 pointer-coarse:text-base focus:border-brand-600 focus:outline-none focus:shadow-[0_0_0_3px] focus:shadow-brand-600/12"
           />
           {error && <p className="mt-2 self-start text-[0.75rem] font-medium text-danger-600">{error}</p>}
           <Button type="submit" size="lg" fullWidth className="mt-5" disabled={!password}>

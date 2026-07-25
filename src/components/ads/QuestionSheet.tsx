@@ -178,13 +178,38 @@ export function QuestionSheet({
         </div>
       )}
 
-      <div className="flex items-center gap-2">
+      {/*
+        Full width on a phone, where a bottom-of-sheet primary is the thumb
+        target and stretching it is the point. NOT full width from md: the
+        card is 32rem there, and a one-word label across 408px of blue read as
+        a banner rather than a button — which is what the operator saw. From
+        md it takes its natural width against a floor, and sits at the end of
+        the row with Back at the other.
+
+        `lg` rather than the default `md` at every width: 40px was squat under
+        a full-width fill, and this is the primary action of the whole screen.
+      */}
+      <div className="flex items-center gap-2 md:justify-end">
         {onBack && (
-          <Button type="button" variant="ghost" onClick={onBack} disabled={submitting}>
+          <Button
+            type="button"
+            size="lg"
+            variant="ghost"
+            onClick={onBack}
+            disabled={submitting}
+            className="md:mr-auto"
+          >
             {t('question.back')}
           </Button>
         )}
-        <Button type="submit" fullWidth disabled={!answered} loading={submitting}>
+        <Button
+          type="submit"
+          size="lg"
+          fullWidth
+          disabled={!answered}
+          loading={submitting}
+          className="md:w-auto md:min-w-[10rem]"
+        >
           {submitLabel}
         </Button>
       </div>
