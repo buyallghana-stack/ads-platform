@@ -536,7 +536,7 @@
     "digit": "Chiffre {position} sur 6",
     "off": {
       "title": "Ajouter une deuxième étape",
-      "body": "Utilisez une application d'authentification pour approuver les changements sensibles — mot de passe, e-mail et réinitialisation du code PIN de retrait. Aucun code ne sera demandé pour vous connecter ni pour regarder des publicités.",
+      "body": "Utilisez une application d'authentification pour confirmer votre identité à la connexion, ainsi que lors d'un changement de mot de passe, d'e-mail ou de la réinitialisation de votre code PIN de retrait. Aucun code n'est envoyé par e-mail.",
       "cta": "Configurer la double authentification"
     },
     "on": {
@@ -544,7 +544,8 @@
       "since": "Protège votre compte depuis le {date}",
       "codesLeft": "{count, plural, =0 {Aucun code de secours restant} one {# code de secours restant} other {# codes de secours restants}}",
       "regenerate": "Obtenir de nouveaux codes de secours",
-      "turnOff": "Désactiver la double authentification"
+      "turnOff": "Désactiver la double authentification",
+      "protects": "Demandé à la connexion et lors des changements sensibles."
     },
     "scan": {
       "title": "Scannez ce code",
@@ -609,6 +610,61 @@
       "notEnabled": "La double authentification n'est pas activée sur ce compte.",
       "noEnrollment": "Cette configuration a expiré. Recommencez.",
       "stepUpRequired": "Saisissez un code ou votre mot de passe pour confirmer.",
+      "notSignedIn": "Veuillez vous reconnecter.",
+      "generic": "Une erreur s'est produite. Veuillez réessayer."
+    },
+    "challenge": {
+      "title": "Confirmez votre identité",
+      "subtitle": "Saisissez le code à 6 chiffres de votre application d'authentification.",
+      "subtitleBackup": "Saisissez l'un des codes de secours que vous avez enregistrés.",
+      "codeLabel": "Code d'authentification",
+      "backupLabel": "Code de secours",
+      "cta": "Continuer",
+      "useBackup": "Utiliser un code de secours",
+      "useApp": "Utiliser mon application d'authentification",
+      "signOut": "Se connecter avec un autre compte"
+    }
+  },
+  "credentials": {
+    "back": "Retour",
+    "backToProfile": "Retour au profil",
+    "stepUp": {
+      "title": "Code d'authentification",
+      "body": "La double authentification est activée. Saisissez le code actuel ou l'un de vos codes de secours."
+    },
+    "password": {
+      "title": "Changer le mot de passe",
+      "subtitle": "Choisissez un mot de passe que vous n'avez pas déjà utilisé.",
+      "current": "Mot de passe actuel",
+      "new": "Nouveau mot de passe",
+      "confirm": "Confirmez le nouveau mot de passe",
+      "cta": "Mettre à jour",
+      "doneTitle": "Mot de passe mis à jour",
+      "doneBody": "Utilisez votre nouveau mot de passe à la prochaine connexion."
+    },
+    "email": {
+      "title": "Changer l'e-mail",
+      "subtitle": "C'est l'adresse avec laquelle vous vous connectez.",
+      "current": "E-mail actuel",
+      "new": "Nouvel e-mail",
+      "newPlaceholder": "vous@exemple.com",
+      "password": "Mot de passe actuel",
+      "cta": "Envoyer la confirmation",
+      "sentTitle": "Vérifiez votre nouvelle boîte mail",
+      "sentBody": "Nous avons envoyé un lien de confirmation à {email}. Ouvrez-le pour terminer le changement.",
+      "sentNote": "Tant que vous n'avez pas ouvert ce lien, vous continuez à vous connecter avec votre adresse actuelle. Ce lien prouve seulement que la nouvelle boîte mail vous appartient — aucun code n'est envoyé par e-mail."
+    },
+    "errors": {
+      "currentRequired": "Saisissez votre mot de passe actuel.",
+      "confirmRequired": "Confirmez votre nouveau mot de passe.",
+      "wrongPassword": "Ce mot de passe est incorrect.",
+      "passwordTooWeak": "Utilisez au moins 8 caractères, avec une majuscule, une minuscule et un chiffre.",
+      "passwordMismatch": "Ces mots de passe ne correspondent pas.",
+      "sameAsCurrent": "C'est votre mot de passe actuel. Choisissez-en un autre.",
+      "emailInvalid": "Cette adresse e-mail ne semble pas valide.",
+      "sameEmail": "C'est déjà votre adresse e-mail.",
+      "emailTaken": "Cette adresse ne peut pas être utilisée.",
+      "codeRequired": "Saisissez le code de votre application d'authentification.",
       "notSignedIn": "Veuillez vous reconnecter.",
       "generic": "Une erreur s'est produite. Veuillez réessayer."
     }

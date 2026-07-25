@@ -4,6 +4,7 @@ import { createClient as createStatelessClient } from '@supabase/supabase-js'
 
 import { getSessionUser } from '@/lib/auth/session'
 import { clientEnv } from '@/lib/env'
+import { markLoginVerified } from '@/lib/security/login-2fa'
 import {
   decryptSecret,
   encryptSecret,
@@ -107,6 +108,15 @@ export async function confirmEnrollment(
   if (codesError) return { ok: false, message: codesError.message }
 
   await admin.rpc('clear_totp_failures', { p_user_id: user.id })
+
+  /*
+    Enrolling switches on the sign-in gate, and this session has never passed
+    it — without this the user is bounced to the challenge the instant they
+    finish setup, locked out of the app they were already using. They just
+    proved possession, so that counts.
+  */
+  await markLoginVerified(user.id)
+
   return { ok: true, backupCodes: codes }
 }
 

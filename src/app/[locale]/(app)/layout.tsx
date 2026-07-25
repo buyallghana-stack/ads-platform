@@ -5,6 +5,7 @@ import { Link } from '@/i18n/navigation'
 import { redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser } from '@/lib/auth/session'
 import { avatarPublicUrl } from '@/lib/profile/avatar'
+import { needsLoginChallenge } from '@/lib/security/login-2fa'
 
 /**
  * Shell for every signed-in screen: Home, Ads, Upgrade, Profile, Withdraw.
@@ -30,6 +31,14 @@ export default async function AppLayout({
 
   const user = await getSessionUser()
   if (!user) redirect({ href: '/login', locale })
+
+  /*
+    A session alone is not enough for an enrolled account. Supabase issues it
+    on a correct password, so the second factor is enforced HERE — the one
+    place every signed-in screen passes through — rather than at the login
+    form, which a direct URL would simply skip.
+  */
+  if (await needsLoginChallenge(user!.id)) redirect({ href: '/verify-2fa', locale })
 
   const t = await getTranslations('nav')
 

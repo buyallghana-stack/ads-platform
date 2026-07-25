@@ -1,5 +1,6 @@
 'use server'
 
+import { clearLoginVerified, isTwoFactorEnabled } from '@/lib/security/login-2fa'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { getRequestContext } from '@/lib/request-context'
@@ -195,6 +196,14 @@ export async function logInAction(formData: {
     return { ok: false, errorKey: 'invalidCredentials' }
   }
 
+  /*
+    A fresh password sign-in never inherits a previous challenge: clear the
+    marker first, so an enrolled account is always asked again. Doing it before
+    the redirect decision means a failure anywhere below still leaves the
+    session half-authenticated rather than fully trusted.
+  */
+  await clearLoginVerified()
+
   if (session.user) {
     const { ip, userAgent, country } = await getRequestContext()
     try {
@@ -207,6 +216,11 @@ export async function logInAction(formData: {
       })
     } catch {
       // A missing login signal must never block a login.
+    }
+
+    // Enrolled accounts finish signing in on the challenge screen.
+    if (await isTwoFactorEnabled(session.user.id)) {
+      return { ok: true, redirectTo: '/verify-2fa' }
     }
   }
 
@@ -263,5 +277,8 @@ export async function forgotPasswordAction(formData: { email: string }): Promise
 export async function logOutAction(): Promise<ActionResult> {
   const supabase = await createClient()
   await supabase.auth.signOut()
+  // Leaving this behind would let the next sign-in on this browser skip the
+  // second factor entirely.
+  await clearLoginVerified()
   return { ok: true, redirectTo: '/login' }
 }

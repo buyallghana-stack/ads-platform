@@ -536,7 +536,7 @@
     "digit": "Digit {position} of 6",
     "off": {
       "title": "Add a second step",
-      "body": "Use an authenticator app to approve sensitive changes — your password, your email, and resetting your withdrawal PIN. You will not need a code to sign in or to watch ads.",
+      "body": "Use an authenticator app to confirm it's you when you sign in, and when you change your password, your email, or reset your withdrawal PIN. No codes are sent by email.",
       "cta": "Set up two-factor"
     },
     "on": {
@@ -544,7 +544,8 @@
       "since": "Protecting your account since {date}",
       "codesLeft": "{count, plural, =0 {No backup codes left} one {# backup code left} other {# backup codes left}}",
       "regenerate": "Get new backup codes",
-      "turnOff": "Turn off two-factor"
+      "turnOff": "Turn off two-factor",
+      "protects": "Asked for at sign-in and on sensitive changes."
     },
     "scan": {
       "title": "Scan this code",
@@ -609,6 +610,61 @@
       "notEnabled": "Two-factor isn't turned on for this account.",
       "noEnrollment": "That setup expired. Start again.",
       "stepUpRequired": "Enter a code or your password to confirm.",
+      "notSignedIn": "Please sign in again.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "challenge": {
+      "title": "Confirm it's you",
+      "subtitle": "Enter the 6-digit code from your authenticator app.",
+      "subtitleBackup": "Enter one of the backup codes you saved.",
+      "codeLabel": "Authentication code",
+      "backupLabel": "Backup code",
+      "cta": "Continue",
+      "useBackup": "Use a backup code instead",
+      "useApp": "Use my authenticator app instead",
+      "signOut": "Sign in with a different account"
+    }
+  },
+  "credentials": {
+    "back": "Back",
+    "backToProfile": "Back to Profile",
+    "stepUp": {
+      "title": "Authenticator code",
+      "body": "Two-factor is on for your account. Enter the current code, or one of your backup codes."
+    },
+    "password": {
+      "title": "Change password",
+      "subtitle": "Choose a password you have not used before.",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Confirm new password",
+      "cta": "Update password",
+      "doneTitle": "Password updated",
+      "doneBody": "Use your new password the next time you sign in."
+    },
+    "email": {
+      "title": "Change email",
+      "subtitle": "This is the address you sign in with.",
+      "current": "Current email",
+      "new": "New email",
+      "newPlaceholder": "you@example.com",
+      "password": "Current password",
+      "cta": "Send confirmation",
+      "sentTitle": "Check your new inbox",
+      "sentBody": "We sent a confirmation link to {email}. Open it to finish the change.",
+      "sentNote": "Until you open that link you keep signing in with your current address. This link only proves the new inbox is yours — codes are never emailed."
+    },
+    "errors": {
+      "currentRequired": "Enter your current password.",
+      "confirmRequired": "Confirm your new password.",
+      "wrongPassword": "That password isn't right.",
+      "passwordTooWeak": "Use at least 8 characters, with an uppercase letter, a lowercase letter and a number.",
+      "passwordMismatch": "Those passwords do not match.",
+      "sameAsCurrent": "That is your current password. Choose a different one.",
+      "emailInvalid": "That does not look like a valid email address.",
+      "sameEmail": "That is already your email address.",
+      "emailTaken": "That address cannot be used.",
+      "codeRequired": "Enter the code from your authenticator app.",
       "notSignedIn": "Please sign in again.",
       "generic": "Something went wrong. Please try again."
     }

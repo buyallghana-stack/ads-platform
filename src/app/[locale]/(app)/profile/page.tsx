@@ -119,8 +119,8 @@ export default async function ProfilePage({
         <SettingsGroup title={t('groups.security')}>
           <SettingsRow href="/profile/2fa" icon={<ShieldCheck />} tone="success" label={t('security.twoFactor')} description={t('security.twoFactorHint')} value={twoFactor.enabled ? t('security.twoFactorOn') : t('security.twoFactorOff')} />
           <SettingsRow href="/profile/backup-codes" icon={<ListChecks />} tone="success" label={t('security.backupCodes')} description={t('security.backupCodesHint')} value={twoFactor.enabled ? t('security.backupCodesLeft', { count: twoFactor.backupCodesRemaining }) : undefined} />
-          <SettingsRow icon={<Lock />} tone="brand" label={t('security.password')} soon={soon} />
-          <SettingsRow icon={<Mail />} tone="brand" label={t('security.email')} value={user!.email} soon={soon} showChevron={false} />
+          <SettingsRow href="/profile/password" icon={<Lock />} tone="brand" label={t('security.password')} />
+          <SettingsRow href="/profile/email" icon={<Mail />} tone="brand" label={t('security.email')} value={user!.email} />
           <SettingsRow icon={<MonitorSmartphone />} tone="neutral" label={t('security.sessions')} description={t('security.sessionsHint')} soon={soon} />
         </SettingsGroup>
 
