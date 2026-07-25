@@ -90,6 +90,11 @@ export type AdOutcome =
   | 'not_watched'
   | 'too_fast'
   | 'daily_cap_reached'
+  // Distinct from the ad cap since migration 040. A cooldown means "wait a
+  // moment", a points cap means "you have earned the maximum today" — telling
+  // either of them "come back tomorrow" was simply untrue.
+  | 'cooldown_active'
+  | 'points_cap_reached'
   | 'earning_blocked'
 
 export type SubmitAdResult = {

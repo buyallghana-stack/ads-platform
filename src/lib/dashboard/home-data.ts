@@ -17,10 +17,15 @@ import { createClient } from '@/lib/supabase/server'
  */
 
 /** Display grouping agreed 2026-07-24: Earned / Bonus / Withdrawal /
- *  Refund / Subscription / Adjustment. Filters group Refund under
- *  Withdrawal-related history but the row still says what happened. */
+ *  Refund / Subscription / Adjustment, plus Survey.
+ *
+ *  Survey was folded into `earned` and therefore labelled "Ad reward", which
+ *  stopped being true once surveys became their own thing users choose on the
+ *  Ads tab. It is its own kind now so the row says what actually happened and
+ *  the filter chips can separate the two. */
 export type TxKind =
   | 'earned'
+  | 'survey'
   | 'bonus'
   | 'withdrawal'
   | 'refund'
@@ -49,7 +54,7 @@ export type TxRow = {
 
 const LEDGER_KIND: Record<string, TxKind> = {
   ad_view: 'earned',
-  survey: 'earned',
+  survey: 'survey',
   referral_signup: 'bonus',
   referral_activation: 'bonus',
   redemption_request: 'withdrawal',
@@ -169,7 +174,14 @@ export async function getHomeData(userId: string): Promise<HomeData> {
     const point = byDay.get(day)
     if (!point) continue
     if (e.amount > 0) point.earned += e.amount
-    if (e.entry_type === 'ad_view') point.adsWatched += 1
+    /*
+      Surveys count. They are `survey` in the ledger and `ad_view` for a video,
+      but BOTH increment daily_earning_counters.ads_completed — so the daily
+      cap has always counted them, and counting only ad_view here made Home
+      contradict itself: the "Ads today" stat (which reads the counter) said 6
+      while this chart said 4 for the same day.
+    */
+    if (e.entry_type === 'ad_view' || e.entry_type === 'survey') point.adsWatched += 1
   }
 
   return { feed, daily: [...byDay.values()] }

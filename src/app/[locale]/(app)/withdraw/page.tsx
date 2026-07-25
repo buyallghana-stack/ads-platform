@@ -5,6 +5,7 @@ import { setRequestLocale } from 'next-intl/server'
 import { WithdrawWizard, type WithdrawAccount } from '@/components/withdraw/WithdrawWizard'
 import { redirect } from '@/i18n/navigation'
 import { getSessionUser } from '@/lib/auth/session'
+import { getResolvedBenefits } from '@/lib/subscriptions/data'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 
@@ -43,9 +44,24 @@ export default async function WithdrawPage({
   const supabase = await createClient()
   const admin = createAdminClient()
 
-  const [{ data: status }, { data: tier }, detailsRes] = await Promise.all([
+  const [{ data: status }, benefits, { data: rateRow }, detailsRes] = await Promise.all([
     admin.rpc('get_user_earning_status', { p_user_id: user!.id }).maybeSingle(),
-    admin.from('tiers').select('redemption_minimum_points').eq('is_default', true).maybeSingle(),
+    /*
+      The user's RESOLVED tier, not the default one.
+
+      This read used to be `tiers where is_default = true`, which is the FREE
+      tier — so every subscriber was told the free 5,000-point minimum while
+      request_redemption would happily have accepted their real, lower one.
+      Every paid plan advertises a lower payout threshold on the Upgrade
+      screen (down to 1,000 points on Platinum) and the stacking note promises
+      "the lowest payout threshold applies", so the old read withheld a
+      benefit people had paid for. resolve_user_tier already does the
+      combining; this screen must not second-guess it.
+    */
+    getResolvedBenefits(user!.id),
+    // The points→GHS rate is operator config, not a constant. Every other
+    // screen reads it; this one used to hardcode 1000.
+    admin.from('app_config').select('value').eq('key', 'points_per_currency_unit').maybeSingle(),
     supabase
       .from('user_payout_details')
       .select(
@@ -81,7 +97,9 @@ export default async function WithdrawPage({
   return (
     <WithdrawWizard
       balance={status?.balance ?? 0}
-      minPoints={tier?.redemption_minimum_points ?? 5000}
+      minPoints={benefits?.redemptionMinimumPoints ?? 5000}
+      pointsPerCurrencyUnit={Number(rateRow?.value ?? 1000)}
+      tierName={benefits?.name ?? ''}
       accounts={accounts}
     />
   )

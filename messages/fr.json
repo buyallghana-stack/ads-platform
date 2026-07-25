@@ -221,7 +221,8 @@
         "withdrawal": "Retrait",
         "refund": "Remboursement",
         "subscription": "Abonnement",
-        "adjustment": "Ajustement"
+        "adjustment": "Ajustement",
+        "survey": "Sondage"
       },
       "kindHint": {
         "earned": "Récompense de pub",
@@ -229,7 +230,8 @@
         "withdrawal": "Demande de paiement",
         "refund": "Retourné au solde",
         "subscription": "Paiement de forfait",
-        "adjustment": "Correction de compte"
+        "adjustment": "Correction de compte",
+        "survey": "Récompense de sondage"
       },
       "method": {
         "mobile_money": "Mobile Money",
@@ -276,7 +278,8 @@
       "balance": "Solde",
       "points": "pts",
       "remaining": "{count, plural, one {# annonce restante aujourd'hui sur votre offre {tier}} other {# annonces restantes aujourd'hui sur votre offre {tier}}}",
-      "spent": "Vous avez utilisé toutes les annonces de votre offre {tier} aujourd'hui."
+      "spent": "Vous avez utilisé toutes les annonces de votre offre {tier} aujourd'hui.",
+      "remainingShared": "{count, plural, one {# annonce restante aujourd'hui — partagée entre vidéos et sondages} other {# annonces restantes aujourd'hui — partagées entre vidéos et sondages}}"
     },
     "card": {
       "reward": "+{points} pts",
@@ -298,7 +301,10 @@
       "checkNow": "Vérifier maintenant",
       "raiseLimit": "Augmenter ma limite quotidienne",
       "switchToSurveys": "{count, plural, one {Répondre à # sondage à la place} other {Répondre à # sondages à la place}}",
-      "switchToVideos": "{count, plural, one {Regarder # vidéo à la place} other {Regarder # vidéos à la place}}"
+      "switchToVideos": "{count, plural, one {Regarder # vidéo à la place} other {Regarder # vidéos à la place}}",
+      "blockedTitle": "Les gains sont en pause",
+      "blockedBody": "Les gains sont en pause pour le moment : les annonces ne rapporteraient rien. Votre solde est intact. Réessayez sous peu.",
+      "pointsCappedBody": "Vous avez atteint le maximum de points qu'il est possible de gagner en une journée. Il reste des annonces ici, mais elles ne rapporteraient rien jusqu'à la réinitialisation de votre total quotidien."
     },
     "player": {
       "close": "Fermer",
@@ -365,6 +371,21 @@
       "error": {
         "title": "Une erreur est survenue",
         "body": "Rien ne vous a été décompté. Veuillez réessayer."
+      },
+      "tryAgain": "Réessayer",
+      "incorrectSurvey": {
+        "body": "{count, plural, one {Refaites le sondage et réessayez. # essai restant.} other {Refaites le sondage et réessayez. # essais restants.}}"
+      },
+      "notWatchedSurvey": {
+        "body": "Répondez à toutes les questions avant de valider."
+      },
+      "cooldown": {
+        "title": "Un instant",
+        "body": "Il y a un court délai entre deux annonces. Réessayez celle-ci dans quelques secondes — rien ne vous a été décompté."
+      },
+      "pointsCap": {
+        "title": "C'est le maximum pour aujourd'hui",
+        "body": "Vous avez atteint le maximum de points qu'il est possible de gagner en une journée : celle-ci n'a pas été comptée. Réinitialisation à minuit UTC."
       }
     },
     "blocked": {
@@ -448,6 +469,11 @@
       "holdNote": "Ceci est une démo — rien n'a été retiré. Les vraies demandes sont vérifiées et aboutissent généralement sous 72 heures.",
       "home": "Retour à l'accueil",
       "history": "Voir dans l'historique"
+    },
+    "notYet": {
+      "title": "Encore {short} points",
+      "body": "Vous pourrez retirer à partir de {min} points (GHS {ghs}). Vous en avez {balance} — ce seuil est celui de votre offre {tier}.",
+      "cta": "Gagner plus"
     }
   },
   "theme": {

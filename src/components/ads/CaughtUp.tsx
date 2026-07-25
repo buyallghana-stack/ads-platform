@@ -11,20 +11,30 @@ import { cn } from '@/lib/cn'
 
 /**
  * The "you're all caught up" screen, with the countdown the operator asked
- * for. There are two genuinely different reasons a tab can be empty and they
- * need different countdowns, because a countdown that is not counting down to
- * anything real is worse than none:
+ * for. Four genuinely different reasons a tab can stop, each needing its own
+ * countdown — a countdown that is not counting down to anything real is worse
+ * than none:
  *
- *   capped  The daily allowance is spent. The counters roll over at UTC
- *           midnight, so this really is a clock, and the honest extra offer is
- *           a higher limit — which is what the plans sell.
+ *   capped      The daily ad allowance is spent. The counters roll over at UTC
+ *               midnight, so this really is a clock, and the honest extra
+ *               offer is a higher limit — which is what the plans sell.
  *
- *   empty   There is allowance left but no ad of this format waiting. Nobody
- *           can say when the next campaign lands, so inventing a time would be
- *           a lie. Instead the screen re-checks the server on a short loop and
- *           counts down to that check — a countdown to the next ads that is
- *           literally true, and which makes a new campaign appear without the
- *           user having to think about refreshing.
+ *   pointsCapped
+ *               They still have ads left but have hit per_user_daily_points_cap,
+ *               so watching more would pay nothing. Same midnight clock, but
+ *               NO upgrade offer: a bigger plan does not raise this ceiling,
+ *               and selling one here would be a lie.
+ *
+ *   blocked     The platform kill switch or the reward-pool stop. Nobody can
+ *               say when it lifts, so there is no countdown at all — just the
+ *               truth and a way to re-check.
+ *
+ *   empty       There is allowance left but no ad of this format waiting.
+ *               Nobody can say when the next campaign lands, so inventing a
+ *               time would be a lie. Instead the screen re-checks the server on
+ *               a short loop and counts down to that check — a countdown to the
+ *               next ads that is literally true, and which makes a new campaign
+ *               appear without the user having to think about refreshing.
  */
 
 const RECHECK_SECONDS = 60
@@ -66,6 +76,8 @@ function Digits({ value }: { value: string }) {
   )
 }
 
+export type CaughtUpVariant = 'capped' | 'pointsCapped' | 'blocked' | 'empty'
+
 export function CaughtUp({
   variant,
   format,
@@ -75,7 +87,7 @@ export function CaughtUp({
   otherCount,
   onSwitch,
 }: {
-  variant: 'capped' | 'empty'
+  variant: CaughtUpVariant
   format: 'video' | 'survey'
   /** Epoch ms of the next UTC midnight — when the daily allowance refills. */
   resetAt: number
@@ -105,42 +117,59 @@ export function CaughtUp({
   }, [variant, router])
 
   const capped = variant === 'capped'
+  const pointsCapped = variant === 'pointsCapped'
+  const blocked = variant === 'blocked'
+  // Both cap flavours wait for the same UTC-midnight rollover.
+  const waitsForMidnight = capped || pointsCapped
 
   return (
     <div className="animate-rise flex flex-col items-center px-5 py-12 text-center sm:py-16">
       <span
         className={cn(
           'grid size-16 place-items-center rounded-full ring-8',
-          capped ? 'bg-brand-50 text-brand-600 ring-brand-600/15' : 'bg-success-50 text-success-600 ring-success-500/15',
+          blocked
+            ? 'bg-warning-50 text-warning-600 ring-warning-500/15'
+            : waitsForMidnight
+              ? 'bg-brand-50 text-brand-600 ring-brand-600/15'
+              : 'bg-success-50 text-success-600 ring-success-500/15',
         )}
       >
         <CheckCheck aria-hidden className="size-7" strokeWidth={2.4} />
       </span>
 
       <h2 className="mt-4 text-[1.25rem] font-semibold text-ink-900">
-        {t('caughtUp.title')}
+        {t(blocked ? 'caughtUp.blockedTitle' : 'caughtUp.title')}
       </h2>
       <p className="mt-1.5 max-w-[36ch] text-[0.875rem] leading-relaxed text-ink-500">
         {capped
           ? t('caughtUp.cappedBody', { cap: dailyCap, tier: tierName })
-          : t(format === 'video' ? 'caughtUp.emptyVideoBody' : 'caughtUp.emptySurveyBody')}
+          : pointsCapped
+            ? t('caughtUp.pointsCappedBody')
+            : blocked
+              ? t('caughtUp.blockedBody')
+              : t(format === 'video' ? 'caughtUp.emptyVideoBody' : 'caughtUp.emptySurveyBody')}
       </p>
 
-      {/* ---- Countdown --------------------------------------------------- */}
-      <div className="mt-7 w-full max-w-[22rem] rounded-(--radius-panel) border border-ink-200 bg-surface px-5 py-5">
-        <p className="text-[0.6875rem] font-semibold tracking-[0.08em] text-ink-400 uppercase">
-          {capped ? t('caughtUp.resetLabel') : t('caughtUp.recheckLabel')}
-        </p>
-        <div className="mt-2">
-          {/* HH:MM:SS for the wait until midnight, bare seconds for the
-              re-check. "00:00:58" spends most of its width on zeros and makes
-              a one-minute loop look like a long one. */}
-          <Digits value={capped ? text : `${tick}s`} />
+      {/* ---- Countdown ---------------------------------------------------
+          Omitted entirely when blocked: nobody knows when a kill switch or a
+          reward-pool stop lifts, and a made-up timer would be the one thing
+          worse than no timer. */}
+      {!blocked && (
+        <div className="mt-7 w-full max-w-[22rem] rounded-(--radius-panel) border border-ink-200 bg-surface px-5 py-5">
+          <p className="text-[0.6875rem] font-semibold tracking-[0.08em] text-ink-400 uppercase">
+            {waitsForMidnight ? t('caughtUp.resetLabel') : t('caughtUp.recheckLabel')}
+          </p>
+          <div className="mt-2">
+            {/* HH:MM:SS for the wait until midnight, bare seconds for the
+                re-check. "00:00:58" spends most of its width on zeros and makes
+                a one-minute loop look like a long one. */}
+            <Digits value={waitsForMidnight ? text : `${tick}s`} />
+          </div>
+          <p className="mt-2 text-[0.75rem] text-ink-400">
+            {waitsForMidnight ? t('caughtUp.resetHint') : t('caughtUp.recheckHint')}
+          </p>
         </div>
-        <p className="mt-2 text-[0.75rem] text-ink-400">
-          {capped ? t('caughtUp.resetHint') : t('caughtUp.recheckHint')}
-        </p>
-      </div>
+      )}
 
       {/* ---- What to do meanwhile ----------------------------------------
           Ordered by what actually helps: the other tab first when it has ads
@@ -148,7 +177,7 @@ export function CaughtUp({
           option. Leading with "upgrade" on a screen that says "come back
           later" reads as a shakedown. */}
       <div className="mt-6 flex w-full max-w-[22rem] flex-col gap-2">
-        {otherCount > 0 && (
+        {otherCount > 0 && !pointsCapped && !blocked && (
           <Button
             fullWidth
             onClick={onSwitch}
@@ -160,7 +189,7 @@ export function CaughtUp({
           </Button>
         )}
 
-        {!capped && (
+        {(!waitsForMidnight || blocked) && (
           <Button
             variant="secondary"
             fullWidth

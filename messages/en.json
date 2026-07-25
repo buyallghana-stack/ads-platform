@@ -221,7 +221,8 @@
         "withdrawal": "Withdrawal",
         "refund": "Refund",
         "subscription": "Subscription",
-        "adjustment": "Adjustment"
+        "adjustment": "Adjustment",
+        "survey": "Survey"
       },
       "kindHint": {
         "earned": "Ad reward",
@@ -229,7 +230,8 @@
         "withdrawal": "Payout request",
         "refund": "Returned to balance",
         "subscription": "Plan payment",
-        "adjustment": "Account correction"
+        "adjustment": "Account correction",
+        "survey": "Survey reward"
       },
       "method": {
         "mobile_money": "Mobile Money",
@@ -276,7 +278,8 @@
       "balance": "Balance",
       "points": "pts",
       "remaining": "{count, plural, one {# ad left on your {tier} plan today} other {# ads left on your {tier} plan today}}",
-      "spent": "You've used every ad on your {tier} plan today."
+      "spent": "You've used every ad on your {tier} plan today.",
+      "remainingShared": "{count, plural, one {# ad left today — shared across videos and surveys} other {# ads left today — shared across videos and surveys}}"
     },
     "card": {
       "reward": "+{points} pts",
@@ -298,7 +301,10 @@
       "checkNow": "Check now",
       "raiseLimit": "Raise my daily limit",
       "switchToSurveys": "{count, plural, one {Answer # survey instead} other {Answer # surveys instead}}",
-      "switchToVideos": "{count, plural, one {Watch # video instead} other {Watch # videos instead}}"
+      "switchToVideos": "{count, plural, one {Watch # video instead} other {Watch # videos instead}}",
+      "blockedTitle": "Earning is paused",
+      "blockedBody": "Earning is paused right now, so ads would not pay. Your balance is safe. Try again shortly.",
+      "pointsCappedBody": "You've reached the most points anyone can earn in a day. There are still ads here, but they would pay nothing until your daily total resets."
     },
     "player": {
       "close": "Close",
@@ -365,6 +371,21 @@
       "error": {
         "title": "Something went wrong",
         "body": "Nothing was counted against you. Please try again."
+      },
+      "tryAgain": "Try again",
+      "incorrectSurvey": {
+        "body": "{count, plural, one {Take the survey again and try once more. # try left.} other {Take the survey again and try once more. # tries left.}}"
+      },
+      "notWatchedSurvey": {
+        "body": "Answer every question before submitting."
+      },
+      "cooldown": {
+        "title": "Just a moment",
+        "body": "There is a short wait between ads. Try this one again in a few seconds — nothing was counted against you."
+      },
+      "pointsCap": {
+        "title": "That's the most for today",
+        "body": "You've reached the maximum points anyone can earn in a day, so this one was not counted. It resets at midnight UTC."
       }
     },
     "blocked": {
@@ -448,6 +469,11 @@
       "holdNote": "This is a demo — nothing was withdrawn. Real requests are reviewed and typically complete within 72 hours.",
       "home": "Back to Home",
       "history": "View in history"
+    },
+    "notYet": {
+      "title": "{short} points to go",
+      "body": "You can withdraw once you reach {min} points (GHS {ghs}). You have {balance} — that threshold comes with your {tier} plan.",
+      "cta": "Earn more"
     }
   },
   "theme": {

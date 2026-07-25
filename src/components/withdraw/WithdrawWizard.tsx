@@ -5,7 +5,6 @@ import { useMemo, useState, useTransition } from 'react'
 import {
   ArrowLeft,
   Check,
-  ChevronRight,
   Coins,
   KeyRound,
   ShieldCheck,
@@ -52,7 +51,6 @@ export type WithdrawAccount = {
 /** Demo indicative rate for the GHS→USD leg. Labelled indicative in the UI —
  *  the real quote comes from the two-hop pricing service at request time. */
 const DEMO_GHS_PER_USD = 10.45
-const POINTS_PER_GHS = 1000
 
 type Step = 'account' | 'amount' | 'confirm' | 'pin' | 'success'
 const STEPS: Step[] = ['account', 'amount', 'confirm', 'pin']
@@ -60,10 +58,18 @@ const STEPS: Step[] = ['account', 'amount', 'confirm', 'pin']
 export function WithdrawWizard({
   balance,
   minPoints,
+  pointsPerCurrencyUnit,
+  tierName,
   accounts,
 }: {
   balance: number
+  /** The user's RESOLVED payout threshold — lower on every paid plan. */
   minPoints: number
+  /** Operator config, not a constant: the rate can be changed. */
+  pointsPerCurrencyUnit: number
+  /** Named in the "not enough yet" copy so a subscriber can see their plan
+   *  threshold is the one being applied. */
+  tierName: string
   accounts: WithdrawAccount[]
 }) {
   const t = useTranslations('withdraw')
@@ -81,6 +87,18 @@ export function WithdrawWizard({
   const [pinError, setPinError] = useState<string | null>(null)
   const [pinBlocked, setPinBlocked] = useState<null | 'locked' | 'no_pin'>(null)
 
+  // Was a module-level constant of 1000. Points-per-cedi is operator config
+  // and every other screen already reads it; hardcoding it here meant a rate
+  // change would silently misprice this screen alone.
+  const POINTS_PER_GHS = pointsPerCurrencyUnit
+
+  /* Nothing in the flow can succeed below the threshold, so the wizard says
+     so on arrival instead of letting the user pick an amount, press Continue
+     and be refused. Every quick chip was a dead end in this state: Min is
+     more than the balance, Max is under the minimum. */
+  const shortOf = Math.max(minPoints - balance, 0)
+  const canWithdraw = shortOf === 0
+
   const account = accounts.find((a) => a.id === accountId) ?? null
   const isCrypto = account?.method === 'crypto'
 
@@ -89,7 +107,8 @@ export function WithdrawWizard({
     const n = Number(raw)
     if (!Number.isFinite(n) || n <= 0) return 0
     return unit === 'points' ? Math.floor(n) : Math.round(n * POINTS_PER_GHS)
-  }, [raw, unit])
+    // POINTS_PER_GHS is a prop now, not a constant — it belongs in the deps.
+  }, [raw, unit, POINTS_PER_GHS])
 
   const ghs = points / POINTS_PER_GHS
   const usdEstimate = ghs / DEMO_GHS_PER_USD
@@ -201,7 +220,41 @@ export function WithdrawWizard({
         <div className="animate-rise mt-6">
           <h2 className="text-sm font-medium text-ink-700">{t('account.title')}</h2>
 
-          {accounts.length === 0 ? (
+          {!canWithdraw ? (
+            /* Below the threshold there is no amount that can be submitted, so
+               the screen says how far off they are and sends them back to
+               earning. Letting them pick an amount first and refusing it at
+               Continue is the same answer delivered three taps later. */
+            <div className="mt-3 flex flex-col items-center gap-3 rounded-(--radius-card) border border-ink-200 bg-surface px-4 py-8 text-center">
+              <span className="grid size-11 place-items-center rounded-full bg-brand-50 text-brand-600">
+                <Coins aria-hidden className="size-5" />
+              </span>
+              <p className="text-[0.9375rem] font-semibold text-ink-900">
+                {t('notYet.title', { short: format.number(shortOf) })}
+              </p>
+              <p className="max-w-[32ch] text-[0.8125rem] leading-relaxed text-ink-500">
+                {t('notYet.body', {
+                  min: format.number(minPoints),
+                  ghs: format.number(minPoints / POINTS_PER_GHS, { minimumFractionDigits: 2 }),
+                  balance: format.number(balance),
+                  tier: tierName,
+                })}
+              </p>
+              <div className="mt-1 w-full max-w-[16rem]">
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-ink-100">
+                  <span
+                    className="block h-full rounded-full bg-brand-600"
+                    style={{
+                      width: `${Math.min((balance / Math.max(minPoints, 1)) * 100, 100)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+              <Link href="/ads">
+                <Button size="md">{t('notYet.cta')}</Button>
+              </Link>
+            </div>
+          ) : accounts.length === 0 ? (
             // No saved payout accounts — send them to set one up.
             <div className="mt-3 flex flex-col items-center gap-3 rounded-(--radius-card) border border-ink-200 bg-surface px-4 py-8 text-center">
               <span className="grid size-11 place-items-center rounded-full bg-teal-50 text-teal-600">
@@ -499,18 +552,13 @@ export function WithdrawWizard({
             {t('success.holdNote')}
           </p>
 
+          {/* One button, not two. The second offered "View in history" and
+              went to the same place — and while submission is demo there is
+              no history row to view, so it promised something that could not
+              exist. It comes back when request_redemption actually writes. */}
           <div className="mt-7 flex w-full flex-col gap-2.5">
             <Button size="lg" fullWidth onClick={() => router.push('/dashboard')}>
               {t('success.home')}
-            </Button>
-            <Button
-              variant="ghost"
-              size="lg"
-              fullWidth
-              trailingIcon={<ChevronRight />}
-              onClick={() => router.push('/dashboard')}
-            >
-              {t('success.history')}
             </Button>
           </div>
         </div>

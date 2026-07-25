@@ -1946,6 +1946,8 @@ export type Database = {
           currency_value: number
           daily_ad_cap: number
           earning_paused: boolean
+          points_cap_reached: boolean
+          points_earned_today: number
           tier_name: string
           tier_slug: string
         }[]
@@ -2326,6 +2328,8 @@ export type Database = {
         | "too_fast"
         | "daily_cap_reached"
         | "earning_blocked"
+        | "cooldown_active"
+        | "points_cap_reached"
       ad_format: "video" | "survey"
       ad_status: "draft" | "active" | "paused" | "exhausted" | "archived"
       alert_severity: "info" | "warning" | "critical"
@@ -2527,6 +2531,8 @@ export const Constants = {
         "too_fast",
         "daily_cap_reached",
         "earning_blocked",
+        "cooldown_active",
+        "points_cap_reached",
       ],
       ad_format: ["video", "survey"],
       ad_status: ["draft", "active", "paused", "exhausted", "archived"],

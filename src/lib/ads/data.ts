@@ -54,6 +54,15 @@ export type EarningStatus = {
   currencyValue: number
   earningPaused: boolean
   accountDisabled: boolean
+  /**
+   * True when this user has already hit per_user_daily_points_cap.
+   *
+   * It cannot be derived from the ad allowance — the two limits diverge once
+   * plans stack, so somebody can have 190 ads left and still be unable to earn
+   * a single point. Computed here rather than discovered by submitting,
+   * because finding out costs the user a whole ad watched for nothing.
+   */
+  pointsCapReached: boolean
 }
 
 export type AdsData = {
@@ -136,6 +145,12 @@ export async function getAdsData(userId: string): Promise<AdsData> {
       currencyValue: Number(s?.currency_value ?? 0),
       earningPaused: s?.earning_paused ?? false,
       accountDisabled: s?.account_disabled ?? false,
+      // Decided in the database. Reading per_user_daily_points_cap from here
+      // does NOT work: app_config's select policy is `is_public OR is_admin()`
+      // and that key is private, so the read returns null for every ordinary
+      // user and the flag would sit permanently false — silently, and only
+      // visibly correct when testing as an admin.
+      pointsCapReached: s?.points_cap_reached ?? false,
     },
     videos: ads.filter((a) => a.format === 'video'),
     surveys: ads.filter((a) => a.format === 'survey'),

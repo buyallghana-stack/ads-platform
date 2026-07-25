@@ -6,6 +6,7 @@ import {
   Coins,
   CreditCard,
   Gift,
+  ListChecks,
   PlayCircle,
   RotateCcw,
   Search,
@@ -34,10 +35,11 @@ import { cn } from '@/lib/cn'
  * server-driven pagination arrives with the full history screen.
  */
 
-const KIND_ORDER: TxKind[] = ['earned', 'bonus', 'withdrawal', 'refund', 'subscription', 'adjustment']
+const KIND_ORDER: TxKind[] = ['earned', 'survey', 'bonus', 'withdrawal', 'refund', 'subscription', 'adjustment']
 
 const KIND_ICON: Record<TxKind, React.ComponentType<{ className?: string }>> = {
   earned: PlayCircle,
+  survey: ListChecks,
   bonus: Gift,
   withdrawal: Smartphone,
   refund: RotateCcw,
@@ -61,6 +63,9 @@ const METHOD_ICON: Record<string, React.ComponentType<{ className?: string }>> =
  */
 const KIND_CHIP: Record<TxKind, string> = {
   earned: 'bg-success-50 text-success-600',
+  // Same green as a watched ad: both are money in, and the platform's accent
+  // hues carry fixed meanings. Format is told apart by the icon and the label.
+  survey: 'bg-success-50 text-success-600',
   bonus: 'bg-orange-50 text-orange-600',
   withdrawal: 'bg-brand-50 text-brand-600',
   refund: 'bg-teal-50 text-teal-600',

@@ -12,7 +12,7 @@ import { cn } from '@/lib/cn'
 
 import { AdCard } from './AdCard'
 import { AdPlayer } from './AdPlayer'
-import { CaughtUp } from './CaughtUp'
+import { CaughtUp, type CaughtUpVariant } from './CaughtUp'
 
 /**
  * The Ads tab.
@@ -79,6 +79,22 @@ export function AdsView({ data }: { data: AdsData }) {
   }
   const { completedIds, spent, earned } = snapshot === data ? optimistic : EMPTY_OPTIMISTIC
 
+  /*
+    Why this is NOT part of the optimistic layer above: that layer is wiped
+    every time fresh server data lands, and handleResolved calls
+    router.refresh() immediately — so a stop recorded there survived for
+    about a second and the feed went straight back to offering ads that
+    cannot pay.
+
+    The points ceiling now arrives from the server (get_user_earning_status),
+    so it is correct on first paint too — a user who is already capped is told
+    before they watch anything. The reward-pool stop has no such signal, so it
+    is remembered locally for the rest of the session.
+  */
+  const [sessionStop, setSessionStop] = useState<null | 'points' | 'blocked'>(null)
+  const stopped: null | 'points' | 'blocked' =
+    sessionStop ?? (data.status.pointsCapReached ? 'points' : null)
+
   const videos = data.videos.filter((a) => !completedIds.includes(a.id))
   const surveys = data.surveys.filter((a) => !completedIds.includes(a.id))
 
@@ -86,8 +102,11 @@ export function AdsView({ data }: { data: AdsData }) {
   const completedToday = data.status.completedToday + spent
   const balance = data.status.balance + earned
 
-  const videoCount = Math.min(videos.length, remainingToday)
-  const surveyCount = Math.min(surveys.length, remainingToday)
+  /* Zeroed while earning is stopped: the ads still exist, but offering "4"
+     on the tab beside a body that says you cannot earn today is the screen
+     arguing with itself. */
+  const videoCount = stopped ? 0 : Math.min(videos.length, remainingToday)
+  const surveyCount = stopped ? 0 : Math.min(surveys.length, remainingToday)
 
   // Open on whichever side has something to do, so a user with no videos left
   // does not land on an empty tab and assume the product is broken.
@@ -97,6 +116,15 @@ export function AdsView({ data }: { data: AdsData }) {
   const list = tab === 'video' ? videos : surveys
   const count = tab === 'video' ? videoCount : surveyCount
   const otherCount = tab === 'video' ? surveyCount : videoCount
+
+  const caughtUpVariant: CaughtUpVariant =
+    stopped === 'points'
+      ? 'pointsCapped'
+      : stopped === 'blocked'
+        ? 'blocked'
+        : remainingToday === 0
+          ? 'capped'
+          : 'empty'
 
   function handleResolved(adId: string, result: SubmitAdResult) {
     setOptimistic((o) => ({
@@ -111,6 +139,8 @@ export function AdsView({ data }: { data: AdsData }) {
             : o.spent,
       earned: result.outcome === 'correct' ? o.earned + result.pointsAwarded : o.earned,
     }))
+    if (result.outcome === 'points_cap_reached') setSessionStop('points')
+    if (result.outcome === 'earning_blocked') setSessionStop('blocked')
     router.refresh()
   }
 
@@ -194,10 +224,17 @@ export function AdsView({ data }: { data: AdsData }) {
           />
         </div>
 
+        {/* When the allowance is smaller than everything on offer it is the
+            binding limit, and the two tab badges can add up to more than the
+            user can actually do today. Saying it is shared here is what keeps
+            those badges honest — each is correct alone, and together they
+            would otherwise over-promise. */}
         <p className="mt-2 text-[0.75rem] text-ink-500">
-          {remainingToday > 0
-            ? t('allowance.remaining', { count: remainingToday, tier: data.status.tierName })
-            : t('allowance.spent', { tier: data.status.tierName })}
+          {remainingToday === 0
+            ? t('allowance.spent', { tier: data.status.tierName })
+            : remainingToday < videos.length + surveys.length
+              ? t('allowance.remainingShared', { count: remainingToday })
+              : t('allowance.remaining', { count: remainingToday, tier: data.status.tierName })}
         </p>
       </section>
 
@@ -256,7 +293,7 @@ export function AdsView({ data }: { data: AdsData }) {
       <div role="tabpanel" className="mt-4">
         {count === 0 ? (
           <CaughtUp
-            variant={remainingToday === 0 ? 'capped' : 'empty'}
+            variant={caughtUpVariant}
             format={tab}
             resetAt={data.resetAt}
             dailyCap={data.status.dailyAdCap}

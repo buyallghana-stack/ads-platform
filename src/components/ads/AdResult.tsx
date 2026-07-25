@@ -4,7 +4,9 @@ import {
   AlertTriangle,
   Check,
   Clock,
+  Coins,
   Gem,
+  Hourglass,
   Lock,
   RotateCcw,
   X,
@@ -59,16 +61,27 @@ const SHAPES: Record<string, Shape> = {
   not_watched: { tone: 'warning', Icon: RotateCcw, key: 'notWatched', retry: true },
   too_fast: { tone: 'warning', Icon: Clock, key: 'tooFast', retry: true },
   daily_cap_reached: { tone: 'brand', Icon: Gem, key: 'cap', upgrade: true },
+  // A cooldown is a wait of seconds, not a day. Reporting it as the daily cap
+  // told people to come back tomorrow when they needed to count to thirty.
+  cooldown_active: { tone: 'neutral', Icon: Hourglass, key: 'cooldown' },
+  // The count cap and the points ceiling are different limits and stacking
+  // makes them diverge, so they get different sentences.
+  points_cap_reached: { tone: 'brand', Icon: Coins, key: 'pointsCap' },
   earning_blocked: { tone: 'warning', Icon: AlertTriangle, key: 'blocked' },
   error: { tone: 'danger', Icon: AlertTriangle, key: 'error', retry: true },
 }
 
 export function AdResult({
   result,
+  format,
   onNext,
   onRetry,
 }: {
   result: SubmitAdResult
+  /** A survey has nothing to re-watch, so "Watch again" is the wrong word for
+   *  half of these screens. The copy branches on format rather than pretending
+   *  every ad is a video. */
+  format: 'video' | 'survey'
   /** Close and move on to the rest of the feed. */
   onNext: () => void
   /** Restart this ad from the top — a wrong answer clears the server-side
@@ -78,6 +91,14 @@ export function AdResult({
   const t = useTranslations('ads')
   const shape = SHAPES[result.outcome] ?? SHAPES.error
   const { Icon } = shape
+  const isSurvey = format === 'survey'
+
+  /* Only the two retry-flavoured outcomes read differently for a survey;
+     everything else ("daily limit", "no tries left") is format-neutral. */
+  const bodyKey =
+    isSurvey && (shape.key === 'incorrect' || shape.key === 'notWatched')
+      ? `${shape.key}Survey`
+      : shape.key
 
   return (
     <div className="flex flex-col items-center gap-4 px-6 py-8 text-center">
@@ -95,7 +116,7 @@ export function AdResult({
           {t(`result.${shape.key}.title`)}
         </h2>
         <p className="max-w-[34ch] text-[0.875rem] leading-relaxed text-ink-500">
-          {t(`result.${shape.key}.body`, { count: result.attemptsRemaining })}
+          {t(`result.${bodyKey}.body`, { count: result.attemptsRemaining })}
         </p>
       </div>
 
@@ -118,7 +139,7 @@ export function AdResult({
       <div className="flex w-full max-w-[18rem] flex-col gap-2 pt-1">
         {shape.retry && result.attemptsRemaining > 0 && (
           <Button fullWidth onClick={onRetry} leadingIcon={<RotateCcw />}>
-            {t('result.watchAgain')}
+            {isSurvey ? t('result.tryAgain') : t('result.watchAgain')}
           </Button>
         )}
 

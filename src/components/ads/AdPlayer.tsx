@@ -563,7 +563,14 @@ export function AdPlayer({
                 <p className="text-[0.8125rem]">{t('result.checking')}</p>
               </div>
             ) : (
-              result && <AdResult result={result} onNext={onClose} onRetry={retry} />
+              result && (
+                <AdResult
+                  result={result}
+                  format={ad.format}
+                  onNext={onClose}
+                  onRetry={retry}
+                />
+              )
             )}
           </div>
         </div>
