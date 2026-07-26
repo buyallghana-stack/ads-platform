@@ -179,17 +179,38 @@ export function QuestionSheet({
       )}
 
       {/*
-        Full width on a phone, where a bottom-of-sheet primary is the thumb
-        target and stretching it is the point. NOT full width from md: the
-        card is 32rem there, and a one-word label across 408px of blue read as
-        a banner rather than a button — which is what the operator saw. From
-        md it takes its natural width against a floor, and sits at the end of
-        the row with Back at the other.
+        A GRID BELOW `md`, NOT A FLEX ROW — and that is the whole bug fix.
+
+        Submit used to carry `fullWidth`, which is `w-full`: 100% of the
+        container, not "the space left over". Alone in the row that reads as
+        full width and is right. Beside Back — the last question of a survey —
+        it was still asking for 100%, and `Button` sets `shrink-0`, so it could
+        not give any of it back. The row overran the sheet and the submit
+        button was clipped at the screen edge: "too long and distorted".
+
+        A grid track cannot overflow like that. `auto` for Back, `1fr` for
+        Submit, and a grid item stretches to its track without any width
+        utility at all — so `shrink-0` never enters into it. With no Back
+        there is one full-width track, which keeps the thumb target a phone
+        wants.
+
+        FROM `md` it is a flex row again and the button sizes to its LABEL,
+        against a floor rather than a fixed width. The old `min-w-[10rem]`
+        forced 160px on every label, so "Next" sat marooned in the middle of a
+        wide blue slab while "Continue watching" looked normal — one number
+        cannot flatter both. 7.5rem is a floor a primary action does not fall
+        below; anything longer simply grows past it.
 
         `lg` rather than the default `md` at every width: 40px was squat under
         a full-width fill, and this is the primary action of the whole screen.
       */}
-      <div className="flex items-center gap-2 md:justify-end">
+      <div
+        className={cn(
+          'grid items-center gap-2',
+          onBack ? 'grid-cols-[auto_minmax(0,1fr)]' : 'grid-cols-1',
+          'md:flex md:justify-end',
+        )}
+      >
         {onBack && (
           <Button
             type="button"
@@ -205,10 +226,9 @@ export function QuestionSheet({
         <Button
           type="submit"
           size="lg"
-          fullWidth
           disabled={!answered}
           loading={submitting}
-          className="md:w-auto md:min-w-[10rem]"
+          className="md:min-w-[7.5rem]"
         >
           {submitLabel}
         </Button>
