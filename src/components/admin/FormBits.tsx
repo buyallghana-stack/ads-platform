@@ -254,7 +254,17 @@ export function ChoiceChip({
   )
 }
 
-/** The editor's section wrapper: a card with a title and an explanation. */
+/**
+ * The editor's section wrapper: a card with a title and an explanation.
+ *
+ * FULL-BLEED ON A PHONE, CARD FROM `sm`. A form section holds question cards,
+ * which hold option rows and condition boxes — on a 360px screen that is
+ * three nested borders and about 60px of padding spent on chrome before any
+ * content, which is what made the editor feel boxed in and uncontained. Below
+ * `sm` the outer card gives up its side borders and its rounding and runs to
+ * both screen edges (`-mx-4` cancels the admin main's `px-4`), so the width
+ * goes to the fields and only the inner cards draw boxes.
+ */
 export function FormSection({
   title,
   description,
@@ -271,7 +281,8 @@ export function FormSection({
   return (
     <section
       className={cn(
-        'rounded-(--radius-card) border border-ink-200 bg-surface p-4 sm:p-5',
+        '-mx-4 border-y border-ink-200 bg-surface px-4 py-4',
+        'sm:mx-0 sm:rounded-(--radius-card) sm:border sm:p-5',
         className,
       )}
     >

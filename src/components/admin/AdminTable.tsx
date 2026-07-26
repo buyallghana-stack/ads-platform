@@ -138,11 +138,45 @@ export function Toolbar<T extends string>({
 }) {
   return (
     <div className="mb-3 flex flex-col gap-3 border-b border-ink-200 sm:flex-row sm:items-end sm:justify-between">
+      {/*
+        ON A PHONE THE TABS ARE A SELECT, NOT A STRIP.
+
+        Six statuses is 560px of tabs in a 328px window: the last two sit off
+        the edge, and the strip pans under the thumb — which the operator read
+        as the whole screen being loose and draggable, because on a phone a
+        horizontal drag inside the page is indistinguishable from the page
+        itself moving. A strip that scrolls is fine when it is obviously a
+        strip (a wide screen showing eight of ten); it is not fine when it is
+        the only sideways-moving thing on a screen that should not move
+        sideways at all.
+
+        The select carries the same counts, is one tap to any status, and
+        cannot hide an option off-screen. The underline strip returns at `sm`,
+        where every tab fits and the design language is the reference's.
+      */}
+      <div className="pb-2.5 sm:hidden">
+        <label className="sr-only" htmlFor="admin-table-filter">
+          {tabsLabel}
+        </label>
+        <select
+          id="admin-table-filter"
+          value={active}
+          onChange={(e) => onSelect(e.target.value as T)}
+          className="h-10 w-full rounded-(--radius-input) border border-ink-200 bg-surface px-3 text-[0.8125rem] font-medium text-ink-900 focus:border-brand-600 focus:outline-none pointer-coarse:text-base"
+        >
+          {tabs.map((tab) => (
+            <option key={tab.key} value={tab.key}>
+              {tab.count === undefined ? tab.label : `${tab.label} (${tab.count})`}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div
         role="tablist"
         aria-label={tabsLabel}
         className={cn(
-          '-mb-px flex min-w-0 gap-1 overflow-x-auto pr-4',
+          '-mb-px hidden min-w-0 gap-1 overflow-x-auto pr-4 sm:flex',
           '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
           /* Fades the last tab out as it runs off rather than letting it be
              chopped flat against whatever sits beside it, which reads as an
@@ -188,9 +222,13 @@ export function Toolbar<T extends string>({
       </div>
 
       {(onQuery || actions) && (
-        <div className="mb-2.5 flex items-center gap-2 sm:mb-2">
+        /* Search and the buttons stop competing for one row below `sm`. Two
+           "New …" buttons beside a search field left the field 90px wide and
+           showing "Titl" — a row where nothing is usable rather than a row
+           that is merely tight. */
+        <div className="mb-2.5 flex flex-col gap-2 sm:mb-2 sm:flex-row sm:items-center">
           {onQuery && (
-            <div className="relative flex-1 sm:w-60 sm:flex-none">
+            <div className="relative sm:w-60">
               <Search
                 aria-hidden
                 className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-ink-400"
@@ -205,7 +243,7 @@ export function Toolbar<T extends string>({
               />
             </div>
           )}
-          {actions}
+          {actions && <div className="flex items-center gap-2">{actions}</div>}
         </div>
       )}
     </div>

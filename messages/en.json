@@ -1242,7 +1242,7 @@
       },
       "meta": {
         "video": "{seconds}s · {questions, plural, =0 {watch only} one {# question} other {# questions}}",
-        "survey": "{questions, plural, one {# question} other {# questions}}"
+        "survey": "{questions, plural, =0 {watch only} one {# question} other {# questions}}"
       },
       "columns": {
         "ad": "Ad",

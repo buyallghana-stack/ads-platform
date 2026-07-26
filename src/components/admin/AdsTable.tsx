@@ -305,8 +305,10 @@ export function AdsTable({
     <span className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[0.6875rem] text-ink-400">
       {advertiser && a.advertiser && <span>{a.advertiser} ·</span>}
       <span>
-        {a.format === 'video'
-          ? t('meta.video', { seconds: a.durationSeconds ?? 0, questions: a.questionCount })
+        {/* "0s" is a lie about an ad whose length was never entered — a
+            YouTube spot does not need one. Say the questions instead. */}
+        {a.format === 'video' && a.durationSeconds !== null
+          ? t('meta.video', { seconds: a.durationSeconds, questions: a.questionCount })
           : t('meta.survey', { questions: a.questionCount })}
       </span>
       {a.branchingCount > 0 && (
@@ -352,11 +354,14 @@ export function AdsTable({
         onQuery={setQuery}
         searchPlaceholder={t('searchPlaceholder')}
         actions={
-          <div className="flex items-center gap-2">
+          <>
+            {/* Both buttons share the row evenly on a phone and shrink to
+                their labels from `sm`, so neither crowds the search field. */}
             <Button
               type="button"
               size="sm"
               variant="secondary"
+              className="flex-1 sm:flex-none"
               onClick={() => router.push('/admin/ads/new?format=survey')}
             >
               <ListChecks aria-hidden className="size-4" />
@@ -365,12 +370,13 @@ export function AdsTable({
             <Button
               type="button"
               size="sm"
+              className="flex-1 sm:flex-none"
               onClick={() => router.push('/admin/ads/new?format=video')}
             >
               <Plus aria-hidden className="size-4" />
               {t('newVideo')}
             </Button>
-          </div>
+          </>
         }
       />
 

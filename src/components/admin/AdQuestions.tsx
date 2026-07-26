@@ -467,81 +467,99 @@ function Conditions({
             />
           )}
 
+          {/*
+            One condition is a small stacked form, not a sentence laid out in
+            a row. On a phone the row version wrapped into "If [question]" /
+            "[is] [answer]" / a stranded bin icon on its own line — three
+            fragments that no longer read as one rule. Stacked with a labelled
+            head it survives any width, and from `sm` the two short controls
+            sit side by side again.
+          */}
           {question.rules.map((rule) => {
             const subject = earlier.find((q) => q.key === rule.dependsOn)
 
             return (
-              <div key={rule.key} className="flex flex-wrap items-center gap-2">
-                <span className="text-[0.75rem] text-ink-500">{t('ifAnswerTo')}</span>
+              <div
+                key={rule.key}
+                className="rounded-(--radius-input) border border-violet-600/20 bg-surface p-2.5"
+              >
+                <div className="mb-1.5 flex items-center justify-between gap-2">
+                  <span className="text-[0.625rem] font-semibold tracking-[0.05em] text-violet-700 uppercase">
+                    {t('ifAnswerTo')}
+                  </span>
+                  {!locked && (
+                    <IconButton
+                      label={t('removeCondition')}
+                      onClick={() =>
+                        onChange({ rules: question.rules.filter((r) => r.key !== rule.key) })
+                      }
+                    >
+                      <Trash2 aria-hidden />
+                    </IconButton>
+                  )}
+                </div>
 
-                <select
-                  value={rule.dependsOn}
-                  disabled={locked}
-                  aria-label={t('ifAnswerTo')}
-                  onChange={(e) => {
-                    const next = earlier.find((q) => q.key === e.target.value)
-                    setRule(rule.key, {
-                      dependsOn: e.target.value,
-                      optionKey:
-                        next?.format === 'multiple_choice' ? (next.options[0]?.key ?? null) : null,
-                      valueText: next?.format === 'short_text' ? '' : null,
-                    })
-                  }}
-                  className={inputClass(false, 'h-9 w-auto min-w-[9rem] flex-1 pr-8')}
-                >
-                  {earlier.map((q, i) => (
-                    <option key={q.key} value={q.key}>
-                      {t('questionN', { n: i + 1 })} · {q.text.trim() || t('untitledQuestion')}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={rule.negate ? 'isNot' : 'is'}
-                  disabled={locked}
-                  aria-label={t('comparison')}
-                  onChange={(e) => setRule(rule.key, { negate: e.target.value === 'isNot' })}
-                  className={inputClass(false, 'h-9 w-auto pr-8')}
-                >
-                  <option value="is">{t('is')}</option>
-                  <option value="isNot">{t('isNot')}</option>
-                </select>
-
-                {subject?.format === 'short_text' ? (
-                  <input
-                    value={rule.valueText ?? ''}
-                    disabled={locked}
-                    placeholder={t('typedAnswer')}
-                    aria-label={t('typedAnswer')}
-                    onChange={(e) => setRule(rule.key, { valueText: e.target.value })}
-                    className={inputClass(false, 'h-9 w-auto min-w-[8rem] flex-1')}
-                  />
-                ) : (
+                <div className="flex flex-col gap-2">
                   <select
-                    value={rule.optionKey ?? ''}
+                    value={rule.dependsOn}
                     disabled={locked}
-                    aria-label={t('chosenOption')}
-                    onChange={(e) => setRule(rule.key, { optionKey: e.target.value })}
-                    className={inputClass(false, 'h-9 w-auto min-w-[8rem] flex-1 pr-8')}
+                    aria-label={t('ifAnswerTo')}
+                    onChange={(e) => {
+                      const next = earlier.find((q) => q.key === e.target.value)
+                      setRule(rule.key, {
+                        dependsOn: e.target.value,
+                        optionKey:
+                          next?.format === 'multiple_choice' ? (next.options[0]?.key ?? null) : null,
+                        valueText: next?.format === 'short_text' ? '' : null,
+                      })
+                    }}
+                    className={inputClass(false, 'h-9 pr-8')}
                   >
-                    {(subject?.options ?? []).map((o, i) => (
-                      <option key={o.key} value={o.key}>
-                        {o.text.trim() || t('optionPlaceholder', { n: i + 1 })}
+                    {earlier.map((q, i) => (
+                      <option key={q.key} value={q.key}>
+                        {t('questionN', { n: i + 1 })} · {q.text.trim() || t('untitledQuestion')}
                       </option>
                     ))}
                   </select>
-                )}
 
-                {!locked && (
-                  <IconButton
-                    label={t('removeCondition')}
-                    onClick={() =>
-                      onChange({ rules: question.rules.filter((r) => r.key !== rule.key) })
-                    }
-                  >
-                    <Trash2 aria-hidden />
-                  </IconButton>
-                )}
+                  <div className="flex min-w-0 gap-2">
+                    <select
+                      value={rule.negate ? 'isNot' : 'is'}
+                      disabled={locked}
+                      aria-label={t('comparison')}
+                      onChange={(e) => setRule(rule.key, { negate: e.target.value === 'isNot' })}
+                      className={inputClass(false, 'h-9 w-[6.5rem] shrink-0 pr-7')}
+                    >
+                      <option value="is">{t('is')}</option>
+                      <option value="isNot">{t('isNot')}</option>
+                    </select>
+
+                    {subject?.format === 'short_text' ? (
+                      <input
+                        value={rule.valueText ?? ''}
+                        disabled={locked}
+                        placeholder={t('typedAnswer')}
+                        aria-label={t('typedAnswer')}
+                        onChange={(e) => setRule(rule.key, { valueText: e.target.value })}
+                        className={inputClass(false, 'h-9 min-w-0 flex-1')}
+                      />
+                    ) : (
+                      <select
+                        value={rule.optionKey ?? ''}
+                        disabled={locked}
+                        aria-label={t('chosenOption')}
+                        onChange={(e) => setRule(rule.key, { optionKey: e.target.value })}
+                        className={inputClass(false, 'h-9 min-w-0 flex-1 pr-8')}
+                      >
+                        {(subject?.options ?? []).map((o, i) => (
+                          <option key={o.key} value={o.key}>
+                            {o.text.trim() || t('optionPlaceholder', { n: i + 1 })}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                </div>
               </div>
             )
           })}

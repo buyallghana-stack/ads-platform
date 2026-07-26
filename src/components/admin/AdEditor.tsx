@@ -145,7 +145,7 @@ export function AdEditor({
   const deletable = draft.attempts === 0 && draft.completions === 0
 
   return (
-    <div className="pb-24">
+    <div className="pb-0 sm:pb-24">
       {/* ---- Header ----------------------------------------------------- */}
       <div className="mb-5 flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
         <div className="min-w-0">
@@ -185,7 +185,10 @@ export function AdEditor({
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
+        {/* Hidden on a phone: the same pair lives in the sticky bar at the
+            bottom, because saving after filling in five questions should not
+            mean scrolling back to the top of the form to find the button. */}
+        <div className="hidden shrink-0 items-center gap-2 sm:flex">
           <Button type="button" variant="secondary" size="md" onClick={() => router.push('/admin/ads')}>
             {t('cancel')}
           </Button>
@@ -557,6 +560,31 @@ export function AdEditor({
             </FormSection>
           )}
         </div>
+      </div>
+
+      {/*
+        The phone's action bar. Sticky rather than fixed on purpose: the admin
+        top bar has a backdrop-filter, and anything `fixed` rendered inside a
+        filtered ancestor resolves against that ancestor rather than the
+        viewport — the bug that once left the nav drawer 56px tall. Sticky
+        answers to the scroll container, so it has none of that risk, and it
+        comes to rest at the end of the form instead of covering the last
+        field forever.
+      */}
+      <div className="sticky bottom-0 z-20 -mx-4 mt-4 flex gap-2 border-t border-ink-200 bg-surface/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur sm:hidden">
+        <Button
+          type="button"
+          variant="secondary"
+          size="md"
+          className="flex-1"
+          onClick={() => router.push('/admin/ads')}
+        >
+          {t('cancel')}
+        </Button>
+        <Button type="button" size="md" className="flex-1" loading={saving} onClick={submit}>
+          <Check aria-hidden className="size-4" />
+          {isNew ? t('create') : t('save')}
+        </Button>
       </div>
     </div>
   )
