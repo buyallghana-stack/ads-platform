@@ -4,6 +4,7 @@ import { Search } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { ThemeSwitchButton } from '@/components/theme/ThemeSwitchButton'
+import { usePathname } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
 
 import { AdminDrawer, type AdminChip, type NavCounts } from './AdminNav'
@@ -12,12 +13,19 @@ import { AdminDrawer, type AdminChip, type NavCounts } from './AdminNav'
  * The bar across the top of every admin screen (reference 1).
  *
  * Carries the menu button on a phone, a search field, the theme switch, and
- * the PREVIEW badge. That badge is not decoration: every figure in this
- * dashboard is invented until the backend is wired, and these are money
- * numbers. An operator must never be one glance away from treating an
+ * the data badge. That badge is not decoration: most figures in this
+ * dashboard are still invented while the backends are wired, and these are
+ * money numbers. An operator must never be one glance away from treating an
  * imagined revenue figure as real, so it sits in the chrome of every screen
  * rather than on a page somebody might scroll past.
+ *
+ * As screens become real the badge has to say so, or "no badge" would mean
+ * both "this is live" and "somebody forgot the badge". So a wired screen
+ * shows a LIVE badge instead of losing one — REAL_ADMIN_SECTIONS is the whole
+ * switch, one line per screen as each is finished.
  */
+const REAL_ADMIN_SECTIONS = ['/admin/ads']
+
 export function AdminTopBar({
   counts,
   admin,
@@ -28,6 +36,8 @@ export function AdminTopBar({
   preview: boolean
 }) {
   const t = useTranslations('admin')
+  const pathname = usePathname()
+  const live = REAL_ADMIN_SECTIONS.some((section) => pathname.startsWith(section))
 
   return (
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-ink-200 bg-surface/95 px-3 backdrop-blur sm:px-5">
@@ -54,11 +64,18 @@ export function AdminTopBar({
       </div>
 
       <div className="ml-auto flex items-center gap-2">
-        {preview && (
-          <span className="hidden items-center gap-1.5 rounded-full border border-warning-500/30 bg-warning-50 px-2.5 py-1 text-[0.6875rem] font-semibold text-warning-600 sm:inline-flex">
-            <span aria-hidden className="size-1.5 rounded-full bg-warning-500" />
-            {t('previewBadge')}
+        {live ? (
+          <span className="hidden items-center gap-1.5 rounded-full border border-success-500/25 bg-success-50 px-2.5 py-1 text-[0.6875rem] font-semibold text-success-700 sm:inline-flex">
+            <span aria-hidden className="size-1.5 rounded-full bg-success-500" />
+            {t('liveBadge')}
           </span>
+        ) : (
+          preview && (
+            <span className="hidden items-center gap-1.5 rounded-full border border-warning-500/30 bg-warning-50 px-2.5 py-1 text-[0.6875rem] font-semibold text-warning-600 sm:inline-flex">
+              <span aria-hidden className="size-1.5 rounded-full bg-warning-500" />
+              {t('previewBadge')}
+            </span>
+          )
         )}
         <ThemeSwitchButton />
       </div>

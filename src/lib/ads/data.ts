@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { clientEnv } from '@/lib/env'
+import { adMediaUrl, adThumbnailUrl } from '@/lib/ads/media'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/database.types'
 
@@ -86,31 +86,9 @@ export type AdsData = {
   now: number
 }
 
-/** Public URL for an object in the `ad-media` bucket. */
-export function adMediaUrl(path: string | null | undefined): string | null {
-  if (!path) return null
-  return `${clientEnv.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/ad-media/${path}`
-}
-
-/**
- * Thumbnail for a feed card.
- *
- * Order: what the advertiser supplied, then YouTube's own still for a YouTube
- * ad, then nothing — and "nothing" is a real answer, because the card draws a
- * generated cover rather than a broken image frame. An ad the operator has not
- * yet uploaded artwork for still looks deliberate.
- *
- * `hqdefault` rather than `maxresdefault`: maxres does not exist for every
- * video and 404s to a grey placeholder, while hqdefault always exists.
- */
-function thumbnailFor(row: { thumbnail_path: string | null; youtube_video_id: string | null }) {
-  const uploaded = adMediaUrl(row.thumbnail_path)
-  if (uploaded) return uploaded
-  if (row.youtube_video_id) {
-    return `https://i.ytimg.com/vi/${row.youtube_video_id}/hqdefault.jpg`
-  }
-  return null
-}
+/* Media URLs live in lib/ads/media.ts — the admin editor previews an upload
+   in the browser and cannot import anything from this `server-only` module. */
+export { adMediaUrl }
 
 /** Next UTC midnight, in epoch ms — when daily_earning_counters roll over. */
 export function nextDailyReset(now = Date.now()): number {
@@ -138,7 +116,7 @@ export async function getAdsData(userId: string): Promise<AdsData> {
     points: Number(r.points_award),
     videoUrl: r.video_source === 'upload' ? adMediaUrl(r.storage_path) : null,
     youtubeId: r.youtube_video_id,
-    thumbnailUrl: thumbnailFor(r),
+    thumbnailUrl: adThumbnailUrl(r),
     durationSeconds: r.duration_seconds,
     minWatchSeconds: r.min_watch_seconds,
     questionCount: r.question_count,

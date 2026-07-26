@@ -1,7 +1,6 @@
 import 'server-only'
 
 import type {
-  AdItem,
   Advertiser,
   AuditEntry,
   DailyMoney,
@@ -264,41 +263,6 @@ export function people(): Person[] {
 /* ------------------------------------------------------------------ */
 /* Content, money and system records                                   */
 /* ------------------------------------------------------------------ */
-
-export function adItems(): AdItem[] {
-  const now = Date.now()
-  const days = (d: number) => new Date(now - d * 24 * HOURS).toISOString()
-
-  return [
-    { id: 'a1', title: 'MTN Ghana — 5G is here', advertiser: 'MTN Ghana', format: 'video',
-      status: 'live', points: 55, durationSeconds: 45, questions: 2,
-      budget: 20000, completions: 14820, tiers: [], createdAt: days(22) },
-    { id: 'a2', title: 'How do you send money?', advertiser: 'Fido Microcredit', format: 'survey',
-      status: 'live', points: 90, durationSeconds: 0, questions: 6,
-      budget: 5000, completions: 4870, tiers: [], createdAt: days(15) },
-    { id: 'a3', title: 'Melcom mid-year sale', advertiser: 'Melcom', format: 'video',
-      status: 'live', points: 40, durationSeconds: 30, questions: 1,
-      budget: 12000, completions: 3110, tiers: [], createdAt: days(9) },
-    // Platinum-only, so it exercises the tier chips.
-    { id: 'a4', title: 'Which bank do you use most?', advertiser: 'Absa Ghana', format: 'survey',
-      status: 'live', points: 120, durationSeconds: 0, questions: 8,
-      budget: 2500, completions: 640, tiers: ['Gold', 'Platinum'], createdAt: days(6) },
-    // 98% delivered — the one about to stop serving, which is the whole
-    // reason budget and completions travel together.
-    { id: 'a5', title: 'Hollard car insurance', advertiser: 'Hollard', format: 'video',
-      status: 'live', points: 65, durationSeconds: 60, questions: 2,
-      budget: 8000, completions: 7860, tiers: [], createdAt: days(31) },
-    { id: 'a6', title: 'Voltic — stay hydrated', advertiser: 'Voltic Ghana', format: 'video',
-      status: 'paused', points: 35, durationSeconds: 20, questions: 1,
-      budget: 15000, completions: 5240, tiers: [], createdAt: days(40) },
-    { id: 'a7', title: 'Your data bundle habits', advertiser: 'Telecel Ghana', format: 'survey',
-      status: 'draft', points: 80, durationSeconds: 0, questions: 5,
-      budget: 6000, completions: 0, tiers: [], createdAt: days(2) },
-    { id: 'a8', title: 'Glo — old campaign', advertiser: 'Glo Ghana', format: 'video',
-      status: 'archived', points: 30, durationSeconds: 30, questions: 1,
-      budget: 10000, completions: 10000, tiers: [], createdAt: days(120) },
-  ]
-}
 
 /**
  * The plans, exactly as `public.tiers` holds them after migration 037.

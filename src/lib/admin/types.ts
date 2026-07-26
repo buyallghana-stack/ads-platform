@@ -161,6 +161,19 @@ export function canDispute(request: PayoutRequest, now: number): boolean {
 /* Content, money and system records                                   */
 /* ------------------------------------------------------------------ */
 
+/* ---- The ad pool. Real data, not preview — see lib/admin/ads-data.ts ---- */
+
+/** Mirrors public.ad_status exactly. `exhausted` is set by the database when
+ *  an ad delivers its budget; no operator ever picks it. */
+export type AdStatus = 'draft' | 'active' | 'paused' | 'exhausted' | 'archived'
+export type AdFormat = 'video' | 'survey'
+export type VideoSource = 'upload' | 'youtube'
+export type AnswerFormat = 'multiple_choice' | 'short_text'
+export type ConditionMode = 'all' | 'any'
+
+/** The statuses an operator may choose. Draft is where an ad starts. */
+export const CHOOSABLE_STATUSES: AdStatus[] = ['draft', 'active', 'paused', 'archived']
+
 /**
  * One item in the pool users watch and answer.
  *
@@ -169,23 +182,121 @@ export function canDispute(request: PayoutRequest, now: number): boolean {
  * up separately. `tiers` empty means everyone — inclusive by default, which
  * is the rule the database already enforces (upgrading never shrinks a
  * user's pool).
+ *
+ * `attempts` is here for one reason: it decides which verb the row may offer.
+ * An ad nobody has attempted can be deleted outright; after that the attempt
+ * history is the evidence behind completions people were paid for, so the
+ * only honest action is archive.
  */
-export type AdItem = {
+export type AdListItem = {
   id: string
   title: string
-  advertiser: string
-  format: 'video' | 'survey'
-  status: 'live' | 'paused' | 'draft' | 'archived'
+  description: string | null
+  advertiser: string | null
+  format: AdFormat
+  status: AdStatus
   /** Points a Free-tier user earns. Higher plans multiply this. */
   points: number
-  durationSeconds: number
-  questions: number
-  /** How many completions are paid for, and how many have happened. */
-  budget: number
+  /** Completions paid for (null = unlimited) against completions delivered. */
+  budget: number | null
   completions: number
+  attempts: number
+  questionCount: number
+  /** How many questions have an answer key. The rest are opinion questions. */
+  gradedCount: number
+  /** Branching rules across the whole ad. 0 = every respondent sees the same
+   *  questions. */
+  branchingCount: number
+  /** Questions pinned to a second of the video rather than asked at the end. */
+  cueCount: number
   /** Plan names this is limited to. Empty = the whole platform. */
   tiers: string[]
+  videoSource: VideoSource | null
+  durationSeconds: number | null
+  minWatchSeconds: number | null
+  thumbnailUrl: string | null
+  weight: number
+  startsAt: string | null
+  endsAt: string | null
   createdAt: string
+  updatedAt: string
+}
+
+/** A plan, as the audience picker needs it. */
+export type TierOption = { id: string; name: string; slug: string; isDefault: boolean }
+
+/* ---- The editor's working copy -------------------------------------------
+ *
+ * Everything inside a draft is addressed by a LOCAL key, never by an index or
+ * a database id. Indexes are what admin_save_ad wants and what admin_get_ad
+ * returns, but they shift the moment a question is reordered or an option is
+ * removed — and a branching rule that quietly re-points at a different
+ * question because a row moved is the worst bug this screen could have. Keys
+ * survive both, and adDraftPayload() converts them back to indexes once, at
+ * the point of saving.
+ */
+
+export type AdOptionDraft = { key: string; text: string; correct: boolean }
+
+export type AdRuleDraft = {
+  key: string
+  /** Local key of the EARLIER question whose answer is tested. */
+  dependsOn: string
+  /** Local key of the option that must have been chosen. */
+  optionKey: string | null
+  /** For a typed answer: compared case-insensitively and trimmed. */
+  valueText: string | null
+  /** "is not" rather than "is". */
+  negate: boolean
+}
+
+export type AdQuestionDraft = {
+  key: string
+  text: string
+  format: AnswerFormat
+  /** Short-text answer key. Null means opinion: any answer is accepted. */
+  correctAnswer: string | null
+  /** Second of the video this interrupts at. Null = ask at the end. */
+  showAtSeconds: number | null
+  conditionMode: ConditionMode
+  options: AdOptionDraft[]
+  rules: AdRuleDraft[]
+}
+
+export type AdDraft = {
+  /** Null while creating. */
+  id: string | null
+  title: string
+  description: string
+  advertiser: string
+  format: AdFormat
+  status: AdStatus
+  points: number
+  videoSource: VideoSource | null
+  storagePath: string | null
+  youtubeId: string | null
+  thumbnailPath: string | null
+  durationSeconds: number | null
+  minWatchSeconds: number | null
+  maxCompletions: number | null
+  weight: number
+  /** ISO strings, or null for "no boundary". */
+  startsAt: string | null
+  endsAt: string | null
+  /** Empty = everyone. */
+  tierIds: string[]
+  questions: AdQuestionDraft[]
+
+  /* Read-only context, carried so the form can explain itself. */
+  completions: number
+  attempts: number
+  /**
+   * True once somebody has completed this ad. The database refuses question
+   * edits from then on — rewriting the questions under people who already
+   * answered rewrites the advertiser's research — so the editor says so
+   * rather than accepting edits the save will silently drop.
+   */
+  questionsLocked: boolean
 }
 
 /**

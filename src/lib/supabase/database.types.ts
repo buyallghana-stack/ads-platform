@@ -1559,25 +1559,37 @@ export type Database = {
         Args: { p_ad_id: string; p_admin_id: string }
         Returns: string
       }
+      admin_get_ad: {
+        Args: { p_ad_id: string; p_admin_id: string }
+        Returns: Json
+      }
       admin_list_ads: {
         Args: { p_status?: Database["public"]["Enums"]["ad_status"] }
         Returns: {
           advertiser_name: string
+          attempts_count: number
           branching_count: number
           completions_count: number
           created_at: string
+          cue_count: number
+          description: string
+          duration_seconds: number
           ends_at: string
           format: Database["public"]["Enums"]["ad_format"]
           graded_count: number
           id: string
           max_completions: number
+          min_watch_seconds: number
           points_reward: number
           question_count: number
           starts_at: string
           status: Database["public"]["Enums"]["ad_status"]
+          thumbnail_path: string
           tier_slugs: string[]
           title: string
           updated_at: string
+          video_source: Database["public"]["Enums"]["video_source"]
+          weight: number
         }[]
       }
       admin_save_ad: {
@@ -1588,6 +1600,14 @@ export type Database = {
           p_tier_ids?: string[]
         }
         Returns: string
+      }
+      admin_set_ad_status: {
+        Args: {
+          p_ad_id: string
+          p_admin_id: string
+          p_status: Database["public"]["Enums"]["ad_status"]
+        }
+        Returns: Database["public"]["Enums"]["ad_status"]
       }
       apply_referral_code: {
         Args: {
