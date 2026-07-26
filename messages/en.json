@@ -1309,11 +1309,25 @@
     "subscriptions": {
       "title": "Subscriptions",
       "description": "The plans, what they cost, and whether they are selling. Free is listed too — it is the denominator.",
+      "filterLabel": "Filter by availability",
+      "filters": {
+        "all": "All",
+        "live": "On sale",
+        "hidden": "Hidden"
+      },
+      "searchPlaceholder": "Plan name or slug",
+      "empty": "No plans match.",
+      "editRow": "Edit {name}",
+      "menuLabel": "Actions for {name}",
+      "defaultBadge": "Default",
+      "freeLabel": "Free",
+      "perDays": "every {days} days",
+      "copyOf": "{name} copy",
       "summary": {
         "paying": "Paying subscribers",
         "payingHint": "of {total} accounts",
-        "monthly": "Monthly revenue",
-        "monthlyHint": "from plans",
+        "monthly": "Plan revenue",
+        "monthlyHint": "current period",
         "conversion": "Conversion",
         "conversionHint": "free to paid"
       },
@@ -1323,18 +1337,94 @@
         "benefits": "What they get",
         "active": "Active",
         "change": "vs last month",
-        "revenue": "Revenue"
+        "revenue": "Revenue",
+        "action": "Actions"
       },
       "status": {
         "live": "On sale",
         "hidden": "Hidden"
       },
-      "freeLabel": "Free",
       "benefits": {
-        "none": "Base earning rate",
-        "value": "{multiplier}× earning · +{ads} ads a day"
+        "none": "Base rate, free allowance",
+        "value": "{multiplier}× earning · {ads} ads a day"
       },
-      "editNote": "Prices, multipliers and daily ad bonuses are edited in Platform settings, so there is nothing to change here — this screen is for reading whether a plan is worth keeping."
+      "actions": {
+        "new": "New plan",
+        "edit": "Edit plan",
+        "duplicate": "Duplicate",
+        "duplicateHint": "Copy starts hidden",
+        "hide": "Take off sale",
+        "show": "Put on sale",
+        "hideHint": "{count} keep their plan"
+      },
+      "valueWarn": {
+        "short": "Off the value line",
+        "title": "This price does not buy what the other plans buy",
+        "body": "At GHS {price} this plan should give {ads} ads a day at {multiplier}× to sit on the same value per cedi as the rest.",
+        "okTitle": "On the value line",
+        "okBody": "Every GHS 1 buys +{ads} ads a day and +{pct}% on the earning rate, the same as every other plan. Any combination of plans lands on the same line, so nobody who paid more can end up behind somebody who paid less.",
+        "undercut": "{plans} together cost GHS {price} and would give {ads} ads a day at {multiplier}× — more, for less money.",
+        "fix": "Set benefits from the price"
+      },
+      "units": {
+        "days": "days",
+        "perDay": "a day",
+        "points": "points",
+        "seconds": "sec"
+      },
+      "panel": {
+        "title": "Plan · {name}",
+        "newTitle": "New plan",
+        "close": "Close",
+        "cancel": "Cancel",
+        "save": "Save plan",
+        "create": "Create plan",
+        "fixErrors": "{count, plural, one {# field needs fixing} other {# fields need fixing}}",
+        "subscribers": "{count, plural, one {# subscriber} other {# subscribers}}",
+        "identity": "Identity",
+        "price": "Price",
+        "benefits": "What subscribers get",
+        "availability": "Availability"
+      },
+      "fields": {
+        "name": "Name",
+        "namePlaceholder": "Gold",
+        "slug": "Slug",
+        "slugHint": "Lowercase, no spaces. Cannot be changed later — payments and subscriptions refer to a plan by this.",
+        "slugLocked": "Fixed once a plan exists. Subscriptions and payments refer to it.",
+        "description": "Description",
+        "descriptionHint": "One line, shown to users on the upgrade screen.",
+        "descriptionPlaceholder": "A high daily limit, priority ads and a low payout threshold.",
+        "price": "Price",
+        "period": "Billing period",
+        "dailyAdCap": "Ads a day",
+        "dailyAdCapHint": "Total, including the {free} everybody gets free.",
+        "rewardMultiplier": "Earning rate",
+        "rewardMultiplierHint": "Multiplies the points on every ad. 1 is the base rate.",
+        "redemptionMinimum": "Payout minimum",
+        "redemptionMinimumHint": "Points needed before they can withdraw. Better plans, lower minimum.",
+        "referralMultiplier": "Referral bonus",
+        "referralMultiplierHint": "Multiplies what their invites earn them.",
+        "adPriority": "Ad priority",
+        "adPriorityHint": "Higher wins when ads are handed out. 0 is no priority.",
+        "cooldown": "Cooldown",
+        "cooldownHint": "Wait between ads. 0 is no wait.",
+        "onSale": "On sale",
+        "onSaleHint": "Off sale, nobody new can buy it.",
+        "onSaleKeeps": "Taken off sale — the {count} who already hold it keep it until it expires.",
+        "onSaleDefault": "The default plan is always on sale. Every new account starts here and expiring plans fall back to it.",
+        "sortOrder": "Order",
+        "sortOrderHint": "Position in the list users see. Low numbers first."
+      },
+      "errors": {
+        "slugFormat": "Lowercase letters, numbers, - and _ only, starting with a letter.",
+        "slugTaken": "Another plan already uses this slug.",
+        "nameLength": "Between 1 and 60 characters.",
+        "negative": "Cannot be negative.",
+        "periodRange": "Between 1 and 3650 days.",
+        "multiplierRange": "Above 0 and no more than 100.",
+        "defaultMustBeFree": "The default plan has to be free."
+      }
     },
     "finance": {
       "title": "Finance",

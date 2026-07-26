@@ -188,19 +188,40 @@ export type AdItem = {
   createdAt: string
 }
 
-/** A plan, and how it is actually selling. */
+/**
+ * A plan, as `public.tiers` actually stores it, plus how it is selling.
+ *
+ * The field names follow the columns rather than the marketing, because the
+ * admin editing this needs to know which column they are changing — and
+ * because the database's own check constraints are the validation rules the
+ * form has to mirror.
+ */
 export type PlanRow = {
   id: string
+  /** Machine identifier. Immutable once created: subscriptions, payments and
+   *  the seed all refer to a plan by slug. */
+  slug: string
   name: string
+  description: string
   priceGhs: number
-  /** What a subscriber gets, as the operator words it. */
-  multiplier: number
-  dailyAdsBonus: number
+  billingPeriodDays: number
+  /** Ads per day this plan allows IN TOTAL, free allowance included. */
+  dailyAdCap: number
+  /** Multiplies the points on every ad. 1 = the base rate. */
+  rewardMultiplier: number
+  redemptionMinimumPoints: number
+  referralBonusMultiplier: number
+  adPriority: number
+  adCooldownSeconds: number
+  /** The tier every new user starts on. Exactly one plan has it, it must be
+   *  free, and it cannot be hidden — all three enforced in the database. */
+  isDefault: boolean
+  status: 'live' | 'hidden'
+  sortOrder: number
+  /** Sales, not configuration. */
   active: number
-  /** Active subscribers a month ago, for the trend. */
   activeLastMonth: number
   monthlyGhs: number
-  status: 'live' | 'hidden'
 }
 
 /** An advertiser contract, keyed in by hand until self-serve exists. */

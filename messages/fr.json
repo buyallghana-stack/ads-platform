@@ -1309,11 +1309,25 @@
     "subscriptions": {
       "title": "Abonnements",
       "description": "Les formules, leur prix, et si elles se vendent. La formule gratuite est incluse — c'est le dénominateur.",
+      "filterLabel": "Filtrer par disponibilité",
+      "filters": {
+        "all": "Toutes",
+        "live": "En vente",
+        "hidden": "Masquée"
+      },
+      "searchPlaceholder": "Nom ou identifiant",
+      "empty": "Aucune formule ne correspond.",
+      "editRow": "Modifier {name}",
+      "menuLabel": "Actions pour {name}",
+      "defaultBadge": "Par défaut",
+      "freeLabel": "Gratuit",
+      "perDays": "tous les {days} jours",
+      "copyOf": "Copie de {name}",
       "summary": {
         "paying": "Abonnés payants",
         "payingHint": "sur {total} comptes",
-        "monthly": "Revenu mensuel",
-        "monthlyHint": "issu des formules",
+        "monthly": "Revenu des formules",
+        "monthlyHint": "période en cours",
         "conversion": "Conversion",
         "conversionHint": "gratuit vers payant"
       },
@@ -1323,18 +1337,94 @@
         "benefits": "Ce qu'ils obtiennent",
         "active": "Actifs",
         "change": "vs mois dernier",
-        "revenue": "Revenu"
+        "revenue": "Revenu",
+        "action": "Actions"
       },
       "status": {
         "live": "En vente",
         "hidden": "Masquée"
       },
-      "freeLabel": "Gratuit",
       "benefits": {
-        "none": "Taux de gain de base",
-        "value": "Gains ×{multiplier} · +{ads} pubs/jour"
+        "none": "Taux de base, quota gratuit",
+        "value": "Gains ×{multiplier} · {ads} pubs/jour"
       },
-      "editNote": "Les prix, multiplicateurs et bonus de publicités quotidiennes se modifient dans les paramètres de la plateforme. Cet écran sert à juger si une formule vaut la peine d'être gardée."
+      "actions": {
+        "new": "Nouvelle formule",
+        "edit": "Modifier",
+        "duplicate": "Dupliquer",
+        "duplicateHint": "La copie démarre masquée",
+        "hide": "Retirer de la vente",
+        "show": "Mettre en vente",
+        "hideHint": "{count} la conservent"
+      },
+      "valueWarn": {
+        "short": "Hors de la ligne de valeur",
+        "title": "Ce prix n'achète pas ce qu'achètent les autres formules",
+        "body": "À {price} GHS, cette formule devrait donner {ads} pubs par jour à ×{multiplier} pour offrir la même valeur par cedi que les autres.",
+        "okTitle": "Sur la ligne de valeur",
+        "okBody": "Chaque 1 GHS achète +{ads} pubs par jour et +{pct} % sur le taux de gain, comme toutes les autres formules. Toute combinaison retombe sur la même ligne : personne ayant payé plus ne peut se retrouver derrière quelqu'un ayant payé moins.",
+        "undercut": "{plans} ensemble coûtent {price} GHS et donneraient {ads} pubs par jour à ×{multiplier} — davantage, pour moins cher.",
+        "fix": "Calculer les avantages depuis le prix"
+      },
+      "units": {
+        "days": "jours",
+        "perDay": "par jour",
+        "points": "points",
+        "seconds": "s"
+      },
+      "panel": {
+        "title": "Formule · {name}",
+        "newTitle": "Nouvelle formule",
+        "close": "Fermer",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "create": "Créer la formule",
+        "fixErrors": "{count, plural, one {# champ à corriger} other {# champs à corriger}}",
+        "subscribers": "{count, plural, one {# abonné} other {# abonnés}}",
+        "identity": "Identité",
+        "price": "Prix",
+        "benefits": "Ce que reçoivent les abonnés",
+        "availability": "Disponibilité"
+      },
+      "fields": {
+        "name": "Nom",
+        "namePlaceholder": "Gold",
+        "slug": "Identifiant",
+        "slugHint": "Minuscules, sans espaces. Non modifiable ensuite — paiements et abonnements y font référence.",
+        "slugLocked": "Fixé dès la création. Les abonnements et paiements y font référence.",
+        "description": "Description",
+        "descriptionHint": "Une ligne, affichée aux utilisateurs sur l'écran d'abonnement.",
+        "descriptionPlaceholder": "Une limite quotidienne élevée, des pubs prioritaires et un seuil de retrait bas.",
+        "price": "Prix",
+        "period": "Période de facturation",
+        "dailyAdCap": "Pubs par jour",
+        "dailyAdCapHint": "Total, y compris les {free} offertes à tout le monde.",
+        "rewardMultiplier": "Taux de gain",
+        "rewardMultiplierHint": "Multiplie les points de chaque publicité. 1 = taux de base.",
+        "redemptionMinimum": "Minimum de retrait",
+        "redemptionMinimumHint": "Points requis avant de pouvoir retirer. Meilleure formule, minimum plus bas.",
+        "referralMultiplier": "Bonus de parrainage",
+        "referralMultiplierHint": "Multiplie ce que rapportent leurs invitations.",
+        "adPriority": "Priorité publicitaire",
+        "adPriorityHint": "Le plus élevé passe devant lors de la distribution. 0 = aucune priorité.",
+        "cooldown": "Délai entre pubs",
+        "cooldownHint": "Attente entre deux publicités. 0 = aucune.",
+        "onSale": "En vente",
+        "onSaleHint": "Retirée de la vente, plus personne ne peut l'acheter.",
+        "onSaleKeeps": "Retirée de la vente — les {count} qui la détiennent la gardent jusqu'à expiration.",
+        "onSaleDefault": "La formule par défaut est toujours en vente. Chaque nouveau compte y démarre et les formules expirées y retombent.",
+        "sortOrder": "Ordre",
+        "sortOrderHint": "Position dans la liste vue par les utilisateurs. Les petits nombres d'abord."
+      },
+      "errors": {
+        "slugFormat": "Minuscules, chiffres, - et _ uniquement, en commençant par une lettre.",
+        "slugTaken": "Une autre formule utilise déjà cet identifiant.",
+        "nameLength": "Entre 1 et 60 caractères.",
+        "negative": "Ne peut pas être négatif.",
+        "periodRange": "Entre 1 et 3650 jours.",
+        "multiplierRange": "Supérieur à 0 et au maximum 100.",
+        "defaultMustBeFree": "La formule par défaut doit être gratuite."
+      }
     },
     "finance": {
       "title": "Finances",

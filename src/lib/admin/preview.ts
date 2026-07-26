@@ -300,18 +300,63 @@ export function adItems(): AdItem[] {
   ]
 }
 
+/**
+ * The plans, exactly as `public.tiers` holds them after migration 037.
+ *
+ * The numbers are the real seeded ones rather than invented, because this is
+ * the screen where the value-per-cedi line is checked — plausible-looking
+ * figures that were not actually on the line would make the editor's warning
+ * fire on load and teach the operator to ignore it.
+ *
+ *   free allowance 20 ads/day; every GHS 1 buys +0.5 ads and +0.5% rate
+ */
 export function plans(): PlanRow[] {
   return [
-    { id: 'p0', name: 'Free', priceGhs: 0, multiplier: 1, dailyAdsBonus: 0,
-      active: 2423, activeLastMonth: 2260, monthlyGhs: 0, status: 'live' },
-    { id: 'p1', name: 'Bronze', priceGhs: 20, multiplier: 1.25, dailyAdsBonus: 3,
-      active: 186, activeLastMonth: 171, monthlyGhs: 3720, status: 'live' },
-    { id: 'p2', name: 'Silver', priceGhs: 50, multiplier: 1.5, dailyAdsBonus: 6,
-      active: 124, activeLastMonth: 118, monthlyGhs: 6200, status: 'live' },
-    { id: 'p3', name: 'Gold', priceGhs: 100, multiplier: 2, dailyAdsBonus: 10,
-      active: 78, activeLastMonth: 66, monthlyGhs: 7800, status: 'live' },
-    { id: 'p4', name: 'Platinum', priceGhs: 200, multiplier: 3, dailyAdsBonus: 20,
-      active: 30, activeLastMonth: 21, monthlyGhs: 6000, status: 'live' },
+    {
+      id: 'p0', slug: 'free', name: 'Free',
+      description: 'Where everybody starts.',
+      priceGhs: 0, billingPeriodDays: 30,
+      dailyAdCap: 20, rewardMultiplier: 1, redemptionMinimumPoints: 5000,
+      referralBonusMultiplier: 1, adPriority: 0, adCooldownSeconds: 0,
+      isDefault: true, status: 'live', sortOrder: 0,
+      active: 2423, activeLastMonth: 2260, monthlyGhs: 0,
+    },
+    {
+      id: 'p1', slug: 'bronze', name: 'Bronze',
+      description: 'A gentle lift on your daily limit, for casual watching.',
+      priceGhs: 20, billingPeriodDays: 90,
+      dailyAdCap: 30, rewardMultiplier: 1.1, redemptionMinimumPoints: 4000,
+      referralBonusMultiplier: 1.1, adPriority: 1, adCooldownSeconds: 0,
+      isDefault: false, status: 'live', sortOrder: 1,
+      active: 186, activeLastMonth: 171, monthlyGhs: 3720,
+    },
+    {
+      id: 'p2', slug: 'silver', name: 'Silver',
+      description: 'More ads a day and a better rate, for regular earners.',
+      priceGhs: 50, billingPeriodDays: 90,
+      dailyAdCap: 45, rewardMultiplier: 1.25, redemptionMinimumPoints: 3000,
+      referralBonusMultiplier: 1.25, adPriority: 2, adCooldownSeconds: 0,
+      isDefault: false, status: 'live', sortOrder: 2,
+      active: 124, activeLastMonth: 118, monthlyGhs: 6200,
+    },
+    {
+      id: 'p3', slug: 'gold', name: 'Gold',
+      description: 'A high daily limit, priority ads and a low payout threshold.',
+      priceGhs: 100, billingPeriodDays: 90,
+      dailyAdCap: 70, rewardMultiplier: 1.5, redemptionMinimumPoints: 2000,
+      referralBonusMultiplier: 1.5, adPriority: 3, adCooldownSeconds: 0,
+      isDefault: false, status: 'live', sortOrder: 3,
+      active: 78, activeLastMonth: 66, monthlyGhs: 7800,
+    },
+    {
+      id: 'p4', slug: 'platinum', name: 'Platinum',
+      description: 'The highest limit and the best rate we offer.',
+      priceGhs: 200, billingPeriodDays: 90,
+      dailyAdCap: 120, rewardMultiplier: 2, redemptionMinimumPoints: 1000,
+      referralBonusMultiplier: 2, adPriority: 4, adCooldownSeconds: 0,
+      isDefault: false, status: 'live', sortOrder: 4,
+      active: 30, activeLastMonth: 21, monthlyGhs: 6000,
+    },
   ]
 }
 
