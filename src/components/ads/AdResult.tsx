@@ -2,12 +2,14 @@
 
 import {
   AlertTriangle,
+  ArrowRight,
   Check,
   Clock,
   Coins,
   Gem,
   Hourglass,
   Lock,
+  Play,
   RotateCcw,
   X,
 } from 'lucide-react'
@@ -16,7 +18,10 @@ import { useTranslations } from 'next-intl'
 import type { SubmitAdResult } from '@/app/[locale]/(app)/ads/actions'
 import { Button } from '@/components/ui/Button'
 import { Link } from '@/i18n/navigation'
+import type { FeedAd } from '@/lib/ads/data'
 import { cn } from '@/lib/cn'
+
+import { AdCta } from './AdCta'
 
 /**
  * What happened after a submission.
@@ -74,8 +79,11 @@ const SHAPES: Record<string, Shape> = {
 export function AdResult({
   result,
   format,
+  ad,
   onNext,
   onRetry,
+  onKeepWatching,
+  onNextAd,
 }: {
   result: SubmitAdResult
   /** A survey has nothing to re-watch, so "Watch again" is the wrong word for
@@ -84,9 +92,22 @@ export function AdResult({
   format: 'video' | 'survey'
   /** Close and move on to the rest of the feed. */
   onNext: () => void
+  /** The ad just watched, for the advertiser's links. */
+  ad: FeedAd
   /** Restart this ad from the top — a wrong answer clears the server-side
    *  watch stamp, so the video genuinely has to be watched again. */
   onRetry: () => void
+  /**
+   * Dismiss this card and go back to the film.
+   *
+   * Undefined when there is nothing left to watch, or when the attempt was
+   * not credited. Being paid should not eject somebody from an ad they were
+   * enjoying — and an advertiser is not helped by their film being cut off at
+   * the moment it has the viewer's attention.
+   */
+  onKeepWatching?: () => void
+  /** Straight into the next ad, without a return trip through the feed. */
+  onNextAd?: () => void
 }) {
   const t = useTranslations('ads')
   const shape = SHAPES[result.outcome] ?? SHAPES.error
@@ -136,7 +157,36 @@ export function AdResult({
         </div>
       )}
 
+      {/* The advertiser's links, at the moment of highest attention: the
+          viewer has just been paid and is looking at the card. Video only —
+          a survey carries no call to action at all. */}
+      {result.outcome === 'correct' && ad.format === 'video' && (
+        <AdCta
+          label={ad.ctaLabel}
+          links={ad.ctaLinks}
+          tone="onSurface"
+          className="w-full max-w-[20rem] items-center text-center"
+        />
+      )}
+
       <div className="flex w-full max-w-[18rem] flex-col gap-2 pt-1">
+        {onKeepWatching && (
+          <Button variant="secondary" fullWidth onClick={onKeepWatching} leadingIcon={<Play />}>
+            {t('result.keepWatching')}
+          </Button>
+        )}
+
+        {onNextAd && (
+          <Button
+            variant={onKeepWatching ? 'primary' : 'secondary'}
+            fullWidth
+            onClick={onNextAd}
+            trailingIcon={<ArrowRight />}
+          >
+            {t('result.nextAd')}
+          </Button>
+        )}
+
         {shape.retry && result.attemptsRemaining > 0 && (
           <Button fullWidth onClick={onRetry} leadingIcon={<RotateCcw />}>
             {isSurvey ? t('result.tryAgain') : t('result.watchAgain')}
@@ -158,11 +208,19 @@ export function AdResult({
         )}
 
         <Button
-          variant={shape.retry && result.attemptsRemaining > 0 ? 'secondary' : 'primary'}
+          variant={
+            (shape.retry && result.attemptsRemaining > 0) || onKeepWatching || onNextAd
+              ? 'secondary'
+              : 'primary'
+          }
           fullWidth
           onClick={onNext}
         >
-          {result.outcome === 'correct' ? t('result.next') : t('result.done')}
+          {result.outcome === 'correct'
+            ? onKeepWatching || onNextAd
+              ? t('result.backToAds')
+              : t('result.next')
+            : t('result.done')}
         </Button>
       </div>
     </div>

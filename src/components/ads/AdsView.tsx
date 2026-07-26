@@ -338,7 +338,17 @@ export function AdsView({ data }: { data: AdsData }) {
           // rather than a reused one holding the previous ad's questions.
           key={playing.id}
           ad={playing}
+          /* The next card this user could actually watch — inside today's
+             allowance, and not the one on screen. Computed here because the
+             feed is the only thing that knows what is left; the player must
+             not offer a "next ad" that the cap would refuse. */
+          nextAd={list.slice(0, count).find((a) => a.id !== playing.id) ?? null}
           onClose={() => setPlaying(null)}
+          onNextAd={() => {
+            const next = list.slice(0, count).find((a) => a.id !== playing.id)
+            if (next) setPlaying(next)
+            else setPlaying(null)
+          }}
           onResolved={handleResolved}
         />
       )}

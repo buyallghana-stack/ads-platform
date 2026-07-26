@@ -277,6 +277,8 @@ export type Database = {
           completions_count: number
           created_at: string
           created_by: string | null
+          cta_label: string | null
+          cta_links: Json
           description: string | null
           duration_seconds: number | null
           ends_at: string | null
@@ -300,6 +302,8 @@ export type Database = {
           completions_count?: number
           created_at?: string
           created_by?: string | null
+          cta_label?: string | null
+          cta_links?: Json
           description?: string | null
           duration_seconds?: number | null
           ends_at?: string | null
@@ -323,6 +327,8 @@ export type Database = {
           completions_count?: number
           created_at?: string
           created_by?: string | null
+          cta_label?: string | null
+          cta_links?: Json
           description?: string | null
           duration_seconds?: number | null
           ends_at?: string | null
@@ -1993,6 +1999,8 @@ export type Database = {
           advertiser_name: string
           attempts_remaining: number
           attempts_used: number
+          cta_label: string
+          cta_links: Json
           description: string
           duration_seconds: number
           format: Database["public"]["Enums"]["ad_format"]
@@ -2040,6 +2048,8 @@ export type Database = {
           completions_count: number
           created_at: string
           created_by: string | null
+          cta_label: string | null
+          cta_links: Json
           description: string | null
           duration_seconds: number | null
           ends_at: string | null

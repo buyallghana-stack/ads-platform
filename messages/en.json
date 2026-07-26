@@ -305,7 +305,11 @@
       "watchOnlyHint": "No questions — just watch it through",
       "answeredCount": "{done} of {total} answered",
       "unavailableTitle": "This ad is no longer available",
-      "unavailableBody": "It was paused or fully booked just now. Nothing was counted against you — pick another one."
+      "unavailableBody": "It was paused or fully booked just now. Nothing was counted against you — pick another one.",
+      "watchLeft": "{seconds}s of watching still required",
+      "watchDone": "Watch time complete",
+      "watchFree": "Paid — watch as long as you like",
+      "creditedChip": "+{points} pts earned"
     },
     "question": {
       "step": "{n} of {total}",
@@ -379,13 +383,31 @@
       "pointsCap": {
         "title": "That's the most for today",
         "body": "You have reached the maximum points anyone can earn in a day, so this one was not counted. It resets at midnight."
-      }
+      },
+      "keepWatching": "Keep watching",
+      "nextAd": "Next ad",
+      "backToAds": "Back to ads"
     },
     "blocked": {
       "pausedTitle": "Earning is paused",
       "pausedBody": "Earning is paused across the platform right now. Your balance is safe and ads will return shortly.",
       "disabledTitle": "Your account is on hold",
       "disabledBody": "Earning is disabled on this account. Check your notifications, or contact support if you think this is a mistake."
+    },
+    "cta": {
+      "heading": "From the advertiser",
+      "default": {
+        "website": "Visit website",
+        "whatsapp": "Message on WhatsApp",
+        "phone": "Call",
+        "email": "Send an email",
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "x": "X",
+        "tiktok": "TikTok",
+        "youtube": "YouTube",
+        "linkedin": "LinkedIn"
+      }
     }
   },
   "upgradeTab": {
@@ -1506,9 +1528,74 @@
           "ruleOptionMissing": "Choose the answer this condition depends on.",
           "ruleValueMissing": "Type the answer this condition depends on.",
           "fileTooBig": "That file is over 100 MB.",
-          "uploadFailed": "The upload failed. Check the file type and try again."
+          "uploadFailed": "The upload failed. Check the file type and try again.",
+          "ctaLabelLength": "Button text must be 2 to 40 characters.",
+          "ctaValueMissing": "Fill this in or remove the link.",
+          "ctaKindUnknown": "Choose a channel.",
+          "ctaTooMany": "Six links is the maximum.",
+          "ctaBad": {
+            "website": "That does not look like a web address (try mtn.com.gh).",
+            "whatsapp": "That does not look like a WhatsApp number.",
+            "phone": "That does not look like a phone number.",
+            "email": "That does not look like an email address.",
+            "instagram": "Use a handle like @advertiser, or the full link.",
+            "facebook": "Use a handle like @advertiser, or the full link.",
+            "x": "Use a handle like @advertiser, or the full link.",
+            "tiktok": "Use a handle like @advertiser, or the full link.",
+            "youtube": "Use a handle like @advertiser, or the full link.",
+            "linkedin": "Use a handle or the full link."
+          }
         },
-        "statusLabel": "Status"
+        "statusLabel": "Status",
+        "cta": "Call to action",
+        "ctaHint": "Where the viewer can reach this advertiser — a website, a WhatsApp number, social handles. Shown under the video and again when the points land. Surveys never carry one.",
+        "ctaEmpty": "No links yet. Add whatever the advertiser gave you.",
+        "ctaAddFirst": "Add a link",
+        "ctaAdd": "Add another",
+        "ctaPrimary": "Main button",
+        "ctaLinkN": "Link {n}",
+        "ctaRemove": "Remove this link",
+        "ctaChannel": "Channel",
+        "ctaValue": "Address, number or handle",
+        "ctaOpens": "Opens {href}",
+        "ctaLabelField": "Button text",
+        "ctaLabelHint": "Leave empty to use a default like “Visit website”.",
+        "ctaLabelPlaceholder": "Shop now",
+        "ctaNote": "The first link is the button; the rest sit beside it. Links open in a new tab, so the ad keeps playing.",
+        "ctaKind": {
+          "website": "Website",
+          "whatsapp": "WhatsApp",
+          "phone": "Phone",
+          "email": "Email",
+          "instagram": "Instagram",
+          "facebook": "Facebook",
+          "x": "X (Twitter)",
+          "tiktok": "TikTok",
+          "youtube": "YouTube",
+          "linkedin": "LinkedIn"
+        },
+        "ctaPlaceholder": {
+          "website": "mtn.com.gh",
+          "whatsapp": "024 123 4567",
+          "phone": "030 000 0000",
+          "email": "hello@advertiser.com",
+          "instagram": "@advertiser",
+          "facebook": "@advertiser",
+          "x": "@advertiser",
+          "tiktok": "@advertiser",
+          "youtube": "@advertiser",
+          "linkedin": "company/advertiser"
+        },
+        "askAlways": "Always ask",
+        "askOnlyIf": "Only if…",
+        "firstAlwaysAsked": "The first question is always asked. Later questions can be made to depend on this answer — use the branch button beside an option, or “Only if…” on the question itself.",
+        "addFollowUp": "Add a follow-up question for “{option}”",
+        "followUpHint": "Use the branch arrow beside an answer to add a question only those people see.",
+        "ruleIs": "Q{n} is “{answer}”",
+        "ruleIsNot": "Q{n} is not “{answer}”",
+        "andJoin": " and ",
+        "orJoin": " or ",
+        "shownWhen": "Asked only when {rule}"
       }
     },
     "advertisers": {

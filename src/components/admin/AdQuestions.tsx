@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowDown, ArrowUp, GitBranch, Plus, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, CornerDownRight, GitBranch, Plus, Trash2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/Button'
@@ -61,6 +61,30 @@ export function AdQuestions({
   const add = () => onChange([...draft.questions, blankQuestion(draft.format)])
 
   /**
+   * The one-tap way to branch: "ask a follow-up when they pick this answer".
+   *
+   * Branching used to be reachable only by adding a second question and
+   * finding the rule builder inside it, which the operator did not see at all
+   * on a survey they built from scratch. Starting from the ANSWER is also how
+   * people think about it — "if they say Yes, then ask…" — so the new question
+   * arrives already gated on that option, at the end of the list where a rule
+   * pointing backwards is always valid.
+   */
+  const addFollowUp = (question: AdQuestionDraft, optionKey: string) => {
+    const follow = blankQuestion(draft.format)
+    follow.rules = [
+      {
+        key: draftKey('r'),
+        dependsOn: question.key,
+        optionKey,
+        valueText: null,
+        negate: false,
+      },
+    ]
+    onChange([...draft.questions, follow])
+  }
+
+  /**
    * Removing a question takes its dependents' rules with it. A rule pointing
    * at a question that no longer exists is a question that can never be
    * shown, and silently leaving one behind would make a survey disappear for
@@ -112,6 +136,7 @@ export function AdQuestions({
           onChange={(patch) => set(question.key, patch)}
           onRemove={() => remove(question.key)}
           onMove={(by) => move(index, by)}
+          onFollowUp={(optionKey) => addFollowUp(question, optionKey)}
         />
       ))}
 
@@ -145,6 +170,7 @@ function QuestionCard({
   onChange,
   onRemove,
   onMove,
+  onFollowUp,
 }: {
   question: AdQuestionDraft
   index: number
@@ -158,6 +184,8 @@ function QuestionCard({
   onChange: (patch: Partial<AdQuestionDraft>) => void
   onRemove: () => void
   onMove: (by: -1 | 1) => void
+  /** Add a new question gated on one of this question's options. */
+  onFollowUp: (optionKey: string) => void
 }) {
   const t = useTranslations('admin.ads.editor')
   const err = (field: string) => {
@@ -314,6 +342,11 @@ function QuestionCard({
         <div className="mt-3">
           <p className="text-[0.75rem] font-medium text-ink-700">{t('options')}</p>
           <p className="mt-0.5 text-[0.625rem] leading-snug text-ink-400">{t('optionsHint')}</p>
+          {!locked && (
+            <p className="mt-0.5 text-[0.625rem] leading-snug text-violet-700">
+              {t('followUpHint')}
+            </p>
+          )}
 
           <ul className="mt-2 flex flex-col gap-2">
             {question.options.map((option, i) => (
@@ -335,6 +368,15 @@ function QuestionCard({
                   onChange={(e) => setOption(option.key, { text: e.target.value })}
                   className={inputClass(Boolean(err('options')))}
                 />
+                {!locked && (
+                  <IconButton
+                    label={t('addFollowUp', { option: option.text.trim() || t('optionPlaceholder', { n: i + 1 }) })}
+                    onClick={() => onFollowUp(option.key)}
+                    violet
+                  >
+                    <CornerDownRight aria-hidden />
+                  </IconButton>
+                )}
                 {!locked && question.options.length > 2 && (
                   <IconButton label={t('removeOption')} onClick={() => removeOption(option.key)}>
                     <Trash2 aria-hidden />
@@ -395,8 +437,17 @@ function QuestionCard({
         </div>
       )}
 
-      {/* ---- Skip logic ------------------------------------------------ */}
-      {index > 0 && (
+      {/* ---- Skip logic ------------------------------------------------
+          Rendered on EVERY question, including the first. The operator built
+          a survey from scratch and reported that branching "does not show up"
+          — it was there, but only from question two, so on a one-question
+          draft there was nothing to find. The first question says why it is
+          always asked instead of hiding the idea. */}
+      {index === 0 ? (
+        <p className="mt-3 border-t border-ink-200 pt-3 text-[0.6875rem] leading-relaxed text-ink-400">
+          {t('firstAlwaysAsked')}
+        </p>
+      ) : (
         <Conditions
           question={question}
           earlier={earlier}
@@ -442,15 +493,50 @@ function Conditions({
   const setRule = (key: string, patch: Partial<AdRuleDraft>) =>
     onChange({ rules: question.rules.map((r) => (r.key === key ? { ...r, ...patch } : r)) })
 
+  /**
+   * The rule in the operator's own words: "Asked only when Q1 is Woman".
+   * Reading three dropdowns back as a sentence is what tells them the branch
+   * they built is the branch they meant.
+   */
+  const summary = question.rules
+    .map((rule) => {
+      const at = earlier.findIndex((q) => q.key === rule.dependsOn)
+      const subject = earlier[at]
+      const answer =
+        subject?.format === 'short_text'
+          ? (rule.valueText ?? '')
+          : (subject?.options.find((o) => o.key === rule.optionKey)?.text ?? '')
+      return t(rule.negate ? 'ruleIsNot' : 'ruleIs', {
+        n: at + 1,
+        answer: answer.trim() || '…',
+      })
+    })
+    .join(t(question.conditionMode === 'any' ? 'orJoin' : 'andJoin'))
+
   return (
     <div className="mt-3 border-t border-ink-200 pt-3">
-      <SwitchRow
-        title={t('conditionsTitle')}
-        description={t('conditionsHint')}
-        checked={on}
-        disabled={locked}
-        onChange={(want) => onChange({ rules: want ? [newRule()] : [] })}
-      />
+      {/* A two-way choice rather than a switch: "Always" is a real answer an
+          operator picks, not the absence of a setting, and seeing both makes
+          branching discoverable on a question that has none. */}
+      <FieldSet label={t('conditionsTitle')} hint={on ? undefined : t('conditionsHint')}>
+        <Segmented
+          value={on ? 'only' : 'always'}
+          disabled={locked}
+          label={t('conditionsTitle')}
+          onChange={(mode) => onChange({ rules: mode === 'only' ? [newRule()] : [] })}
+          options={[
+            { value: 'always', label: t('askAlways') },
+            { value: 'only', label: t('askOnlyIf') },
+          ]}
+        />
+      </FieldSet>
+
+      {on && summary && (
+        <p className="mt-2 inline-flex items-start gap-1.5 rounded-(--radius-input) bg-violet-50 px-2.5 py-1.5 text-[0.6875rem] leading-snug font-medium text-violet-700">
+          <GitBranch aria-hidden className="mt-px size-3 shrink-0" />
+          {t('shownWhen', { rule: summary })}
+        </p>
+      )}
 
       {on && (
         <div className="mt-2 flex flex-col gap-2 rounded-(--radius-card) border border-violet-600/20 bg-violet-50/40 p-3">
@@ -595,12 +681,14 @@ function IconButton({
   onClick,
   disabled,
   danger,
+  violet,
   children,
 }: {
   label: string
   onClick: () => void
   disabled?: boolean
   danger?: boolean
+  violet?: boolean
   children: React.ReactNode
 }) {
   return (
@@ -615,7 +703,9 @@ function IconButton({
         'disabled:cursor-not-allowed disabled:opacity-30 [&>svg]:size-3.5',
         danger
           ? 'text-danger-600 hover:bg-danger-50'
-          : 'text-ink-500 hover:bg-ink-100 hover:text-ink-900',
+          : violet
+            ? 'text-violet-600 hover:bg-violet-50'
+            : 'text-ink-500 hover:bg-ink-100 hover:text-ink-900',
       )}
     >
       {children}

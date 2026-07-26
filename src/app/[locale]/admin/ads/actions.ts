@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
 import { adDraftPayload, validateAd, type AdErrors } from '@/lib/admin/ad-draft'
+import { CTA_KINDS } from '@/lib/ads/cta'
 import { getAdDraft } from '@/lib/admin/ads-data'
 import type { AdDraft, AdStatus } from '@/lib/admin/types'
 import { getSessionUser } from '@/lib/auth/session'
@@ -53,6 +54,11 @@ const questionSchema = z.object({
   rules: z.array(ruleSchema).max(10),
 })
 
+const ctaLinkSchema = z.object({
+  kind: z.enum(CTA_KINDS),
+  value: z.string().max(300),
+})
+
 const draftSchema = z.object({
   id: z.uuid().nullable(),
   title: z.string(),
@@ -73,6 +79,8 @@ const draftSchema = z.object({
   endsAt: z.string().nullable(),
   tierIds: z.array(z.uuid()).max(20),
   questions: z.array(questionSchema).max(40),
+  ctaLabel: z.string().max(60),
+  ctaLinks: z.array(ctaLinkSchema).max(6),
   completions: z.number().int(),
   attempts: z.number().int(),
   questionsLocked: z.boolean(),

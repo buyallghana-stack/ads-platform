@@ -305,7 +305,11 @@
       "watchOnlyHint": "Aucune question — regardez simplement jusqu’au bout",
       "answeredCount": "{done} sur {total} répondues",
       "unavailableTitle": "Cette annonce n'est plus disponible",
-      "unavailableBody": "Elle vient d'être mise en pause ou complète. Rien ne vous a été décompté — choisissez-en une autre."
+      "unavailableBody": "Elle vient d'être mise en pause ou complète. Rien ne vous a été décompté — choisissez-en une autre.",
+      "watchLeft": "Encore {seconds} s de visionnage requises",
+      "watchDone": "Visionnage requis atteint",
+      "watchFree": "Payé — regardez autant que vous voulez",
+      "creditedChip": "+{points} pts gagnés"
     },
     "question": {
       "step": "{n} sur {total}",
@@ -379,13 +383,31 @@
       "pointsCap": {
         "title": "C'est le maximum pour aujourd'hui",
         "body": "Vous avez atteint le maximum de points qu'il est possible de gagner en une journée : celle-ci n'a pas été comptée. Réinitialisation à minuit."
-      }
+      },
+      "keepWatching": "Continuer à regarder",
+      "nextAd": "Publicité suivante",
+      "backToAds": "Retour aux publicités"
     },
     "blocked": {
       "pausedTitle": "Les gains sont en pause",
       "pausedBody": "Les gains sont en pause sur toute la plateforme pour le moment. Votre solde est intact et les annonces reviendront bientôt.",
       "disabledTitle": "Votre compte est suspendu",
       "disabledBody": "Les gains sont désactivés sur ce compte. Consultez vos notifications ou contactez le support si vous pensez qu’il s’agit d’une erreur."
+    },
+    "cta": {
+      "heading": "De l’annonceur",
+      "default": {
+        "website": "Voir le site",
+        "whatsapp": "Écrire sur WhatsApp",
+        "phone": "Appeler",
+        "email": "Envoyer un e-mail",
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "x": "X",
+        "tiktok": "TikTok",
+        "youtube": "YouTube",
+        "linkedin": "LinkedIn"
+      }
     }
   },
   "upgradeTab": {
@@ -1506,9 +1528,74 @@
           "ruleOptionMissing": "Choisissez la réponse dont dépend cette condition.",
           "ruleValueMissing": "Saisissez la réponse dont dépend cette condition.",
           "fileTooBig": "Ce fichier dépasse 100 Mo.",
-          "uploadFailed": "L’envoi a échoué. Vérifiez le type de fichier et réessayez."
+          "uploadFailed": "L’envoi a échoué. Vérifiez le type de fichier et réessayez.",
+          "ctaLabelLength": "Le texte du bouton doit faire 2 à 40 caractères.",
+          "ctaValueMissing": "Complétez ce champ ou retirez le lien.",
+          "ctaKindUnknown": "Choisissez un canal.",
+          "ctaTooMany": "Six liens au maximum.",
+          "ctaBad": {
+            "website": "Cela ne ressemble pas à une adresse web (essayez mtn.com.gh).",
+            "whatsapp": "Cela ne ressemble pas à un numéro WhatsApp.",
+            "phone": "Cela ne ressemble pas à un numéro de téléphone.",
+            "email": "Cela ne ressemble pas à une adresse e-mail.",
+            "instagram": "Utilisez un identifiant comme @annonceur, ou le lien complet.",
+            "facebook": "Utilisez un identifiant comme @annonceur, ou le lien complet.",
+            "x": "Utilisez un identifiant comme @annonceur, ou le lien complet.",
+            "tiktok": "Utilisez un identifiant comme @annonceur, ou le lien complet.",
+            "youtube": "Utilisez un identifiant comme @annonceur, ou le lien complet.",
+            "linkedin": "Utilisez un identifiant ou le lien complet."
+          }
         },
-        "statusLabel": "Statut"
+        "statusLabel": "Statut",
+        "cta": "Appel à l’action",
+        "ctaHint": "Où joindre cet annonceur — site web, numéro WhatsApp, réseaux sociaux. Affiché sous la vidéo puis au moment du gain. Jamais sur un sondage.",
+        "ctaEmpty": "Aucun lien pour l’instant. Ajoutez ce que l’annonceur vous a donné.",
+        "ctaAddFirst": "Ajouter un lien",
+        "ctaAdd": "Ajouter un autre",
+        "ctaPrimary": "Bouton principal",
+        "ctaLinkN": "Lien {n}",
+        "ctaRemove": "Retirer ce lien",
+        "ctaChannel": "Canal",
+        "ctaValue": "Adresse, numéro ou identifiant",
+        "ctaOpens": "Ouvre {href}",
+        "ctaLabelField": "Texte du bouton",
+        "ctaLabelHint": "Laissez vide pour un libellé par défaut comme « Voir le site ».",
+        "ctaLabelPlaceholder": "Acheter maintenant",
+        "ctaNote": "Le premier lien devient le bouton ; les autres se placent à côté. Les liens s’ouvrent dans un nouvel onglet, la publicité continue.",
+        "ctaKind": {
+          "website": "Site web",
+          "whatsapp": "WhatsApp",
+          "phone": "Téléphone",
+          "email": "E-mail",
+          "instagram": "Instagram",
+          "facebook": "Facebook",
+          "x": "X (Twitter)",
+          "tiktok": "TikTok",
+          "youtube": "YouTube",
+          "linkedin": "LinkedIn"
+        },
+        "ctaPlaceholder": {
+          "website": "mtn.com.gh",
+          "whatsapp": "024 123 4567",
+          "phone": "030 000 0000",
+          "email": "bonjour@annonceur.com",
+          "instagram": "@annonceur",
+          "facebook": "@annonceur",
+          "x": "@annonceur",
+          "tiktok": "@annonceur",
+          "youtube": "@annonceur",
+          "linkedin": "company/annonceur"
+        },
+        "askAlways": "Toujours poser",
+        "askOnlyIf": "Seulement si…",
+        "firstAlwaysAsked": "La première question est toujours posée. Les suivantes peuvent dépendre de cette réponse — utilisez la flèche à côté d’une option, ou « Seulement si… » sur la question elle-même.",
+        "addFollowUp": "Ajouter une question de suivi pour « {option} »",
+        "followUpHint": "Utilisez la flèche à côté d’une réponse pour ajouter une question que seules ces personnes verront.",
+        "ruleIs": "Q{n} est « {answer} »",
+        "ruleIsNot": "Q{n} n’est pas « {answer} »",
+        "andJoin": " et ",
+        "orJoin": " ou ",
+        "shownWhen": "Posée seulement si {rule}"
       }
     },
     "advertisers": {

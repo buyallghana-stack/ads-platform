@@ -19,6 +19,7 @@ import { hasBranching, validateAd, type AdErrors } from '@/lib/admin/ad-draft'
 import { CHOOSABLE_STATUSES, type AdDraft, type AdStatus, type TierOption } from '@/lib/admin/types'
 import { cn } from '@/lib/cn'
 
+import { AdCallToAction } from './AdCallToAction'
 import { AdMedia } from './AdMedia'
 import { AdQuestions } from './AdQuestions'
 import { StatusDot } from './AdminChrome'
@@ -306,6 +307,23 @@ export function AdEditor({
           >
             <AdQuestions draft={draft} errors={showErrors ? errors : {}} onChange={(questions) => set({ questions })} />
           </FormSection>
+
+          {/* ---- Call to action ------------------------------------------ */}
+          {/* Video only. A survey is research: sending the respondent to the
+              advertiser's shop mid-questionnaire changes what the answers
+              mean, and the database refuses it outright. */}
+          {draft.format === 'video' && (
+            <FormSection title={t('cta')} description={t('ctaHint')}>
+              <AdCallToAction
+                label={draft.ctaLabel}
+                links={draft.ctaLinks}
+                errors={errors}
+                showErrors={showErrors}
+                onLabel={(ctaLabel) => set({ ctaLabel })}
+                onLinks={(ctaLinks) => set({ ctaLinks })}
+              />
+            </FormSection>
+          )}
 
           {/* ---- Audience ------------------------------------------------ */}
           <FormSection title={t('audience')} description={t('audienceHint')}>

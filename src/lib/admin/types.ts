@@ -1,3 +1,5 @@
+import type { CtaLink } from '@/lib/ads/cta'
+
 /**
  * Shared admin types and the pure rules that go with them.
  *
@@ -286,6 +288,14 @@ export type AdDraft = {
   /** Empty = everyone. */
   tierIds: string[]
   questions: AdQuestionDraft[]
+
+  /**
+   * The advertiser's call to action. Video ads only — the database refuses it
+   * on a survey, because pushing a respondent to a shop mid-questionnaire
+   * changes what their answers mean.
+   */
+  ctaLabel: string
+  ctaLinks: CtaLink[]
 
   /* Read-only context, carried so the form can explain itself. */
   completions: number

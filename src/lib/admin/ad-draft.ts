@@ -1,3 +1,5 @@
+import { ctaProblem, type CtaLink } from '@/lib/ads/cta'
+
 import type {
   AdDraft,
   AdOptionDraft,
@@ -83,6 +85,8 @@ export function blankDraft(format: AdFormat): AdDraft {
     endsAt: null,
     tierIds: [],
     questions: [],
+    ctaLabel: '',
+    ctaLinks: [],
     completions: 0,
     attempts: 0,
     questionsLocked: false,
@@ -209,6 +213,19 @@ export function validateAd(draft: AdDraft): AdErrors {
     errors.schedule = 'scheduleOrder'
   }
 
+  // The call to action. Video only — the database has a check constraint for
+  // it, so a survey carrying one would be rejected with a constraint name
+  // instead of a sentence.
+  if (draft.format === 'video') {
+    const label = draft.ctaLabel.trim()
+    if (label && (label.length < 2 || label.length > 40)) errors.ctaLabel = 'ctaLabelLength'
+    draft.ctaLinks.forEach((link, index) => {
+      const problem = ctaProblem(link)
+      if (problem) errors[`cta.${index}`] = problem
+    })
+    if (draft.ctaLinks.length > 6) errors.ctaLinks = 'ctaTooMany'
+  }
+
   // A survey with no questions is not a survey. A video with none is a
   // legitimate watch-only spot.
   if (draft.format === 'survey' && draft.questions.length === 0) {
@@ -315,6 +332,14 @@ export function adDraftPayload(draft: AdDraft): Payload {
       weight: draft.weight,
       starts_at: draft.startsAt,
       ends_at: draft.endsAt,
+      // A survey sends an empty list and no label, which is what the
+      // ads_cta_video_only constraint requires.
+      cta_label: video ? trimmed(draft.ctaLabel) : null,
+      cta_links: video
+        ? draft.ctaLinks
+            .filter((link) => link.value.trim())
+            .map((link) => ({ kind: link.kind, value: link.value.trim() }))
+        : [],
     },
     questions: draft.questions.map((question) => {
       const multi = question.format === 'multiple_choice'
@@ -385,6 +410,8 @@ export type RawAd = {
   weight: number
   starts_at: string | null
   ends_at: string | null
+  cta_label: string | null
+  cta_links: CtaLink[] | null
   completions_count: number
   attempts_count: number
   questions_locked: boolean
@@ -444,6 +471,8 @@ export function draftFromRaw(raw: RawAd): AdDraft {
     endsAt: raw.ends_at,
     tierIds: raw.tier_ids ?? [],
     questions,
+    ctaLabel: raw.cta_label ?? '',
+    ctaLinks: raw.cta_links ?? [],
     completions: raw.completions_count,
     attempts: raw.attempts_count,
     questionsLocked: raw.questions_locked,

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { Loader2, Play, X } from 'lucide-react'
+import { Check, Loader2, Play, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import {
@@ -16,6 +16,7 @@ import type { FeedAd } from '@/lib/ads/data'
 import { hasBranching, visibleQuestions } from '@/lib/ads/visibility'
 import { cn } from '@/lib/cn'
 
+import { AdCta } from './AdCta'
 import { AdResult } from './AdResult'
 import { QuestionSheet } from './QuestionSheet'
 import { VideoStage } from './VideoStage'
@@ -61,11 +62,20 @@ type Phase =
 
 export function AdPlayer({
   ad,
+  nextAd,
   onClose,
+  onNextAd,
   onResolved,
 }: {
   ad: FeedAd
+  /**
+   * The ad that would come next, if the feed has one left within today's
+   * allowance. Null hides the "next ad" button rather than showing a control
+   * that lands on an empty feed.
+   */
+  nextAd: FeedAd | null
   onClose: () => void
+  onNextAd: () => void
   /** Fired once the server has ruled on the attempt, so the feed can drop the
    *  card and move the counters. */
   onResolved: (adId: string, result: SubmitAdResult) => void
@@ -83,6 +93,17 @@ export function AdPlayer({
 
   const [elapsed, setElapsed] = useState(0)
   const [duration, setDuration] = useState(ad.durationSeconds ?? 0)
+  /**
+   * Set once the server has ruled, and never cleared except by a retry.
+   *
+   * The operator's objection: "I don't like the fact that users are
+   * automatically made to leave the video ad screen once they answer all
+   * questions." So finishing an ad no longer ends the session — the result
+   * card offers to keep watching, and this flag is what makes that safe. Every
+   * clock-driven branch below refuses to act once it is true, so a second
+   * pass over a cue or a watch requirement cannot submit the ad twice.
+   */
+  const [credited, setCredited] = useState(false)
 
   /* Guards a race the polling loop makes easy: two ticks 250ms apart can both
      see the same cue before React has re-rendered with the new askedIds, which
@@ -170,6 +191,7 @@ export function AdPlayer({
       setPhaseNow('submitting')
       submitAd(ad.id, finalAnswers).then((res) => {
         setResult(res)
+        setCredited(res.outcome === 'correct')
         setPhaseNow('result')
         onResolved(ad.id, res)
       })
@@ -203,6 +225,9 @@ export function AdPlayer({
       // Only act while actually playing; a tick can land after the question
       // sheet is already up, or after the ad has been submitted.
       if (phaseRef.current !== 'playing') return
+      // Watching on after the credit: the clock still runs the progress bar,
+      // but nothing may be submitted or asked again.
+      if (submittedRef.current) return
 
       // The clock has caught up with the answers.
       const waiting = pendingSubmitRef.current
@@ -241,6 +266,11 @@ export function AdPlayer({
 
   const handleEnded = useCallback(() => {
     if (phaseRef.current !== 'playing') return
+    // Watching on after the credit — the film simply finishes.
+    if (submittedRef.current) {
+      setPhaseNow('result')
+      return
+    }
     const waiting = pendingSubmitRef.current
     if (waiting) {
       pendingSubmitRef.current = null
@@ -248,7 +278,7 @@ export function AdPlayer({
       return
     }
     askNextPending(answers)
-  }, [answers, askNextPending, submit])
+  }, [answers, askNextPending, setPhaseNow, submit])
 
   // ---- Answering ---------------------------------------------------------
   function answerCurrent() {
@@ -324,6 +354,7 @@ export function AdPlayer({
     setDraft('')
     setCurrentId(null)
     setResult(null)
+    setCredited(false)
     setElapsed(0)
     setPhaseNow('starting')
     setRunKey((k) => k + 1)
@@ -345,6 +376,11 @@ export function AdPlayer({
 
   const progress = duration > 0 ? Math.min(elapsed / duration, 1) : 0
   const answeredCount = askedIds.length
+  /** Seconds of the admin's minimum watch still to run. */
+  const watchLeft = Math.max(0, Math.ceil(requiredWatch - elapsed))
+  /** Whether there is any film left worth staying for. A video whose duration
+   *  is unknown counts as "yes" — the viewer decides, not a missing field. */
+  const moreToWatch = duration === 0 || elapsed < duration - 1
 
   return (
     <div
@@ -517,11 +553,68 @@ export function AdPlayer({
                 />
               ))}
           </div>
-          {questions.length > 0 && (
-            <p className="mt-2 text-center text-[0.6875rem] text-white/50 tabular-nums">
-              {t('player.answeredCount', { done: answeredCount, total: questions.length })}
-            </p>
-          )}
+          {/*
+            THE WATCH REQUIREMENT, COUNTED DOWN.
+
+            The admin can gate an ad at 20 seconds of a 60-second film, and
+            until now the only way to discover that was to answer everything
+            and be told "too fast". The number that decides whether this
+            attempt pays is the one the viewer should be able to see, so it is
+            on the screen, ticking, in the same place as the progress bar.
+
+            Once it is satisfied it says so rather than disappearing — a
+            counter that vanishes reads as a counter that broke.
+          */}
+          <div className="mt-2 flex items-center justify-between gap-3 text-[0.6875rem] tabular-nums">
+            <span className={cn(watchLeft > 0 ? 'font-semibold text-white/80' : 'text-success-400')}>
+              {credited
+                ? t('player.watchFree')
+                : requiredWatch > 0
+                  ? watchLeft > 0
+                    ? t('player.watchLeft', { seconds: watchLeft })
+                    : t('player.watchDone')
+                  : ''}
+            </span>
+            {questions.length > 0 && (
+              <span className="text-white/50">
+                {t('player.answeredCount', { done: answeredCount, total: questions.length })}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ---- The advertiser's links --------------------------------------
+          Video only, and never on a survey — the database refuses a call to
+          action there, so `ctaLinks` is always empty for one. Kept out of the
+          question sheet: a link that navigates away while a question is open
+          would cost the viewer the answer they were typing. */}
+      {isVideo && (phase === 'playing' || phase === 'intro') && (
+        <div className="shrink-0 px-3 pb-4 sm:px-5">
+          <AdCta label={ad.ctaLabel} links={ad.ctaLinks} tone="onVideo" />
+        </div>
+      )}
+
+      {/* ---- Watching on after the credit --------------------------------
+          The operator's objection was that answering the last question threw
+          you out of the ad. It no longer does: the result card offers to keep
+          watching, and this bar is how you leave when you are ready. */}
+      {credited && phase === 'playing' && (
+        <div className="shrink-0 border-t border-white/10 bg-black/60 px-3 py-3 sm:px-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="mr-auto inline-flex items-center gap-1.5 text-[0.8125rem] font-semibold text-success-400">
+              <Check aria-hidden className="size-4" />
+              {t('player.creditedChip', { points: result?.pointsAwarded ?? ad.points })}
+            </span>
+            {nextAd && (
+              <Button size="sm" onClick={onNextAd}>
+                {t('result.nextAd')}
+              </Button>
+            )}
+            <Button size="sm" variant="secondary" onClick={onClose}>
+              {t('result.done')}
+            </Button>
+          </div>
         </div>
       )}
 
@@ -621,8 +714,16 @@ export function AdPlayer({
                 <AdResult
                   result={result}
                   format={ad.format}
+                  ad={ad}
                   onNext={onClose}
                   onRetry={retry}
+                  /* Only offered when there is genuinely more film: a card
+                     that promises "keep watching" on a finished video is a
+                     button that does nothing. */
+                  onKeepWatching={
+                    credited && isVideo && moreToWatch ? () => setPhaseNow('playing') : undefined
+                  }
+                  onNextAd={nextAd ? onNextAd : undefined}
                 />
               )
             )}

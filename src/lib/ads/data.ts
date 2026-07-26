@@ -1,5 +1,6 @@
 import 'server-only'
 
+import type { CtaLink } from '@/lib/ads/cta'
 import { adMediaUrl, adThumbnailUrl } from '@/lib/ads/media'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/database.types'
@@ -49,6 +50,12 @@ export type FeedAd = {
   gradedCount: number
   attemptsRemaining: number
   attemptsUsed: number
+  /**
+   * The advertiser's call to action. Video ads only: the database refuses one
+   * on a survey, so this is always empty there and the player never asks.
+   */
+  ctaLabel: string | null
+  ctaLinks: CtaLink[]
 }
 
 export type EarningStatus = {
@@ -123,6 +130,10 @@ export async function getAdsData(userId: string): Promise<AdsData> {
     gradedCount: r.graded_count,
     attemptsRemaining: r.attempts_remaining,
     attemptsUsed: r.attempts_used,
+    ctaLabel: r.cta_label,
+    // jsonb arrives as unknown; anything malformed simply renders nothing,
+    // and ctaHref refuses whatever it cannot turn into a safe link.
+    ctaLinks: Array.isArray(r.cta_links) ? (r.cta_links as unknown as CtaLink[]) : [],
   }))
 
   return {
