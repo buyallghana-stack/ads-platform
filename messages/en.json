@@ -408,6 +408,18 @@
         "youtube": "YouTube",
         "linkedin": "LinkedIn"
       }
+    },
+    "leave": {
+      "title": "Leave this ad?",
+      "bodyVideo": "Your progress is not saved. If you come back, this ad starts again from the beginning.",
+      "bodySurvey": "Your answers are not saved. If you come back, this survey starts again from the first question.",
+      "progress": "Where you are",
+      "watched": "{seconds}s watched",
+      "answered": "{done, plural, =0 {No questions answered yet} one {# question answered} other {# questions answered}}",
+      "answeredOf": "{done} of {total} answered",
+      "noAttempt": "Leaving does not use up one of your tries — only answering does.",
+      "stay": "Stay and finish",
+      "leave": "Leave the ad"
     }
   },
   "upgradeTab": {

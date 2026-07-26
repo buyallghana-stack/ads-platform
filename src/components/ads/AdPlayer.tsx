@@ -104,6 +104,8 @@ export function AdPlayer({
    * pass over a cue or a watch requirement cannot submit the ad twice.
    */
   const [credited, setCredited] = useState(false)
+  /** The "leave this ad?" dialog. See requestClose below. */
+  const [confirmingClose, setConfirmingClose] = useState(false)
 
   /* Guards a race the polling loop makes easy: two ticks 250ms apart can both
      see the same cue before React has re-rendered with the new askedIds, which
@@ -360,10 +362,46 @@ export function AdPlayer({
     setRunKey((k) => k + 1)
   }
 
-  // Escape closes, and the body must not scroll behind a full-screen overlay.
+  /**
+   * Whether leaving now would throw something away.
+   *
+   * Closing does NOT spend an attempt — the attempt is recorded on submission
+   * — but it does discard every answer given so far AND the server's watch
+   * clock, which `register_ad_view` restarts from zero on the next open. So
+   * the ad genuinely begins again, and somebody four questions into a survey
+   * deserves to be told that before it happens.
+   *
+   * Nothing to lose means no dialog. A confirmation that fires when you have
+   * done nothing is how people learn to dismiss confirmations without
+   * reading them, and this one has to be read.
+   */
+  const answeredSoFar = Object.keys(answers).length
+  const hasProgress =
+    !credited &&
+    phase !== 'starting' &&
+    phase !== 'unavailable' &&
+    phase !== 'submitting' &&
+    (answeredSoFar > 0 || askedIds.length > 0 || elapsed > 0)
+
+  const requestClose = useCallback(() => {
+    if (!hasProgress) {
+      onClose()
+      return
+    }
+    setConfirmingClose(true)
+  }, [hasProgress, onClose])
+
+  // Escape asks the same question the X does, and the body must not scroll
+  // behind a full-screen overlay.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key !== 'Escape') return
+      // While the dialog is up, Escape is "stay" — the conventional cancel.
+      if (confirmingClose) {
+        setConfirmingClose(false)
+        return
+      }
+      requestClose()
     }
     window.addEventListener('keydown', onKey)
     const previousOverflow = document.body.style.overflow
@@ -372,7 +410,7 @@ export function AdPlayer({
       window.removeEventListener('keydown', onKey)
       document.body.style.overflow = previousOverflow
     }
-  }, [onClose])
+  }, [confirmingClose, requestClose])
 
   const progress = duration > 0 ? Math.min(elapsed / duration, 1) : 0
   const answeredCount = askedIds.length
@@ -404,7 +442,7 @@ export function AdPlayer({
       >
         <button
           type="button"
-          onClick={onClose}
+          onClick={requestClose}
           aria-label={t('player.close')}
           className={cn(
             'grid size-9 shrink-0 place-items-center rounded-full transition-colors',
@@ -481,7 +519,11 @@ export function AdPlayer({
           <div className="relative aspect-video w-full max-w-[64rem] bg-black">
             <VideoStage
               ad={ad}
-              playing={phase === 'playing'}
+              /* Paused while the leave dialog is up. The SERVER's watch clock
+                 keeps running regardless — it is wall time from
+                 register_ad_view — so pausing here costs the user nothing and
+                 cannot be used to stretch a watch requirement. */
+              playing={phase === 'playing' && !confirmingClose}
               onTime={handleTime}
               onEnded={handleEnded}
               onReady={(d) => setDuration((prev) => (d > 0 ? d : prev))}
@@ -696,6 +738,84 @@ export function AdPlayer({
                     : t('question.next')
               }
             />
+          </div>
+        </div>
+      )}
+
+      {/* ---- Leaving mid-attempt ------------------------------------------
+          The X is the one control on this screen that throws work away, and
+          it sits in the corner every "go back" instinct reaches for. So it
+          asks — and it shows what would be lost, because "you will lose your
+          progress" means nothing until you see that it is four answers and
+          two minutes of watching.
+
+          z-30 puts it above the question sheet (z-10) and the header (z-20);
+          the result overlay is z-20 and cannot be open at the same time. */}
+      {confirmingClose && (
+        <div className="absolute inset-0 z-30 grid place-items-center bg-black/70 p-4">
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-label={t('leave.title')}
+            className="w-full max-w-[24rem] rounded-(--radius-panel) bg-surface p-5 shadow-[0_16px_48px_-12px_rgb(15_23_42/0.5)]"
+          >
+            <h2 className="text-[1.0625rem] font-semibold text-ink-900">{t('leave.title')}</h2>
+            <p className="mt-1.5 text-[0.875rem] leading-relaxed text-ink-500">
+              {isVideo ? t('leave.bodyVideo') : t('leave.bodySurvey')}
+            </p>
+
+            {/* What is actually on the table. */}
+            <div className="mt-3.5 rounded-(--radius-card) border border-ink-200 bg-ink-50/60 px-3.5 py-3">
+              <p className="text-[0.6875rem] font-medium tracking-[0.04em] text-ink-400 uppercase">
+                {t('leave.progress')}
+              </p>
+
+              {isVideo && (
+                <>
+                  <p className="mt-1.5 text-[0.8125rem] font-medium text-ink-900 tabular-nums">
+                    {t('leave.watched', { seconds: Math.floor(elapsed) })}
+                  </p>
+                  {duration > 0 && (
+                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink-200">
+                      <span
+                        className="block h-full rounded-full bg-brand-600"
+                        style={{ width: `${Math.min(progress * 100, 100)}%` }}
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+
+              {questions.length > 0 && (
+                <p
+                  className={cn(
+                    'text-[0.8125rem] font-medium text-ink-900 tabular-nums',
+                    isVideo ? 'mt-2' : 'mt-1.5',
+                  )}
+                >
+                  {branching
+                    ? t('leave.answered', { done: answeredSoFar })
+                    : t('leave.answeredOf', { done: answeredSoFar, total: visible.length })}
+                </p>
+              )}
+
+              {/* The reassurance that matters most: leaving is not a failed
+                  attempt. Without this line people stay in an ad they no
+                  longer want to watch because they think quitting is
+                  penalised. */}
+              <p className="mt-2.5 border-t border-ink-200 pt-2.5 text-[0.75rem] leading-relaxed text-ink-500">
+                {t('leave.noAttempt')}
+              </p>
+            </div>
+
+            <div className="mt-4 flex flex-col gap-2">
+              <Button fullWidth onClick={() => setConfirmingClose(false)}>
+                {t('leave.stay')}
+              </Button>
+              <Button variant="ghost" fullWidth onClick={onClose} className="text-danger-700 hover:bg-danger-50">
+                {t('leave.leave')}
+              </Button>
+            </div>
           </div>
         </div>
       )}

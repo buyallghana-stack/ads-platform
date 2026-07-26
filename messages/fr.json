@@ -408,6 +408,18 @@
         "youtube": "YouTube",
         "linkedin": "LinkedIn"
       }
+    },
+    "leave": {
+      "title": "Quitter cette publicité ?",
+      "bodyVideo": "Votre progression n’est pas enregistrée. En revenant, la publicité repart du début.",
+      "bodySurvey": "Vos réponses ne sont pas enregistrées. En revenant, le sondage repart de la première question.",
+      "progress": "Où vous en êtes",
+      "watched": "{seconds} s regardées",
+      "answered": "{done, plural, =0 {Aucune question répondue} one {# question répondue} other {# questions répondues}}",
+      "answeredOf": "{done} sur {total} répondues",
+      "noAttempt": "Quitter ne consomme aucun de vos essais — seule une réponse en consomme un.",
+      "stay": "Rester et terminer",
+      "leave": "Quitter la publicité"
     }
   },
   "upgradeTab": {
