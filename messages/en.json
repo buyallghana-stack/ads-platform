@@ -11,6 +11,253 @@
     "showPassword": "Show password",
     "hidePassword": "Hide password"
   },
+  "landing": {
+    "meta": {
+      "title": "SidePerks — get paid for watching ads and taking surveys",
+      "description": "Watch short video ads and answer quick surveys on your phone. Points are pegged to the cedi and you withdraw to Mobile Money or crypto. Free to join, no card needed."
+    },
+    "nav": {
+      "primary": "Main",
+      "how": "How it works",
+      "earning": "Earning",
+      "plans": "Plans",
+      "invite": "Invite",
+      "faq": "FAQ",
+      "login": "Log in",
+      "signup": "Create account",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu"
+    },
+    "hero": {
+      "badgeChip": "New",
+      "badge": "Surveys now pay too",
+      "title": "Get paid for your",
+      "titleAccent": "attention.",
+      "lead": "SidePerks pays you points for watching short video ads and answering quick surveys on your phone. {points} points is GHS 1, and the free plan gives you {freeAds} ads every single day.",
+      "primaryCta": "Create free account",
+      "secondaryCta": "See how it works",
+      "note": "Free to join. No card, no deposit, no minimum.",
+      "shotAlt": "The SidePerks ads feed on a phone, showing video ads with the points each one pays",
+      "chipEarnedLabel": "This ad pays",
+      "chipEarnedValue": "+50 pts",
+      "chipDailyLabel": "Free every day",
+      "chipDailyValue": "{count} ads"
+    },
+    "stats": {
+      "freeAds": "Free ads every day",
+      "rate": "for every {points} points",
+      "bestRate": "Points on the top plan",
+      "monthsValue": "{months}",
+      "months": "Months on every paid plan"
+    },
+    "ways": {
+      "eyebrow": "Ways to earn",
+      "title": "Two ways to earn, and one",
+      "titleAccent": "on the way.",
+      "lead": "Watching is live today. Inviting friends is live today. Affiliate offers are the next thing being built, and we would rather say so than dress it up.",
+      "watch": {
+        "chip": "Live now",
+        "title": "Watch video ads and take surveys",
+        "body": "The main way to earn on SidePerks. Short video ads with a question or two, and surveys where your honest opinion is the whole point. {freeAds} a day on the free plan, and more on every paid one.",
+        "points": {
+          "videos": "Short videos, most under two minutes",
+          "surveys": "Surveys with no right or wrong answers",
+          "upfront": "You see what an ad pays before you open it",
+          "instant": "Points land in your balance the moment you finish"
+        },
+        "cta": "Start watching"
+      },
+      "invite": {
+        "chip": "Live now",
+        "title": "Invite your friends",
+        "body": "Every account comes with a personal invite link. Share it, and you earn a bonus once the people who joined through it start watching.",
+        "cta": "How inviting works"
+      },
+      "affiliate": {
+        "chip": "Coming next",
+        "title": "Affiliate offers",
+        "body": "Promoting partner products for a commission. This one is not built yet — it is on the roadmap, not in the app, and there is nothing here to sign up for."
+      }
+    },
+    "how": {
+      "eyebrow": "How it works",
+      "title": "From sign-up to points in",
+      "titleAccent": "four steps.",
+      "lead": "No interview, no documents, no waiting to be approved. You can be earning within a minute of creating an account.",
+      "steps": {
+        "signup": {
+          "title": "Create your account",
+          "body": "An email address and a password. That is the whole form, and you are on the free plan straight away."
+        },
+        "watch": {
+          "title": "Open an ad or a survey",
+          "body": "Your feed shows what is available to you today and exactly how many points each one pays."
+        },
+        "answer": {
+          "title": "Answer the question",
+          "body": "Video ads ask a short question to check you were watching. Surveys simply ask what you think."
+        },
+        "earn": {
+          "title": "Points hit your balance",
+          "body": "Credited the moment you finish, shown in points and in cedis, and listed in your statement."
+        }
+      }
+    },
+    "earning": {
+      "eyebrow": "Inside the app",
+      "title": "The real app, not a",
+      "titleAccent": "mock-up.",
+      "lead": "Every screen below is a genuine screenshot of SidePerks running, in the theme you are reading this in.",
+      "feed": {
+        "eyebrow": "Your feed",
+        "title": "Every ad tells you what it pays, before you open it",
+        "body": "No mystery rewards and no bait. The points, the length and the number of questions are on the card, so you can decide whether it is worth your data before you spend any.",
+        "points": {
+          "points": "Points printed on every card",
+          "length": "Video length shown before you commit",
+          "tabs": "Videos and surveys kept in separate tabs",
+          "cap": "A clear count of what is left today — {freeAds} free"
+        },
+        "shotAlt": "The SidePerks ads feed, with video ad cards each showing the points it pays"
+      },
+      "balance": {
+        "eyebrow": "Your balance",
+        "title": "Your balance in cedis, not just points",
+        "body": "Points are pegged to the cedi at {points} to GHS 1, so you always know what a balance is actually worth. The rate in force is written onto every entry, so nothing reprices behind you.",
+        "points": {
+          "cedis": "Balance shown in GHS first, points underneath",
+          "statement": "A full statement of every point in and out",
+          "chart": "Earnings and ads watched over the last 30 days",
+          "withdraw": "Withdraw to your own Mobile Money or crypto account"
+        },
+        "shotAlt": "The SidePerks home screen showing a balance in Ghana cedis, the daily ad count and lifetime earnings"
+      }
+    },
+    "plans": {
+      "eyebrow": "Plans",
+      "title": "Watch more, earn",
+      "titleAccent": "faster.",
+      "lead": "The free plan never expires. A paid plan raises your daily limit, pays more points per ad, and lowers the balance you need before you can withdraw.",
+      "bestChip": "Best rate",
+      "period": "for {months} months",
+      "rowAds": "Ads a day",
+      "rowRate": "Points per ad",
+      "rowThreshold": "Withdraw from",
+      "free": {
+        "title": "{name} plan — GHS 0",
+        "body": "{ads} ads a day, for as long as you want, and you can withdraw from {threshold} points. No card needed to start.",
+        "cta": "Start free"
+      },
+      "stacking": "Plans stack. Hold more than one and the daily limits add up, the earning bonuses add together, and the lowest withdrawal threshold is the one that applies. Every plan runs for a fixed period and nothing renews on its own — you are never charged again without asking."
+    },
+    "invite": {
+      "eyebrow": "Invite & earn",
+      "title": "Your link, your",
+      "titleAccent": "circle.",
+      "lead": "Every account comes with a personal invite link. Send it on WhatsApp, and when the people who joined through it start watching, you earn a bonus on top of your own earnings.",
+      "cta": "Get your invite link",
+      "steps": {
+        "share": {
+          "title": "Share your link",
+          "body": "One tap copies a ready-made message with your link in it, or opens your phone's share sheet straight into WhatsApp."
+        },
+        "join": {
+          "title": "They join",
+          "body": "Your code is filled in for them automatically, so nobody has to remember or type anything."
+        },
+        "watch": {
+          "title": "They start watching",
+          "body": "Your bonus is tied to real activity rather than to a signup — which is what keeps the programme worth anything."
+        },
+        "bonus": {
+          "title": "You get your bonus",
+          "body": "Credited to your balance like any other earning and listed in your statement. Paid plans multiply what a referral is worth."
+        }
+      }
+    },
+    "safety": {
+      "eyebrow": "Safety",
+      "title": "Built like something that holds your",
+      "titleAccent": "money.",
+      "lead": "Every item here is already in the app. None of it is on a roadmap.",
+      "items": {
+        "twoFactor": {
+          "title": "Two-factor sign-in",
+          "body": "Optional authenticator-app sign-in, with backup codes for when you lose the phone. No sign-in code is ever emailed to you."
+        },
+        "pin": {
+          "title": "Withdrawal PIN",
+          "body": "A separate 4-digit PIN for moving money, stored only as a hash, and locked for 15 minutes after five wrong tries."
+        },
+        "accounts": {
+          "title": "Your accounts only",
+          "body": "Withdrawals go to Mobile Money or crypto accounts you set up yourself, and changing one starts a 48-hour cool-off."
+        },
+        "peg": {
+          "title": "Pegged to the cedi",
+          "body": "The points-to-cedi rate in force is written onto every entry in your statement, so a balance cannot quietly reprice."
+        },
+        "data": {
+          "title": "Only what the account needs",
+          "body": "Passwords, PINs and backup codes are stored as hashes, never as text, and the servers are in the EU."
+        },
+        "oneAccount": {
+          "title": "One account per person",
+          "body": "Duplicate and automated accounts are removed. That is what keeps the reward pool for people who actually watch."
+        }
+      }
+    },
+    "faq": {
+      "eyebrow": "Questions",
+      "title": "Straight",
+      "titleAccent": "answers.",
+      "lead": "Better to have this clear before you sign up than after.",
+      "items": {
+        "free": {
+          "q": "Is SidePerks free?",
+          "a": "Yes. The free plan gives you {freeAds} ads a day and never expires. Paid plans exist, but nothing is locked behind them — they raise your daily limit and the points you get per ad."
+        },
+        "worth": {
+          "q": "What is a point actually worth?",
+          "a": "{points} points is GHS 1. That rate is stored on every entry in your statement, so points you earned last month are still worth what they were worth when you earned them."
+        },
+        "withdraw": {
+          "q": "When can I withdraw?",
+          "a": "Once your balance passes your plan's threshold — {freeThreshold} points on the free plan, down to {bestThreshold} points on the top plan. Payouts switch on when our payout licensing is complete; until then you can set up your payout account and keep earning, and the app tells you plainly where a request stands rather than pretending."
+        },
+        "questions": {
+          "q": "Do I have to answer questions?",
+          "a": "Some video ads carry a short question to check you were watching, and some are watch-only. Surveys are a different thing: they are asking for your opinion, so there is no right answer and nothing to get wrong."
+        },
+        "methods": {
+          "q": "How do I get paid?",
+          "a": "To a Mobile Money account — MTN, Telecel or AirtelTigo — or to a crypto wallet in USDT. You choose which and set it up yourself in your profile, and withdrawals can only ever go to an account saved on your own profile."
+        },
+        "devices": {
+          "q": "Will it work on my phone?",
+          "a": "It is built for inexpensive Android phones and slow connections, and it is tested down to iOS 12 and Android 6. There is nothing to install — it runs in your browser."
+        }
+      }
+    },
+    "cta": {
+      "title": "Your spare minutes are already",
+      "titleAccent": "worth something.",
+      "lead": "Create a free account and watch your first ad today — {freeAds} of them a day, every day, at no cost.",
+      "primary": "Create free account",
+      "secondary": "I already have an account",
+      "note": "Under a minute to join. An email address and a password, nothing else."
+    },
+    "footer": {
+      "product": "Product",
+      "account": "Account",
+      "legal": "Legal",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "blurb": "SidePerks pays you for watching short video ads and taking surveys on your phone. Built in Ghana, for Ghana.",
+      "copyright": "© {year} SidePerks. All rights reserved.",
+      "madeIn": "Made in Ghana · English & Français"
+    }
+  },
   "auth": {
     "panel": {
       "badge": "Made for Ghana",

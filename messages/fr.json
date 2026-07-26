@@ -11,6 +11,253 @@
     "showPassword": "Afficher le mot de passe",
     "hidePassword": "Masquer le mot de passe"
   },
+  "landing": {
+    "meta": {
+      "title": "SidePerks — soyez payé pour regarder des pubs et répondre à des sondages",
+      "description": "Regardez de courtes vidéos publicitaires et répondez à des sondages depuis votre téléphone. Les points sont indexés sur le cedi et vous retirez vers Mobile Money ou en crypto. Inscription gratuite, sans carte."
+    },
+    "nav": {
+      "primary": "Principal",
+      "how": "Comment ça marche",
+      "earning": "Gains",
+      "plans": "Formules",
+      "invite": "Parrainage",
+      "faq": "FAQ",
+      "login": "Connexion",
+      "signup": "Créer un compte",
+      "openMenu": "Ouvrir le menu",
+      "closeMenu": "Fermer le menu"
+    },
+    "hero": {
+      "badgeChip": "Nouveau",
+      "badge": "Les sondages rapportent aussi",
+      "title": "Soyez payé pour votre",
+      "titleAccent": "attention.",
+      "lead": "SidePerks vous verse des points quand vous regardez de courtes vidéos publicitaires et répondez à des sondages depuis votre téléphone. {points} points valent 1 GHS, et la formule gratuite vous donne {freeAds} publicités chaque jour.",
+      "primaryCta": "Créer un compte gratuit",
+      "secondaryCta": "Voir comment ça marche",
+      "note": "Inscription gratuite. Sans carte, sans dépôt, sans minimum.",
+      "shotAlt": "Le fil de publicités SidePerks sur un téléphone, montrant les points que rapporte chaque vidéo",
+      "chipEarnedLabel": "Cette pub rapporte",
+      "chipEarnedValue": "+50 pts",
+      "chipDailyLabel": "Gratuit chaque jour",
+      "chipDailyValue": "{count} pubs"
+    },
+    "stats": {
+      "freeAds": "Publicités gratuites par jour",
+      "rate": "pour {points} points",
+      "bestRate": "Points sur la meilleure formule",
+      "monthsValue": "{months}",
+      "months": "Mois pour chaque formule payante"
+    },
+    "ways": {
+      "eyebrow": "Façons de gagner",
+      "title": "Deux façons de gagner, et une",
+      "titleAccent": "à venir.",
+      "lead": "Regarder est disponible aujourd'hui. Parrainer est disponible aujourd'hui. Les offres d'affiliation sont la prochaine étape, et nous préférons le dire clairement.",
+      "watch": {
+        "chip": "Disponible",
+        "title": "Regardez des vidéos et répondez à des sondages",
+        "body": "La principale façon de gagner sur SidePerks. De courtes vidéos publicitaires avec une question ou deux, et des sondages où votre avis sincère est tout l'intérêt. {freeAds} par jour avec la formule gratuite, davantage avec chaque formule payante.",
+        "points": {
+          "videos": "Des vidéos courtes, souvent moins de deux minutes",
+          "surveys": "Des sondages sans bonne ni mauvaise réponse",
+          "upfront": "Vous voyez ce que rapporte une pub avant de l'ouvrir",
+          "instant": "Les points arrivent dès que vous avez terminé"
+        },
+        "cta": "Commencer à regarder"
+      },
+      "invite": {
+        "chip": "Disponible",
+        "title": "Invitez vos proches",
+        "body": "Chaque compte dispose d'un lien de parrainage personnel. Partagez-le et vous recevez un bonus lorsque les personnes inscrites grâce à lui commencent à regarder.",
+        "cta": "Comment ça fonctionne"
+      },
+      "affiliate": {
+        "chip": "Bientôt",
+        "title": "Offres d'affiliation",
+        "body": "Promouvoir les produits de partenaires contre une commission. Cette partie n'existe pas encore : elle est prévue, elle n'est pas dans l'application, et il n'y a rien à souscrire ici."
+      }
+    },
+    "how": {
+      "eyebrow": "Comment ça marche",
+      "title": "De l'inscription aux points en",
+      "titleAccent": "quatre étapes.",
+      "lead": "Pas d'entretien, pas de documents, pas d'attente de validation. Vous pouvez gagner vos premiers points une minute après votre inscription.",
+      "steps": {
+        "signup": {
+          "title": "Créez votre compte",
+          "body": "Une adresse e-mail et un mot de passe. C'est tout le formulaire, et vous êtes immédiatement sur la formule gratuite."
+        },
+        "watch": {
+          "title": "Ouvrez une pub ou un sondage",
+          "body": "Votre fil affiche ce qui vous est proposé aujourd'hui et exactement combien de points chaque élément rapporte."
+        },
+        "answer": {
+          "title": "Répondez à la question",
+          "body": "Les vidéos posent une courte question pour vérifier que vous regardiez. Les sondages demandent simplement votre avis."
+        },
+        "earn": {
+          "title": "Les points arrivent sur votre solde",
+          "body": "Crédités dès que vous terminez, affichés en points et en cedis, et inscrits dans votre relevé."
+        }
+      }
+    },
+    "earning": {
+      "eyebrow": "Dans l'application",
+      "title": "La vraie application, pas une",
+      "titleAccent": "maquette.",
+      "lead": "Chaque écran ci-dessous est une véritable capture de SidePerks, dans le thème où vous lisez cette page.",
+      "feed": {
+        "eyebrow": "Votre fil",
+        "title": "Chaque pub annonce ce qu'elle rapporte, avant que vous l'ouvriez",
+        "body": "Pas de récompense mystère et pas d'appât. Les points, la durée et le nombre de questions sont sur la carte, pour que vous décidiez si cela vaut vos données avant d'en dépenser.",
+        "points": {
+          "points": "Les points affichés sur chaque carte",
+          "length": "La durée de la vidéo avant de vous engager",
+          "tabs": "Vidéos et sondages dans des onglets séparés",
+          "cap": "Un décompte clair de ce qu'il reste aujourd'hui — {freeAds} gratuites"
+        },
+        "shotAlt": "Le fil de publicités SidePerks, chaque carte indiquant les points qu'elle rapporte"
+      },
+      "balance": {
+        "eyebrow": "Votre solde",
+        "title": "Votre solde en cedis, pas seulement en points",
+        "body": "Les points sont indexés sur le cedi à raison de {points} pour 1 GHS, vous savez donc toujours ce que vaut réellement un solde. Le taux en vigueur est inscrit sur chaque écriture, rien ne change dans votre dos.",
+        "points": {
+          "cedis": "Le solde affiché d'abord en GHS, les points en dessous",
+          "statement": "Un relevé complet de chaque point entré et sorti",
+          "chart": "Gains et publicités regardées sur les 30 derniers jours",
+          "withdraw": "Retrait vers votre propre compte Mobile Money ou crypto"
+        },
+        "shotAlt": "L'écran d'accueil SidePerks montrant un solde en cedis, le compteur du jour et les gains cumulés"
+      }
+    },
+    "plans": {
+      "eyebrow": "Formules",
+      "title": "Regardez plus, gagnez",
+      "titleAccent": "plus vite.",
+      "lead": "La formule gratuite n'expire jamais. Une formule payante augmente votre limite quotidienne, rapporte davantage de points par publicité et abaisse le solde nécessaire pour retirer.",
+      "bestChip": "Meilleur taux",
+      "period": "pour {months} mois",
+      "rowAds": "Publicités par jour",
+      "rowRate": "Points par publicité",
+      "rowThreshold": "Retrait dès",
+      "free": {
+        "title": "Formule {name} — 0 GHS",
+        "body": "{ads} publicités par jour, aussi longtemps que vous voulez, et un retrait possible dès {threshold} points. Aucune carte nécessaire pour commencer.",
+        "cta": "Commencer gratuitement"
+      },
+      "stacking": "Les formules se cumulent. Si vous en détenez plusieurs, les limites quotidiennes s'additionnent, les bonus de gain s'additionnent, et c'est le seuil de retrait le plus bas qui s'applique. Chaque formule court sur une durée fixe et rien ne se renouvelle tout seul : vous n'êtes jamais débité de nouveau sans le demander."
+    },
+    "invite": {
+      "eyebrow": "Parrainage",
+      "title": "Votre lien, votre",
+      "titleAccent": "entourage.",
+      "lead": "Chaque compte dispose d'un lien de parrainage personnel. Envoyez-le sur WhatsApp : quand les personnes inscrites grâce à lui commencent à regarder, vous recevez un bonus en plus de vos propres gains.",
+      "cta": "Obtenir mon lien",
+      "steps": {
+        "share": {
+          "title": "Partagez votre lien",
+          "body": "Un appui copie un message tout prêt contenant votre lien, ou ouvre le partage de votre téléphone directement vers WhatsApp."
+        },
+        "join": {
+          "title": "Ils s'inscrivent",
+          "body": "Votre code est renseigné automatiquement pour eux : personne n'a à le retenir ni à le saisir."
+        },
+        "watch": {
+          "title": "Ils commencent à regarder",
+          "body": "Votre bonus dépend d'une activité réelle et non d'une simple inscription — c'est ce qui donne sa valeur au programme."
+        },
+        "bonus": {
+          "title": "Vous recevez votre bonus",
+          "body": "Crédité sur votre solde comme n'importe quel gain et inscrit dans votre relevé. Les formules payantes multiplient ce que rapporte un parrainage."
+        }
+      }
+    },
+    "safety": {
+      "eyebrow": "Sécurité",
+      "title": "Conçu comme ce qui détient votre",
+      "titleAccent": "argent.",
+      "lead": "Tout ce qui figure ici existe déjà dans l'application. Rien n'est une promesse.",
+      "items": {
+        "twoFactor": {
+          "title": "Connexion à deux facteurs",
+          "body": "Connexion facultative par application d'authentification, avec des codes de secours si vous perdez le téléphone. Aucun code de connexion ne vous est jamais envoyé par e-mail."
+        },
+        "pin": {
+          "title": "Code PIN de retrait",
+          "body": "Un code à 4 chiffres distinct pour les mouvements d'argent, stocké uniquement sous forme de hachage, et bloqué 15 minutes après cinq erreurs."
+        },
+        "accounts": {
+          "title": "Vos comptes uniquement",
+          "body": "Les retraits vont vers des comptes Mobile Money ou crypto que vous avez vous-même enregistrés, et toute modification déclenche un délai de 48 heures."
+        },
+        "peg": {
+          "title": "Indexé sur le cedi",
+          "body": "Le taux points-cedi en vigueur est inscrit sur chaque écriture de votre relevé : un solde ne peut pas être réévalué en silence."
+        },
+        "data": {
+          "title": "Seulement le nécessaire",
+          "body": "Mots de passe, codes PIN et codes de secours sont stockés hachés, jamais en clair, et les serveurs sont dans l'Union européenne."
+        },
+        "oneAccount": {
+          "title": "Un compte par personne",
+          "body": "Les comptes en double et automatisés sont supprimés. C'est ce qui réserve la cagnotte à celles et ceux qui regardent vraiment."
+        }
+      }
+    },
+    "faq": {
+      "eyebrow": "Questions",
+      "title": "Réponses",
+      "titleAccent": "directes.",
+      "lead": "Mieux vaut que ce soit clair avant votre inscription qu'après.",
+      "items": {
+        "free": {
+          "q": "SidePerks est-il gratuit ?",
+          "a": "Oui. La formule gratuite vous donne {freeAds} publicités par jour et n'expire jamais. Des formules payantes existent, mais rien n'est verrouillé derrière : elles augmentent votre limite quotidienne et les points obtenus par publicité."
+        },
+        "worth": {
+          "q": "Que vaut réellement un point ?",
+          "a": "{points} points valent 1 GHS. Ce taux est enregistré sur chaque écriture de votre relevé : les points gagnés le mois dernier valent toujours ce qu'ils valaient au moment où vous les avez gagnés."
+        },
+        "withdraw": {
+          "q": "Quand puis-je retirer ?",
+          "a": "Dès que votre solde dépasse le seuil de votre formule — {freeThreshold} points avec la formule gratuite, et jusqu'à {bestThreshold} points avec la meilleure. Les retraits seront activés une fois notre autorisation de paiement obtenue ; en attendant, vous pouvez enregistrer votre compte de retrait et continuer à gagner, et l'application vous dit clairement où en est une demande."
+        },
+        "questions": {
+          "q": "Suis-je obligé de répondre aux questions ?",
+          "a": "Certaines vidéos posent une courte question pour vérifier que vous regardiez, d'autres se regardent simplement. Les sondages sont différents : ils demandent votre avis, il n'y a donc pas de bonne réponse ni rien à rater."
+        },
+        "methods": {
+          "q": "Comment suis-je payé ?",
+          "a": "Vers un compte Mobile Money — MTN, Telecel ou AirtelTigo — ou vers un portefeuille crypto en USDT. Vous choisissez et l'enregistrez vous-même dans votre profil, et un retrait ne peut aller que vers un compte enregistré sur votre propre profil."
+        },
+        "devices": {
+          "q": "Est-ce que ça marchera sur mon téléphone ?",
+          "a": "L'application est conçue pour les téléphones Android peu coûteux et les connexions lentes, et elle est testée jusqu'à iOS 12 et Android 6. Il n'y a rien à installer : tout se passe dans votre navigateur."
+        }
+      }
+    },
+    "cta": {
+      "title": "Vos minutes perdues valent déjà",
+      "titleAccent": "quelque chose.",
+      "lead": "Créez un compte gratuit et regardez votre première publicité aujourd'hui — {freeAds} par jour, tous les jours, sans rien payer.",
+      "primary": "Créer un compte gratuit",
+      "secondary": "J'ai déjà un compte",
+      "note": "Moins d'une minute. Une adresse e-mail et un mot de passe, rien d'autre."
+    },
+    "footer": {
+      "product": "Produit",
+      "account": "Compte",
+      "legal": "Mentions légales",
+      "terms": "Conditions d'utilisation",
+      "privacy": "Politique de confidentialité",
+      "blurb": "SidePerks vous paie pour regarder de courtes vidéos publicitaires et répondre à des sondages depuis votre téléphone. Conçu au Ghana, pour le Ghana.",
+      "copyright": "© {year} SidePerks. Tous droits réservés.",
+      "madeIn": "Conçu au Ghana · English & Français"
+    }
+  },
   "auth": {
     "panel": {
       "badge": "Conçu pour le Ghana",

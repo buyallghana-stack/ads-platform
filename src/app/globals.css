@@ -129,6 +129,12 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
     'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
+  /* Marketing display face — the italic serif accent inside a landing-page
+     headline, and nothing else. Loaded in one weight/one style; the signed-in
+     app never sets `font-display`, so it never pays for it. */
+  --font-display: var(--font-instrument-serif), ui-serif, Georgia, 'Times New Roman',
+    serif;
+
   /* --- Radii ------------------------------------------------------------
      Softened platform-wide at the operator's direction (2026-07-23): the
      first pass used tight 6px corners and read as a developer tool. The

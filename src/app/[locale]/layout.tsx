@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Instrument_Serif, Inter } from 'next/font/google'
 import { notFound } from 'next/navigation'
 
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
@@ -13,6 +13,20 @@ import '../globals.css'
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
+  display: 'swap',
+})
+
+/**
+ * Display serif, used for exactly one thing: the italic accent word inside a
+ * marketing headline. It is a single weight in a single style, so it costs one
+ * small extra file and only on pages that actually set `font-display` — the
+ * signed-in app never renders a character of it.
+ */
+const instrumentSerif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  style: 'italic',
+  variable: '--font-instrument-serif',
   display: 'swap',
 })
 
@@ -56,7 +70,11 @@ export default async function LocaleLayout({
     // suppressHydrationWarning: next-themes writes the resolved theme class
     // onto <html> before React hydrates, so the server/client class lists
     // differ by design on the first paint.
-    <html lang={locale} className={`${inter.variable} h-full`} suppressHydrationWarning>
+    <html
+      lang={locale}
+      className={`${inter.variable} ${instrumentSerif.variable} h-full`}
+      suppressHydrationWarning
+    >
       <body className="min-h-full antialiased">
         <ThemeProvider>
           <NextIntlClientProvider>{children}</NextIntlClientProvider>
