@@ -11,6 +11,7 @@ import { getOrigin, getRequestContext } from '@/lib/request-context'
 import {
   forgotPasswordSchema,
   logInSchema,
+  resetPasswordSchema,
   signUpSchema,
 } from '@/lib/validation/auth'
 
@@ -421,6 +422,86 @@ export async function forgotPasswordAction(formData: { email: string }): Promise
   await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: `${origin}/auth/confirm?next=/reset-password`,
   })
+  return { ok: true }
+}
+
+/**
+ * The second half of a password reset: actually setting the new password.
+ *
+ * This did not exist. `ResetPasswordForm` waited 400ms and then displayed the
+ * generic error unconditionally — a placeholder left behind when the auth
+ * wiring landed — so every reset that got all the way through the email link
+ * failed at the last step, and said nothing useful about why.
+ *
+ * By the time anybody reaches the form, `/auth/confirm` has already redeemed
+ * the recovery token and put a session on the request. That session IS the
+ * authorisation: Supabase will only change the password of whoever the
+ * cookie says we are, so there is no token to re-check here and nothing from
+ * the client that decides whose password moves.
+ */
+export async function resetPasswordAction(formData: {
+  password: string
+  confirmPassword: string
+}): Promise<ActionResult> {
+  const parsed = resetPasswordSchema.safeParse(formData)
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0]
+    return { ok: false, errorKey: issue.message, field: String(issue.path[0] ?? 'password') }
+  }
+
+  const supabase = await createClient()
+
+  /*
+    No session means the recovery link expired, was already used, or was
+    opened in a different browser from the one now submitting. That is a
+    specific, fixable situation and it must not be reported as "something
+    went wrong" — the person needs to be told to request a new link.
+  */
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, errorKey: 'resetLinkExpired' }
+
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password })
+
+  if (error) {
+    /*
+      Supabase refuses a password identical to the current one. Somebody
+      resetting because they forgot theirs can easily land on the old one, and
+      "something went wrong" would send them round the whole email loop again
+      to hit the same wall.
+    */
+    if (error.code === 'same_password') {
+      return { ok: false, errorKey: 'passwordSameAsOld', field: 'password' }
+    }
+    if (error.code === 'weak_password') {
+      return { ok: false, errorKey: 'passwordTooWeak', field: 'password' }
+    }
+
+    reportUnexpected(error, 'auth.reset-password', { code: error.code ?? null })
+    return { ok: false, errorKey: 'generic', message: error.message }
+  }
+
+  /*
+    A reset is what someone does when they think their account is not theirs
+    any more, so ending every OTHER session is the point of it — leaving an
+    attacker signed in on their own device would make the reset cosmetic.
+    Best-effort: the password has already changed, and failing to tidy up
+    sessions must not report the reset itself as failed.
+  */
+  const { error: revokeError } = await supabase.rpc('revoke_other_sessions')
+  if (revokeError) reportUnexpected(revokeError, 'auth.reset-password.revoke-sessions')
+
+  /*
+    Then end this one too, and send them to log in with the new password. The
+    success screen already offers exactly that. It also keeps the recovery
+    session from turning into a signed-in session that never passed the
+    second factor — the app shell would catch that anyway, but the shorter
+    path is not to hand out the session at all.
+  */
+  await supabase.auth.signOut()
+  await clearLoginVerified()
+
   return { ok: true }
 }
 

@@ -7,6 +7,7 @@ import { CheckCircle2, LockKeyhole } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Controller, useForm } from 'react-hook-form'
 
+import { resetPasswordAction } from '@/app/[locale]/(auth)/actions'
 import { FormHeader } from '@/components/auth/FormHeader'
 import { Button } from '@/components/ui/Button'
 import { PasswordField } from '@/components/ui/PasswordField'
@@ -27,6 +28,7 @@ export function ResetPasswordForm() {
     handleSubmit,
     control,
     watch,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<ResetPasswordInput>({
     resolver: zodResolver(resetPasswordSchema),
@@ -37,11 +39,31 @@ export function ResetPasswordForm() {
   const password = watch('password') ?? ''
   const confirmPassword = watch('confirmPassword') ?? ''
 
-  const onSubmit = handleSubmit(async () => {
+  const onSubmit = handleSubmit(async (values) => {
     setFormError(null)
-    // Server action lands with the auth wiring.
-    await new Promise((r) => setTimeout(r, 400))
-    setFormError(tError('generic'))
+
+    try {
+      const result = await resetPasswordAction(values)
+
+      if (!result.ok) {
+        // Field-specific problems belong on the field, not in the banner —
+        // "that is your current password" above the form reads as though the
+        // whole reset is broken.
+        if (result.field === 'password' || result.field === 'confirmPassword') {
+          setError(result.field, { message: result.errorKey })
+          return
+        }
+        setFormError(result.message ?? msg(result.errorKey) ?? tError('generic'))
+        return
+      }
+
+      setDone(true)
+    } catch {
+      // A thrown server action is the network being down, not a rejected
+      // password. Saying "something went wrong" would send them looking for a
+      // problem with what they typed.
+      setFormError(tError('network'))
+    }
   })
 
   if (done) {
