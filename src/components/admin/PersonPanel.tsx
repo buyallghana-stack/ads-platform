@@ -238,8 +238,24 @@ function Panel({
             thread={thread}
             loading={threadLoading}
             busy={threadBusy}
-            onReply={onReply ?? (() => {})}
-            onToggleStatus={onToggleStatus ?? (() => {})}
+            /* Throwing beats a no-op fallback. `?? (() => {})` here meant a
+               caller that rendered the messages panel without a handler got a
+               Send button that swallowed every reply in silence — the same
+               failure that left the password reset form dead in production
+               for weeks. Reaching this is a wiring mistake, and it should
+               show up as one the first time the panel is opened. */
+            onReply={
+              onReply ??
+              (() => {
+                throw new Error('PersonPanel: mode="messages" needs onReply')
+              })
+            }
+            onToggleStatus={
+              onToggleStatus ??
+              (() => {
+                throw new Error('PersonPanel: mode="messages" needs onToggleStatus')
+              })
+            }
           />
         </PanelSection>
       )}
