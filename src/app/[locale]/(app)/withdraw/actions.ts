@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 
 import { getSessionUser } from '@/lib/auth/session'
+import { reportUnexpected } from '@/lib/observability/report'
 import { getRequestContext } from '@/lib/request-context'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -117,7 +118,19 @@ export async function requestWithdrawal(input: {
     p_ip: ip,
   })
 
-  if (error) return classify(error.message)
+  if (error) {
+    const classified = classify(error.message)
+    /*
+      Only the branch that ran out of explanations. Every other code here is
+      the pipeline refusing for a reason we wrote — no payout details, still
+      inside the cool-off, under the minimum — and reporting those would bury
+      the one that means something.
+    */
+    if (!classified.ok && classified.reason === 'refused' && classified.code === 'unknown') {
+      reportUnexpected(error, 'withdraw.request', { message: error.message })
+    }
+    return classified
+  }
   if (!data) return { ok: false, reason: 'error' }
 
   const row = data as unknown as {

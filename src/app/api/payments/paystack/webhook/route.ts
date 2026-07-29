@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { serverEnv } from '@/lib/env'
+import { reportUnexpected } from '@/lib/observability/report'
 import { confirmPaystackReference } from '@/lib/payments/confirm'
 import { verifyWebhookSignature } from '@/lib/payments/paystack'
 
@@ -40,7 +41,13 @@ export async function POST(request: Request) {
   let event: { event?: string; data?: { reference?: string } }
   try {
     event = JSON.parse(raw)
-  } catch {
+  } catch (error) {
+    /*
+      The signature already verified, so this body came from Paystack and we
+      still could not read it. That is not a caller mistake, it is a contract
+      change or a corruption, and it means a real payment may go unconfirmed.
+    */
+    reportUnexpected(error, 'paystack.webhook.parse')
     return NextResponse.json({ received: true, ignored: 'unparseable' })
   }
 
@@ -49,6 +56,19 @@ export async function POST(request: Request) {
   }
 
   const outcome = await confirmPaystackReference(event.data.reference)
+
+  /*
+    MONEY ARRIVED AND WE DID NOT GRANT IT. Paystack has taken the customer's
+    money and told us so; if confirmation failed the person has paid for a
+    plan they do not have, and nothing else in the system will notice.
+    Reported with the reference so it can be reconciled by hand.
+  */
+  if (!outcome.ok) {
+    reportUnexpected(new Error(`Paystack confirmation failed: ${outcome.reason}`), 'paystack.webhook.confirm', {
+      reference: event.data.reference,
+      reason: outcome.reason,
+    })
+  }
 
   return NextResponse.json({
     received: true,

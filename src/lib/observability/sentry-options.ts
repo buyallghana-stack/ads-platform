@@ -72,12 +72,37 @@ function scrubUrl(value: string): string {
 /**
  * Last gate before an event leaves the machine.
  *
- * Sentry's own scrubbing works on keys it recognises; this works on the two
- * places a token actually appears in this app — the request URL and the
- * breadcrumb trail that led there.
+ * Sentry's own scrubbing works on keys it recognises; this works on the three
+ * places this app's secrets actually appear.
  */
 function beforeSend(event: ErrorEvent): ErrorEvent | null {
   if (event.request?.url) event.request.url = scrubUrl(event.request.url)
+
+  /*
+    SERVER ACTION ARGUMENTS. Sentry captures them as the request body, and
+    `sendDefaultPii: false` does NOT cover it — found by reading a real event
+    from the live project, which carried a signup's email address and phone
+    number in clear. Its own denylist had filtered `password` and
+    `turnstileToken` by NAME and nothing else.
+
+    That is unacceptable in this application specifically, because the
+    arguments to these actions are a withdrawal PIN, a mobile-money number, a
+    crypto wallet address and the text of somebody's support message.
+
+    Redacting by key NAME was rejected outright: that is a denylist, and a
+    denylist is exactly what just failed. Everything goes.
+
+    In practice the whole body collapses to a single "[redacted]" string,
+    because a server action's payload arrives here as one encoded string and is
+    only parsed into fields later, by Sentry's own UI. Verified against a real
+    event. The recursion below still matters for the shapes that do arrive
+    structured — and losing the body entirely is the right trade on a money
+    path anyway: the stack trace says which action failed, which is the part
+    worth having.
+  */
+  if (event.request && 'data' in event.request) {
+    event.request.data = redactValues(event.request.data)
+  }
 
   if (event.breadcrumbs) {
     event.breadcrumbs = event.breadcrumbs.map((crumb) =>
@@ -88,6 +113,22 @@ function beforeSend(event: ErrorEvent): ErrorEvent | null {
   }
 
   return event
+}
+
+/**
+ * Keeps the shape, drops the content. Recurses so a nested object in an
+ * action's arguments cannot smuggle a value out inside it.
+ */
+function redactValues(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(redactValues)
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, redactValues(v)]),
+    )
+  }
+  // Scalars are the payload. Null stays null so an absent field still reads as
+  // absent rather than as something withheld.
+  return value === null || value === undefined ? value : '[redacted]'
 }
 
 export function sharedOptions() {

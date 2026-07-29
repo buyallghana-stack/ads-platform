@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
 import { PERSON_RULES } from '@/components/admin/person-actions'
+import { reportUnexpected } from '@/lib/observability/report'
 import { getPeople, type PeopleScope } from '@/lib/admin/data/people'
 import type { Person } from '@/lib/admin/types'
 import { getSessionUser } from '@/lib/auth/session'
@@ -121,7 +122,8 @@ export async function decidePerson(
 async function safePeople(scope: PeopleScope): Promise<Person[] | undefined> {
   try {
     return await getPeople(scope)
-  } catch {
+  } catch (error) {
+    reportUnexpected(error, 'admin.people.list', { scope })
     return undefined
   }
 }

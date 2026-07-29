@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import { z } from 'zod'
 
+import { reportUnexpected } from '@/lib/observability/report'
 import { getPayoutQueue } from '@/lib/admin/data/payouts'
 import { ACTION_RULES, type PayoutAction } from '@/components/admin/payout-actions'
 import type { PayoutRequest } from '@/lib/admin/types'
@@ -204,7 +205,11 @@ export async function approvePayouts(
 async function safeQueue(): Promise<PayoutRequest[] | undefined> {
   try {
     return await getPayoutQueue()
-  } catch {
+  } catch (error) {
+    // The decision itself may well have succeeded; this is the re-read that
+    // failed. Worth knowing, because the operator is now looking at a payout
+    // screen that cannot show them the queue.
+    reportUnexpected(error, 'admin.payouts.queue')
     return undefined
   }
 }

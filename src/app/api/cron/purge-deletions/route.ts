@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { serverEnv } from '@/lib/env'
+import { reportUnexpected } from '@/lib/observability/report'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
@@ -30,6 +31,12 @@ export async function GET(request: Request) {
   const admin = createAdminClient()
   const { data: due, error } = await admin.rpc('due_account_deletions')
   if (error) {
+    /*
+      Nobody is watching a cron's response body. If this fails every night,
+      accounts that asked to be deleted 15 days ago are silently still here —
+      a promise in the privacy policy quietly going unkept.
+    */
+    reportUnexpected(error, 'cron.purge-deletions.list')
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
@@ -42,7 +49,9 @@ export async function GET(request: Request) {
       p_user_id: row.user_id,
     })
     if (purgeError) {
-      // One bad account must not stop the rest of the batch.
+      // One bad account must not stop the rest of the batch — but it must not
+      // vanish either. The id is the operator's own record, not personal data.
+      reportUnexpected(purgeError, 'cron.purge-deletions.account', { userId: row.user_id })
       failures.push(row.user_id)
       continue
     }

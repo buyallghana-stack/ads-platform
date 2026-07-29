@@ -2,6 +2,7 @@
 
 import { z } from 'zod'
 
+import { reportUnexpected } from '@/lib/observability/report'
 import { getPeople } from '@/lib/admin/data/people'
 import { getSupportThreadFor, type AdminSupportThread } from '@/lib/admin/data/support'
 import type { Person } from '@/lib/admin/types'
@@ -58,6 +59,7 @@ export async function loadSupportThread(userId: string): Promise<ThreadResult> {
     ])
     return { ok: true, thread, people }
   } catch (error) {
+    reportUnexpected(error, 'admin.support.load')
     return { ok: false, message: error instanceof Error ? error.message : GENERIC }
   }
 }
@@ -99,7 +101,11 @@ export async function replyToSupport(input: {
       getPeople('messages'),
     ])
     return { ok: true, thread, people }
-  } catch {
+  } catch (error) {
+    // The reply itself succeeded — the database has it and the person has
+    // been notified. This is the re-read failing, so the operator is told it
+    // did not save when it did. Exactly the kind of lie worth an alert.
+    reportUnexpected(error, 'admin.support.reply.reload')
     return { ok: false, message: GENERIC }
   }
 }
@@ -127,7 +133,8 @@ export async function setSupportStatus(userId: string, closed: boolean): Promise
       getPeople('messages'),
     ])
     return { ok: true, thread, people }
-  } catch {
+  } catch (error) {
+    reportUnexpected(error, 'admin.support.status.reload')
     return { ok: false, message: GENERIC }
   }
 }

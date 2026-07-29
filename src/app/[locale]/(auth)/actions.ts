@@ -3,6 +3,7 @@
 import { clearLoginVerified, isTwoFactorEnabled } from '@/lib/security/login-2fa'
 import { recordSessionContext } from '@/lib/security/session-record'
 import { verifyTurnstile } from '@/lib/fraud/turnstile'
+import { reportUnexpected } from '@/lib/observability/report'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { landingFor } from '@/lib/auth/landing'
@@ -179,7 +180,7 @@ export async function signUpAction(formData: {
       they are told that rather than blamed.
     */
     if (signUpError?.status === 500 || /send email|smtp|550/i.test(signUpError?.message ?? '')) {
-      console.error('[signup] mail send failed:', signUpError?.message)
+      reportUnexpected(signUpError, 'signup.mail-send')
       return { ok: false, errorKey: 'emailSendFailed' }
     }
 
@@ -191,7 +192,7 @@ export async function signUpAction(formData: {
     */
     const raw = signUpError?.message?.trim()
     const usable = raw && !/^[[{]/.test(raw) && raw.length > 3 ? raw : undefined
-    if (!usable) console.error('[signup] unusable error from Supabase:', raw)
+    if (!usable) reportUnexpected(signUpError, 'signup.unusable-error', { raw: raw ?? null })
     return { ok: false, errorKey: 'generic', message: usable }
   }
 
@@ -241,8 +242,14 @@ export async function signUpAction(formData: {
         p_fingerprint: data.fingerprint || undefined,
       })
     }
-  } catch {
-    // Intentionally ignored — see above.
+  } catch (error) {
+    /*
+      Still swallowed — the account exists and the person is waiting, and no
+      fraud signal is worth failing a signup over. But silently losing them on
+      every signup would leave the fraud layer looking calm while seeing
+      nothing, so it is reported even though it is not surfaced.
+    */
+    reportUnexpected(error, 'signup.fraud-signals')
   }
 
   /*
