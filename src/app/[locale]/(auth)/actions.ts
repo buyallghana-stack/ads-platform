@@ -62,7 +62,15 @@ export async function signUpAction(formData: {
   */
   const bot = await verifyTurnstile(data.turnstileToken, ip)
   if (!bot.ok) {
-    return { ok: false, errorKey: 'botCheckFailed', field: 'turnstileToken' }
+    /*
+      NO `field` HERE, and it is not a detail. The form routes a field-tagged
+      error to that input with `setError`, and the bot check is not an input —
+      so tagging it sent the message to a control that does not exist and the
+      form silently did nothing when somebody pressed Create account. Caught in
+      testing with the challenge script blocked, which is exactly how a real
+      person meets this: an ad blocker, a dead network, a proxy.
+    */
+    return { ok: false, errorKey: 'botCheckFailed' }
   }
 
   /*

@@ -49,6 +49,11 @@ function loadScript(): Promise<void> {
   })
 }
 
+/** What the app is actually showing right now, not what the OS prefers. */
+function currentTheme(): 'light' | 'dark' {
+  return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+}
+
 export function TurnstileWidget({
   siteKey,
   onToken,
@@ -81,7 +86,18 @@ export function TurnstileWidget({
       if (cancelled || !box.current || !window.turnstile) return
       widgetId.current = window.turnstile.render(box.current, {
         sitekey: siteKey,
-        theme,
+        /*
+          Cloudflare's own `auto` follows the OPERATING SYSTEM, while this app
+          follows next-themes — so somebody who chose Dark on a light phone got
+          a white challenge box in a dark form.
+
+          Resolved from the DOM class here rather than from `useTheme()` on
+          purpose: the hook returns undefined until it has mounted, and feeding
+          that to the effect would tear down and re-render the challenge on
+          every page load. The class is already on <html> by this point,
+          written by the no-flash script before paint.
+        */
+        theme: theme === 'auto' ? currentTheme() : theme,
         callback: (token: string) => callback.current(token),
         // A token is single-use and short-lived. When it expires or the
         // challenge errors, clear it so the form asks again rather than

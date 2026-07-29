@@ -373,7 +373,7 @@
       "invalidCredentials": "Cet e-mail ou ce mot de passe n'est pas correct",
       "emailNotVerified": "Veuillez d'abord vérifier votre adresse e-mail",
       "identityBlocked": "Cette adresse e-mail ou ce numéro de téléphone ne peut pas servir à créer un compte.",
-      "botCheckFailed": "Cette vérification a échoué. Veuillez réessayer.",
+      "botCheckFailed": "Nous n'avons pas pu confirmer que vous êtes une personne. Actualisez la page et réessayez — si vous utilisez un bloqueur de publicités ou un VPN, désactivez-le pour cette page.",
       "emailSendLimit": "Nous n'avons pas pu envoyer votre e-mail de confirmation pour le moment. Veuillez réessayer dans quelques minutes."
     }
   },
