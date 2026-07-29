@@ -19,7 +19,7 @@ import { useFormatter, useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/Button'
 import { REVEAL_SECONDS, maskDestination, nameMatches } from '@/lib/admin/destination'
-import type { PayoutRequest } from '@/lib/admin/types'
+import { holdEndsAt, type PayoutRequest } from '@/lib/admin/types'
 import { cn } from '@/lib/cn'
 
 import { PersonCell, StatusDot } from './AdminChrome'
@@ -31,7 +31,12 @@ import {
   PanelIconButton,
   PanelSection as Section,
 } from './DetailPanel'
-import { ACTION_RULES, availableActions, type PayoutAction } from './payout-actions'
+import {
+  ACTION_RULES,
+  availableActions,
+  effectiveRule,
+  type PayoutAction,
+} from './payout-actions'
 import { PAYOUT_TONE } from './payout-status'
 
 /**
@@ -172,7 +177,7 @@ function Panel({
 
   const start = (action: PayoutAction) => {
     if (busy) return
-    const rule = ACTION_RULES[action]
+    const rule = effectiveRule(action, r)
     if (rule.confirm || rule.reason) {
       setPending(action)
       setReason('')
@@ -455,8 +460,22 @@ function ConfirmStep({
 }) {
   const t = useTranslations('admin.payouts')
   const format = useFormatter()
-  const rule = ACTION_RULES[action]
-  const ready = (!rule.reason || reason.trim().length >= 3) && !busy
+  const rule = effectiveRule(action, request)
+
+  /* Approving a held request is a different act from approving a matured one,
+     so it gets its own wording and its own copy key rather than reusing
+     "approve" — the operator is waiving a fraud window, and the sentence
+     above the box should say so. */
+  const early = action === 'approve' && rule.reason
+  const copyKey = early ? 'approveEarly' : action
+
+  // The database demands five characters for an early reason and three for
+  // the rest. Matching it here means the button goes live at the same moment
+  // the request would be accepted.
+  const minReason = early ? 5 : 3
+  const ready = (!rule.reason || reason.trim().length >= minReason) && !busy
+
+  const until = holdEndsAt(request)
 
   const ghs = `GHS ${format.number(request.ghs, {
     minimumFractionDigits: 2,
@@ -466,10 +485,18 @@ function ConfirmStep({
   return (
     <div>
       <p className="text-[0.8125rem] leading-relaxed font-medium text-ink-900">
-        {t(`confirm.${action}`, {
+        {t(`confirm.${copyKey}`, {
           amount: ghs,
           destination: masked,
           name: request.user.name,
+          until: until
+            ? format.dateTime(until, {
+                day: 'numeric',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit',
+              })
+            : t('confirm.untilLifted'),
         })}
       </p>
 
@@ -483,7 +510,7 @@ function ConfirmStep({
             rows={2}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder={t(`confirm.reasonPlaceholder.${action}`)}
+            placeholder={t(`confirm.reasonPlaceholder.${copyKey}`)}
             className="mt-1 w-full resize-none rounded-(--radius-input) border border-ink-200 bg-canvas px-3 py-2 text-[0.8125rem] text-ink-900 placeholder:text-ink-400 focus:border-brand-600 focus:outline-none pointer-coarse:text-base"
           />
           <span className="mt-1 block text-[0.625rem] text-ink-400">{t('confirm.reasonHint')}</span>

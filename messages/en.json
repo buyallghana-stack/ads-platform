@@ -1403,14 +1403,17 @@
         "reasonPlaceholder": {
           "hold": "e.g. Confirm the MoMo number matches your ID",
           "decline": "e.g. Payout account belongs to someone else",
-          "dispute": "e.g. Recipient says the money never arrived"
+          "dispute": "e.g. Recipient says the money never arrived",
+          "approveEarly": "e.g. Long-standing account, destination verified by phone"
         },
         "reasonHint": "Written plainly. It goes straight into their notifications.",
         "cancel": "Cancel",
         "working": "Working…",
         "referenceLabel": "Transfer reference — optional",
         "referencePlaceholder": "e.g. MoMo transaction ID",
-        "referenceHint": "Stored with the payout. It is what you check against if they later say the money never arrived."
+        "referenceHint": "Stored with the payout. It is what you check against if they later say the money never arrived.",
+        "approveEarly": "Approve {amount} for {name} before its holding period ends on {until}? This is recorded as an early approval and raises an alert.",
+        "untilLifted": "until an operator lifts it"
       },
       "errors": {
         "dismiss": "Dismiss"

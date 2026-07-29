@@ -1,5 +1,5 @@
 import type { PayoutRequest, PayoutStatus } from '@/lib/admin/types'
-import { canDispute } from '@/lib/admin/types'
+import { canDispute, needsEarlyApproval } from '@/lib/admin/types'
 
 /**
  * What an operator may do to a payout, and what it costs them to do it.
@@ -48,6 +48,24 @@ export const ACTION_RULES: Record<
 }
 
 /**
+ * The rule as it applies to THIS request, which is not always the flat one.
+ *
+ * Approve is normally the cheap, unconfirmed happy path. On a request that is
+ * still held it is something else entirely — an override of a fraud control
+ * that the database records as `approved_early`, stores a reason for, and
+ * raises a system alert about. So it earns a reason box, and the caller must
+ * ask for the rule with the request in hand rather than reading ACTION_RULES
+ * directly.
+ */
+export function effectiveRule(action: PayoutAction, request: PayoutRequest) {
+  const base = ACTION_RULES[action]
+  if (action === 'approve' && needsEarlyApproval(request)) {
+    return { ...base, confirm: true, reason: true }
+  }
+  return base
+}
+
+/**
  * The actions this request is entitled to, in the order they should appear.
  *
  * An action that cannot succeed is absent, never disabled. A greyed-out
@@ -77,11 +95,22 @@ export function primaryAction(request: PayoutRequest, now: number): PayoutAction
   return availableActions(request, now)[0] ?? null
 }
 
-/** Requests a bulk action can legally be applied to. */
+/**
+ * Requests a bulk action can legally be applied to.
+ *
+ * A held request is deliberately NOT bulk-approvable even though approve is
+ * one of its actions: overriding a fraud window demands a reason that is
+ * recorded per request, and a checkbox cannot give one. Twenty windows waived
+ * under a single click is precisely the thing the window exists to stop.
+ */
 export function bulkEligible(
   requests: PayoutRequest[],
   action: PayoutAction,
   now: number,
 ): PayoutRequest[] {
-  return requests.filter((r) => availableActions(r, now).includes(action))
+  return requests.filter(
+    (r) =>
+      availableActions(r, now).includes(action) &&
+      !(action === 'approve' && needsEarlyApproval(r)),
+  )
 }

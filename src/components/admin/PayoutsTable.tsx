@@ -11,6 +11,7 @@ import { maskDestination } from '@/lib/admin/destination'
 import {
   DISPUTE_WINDOW_HOURS,
   canDispute,
+  needsEarlyApproval,
   type PayoutRequest,
   type PayoutStatus,
 } from '@/lib/admin/types'
@@ -31,7 +32,13 @@ import {
   type Tab,
 } from './AdminTable'
 import { PayoutDrawer } from './PayoutDrawer'
-import { ACTION_RULES, availableActions, bulkEligible, type PayoutAction } from './payout-actions'
+import {
+  ACTION_RULES,
+  availableActions,
+  bulkEligible,
+  effectiveRule,
+  type PayoutAction,
+} from './payout-actions'
 import { PAYOUT_TONE } from './payout-status'
 
 /**
@@ -169,8 +176,24 @@ export function PayoutsTable({
    */
   const decide = (id: string, action: PayoutAction, reason: string, reference?: string) => {
     setError(null)
+
+    /* Approving a request that is still held is an OVERRIDE, and the database
+       will not do it without being told so explicitly. The flag is derived
+       here from the row we already hold rather than threaded through every
+       caller's signature — the drawer has already demanded the reason, and
+       that reason is what gets recorded against the override. */
+    const row = rows.find((r) => r.id === id)
+    const early = action === 'approve' && row ? needsEarlyApproval(row) : false
+
     startTransition(async () => {
-      const result = await decidePayout({ id, action, reason, reference })
+      const result = await decidePayout({
+        id,
+        action,
+        reason,
+        reference,
+        early,
+        earlyReason: early ? reason : undefined,
+      })
 
       // A refused decision still returns the queue as it now stands, so a
       // request somebody else has already handled corrects itself on screen
@@ -253,7 +276,10 @@ export function PayoutsTable({
       .slice()
       .sort((a, b) => Number(ACTION_RULES[a].destructive) - Number(ACTION_RULES[b].destructive))
       .forEach((a, i, sorted) => {
-        const rule = ACTION_RULES[a]
+        /* effectiveRule, not ACTION_RULES: on a held request Approve needs a
+           reason, so it must open the panel rather than firing from the menu
+           into a refusal. */
+        const rule = effectiveRule(a, r)
         items.push({
           key: a,
           label: t(`actions.${a}`),

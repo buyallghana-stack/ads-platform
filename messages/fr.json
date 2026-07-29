@@ -1403,14 +1403,17 @@
         "reasonPlaceholder": {
           "hold": "ex. Vérifiez que le numéro MoMo correspond à votre pièce d'identité",
           "decline": "ex. Le compte de retrait appartient à quelqu'un d'autre",
-          "dispute": "ex. Le destinataire dit n'avoir rien reçu"
+          "dispute": "ex. Le destinataire dit n'avoir rien reçu",
+          "approveEarly": "ex. Compte ancien, destination vérifiée par téléphone"
         },
         "reasonHint": "Écrit simplement. Cela part directement dans ses notifications.",
         "cancel": "Annuler",
         "working": "En cours…",
         "referenceLabel": "Référence du transfert — facultatif",
         "referencePlaceholder": "ex. identifiant de transaction MoMo",
-        "referenceHint": "Enregistrée avec le paiement. C'est ce que vous vérifiez si la personne signale plus tard n'avoir rien reçu."
+        "referenceHint": "Enregistrée avec le paiement. C'est ce que vous vérifiez si la personne signale plus tard n'avoir rien reçu.",
+        "approveEarly": "Approuver {amount} pour {name} avant la fin de sa période de retenue le {until} ? Ceci est enregistré comme une approbation anticipée et déclenche une alerte.",
+        "untilLifted": "jusqu'à sa levée par un opérateur"
       },
       "errors": {
         "dismiss": "Fermer"

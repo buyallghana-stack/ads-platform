@@ -130,6 +130,13 @@ function toRequest(row: QueueRow, now: number): PayoutRequest {
     risk: row.risk,
     riskReasons: riskReasons(row, joinedDaysAgo),
     decisionNote: row.decision_note ?? undefined,
+    // Carried so the panel can say WHEN the window ends and the button can
+    // ask for the override. These were already on the row and simply were
+    // not being passed on, which is why Approve on a held request could only
+    // ever fail.
+    holdingUntil: row.holding_until ?? undefined,
+    adminHeld: row.admin_hold_at !== null,
+    approvedEarly: row.approved_early,
   }
 }
 

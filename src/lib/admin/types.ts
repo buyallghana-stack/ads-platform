@@ -107,6 +107,50 @@ export type PayoutRequest = {
    * what the last one told them.
    */
   decisionNote?: string
+  /**
+   * When the fraud-catch window on this request ends.
+   *
+   * FROZEN AT REQUEST TIME, and that is the whole point: it is computed from
+   * `redemption_holding_hours` when the request is filed and stored on the
+   * row, so lowering that setting afterwards does NOT release requests that
+   * are already waiting. A window somebody can shorten retroactively is not
+   * a fraud-catch window.
+   *
+   * `'infinity'` here means an operator placed the hold themselves and only
+   * an operator can lift it.
+   */
+  holdingUntil?: string
+  /** Set when the hold was placed by a person rather than by the fraud window. */
+  adminHeld?: boolean
+  /** True when this was approved before its window elapsed, under override. */
+  approvedEarly?: boolean
+}
+
+/**
+ * Does approving this request need the early-approval override?
+ *
+ * MIRRORS `approve_redemption` EXACTLY: it demands the override for any row
+ * whose status is `held`, full stop — whether the hold came from the fraud
+ * window or from an operator. Re-deriving that from dates here is how the
+ * button ends up offering something the database refuses; the maturity of the
+ * window only decides what we SAY, never whether the override is needed.
+ */
+export function needsEarlyApproval(request: PayoutRequest): boolean {
+  return request.status === 'held'
+}
+
+/**
+ * When the hold ends, in words the panel can print — or null when there is no
+ * date to give.
+ *
+ * `holding_until` is `'infinity'` for an operator-placed hold, which
+ * `new Date()` parses as NaN rather than Infinity. That is not "no hold", it
+ * is "until a person lifts it", so it must not fall through to a date.
+ */
+export function holdEndsAt(request: PayoutRequest): Date | null {
+  if (!request.holdingUntil || request.adminHeld) return null
+  const at = new Date(request.holdingUntil)
+  return Number.isNaN(at.getTime()) ? null : at
 }
 
 export type Person = {

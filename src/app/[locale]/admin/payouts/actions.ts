@@ -53,6 +53,19 @@ const decisionSchema = z.object({
   reason: z.string().max(1000).optional(),
   /** Free-text proof the transfer happened. Only meaningful for markPaid. */
   reference: z.string().max(200).optional(),
+  /**
+   * Approving a request that is still held, before its fraud-catch window has
+   * elapsed. `approve_redemption` has taken this since the pipeline was
+   * built and the app never sent it, so Approve on a held request could only
+   * ever raise "Use the early-approval override to proceed now."
+   *
+   * It is not a flag that merely silences a check: the database records
+   * `approved_early`, stores the reason on the request, and raises a
+   * `redemption_approved_early` system alert. Overriding a fraud control
+   * should leave a mark, which is exactly why it must not be automatic.
+   */
+  early: z.boolean().optional(),
+  earlyReason: z.string().max(1000).optional(),
 })
 
 export type DecisionInput = z.infer<typeof decisionSchema>
@@ -79,7 +92,7 @@ export async function decidePayout(input: DecisionInput): Promise<DecisionResult
 
   const parsed = decisionSchema.safeParse(input)
   if (!parsed.success) return { ok: false, message: GENERIC }
-  const { id, action, reason, reference } = parsed.data
+  const { id, action, reason, reference, early, earlyReason } = parsed.data
 
   // The same rule the buttons obey, re-applied on this side. The client
   // deciding that a decline needs no reason is not a reason for it to be
@@ -89,6 +102,15 @@ export async function decidePayout(input: DecisionInput): Promise<DecisionResult
     return { ok: false, message: 'Write a reason first — the user is shown it.' }
   }
 
+  // The database asks for five characters; asking here too means the operator
+  // is told before the round trip rather than by a raised exception.
+  if (early && (earlyReason ?? '').trim().length < 5) {
+    return {
+      ok: false,
+      message: 'Approving before the holding period ends needs a reason — it is recorded.',
+    }
+  }
+
   const admin = createAdminClient()
   const { error } = await admin.rpc('admin_decide_redemption', {
     p_admin_id: user.id,
@@ -96,6 +118,8 @@ export async function decidePayout(input: DecisionInput): Promise<DecisionResult
     p_action: DB_ACTION[action],
     p_reason: reason?.trim() || undefined,
     p_reference: reference?.trim() || undefined,
+    p_approve_early: early ?? false,
+    p_early_reason: early ? earlyReason?.trim() : undefined,
   })
 
   if (error) {
