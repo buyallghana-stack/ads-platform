@@ -14,8 +14,7 @@ import {
 } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
-import { verifyWithdrawalPin } from '@/app/[locale]/(app)/withdraw/actions'
-import { Badge } from '@/components/ui/Badge'
+import { requestWithdrawal } from '@/app/[locale]/(app)/withdraw/actions'
 import { Button } from '@/components/ui/Button'
 import { PinPad } from '@/components/ui/PinPad'
 import { Link, useRouter } from '@/i18n/navigation'
@@ -30,11 +29,16 @@ import { cn } from '@/lib/cn'
  *   - Amount is a NATIVE input (numeric keyboard, accessible, reliable on
  *     old Androids) with a points↔GHS toggle; the PIN step is the shared
  *     PinPad — the one place the app-like ceremony earns its keep.
- *   - The account choice and the PIN are now REAL: the accounts are the
- *     user's saved payout details, and the PIN is verified against
- *     verify_withdrawal_pin (rate-limited). Only the final SUBMISSION is
- *     still demo-badged — nothing is written; the real request_redemption
- *     pipeline waits on PAYOUTS_ENABLED.
+ *   - REAL END TO END as of 2026-07-29. The accounts are the user's saved
+ *     payout details, the PIN is verified against verify_withdrawal_pin
+ *     (rate-limited), and the last step calls request_redemption: the points
+ *     leave the balance and the request appears in the admin payout queue.
+ *     The demo badge is gone because there is nothing demo left.
+ *
+ *     Everything the database can refuse it refuses AFTER the PIN, so a
+ *     refusal lands on the PIN step. Two of them — not enough points, below
+ *     the threshold — are about the amount rather than the PIN, so those send
+ *     the user back to the amount step where the thing they must change is.
  *
  * The USDT path shows the fluctuation notice agreed at kickoff: the points
  * → GHS leg is pegged; the GHS → USD leg updates daily and the final coin
@@ -87,6 +91,16 @@ export function WithdrawWizard({
   const [pinError, setPinError] = useState<string | null>(null)
   const [pinBlocked, setPinBlocked] = useState<null | 'locked' | 'no_pin'>(null)
 
+  /* What the database actually recorded. The success screen renders from
+     THIS, never from what the user typed — the points, the cedi value and
+     the reference on screen are the ones in the row an operator will open. */
+  const [filed, setFiled] = useState<{
+    reference: string
+    points: number
+    ghs: number
+    holdingUntil: string
+  } | null>(null)
+
   // Was a module-level constant of 1000. Points-per-cedi is operator config
   // and every other screen already reads it; hardcoding it here meant a rate
   // change would silently misprice this screen alone.
@@ -132,37 +146,75 @@ export function WithdrawWizard({
     if (!err) setStep('confirm')
   }
 
-  // Real PIN verification (rate-limited server-side). On success the demo
-  // submission "completes" — nothing is written until PAYOUTS_ENABLED.
+  /**
+   * The PIN, and the withdrawal, in one call.
+   *
+   * Deliberately not two: the server verifies the PIN and files the request
+   * inside a single action, because two actions would be two public endpoints
+   * and the second could be called without the first. So there is no "PIN
+   * accepted" moment on this screen — the next thing that happens is either a
+   * filed request or a refusal.
+   */
   const onPin = (next: string) => {
-    if (submitting) return
+    if (submitting || !account) return
     setPinError(null)
     setPin(next)
     if (next.length < 4) return
 
     setSubmitting(true)
     startTransition(async () => {
-      const res = await verifyWithdrawalPin(next)
+      const res = await requestWithdrawal({ method: account.method, points, pin: next })
+      setSubmitting(false)
+
       if (res.ok) {
-        setSubmitting(false)
+        setFiled({
+          reference: res.reference,
+          points: res.points,
+          ghs: res.ghs,
+          holdingUntil: res.holdingUntil,
+        })
         setStep('success')
         return
       }
+
       setPin('')
-      setSubmitting(false)
+
       if (res.reason === 'no_pin') {
         setPinBlocked('no_pin')
-      } else if (res.reason === 'locked') {
+        return
+      }
+      if (res.reason === 'locked') {
         const mins = res.retryAfter
           ? Math.max(1, Math.ceil((new Date(res.retryAfter).getTime() - Date.now()) / 60000))
           : 15
         setPinBlocked('locked')
         setPinError(t('pin.locked', { minutes: mins }))
-      } else if (res.reason === 'wrong') {
-        setPinError(t('pin.wrong', { count: res.attemptsLeft }))
-      } else {
-        setPinError(t('pin.error'))
+        return
       }
+      if (res.reason === 'wrong') {
+        setPinError(t('pin.wrong', { count: res.attemptsLeft }))
+        return
+      }
+      if (res.reason === 'refused') {
+        /* The two refusals that are about the AMOUNT go back to the amount
+           step. Leaving "that is more than your balance" under a PIN pad
+           puts the message nowhere near the field that has to change. */
+        if (res.code === 'insufficient' || res.code === 'below_minimum') {
+          setAmountError(t(`refused.${res.code}`))
+          setStep('amount')
+          return
+        }
+        setPinError(
+          res.code === 'cooloff' && res.hours !== null
+            ? t('refused.cooloffHours', { hours: res.hours })
+            : res.code === 'unknown'
+              ? res.detail
+              : t(`refused.${res.code}`),
+        )
+        return
+      }
+
+      setPinError(t('pin.error'))
     })
   }
 
@@ -196,7 +248,9 @@ export function WithdrawWizard({
         <h1 className="flex-1 text-[1.0625rem] font-semibold tracking-[-0.01em] text-ink-900">
           {t('title')}
         </h1>
-        <Badge tone="warning">{t('demoBadge')}</Badge>
+        {/* The demo badge is gone. It was honest while nothing was written;
+            leaving it on a screen that now debits a real balance would be the
+            opposite of what it was for. */}
       </div>
 
       {step !== 'success' && (
@@ -534,7 +588,7 @@ export function WithdrawWizard({
       {/* ---------------------------------------------------------------- */}
       {/* Success                                                          */}
       {/* ---------------------------------------------------------------- */}
-      {step === 'success' && account && (
+      {step === 'success' && account && filed && (
         <div className="animate-rise mt-10 flex flex-col items-center text-center">
           <span className="grid size-16 place-items-center rounded-full bg-success-50 text-success-600">
             <Check aria-hidden className="size-8" strokeWidth={2.5} />
@@ -542,20 +596,31 @@ export function WithdrawWizard({
           <h2 className="mt-4 text-[1.25rem] font-semibold tracking-[-0.01em] text-ink-900">
             {t('success.title')}
           </h2>
+          {/* Every figure here comes from the row the database wrote, not from
+              what was typed into the form. */}
           <p className="mt-1.5 max-w-[32ch] text-[0.8125rem] leading-relaxed text-ink-500">
             {t('success.body', {
-              points: format.number(points),
+              points: format.number(filed.points),
               account: account.title,
             })}
           </p>
-          <p className="mt-3 max-w-[34ch] text-[0.75rem] leading-relaxed text-ink-400">
-            {t('success.holdNote')}
+
+          {/* The reference, because this is the thing a user quotes when they
+              write in about a payout, and the moment they can copy it is now
+              rather than after digging through their history. */}
+          <p className="mt-4 rounded-(--radius-input) border border-ink-200 bg-ink-50/60 px-3 py-2 font-mono text-[0.8125rem] tracking-[0.04em] text-ink-700">
+            {filed.reference}
           </p>
 
-          {/* One button, not two. The second offered "View in history" and
-              went to the same place — and while submission is demo there is
-              no history row to view, so it promised something that could not
-              exist. It comes back when request_redemption actually writes. */}
+          <p className="mt-3 max-w-[34ch] text-[0.75rem] leading-relaxed text-ink-400">
+            {t('success.holdNote', {
+              when: format.dateTime(new Date(filed.holdingUntil), {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              }),
+            })}
+          </p>
+
           <div className="mt-7 flex w-full flex-col gap-2.5">
             <Button size="lg" fullWidth onClick={() => router.push('/dashboard')}>
               {t('success.home')}

@@ -25,10 +25,14 @@ function maskWallet(v: string) {
 /**
  * Withdrawal page — the stepped wizard, reached from the balance hero.
  *
- * Now wired to the user's REAL saved payout accounts and REAL withdrawal PIN.
- * The final submission is still demo-badged (nothing is written; the real
- * request_redemption pipeline waits on PAYOUTS_ENABLED), but the account choice
- * and the PIN check are genuine.
+ * REAL END TO END as of 2026-07-29: the accounts are the user's saved payout
+ * details, the PIN is verified server-side, and confirming files a real
+ * `request_redemption` — points leave the balance and the request lands in
+ * the admin payout queue.
+ *
+ * The licence switches (`payouts_enabled`, `PAYOUTS_ENABLED`) gate
+ * DISBURSEMENT only, not this. A user can queue a request and an operator can
+ * review it while both are off; the one thing nobody can do is mark it paid.
  */
 export default async function WithdrawPage({
   params,

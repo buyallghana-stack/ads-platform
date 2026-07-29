@@ -683,7 +683,6 @@
   },
   "withdraw": {
     "title": "Retirer",
-    "demoBadge": "Démo",
     "back": "Retour",
     "next": "Continuer",
     "account": {
@@ -726,7 +725,6 @@
     },
     "pin": {
       "title": "Saisissez votre code PIN de retrait",
-      "demoHint": "Démo — 4 chiffres au choix. La configuration du PIN arrive avec l'onglet Profil.",
       "delete": "Effacer le dernier chiffre",
       "submitting": "Envoi de votre demande…",
       "hint": "Saisissez votre PIN de retrait",
@@ -740,14 +738,22 @@
     "success": {
       "title": "Retrait demandé",
       "body": "{points} pts en route vers {account}.",
-      "holdNote": "Ceci est une démo — rien n'a été retiré. Les vraies demandes sont vérifiées et aboutissent généralement sous 72 heures.",
-      "home": "Retour à l'accueil",
-      "history": "Voir dans l'historique"
+      "holdNote": "Chaque retrait est vérifié pour des raisons de sécurité. Le vôtre entre dans la file d'examen le {when}, et nous vous préviendrons dès qu'il y aura du nouveau.",
+      "home": "Retour à l'accueil"
     },
     "notYet": {
       "title": "Encore {short} points",
       "body": "Vous pourrez retirer à partir de {min} points (GHS {ghs}). Vous en avez {balance} — ce seuil est celui de votre offre {tier}.",
       "cta": "Gagner plus"
+    },
+    "refused": {
+      "no_details": "Ajoutez les coordonnées de votre compte de paiement avant de retirer.",
+      "cooloff": "Vous avez récemment modifié vos coordonnées de paiement. Par sécurité, les retraits attendent 48 heures après un changement.",
+      "cooloffHours": "Vous avez récemment modifié vos coordonnées de paiement. Par sécurité, vous pourrez retirer de nouveau dans environ {hours, plural, =1 {1 heure} other {# heures}}.",
+      "insufficient": "C'est plus que votre solde. Votre solde a peut-être changé depuis l'ouverture de cet écran.",
+      "below_minimum": "Ce montant est inférieur au minimum de retrait de votre offre.",
+      "disabled": "Ce compte ne peut pas effectuer de retrait pour le moment. Contactez le support.",
+      "too_small": "Ce montant est trop faible pour être versé."
     }
   },
   "theme": {

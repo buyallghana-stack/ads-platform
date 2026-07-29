@@ -683,7 +683,6 @@
   },
   "withdraw": {
     "title": "Withdraw",
-    "demoBadge": "Demo",
     "back": "Back",
     "next": "Continue",
     "account": {
@@ -726,7 +725,6 @@
     },
     "pin": {
       "title": "Enter your withdrawal PIN",
-      "demoHint": "Demo — any 4 digits work. PIN setup arrives with the Profile tab.",
       "delete": "Delete last digit",
       "submitting": "Submitting your request…",
       "hint": "Enter your withdrawal PIN",
@@ -740,14 +738,22 @@
     "success": {
       "title": "Withdrawal requested",
       "body": "{points} pts on their way to {account}.",
-      "holdNote": "This is a demo — nothing was withdrawn. Real requests are reviewed and typically complete within 72 hours.",
-      "home": "Back to Home",
-      "history": "View in history"
+      "holdNote": "Every withdrawal is reviewed for security. Yours enters the review queue on {when}, and we will notify you the moment anything changes.",
+      "home": "Back to Home"
     },
     "notYet": {
       "title": "{short} points to go",
       "body": "You can withdraw once you reach {min} points (GHS {ghs}). You have {balance} — that threshold comes with your {tier} plan.",
       "cta": "Earn more"
+    },
+    "refused": {
+      "no_details": "Add your payout account details before withdrawing.",
+      "cooloff": "You changed your payout details recently. For your security, withdrawals wait 48 hours after a change.",
+      "cooloffHours": "You changed your payout details recently. For your security, you can withdraw again in about {hours, plural, =1 {1 hour} other {# hours}}.",
+      "insufficient": "That is more than your balance. Your balance may have changed since you opened this screen.",
+      "below_minimum": "That is below the minimum withdrawal for your plan.",
+      "disabled": "This account cannot withdraw at the moment. Contact support.",
+      "too_small": "That amount is too small to pay out."
     }
   },
   "theme": {
