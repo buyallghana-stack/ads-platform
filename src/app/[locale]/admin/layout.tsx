@@ -5,6 +5,7 @@ import { AdminTopBar } from '@/components/admin/AdminChrome'
 import { redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser } from '@/lib/auth/session'
 import { countPayoutsAwaitingDecision } from '@/lib/admin/data/payouts'
+import { countFlaggedAccounts } from '@/lib/admin/data/people'
 import { PREVIEW, people } from '@/lib/admin/preview'
 import { needsLoginChallenge } from '@/lib/security/login-2fa'
 import { createClient } from '@/lib/supabase/server'
@@ -52,17 +53,23 @@ export default async function AdminLayout({
     where the work is before they click anything, so they are computed here
     once rather than on each screen.
 
-    Payouts is real as of 2026-07-28; messages and flagged are still preview
-    and stay that way until their screens are wired. A badge is a promise that
-    there is work behind it, so the two that are still invented must not be
-    left to look like the one that is not — the top bar's data badge is what
-    says which is which.
+    Payouts is real as of 2026-07-28 and flagged as of 2026-07-29. Messages is
+    the last invented one and stays that way until there is a message backend
+    to count. A badge is a promise that there is work behind it, so the one
+    that is still invented must not be left to look like the two that are
+    not — the top bar's data badge is what says which is which.
+
+    Both counts in parallel: this layout runs on every admin screen, and two
+    sequential awaits would add a round trip to all of them.
   */
-  const everyone = people()
+  const [payouts, flagged] = await Promise.all([
+    countPayoutsAwaitingDecision(),
+    countFlaggedAccounts(),
+  ])
   const counts = {
-    payouts: await countPayoutsAwaitingDecision(),
-    messages: everyone.reduce((n, p) => n + (p.unread ?? 0), 0),
-    flagged: everyone.filter((p) => p.status === 'flagged' || p.status === 'disabled').length,
+    payouts,
+    flagged,
+    messages: people().reduce((n, p) => n + (p.unread ?? 0), 0),
   }
 
   const admin = {

@@ -1660,6 +1660,40 @@ export type Database = {
           weight: number
         }[]
       }
+      admin_list_audit: {
+        Args: { p_limit?: number }
+        Returns: {
+          action: string
+          actor: string
+          after: string
+          at: string
+          before: string
+          id: string
+          note: string
+          target: string
+        }[]
+      }
+      admin_list_people: {
+        Args: { p_scope?: string }
+        Returns: {
+          ads_watched: number
+          avatar_path: string
+          balance_points: number
+          email: string
+          flag_reason: string
+          flagged_by: string
+          id: string
+          joined_at: string
+          last_active_at: string
+          lifetime_points: number
+          name: string
+          paid_out_ghs: number
+          phone: string
+          referrals: number
+          status: string
+          tier: string
+        }[]
+      }
       admin_list_redemptions: {
         Args: { p_status?: Database["public"]["Enums"]["redemption_status"] }
         Returns: {
@@ -2008,6 +2042,35 @@ export type Database = {
         }
       }
       disable_totp: { Args: { p_user_id: string }; Returns: undefined }
+      disable_user_account: {
+        Args: { p_admin_id: string; p_reason: string; p_user_id: string }
+        Returns: {
+          avatar_path: string | null
+          created_at: string
+          deleted_at: string | null
+          deletion_effective_at: string | null
+          deletion_requested_at: string | null
+          disabled_at: string | null
+          disabled_by: string | null
+          disabled_reason: string | null
+          flagged_at: string | null
+          flagged_by: string | null
+          flagged_reason: string | null
+          full_name: string
+          id: string
+          phone: string | null
+          referral_code: string
+          referred_by: string | null
+          signup_country: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       dispute_redemption: {
         Args: { p_admin_id: string; p_reason: string; p_redemption_id: string }
         Returns: {
@@ -2057,6 +2120,35 @@ export type Database = {
         }[]
       }
       email_is_registered: { Args: { p_email: string }; Returns: boolean }
+      enable_user_account: {
+        Args: { p_admin_id: string; p_user_id: string }
+        Returns: {
+          avatar_path: string | null
+          created_at: string
+          deleted_at: string | null
+          deletion_effective_at: string | null
+          deletion_requested_at: string | null
+          disabled_at: string | null
+          disabled_by: string | null
+          disabled_reason: string | null
+          flagged_at: string | null
+          flagged_by: string | null
+          flagged_reason: string | null
+          full_name: string
+          id: string
+          phone: string | null
+          referral_code: string
+          referred_by: string | null
+          signup_country: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       evaluate_signup_fraud: {
         Args: {
           p_email: string

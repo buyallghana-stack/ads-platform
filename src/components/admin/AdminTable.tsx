@@ -136,10 +136,44 @@ export function Toolbar<T extends string>({
   /** Buttons pinned to the right of the search field. */
   actions?: React.ReactNode
 }) {
+  /*
+    HOW MANY TABS THERE ARE DECIDES WHERE THE STRIP CAN LIVE.
+
+    A four-or-more tab set is 580–700px of strip; three or fewer is under
+    250px and fits beside the search field from `sm`. Keying off the count
+    rather than applying one breakpoint everywhere is what keeps Users and
+    Flagged on the underline strip at tablet — the approved design language —
+    while the payout queue and the ads pool wait for the room they need.
+
+    It is a count, not a measurement, on purpose: the alternative is measuring
+    the strip in an effect and swapping layout after paint, which flashes.
+  */
+  const wide = tabs.length > 3
+
   return (
-    <div className="mb-3 flex flex-col gap-3 border-b border-ink-200 sm:flex-row sm:items-end sm:justify-between">
+    <div
+      className={cn(
+        'mb-3 flex flex-col gap-3 border-b border-ink-200',
+        /*
+          The tabs only share a row once there is genuinely room for both.
+          Measured: at 1024 the payout queue's six statuses need 695px and the
+          search field left them 652px, so "All" sat off the edge. `xl` is
+          where the widest tab set clears the search field.
+
+          A toolbar carrying ACTION BUTTONS never shares at all. On Ads that
+          group is a search field and two "New …" buttons — around 520px —
+          which squeezed a 581px strip into 475px even at 1280. Tabs on their
+          own line cost one row of height; a hidden tab costs the operator the
+          status they were looking for.
+        */
+        !actions &&
+          (wide
+            ? 'xl:flex-row xl:items-end xl:justify-between'
+            : 'sm:flex-row sm:items-end sm:justify-between'),
+      )}
+    >
       {/*
-        ON A PHONE THE TABS ARE A SELECT, NOT A STRIP.
+        UNTIL THE TABS GENUINELY FIT, THEY ARE A SELECT, NOT A STRIP.
 
         Six statuses is 560px of tabs in a 328px window: the last two sit off
         the edge, and the strip pans under the thumb — which the operator read
@@ -150,11 +184,18 @@ export function Toolbar<T extends string>({
         the only sideways-moving thing on a screen that should not move
         sideways at all.
 
-        The select carries the same counts, is one tap to any status, and
-        cannot hide an option off-screen. The underline strip returns at `sm`,
-        where every tab fits and the design language is the reference's.
+        The swap happens at `sm` for a short tab set and at `xl` for a long
+        one — see `wide` above. It used to be `sm` for everything, on the
+        stated grounds that "every tab
+        fits" from there. MEASURED 2026-07-29, IT DOES NOT: at 834 the audit
+        log's five filters need 609px in the 478px the row gave them, so
+        "System" sat off the edge — on a tablet, which is one of the three
+        widths the operator reviews at. Payouts and Ads were worse. `lg` is
+        the width where the strip has the room the original comment claimed,
+        and below it the select carries the same counts, is one tap to any
+        status, and cannot hide an option off-screen.
       */}
-      <div className="pb-2.5 sm:hidden">
+      <div className={cn('pb-2.5', wide ? 'xl:hidden' : 'sm:hidden')}>
         <label className="sr-only" htmlFor="admin-table-filter">
           {tabsLabel}
         </label>
@@ -176,7 +217,8 @@ export function Toolbar<T extends string>({
         role="tablist"
         aria-label={tabsLabel}
         className={cn(
-          '-mb-px hidden min-w-0 gap-1 overflow-x-auto pr-4 sm:flex',
+          '-mb-px hidden min-w-0 gap-1 overflow-x-auto pr-4',
+          wide ? 'xl:flex' : 'sm:flex',
           '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
           /* Fades the last tab out as it runs off rather than letting it be
              chopped flat against whatever sits beside it, which reads as an

@@ -1439,6 +1439,9 @@
         "admin": "Raised by you"
       },
       "chatSoonBody": "Replying opens here once your chatbot is connected. Nothing is shown until it is real.",
+      "errors": {
+        "dismiss": "Dismiss"
+      },
       "actions": {
         "review": "Open account",
         "flag": "Flag account",
