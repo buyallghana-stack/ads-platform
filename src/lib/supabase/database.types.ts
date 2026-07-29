@@ -1078,6 +1078,79 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_commissions: {
+        Row: {
+          amount_minor: number
+          created_at: string
+          currency_code: string
+          id: string
+          payment_id: string
+          percent_applied: number
+          points: number
+          referee_id: string
+          referral_id: string
+          referrer_id: string
+          reversed_at: string | null
+          scope_at_payment: string
+          tier_id: string
+          tier_multiplier: number
+        }
+        Insert: {
+          amount_minor: number
+          created_at?: string
+          currency_code: string
+          id?: string
+          payment_id: string
+          percent_applied: number
+          points: number
+          referee_id: string
+          referral_id: string
+          referrer_id: string
+          reversed_at?: string | null
+          scope_at_payment: string
+          tier_id: string
+          tier_multiplier: number
+        }
+        Update: {
+          amount_minor?: number
+          created_at?: string
+          currency_code?: string
+          id?: string
+          payment_id?: string
+          percent_applied?: number
+          points?: number
+          referee_id?: string
+          referral_id?: string
+          referrer_id?: string
+          reversed_at?: string | null
+          scope_at_payment?: string
+          tier_id?: string
+          tier_multiplier?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_commissions_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: true
+            referencedRelation: "subscription_payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_commissions_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "referrals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_commissions_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referrals: {
         Row: {
           activation_bonus_paid_at: string | null
@@ -2698,8 +2771,10 @@ export type Database = {
         Returns: {
           activated_count: number
           ads_required: number
+          commission_points: number
           pending_count: number
           points_earned: number
+          purchases_count: number
           referral_code: string
           total_referred: number
         }[]
@@ -2855,6 +2930,16 @@ export type Database = {
       mark_support_read: { Args: never; Returns: number }
       mask_payout_value: { Args: { p_value: string }; Returns: string }
       normalise_phone: { Args: { p_phone: string }; Returns: string }
+      pay_referral_purchase_commission: {
+        Args: { p_payment_id: string }
+        Returns: Database["public"]["Tables"]["referral_commissions"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "referral_commissions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       precheck_signup_fraud: {
         Args: { p_email: string; p_ip?: unknown }
         Returns: Database["public"]["CompositeTypes"]["fraud_decision"]
@@ -3189,6 +3274,7 @@ export type Database = {
         | "survey"
         | "referral_signup"
         | "referral_activation"
+        | "referral_purchase"
         | "redemption_request"
         | "redemption_refund"
         | "admin_adjustment"
@@ -3399,6 +3485,7 @@ export const Constants = {
         "survey",
         "referral_signup",
         "referral_activation",
+        "referral_purchase",
         "redemption_request",
         "redemption_refund",
         "admin_adjustment",

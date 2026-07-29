@@ -2153,7 +2153,8 @@
         "hours": "heures",
         "perCedi": "pour 1 GHS",
         "times": "×",
-        "ads": "pubs"
+        "ads": "pubs",
+        "percent": "% du prix"
       },
       "groups": {
         "earning": {
@@ -2264,6 +2265,21 @@
           "label": "Suspendre tous les gains",
           "description": "Plus personne ne gagne quoi que ce soit tant que ce n'est pas rétabli.",
           "warning": "Cela arrête immédiatement tous les utilisateurs. Les publicités continuent de se lancer mais ne rapportent rien, ce que les utilisateurs remarquent en quelques minutes."
+        },
+        "referralCommission": {
+          "label": "Commission quand un filleul achète une formule",
+          "description": "Un pourcentage de ce qu'il paie, crédité en points à la personne qui l'a invité. La formule du parrain le multiplie : 10 % versés à un détenteur Platinum coûtent 20 % de la vente. Zéro désactive complètement."
+        },
+        "referralCommissionScope": {
+          "label": "Quels achats donnent droit à une commission",
+          "description": "Les renouvellements sont exclus par défaut. Les formules étant cumulables une par type, « chaque nouvelle formule » plafonne à quatre commissions par filleul, définitivement.",
+          "newPlans": "Chaque nouvelle formule, hors renouvellements",
+          "first": "Uniquement son premier achat",
+          "all": "Chaque achat, renouvellements compris"
+        },
+        "referralCommissionCap": {
+          "label": "Plafond de commission à vie par filleul",
+          "description": "Le maximum qu'un filleul peut rapporter à son parrain via ses achats. Un achat qui dépasse le plafond verse le reliquat. Zéro = illimité."
         }
       }
     },

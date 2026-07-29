@@ -1,0 +1,29 @@
+-- ============================================================================
+-- Migration 060 — a third referral entry type: referral_purchase
+--
+-- Stage three of the referral programme pays the referrer a commission when
+-- someone they referred BUYS A PLAN. That needs its own ledger entry type, so
+-- it can be labelled honestly in the user's transaction history, counted
+-- separately in finance reporting, and clawed back on its own terms.
+--
+-- WHY THIS FILE CONTAINS ONE STATEMENT
+-- Postgres will not let an enum value be added and then USED in the same
+-- transaction ("unsafe use of new value of enum type"). Supabase runs each
+-- migration file in a transaction, so the value has to land here and every
+-- function that writes it has to live in the next migration. Migration 039
+-- was split for exactly the same reason.
+--
+-- WHAT IS DELIBERATELY *NOT* CHANGED HERE
+-- `credit_points` guards earning by a disabled account with an entry-type
+-- list, and this type is not being added to it. That function has now been
+-- amended by five migrations and restating it a sixth time to add one word to
+-- one list is the more dangerous edit. The disabled check is made instead at
+-- the top of `pay_referral_purchase_commission`, which is where the referrer
+-- is looked up anyway — the same place and the same way `apply_referral_code`
+-- already refuses a disabled referrer.
+--
+-- The global earning pause DOES apply, and should: unlike a redemption refund,
+-- a commission issues new points into the economy.
+-- ============================================================================
+
+alter type public.ledger_entry_type add value if not exists 'referral_purchase';

@@ -63,6 +63,12 @@ const LEDGER_KIND: Record<string, TxKind> = {
   survey: 'survey',
   referral_signup: 'bonus',
   referral_activation: 'bonus',
+  // Stage three, the commission when a referee buys a plan. Folded into the
+  // same kind as the other two on purpose: all three are money the user got
+  // for inviting somebody, they share the orange referral hue, and one filter
+  // chip should show all of them. Unlike the survey/ad case, the label does
+  // not become untrue — this genuinely is a referral bonus.
+  referral_purchase: 'bonus',
   redemption_request: 'withdrawal',
   redemption_refund: 'refund',
   admin_adjustment: 'adjustment',
@@ -105,7 +111,13 @@ export async function getHomeData(userId: string): Promise<HomeData> {
       .select('entry_type, amount, created_at')
       .eq('user_id', userId)
       .gte('created_at', since.toISOString())
-      .in('entry_type', ['ad_view', 'survey', 'referral_signup', 'referral_activation']),
+      .in('entry_type', [
+        'ad_view',
+        'survey',
+        'referral_signup',
+        'referral_activation',
+        'referral_purchase',
+      ]),
     supabase
       .from('subscription_payments')
       .select('id, method, status, amount_minor, currency_code, created_at')

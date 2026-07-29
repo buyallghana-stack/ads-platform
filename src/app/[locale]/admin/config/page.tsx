@@ -210,6 +210,39 @@ export default async function AdminConfigPage({
           min: 1,
           suffix: t('units.ads'),
         },
+        {
+          key: 'referral_purchase_commission_percent',
+          label: t('fields.referralCommission.label'),
+          description: t('fields.referralCommission.description'),
+          kind: 'number',
+          min: 0,
+          max: 50,
+          step: 0.5,
+          suffix: t('units.percent'),
+        },
+        {
+          key: 'referral_purchase_commission_scope',
+          label: t('fields.referralCommissionScope.label'),
+          description: t('fields.referralCommissionScope.description'),
+          kind: 'select',
+          /* The same three branches `pay_referral_purchase_commission`
+             implements, and the same guard: `config_allowed_values` refuses
+             anything outside this set, so the screen and the function cannot
+             drift apart without a save failing loudly. */
+          options: [
+            { value: 'new_plans', label: t('fields.referralCommissionScope.newPlans') },
+            { value: 'first', label: t('fields.referralCommissionScope.first') },
+            { value: 'all', label: t('fields.referralCommissionScope.all') },
+          ],
+        },
+        {
+          key: 'referral_purchase_commission_cap_points',
+          label: t('fields.referralCommissionCap.label'),
+          description: t('fields.referralCommissionCap.description'),
+          kind: 'number',
+          min: 0,
+          suffix: t('units.points'),
+        },
       ],
     },
     {

@@ -2153,7 +2153,8 @@
         "hours": "hours",
         "perCedi": "per GHS 1",
         "times": "×",
-        "ads": "ads"
+        "ads": "ads",
+        "percent": "% of the price"
       },
       "groups": {
         "earning": {
@@ -2264,6 +2265,21 @@
           "label": "Pause all earning, platform-wide",
           "description": "Nobody earns anything from any ad until this is switched back off.",
           "warning": "This stops every user on the platform immediately. Ads keep playing but award nothing, which users notice within minutes."
+        },
+        "referralCommission": {
+          "label": "Commission when a referred person buys a plan",
+          "description": "A percentage of what they pay, credited to whoever invited them as points. The inviter’s own plan multiplies it, so the real share of a sale is this figure times their referral multiplier — 10% paid to a Platinum holder costs 20% of the sale. Zero switches this off completely."
+        },
+        "referralCommissionScope": {
+          "label": "Which purchases pay a commission",
+          "description": "Renewals are excluded by default. Because plans stack one of each, \"each new plan\" is capped at four commissions per invited person for all time.",
+          "newPlans": "Each new plan they buy, but not renewals",
+          "first": "Their first purchase only",
+          "all": "Every purchase, renewals included"
+        },
+        "referralCommissionCap": {
+          "label": "Lifetime commission cap per invited person",
+          "description": "The most one invited person can ever earn their inviter from purchases. A purchase that crosses it pays the remainder. Zero means no limit."
         }
       }
     },
