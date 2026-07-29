@@ -122,6 +122,7 @@ export const privacyFr: LegalDoc = {
             "Les prestataires de paiement, pour que l'argent vous parvienne. Ils ne reçoivent que le nécessaire.",
             "Les annonceurs et partenaires publicitaires, de façon agrégée — combien de personnes ont vu une publicité et sa performance. Ils ne reçoivent ni votre nom, ni votre e-mail, ni votre téléphone.",
             "Les prestataires techniques qui hébergent et font fonctionner le service (base de données, hébergement, e-mail), liés par contrat à agir sur nos seules instructions.",
+            "Un prestataire de surveillance des erreurs, qui reçoit un rapport lorsqu'un problème survient — la page concernée, l'erreur et le type de navigateur. Il est configuré pour NE PAS recevoir votre adresse, vos cookies ni votre session, et les jetons des liens de connexion sont retirés avant l'envoi du rapport.",
             "Les autorités et régulateurs, lorsque la loi l'exige ou pour faire valoir ou défendre des droits.",
             "Un acquéreur ou successeur, si l'activité était cédée ou réorganisée. Nous vous préviendrions au préalable.",
           ],

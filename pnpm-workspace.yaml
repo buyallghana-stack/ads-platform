@@ -3,8 +3,13 @@
 #   unrs-resolver    - native module resolver used by eslint-config-next
 #   @swc/core        - native compiler used by next-intl's plugin
 #   @parcel/watcher  - native file watcher; dev-only, safe to skip
+#   @sentry/cli      - downloads the binary that uploads source maps at build
+#                      time. Without it a stack trace from production is
+#                      minified rubbish, which is most of the reason to have
+#                      error tracking at all.
 allowBuilds:
   '@parcel/watcher': false
+  '@sentry/cli': true
   '@swc/core': true
   sharp: true
   unrs-resolver: true

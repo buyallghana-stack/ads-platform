@@ -127,6 +127,7 @@ export const privacyEn: LegalDoc = {
             'Payment and payout providers, so that money can reach you. They receive only what is needed to make the payment.',
             'Advertisers and advertising partners, in aggregate — how many people watched an ad and how it performed. They do not receive your name, email or phone number.',
             'Technology providers that host and run the service for us, including our database, hosting and email providers, under contracts that limit them to acting on our instructions.',
+            'An error-monitoring provider, which receives a report when something breaks — the page it happened on, the error, and the make of browser. It is configured NOT to receive your address, your cookies or your session, and sign-in links have their token removed before the report is sent.',
             'Authorities and regulators, where the law requires it or to establish or defend legal claims.',
             'A buyer or successor, if the business is ever sold or reorganised. We would tell you first.',
           ],

@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
+    "@sentry/nextjs": "^10.68.0",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.8",
     "@thumbmarkjs/thumbmarkjs": "^1.10.1",
