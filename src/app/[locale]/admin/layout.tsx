@@ -5,8 +5,8 @@ import { AdminTopBar } from '@/components/admin/AdminChrome'
 import { redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser } from '@/lib/auth/session'
 import { countPayoutsAwaitingDecision } from '@/lib/admin/data/payouts'
-import { countFlaggedAccounts } from '@/lib/admin/data/people'
-import { PREVIEW, people } from '@/lib/admin/preview'
+import { countFlaggedAccounts, countUnreadSupport } from '@/lib/admin/data/people'
+import { PREVIEW } from '@/lib/admin/preview'
 import { adminNeedsTwoFactor, needsLoginChallenge } from '@/lib/security/login-2fa'
 import { createClient } from '@/lib/supabase/server'
 
@@ -65,24 +65,23 @@ export default async function AdminLayout({
     where the work is before they click anything, so they are computed here
     once rather than on each screen.
 
-    Payouts is real as of 2026-07-28 and flagged as of 2026-07-29. Messages is
-    the last invented one and stays that way until there is a message backend
-    to count. A badge is a promise that there is work behind it, so the one
-    that is still invented must not be left to look like the two that are
-    not — the top bar's data badge is what says which is which.
+    All three are real as of 2026-07-29: payouts since 2026-07-28, flagged and
+    now messages. A badge is a promise that there is work behind it, and there
+    is no longer an invented one sitting next to the two that mean something.
 
-    Both counts in parallel: this layout runs on every admin screen, and two
-    sequential awaits would add a round trip to all of them.
+    Messages counts PEOPLE waiting, not messages — somebody who asks three
+    questions is one conversation to answer, and a badge reading "3" for one
+    person would send an operator looking for two more.
+
+    All three in parallel: this layout runs on every admin screen, and
+    sequential awaits would add a round trip to each of them.
   */
-  const [payouts, flagged] = await Promise.all([
+  const [payouts, flagged, messages] = await Promise.all([
     countPayoutsAwaitingDecision(),
     countFlaggedAccounts(),
+    countUnreadSupport(),
   ])
-  const counts = {
-    payouts,
-    flagged,
-    messages: people().reduce((n, p) => n + (p.unread ?? 0), 0),
-  }
+  const counts = { payouts, flagged, messages }
 
   const admin = {
     name: profile?.full_name ?? user!.email ?? 'Admin',

@@ -12,11 +12,11 @@ import {
   Mail,
   MonitorSmartphone,
   Palette,
-  ScrollText,
   ShieldCheck,
   Trash2,
   UserRound,
   Wallet,
+  MessageCircle,
 } from 'lucide-react'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
@@ -70,7 +70,6 @@ export default async function ProfilePage({
   const isAdmin = await isAdminUser(user!.id)
   const deletion = await getDeletionStatus()
   const fullName = profile?.full_name ?? user!.email ?? ''
-  const soon = t('soon')
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 py-5 sm:px-6 md:py-7">
@@ -182,7 +181,13 @@ export default async function ProfilePage({
 
         {/* Support ------------------------------------------------------- */}
         <SettingsGroup title={t('groups.support')}>
-          <SettingsRow icon={<ScrollText />} tone="neutral" label={t('support.help')} soon={soon} />
+          <SettingsRow
+            href="/support"
+            icon={<MessageCircle />}
+            tone="neutral"
+            label={t('support.help')}
+            description={t('support.helpHint')}
+          />
           <SettingsRow href="/privacy" icon={<FileText />} tone="neutral" label={t('support.privacy')} />
           <SettingsRow href="/terms" icon={<FileText />} tone="neutral" label={t('support.terms')} />
         </SettingsGroup>

@@ -6,6 +6,12 @@ import { AlertTriangle, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { decidePerson } from '@/app/[locale]/admin/users/actions'
+import {
+  loadSupportThread,
+  replyToSupport,
+  setSupportStatus,
+} from '@/app/[locale]/admin/messages/actions'
+import type { AdminSupportThread } from '@/lib/admin/data/support'
 import type { Person } from '@/lib/admin/types'
 
 import { PeopleGrid, type PeopleMode } from './PeopleGrid'
@@ -33,11 +39,10 @@ import { PERSON_RULES, type PersonAction } from './person-actions'
  * it "active" in place would leave it sitting on a screen it no longer
  * belongs to.
  *
- * MESSAGES IS STILL PREVIEW (`live={false}`) and decides in local state, as
- * every screen here used to. There is no message backend — the support chat
- * is waiting on the operator's chatbot — so that tab renders invented people
- * behind the preview badge, and must not be allowed to send their ids to a
- * function that would go looking for them.
+ * MESSAGES IS LIVE TOO AS OF 2026-07-29 and was the last preview screen in
+ * the admin area. Opening somebody there loads their transcript — lazily, on
+ * open, because a hundred conversations attached to a list nobody has clicked
+ * is a hundred transcripts sent for nothing.
  */
 export function PeopleBoard({
   people,
@@ -63,6 +68,53 @@ export function PeopleBoard({
      rewording them here would mean a second vocabulary for the same rules. */
   const [error, setError] = useState<string | null>(null)
   const [, startTransition] = useTransition()
+
+  /* The open conversation on Messages. Null on the other two screens, and
+     null again the moment a different person is opened, so a transcript can
+     never be shown under somebody else's name. */
+  const [thread, setThread] = useState<AdminSupportThread | null>(null)
+  const [threadLoading, setThreadLoading] = useState(false)
+  const [threadBusy, startThreadWork] = useTransition()
+
+  const openPerson = (person: Person) => {
+    setOpenId(person.id)
+    if (mode !== 'messages' || !live) return
+
+    setThread(null)
+    setThreadLoading(true)
+    startThreadWork(async () => {
+      const result = await loadSupportThread(person.id)
+      setThreadLoading(false)
+      if (!result.ok) {
+        setError(result.message)
+        return
+      }
+      setThread(result.thread)
+      // Reading it cleared the unread count, so the card has changed too.
+      if (result.people) setRows(result.people)
+    })
+  }
+
+  const applyThreadResult = (result: Awaited<ReturnType<typeof replyToSupport>>) => {
+    if (result.ok) {
+      setThread(result.thread)
+      if (result.people) setRows(result.people)
+      return
+    }
+    setError(result.message)
+  }
+
+  const reply = (body: string) => {
+    if (!openId) return
+    setError(null)
+    startThreadWork(async () => applyThreadResult(await replyToSupport({ userId: openId, body })))
+  }
+
+  const toggleStatus = (closed: boolean) => {
+    if (!openId) return
+    setError(null)
+    startThreadWork(async () => applyThreadResult(await setSupportStatus(openId, closed)))
+  }
 
   const decide = (id: string, action: PersonAction, reason: string) => {
     setError(null)
@@ -136,15 +188,23 @@ export function PeopleBoard({
         mode={mode}
         serverNow={serverNow}
         openId={openId}
-        onOpen={(p) => setOpenId(p.id)}
+        onOpen={openPerson}
         onDecide={decide}
       />
       <PersonPanel
         person={open}
         mode={mode}
         now={serverNow}
-        onClose={() => setOpenId(null)}
+        onClose={() => {
+          setOpenId(null)
+          setThread(null)
+        }}
         onDecide={decide}
+        thread={thread}
+        threadLoading={threadLoading}
+        threadBusy={threadBusy}
+        onReply={reply}
+        onToggleStatus={toggleStatus}
       />
     </>
   )

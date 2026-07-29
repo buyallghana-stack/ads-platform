@@ -13,6 +13,8 @@ import { PersonCell, StatusDot } from './AdminChrome'
 import { DetailPanel, Fact, PanelFacts, PanelFooter, PanelSection } from './DetailPanel'
 import { PERSON_RULES, personActions, type PersonAction } from './person-actions'
 import type { PeopleMode } from './PeopleGrid'
+import { SupportConversation } from './SupportConversation'
+import type { AdminSupportThread } from '@/lib/admin/data/support'
 
 /**
  * One account, everything about it, and the decision at the bottom.
@@ -42,17 +44,43 @@ export function PersonPanel({
   now,
   onClose,
   onDecide,
+  thread = null,
+  threadLoading = false,
+  threadBusy = false,
+  onReply,
+  onToggleStatus,
 }: {
   person: Person | null
   mode: PeopleMode
   now: number
   onClose: () => void
   onDecide: (id: string, action: PersonAction, reason: string) => void
+  /** Messages only: the open conversation and its handlers. Null everywhere
+   *  else, which is what keeps this panel one component across three screens. */
+  thread?: AdminSupportThread | null
+  threadLoading?: boolean
+  threadBusy?: boolean
+  onReply?: (body: string) => void
+  onToggleStatus?: (closed: boolean) => void
 }) {
   if (!person) return null
   /* Keyed, so opening a different account mounts a fresh panel rather than
      carrying a half-typed disable reason across to the wrong person. */
-  return <Panel key={person.id} person={person} mode={mode} now={now} onClose={onClose} onDecide={onDecide} />
+  return (
+    <Panel
+      key={person.id}
+      person={person}
+      mode={mode}
+      now={now}
+      onClose={onClose}
+      onDecide={onDecide}
+      thread={thread}
+      threadLoading={threadLoading}
+      threadBusy={threadBusy}
+      onReply={onReply}
+      onToggleStatus={onToggleStatus}
+    />
+  )
 }
 
 function Panel({
@@ -61,12 +89,22 @@ function Panel({
   now,
   onClose,
   onDecide,
+  thread,
+  threadLoading,
+  threadBusy,
+  onReply,
+  onToggleStatus,
 }: {
   person: Person
   mode: PeopleMode
   now: number
   onClose: () => void
   onDecide: (id: string, action: PersonAction, reason: string) => void
+  thread: AdminSupportThread | null
+  threadLoading: boolean
+  threadBusy: boolean
+  onReply?: (body: string) => void
+  onToggleStatus?: (closed: boolean) => void
 }) {
   const t = useTranslations('admin.people')
   const format = useFormatter()
@@ -189,6 +227,23 @@ function Panel({
         </div>
       )}
 
+      {/* Messages LEADS with the conversation: the reply is the work, and the
+         account facts below it are the context an operator reads while
+         writing one. It sat last until testing showed the composer clipped
+         under the panel's sticky footer, which made replying a scroll hunt
+         past six sections. */}
+      {mode === 'messages' && (
+        <PanelSection label={t('panel.conversation')}>
+          <SupportConversation
+            thread={thread}
+            loading={threadLoading}
+            busy={threadBusy}
+            onReply={onReply ?? (() => {})}
+            onToggleStatus={onToggleStatus ?? (() => {})}
+          />
+        </PanelSection>
+      )}
+
       <PanelSection label={t('panel.balance')}>
         <p className="text-[1.75rem] leading-none font-semibold tracking-[-0.02em] text-ink-900 tabular-nums">
           {p.balancePoints.toLocaleString()}
@@ -228,29 +283,6 @@ function Panel({
         </PanelFacts>
       </PanelSection>
 
-      {/* Messages leads with the thread, and says plainly that replying is
-          not wired yet rather than rendering an invented transcript. An
-          operator reading fake messages from a real user is worse than an
-          empty panel. */}
-      {mode === 'messages' && (
-        <PanelSection label={t('panel.conversation')}>
-          {p.lastMessage ? (
-            <blockquote className="border-l-2 border-ink-300 pl-3 text-[0.8125rem] leading-relaxed text-ink-600">
-              {p.lastMessage}
-              {p.lastMessageAt && (
-                <footer className="mt-1 text-[0.6875rem] text-ink-400">
-                  {format.relativeTime(new Date(p.lastMessageAt), now)}
-                </footer>
-              )}
-            </blockquote>
-          ) : (
-            <p className="text-[0.8125rem] text-ink-400">{t('noMessages')}</p>
-          )}
-          <p className="mt-3 rounded-(--radius-input) border border-dashed border-ink-200 px-3 py-2.5 text-[0.75rem] leading-relaxed text-ink-500">
-            {t('chatSoonBody')}
-          </p>
-        </PanelSection>
-      )}
     </DetailPanel>
   )
 }

@@ -811,7 +811,8 @@
     "support": {
       "help": "Help & Support",
       "privacy": "Privacy Policy",
-      "terms": "Terms of Service"
+      "terms": "Terms of Service",
+      "helpHint": "A person reads every message."
     },
     "danger": {
       "delete": "Delete account",
@@ -901,7 +902,6 @@
     "close": "Close",
     "back": "Back",
     "contactSupport": "Contact support",
-    "supportComingSoon": "In-app support chat is coming soon. We'll let you know right here as soon as it's ready.",
     "tabs": {
       "label": "Filter by time",
       "today": "Today",
@@ -916,7 +916,8 @@
     "actions": {
       "readAll": "Read all",
       "clearAll": "Clear all"
-    }
+    },
+    "openSupport": "Open the conversation"
   },
   "personal": {
     "title": "Personal information",
@@ -1241,10 +1242,22 @@
     }
   },
   "support": {
-    "chat": {
-      "label": "Support chat",
-      "soonTitle": "Chat support is on the way",
-      "soonBody": "We're setting up live chat. In the meantime, anything urgent about your balance or a payout will reach you in your notifications."
+    "title": "Support",
+    "subtitle": "We usually reply within a day.",
+    "back": "Back to profile",
+    "placeholder": "Write a message…",
+    "send": "Send",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "empty": {
+      "title": "How can we help?",
+      "body": "Tell us what is going on and a person will read it. Your balance, your plan and any withdrawal you have requested are already in front of us — you do not need to explain them."
+    },
+    "ask": {
+      "hold": "Why is my withdrawal on hold?",
+      "upgrade": "How do plans work?",
+      "ads": "I cannot watch ads",
+      "payout": "My payout has not arrived"
     }
   },
   "admin": {
@@ -1438,7 +1451,6 @@
         "system": "Raised by the system",
         "admin": "Raised by you"
       },
-      "chatSoonBody": "Replying opens here once your chatbot is connected. Nothing is shown until it is real.",
       "errors": {
         "dismiss": "Dismiss"
       },
@@ -1468,7 +1480,7 @@
         "contact": "Contact",
         "email": "Email",
         "phone": "Phone",
-        "conversation": "Latest message"
+        "conversation": "Conversation"
       },
       "confirm": {
         "flag": "Flag {name}. They keep earning, but every payout of theirs stops for review first.",
@@ -1492,7 +1504,13 @@
     },
     "messages": {
       "title": "Messages",
-      "description": "Anybody who writes in appears here. Select them to open the conversation."
+      "description": "Anybody who writes in appears here. Select them to open the conversation.",
+      "loading": "Opening the conversation…",
+      "noMessages": "No messages yet.",
+      "replyPlaceholder": "Write a reply…",
+      "reply": "Send reply",
+      "markDone": "Mark as done",
+      "reopen": "Reopen"
     },
     "ads": {
       "title": "Ads & surveys",

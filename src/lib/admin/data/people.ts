@@ -21,13 +21,13 @@ import type { Person } from '../types'
  * service key stays for the writes, where the acting admin's identity has to
  * come from somewhere the browser cannot reach.
  *
- * WHAT IS DELIBERATELY ABSENT: `unread`, `lastMessage`, `lastMessageAt`.
- * There is no message backend yet — the support chat is still waiting on the
- * operator's chatbot — so those fields are left undefined rather than filled
- * with a zero that would read as "nobody has written in".
+ * THE MESSAGE COLUMNS come from the same function, left-joined off the
+ * support thread. They are null for anybody who has never written, which is
+ * exactly what the Users and Flagged cards want — undefined rather than a
+ * zero that would read as "nobody has written in".
  */
 
-export type PeopleScope = 'all' | 'flagged'
+export type PeopleScope = 'all' | 'flagged' | 'messages'
 
 /** One row as `admin_list_people` returns it. */
 type PersonRow = {
@@ -47,6 +47,9 @@ type PersonRow = {
   referrals: number
   last_active_at: string
   paid_out_ghs: number | string
+  last_message: string | null
+  last_message_at: string | null
+  unread: number | null
 }
 
 function toPerson(row: PersonRow): Person {
@@ -70,6 +73,9 @@ function toPerson(row: PersonRow): Person {
     referrals: row.referrals,
     lastActiveAt: row.last_active_at,
     paidOutGhs: Number(row.paid_out_ghs),
+    lastMessage: row.last_message ?? undefined,
+    lastMessageAt: row.last_message_at ?? undefined,
+    unread: row.unread ?? undefined,
   }
 }
 
@@ -105,4 +111,18 @@ export async function countFlaggedAccounts(): Promise<number> {
     .or('flagged_at.not.is.null,disabled_at.not.is.null')
 
   return error ? 0 : (count ?? 0)
+}
+
+
+/**
+ * People waiting on a reply, for the Messages badge.
+ *
+ * Counts PEOPLE and not messages: somebody who asks three questions is one
+ * conversation to answer, and a badge reading "3" for one person would send
+ * an operator looking for two more.
+ */
+export async function countUnreadSupport(): Promise<number> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('admin_count_unread_support')
+  return error ? 0 : (data ?? 0)
 }

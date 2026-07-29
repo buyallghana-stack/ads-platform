@@ -1,10 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-
 import { Megaphone, MessageCircle, ShieldAlert, Wallet } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
+import { Link } from '@/i18n/navigation'
 import type { NotificationRow, NotificationType } from '@/lib/notifications/data'
 import { cn } from '@/lib/cn'
 
@@ -40,6 +39,15 @@ const TYPE_META: Record<
     chip: 'border-danger-500/25 bg-danger-50 text-danger-600',
     dot: 'bg-danger-500',
   },
+  /* A reply from support is informational, not an alarm — brand blue, and
+     deliberately NOT the danger red the flag card owns. The one colour that
+     means "something is wrong with your account" has to keep meaning only
+     that. */
+  support: {
+    Icon: MessageCircle,
+    chip: 'border-brand-600/25 bg-brand-50 text-brand-600',
+    dot: 'bg-brand-600',
+  },
 }
 
 export function NotificationCard({
@@ -55,10 +63,6 @@ export function NotificationCard({
   const format = useFormatter()
   const { Icon, chip, dot } = TYPE_META[notification.type]
   const unread = notification.read_at === null
-
-  // Local-only: the in-app support chat is a later dependency, so the button
-  // is honest about that rather than pretending to open something.
-  const [supportOpen, setSupportOpen] = useState(false)
 
   return (
     <div className="flex gap-3 px-1 py-3.5">
@@ -89,25 +93,36 @@ export function NotificationCard({
 
         <p className="mt-1 text-[0.8125rem] leading-relaxed text-ink-500">{notification.body}</p>
 
-        {notification.type === 'flag' &&
-          (supportOpen ? (
-            <p className="mt-2.5 rounded-(--radius-input) border border-danger-500/20 bg-danger-50 px-3 py-2 text-[0.75rem] leading-relaxed text-danger-700">
-              {t('supportComingSoon')}
-            </p>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setSupportOpen(true)}
-              className={cn(
-                'mt-2.5 inline-flex items-center gap-1.5 rounded-full border border-danger-500/30 bg-surface px-3 py-1.5',
-                'text-[0.75rem] font-medium text-danger-600 transition-colors',
-                'hover:bg-danger-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-500',
-              )}
-            >
-              <MessageCircle aria-hidden className="size-3.5" />
-              {t('contactSupport')}
-            </button>
-          ))}
+        {/* `about` travels with the first message, so support opens the
+            conversation already knowing which notification brought them —
+            their first question is always "which one?". */}
+        {notification.type === 'flag' && (
+          <Link
+            href={{ pathname: '/support', query: { about: 'flag' } }}
+            className={cn(
+              'mt-2.5 inline-flex items-center gap-1.5 rounded-full border border-danger-500/30 bg-surface px-3 py-1.5',
+              'text-[0.75rem] font-medium text-danger-600 transition-colors',
+              'hover:bg-danger-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-500',
+            )}
+          >
+            <MessageCircle aria-hidden className="size-3.5" />
+            {t('contactSupport')}
+          </Link>
+        )}
+
+        {notification.type === 'support' && (
+          <Link
+            href="/support"
+            className={cn(
+              'mt-2.5 inline-flex items-center gap-1.5 rounded-full border border-brand-600/30 bg-surface px-3 py-1.5',
+              'text-[0.75rem] font-medium text-brand-700 transition-colors',
+              'hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600',
+            )}
+          >
+            <MessageCircle aria-hidden className="size-3.5" />
+            {t('openSupport')}
+          </Link>
+        )}
       </div>
     </div>
   )

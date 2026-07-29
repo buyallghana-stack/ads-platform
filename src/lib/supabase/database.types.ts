@@ -1376,6 +1376,66 @@ export type Database = {
         }
         Relationships: []
       }
+      support_messages: {
+        Row: {
+          author: Database["public"]["Enums"]["support_author"]
+          author_id: string | null
+          body: string
+          context: Json | null
+          created_at: string
+          id: string
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          author: Database["public"]["Enums"]["support_author"]
+          author_id?: string | null
+          body: string
+          context?: Json | null
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          author?: Database["public"]["Enums"]["support_author"]
+          author_id?: string | null
+          body?: string
+          context?: Json | null
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      support_threads: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          last_message_at: string
+          opened_at: string
+          status: Database["public"]["Enums"]["support_thread_status"]
+          user_id: string
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          last_message_at?: string
+          opened_at?: string
+          status?: Database["public"]["Enums"]["support_thread_status"]
+          user_id: string
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          last_message_at?: string
+          opened_at?: string
+          status?: Database["public"]["Enums"]["support_thread_status"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_devices: {
         Row: {
           fingerprint: string
@@ -1642,6 +1702,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_count_unread_support: { Args: never; Returns: number }
       admin_daily_money: {
         Args: { p_days?: number }
         Returns: {
@@ -1724,6 +1785,10 @@ export type Database = {
       }
       admin_get_ad: {
         Args: { p_ad_id: string; p_admin_id: string }
+        Returns: Json
+      }
+      admin_get_support_thread: {
+        Args: { p_admin: string; p_user: string }
         Returns: Json
       }
       admin_list_ads: {
@@ -1824,11 +1889,14 @@ export type Database = {
           last_active_at: string
           lifetime_points: number
           name: string
+          last_message: string
+          last_message_at: string
           paid_out_ghs: number
           phone: string
           referrals: number
           status: string
           tier: string
+          unread: number
         }[]
       }
       admin_list_plans: {
@@ -1887,6 +1955,10 @@ export type Database = {
       admin_overview_metrics: {
         Args: never
         Returns: Json
+      }
+      admin_mark_support_read: {
+        Args: { p_admin: string; p_user: string }
+        Returns: number
       }
       admin_record_advertiser_payment: {
         Args: {
@@ -2011,6 +2083,30 @@ export type Database = {
           to: "tiers"
           isOneToOne: true
           isSetofReturn: false
+        }
+      }
+      admin_send_support_message: {
+        Args: { p_admin: string; p_body: string; p_user: string }
+        Returns: {
+          author: Database["public"]["Enums"]["support_author"]
+          author_id: string | null
+          body: string
+          context: Json | null
+          created_at: string
+          id: string
+          read_at: string | null
+          user_id: string
+        }
+      }
+      admin_set_support_status: {
+        Args: { p_admin: string; p_closed: boolean; p_user: string }
+        Returns: {
+          closed_at: string | null
+          closed_by: string | null
+          last_message_at: string
+          opened_at: string
+          status: Database["public"]["Enums"]["support_thread_status"]
+          user_id: string
         }
       }
       admin_set_config: {
@@ -2701,6 +2797,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      mark_support_read: { Args: never; Returns: number }
       mask_payout_value: { Args: { p_value: string }; Returns: string }
       normalise_phone: { Args: { p_phone: string }; Returns: string }
       precheck_signup_fraud: {
@@ -2893,6 +2990,19 @@ export type Database = {
       }
       revoke_other_sessions: { Args: never; Returns: number }
       revoke_session: { Args: { p_session_id: string }; Returns: boolean }
+      send_support_message: {
+        Args: { p_body: string; p_context?: Json }
+        Returns: {
+          author: Database["public"]["Enums"]["support_author"]
+          author_id: string | null
+          body: string
+          context: Json | null
+          created_at: string
+          id: string
+          read_at: string | null
+          user_id: string
+        }
+      }
       set_payout_details: {
         Args: {
           p_account_name?: string
@@ -3027,7 +3137,7 @@ export type Database = {
         | "redemption_request"
         | "redemption_refund"
         | "admin_adjustment"
-      notification_type: "announcement" | "payout" | "flag"
+      notification_type: "announcement" | "payout" | "flag" | "support"
       payout_method: "crypto" | "mobile_money"
       question_condition_mode: "all" | "any"
       redemption_status:
@@ -3041,6 +3151,8 @@ export type Database = {
         | "disputed"
       referral_status: "pending" | "activated" | "rejected"
       risk_level: "low" | "medium" | "high" | "critical"
+      support_author: "user" | "admin"
+      support_thread_status: "open" | "closed"
       subscription_payment_method: "korapay" | "crypto" | "paystack"
       subscription_payment_status:
         | "pending"
@@ -3236,7 +3348,7 @@ export const Constants = {
         "redemption_refund",
         "admin_adjustment",
       ],
-      notification_type: ["announcement", "payout", "flag"],
+      notification_type: ["announcement", "payout", "flag", "support"],
       payout_method: ["crypto", "mobile_money"],
       question_condition_mode: ["all", "any"],
       redemption_status: [
@@ -3251,6 +3363,8 @@ export const Constants = {
       ],
       referral_status: ["pending", "activated", "rejected"],
       risk_level: ["low", "medium", "high", "critical"],
+      support_author: ["user", "admin"],
+      support_thread_status: ["open", "closed"],
       subscription_payment_method: ["korapay", "crypto", "paystack"],
       subscription_payment_status: [
         "pending",

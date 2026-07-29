@@ -811,7 +811,8 @@
     "support": {
       "help": "Aide et assistance",
       "privacy": "Politique de confidentialité",
-      "terms": "Conditions d'utilisation"
+      "terms": "Conditions d'utilisation",
+      "helpHint": "Une personne lit chaque message."
     },
     "danger": {
       "delete": "Supprimer le compte",
@@ -901,7 +902,6 @@
     "close": "Fermer",
     "back": "Retour",
     "contactSupport": "Contacter le support",
-    "supportComingSoon": "La messagerie d'assistance intégrée arrive bientôt. Nous vous préviendrons ici dès qu'elle sera prête.",
     "tabs": {
       "label": "Filtrer par période",
       "today": "Aujourd'hui",
@@ -916,7 +916,8 @@
     "actions": {
       "readAll": "Tout lire",
       "clearAll": "Tout effacer"
-    }
+    },
+    "openSupport": "Ouvrir la conversation"
   },
   "personal": {
     "title": "Informations personnelles",
@@ -1241,10 +1242,22 @@
     }
   },
   "support": {
-    "chat": {
-      "label": "Chat d’assistance",
-      "soonTitle": "Le chat d’assistance arrive",
-      "soonBody": "Nous mettons en place le chat en direct. En attendant, tout message urgent concernant votre solde ou un retrait vous parviendra dans vos notifications."
+    "title": "Assistance",
+    "subtitle": "Nous répondons généralement sous 24 heures.",
+    "back": "Retour au profil",
+    "placeholder": "Écrivez un message…",
+    "send": "Envoyer",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "empty": {
+      "title": "Comment pouvons-nous vous aider ?",
+      "body": "Dites-nous ce qui se passe et une personne le lira. Votre solde, votre formule et vos demandes de retrait sont déjà sous nos yeux — inutile de les expliquer."
+    },
+    "ask": {
+      "hold": "Pourquoi mon retrait est-il en attente ?",
+      "upgrade": "Comment fonctionnent les formules ?",
+      "ads": "Je ne peux pas regarder de publicités",
+      "payout": "Mon paiement n'est pas arrivé"
     }
   },
   "admin": {
@@ -1438,7 +1451,6 @@
         "system": "Signalé par le système",
         "admin": "Signalé par vous"
       },
-      "chatSoonBody": "La réponse s'ouvrira ici une fois votre chatbot connecté. Rien n'est affiché tant que ce n'est pas réel.",
       "errors": {
         "dismiss": "Fermer"
       },
@@ -1468,7 +1480,7 @@
         "contact": "Contact",
         "email": "E-mail",
         "phone": "Téléphone",
-        "conversation": "Dernier message"
+        "conversation": "Conversation"
       },
       "confirm": {
         "flag": "Signaler {name}. La personne continue de gagner, mais chacun de ses retraits passe d'abord en révision.",
@@ -1492,7 +1504,13 @@
     },
     "messages": {
       "title": "Messages",
-      "description": "Toute personne qui écrit apparaît ici. Sélectionnez-la pour ouvrir la conversation."
+      "description": "Toute personne qui écrit apparaît ici. Sélectionnez-la pour ouvrir la conversation.",
+      "loading": "Ouverture de la conversation…",
+      "noMessages": "Aucun message pour l'instant.",
+      "replyPlaceholder": "Écrivez une réponse…",
+      "reply": "Envoyer la réponse",
+      "markDone": "Marquer comme traité",
+      "reopen": "Rouvrir"
     },
     "ads": {
       "title": "Publicités et sondages",
