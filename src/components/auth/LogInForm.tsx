@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Mail, UserRound } from 'lucide-react'
@@ -13,6 +13,7 @@ import { Checkbox } from '@/components/ui/Checkbox'
 import { PasswordField } from '@/components/ui/PasswordField'
 import { TextField } from '@/components/ui/TextField'
 import { logInAction } from '@/app/[locale]/(auth)/actions'
+import { deviceFingerprint, warmFingerprint } from '@/lib/fraud/fingerprint'
 import { Link, useRouter } from '@/i18n/navigation'
 import { logInSchema, type LogInInput } from '@/lib/validation/auth'
 import { useAuthErrorMessage } from '@/lib/useAuthErrorMessage'
@@ -39,10 +40,20 @@ export function LogInForm() {
 
   const password = watch('password') ?? ''
 
+  // Fetches and computes the device signature while the form is being filled,
+  // so submitting does not wait on a download. See `warmFingerprint`.
+  useEffect(() => {
+    warmFingerprint()
+  }, [])
+
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null)
 
-    const result = await logInAction({ email: values.email, password: values.password })
+    const result = await logInAction({
+      email: values.email,
+      password: values.password,
+      fingerprint: await deviceFingerprint(),
+    })
 
     if (result.ok) {
       /*

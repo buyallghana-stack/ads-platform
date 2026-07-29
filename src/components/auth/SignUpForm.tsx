@@ -13,6 +13,8 @@ import { Checkbox } from '@/components/ui/Checkbox'
 import { PasswordField } from '@/components/ui/PasswordField'
 import { TextField } from '@/components/ui/TextField'
 import { signUpAction } from '@/app/[locale]/(auth)/actions'
+import { TurnstileWidget } from '@/components/auth/TurnstileWidget'
+import { deviceFingerprint, warmFingerprint } from '@/lib/fraud/fingerprint'
 import { Link, useRouter } from '@/i18n/navigation'
 import { useAuthErrorMessage } from '@/lib/useAuthErrorMessage'
 import { signUpSchema, type SignUpInput } from '@/lib/validation/auth'
@@ -93,6 +95,17 @@ export function SignUpForm() {
     }
   }, [setValue])
 
+  // Fetches and computes the device signature while the form is being filled,
+  // so submitting does not wait on a download. See `warmFingerprint`.
+  useEffect(() => {
+    warmFingerprint()
+  }, [])
+
+  /* Undefined until the challenge solves, or when no site key is configured
+     and the widget renders nothing at all. The SERVER decides whether it was
+     required — a client that simply omits it must not be able to opt out. */
+  const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined)
+
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null)
 
@@ -103,6 +116,11 @@ export function SignUpForm() {
       password: values.password,
       referralCode: values.referralCode || undefined,
       acceptTerms: true,
+      /* Awaited rather than fired alongside, because the signal is worth
+         nothing if it arrives after the account. It cannot hang the form —
+         `deviceFingerprint` resolves to undefined on its own timeout. */
+      fingerprint: await deviceFingerprint(),
+      turnstileToken: turnstileToken ?? undefined,
     })
 
     if (result.ok) {
@@ -236,6 +254,13 @@ export function SignUpForm() {
               })}
             />
           )}
+        />
+
+        {/* Above the button, and rendering nothing at all until the operator
+            sets a site key — no empty box and no layout shift meanwhile. */}
+        <TurnstileWidget
+          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+          onToken={setTurnstileToken}
         />
 
         <Button type="submit" size="lg" fullWidth loading={isSubmitting} className="mt-1.5">

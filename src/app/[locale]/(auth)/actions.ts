@@ -2,6 +2,7 @@
 
 import { clearLoginVerified, isTwoFactorEnabled } from '@/lib/security/login-2fa'
 import { recordSessionContext } from '@/lib/security/session-record'
+import { verifyTurnstile } from '@/lib/fraud/turnstile'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { landingFor } from '@/lib/auth/landing'
@@ -37,6 +38,10 @@ export async function signUpAction(formData: {
   password: string
   referralCode?: string
   acceptTerms: boolean
+  /** Device fingerprint from the browser. Optional — see signUpSchema. */
+  fingerprint?: string
+  /** Turnstile token. Only checked when the operator has set keys. */
+  turnstileToken?: string
 }): Promise<ActionResult> {
   const parsed = signUpSchema.safeParse(formData)
   if (!parsed.success) {
@@ -47,6 +52,18 @@ export async function signUpAction(formData: {
 
   const { ip, userAgent, country } = await getRequestContext()
   const admin = createAdminClient()
+
+  /*
+    The bot check goes FIRST, before any database work and before the account
+    exists — the whole point of it is to stop automated registration cheaply,
+    and doing it after two round trips concedes most of that.
+
+    A no-op unless the operator has set Turnstile keys; see `turnstile.ts`.
+  */
+  const bot = await verifyTurnstile(data.turnstileToken, ip)
+  if (!bot.ok) {
+    return { ok: false, errorKey: 'botCheckFailed', field: 'turnstileToken' }
+  }
 
   /*
     Blocking fraud checks run BEFORE the account exists. Otherwise every
@@ -122,6 +139,21 @@ export async function signUpAction(formData: {
   })
 
   if (signUpError || !signUp.user) {
+    /*
+      Supabase's built-in mailer allows only a few messages an hour, and a
+      signup whose confirmation email cannot be sent fails whole — GoTrue rolls
+      the account back, so there is nothing half-created to recover. Verified
+      while testing this file: three attempts, three 429s, and no rows left in
+      auth.users afterwards.
+
+      It gets its own message because the raw one ("email rate limit exceeded")
+      tells a person nothing about the only move they have, which is to wait.
+      Until Resend is wired this is a real launch-day failure mode, not a
+      theoretical one.
+    */
+    if (signUpError?.code === 'over_email_send_rate_limit' || signUpError?.status === 429) {
+      return { ok: false, errorKey: 'emailSendLimit' }
+    }
     return { ok: false, errorKey: 'generic', message: signUpError?.message }
   }
 
@@ -144,6 +176,7 @@ export async function signUpAction(formData: {
       p_ip: ip ?? undefined,
       p_user_agent: userAgent ?? undefined,
       p_country: country ?? undefined,
+      p_fingerprint: data.fingerprint || undefined,
     })
 
     await admin.rpc('evaluate_signup_fraud', {
@@ -151,7 +184,12 @@ export async function signUpAction(formData: {
       p_email: data.email,
       p_phone: data.phone,
       p_ip: ip ?? undefined,
-      p_fingerprint: undefined, // ThumbmarkJS lands with the fraud client work
+      // Wired 2026-07-29. This argument has existed since the fraud layer was
+      // built and was passed `undefined` the whole time, which left
+      // `device_multi_account` (weight 30) and `self_referral_suspected` (35)
+      // unable to fire at all — the two highest-weighted device checks on a
+      // platform whose main fraud is one person running many accounts.
+      p_fingerprint: data.fingerprint || undefined,
     })
 
     if (referrerId && data.referralCode) {
@@ -159,7 +197,10 @@ export async function signUpAction(formData: {
         p_referee_id: userId,
         p_code: data.referralCode,
         p_ip: ip ?? undefined,
-        p_fingerprint: undefined,
+        // Referrer and referee on one device is self-referral, and it is
+        // exactly what a referral bonus invites. This is the argument that
+        // lets `apply_referral_code` see it.
+        p_fingerprint: data.fingerprint || undefined,
       })
     }
   } catch {
@@ -191,6 +232,8 @@ export async function signUpAction(formData: {
 export async function logInAction(formData: {
   email: string
   password: string
+  /** Device fingerprint from the browser. Optional — see signUpSchema. */
+  fingerprint?: string
 }): Promise<ActionResult> {
   const parsed = logInSchema.safeParse(formData)
   if (!parsed.success) {
@@ -241,6 +284,10 @@ export async function logInAction(formData: {
         p_ip: ip ?? undefined,
         p_user_agent: userAgent ?? undefined,
         p_country: country ?? undefined,
+        // Signals on SIGN-IN too, not just signup. Somebody who registers ten
+        // accounts from ten places and then farms them all from one phone is
+        // invisible to a signup-only check, and that is the cheaper attack.
+        p_fingerprint: parsed.data.fingerprint || undefined,
       })
     } catch {
       // A missing login signal must never block a login.

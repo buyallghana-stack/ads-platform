@@ -56,6 +56,14 @@ export const privacyFr: LegalDoc = {
           text: "Informations provenant de tiers : la confirmation, par nos prestataires de paiement, qu'un paiement ou un versement a réussi ou échoué.",
         },
         {
+          kind: 'p',
+          text: "Une signature d'appareil : lors de votre inscription ou de votre connexion, votre navigateur calcule un code court à partir de caractéristiques générales de votre appareil et de votre navigateur — taille d'écran, langue, fuseau horaire, polices disponibles. C'est un code à sens unique, pas un nom, et il est calculé sur votre appareil : les caractéristiques elles-mêmes ne nous sont jamais envoyées, seulement le code. Nous l'utilisons dans un seul but, décrit à la section 4.",
+        },
+        {
+          kind: 'p',
+          text: "Une vérification anti-robot : pour empêcher les inscriptions automatisées, nous pouvons afficher un défi Cloudflare Turnstile. Cloudflare reçoit votre adresse IP et des informations de base sur la requête pour y répondre.",
+        },
+        {
           kind: 'note',
           text: "Nous ne collectons pas vos coordonnées bancaires complètes et ne demandons jamais votre code PIN mobile money ni les clés privées de votre portefeuille. Aucun interlocuteur légitime ne vous les demandera.",
         },
@@ -89,6 +97,14 @@ export const privacyFr: LegalDoc = {
         {
           kind: 'p',
           text: "Nous effectuons des contrôles automatisés sur l'activité — par exemple des signaux sur l'appareil et le réseau utilisés, et la manière dont les publicités sont regardées et validées. Ces contrôles peuvent entraîner l'annulation de points, le signalement d'un compte ou la suspension d'un retrait.",
+        },
+        {
+          kind: 'p',
+          text: "La signature d'appareil décrite à la section 2 sert uniquement à repérer un même appareil derrière plusieurs comptes, ou une personne qui se parraine elle-même. Elle ne sert pas à vous suivre sur d'autres sites, n'est pas partagée et ne détermine pas ce que vous voyez.",
+        },
+        {
+          kind: 'note',
+          text: "Aucune décision importante n'est prise par une machine seule. Un contrôle automatisé peut signaler un compte ou retenir un versement ; une personne décide de la suite, et vous pouvez demander un réexamen.",
         },
         {
           kind: 'p',

@@ -372,7 +372,9 @@
       "referralNotFound": "Ce code de parrainage n'existe pas",
       "invalidCredentials": "Cet e-mail ou ce mot de passe n'est pas correct",
       "emailNotVerified": "Veuillez d'abord vérifier votre adresse e-mail",
-      "identityBlocked": "Cette adresse e-mail ou ce numéro de téléphone ne peut pas servir à créer un compte."
+      "identityBlocked": "Cette adresse e-mail ou ce numéro de téléphone ne peut pas servir à créer un compte.",
+      "botCheckFailed": "Cette vérification a échoué. Veuillez réessayer.",
+      "emailSendLimit": "Nous n'avons pas pu envoyer votre e-mail de confirmation pour le moment. Veuillez réessayer dans quelques minutes."
     }
   },
   "legal": {

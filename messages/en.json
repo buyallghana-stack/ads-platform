@@ -372,7 +372,9 @@
       "referralNotFound": "That referral code does not exist",
       "invalidCredentials": "That email or password is not correct",
       "emailNotVerified": "Please verify your email address first",
-      "identityBlocked": "This email address or phone number cannot be used to open an account."
+      "identityBlocked": "This email address or phone number cannot be used to open an account.",
+      "botCheckFailed": "That check did not pass. Please try again.",
+      "emailSendLimit": "We could not send your confirmation email just now. Please try again in a few minutes."
     }
   },
   "legal": {

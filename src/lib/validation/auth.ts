@@ -54,12 +54,29 @@ export const signUpSchema = z.object({
     .refine((v) => v === '' || /^[0-9ABCDEFGHJKMNPQRSTVWXYZ]{8}$/.test(v), 'referralInvalid')
     .optional(),
   acceptTerms: z.literal(true, { message: 'termsRequired' }),
+  /*
+    The device fingerprint, taken in the browser. OPTIONAL and always will be:
+    privacy browsers break the APIs it needs on purpose, and a fraud control
+    that stops a real person registering costs more than it saves. Absent
+    simply means the device checks cannot speak for this signup.
+
+    Bounded because it is attacker-supplied, like every other field here — it
+    is a hash on the way in and nothing downstream treats it as trusted.
+  */
+  fingerprint: z.string().trim().max(128).optional(),
+  /** Cloudflare Turnstile token. Only required when the operator has set
+   *  keys — see `turnstile.ts`; the server decides, not this schema. */
+  turnstileToken: z.string().max(4096).optional(),
 })
 
 export const logInSchema = z.object({
   email,
   password: z.string().min(1, 'passwordRequired'),
   rememberMe: z.boolean().optional(),
+  /** See the note on signUpSchema. Recorded against the sign-in signal so a
+   *  device that collects accounts is visible even when each one was made
+   *  somewhere else. */
+  fingerprint: z.string().trim().max(128).optional(),
 })
 
 export const forgotPasswordSchema = z.object({ email })

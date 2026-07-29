@@ -18,6 +18,7 @@
     "@hookform/resolvers": "^5.4.0",
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.8",
+    "@thumbmarkjs/thumbmarkjs": "^1.10.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.25.0",
     "next": "16.2.11",

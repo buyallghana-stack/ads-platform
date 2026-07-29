@@ -61,6 +61,14 @@ export const privacyEn: LegalDoc = {
         },
         { kind: 'p', text: 'Information from others: confirmation from payment and payout providers that a payment or disbursement succeeded or failed.' },
         {
+          kind: 'p',
+          text: 'A device signature: when you register or sign in, your browser calculates a short code from general characteristics of your device and browser — things like screen size, language, time zone and the fonts available. It is a one-way code, not a name, and it is calculated on your device: the characteristics themselves are never sent to us, only the code. We use it for one purpose, described in section 4.',
+        },
+        {
+          kind: 'p',
+          text: 'A bot check: to stop automated sign-ups we may show a challenge from Cloudflare Turnstile. Cloudflare receives your IP address and basic request information in order to answer it.',
+        },
+        {
           kind: 'note',
           text: 'We do not collect your full card details, and we do not ask for your mobile money PIN or your wallet’s private keys. Nobody legitimate will ever ask you for those.',
         },
@@ -94,6 +102,14 @@ export const privacyEn: LegalDoc = {
         {
           kind: 'p',
           text: 'We run automated checks on activity — for example, signals about the device and network used, and patterns in how ads are watched and answered. These checks can result in points being reversed, an account being flagged for review, or a payout being held.',
+        },
+        {
+          kind: 'p',
+          text: 'The device signature described in section 2 is used only to notice when one device is behind several accounts, or when somebody refers themselves. It is not used to track you across other websites, it is not shared, and it is not used to decide what you see.',
+        },
+        {
+          kind: 'note',
+          text: 'No decision that matters is made by a machine alone. An automated check can flag an account or hold a payout; a person decides what happens next, and you can ask us to look again.',
         },
         {
           kind: 'p',

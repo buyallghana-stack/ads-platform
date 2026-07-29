@@ -17,6 +17,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.110.8
         version: 2.110.8
+      '@thumbmarkjs/thumbmarkjs':
+        specifier: ^1.10.1
+        version: 1.10.1
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1120,6 +1123,9 @@ packages:
 
   '@tailwindcss/postcss@4.3.3':
     resolution: {integrity: sha512-JTSZZGQi1AyKirbLN3azmjVzef92tcX7h+iSqPdaeStyFpGpDlKvvpxeOE8njhbUanbRwr3z8DyzhICWnMtQeg==}
+
+  '@thumbmarkjs/thumbmarkjs@1.10.1':
+    resolution: {integrity: sha512-BH7HP3g+NeIXgcYDxtNjx2wfO5cHaH6DjkoDzi4adYe0fknkQZABtKag+2j75p5p8mGMhl9mq2Ee5m1UosYPUw==}
 
   '@tybys/wasm-util@0.10.3':
     resolution: {integrity: sha512-F3fo1MYrRJYL3zER0OUOmkutjr1Vp23m7OsSgp7nq4SP6OqX6C/56XFIPAl5bt3zaBRjmW7SGz3u/6LwFpYcOg==}
@@ -3825,6 +3831,8 @@ snapshots:
       '@tailwindcss/oxide': 4.3.3
       postcss: 8.5.21
       tailwindcss: 4.3.3
+
+  '@thumbmarkjs/thumbmarkjs@1.10.1': {}
 
   '@tybys/wasm-util@0.10.3':
     dependencies:
