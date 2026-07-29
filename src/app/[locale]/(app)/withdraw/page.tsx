@@ -5,6 +5,7 @@ import { setRequestLocale } from 'next-intl/server'
 import { WithdrawWizard, type WithdrawAccount } from '@/components/withdraw/WithdrawWizard'
 import { redirect } from '@/i18n/navigation'
 import { getSessionUser } from '@/lib/auth/session'
+import { getCryptoQuote } from '@/lib/pricing/quote'
 import { getResolvedBenefits } from '@/lib/subscriptions/data'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
@@ -74,6 +75,13 @@ export default async function WithdrawPage({
       .eq('user_id', user!.id),
   ])
 
+  /* The coin the user would actually be paid in, kept separately because the
+     account's title is display text ("USDT · TRC20") and pricing needs the
+     code. Null when they have no crypto account, which is also when no quote
+     is needed. */
+  const cryptoCoin =
+    (detailsRes.data ?? []).find((r) => r.method === 'crypto' && r.coin)?.coin?.code ?? null
+
   const accounts: WithdrawAccount[] = (detailsRes.data ?? []).flatMap((r): WithdrawAccount[] => {
     if (r.method === 'mobile_money' && r.provider) {
       return [
@@ -98,9 +106,17 @@ export default async function WithdrawPage({
     return []
   })
 
+  /* Null when a rate is missing or stale. The wizard shows no dollar figure
+     at all in that case — the defect this replaced was a hardcoded 10.45
+     GHS/USD, about 12% adrift of the real rate and in the direction that
+     promises more than gets sent. Showing nothing is worse UX and better
+     honesty. */
+  const quote = await getCryptoQuote(cryptoCoin)
+
   return (
     <WithdrawWizard
       balance={status?.balance ?? 0}
+      quote={quote}
       minPoints={benefits?.redemptionMinimumPoints ?? 5000}
       pointsPerCurrencyUnit={Number(rateRow?.value ?? 1000)}
       tierName={benefits?.name ?? ''}

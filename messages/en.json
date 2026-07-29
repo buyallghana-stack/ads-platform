@@ -711,7 +711,8 @@
         "half": "Half",
         "max": "Max"
       },
-      "usdtEstimate": "≈ {usd} USDT at today's indicative rate (GHS {rate} / USD)."
+      "coinEstimate": "≈ {coinAmount} {coin} (about ${usd}) at today's indicative rate, GHS {rate} to the dollar.",
+      "estimateUnavailable": "We cannot show a crypto estimate right now — today's exchange rate has not come through. Your withdrawal is recorded in cedis and the coin amount is worked out when it is sent."
     },
     "usdtNotice": "USDT amounts are estimates. Your points convert to cedis at the fixed rate; the cedi–dollar rate updates daily, and the final USDT amount is calculated when your payout is sent — it may differ slightly from this estimate.",
     "errors": {

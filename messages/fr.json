@@ -711,7 +711,8 @@
         "half": "Moitié",
         "max": "Max"
       },
-      "usdtEstimate": "≈ {usd} USDT au taux indicatif du jour (GHS {rate} / USD)."
+      "coinEstimate": "≈ {coinAmount} {coin} (environ {usd} $) au taux indicatif du jour, GHS {rate} pour un dollar.",
+      "estimateUnavailable": "Nous ne pouvons pas afficher d'estimation en crypto pour le moment — le taux du jour n'est pas disponible. Votre retrait est enregistré en cedis et le montant en crypto est calculé au moment de l'envoi."
     },
     "usdtNotice": "Les montants en USDT sont des estimations. Vos points se convertissent en cédis au taux fixe ; le taux cédi–dollar est mis à jour quotidiennement, et le montant final en USDT est calculé à l'envoi du paiement — il peut différer légèrement de cette estimation.",
     "errors": {

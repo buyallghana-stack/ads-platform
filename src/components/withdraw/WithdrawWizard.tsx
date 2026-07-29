@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/Button'
 import { PinPad } from '@/components/ui/PinPad'
 import { Link, useRouter } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
+import type { CryptoQuote } from '@/lib/pricing/types'
 
 /**
  * Withdrawal wizard (operator decisions 2026-07-24):
@@ -52,9 +53,6 @@ export type WithdrawAccount = {
   detail: string
 }
 
-/** Demo indicative rate for the GHS→USD leg. Labelled indicative in the UI —
- *  the real quote comes from the two-hop pricing service at request time. */
-const DEMO_GHS_PER_USD = 10.45
 
 type Step = 'account' | 'amount' | 'confirm' | 'pin' | 'success'
 const STEPS: Step[] = ['account', 'amount', 'confirm', 'pin']
@@ -65,6 +63,7 @@ export function WithdrawWizard({
   pointsPerCurrencyUnit,
   tierName,
   accounts,
+  quote,
 }: {
   balance: number
   /** The user's RESOLVED payout threshold — lower on every paid plan. */
@@ -75,6 +74,11 @@ export function WithdrawWizard({
    *  threshold is the one being applied. */
   tierName: string
   accounts: WithdrawAccount[]
+  /* Null when no fresh rate is available, and then NOTHING is shown. This
+     replaced `const DEMO_GHS_PER_USD = 10.45`, which was ~12% adrift of the
+     real rate and overstated every crypto payout. An estimate no source
+     stands behind is worse than no estimate. */
+  quote: CryptoQuote | null
 }) {
   const t = useTranslations('withdraw')
   const format = useFormatter()
@@ -125,7 +129,14 @@ export function WithdrawWizard({
   }, [raw, unit, POINTS_PER_GHS])
 
   const ghs = points / POINTS_PER_GHS
-  const usdEstimate = ghs / DEMO_GHS_PER_USD
+
+  /* Linear in the amount, so the rates come down once and the arithmetic
+     happens here rather than a server round trip per keystroke. */
+  const usdEstimate = quote ? ghs / quote.ghsPerUsd : null
+  const coinEstimate =
+    quote && usdEstimate !== null
+      ? (usdEstimate / quote.coinUsd) * (1 - quote.spreadPct / 100)
+      : null
 
   const stepIndex = STEPS.indexOf(step)
 
@@ -474,13 +485,32 @@ export function WithdrawWizard({
               ))}
             </div>
 
-            {isCrypto && points > 0 && (
+            {isCrypto && points > 0 && quote && usdEstimate !== null && coinEstimate !== null && (
               <p className="mt-4 text-[0.8125rem] text-ink-600">
-                {t('amount.usdtEstimate', {
-                  usd: format.number(usdEstimate, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-                  rate: format.number(DEMO_GHS_PER_USD, { minimumFractionDigits: 2 }),
+                {t('amount.coinEstimate', {
+                  coinAmount: format.number(coinEstimate, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }),
+                  coin: quote.coin,
+                  usd: format.number(usdEstimate, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }),
+                  /* Intl defaults maximumFractionDigits to 3 when only a
+                     minimum is given, which rendered "GHS 11.678". Two is
+                     how a cedi rate is quoted. */
+                  rate: format.number(quote.ghsPerUsd, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }),
                 })}
               </p>
+            )}
+            {/* No rate, no number. Saying so beats a blank space where a
+                figure used to be, and beats inventing one. */}
+            {isCrypto && points > 0 && !quote && (
+              <p className="mt-4 text-[0.8125rem] text-ink-500">{t('amount.estimateUnavailable')}</p>
             )}
             {isCrypto && <div className="mt-3">{fluctuationNotice(false)}</div>}
 
@@ -504,8 +534,16 @@ export function WithdrawWizard({
                 { label: t('confirm.to'), value: `${account.title}` },
                 { label: t('confirm.amount'), value: `${format.number(points)} ${t('amount.points')}` },
                 { label: t('confirm.value'), value: `GHS ${format.number(ghs, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
-                ...(isCrypto
-                  ? [{ label: t('confirm.estimate'), value: `≈ ${format.number(usdEstimate, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDT` }]
+                /* Was `≈ {usd} USDT` — the DOLLAR figure with a coin ticker
+                   glued on, and the ticker hardcoded to USDT even for a USDC
+                   account. Now the coin amount, in the coin they hold. */
+                ...(isCrypto && coinEstimate !== null && quote
+                  ? [
+                      {
+                        label: t('confirm.estimate'),
+                        value: `≈ ${format.number(coinEstimate, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${quote.coin}`,
+                      },
+                    ]
                   : []),
                 { label: t('confirm.fee'), value: t('confirm.feeFree') },
               ].map((row) => (

@@ -675,6 +675,30 @@ export type Database = {
           },
         ]
       }
+      fx_rates: {
+        Row: {
+          fetched_at: string
+          pair: string
+          rate: number
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          fetched_at?: string
+          pair: string
+          rate: number
+          source: string
+          updated_at?: string
+        }
+        Update: {
+          fetched_at?: string
+          pair?: string
+          rate?: number
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string
@@ -2667,6 +2691,7 @@ export type Database = {
         Args: { p_exclude?: string; p_phone: string }
         Returns: number
       }
+      fx_rate: { Args: { p_pair: string }; Returns: number }
       generate_referral_code: { Args: never; Returns: string }
       get_active_sessions: {
         Args: never
@@ -2950,6 +2975,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      quote_crypto_payout: {
+        Args: { p_coin: string; p_ghs: number }
+        Returns: Json
+      }
       recompute_user_risk: {
         Args: { p_user_id: string }
         Returns: {
@@ -3129,6 +3158,16 @@ export type Database = {
         }
       }
       revoke_other_sessions: { Args: never; Returns: number }
+      set_fx_rate: {
+        Args: { p_pair: string; p_rate: number; p_source: string }
+        Returns: Database["public"]["Tables"]["fx_rates"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "fx_rates"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       revoke_session: { Args: { p_session_id: string }; Returns: boolean }
       send_support_message: {
         Args: { p_body: string; p_context?: Json }
