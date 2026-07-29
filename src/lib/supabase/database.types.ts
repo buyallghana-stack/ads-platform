@@ -992,9 +992,6 @@ export type Database = {
           created_at: string
           currency_amount: number
           currency_code: string
-          dispute_reason: string | null
-          disputed_at: string | null
-          disputed_by: string | null
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
@@ -1025,9 +1022,6 @@ export type Database = {
           created_at?: string
           currency_amount: number
           currency_code?: string
-          dispute_reason?: string | null
-          disputed_at?: string | null
-          disputed_by?: string | null
           early_approval_reason?: string | null
           external_reference?: string | null
           failure_reason?: string | null
@@ -1058,9 +1052,6 @@ export type Database = {
           created_at?: string
           currency_amount?: number
           currency_code?: string
-          dispute_reason?: string | null
-          disputed_at?: string | null
-          disputed_by?: string | null
           early_approval_reason?: string | null
           external_reference?: string | null
           failure_reason?: string | null
@@ -1675,9 +1666,6 @@ export type Database = {
           created_at: string
           currency_amount: number
           currency_code: string
-          dispute_reason: string | null
-          disputed_at: string | null
-          disputed_by: string | null
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
@@ -1980,9 +1968,6 @@ export type Database = {
           created_at: string
           currency_amount: number
           currency_code: string
-          dispute_reason: string | null
-          disputed_at: string | null
-          disputed_by: string | null
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
@@ -2033,9 +2018,6 @@ export type Database = {
           created_at: string
           currency_amount: number
           currency_code: string
-          dispute_reason: string | null
-          disputed_at: string | null
-          disputed_by: string | null
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
@@ -2254,48 +2236,6 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "profiles"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
-      dispute_redemption: {
-        Args: { p_admin_id: string; p_reason: string; p_redemption_id: string }
-        Returns: {
-          admin_hold_at: string | null
-          approved_early: boolean
-          created_at: string
-          currency_amount: number
-          currency_code: string
-          dispute_reason: string | null
-          disputed_at: string | null
-          disputed_by: string | null
-          early_approval_reason: string | null
-          external_reference: string | null
-          failure_reason: string | null
-          holding_until: string
-          id: string
-          method: Database["public"]["Enums"]["payout_method"]
-          paid_at: string | null
-          points_amount: number
-          points_per_currency_unit: number
-          review_notes: string | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          risk_level_at_request: Database["public"]["Enums"]["risk_level"]
-          risk_score_at_request: number
-          snapshot_account_name: string | null
-          snapshot_coin_code: string | null
-          snapshot_msisdn: string | null
-          snapshot_network_code: string | null
-          snapshot_provider_code: string | null
-          snapshot_wallet: string | null
-          status: Database["public"]["Enums"]["redemption_status"]
-          updated_at: string
-          user_id: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "redemptions"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -2543,9 +2483,6 @@ export type Database = {
           created_at: string
           currency_amount: number
           currency_code: string
-          dispute_reason: string | null
-          disputed_at: string | null
-          disputed_by: string | null
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
@@ -2593,9 +2530,6 @@ export type Database = {
           created_at: string
           currency_amount: number
           currency_code: string
-          dispute_reason: string | null
-          disputed_at: string | null
-          disputed_by: string | null
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
@@ -2639,9 +2573,6 @@ export type Database = {
           created_at: string
           currency_amount: number
           currency_code: string
-          dispute_reason: string | null
-          disputed_at: string | null
-          disputed_by: string | null
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
@@ -2753,9 +2684,6 @@ export type Database = {
           created_at: string
           currency_amount: number
           currency_code: string
-          dispute_reason: string | null
-          disputed_at: string | null
-          disputed_by: string | null
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null

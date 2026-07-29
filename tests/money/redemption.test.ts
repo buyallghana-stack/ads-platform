@@ -483,8 +483,8 @@ describe.skipIf(!HAS_DB)('the licence kill switch', () => {
   })
 })
 
-describe.skipIf(!HAS_DB)('disputes', () => {
-  /** Takes a request all the way to paid, which is the only disputable state. */
+describe.skipIf(!HAS_DB)('a paid payout is the end of the line', () => {
+  /** Takes a request all the way to paid. */
   async function paidRedemption(tx: Tx) {
     const made = await requestedRedemption(tx)
     await matureTheHold(tx, made.id)
@@ -500,65 +500,64 @@ describe.skipIf(!HAS_DB)('disputes', () => {
     return made
   }
 
-  it('records who contested it and why, and moves no points', async () => {
-    await withRollback(async (tx) => {
-      const { user, admin, id } = await paidRedemption(tx)
-      const before = await balanceOf(tx, user.id)
+  /*
+    Disputes were removed on 2026-07-29 (migration 057). The operator holds a
+    request before the money leaves instead — the user is told why and it can
+    be undone, where `disputed` was terminal with no path out.
 
-      await tx.query(`select public.admin_decide_redemption($1, $2, 'dispute', $3)`, [
-        admin.id,
-        id,
-        'Recipient says the money never arrived',
-      ])
-
-      const r = await redemption(tx, id)
-      expect(r.status).toBe('disputed')
-      expect(r.disputed_by).toBe(admin.id)
-      expect(r.dispute_reason).toBe('Recipient says the money never arrived')
-
-      // The money has already gone and the points were taken at request.
-      // Refunding here would hand the user both.
-      expect(await balanceOf(tx, user.id)).toBe(before)
-      expect(await balanceOf(tx, user.id)).toBe(POINTS_LEFT)
-    })
-  })
-
-  it('is refused once the window has closed', async () => {
+    These replace the three dispute tests rather than deleting them, because
+    the thing worth asserting did not go away: a payout that has been sent
+    must not be movable by anybody, and the removed verb must be refused
+    rather than silently ignored by an old client that still sends it.
+  */
+  it('refuses the removed dispute verb outright', async () => {
     await withRollback(async (tx) => {
       const { admin, id } = await paidRedemption(tx)
-
-      // 49 hours after payment, against the 48-hour default. The UI hides the
-      // button at this point; this asserts the database would refuse it even
-      // if the button were still there.
-      await tx.query(
-        `update public.redemptions set paid_at = now() - interval '49 hours' where id = $1`,
-        [id],
-      )
 
       const message = await expectRejection(tx, () =>
         tx.query(`select public.admin_decide_redemption($1, $2, 'dispute', $3)`, [
           admin.id,
           id,
-          'Far too late',
+          'Recipient says the money never arrived',
         ]),
       )
-      expect(message).toMatch(/window/i)
+      expect(message).toMatch(/unknown payout action/i)
       expect((await redemption(tx, id)).status).toBe('paid')
     })
   })
 
-  it('is refused on anything that was never paid', async () => {
+  it('cannot be put back into any other state', async () => {
     await withRollback(async (tx) => {
-      const { admin, id } = await requestedRedemption(tx)
+      const { user, admin, id } = await paidRedemption(tx)
+      const before = await balanceOf(tx, user.id)
 
+      for (const action of ['approve', 'hold', 'decline']) {
+        await expectRejection(tx, () =>
+          tx.query(`select public.admin_decide_redemption($1, $2, $3, 'anything')`, [
+            admin.id,
+            id,
+            action,
+          ]),
+        )
+      }
+
+      expect((await redemption(tx, id)).status).toBe('paid')
+      // And nothing moved the points while all that was being refused.
+      expect(await balanceOf(tx, user.id)).toBe(before)
+    })
+  })
+
+  it('cannot be written into the disputed state directly', async () => {
+    await withRollback(async (tx) => {
+      const { id } = await paidRedemption(tx)
+
+      // The enum label still exists — Postgres cannot drop a value from a
+      // type without rebuilding it — so the check constraint is what actually
+      // makes it unreachable. Assert the constraint, not the absence.
       const message = await expectRejection(tx, () =>
-        tx.query(`select public.admin_decide_redemption($1, $2, 'dispute', $3)`, [
-          admin.id,
-          id,
-          'Nothing to dispute yet',
-        ]),
+        tx.query(`update public.redemptions set status = 'disputed' where id = $1`, [id]),
       )
-      expect(message).toMatch(/marked paid/i)
+      expect(message).toMatch(/redemptions_no_disputes|violates check constraint/i)
     })
   })
 })

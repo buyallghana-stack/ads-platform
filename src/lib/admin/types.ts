@@ -48,12 +48,15 @@ export type OverviewMetrics = {
 export type DailyMoney = { day: string; deposits: number; withdrawals: number }
 
 /**
- * Mirrors public.redemption_status, plus `disputed`.
+ * Mirrors public.redemption_status.
  *
- * `disputed` does not exist in the database yet — it arrives with the backend
- * work. It is here because the operator's rule shapes the UI: after a payout
- * is marked paid they may raise a dispute, but only within 48 hours of that
- * status change, and if they take no action the option disappears.
+ * `disputed` is deliberately ABSENT. The operator removed disputes on
+ * 2026-07-29 — a payout can be held at any point before the money leaves, the
+ * user is told it is on hold and why, and the chatbot carries it from there,
+ * which is reversible where a dispute never was. The enum label still exists
+ * in Postgres because a value cannot be dropped from a type without rebuilding
+ * it, but a check constraint makes it unreachable, so no row can arrive here
+ * carrying it. See migration 057.
  */
 export type PayoutStatus =
   | 'held'
@@ -63,7 +66,6 @@ export type PayoutStatus =
   | 'rejected'
   | 'cancelled'
   | 'failed'
-  | 'disputed'
 
 export type PayoutRequest = {
   id: string
@@ -103,13 +105,13 @@ export type PayoutRequest = {
   reuse: number
   status: PayoutStatus
   requestedAt: string
-  /** When the status last moved. The 48-hour dispute window runs from here. */
+  /** When the status last moved. */
   statusChangedAt: string
   risk: 'low' | 'medium' | 'high' | 'critical'
   /** Why the risk is what it is. Empty on a clean request. */
   riskReasons?: string[]
   /**
-   * The note the operator gave when they last held, declined or disputed it.
+   * The note the operator gave when they last held or declined it.
    * The user is shown this verbatim in their notifications, which is why it
    * is required for those three actions and stored on the request rather
    * than only in the audit log — the next operator to open this needs to see
@@ -192,24 +194,6 @@ export type Person = {
   lastActiveAt: string
   /** How much has already been paid out to them, in cedis. */
   paidOutGhs: number
-}
-
-/**
- * The operator's rule, in one place so the table and any future server action
- * cannot disagree: a dispute may be raised only on a payout already marked
- * paid, and only within 48 hours of that status change. After that the option
- * disappears rather than sitting there greyed out — an action that can never
- * succeed should not keep occupying the row.
- *
- * `now` is a parameter rather than a call to Date.now() so the caller decides
- * the clock. That is what lets the server and the first client render agree.
- */
-export const DISPUTE_WINDOW_HOURS = 48
-
-export function canDispute(request: PayoutRequest, now: number): boolean {
-  if (request.status !== 'paid') return false
-  const elapsed = now - new Date(request.statusChangedAt).getTime()
-  return elapsed < DISPUTE_WINDOW_HOURS * 3_600_000
 }
 
 /* ------------------------------------------------------------------ */

@@ -1304,8 +1304,7 @@
         "paid": "Terminé",
         "rejected": "Refusé",
         "cancelled": "Annulé",
-        "failed": "Échec",
-        "disputed": "Contesté"
+        "failed": "Échec"
       },
       "chart": {
         "title": "Entrées et sorties",
@@ -1323,7 +1322,7 @@
     },
     "payouts": {
       "title": "Retraits",
-      "description": "Approuvez, mettez en attente ou refusez les demandes de retrait. Les numéros de compte et portefeuilles sont masqués — ouvrez une demande pour en révéler un. Un retrait terminé peut être contesté pendant {hours} heures.",
+      "description": "Approuvez, mettez en attente ou refusez les demandes de retrait. Les numéros de compte et les portefeuilles sont masqués — ouvrez une demande pour en révéler un.",
       "filterLabel": "Filtrer par statut",
       "filters": {
         "queue": "Décision requise",
@@ -1332,7 +1331,6 @@
       "searchPlaceholder": "Nom, référence, derniers chiffres",
       "empty": "Aucun résultat.",
       "emptyQueue": "Rien ne vous attend. Toutes les demandes ont été traitées.",
-      "disputeWindow": "Contestation ouverte {hours} h",
       "selectAll": "Sélectionner toutes les demandes traitables",
       "selectRow": "Sélectionner {reference}",
       "reviewRow": "Examiner {reference} de {name}",
@@ -1362,7 +1360,6 @@
         "hold": "Mettre en attente",
         "decline": "Refuser",
         "markPaid": "Marquer terminé",
-        "dispute": "Contester",
         "opensPanel": "Ouvre la demande"
       },
       "bulk": {
@@ -1398,12 +1395,10 @@
         "hold": "Mettre {amount} en attente pour {name}. La personne est informée du motif, écrivez quelque chose d'actionnable.",
         "decline": "Refuser {amount} pour {name} ? La demande s'arrête ici et les points retournent au solde.",
         "markPaid": "Confirmez que vous avez envoyé {amount} vers {destination}. Cette action est irréversible.",
-        "dispute": "Contester {amount} versé vers {destination} ?",
         "reasonLabel": "Motif — visible par l'utilisateur",
         "reasonPlaceholder": {
           "hold": "ex. Vérifiez que le numéro MoMo correspond à votre pièce d'identité",
           "decline": "ex. Le compte de retrait appartient à quelqu'un d'autre",
-          "dispute": "ex. Le destinataire dit n'avoir rien reçu",
           "approveEarly": "ex. Compte ancien, destination vérifiée par téléphone"
         },
         "reasonHint": "Écrit simplement. Cela part directement dans ses notifications.",

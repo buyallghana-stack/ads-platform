@@ -1304,8 +1304,7 @@
         "paid": "Completed",
         "rejected": "Declined",
         "cancelled": "Cancelled",
-        "failed": "Failed",
-        "disputed": "Disputed"
+        "failed": "Failed"
       },
       "chart": {
         "title": "Money in and out",
@@ -1323,7 +1322,7 @@
     },
     "payouts": {
       "title": "Payouts",
-      "description": "Approve, hold or decline withdrawal requests. Account numbers and wallets are masked — open a request to reveal one. A completed payout can be disputed for {hours} hours.",
+      "description": "Approve, hold or decline withdrawal requests. Account numbers and wallets are masked — open a request to reveal one.",
       "filterLabel": "Filter by status",
       "filters": {
         "queue": "Needs a decision",
@@ -1332,7 +1331,6 @@
       "searchPlaceholder": "Name, reference, last digits",
       "empty": "Nothing matches.",
       "emptyQueue": "Nothing waiting on you. Every request has been decided.",
-      "disputeWindow": "Dispute open for {hours}h",
       "selectAll": "Select every request that can be decided",
       "selectRow": "Select {reference}",
       "reviewRow": "Review {reference} from {name}",
@@ -1362,7 +1360,6 @@
         "hold": "Hold",
         "decline": "Decline",
         "markPaid": "Mark completed",
-        "dispute": "Dispute",
         "opensPanel": "Opens the request"
       },
       "bulk": {
@@ -1398,12 +1395,10 @@
         "hold": "Hold {amount} for {name}. They are told why, so write something they can act on.",
         "decline": "Decline {amount} for {name}? The request ends here and the points go back to their balance.",
         "markPaid": "Confirm you have sent {amount} to {destination}. This cannot be undone.",
-        "dispute": "Raise a dispute on {amount} paid to {destination}?",
         "reasonLabel": "Reason — the user sees this",
         "reasonPlaceholder": {
           "hold": "e.g. Confirm the MoMo number matches your ID",
           "decline": "e.g. Payout account belongs to someone else",
-          "dispute": "e.g. Recipient says the money never arrived",
           "approveEarly": "e.g. Long-standing account, destination verified by phone"
         },
         "reasonHint": "Written plainly. It goes straight into their notifications.",

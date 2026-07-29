@@ -83,7 +83,7 @@ export function people(): Person[] {
       avatarUrl: null, joinedAt: at(48), balancePoints: 150, tier: 'Free', status: 'active' },
     { id: 'u7', name: 'Abena Owusu', email: 'abena.owusu@gmail.com', phone: '026 222 2345',
       avatarUrl: null, joinedAt: at(700), balancePoints: 91500, tier: 'Platinum', status: 'flagged',
-      flaggedBy: 'admin', flagReason: 'Payout disputed after completion',
+      flaggedBy: 'admin', flagReason: 'Repeated failed attention questions',
       unread: 5, lastMessageAt: at(1), lastMessage: 'This is unfair, I earned those points.' },
     { id: 'u8', name: 'Kofi Danso', email: 'kofi.danso@gmail.com', phone: '024 999 7676',
       avatarUrl: null, joinedAt: at(410), balancePoints: 0, tier: 'Free', status: 'disabled',

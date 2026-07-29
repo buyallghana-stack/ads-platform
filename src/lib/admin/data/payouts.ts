@@ -144,7 +144,7 @@ function toRequest(row: QueueRow, now: number): PayoutRequest {
  * Every redemption, queue first.
  *
  * Unfiltered on purpose: the table's own tabs (queue, approved, paid,
- * disputed, rejected, all) filter client-side over one list, and paginating
+ * rejected, all) filter client-side over one list, and paginating
  * underneath them would make a tab show "12" and then list four. When the
  * volume justifies it, the filter moves into `p_status` and the tabs become
  * server round trips — the function already takes the argument.

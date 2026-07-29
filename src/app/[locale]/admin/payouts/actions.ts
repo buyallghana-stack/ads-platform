@@ -44,12 +44,11 @@ const DB_ACTION: Record<PayoutAction, string> = {
   hold: 'hold',
   decline: 'decline',
   markPaid: 'mark_paid',
-  dispute: 'dispute',
 }
 
 const decisionSchema = z.object({
   id: z.uuid(),
-  action: z.enum(['approve', 'hold', 'decline', 'markPaid', 'dispute']),
+  action: z.enum(['approve', 'hold', 'decline', 'markPaid']),
   reason: z.string().max(1000).optional(),
   /** Free-text proof the transfer happened. Only meaningful for markPaid. */
   reference: z.string().max(200).optional(),

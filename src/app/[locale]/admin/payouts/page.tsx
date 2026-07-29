@@ -5,7 +5,6 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { PageHeader } from '@/components/admin/AdminChrome'
 import { PayoutsTable } from '@/components/admin/PayoutsTable'
 import { getPayoutQueue } from '@/lib/admin/data/payouts'
-import { DISPUTE_WINDOW_HOURS } from '@/lib/admin/types'
 
 export const metadata: Metadata = {
   title: 'Admin · Payouts',
@@ -34,7 +33,7 @@ export default async function AdminPayoutsPage({
     <>
       <PageHeader
         title={t('title')}
-        description={t('description', { hours: DISPUTE_WINDOW_HOURS })}
+        description={t('description')}
       />
       {/* Date.now() in a Server Component is the repo's deliberate pattern for
           handing a stable clock to a client component — see dashboard/page.tsx. */}

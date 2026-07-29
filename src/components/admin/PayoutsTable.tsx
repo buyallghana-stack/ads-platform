@@ -2,19 +2,13 @@
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
 
-import { AlertTriangle, Check, Clock, Coins, Gavel, PanelRight, Smartphone, X } from 'lucide-react'
+import { AlertTriangle, Check, Clock, Coins, PanelRight, Smartphone, X } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import { approvePayouts, decidePayout } from '@/app/[locale]/admin/payouts/actions'
 import { MoreMenu, type MenuItem } from '@/components/ui/MoreMenu'
 import { maskDestination } from '@/lib/admin/destination'
-import {
-  DISPUTE_WINDOW_HOURS,
-  canDispute,
-  needsEarlyApproval,
-  type PayoutRequest,
-  type PayoutStatus,
-} from '@/lib/admin/types'
+import { needsEarlyApproval, type PayoutRequest, type PayoutStatus } from '@/lib/admin/types'
 import { cn } from '@/lib/cn'
 
 import { PersonCell, StatusDot } from './AdminChrome'
@@ -73,11 +67,9 @@ import { PAYOUT_TONE } from './payout-status'
  * time, and re-masks itself. A queue of thirty full phone numbers is a
  * screenshot waiting to happen.
  *
- * THE DISPUTE RULE (operator, 2026-07-25)
- * A dispute can only be raised on a payout already marked paid, and only
- * within 48 hours of that status change. After the window it is GONE from
- * the row rather than greyed out: an action that can never succeed should
- * not keep taking up space and inviting a click.
+ * NO ACTIONS ON A PAID PAYOUT. Disputes were removed on 2026-07-29 — the
+ * operator holds a request before the money leaves instead, which tells the
+ * user why and can be undone. Marked paid is now the end of the line.
  *
  * DECISIONS ARE REAL AS OF 2026-07-28. `decide` calls the server action,
  * which calls `admin_decide_redemption`, which calls the pipeline function
@@ -97,14 +89,13 @@ type Filter = 'queue' | 'all' | PayoutStatus
 /* Only the states that actually occur get a tab. `cancelled` and `failed`
    exist in the type because the database has them, but a tab that is always
    empty is a tab that teaches the operator to ignore the tab row. */
-const FILTERS: Filter[] = ['queue', 'approved', 'paid', 'disputed', 'rejected', 'all']
+const FILTERS: Filter[] = ['queue', 'approved', 'paid', 'rejected', 'all']
 
 const ACTION_ICON: Record<PayoutAction, React.ReactNode> = {
   approve: <Check />,
   hold: <Clock />,
   decline: <X />,
   markPaid: <Check />,
-  dispute: <Gavel />,
 }
 
 export function PayoutsTable({
@@ -123,8 +114,8 @@ export function PayoutsTable({
 
   const [rows, setRows] = useState(initial)
 
-  /* Ticks every minute so a dispute window genuinely closes while the
-     operator is looking at it, rather than only on reload. */
+  /* Ticks every minute so relative times ("7 hours ago") stay honest while
+     the operator is looking at the queue, rather than only on reload. */
   const [now, setNow] = useState(serverNow)
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 60_000)
@@ -243,7 +234,7 @@ export function PayoutsTable({
   }, [rows, now])
 
   /* ---- Selection ---------------------------------------------------- */
-  const selectable = visible.filter((r) => availableActions(r, now).length > 0)
+  const selectable = visible.filter((r) => availableActions(r).length > 0)
   const selectedRows = rows.filter((r) => selected.has(r.id))
   const allSelected = selectable.length > 0 && selectable.every((r) => selected.has(r.id))
 
@@ -255,14 +246,9 @@ export function PayoutsTable({
       return copy
     })
 
-  const hoursLeft = (r: PayoutRequest) => {
-    const elapsed = (now - new Date(r.statusChangedAt).getTime()) / 3_600_000
-    return Math.max(0, Math.ceil(DISPUTE_WINDOW_HOURS - elapsed))
-  }
-
   /** The row's menu: review first, then the decisions, destructive last. */
   const menuFor = (r: PayoutRequest): MenuItem[] => {
-    const acts = availableActions(r, now)
+    const acts = availableActions(r)
     const items: MenuItem[] = [
       {
         key: 'review',
@@ -441,7 +427,7 @@ export function PayoutsTable({
                   <td className="py-3 pl-4">
                     <RowCheckbox
                       checked={isSelected}
-                      disabled={availableActions(r, now).length === 0}
+                      disabled={availableActions(r).length === 0}
                       onChange={() => toggle(r.id)}
                       label={t('selectRow', { reference: r.reference })}
                     />
@@ -474,11 +460,6 @@ export function PayoutsTable({
 
                   <td className="px-4 py-3">
                     <StatusDot tone={PAYOUT_TONE[r.status]}>{ts(r.status)}</StatusDot>
-                    {canDispute(r, now) && (
-                      <p className="mt-0.5 text-[0.625rem] text-ink-400">
-                        {t('disputeWindow', { hours: hoursLeft(r) })}
-                      </p>
-                    )}
                     {r.risk !== 'low' && (
                       <p className="mt-0.5 text-[0.625rem] font-medium text-warning-600">
                         {t(`riskLevel.${r.risk}`)}
@@ -548,11 +529,6 @@ export function PayoutsTable({
                 <span className="text-[0.6875rem] text-ink-400">
                   {format.relativeTime(new Date(r.requestedAt), now)}
                 </span>
-                {canDispute(r, now) && (
-                  <span className="text-[0.6875rem] text-violet-700">
-                    {t('disputeWindow', { hours: hoursLeft(r) })}
-                  </span>
-                )}
                 {r.risk !== 'low' && (
                   <span className="text-[0.6875rem] font-medium text-warning-600">
                     {t(`riskLevel.${r.risk}`)}
@@ -577,7 +553,7 @@ export function PayoutsTable({
           clearLabel={t('bulk.clear')}
         >
           {(() => {
-            const eligible = bulkEligible(selectedRows, 'approve', now)
+            const eligible = bulkEligible(selectedRows, 'approve')
             return (
               <SelectionAction
                 disabled={eligible.length === 0 || busy}

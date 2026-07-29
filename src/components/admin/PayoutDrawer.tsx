@@ -10,7 +10,6 @@ import {
   Copy,
   Eye,
   EyeOff,
-  Gavel,
   ShieldAlert,
   Users,
   X,
@@ -139,7 +138,7 @@ function Panel({
     return () => clearTimeout(id)
   }, [copied])
 
-  const actions = availableActions(r, now)
+  const actions = availableActions(r)
   const ghs = (n: number) =>
     `GHS ${format.number(n, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
@@ -425,7 +424,6 @@ function ActionIcon({ action }: { action: PayoutAction }) {
   const cls = 'size-4'
   if (action === 'hold') return <Clock aria-hidden className={cls} />
   if (action === 'decline') return <X aria-hidden className={cls} />
-  if (action === 'dispute') return <Gavel aria-hidden className={cls} />
   return <Check aria-hidden className={cls} />
 }
 

@@ -26,5 +26,4 @@ export const PAYOUT_TONE: Record<
   rejected: 'danger',
   cancelled: 'neutral',
   failed: 'danger',
-  disputed: 'violet',
 }
