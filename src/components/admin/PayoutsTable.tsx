@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 
-import { Check, Clock, Coins, Gavel, PanelRight, Smartphone, X } from 'lucide-react'
+import { AlertTriangle, Check, Clock, Coins, Gavel, PanelRight, Smartphone, X } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
+import { approvePayouts, decidePayout } from '@/app/[locale]/admin/payouts/actions'
 import { MoreMenu, type MenuItem } from '@/components/ui/MoreMenu'
 import { maskDestination } from '@/lib/admin/destination'
 import {
@@ -71,9 +72,17 @@ import { PAYOUT_TONE } from './payout-status'
  * the row rather than greyed out: an action that can never succeed should
  * not keep taking up space and inviting a click.
  *
- * Every decision here is local state only. The backend lands later; when it
- * does, `decide` becomes a server action and nothing else about this file
- * changes.
+ * DECISIONS ARE REAL AS OF 2026-07-28. `decide` calls the server action,
+ * which calls `admin_decide_redemption`, which calls the pipeline function
+ * that owns the transition. What comes back is the refreshed queue, and that
+ * is what gets rendered — NOT `ACTION_RULES[action].next`.
+ *
+ * That distinction matters here more than it looks. The database refuses
+ * things this table cannot know about: approving inside a holding period
+ * without the audited override, marking paid while the licence flag is off,
+ * deciding a request another operator decided thirty seconds ago. Painting
+ * the predicted status and quietly keeping it would show an operator a payout
+ * marked completed that the database still has sitting in the queue.
  */
 
 type Filter = 'queue' | 'all' | PayoutStatus
@@ -120,6 +129,13 @@ export function PayoutsTable({
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [openId, setOpenId] = useState<string | null>(null)
 
+  /* What the database said when it refused. Shown verbatim — the pipeline
+     raises these in operator language ("Payouts are disabled", "Only an
+     approved redemption can be marked paid"), and rewording them here would
+     mean maintaining a second vocabulary for the same rules. */
+  const [error, setError] = useState<string | null>(null)
+  const [busy, startTransition] = useTransition()
+
   const inQueue = (r: PayoutRequest) => r.status === 'pending_approval' || r.status === 'held'
 
   const visible = useMemo(() => {
@@ -142,40 +158,47 @@ export function PayoutsTable({
       })
   }, [rows, filter, query])
 
-  /** Local only, until the backend exists. */
-  const decide = (id: string, action: PayoutAction, reason: string) => {
-    const next = ACTION_RULES[action].next
-    setRows((all) =>
-      all.map((r) =>
-        r.id === id
-          ? {
-              ...r,
-              status: next,
-              statusChangedAt: new Date().toISOString(),
-              // Kept rather than discarded: the user is shown this, so the
-              // next operator to open the request must see it too.
-              decisionNote: reason || r.decisionNote,
-            }
-          : r,
-      ),
-    )
-    setSelected((s) => {
-      if (!s.has(id)) return s
-      const copy = new Set(s)
-      copy.delete(id)
-      return copy
+  /**
+   * One decision, through the server.
+   *
+   * No optimistic paint. On a screen where the units are other people's
+   * money, a row that says "completed" for the half-second before the server
+   * disagrees is a row an operator can screenshot, act on, or walk away from.
+   * The button reports itself as busy instead, and the row changes when the
+   * database says it changed.
+   */
+  const decide = (id: string, action: PayoutAction, reason: string, reference?: string) => {
+    setError(null)
+    startTransition(async () => {
+      const result = await decidePayout({ id, action, reason, reference })
+
+      // A refused decision still returns the queue as it now stands, so a
+      // request somebody else has already handled corrects itself on screen
+      // instead of staying stale under the error.
+      if (result.requests) setRows(result.requests)
+      if (!result.ok) {
+        setError(result.message)
+        return
+      }
+
+      setSelected((s) => {
+        if (!s.has(id)) return s
+        const copy = new Set(s)
+        copy.delete(id)
+        return copy
+      })
+      setOpenId(null)
     })
   }
 
-  const decideMany = (ids: string[], action: PayoutAction) => {
-    const next = ACTION_RULES[action].next
-    const set = new Set(ids)
-    setRows((all) =>
-      all.map((r) =>
-        set.has(r.id) ? { ...r, status: next, statusChangedAt: new Date().toISOString() } : r,
-      ),
-    )
-    setSelected(new Set())
+  const decideMany = (ids: string[]) => {
+    setError(null)
+    startTransition(async () => {
+      const result = await approvePayouts(ids)
+      if (result.requests) setRows(result.requests)
+      if (!result.ok) setError(result.message)
+      setSelected(new Set())
+    })
   }
 
   const ghs = (n: number) =>
@@ -244,7 +267,15 @@ export function PayoutsTable({
              mis-aim, and "Decline" one click from "Approve" on a money screen
              is not a risk worth taking for the keystroke it saves. */
           hint: rule.confirm || rule.reason ? t('actions.opensPanel') : undefined,
-          onSelect: () => (rule.confirm || rule.reason ? setOpenId(r.id) : decide(r.id, a, '')),
+          onSelect: () => {
+            // A decision already in flight makes every menu item inert.
+            // Approving the same payout twice is not a duplicate the database
+            // silently absorbs — the second call raises, and the operator gets
+            // an error for something that worked.
+            if (busy) return
+            if (rule.confirm || rule.reason) setOpenId(r.id)
+            else decide(r.id, a, '')
+          },
         })
       })
 
@@ -317,6 +348,28 @@ export function PayoutsTable({
         onQuery={setQuery}
         searchPlaceholder={t('searchPlaceholder')}
       />
+
+      {/* A refusal sits above the queue rather than inside the panel that
+          caused it: the panel closes on a successful decision, and half the
+          refusals arrive from the overflow menu where no panel was ever
+          open. `role="alert"` so it is announced — an operator who has just
+          pressed Approve and had nothing happen needs telling why. */}
+      {error && (
+        <div
+          role="alert"
+          className="mb-4 flex items-start gap-2.5 rounded-(--radius-card) border border-danger-500/30 bg-danger-50 px-3.5 py-3"
+        >
+          <AlertTriangle aria-hidden className="mt-0.5 size-4 shrink-0 text-danger-700" />
+          <p className="min-w-0 flex-1 text-[0.8125rem] leading-relaxed text-danger-700">{error}</p>
+          <button
+            type="button"
+            onClick={() => setError(null)}
+            className="shrink-0 text-[0.75rem] font-medium text-danger-700 underline underline-offset-2"
+          >
+            {t('errors.dismiss')}
+          </button>
+        </div>
+      )}
 
       {visible.length === 0 && (
         <EmptyState>{filter === 'queue' ? t('emptyQueue') : t('empty')}</EmptyState>
@@ -501,13 +554,8 @@ export function PayoutsTable({
             const eligible = bulkEligible(selectedRows, 'approve', now)
             return (
               <SelectionAction
-                disabled={eligible.length === 0}
-                onClick={() =>
-                  decideMany(
-                    eligible.map((r) => r.id),
-                    'approve',
-                  )
-                }
+                disabled={eligible.length === 0 || busy}
+                onClick={() => decideMany(eligible.map((r) => r.id))}
               >
                 <Check aria-hidden className="size-3.5" />
                 {t('bulk.approve', { count: eligible.length })}
@@ -517,7 +565,13 @@ export function PayoutsTable({
         </SelectionBar>
       )}
 
-      <PayoutDrawer request={open} now={now} onClose={() => setOpenId(null)} onDecide={decide} />
+      <PayoutDrawer
+        request={open}
+        now={now}
+        busy={busy}
+        onClose={() => setOpenId(null)}
+        onDecide={decide}
+      />
     </div>
   )
 }

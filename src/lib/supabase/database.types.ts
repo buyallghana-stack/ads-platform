@@ -909,10 +909,14 @@ export type Database = {
       }
       redemptions: {
         Row: {
+          admin_hold_at: string | null
           approved_early: boolean
           created_at: string
           currency_amount: number
           currency_code: string
+          dispute_reason: string | null
+          disputed_at: string | null
+          disputed_by: string | null
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
@@ -938,10 +942,14 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_hold_at?: string | null
           approved_early?: boolean
           created_at?: string
           currency_amount: number
           currency_code?: string
+          dispute_reason?: string | null
+          disputed_at?: string | null
+          disputed_by?: string | null
           early_approval_reason?: string | null
           external_reference?: string | null
           failure_reason?: string | null
@@ -967,10 +975,14 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_hold_at?: string | null
           approved_early?: boolean
           created_at?: string
           currency_amount?: number
           currency_code?: string
+          dispute_reason?: string | null
+          disputed_at?: string | null
+          disputed_by?: string | null
           early_approval_reason?: string | null
           external_reference?: string | null
           failure_reason?: string | null
@@ -1561,6 +1573,56 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_decide_redemption: {
+        Args: {
+          p_action: string
+          p_admin_id: string
+          p_approve_early?: boolean
+          p_early_reason?: string
+          p_reason?: string
+          p_redemption_id: string
+          p_reference?: string
+        }
+        Returns: {
+          admin_hold_at: string | null
+          approved_early: boolean
+          created_at: string
+          currency_amount: number
+          currency_code: string
+          dispute_reason: string | null
+          disputed_at: string | null
+          disputed_by: string | null
+          early_approval_reason: string | null
+          external_reference: string | null
+          failure_reason: string | null
+          holding_until: string
+          id: string
+          method: Database["public"]["Enums"]["payout_method"]
+          paid_at: string | null
+          points_amount: number
+          points_per_currency_unit: number
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          risk_level_at_request: Database["public"]["Enums"]["risk_level"]
+          risk_score_at_request: number
+          snapshot_account_name: string | null
+          snapshot_coin_code: string | null
+          snapshot_msisdn: string | null
+          snapshot_network_code: string | null
+          snapshot_provider_code: string | null
+          snapshot_wallet: string | null
+          status: Database["public"]["Enums"]["redemption_status"]
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "redemptions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_delete_ad: {
         Args: { p_ad_id: string; p_admin_id: string }
         Returns: string
@@ -1596,6 +1658,36 @@ export type Database = {
           updated_at: string
           video_source: Database["public"]["Enums"]["video_source"]
           weight: number
+        }[]
+      }
+      admin_list_redemptions: {
+        Args: { p_status?: Database["public"]["Enums"]["redemption_status"] }
+        Returns: {
+          account_name: string
+          admin_hold_at: string
+          approved_early: boolean
+          decision_note: string
+          destination: string
+          ghs: number
+          holding_until: string
+          id: string
+          method: Database["public"]["Enums"]["payout_method"]
+          paid_before: number
+          paid_before_ghs: number
+          points: number
+          provider: string
+          reference: string
+          requested_at: string
+          reuse: number
+          risk: Database["public"]["Enums"]["risk_level"]
+          risk_reasons: string[]
+          status: Database["public"]["Enums"]["redemption_status"]
+          status_changed_at: string
+          user_avatar_path: string
+          user_email: string
+          user_id: string
+          user_joined_at: string
+          user_name: string
         }[]
       }
       admin_save_ad: {
@@ -1654,10 +1746,14 @@ export type Database = {
           p_redemption_id: string
         }
         Returns: {
+          admin_hold_at: string | null
           approved_early: boolean
           created_at: string
           currency_amount: number
           currency_code: string
+          dispute_reason: string | null
+          disputed_at: string | null
+          disputed_by: string | null
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
@@ -1703,10 +1799,14 @@ export type Database = {
       cancel_redemption: {
         Args: { p_redemption_id: string; p_user_id: string }
         Returns: {
+          admin_hold_at: string | null
           approved_early: boolean
           created_at: string
           currency_amount: number
           currency_code: string
+          dispute_reason: string | null
+          disputed_at: string | null
+          disputed_by: string | null
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
@@ -1899,6 +1999,48 @@ export type Database = {
         }
       }
       disable_totp: { Args: { p_user_id: string }; Returns: undefined }
+      dispute_redemption: {
+        Args: { p_admin_id: string; p_reason: string; p_redemption_id: string }
+        Returns: {
+          admin_hold_at: string | null
+          approved_early: boolean
+          created_at: string
+          currency_amount: number
+          currency_code: string
+          dispute_reason: string | null
+          disputed_at: string | null
+          disputed_by: string | null
+          early_approval_reason: string | null
+          external_reference: string | null
+          failure_reason: string | null
+          holding_until: string
+          id: string
+          method: Database["public"]["Enums"]["payout_method"]
+          paid_at: string | null
+          points_amount: number
+          points_per_currency_unit: number
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          risk_level_at_request: Database["public"]["Enums"]["risk_level"]
+          risk_score_at_request: number
+          snapshot_account_name: string | null
+          snapshot_coin_code: string | null
+          snapshot_msisdn: string | null
+          snapshot_network_code: string | null
+          snapshot_provider_code: string | null
+          snapshot_wallet: string | null
+          status: Database["public"]["Enums"]["redemption_status"]
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "redemptions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       due_account_deletions: {
         Args: never
         Returns: {
@@ -2105,6 +2247,48 @@ export type Database = {
         }[]
       }
       has_withdrawal_pin: { Args: { p_user_id: string }; Returns: boolean }
+      hold_redemption: {
+        Args: { p_admin_id: string; p_reason: string; p_redemption_id: string }
+        Returns: {
+          admin_hold_at: string | null
+          approved_early: boolean
+          created_at: string
+          currency_amount: number
+          currency_code: string
+          dispute_reason: string | null
+          disputed_at: string | null
+          disputed_by: string | null
+          early_approval_reason: string | null
+          external_reference: string | null
+          failure_reason: string | null
+          holding_until: string
+          id: string
+          method: Database["public"]["Enums"]["payout_method"]
+          paid_at: string | null
+          points_amount: number
+          points_per_currency_unit: number
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          risk_level_at_request: Database["public"]["Enums"]["risk_level"]
+          risk_score_at_request: number
+          snapshot_account_name: string | null
+          snapshot_coin_code: string | null
+          snapshot_msisdn: string | null
+          snapshot_network_code: string | null
+          snapshot_provider_code: string | null
+          snapshot_wallet: string | null
+          status: Database["public"]["Enums"]["redemption_status"]
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "redemptions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       identity_hash: { Args: { p_value: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
       is_identity_blocked: {
@@ -2116,10 +2300,14 @@ export type Database = {
       mark_redemption_failed: {
         Args: { p_admin_id: string; p_reason: string; p_redemption_id: string }
         Returns: {
+          admin_hold_at: string | null
           approved_early: boolean
           created_at: string
           currency_amount: number
           currency_code: string
+          dispute_reason: string | null
+          disputed_at: string | null
+          disputed_by: string | null
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
@@ -2158,10 +2346,14 @@ export type Database = {
           p_reference: string
         }
         Returns: {
+          admin_hold_at: string | null
           approved_early: boolean
           created_at: string
           currency_amount: number
           currency_code: string
+          dispute_reason: string | null
+          disputed_at: string | null
+          disputed_by: string | null
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
@@ -2268,10 +2460,14 @@ export type Database = {
       reject_redemption: {
         Args: { p_admin_id: string; p_reason: string; p_redemption_id: string }
         Returns: {
+          admin_hold_at: string | null
           approved_early: boolean
           created_at: string
           currency_amount: number
           currency_code: string
+          dispute_reason: string | null
+          disputed_at: string | null
+          disputed_by: string | null
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
@@ -2528,6 +2724,7 @@ export type Database = {
         | "rejected"
         | "cancelled"
         | "failed"
+        | "disputed"
       referral_status: "pending" | "activated" | "rejected"
       risk_level: "low" | "medium" | "high" | "critical"
       subscription_payment_method: "korapay" | "crypto" | "paystack"
@@ -2735,6 +2932,7 @@ export const Constants = {
         "rejected",
         "cancelled",
         "failed",
+        "disputed",
       ],
       referral_status: ["pending", "activated", "rejected"],
       risk_level: ["low", "medium", "high", "critical"],

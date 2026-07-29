@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { PageHeader } from '@/components/admin/AdminChrome'
 import { PayoutsTable } from '@/components/admin/PayoutsTable'
-import { payoutRequests } from '@/lib/admin/preview'
+import { getPayoutQueue } from '@/lib/admin/data/payouts'
 import { DISPUTE_WINDOW_HOURS } from '@/lib/admin/types'
 
 export const metadata: Metadata = {
@@ -12,6 +12,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
+/**
+ * The payout queue, off preview data as of 2026-07-28.
+ *
+ * Nothing about the table changed to get here — `getPayoutQueue()` returns
+ * the shape `preview.payoutRequests()` returned, which is what the preview
+ * seam was for.
+ */
 export default async function AdminPayoutsPage({
   params,
 }: {
@@ -21,6 +28,8 @@ export default async function AdminPayoutsPage({
   setRequestLocale(locale)
   const t = await getTranslations('admin.payouts')
 
+  const requests = await getPayoutQueue()
+
   return (
     <>
       <PageHeader
@@ -29,7 +38,7 @@ export default async function AdminPayoutsPage({
       />
       {/* Date.now() in a Server Component is the repo's deliberate pattern for
           handing a stable clock to a client component — see dashboard/page.tsx. */}
-      <PayoutsTable initial={payoutRequests()} serverNow={Date.now()} />
+      <PayoutsTable initial={requests} serverNow={Date.now()} />
     </>
   )
 }

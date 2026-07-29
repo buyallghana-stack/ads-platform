@@ -4,7 +4,8 @@ import { AdminRail, AdminSidebar } from '@/components/admin/AdminNav'
 import { AdminTopBar } from '@/components/admin/AdminChrome'
 import { redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser } from '@/lib/auth/session'
-import { PREVIEW, payoutRequests, people } from '@/lib/admin/preview'
+import { countPayoutsAwaitingDecision } from '@/lib/admin/data/payouts'
+import { PREVIEW, people } from '@/lib/admin/preview'
 import { needsLoginChallenge } from '@/lib/security/login-2fa'
 import { createClient } from '@/lib/supabase/server'
 
@@ -50,11 +51,16 @@ export default async function AdminLayout({
     Queue depths on the nav. These are the numbers that tell the operator
     where the work is before they click anything, so they are computed here
     once rather than on each screen.
+
+    Payouts is real as of 2026-07-28; messages and flagged are still preview
+    and stay that way until their screens are wired. A badge is a promise that
+    there is work behind it, so the two that are still invented must not be
+    left to look like the one that is not — the top bar's data badge is what
+    says which is which.
   */
-  const requests = payoutRequests()
   const everyone = people()
   const counts = {
-    payouts: requests.filter((r) => r.status === 'pending_approval' || r.status === 'held').length,
+    payouts: await countPayoutsAwaitingDecision(),
     messages: everyone.reduce((n, p) => n + (p.unread ?? 0), 0),
     flagged: everyone.filter((p) => p.status === 'flagged' || p.status === 'disabled').length,
   }

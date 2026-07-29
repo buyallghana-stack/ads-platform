@@ -24,7 +24,7 @@ import { AdminDrawer, type AdminChip, type NavCounts } from './AdminNav'
  * shows a LIVE badge instead of losing one — REAL_ADMIN_SECTIONS is the whole
  * switch, one line per screen as each is finished.
  */
-const REAL_ADMIN_SECTIONS = ['/admin/ads']
+const REAL_ADMIN_SECTIONS = ['/admin/ads', '/admin/payouts']
 
 export function AdminTopBar({
   counts,

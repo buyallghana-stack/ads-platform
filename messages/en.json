@@ -1400,7 +1400,14 @@
           "dispute": "e.g. Recipient says the money never arrived"
         },
         "reasonHint": "Written plainly. It goes straight into their notifications.",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "working": "Working…",
+        "referenceLabel": "Transfer reference — optional",
+        "referencePlaceholder": "e.g. MoMo transaction ID",
+        "referenceHint": "Stored with the payout. It is what you check against if they later say the money never arrived."
+      },
+      "errors": {
+        "dismiss": "Dismiss"
       }
     },
     "people": {

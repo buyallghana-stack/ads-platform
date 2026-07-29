@@ -6,6 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint",
     "shoot": "node scripts/shoot.mjs",
     "seed": "node scripts/seed-dev.mjs",
@@ -34,14 +36,17 @@
     "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pg": "^8.20.0",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.11",
+    "pg": "^8.22.0",
     "sharp": "^0.35.3",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   },
   "//browserslist": "This platform serves old, cheap handsets in Ghana, so the build must transpile down to them. Next 16's default target drops everything below Safari 16, shipping syntax those phones cannot even parse (class static blocks -> iOS 15 crash; optional chaining/nullish -> iOS 12 crash). This target forces SWC to downlevel. Verify after any change: built .next/static/chunks/*.js must contain no `static{` blocks, no `??` nullish operators, and no `?.` optional chaining. iOS 12 is the practical floor for a Next 16 / React 19 app; older than that is not realistically supported.",
   "browserslist": [

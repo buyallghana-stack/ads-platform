@@ -60,11 +60,15 @@ export function PayoutDrawer({
   now,
   onClose,
   onDecide,
+  busy,
 }: {
   request: PayoutRequest | null
   now: number
   onClose: () => void
-  onDecide: (id: string, action: PayoutAction, reason: string) => void
+  onDecide: (id: string, action: PayoutAction, reason: string, reference?: string) => void
+  /** A decision is in flight. Every control that could start a second one
+   *  goes inert — double-approving a payout is not a harmless duplicate. */
+  busy: boolean
 }) {
   if (!request) return null
   /* Keyed on the request, so opening a different payout mounts a fresh panel
@@ -73,7 +77,14 @@ export function PayoutDrawer({
      decline reason across from the previous payout is how the wrong person
      gets declined. React guarantees the reset; an effect only promises it. */
   return (
-    <Panel key={request.id} request={request} now={now} onClose={onClose} onDecide={onDecide} />
+    <Panel
+      key={request.id}
+      request={request}
+      now={now}
+      onClose={onClose}
+      onDecide={onDecide}
+      busy={busy}
+    />
   )
 }
 
@@ -82,11 +93,15 @@ function Panel({
   now,
   onClose,
   onDecide,
+  busy,
 }: {
   request: PayoutRequest
   now: number
   onClose: () => void
-  onDecide: (id: string, action: PayoutAction, reason: string) => void
+  onDecide: (id: string, action: PayoutAction, reason: string, reference?: string) => void
+  /** A decision is in flight. Every control that could start a second one
+   *  goes inert — double-approving a payout is not a harmless duplicate. */
+  busy: boolean
 }) {
   const t = useTranslations('admin.payouts')
   const ts = useTranslations('admin.overview.status')
@@ -96,6 +111,14 @@ function Panel({
   const [copied, setCopied] = useState(false)
   const [pending, setPending] = useState<PayoutAction | null>(null)
   const [reason, setReason] = useState('')
+
+  /* Proof the transfer actually happened, for markPaid only. Optional, and
+     that is the operator's rule holding: marking paid needs a confirmation,
+     not a form. But it is offered, because "the money never arrived" is a
+     message this platform will receive, and the answer to it is a MoMo
+     transaction id — one nobody can produce later if there was never
+     anywhere to put it. */
+  const [reference, setReference] = useState('')
 
   /* Re-mask on a timer. See REVEAL_SECONDS: the realistic exposure is a
      screen left unattended, not an attacker. */
@@ -129,11 +152,17 @@ function Panel({
     }
   }
 
+  /**
+   * Hands the decision up and then leaves the confirm step exactly as it is.
+   *
+   * A successful decision unmounts this panel from above, so there is nothing
+   * to tidy. A refused one keeps the typed reason on screen — clearing it
+   * here would mean an operator whose decline was rejected for a reason they
+   * can fix has to write the whole explanation again.
+   */
   const submit = () => {
-    if (!pending) return
-    onDecide(r.id, pending, reason.trim())
-    setPending(null)
-    setReason('')
+    if (!pending || busy) return
+    onDecide(r.id, pending, reason.trim(), reference.trim() || undefined)
   }
 
   /* Escape and the scrim both route through here, so a half-typed decline
@@ -142,10 +171,12 @@ function Panel({
   const requestClose = () => (pending ? setPending(null) : onClose())
 
   const start = (action: PayoutAction) => {
+    if (busy) return
     const rule = ACTION_RULES[action]
     if (rule.confirm || rule.reason) {
       setPending(action)
       setReason('')
+      setReference('')
     } else {
       onDecide(r.id, action, '')
     }
@@ -181,6 +212,9 @@ function Panel({
                 masked={masked}
                 reason={reason}
                 setReason={setReason}
+                reference={reference}
+                setReference={setReference}
+                busy={busy}
                 onCancel={() => setPending(null)}
                 onConfirm={submit}
               />
@@ -194,6 +228,7 @@ function Panel({
                     variant={
                       ACTION_RULES[a].destructive ? 'ghost' : i === 0 ? 'primary' : 'secondary'
                     }
+                    disabled={busy}
                     onClick={() => start(a)}
                     className={cn(
                       i === 0 && 'flex-1',
@@ -401,6 +436,9 @@ function ConfirmStep({
   masked,
   reason,
   setReason,
+  reference,
+  setReference,
+  busy,
   onCancel,
   onConfirm,
 }: {
@@ -409,13 +447,16 @@ function ConfirmStep({
   masked: string
   reason: string
   setReason: (v: string) => void
+  reference: string
+  setReference: (v: string) => void
+  busy: boolean
   onCancel: () => void
   onConfirm: () => void
 }) {
   const t = useTranslations('admin.payouts')
   const format = useFormatter()
   const rule = ACTION_RULES[action]
-  const ready = !rule.reason || reason.trim().length >= 3
+  const ready = (!rule.reason || reason.trim().length >= 3) && !busy
 
   const ghs = `GHS ${format.number(request.ghs, {
     minimumFractionDigits: 2,
@@ -449,8 +490,38 @@ function ConfirmStep({
         </label>
       )}
 
+      {/* Only on markPaid, and never required. This is the one action that
+          asserts cash has left the business, and it is the one whose
+          aftermath — "I never received it" — needs something to check
+          against. */}
+      {action === 'markPaid' && (
+        <label className="mt-3 block">
+          <span className="text-[0.6875rem] font-medium text-ink-500">
+            {t('confirm.referenceLabel')}
+          </span>
+          <input
+            autoFocus
+            type="text"
+            value={reference}
+            onChange={(e) => setReference(e.target.value)}
+            placeholder={t('confirm.referencePlaceholder')}
+            className="mt-1 w-full rounded-(--radius-input) border border-ink-200 bg-canvas px-3 py-2 font-mono text-[0.8125rem] text-ink-900 placeholder:font-sans placeholder:text-ink-400 focus:border-brand-600 focus:outline-none pointer-coarse:text-base"
+          />
+          <span className="mt-1 block text-[0.625rem] text-ink-400">
+            {t('confirm.referenceHint')}
+          </span>
+        </label>
+      )}
+
       <div className="mt-3 flex gap-2">
-        <Button type="button" size="md" variant="secondary" onClick={onCancel} className="flex-1">
+        <Button
+          type="button"
+          size="md"
+          variant="secondary"
+          disabled={busy}
+          onClick={onCancel}
+          className="flex-1"
+        >
           {t('confirm.cancel')}
         </Button>
         <Button
@@ -461,7 +532,7 @@ function ConfirmStep({
           onClick={onConfirm}
           className="flex-1"
         >
-          {t(`actions.${action}`)}
+          {busy ? t('confirm.working') : t(`actions.${action}`)}
           <ArrowRight aria-hidden className="size-4" />
         </Button>
       </div>
