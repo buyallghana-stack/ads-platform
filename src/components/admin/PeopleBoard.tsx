@@ -16,7 +16,7 @@ import type { Person } from '@/lib/admin/types'
 
 import { PeopleGrid, type PeopleMode } from './PeopleGrid'
 import { PersonPanel } from './PersonPanel'
-import { PERSON_RULES, type PersonAction } from './person-actions'
+import type { PersonAction } from './person-actions'
 
 /**
  * Holds the account list and the selection for Users, Flagged and Messages.
@@ -29,7 +29,7 @@ import { PERSON_RULES, type PersonAction } from './person-actions'
  *
  * DECISIONS ARE REAL AS OF 2026-07-29, on Users and Flagged. `decide` calls
  * the server action, which calls the function that owns the transition, and
- * what comes back is the refreshed list — NOT `PERSON_RULES[action].next`.
+ * what comes back is the refreshed list, never a locally predicted status.
  *
  * No optimistic paint, for the same reason the payout queue has none: a card
  * that reads "disabled" for the half-second before the database disagrees is
@@ -48,15 +48,10 @@ export function PeopleBoard({
   people,
   mode,
   serverNow,
-  live,
 }: {
   people: Person[]
   mode: PeopleMode
   serverNow: number
-  /** True where the list came from the database and decisions must go back
-   *  to it. Explicit rather than derived from `mode`, so wiring Messages up
-   *  later is one prop rather than a rule somebody has to notice. */
-  live: boolean
 }) {
   const t = useTranslations('admin.people')
 
@@ -78,7 +73,7 @@ export function PeopleBoard({
 
   const openPerson = (person: Person) => {
     setOpenId(person.id)
-    if (mode !== 'messages' || !live) return
+    if (mode !== 'messages') return
 
     setThread(null)
     setThreadLoading(true)
@@ -118,27 +113,6 @@ export function PeopleBoard({
 
   const decide = (id: string, action: PersonAction, reason: string) => {
     setError(null)
-
-    if (!live) {
-      const rule = PERSON_RULES[action]
-      setRows((all) =>
-        all.map((p) =>
-          p.id === id
-            ? {
-                ...p,
-                status: rule.next,
-                /* Clearing a flag clears the note with it. Leaving last
-                   month's reason on a now-active account is how a resolved
-                   case gets re-opened by the next person who reads it. */
-                flaggedBy: rule.next === 'active' ? undefined : 'admin',
-                flagReason: rule.next === 'active' ? undefined : reason || p.flagReason,
-              }
-            : p,
-        ),
-      )
-      setOpenId(null)
-      return
-    }
 
     startTransition(async () => {
       const result = await decidePerson({

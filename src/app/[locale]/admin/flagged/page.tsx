@@ -28,7 +28,7 @@ export default async function AdminFlaggedPage({ params }: { params: Promise<{ l
   return (
     <>
       <PageHeader title={t('title')} description={t('description')} />
-      <PeopleBoard people={flagged} serverNow={Date.now()} mode="flagged" live />
+      <PeopleBoard people={flagged} serverNow={Date.now()} mode="flagged" />
     </>
   )
 }

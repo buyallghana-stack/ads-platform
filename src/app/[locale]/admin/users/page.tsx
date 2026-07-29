@@ -20,7 +20,7 @@ export default async function AdminUsersPage({ params }: { params: Promise<{ loc
       <PageHeader title={t('title')} description={t('description')} />
       {/* Date.now() in a Server Component is the repo's deliberate pattern for
           handing a stable clock to a client component — see payouts/page.tsx. */}
-      <PeopleBoard people={people} serverNow={Date.now()} mode="users" live />
+      <PeopleBoard people={people} serverNow={Date.now()} mode="users" />
     </>
   )
 }

@@ -60,8 +60,13 @@ export function PersonPanel({
   thread?: AdminSupportThread | null
   threadLoading?: boolean
   threadBusy?: boolean
-  onReply?: (body: string) => void
-  onToggleStatus?: (closed: boolean) => void
+  /* Required, not optional with a fallback. These were defaulted to `() => {}`,
+     which meant a caller that forgot them got a Send button that swallowed
+     every reply in silence — the same shape as the password reset form that
+     sat broken in production. A missing handler is a wiring mistake and the
+     compiler should be the one to say so. */
+  onReply: (body: string) => void
+  onToggleStatus: (closed: boolean) => void
 }) {
   if (!person) return null
   /* Keyed, so opening a different account mounts a fresh panel rather than
@@ -103,8 +108,8 @@ function Panel({
   thread: AdminSupportThread | null
   threadLoading: boolean
   threadBusy: boolean
-  onReply?: (body: string) => void
-  onToggleStatus?: (closed: boolean) => void
+  onReply: (body: string) => void
+  onToggleStatus: (closed: boolean) => void
 }) {
   const t = useTranslations('admin.people')
   const format = useFormatter()
@@ -238,24 +243,8 @@ function Panel({
             thread={thread}
             loading={threadLoading}
             busy={threadBusy}
-            /* Throwing beats a no-op fallback. `?? (() => {})` here meant a
-               caller that rendered the messages panel without a handler got a
-               Send button that swallowed every reply in silence — the same
-               failure that left the password reset form dead in production
-               for weeks. Reaching this is a wiring mistake, and it should
-               show up as one the first time the panel is opened. */
-            onReply={
-              onReply ??
-              (() => {
-                throw new Error('PersonPanel: mode="messages" needs onReply')
-              })
-            }
-            onToggleStatus={
-              onToggleStatus ??
-              (() => {
-                throw new Error('PersonPanel: mode="messages" needs onToggleStatus')
-              })
-            }
+            onReply={onReply}
+            onToggleStatus={onToggleStatus}
           />
         </PanelSection>
       )}

@@ -28,7 +28,7 @@ export default async function AdminMessagesPage({ params }: { params: Promise<{ 
       <PageHeader title={t('title')} description={t('description')} />
       {/* Deliberate clock read in a server component — the accepted pattern
           here for handing a stable `now` to a client component. */}
-      <PeopleBoard people={threads} serverNow={Date.now()} mode="messages" live />
+      <PeopleBoard people={threads} serverNow={Date.now()} mode="messages" />
     </>
   )
 }
