@@ -1,19 +1,26 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 
 import {
   AlertTriangle,
   Copy,
+  X,
   Eye,
   EyeOff,
   Pencil,
   Plus,
+  Trash2,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import {
+  deletePlan,
+  savePlan,
+  setPlanVisibility,
+} from '@/app/[locale]/admin/subscriptions/actions'
 import { Button } from '@/components/ui/Button'
 import { MoreMenu, type MenuItem } from '@/components/ui/MoreMenu'
 import { checkPlanValue, houseRate, nextDraftPlanId, slugify } from '@/lib/admin/plan-value'
@@ -68,6 +75,10 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
   const t = useTranslations('admin.subscriptions')
 
   const [rows, setRows] = useState(initial)
+  /* What the database said when it refused — shown verbatim, because it
+     raises these in operator language ("The starting plan must stay free"). */
+  const [error, setError] = useState<string | null>(null)
+  const [busy, startTransition] = useTransition()
   const [filter, setFilter] = useState<Filter>('all')
   const [query, setQuery] = useState('')
   /** The plan being edited, or 'new' while creating one. */
@@ -95,12 +106,59 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
     }
   }, [rows])
 
-  /** Local only, until the backend exists. */
-  const save = (plan: PlanRow) =>
-    setRows((all) => (all.some((p) => p.id === plan.id) ? all.map((p) => (p.id === plan.id ? plan : p)) : [...all, plan]))
+  /**
+   * Real as of 2026-07-29. What comes back is the refreshed list, and that is
+   * what gets rendered — never the draft that was submitted. The database
+   * refuses things this table cannot know about (a slug rename, making the
+   * starting plan cost money), and painting the optimistic version would show
+   * an operator a plan that does not exist in that shape.
+   */
+  const save = (plan: PlanRow) => {
+    setError(null)
+    startTransition(async () => {
+      const result = await savePlan({
+        // A draft plan's local id is not a uuid — it means "new".
+        id: /^[0-9a-f-]{36}$/i.test(plan.id) ? plan.id : undefined,
+        slug: plan.slug,
+        name: plan.name,
+        description: plan.description,
+        priceGhs: plan.priceGhs,
+        billingPeriodDays: plan.billingPeriodDays,
+        dailyAdCap: plan.dailyAdCap,
+        rewardMultiplier: plan.rewardMultiplier,
+        redemptionMinimumPoints: plan.redemptionMinimumPoints,
+        referralBonusMultiplier: plan.referralBonusMultiplier,
+        adPriority: plan.adPriority,
+        adCooldownSeconds: plan.adCooldownSeconds,
+        sortOrder: plan.sortOrder,
+      })
+      if (result.plans) setRows(result.plans)
+      if (!result.ok) return setError(result.message)
+      setEditing(null)
+    })
+  }
 
-  const setStatus = (id: string, status: PlanRow['status']) =>
-    setRows((all) => all.map((p) => (p.id === id ? { ...p, status } : p)))
+  const setStatus = (id: string, status: PlanRow['status']) => {
+    setError(null)
+    startTransition(async () => {
+      const result = await setPlanVisibility(id, status === 'live')
+      if (result.plans) setRows(result.plans)
+      if (!result.ok) setError(result.message)
+    })
+  }
+
+  const remove = (p: PlanRow) => {
+    setError(null)
+    startTransition(async () => {
+      const result = await deletePlan(p.id)
+      if (result.plans) setRows(result.plans)
+      if (!result.ok) return setError(result.message)
+      // A plan somebody has bought is hidden rather than deleted, because the
+      // statement is built from those payments. Say which happened.
+      if (result.outcome === 'hidden') setError(t('hiddenInstead', { name: p.name }))
+      setEditing(null)
+    })
+  }
 
   const duplicate = (p: PlanRow) => {
     const copy: PlanRow = {
@@ -139,9 +197,9 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
       },
     ]
 
-    /* The default plan cannot be hidden — the database refuses it, because
-       every new user is put on it and auto-downgraded back to it on expiry.
-       Absent rather than disabled, as everywhere else in this dashboard. */
+    /* The default plan cannot be hidden or deleted — the database refuses
+       both, because every new user is put on it and auto-downgraded back to
+       it on expiry. Absent rather than disabled, as everywhere else here. */
     if (!p.isDefault) {
       items.push({
         key: 'visibility',
@@ -149,8 +207,25 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
         icon: p.status === 'live' ? <EyeOff /> : <Eye />,
         separated: true,
         hint: p.status === 'live' && p.active > 0 ? t('actions.hideHint', { count: p.active }) : undefined,
-        onSelect: () => setStatus(p.id, p.status === 'live' ? 'hidden' : 'live'),
+        onSelect: () => !busy && setStatus(p.id, p.status === 'live' ? 'hidden' : 'live'),
       })
+
+      /* Delete appears ONLY when it can actually delete. A plan anybody has
+         bought is kept — the payments behind the statement point at it — and
+         the database turns the attempt into a hide. Offering it anyway, under
+         the label of what would really happen, put "Take off sale" in the menu
+         twice: two identical labels doing two different things is worse than
+         one honest one, and the visibility item above already does it. */
+      if (p.active === 0 && p.monthlyGhs === 0) {
+        items.push({
+          key: 'delete',
+          label: t('actions.delete'),
+          icon: <Trash2 />,
+          tone: 'danger',
+          separated: true,
+          onSelect: () => !busy && remove(p),
+        })
+      }
     }
 
     return items
@@ -189,6 +264,24 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
 
   return (
     <div>
+      {error && (
+        <div
+          role="alert"
+          className="mb-4 flex items-start gap-2.5 rounded-(--radius-card) border border-danger-500/25 bg-danger-50 px-3.5 py-3"
+        >
+          <AlertTriangle aria-hidden className="mt-px size-4 shrink-0 text-danger-700" />
+          <p className="min-w-0 flex-1 text-[0.8125rem] leading-relaxed text-danger-700">{error}</p>
+          <button
+            type="button"
+            onClick={() => setError(null)}
+            className="shrink-0 rounded p-0.5 text-danger-700/70 hover:text-danger-700"
+          >
+            <X aria-hidden className="size-4" />
+            <span className="sr-only">{t('dismissError')}</span>
+          </button>
+        </div>
+      )}
+
       <SummaryStrip className="mb-5">
         <SummaryCell
           label={t('summary.paying')}

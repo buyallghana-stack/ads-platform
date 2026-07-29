@@ -6,7 +6,9 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { PageHeader, PersonCell, StatusDot } from '@/components/admin/AdminChrome'
 import { SettingsForm, type FieldGroup } from '@/components/admin/SettingsForm'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
-import { administrators } from '@/lib/admin/preview'
+import { saveConfig } from '@/app/[locale]/admin/config/actions'
+import { getAdministrators } from '@/lib/admin/data/administrators'
+import { getPlatformConfig } from '@/lib/admin/data/config'
 
 export const metadata: Metadata = {
   title: 'Admin · Admin settings',
@@ -21,10 +23,16 @@ export const metadata: Metadata = {
  * are different blast radii and mixing them into one long form is how the
  * kill switch ends up two rows below a theme preference.
  *
- * The administrator list is read-only for now and says so. Granting the admin
- * role is the one action on this screen that cannot be undone from this
- * screen — a mis-grant hands somebody the payout queue — so it waits for the
- * backend rather than shipping as a button that half works.
+ * REAL AS OF 2026-07-29. The administrator list comes from `user_roles`, and
+ * every control below writes through `admin_set_config` — the same writer the
+ * platform-settings screen uses, so two screens cannot disagree about how a
+ * setting is validated.
+ *
+ * The list stays READ-ONLY on purpose. Granting the admin role is the one
+ * action here that cannot be undone from here — a mis-grant hands somebody the
+ * payout queue — and with exactly one administrator today, a revoke button is
+ * a way to lock the only operator out of their own platform. It stays a
+ * deliberate database action until the operator asks for it.
  */
 export default async function AdminSettingsPage({
   params,
@@ -35,7 +43,7 @@ export default async function AdminSettingsPage({
   setRequestLocale(locale)
   const t = await getTranslations('admin.adminSettings')
 
-  const admins = administrators()
+  const [admins, config] = await Promise.all([getAdministrators(), getPlatformConfig()])
 
   const groups: FieldGroup[] = [
     {
@@ -51,12 +59,21 @@ export default async function AdminSettingsPage({
           kind: 'toggle',
         },
         {
-          key: 'admin_session_hours',
-          label: t('fields.sessionHours.label'),
-          description: t('fields.sessionHours.description'),
+          /*
+            Was `admin_session_hours`, which did not exist and could not have.
+            There is no admin session distinct from a user session — signing in
+            is signing in — and the only admin-relevant timer in the system is
+            how long a passed two-factor check lasts before it is asked for
+            again. This is that timer, under a name that says so. It applies to
+            everybody with 2FA enrolled, and the description says so rather
+            than implying an admin-only scope it does not have.
+          */
+          key: 'two_factor_recheck_hours',
+          label: t('fields.recheckHours.label'),
+          description: t('fields.recheckHours.description'),
           kind: 'number',
-          min: 1,
-          max: 720,
+          min: config.meta.two_factor_recheck_hours?.min ?? 1,
+          max: config.meta.two_factor_recheck_hours?.max ?? 720,
           suffix: t('units.hours'),
         },
       ],
@@ -107,14 +124,36 @@ export default async function AdminSettingsPage({
           {admins.map((a) => (
             <li key={a.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
               <div className="min-w-0 flex-1">
-                <PersonCell name={a.name} secondary={a.email} />
+                <PersonCell
+                  name={a.isYou ? `${a.name} · ${t('administrators.you')}` : a.name}
+                  secondary={a.email}
+                />
               </div>
+              <span className="text-[0.6875rem] text-ink-400">
+                {a.lastSeenAt
+                  ? t('administrators.lastSeen', {
+                      when: new Date(a.lastSeenAt).toLocaleDateString('en-GB', {
+                        day: 'numeric',
+                        month: 'short',
+                      }),
+                    })
+                  : t('administrators.neverSeen')}
+              </span>
               <StatusDot tone={a.twoFactor ? 'success' : 'warning'}>
                 {t(a.twoFactor ? 'administrators.twoFactorOn' : 'administrators.twoFactorOff')}
               </StatusDot>
             </li>
           ))}
         </ul>
+
+        {/* Said plainly, because the setting above can send every one of them
+            to an enrolment screen and the operator should know that before
+            they switch it on rather than after. */}
+        {admins.length > 0 && admins.every((a) => !a.twoFactor) && (
+          <p className="border-t border-ink-200 bg-warning-50 px-4 py-3 text-[0.75rem] leading-relaxed text-warning-600">
+            {t('administrators.noneProtected')}
+          </p>
+        )}
 
         <p className="flex items-start gap-2 border-t border-ink-200 bg-ink-50 px-4 py-3 text-[0.75rem] leading-relaxed text-ink-500">
           <ShieldCheck aria-hidden className="mt-px size-3.5 shrink-0 text-ink-400" />
@@ -137,15 +176,19 @@ export default async function AdminSettingsPage({
         <ThemeToggle />
       </section>
 
+      {/* The same writer the platform-settings screen uses: `admin_set_config`
+          validates each value against that row's own type and bounds, and
+          returns only what actually changed. Two screens, one write path. */}
       <SettingsForm
         groups={groups}
         initial={{
-          require_admin_2fa: false,
-          admin_session_hours: 168,
-          alert_on_payout_request: true,
-          alert_on_pool_ceiling: true,
-          alert_on_critical_risk: true,
+          require_admin_2fa: config.values.require_admin_2fa,
+          two_factor_recheck_hours: config.values.two_factor_recheck_hours,
+          alert_on_payout_request: config.values.alert_on_payout_request,
+          alert_on_pool_ceiling: config.values.alert_on_pool_ceiling,
+          alert_on_critical_risk: config.values.alert_on_critical_risk,
         }}
+        onSave={saveConfig}
       />
     </>
   )

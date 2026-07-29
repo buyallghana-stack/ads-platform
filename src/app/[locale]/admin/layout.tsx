@@ -7,7 +7,7 @@ import { getProfile, getSessionUser } from '@/lib/auth/session'
 import { countPayoutsAwaitingDecision } from '@/lib/admin/data/payouts'
 import { countFlaggedAccounts } from '@/lib/admin/data/people'
 import { PREVIEW, people } from '@/lib/admin/preview'
-import { needsLoginChallenge } from '@/lib/security/login-2fa'
+import { adminNeedsTwoFactor, needsLoginChallenge } from '@/lib/security/login-2fa'
 import { createClient } from '@/lib/supabase/server'
 
 /**
@@ -45,6 +45,18 @@ export default async function AdminLayout({
   const supabase = await createClient()
   const { data: isAdmin } = await supabase.rpc('is_admin')
   if (!isAdmin) redirect({ href: '/dashboard', locale })
+
+  /*
+    `require_admin_2fa`, from /admin/settings, enforced HERE for the same
+    reason the role check is: a per-page check is a check somebody forgets to
+    add to page fourteen.
+
+    It sends an unprotected admin to ENROL rather than locking them out.
+    Locking out would be a setting that can strand the only administrator —
+    there is currently exactly one — with no way back in short of SQL. Enrol
+    is recoverable and gets the same outcome.
+  */
+  if (await adminNeedsTwoFactor(user!.id)) redirect({ href: '/profile/2fa', locale })
 
   const profile = await getProfile(user!.id)
 

@@ -1709,6 +1709,10 @@ export type Database = {
         Args: { p_admin_id: string; p_payment_id: string }
         Returns: undefined
       }
+      admin_delete_plan: {
+        Args: { p_admin_id: string; p_plan_id: string }
+        Returns: string
+      }
       admin_finance_statement: {
         Args: { p_months?: number }
         Returns: {
@@ -1749,6 +1753,18 @@ export type Database = {
           updated_at: string
           video_source: Database["public"]["Enums"]["video_source"]
           weight: number
+        }[]
+      }
+      admin_list_administrators: {
+        Args: never
+        Returns: {
+          email: string
+          granted_at: string
+          id: string
+          is_you: boolean
+          last_seen_at: string
+          name: string
+          two_factor: boolean
         }[]
       }
       admin_list_advertiser_payments: {
@@ -1813,6 +1829,29 @@ export type Database = {
           referrals: number
           status: string
           tier: string
+        }[]
+      }
+      admin_list_plans: {
+        Args: never
+        Returns: {
+          active: number
+          active_last_month: number
+          ad_cooldown_seconds: number
+          ad_priority: number
+          billing_period_days: number
+          daily_ad_cap: number
+          description: string
+          id: string
+          is_active: boolean
+          is_default: boolean
+          monthly_ghs: number
+          name: string
+          price_ghs: number
+          redemption_minimum_points: number
+          referral_bonus_multiplier: number
+          reward_multiplier: number
+          slug: string
+          sort_order: number
         }[]
       }
       admin_list_redemptions: {
@@ -1912,6 +1951,64 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "advertisers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_save_plan: {
+        Args: { p_admin_id: string; p_plan: Json }
+        Returns: {
+          ad_cooldown_seconds: number
+          ad_priority: number
+          billing_period_days: number
+          created_at: string
+          currency_code: string
+          daily_ad_cap: number
+          description: string | null
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          price_minor: number
+          redemption_minimum_points: number
+          referral_bonus_multiplier: number
+          reward_multiplier: number
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tiers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_set_plan_visibility: {
+        Args: { p_active: boolean; p_admin_id: string; p_plan_id: string }
+        Returns: {
+          ad_cooldown_seconds: number
+          ad_priority: number
+          billing_period_days: number
+          created_at: string
+          currency_code: string
+          daily_ad_cap: number
+          description: string | null
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          price_minor: number
+          redemption_minimum_points: number
+          referral_bonus_multiplier: number
+          reward_multiplier: number
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tiers"
           isOneToOne: true
           isSetofReturn: false
         }

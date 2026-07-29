@@ -2021,7 +2021,8 @@
         "duplicateHint": "La copie démarre masquée",
         "hide": "Retirer de la vente",
         "show": "Mettre en vente",
-        "hideHint": "{count} la conservent"
+        "hideHint": "{count} la conservent",
+        "delete": "Supprimer le forfait"
       },
       "valueWarn": {
         "short": "Hors de la ligne de valeur",
@@ -2090,7 +2091,9 @@
         "periodRange": "Entre 1 et 3650 jours.",
         "multiplierRange": "Supérieur à 0 et au maximum 100.",
         "defaultMustBeFree": "La formule par défaut doit être gratuite."
-      }
+      },
+      "dismissError": "Fermer",
+      "hiddenInstead": "{name} a été acheté : il a été retiré de la vente plutôt que supprimé — les paiements associés font partie du relevé."
     },
     "finance": {
       "title": "Finances",
@@ -2290,7 +2293,11 @@
         "description": "Toutes les personnes pouvant accéder à cette zone, approuver un retrait ou désactiver un compte.",
         "twoFactorOn": "Double authentification active",
         "twoFactorOff": "Pas de double authentification",
-        "note": "L'attribution et le retrait du rôle d'administrateur ne sont pas encore branchés. C'est la seule action ici qui ne peut pas être annulée depuis cet écran — une erreur donnerait à quelqu'un la file des retraits — elle attend donc le serveur plutôt que d'être livrée à moitié."
+        "note": "Accorder et retirer le rôle d'administrateur reste une action délibérée en base. C'est la seule chose ici qui ne peut pas être annulée depuis ici — une erreur donne à quelqu'un la file des retraits.",
+        "lastSeen": "Vu {when}",
+        "neverSeen": "Jamais connecté",
+        "you": "Vous",
+        "noneProtected": "Aucun administrateur n'a encore d'authentificateur. Activer l'exigence ci-dessus les enverra s'inscrire, sans les bloquer."
       },
       "appearance": {
         "title": "Apparence",
@@ -2312,10 +2319,6 @@
           "description": "Chaque administrateur doit enrôler une application d'authentification avant d'accéder à cette zone.",
           "warning": "À activer avant l'ouverture des retraits. Un administrateur n'a actuellement aucune application enrôlée et serait bloqué jusqu'à ce qu'il en configure une."
         },
-        "sessionHours": {
-          "label": "Durée de session administrateur",
-          "description": "Combien de temps un administrateur reste connecté avant qu'on lui redemande."
-        },
         "alertPayout": {
           "label": "Nouvelle demande de retrait",
           "description": "Dès que quelqu'un demande à retirer."
@@ -2327,6 +2330,10 @@
         "alertRisk": {
           "label": "Retrait à risque critique",
           "description": "Quand une demande atteint un score justifiant de ne pas payer sans vérifier."
+        },
+        "recheckHours": {
+          "label": "Revérification 2FA",
+          "description": "Durée de validité d'une vérification à deux facteurs avant qu'elle ne soit redemandée. S'applique à tous les comptes avec la 2FA, pas seulement aux administrateurs."
         }
       }
     },

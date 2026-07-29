@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { PageHeader } from '@/components/admin/AdminChrome'
 import { PlansTable } from '@/components/admin/PlansTable'
-import { plans } from '@/lib/admin/preview'
+import { getPlans } from '@/lib/admin/data/plans'
 
 export const metadata: Metadata = {
   title: 'Admin · Subscriptions',
@@ -20,10 +20,12 @@ export default async function AdminSubscriptionsPage({
   setRequestLocale(locale)
   const t = await getTranslations('admin.subscriptions')
 
+  const plans = await getPlans()
+
   return (
     <>
       <PageHeader title={t('title')} description={t('description')} />
-      <PlansTable initial={plans()} />
+      <PlansTable initial={plans} />
     </>
   )
 }

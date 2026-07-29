@@ -2021,7 +2021,8 @@
         "duplicateHint": "Copy starts hidden",
         "hide": "Take off sale",
         "show": "Put on sale",
-        "hideHint": "{count} keep their plan"
+        "hideHint": "{count} keep their plan",
+        "delete": "Delete plan"
       },
       "valueWarn": {
         "short": "Off the value line",
@@ -2090,7 +2091,9 @@
         "periodRange": "Between 1 and 3650 days.",
         "multiplierRange": "Above 0 and no more than 100.",
         "defaultMustBeFree": "The default plan has to be free."
-      }
+      },
+      "dismissError": "Dismiss",
+      "hiddenInstead": "{name} has been bought, so it was taken off sale rather than deleted — the payments behind it are part of the statement."
     },
     "finance": {
       "title": "Finance",
@@ -2290,7 +2293,11 @@
         "description": "Everyone who can reach this area, approve a payout or disable an account.",
         "twoFactorOn": "Two-factor on",
         "twoFactorOff": "No two-factor",
-        "note": "Granting and revoking the admin role is not wired up yet. It is the one action here that cannot be undone from here — a mis-grant hands somebody the payout queue — so it waits for the backend rather than shipping half-working."
+        "note": "Granting and revoking the admin role stays a deliberate database action. It is the one thing here that cannot be undone from here — a mis-grant hands somebody the payout queue.",
+        "lastSeen": "Last seen {when}",
+        "neverSeen": "Never signed in",
+        "you": "You",
+        "noneProtected": "No administrator has an authenticator yet. Turning on the requirement above will send them to enrol, not lock them out."
       },
       "appearance": {
         "title": "Appearance",
@@ -2312,10 +2319,6 @@
           "description": "Every admin must enrol an authenticator before they can reach this area.",
           "warning": "Worth turning on before payouts go live. One administrator currently has no authenticator enrolled and would be locked out until they set one up."
         },
-        "sessionHours": {
-          "label": "Admin session length",
-          "description": "How long an administrator stays signed in before being asked again."
-        },
         "alertPayout": {
           "label": "New payout request",
           "description": "Whenever somebody asks to withdraw."
@@ -2327,6 +2330,10 @@
         "alertRisk": {
           "label": "Critical-risk payout",
           "description": "When a request scores high enough to say do not pay without checking."
+        },
+        "recheckHours": {
+          "label": "Two-factor recheck",
+          "description": "How long a passed two-factor check lasts before it is asked for again. Applies to every account with 2FA on, not only administrators."
         }
       }
     },
