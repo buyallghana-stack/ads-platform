@@ -146,11 +146,19 @@ describe.skipIf(!HAS_DB)('values a setting may take', () => {
 
       // "yes" is the plausible mistake, and payouts_enabled is the licence
       // switch — a value it cannot parse must not become truthy.
+      //
+      // The before-value is READ, not assumed. This asserted `'false'`
+      // literally until the operator turned payouts on for real, at which
+      // point a passing test started failing because the world changed
+      // rather than because the code did. What it always meant is that a
+      // rejected write leaves the setting exactly as it was.
+      const before = await configValue(tx, 'payouts_enabled')
+
       const message = await expectRejection(tx, () =>
         setConfigAs(tx, admin.id, { payouts_enabled: 'yes' }),
       )
       expect(message).toMatch(/true or false/i)
-      expect(await configValue(tx, 'payouts_enabled')).toBe('false')
+      expect(await configValue(tx, 'payouts_enabled')).toBe(before)
     })
   })
 
@@ -287,18 +295,19 @@ describe.skipIf(!HAS_DB)('settings that gate money', () => {
     })
   })
 
-  it('cannot start payouts on its own — the environment switch is separate', async () => {
+  it('is the single switch that lets a payout be marked paid', async () => {
     await withRollback(async (tx) => {
       const admin = await createAdmin(tx)
 
-      // Two switches in different systems, both defaulting off (§2.3). This
-      // screen owns one of them; flipping it must not be sufficient.
+      // CORRECTED 2026-07-29. This used to be called "cannot start payouts on
+      // its own — the environment switch is separate", on the belief that
+      // `PAYOUTS_ENABLED` in the environment was a second required gate.
+      // It is not: `mark_redemption_paid` checks `config_bool` and nothing
+      // else, and the env var is declared in src/lib/env.ts and read by no
+      // code at all. The old name asserted a safety property this system does
+      // not have, which is worse than having no test.
       await setConfigAs(tx, admin.id, { payouts_enabled: 'true' })
       expect(await configValue(tx, 'payouts_enabled')).toBe('true')
-
-      // The second is PAYOUTS_ENABLED in the environment, which no SQL can
-      // reach. This test documents the boundary rather than proving the env
-      // var, which is asserted where it is read.
       const { rows } = await tx.query<{ v: boolean }>(
         `select public.config_bool('payouts_enabled') as v`,
       )

@@ -14,6 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
+      advertiser_payments: {
+        Row: {
+          advertiser_id: string
+          amount_minor: number
+          created_at: string
+          currency_code: string
+          id: string
+          method: string | null
+          note: string | null
+          received_at: string
+          recorded_by: string | null
+          reference: string | null
+        }
+        Insert: {
+          advertiser_id: string
+          amount_minor: number
+          created_at?: string
+          currency_code?: string
+          id?: string
+          method?: string | null
+          note?: string | null
+          received_at?: string
+          recorded_by?: string | null
+          reference?: string | null
+        }
+        Update: {
+          advertiser_id?: string
+          amount_minor?: number
+          created_at?: string
+          currency_code?: string
+          id?: string
+          method?: string | null
+          note?: string | null
+          received_at?: string
+          recorded_by?: string | null
+          reference?: string | null
+        }
+        Relationships: []
+      }
+      advertisers: {
+        Row: {
+          contact: string | null
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          name: string
+          notes: string | null
+          started_at: string
+          status: Database["public"]["Enums"]["advertiser_status"]
+          updated_at: string
+        }
+        Insert: {
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          started_at?: string
+          status?: Database["public"]["Enums"]["advertiser_status"]
+          updated_at?: string
+        }
+        Update: {
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          started_at?: string
+          status?: Database["public"]["Enums"]["advertiser_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ad_attempts: {
         Row: {
           ad_id: string
@@ -1573,6 +1651,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_daily_money: {
+        Args: { p_days?: number }
+        Returns: {
+          day: string
+          deposits: number
+          withdrawals: number
+        }[]
+      }
       admin_decide_redemption: {
         Args: {
           p_action: string
@@ -1627,6 +1713,23 @@ export type Database = {
         Args: { p_ad_id: string; p_admin_id: string }
         Returns: string
       }
+      admin_delete_advertiser: {
+        Args: { p_admin_id: string; p_advertiser_id: string }
+        Returns: string
+      }
+      admin_delete_advertiser_payment: {
+        Args: { p_admin_id: string; p_payment_id: string }
+        Returns: undefined
+      }
+      admin_finance_statement: {
+        Args: { p_months?: number }
+        Returns: {
+          advertisers_ghs: number
+          month: string
+          subscriptions_ghs: number
+          withdrawals_ghs: number
+        }[]
+      }
       admin_get_ad: {
         Args: { p_ad_id: string; p_admin_id: string }
         Returns: Json
@@ -1658,6 +1761,36 @@ export type Database = {
           updated_at: string
           video_source: Database["public"]["Enums"]["video_source"]
           weight: number
+        }[]
+      }
+      admin_list_advertiser_payments: {
+        Args: { p_advertiser_id: string }
+        Returns: {
+          amount_ghs: number
+          id: string
+          method: string
+          note: string
+          received_at: string
+          recorded_by: string
+          reference: string
+        }[]
+      }
+      admin_list_advertisers: {
+        Args: never
+        Returns: {
+          ads_live: number
+          ads_total: number
+          contact: string
+          ends_at: string
+          id: string
+          last_paid_at: string
+          name: string
+          notes: string
+          paid_ghs: number
+          payments: number
+          spent_ghs: number
+          started_at: string
+          status: string
         }[]
       }
       admin_list_audit: {
@@ -1724,6 +1857,39 @@ export type Database = {
           user_name: string
         }[]
       }
+      admin_overview_metrics: {
+        Args: never
+        Returns: Json
+      }
+      admin_record_advertiser_payment: {
+        Args: {
+          p_admin_id: string
+          p_advertiser_id: string
+          p_amount_minor: number
+          p_method?: string
+          p_note?: string
+          p_received_at?: string
+          p_reference?: string
+        }
+        Returns: {
+          advertiser_id: string
+          amount_minor: number
+          created_at: string
+          currency_code: string
+          id: string
+          method: string | null
+          note: string | null
+          received_at: string
+          recorded_by: string | null
+          reference: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "advertiser_payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_save_ad: {
         Args: {
           p_ad: Json
@@ -1740,6 +1906,27 @@ export type Database = {
           p_status: Database["public"]["Enums"]["ad_status"]
         }
         Returns: Database["public"]["Enums"]["ad_status"]
+      }
+      admin_save_advertiser: {
+        Args: { p_admin_id: string; p_advertiser: Json }
+        Returns: {
+          contact: string | null
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          name: string
+          notes: string | null
+          started_at: string
+          status: Database["public"]["Enums"]["advertiser_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "advertisers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       admin_set_config: {
         Args: { p_admin_id: string; p_values: Json }
@@ -2781,6 +2968,7 @@ export type Database = {
       }
     }
     Enums: {
+      advertiser_status: "pending" | "active" | "ended"
       ad_answer_outcome:
         | "correct"
         | "incorrect"
@@ -2986,6 +3174,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      advertiser_status: ["pending", "active", "ended"],
       ad_answer_outcome: [
         "correct",
         "incorrect",

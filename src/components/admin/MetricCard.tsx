@@ -35,7 +35,9 @@ export function MetricCard({
   value: string
   /** The "GHS 172,650.00 previous month" line. */
   comparison?: string
-  changePct?: number
+  /** Null when there was no previous window to compare against — the badge is
+   *  omitted rather than shown as 0%. See `Trend` in admin/types. */
+  changePct?: number | null
   positiveIsGood?: boolean
   footer?: React.ReactNode
   className?: string
@@ -71,7 +73,7 @@ export function MetricCard({
         {value}
       </p>
 
-      {changePct !== undefined && (
+      {changePct != null && (
         <p
           className={cn(
             'mt-2.5 inline-flex w-fit items-center gap-1 rounded-full px-1.5 py-0.5',

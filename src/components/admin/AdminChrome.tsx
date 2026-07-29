@@ -31,6 +31,12 @@ const REAL_ADMIN_SECTIONS = [
   '/admin/users',
   '/admin/flagged',
   '/admin/audit',
+  '/admin/advertisers',
+  '/admin/finance',
+  // The overview itself. Matched EXACTLY — a `startsWith('/admin')` would
+  // mark every screen in the area live, including the ones still showing
+  // invented money, which is the precise mistake this badge exists to stop.
+  '/admin',
 ]
 
 export function AdminTopBar({
@@ -44,7 +50,12 @@ export function AdminTopBar({
 }) {
   const t = useTranslations('admin')
   const pathname = usePathname()
-  const live = REAL_ADMIN_SECTIONS.some((section) => pathname.startsWith(section))
+  /* Exact match, or a path UNDER the section. Plain `startsWith` would let
+     '/admin' claim every screen in the area, and '/admin/ads' would also
+     match a future '/admin/adsomething'. */
+  const live = REAL_ADMIN_SECTIONS.some(
+    (section) => pathname === section || pathname.startsWith(`${section}/`),
+  )
 
   return (
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-ink-200 bg-surface/95 px-3 backdrop-blur sm:px-5">

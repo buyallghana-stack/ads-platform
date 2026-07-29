@@ -9,7 +9,8 @@ import { MetricCard } from '@/components/admin/MetricCard'
 import { MoneyChart } from '@/components/admin/MoneyChart'
 import { PAYOUT_TONE } from '@/components/admin/payout-status'
 import { Link } from '@/i18n/navigation'
-import { moneySeries, overviewMetrics, payoutRequests } from '@/lib/admin/preview'
+import { getDailyMoney, getOverviewMetrics } from '@/lib/admin/data/finance'
+import { getPayoutQueue } from '@/lib/admin/data/payouts'
 
 export const metadata: Metadata = {
   title: 'Admin · Overview',
@@ -49,9 +50,11 @@ export default async function AdminOverviewPage({
   setRequestLocale(locale)
   const t = await getTranslations('admin.overview')
 
-  const m = overviewMetrics()
-  const series = moneySeries(30)
-  const requests = payoutRequests()
+  const [m, series, requests] = await Promise.all([
+    getOverviewMetrics(),
+    getDailyMoney(30),
+    getPayoutQueue(),
+  ])
 
   const queue = requests
     .filter((r) => r.status === 'pending_approval' || r.status === 'held')

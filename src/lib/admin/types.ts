@@ -13,7 +13,16 @@ import type { CtaLink } from '@/lib/ads/cta'
  * arguments only.
  */
 
-export type Trend = { value: number; changePct: number }
+/**
+ * A figure and how it moved against the previous window.
+ *
+ * `changePct` is NULL when the earlier window was empty — going from nothing
+ * to GHS 740 is neither "+100%" nor "no change", it is a comparison that
+ * cannot be made. The card renders no trend at all in that case, which is the
+ * only honest thing to draw and matters most in a platform's first weeks,
+ * when almost every comparison is against zero.
+ */
+export type Trend = { value: number; changePct: number | null }
 
 export type OverviewMetrics = {
   /** Everything that came IN: plan purchases plus advertiser contracts. */
@@ -393,14 +402,42 @@ export type PlanRow = {
 export type Advertiser = {
   id: string
   name: string
-  contact: string
+  contact: string | null
   status: 'active' | 'ended' | 'pending'
-  /** What they have paid, and what has been delivered against it. */
+  /**
+   * What they have paid, and what has been delivered against it.
+   *
+   * `contractGhs` is the SUM OF THEIR RECEIPTS, not a stored contract value —
+   * a single editable "contract worth" column would have to be rewritten
+   * every time more money arrived, and an edited number cannot answer "when
+   * did they pay, how much, and against what bank reference?".
+   *
+   * `spentGhs` comes from the points ledger rather than from completion
+   * counts, because the reward is tier-adjusted at credit time: what an ad
+   * actually cost is what was actually credited for it.
+   */
   contractGhs: number
   spentGhs: number
   adsLive: number
+  /** Including paused, finished and archived ones. */
+  adsTotal: number
+  /** How many receipts make up `contractGhs`, and when the last one landed. */
+  payments: number
+  lastPaidAt: string | null
   startedAt: string
   endsAt: string | null
+  notes: string | null
+}
+
+/** One receipt against an advertiser, as shown in their review panel. */
+export type AdvertiserPayment = {
+  id: string
+  amountGhs: number
+  receivedAt: string
+  method: string | null
+  reference: string | null
+  note: string | null
+  recordedBy: string | null
 }
 
 /** One line of the admin audit log. */

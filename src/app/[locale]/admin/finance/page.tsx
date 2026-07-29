@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { PageHeader } from '@/components/admin/AdminChrome'
 import { SummaryCell, SummaryStrip } from '@/components/admin/AdminTable'
-import { financeRows, overviewMetrics } from '@/lib/admin/preview'
+import { getFinanceRows, getOverviewMetrics } from '@/lib/admin/data/finance'
 
 export const metadata: Metadata = {
   title: 'Admin · Finance',
@@ -41,8 +41,8 @@ export default async function AdminFinancePage({
   setRequestLocale(locale)
   const t = await getTranslations('admin.finance')
 
-  const rows = financeRows()
-  const m = overviewMetrics()
+  // In parallel: two independent reads, and this page waits for both.
+  const [rows, m] = await Promise.all([getFinanceRows(), getOverviewMetrics()])
 
   const totals = rows.reduce(
     (acc, r) => ({
