@@ -116,7 +116,7 @@ describe.skipIf(!HAS_DB)('requesting a payout', () => {
 
       // 8,000 left, another 12,000 asked for. If this ever succeeds the
       // platform owes more than the user ever earned.
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`select public.request_redemption($1, 'mobile_money', $2)`, [
           user.id,
           POINTS_REQUESTED,
@@ -134,7 +134,7 @@ describe.skipIf(!HAS_DB)('requesting a payout', () => {
       await creditPoints(tx, user.id, POINTS_EARNED)
 
       // Free tier's minimum is 5,000.
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`select public.request_redemption($1, 'mobile_money', 4000)`, [user.id]),
       )
       expect(message).toMatch(/minimum/i)
@@ -149,7 +149,7 @@ describe.skipIf(!HAS_DB)('requesting a payout', () => {
       await creditPoints(tx, user.id, POINTS_EARNED)
       await tx.query(`update public.profiles set disabled_at = now() where id = $1`, [user.id])
 
-      await expectRejection(() =>
+      await expectRejection(tx, () =>
         tx.query(`select public.request_redemption($1, 'mobile_money', $2)`, [
           user.id,
           POINTS_REQUESTED,
@@ -172,7 +172,7 @@ describe.skipIf(!HAS_DB)('requesting a payout', () => {
         [user.id],
       )
 
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`select public.request_redemption($1, 'mobile_money', $2)`, [
           user.id,
           POINTS_REQUESTED,
@@ -188,7 +188,7 @@ describe.skipIf(!HAS_DB)('the holding period', () => {
     await withRollback(async (tx) => {
       const { admin, id } = await requestedRedemption(tx)
 
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`select public.admin_decide_redemption($1, $2, 'approve')`, [admin.id, id]),
       )
       expect(message).toMatch(/holding period/i)
@@ -235,7 +235,7 @@ describe.skipIf(!HAS_DB)('the holding period', () => {
     await withRollback(async (tx) => {
       const { admin, id } = await requestedRedemption(tx)
 
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`select public.admin_decide_redemption($1, $2, 'approve', null, null, true, null)`, [
           admin.id,
           id,
@@ -277,7 +277,7 @@ describe.skipIf(!HAS_DB)('an operator holding a request', () => {
       const { admin, id } = await requestedRedemption(tx)
       await matureTheHold(tx, id)
 
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`select public.admin_decide_redemption($1, $2, 'hold', $3)`, [admin.id, id, 'no']),
       )
       expect(message).toMatch(/reason/i)
@@ -364,7 +364,7 @@ describe.skipIf(!HAS_DB)('refunds', () => {
 
       // Declining an already-declined request is the cheapest way to mint
       // points that exists, so it has to be refused by status, not by luck.
-      await expectRejection(() =>
+      await expectRejection(tx, () =>
         tx.query(`select public.admin_decide_redemption($1, $2, 'decline', $3)`, [
           admin.id,
           id,
@@ -435,7 +435,7 @@ describe.skipIf(!HAS_DB)('the licence kill switch', () => {
       // This is the switch standing between a half-built disbursement path
       // and real money moving without a money-service licence.
       await setConfig(tx, 'payouts_enabled', 'false')
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`select public.admin_decide_redemption($1, $2, 'mark_paid', null, 'MOMO-1')`, [
           admin.id,
           id,
@@ -472,7 +472,7 @@ describe.skipIf(!HAS_DB)('the licence kill switch', () => {
       await matureTheHold(tx, id)
       await setConfig(tx, 'payouts_enabled', 'true')
 
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`select public.admin_decide_redemption($1, $2, 'mark_paid', null, 'MOMO-1')`, [
           admin.id,
           id,
@@ -535,7 +535,7 @@ describe.skipIf(!HAS_DB)('disputes', () => {
         [id],
       )
 
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`select public.admin_decide_redemption($1, $2, 'dispute', $3)`, [
           admin.id,
           id,
@@ -551,7 +551,7 @@ describe.skipIf(!HAS_DB)('disputes', () => {
     await withRollback(async (tx) => {
       const { admin, id } = await requestedRedemption(tx)
 
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`select public.admin_decide_redemption($1, $2, 'dispute', $3)`, [
           admin.id,
           id,
@@ -571,7 +571,7 @@ describe.skipIf(!HAS_DB)('who is allowed to decide', () => {
 
       // The server action names the acting admin from the verified session,
       // so this is the database refusing to take that on trust anyway.
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`select public.admin_decide_redemption($1, $2, 'approve')`, [user.id, id]),
       )
       expect(message).toMatch(/not an administrator/i)
@@ -583,7 +583,7 @@ describe.skipIf(!HAS_DB)('who is allowed to decide', () => {
     await withRollback(async (tx) => {
       const { admin, id } = await requestedRedemption(tx)
 
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`select public.admin_decide_redemption($1, $2, 'delete_and_keep_the_money')`, [
           admin.id,
           id,
@@ -685,7 +685,7 @@ describe.skipIf(!HAS_DB)('the admin queue listing', () => {
       ])
       await tx.query(`set local role authenticated`)
 
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`select * from public.admin_list_redemptions()`),
       )
       expect(message).toMatch(/not an administrator|permission denied/i)

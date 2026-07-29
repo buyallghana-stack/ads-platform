@@ -28,7 +28,7 @@ describe.skipIf(!HAS_DB)('the append-only guarantee', () => {
       // RLS would not be enough here: the service key bypasses it entirely,
       // and this table has to resist a mistake in our own server code exactly
       // as firmly as a hostile client. Hence a trigger, which no role escapes.
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`update public.points_ledger set amount = 999999 where user_id = $1`, [user.id]),
       )
       expect(message).toMatch(/append-only/i)
@@ -40,7 +40,7 @@ describe.skipIf(!HAS_DB)('the append-only guarantee', () => {
       const user = await createUser(tx)
       await creditPoints(tx, user.id, 5_000)
 
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`delete from public.points_ledger where user_id = $1`, [user.id]),
       )
       expect(message).toMatch(/append-only/i)
@@ -51,8 +51,8 @@ describe.skipIf(!HAS_DB)('the append-only guarantee', () => {
     await withRollback(async (tx) => {
       const user = await createUser(tx)
 
-      await expectRejection(() => tx.query(`select public.credit_points($1, 0, 'ad_view')`, [user.id]))
-      await expectRejection(() => tx.query(`select public.debit_points($1, 0, 'ad_view')`, [user.id]))
+      await expectRejection(tx, () => tx.query(`select public.credit_points($1, 0, 'ad_view')`, [user.id]))
+      await expectRejection(tx, () => tx.query(`select public.debit_points($1, 0, 'ad_view')`, [user.id]))
     })
   })
 
@@ -60,7 +60,7 @@ describe.skipIf(!HAS_DB)('the append-only guarantee', () => {
     await withRollback(async (tx) => {
       const user = await createUser(tx)
 
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`select public.credit_points($1, -5000, 'ad_view')`, [user.id]),
       )
       expect(message).toMatch(/positive/i)
@@ -137,7 +137,7 @@ describe.skipIf(!HAS_DB)('spending points', () => {
       const user = await createUser(tx)
       await creditPoints(tx, user.id, 3_000)
 
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`select public.debit_points($1, 3_001, 'admin_adjustment')`, [user.id]),
       )
       expect(message).toMatch(/insufficient/i)
@@ -168,7 +168,7 @@ describe.skipIf(!HAS_DB)('spending points', () => {
 
       // No user_balances row at all. The UPDATE matches nothing, which must
       // raise rather than quietly do nothing and write a ledger entry.
-      await expectRejection(() =>
+      await expectRejection(tx, () =>
         tx.query(`select public.debit_points($1, 100, 'admin_adjustment')`, [user.id]),
       )
       const { rows } = await tx.query<{ count: string }>(
@@ -190,7 +190,7 @@ describe.skipIf(!HAS_DB)('crediting the same source twice', () => {
 
       // A double-submitted form, a retried request or a bug all look like
       // this, and all of them mint points if the index is not there.
-      await expectRejection(() =>
+      await expectRejection(tx, () =>
         tx.query(`select public.credit_points($1, 500, 'ad_view', 'ad', $2)`, [user.id, adId]),
       )
       expect(await balanceOf(tx, user.id)).toBe(500)
@@ -224,7 +224,7 @@ describe.skipIf(!HAS_DB)('the global earning switch', () => {
 
       // Checked inside credit_points rather than at each call site, so every
       // earning path is covered by construction rather than by remembering.
-      const message = await expectRejection(() => creditPoints(tx, user.id, 1_000))
+      const message = await expectRejection(tx, () => creditPoints(tx, user.id, 1_000))
       expect(message).toMatch(/paused/i)
       expect(await balanceOf(tx, user.id)).toBe(0)
     })
@@ -258,7 +258,7 @@ describe.skipIf(!HAS_DB)('the global earning switch', () => {
 
       // Deliberately NOT exempted alongside refunds: an operator handing out
       // points during a platform-wide freeze is what the freeze is for.
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`select public.credit_points($1, 1_000, 'admin_adjustment')`, [user.id]),
       )
       expect(message).toMatch(/paused/i)
@@ -279,7 +279,7 @@ describe.skipIf(!HAS_DB)('the daily cap', () => {
         [user.id],
       )
 
-      const message = await expectRejection(() =>
+      const message = await expectRejection(tx, () =>
         tx.query(`select public.credit_points($1, 500, 'ad_view', null, null, '{}'::jsonb, true)`, [
           user.id,
         ]),

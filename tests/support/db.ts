@@ -190,12 +190,28 @@ export async function redemption(tx: Tx, id: string) {
  * "It threw" is a weak assertion on a money path: a typo in a function name
  * also throws, and would make a test that is checking a kill switch pass
  * while the kill switch does nothing.
+ *
+ * THE SAVEPOINT IS NOT OPTIONAL. Postgres poisons a transaction the moment a
+ * statement inside it raises: every later command returns "current
+ * transaction is aborted" until somebody rolls back. Almost every test here
+ * asserts a refusal and THEN checks the balance survived it, so without a
+ * savepoint to rewind to, the check that matters most — that nothing moved —
+ * cannot run at all. Catching the error is not enough; the transaction has
+ * to be put back to where it was.
  */
-export async function expectRejection(body: () => Promise<unknown>): Promise<string> {
+export async function expectRejection(
+  tx: Tx,
+  body: () => Promise<unknown>,
+): Promise<string> {
+  await tx.query('savepoint expect_rejection')
+
   try {
     await body()
   } catch (error) {
+    await tx.query('rollback to savepoint expect_rejection')
     return error instanceof Error ? error.message : String(error)
   }
+
+  await tx.query('release savepoint expect_rejection')
   throw new Error('Expected this to be refused, but it succeeded.')
 }
