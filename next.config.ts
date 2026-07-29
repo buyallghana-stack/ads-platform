@@ -32,6 +32,13 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   project: process.env.SENTRY_PROJECT,
   authToken: process.env.SENTRY_AUTH_TOKEN,
 
+  /*
+    Uploads a wider set of client files, which is what makes a browser stack
+    trace resolve to our source instead of stopping at a framework frame. The
+    reference calls for it and the cost is build time, not runtime bytes.
+  */
+  widenClientFileUpload: true,
+
   silent: !process.env.CI,
 
   /*
@@ -45,13 +52,15 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   */
   tunnelRoute: '/monitoring',
 
-  // Strips the SDK's own debug logging from the browser bundle.
-  disableLogger: true,
-
   /*
-    The SDK would otherwise instrument Vercel's cron invocations. There is
-    exactly one cron here (the deletion purge) and it already fails loudly, so
-    this keeps the check-in quota for something that needs it.
+    NO `disableLogger` OR `automaticVercelMonitors` HERE. Both are deprecated
+    in favour of `webpack.*` equivalents, and this project builds with
+    TURBOPACK, where the webpack tree-shaking options do nothing at all. They
+    were set, did nothing, and printed a deprecation warning on every build —
+    so they are gone rather than left as decoration.
+
+    The practical consequence: the SDK's own debug logging stays in the browser
+    bundle. That is part of the 63 KB measured, and it is not removable while
+    the build is Turbopack.
   */
-  automaticVercelMonitors: false,
 })

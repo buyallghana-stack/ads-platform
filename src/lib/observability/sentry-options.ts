@@ -1,4 +1,4 @@
-import type { ErrorEvent, EventHint } from '@sentry/nextjs'
+import type { ErrorEvent } from '@sentry/nextjs'
 
 /**
  * The settings every Sentry entry point shares, in one place so the browser,
@@ -19,8 +19,15 @@ import type { ErrorEvent, EventHint } from '@sentry/nextjs'
  *   · SESSION REPLAY IS NOT INSTALLED AT ALL. It records the DOM, and the DOM
  *     here is somebody's balance, their MSISDN and their payout history. There
  *     is no masking setting that makes recording a money screen a good trade.
- *   · Tracing is off. It is a performance product, it samples real user
- *     requests, and nobody is going to read it. Errors are what was missing.
+ *   · `includeLocalVariables` is NOT set on the server. It attaches local
+ *     variable values to every stack frame, and the locals on the paths worth
+ *     instrumenting here are a withdrawal PIN, a session token and somebody's
+ *     MSISDN.
+ *   · `enableLogs` is off. The ask was to find out when things break, not to
+ *     ship a second logging product.
+ *
+ * Tracing IS on, at Sentry's own recommended baseline — see below. It is the
+ * one default worth taking as written.
  */
 
 export function sentryEnabled(): boolean {
@@ -69,7 +76,7 @@ function scrubUrl(value: string): string {
  * places a token actually appears in this app — the request URL and the
  * breadcrumb trail that led there.
  */
-function beforeSend(event: ErrorEvent, _hint: EventHint): ErrorEvent | null {
+function beforeSend(event: ErrorEvent): ErrorEvent | null {
   if (event.request?.url) event.request.url = scrubUrl(event.request.url)
 
   if (event.breadcrumbs) {
@@ -88,10 +95,23 @@ export function sharedOptions() {
     dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
     environment: environment(),
 
-    // See the note above. Both are the SDK defaults; stated explicitly so
-    // turning either on has to be a decision somebody makes on purpose.
+    /*
+      `sendDefaultPii: false` is the SDK default, stated explicitly so turning
+      it on has to be somebody's decision.
+
+      DO NOT REPLACE THIS WITH A `dataCollection` OBJECT. Sentry only falls back
+      to `sendDefaultPii` while `dataCollection` is ABSENT — passing it at all,
+      even as `{}`, flips every unset category to its permissive default. An
+      empty object here would quietly start sending cookies and headers.
+    */
     sendDefaultPii: false,
-    tracesSampleRate: 0,
+
+    /*
+      Tracing at Sentry's recommended baseline: everything in development, a
+      tenth of production traffic. Enough to see which route or query is slow
+      without sampling every request a user makes or burning the quota.
+    */
+    tracesSampleRate: process.env.NODE_ENV === 'development' ? 1 : 0.1,
 
     /*
       Errors we can neither fix nor act on. A tracker that cries about a user's

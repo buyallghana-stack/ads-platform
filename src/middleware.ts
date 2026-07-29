@@ -35,6 +35,11 @@ export const config = {
     address printed inside every verification email. Locale negotiation would
     rewrite it to /en/auth/confirm — not a route — and every link already sent
     would 404. An emailed URL has to stay exactly what was emailed.
+
+    `monitoring` is the Sentry tunnel, and it is load-bearing for the same
+    reason: the SDK posts events to /monitoring, locale negotiation would
+    rewrite that to /en/monitoring, and every error report would 404 into a
+    dashboard that looked reassuringly quiet.
   */
-  matcher: ['/((?!api|auth|_next|_vercel|.*\\..*).*)'],
+  matcher: ['/((?!api|auth|monitoring|_next|_vercel|.*\\..*).*)'],
 }
