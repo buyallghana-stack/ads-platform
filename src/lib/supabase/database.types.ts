@@ -1376,6 +1376,36 @@ export type Database = {
         }
         Relationships: []
       }
+      announcements: {
+        Row: {
+          audience: string
+          body: string
+          created_at: string
+          id: string
+          recipient_count: number
+          sent_by: string | null
+          title: string
+        }
+        Insert: {
+          audience?: string
+          body: string
+          created_at?: string
+          id?: string
+          recipient_count: number
+          sent_by?: string | null
+          title: string
+        }
+        Update: {
+          audience?: string
+          body?: string
+          created_at?: string
+          id?: string
+          recipient_count?: number
+          sent_by?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       support_messages: {
         Row: {
           author: Database["public"]["Enums"]["support_author"]
@@ -1702,6 +1732,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_announcement_audience: { Args: never; Returns: number }
+      admin_broadcast_announcement: {
+        Args: { p_admin: string; p_body: string; p_title: string }
+        Returns: {
+          audience: string
+          body: string
+          created_at: string
+          id: string
+          recipient_count: number
+          sent_by: string | null
+          title: string
+        }
+      }
       admin_count_unread_support: { Args: never; Returns: number }
       admin_daily_money: {
         Args: { p_days?: number }
@@ -1790,6 +1833,18 @@ export type Database = {
       admin_get_support_thread: {
         Args: { p_admin: string; p_user: string }
         Returns: Json
+      }
+      admin_list_announcements: {
+        Args: { p_limit?: number }
+        Returns: {
+          audience: string
+          body: string
+          created_at: string
+          id: string
+          recipient_count: number
+          sent_by_name: string
+          title: string
+        }[]
       }
       admin_list_ads: {
         Args: { p_status?: Database["public"]["Enums"]["ad_status"] }

@@ -1288,6 +1288,7 @@
         "users": "Users",
         "messages": "Messages",
         "flagged": "Flagged",
+        "announcements": "Announcements",
         "ads": "Ads & surveys",
         "config": "Platform settings",
         "audit": "Audit log",
@@ -2360,6 +2361,26 @@
         }
       }
     },
-    "liveBadge": "Live data"
+    "liveBadge": "Live data",
+    "announcements": {
+      "title": "Announcements",
+      "description": "One message to everybody using SidePerks. It lands in their notifications.",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Payouts are now open",
+      "bodyLabel": "Message",
+      "bodyPlaceholder": "Tell people what changed, in a sentence or two. This lands in their notifications.",
+      "review": "Review and send",
+      "confirmBody": "This goes to {count, plural, one {# person} other {# people}} — everyone with an active account.",
+      "confirmIrreversible": "It cannot be recalled, edited or deleted once sent. Read it once more.",
+      "sendNow": "Send to {count, plural, one {# person} other {# people}}",
+      "cancel": "Cancel",
+      "dismiss": "Dismiss",
+      "sentTo": "Sent to {count, plural, one {# person} other {# people}}.",
+      "previewLabel": "What they will see",
+      "previewHint": "The real notification card, exactly as it appears in their bell.",
+      "historyTitle": "Sent before",
+      "historyEmpty": "Nothing has been announced yet.",
+      "historyMeta": "{name} · reached {count, plural, one {# person} other {# people}}"
+    }
   }
 }

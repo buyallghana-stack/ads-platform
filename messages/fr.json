@@ -1288,6 +1288,7 @@
         "users": "Utilisateurs",
         "messages": "Messages",
         "flagged": "Signalés",
+        "announcements": "Annonces",
         "ads": "Annonces et sondages",
         "config": "Paramètres plateforme",
         "audit": "Journal",
@@ -2360,6 +2361,26 @@
         }
       }
     },
-    "liveBadge": "Données réelles"
+    "liveBadge": "Données réelles",
+    "announcements": {
+      "title": "Annonces",
+      "description": "Un message à toutes les personnes qui utilisent SidePerks. Il arrive dans leurs notifications.",
+      "titleLabel": "Titre",
+      "titlePlaceholder": "Les retraits sont ouverts",
+      "bodyLabel": "Message",
+      "bodyPlaceholder": "Dites en une ou deux phrases ce qui a changé. Le message arrive dans leurs notifications.",
+      "review": "Relire et envoyer",
+      "confirmBody": "Ceci part vers {count, plural, one {# personne} other {# personnes}} — tous les comptes actifs.",
+      "confirmIrreversible": "Impossible de le rappeler, de le modifier ou de le supprimer une fois envoyé. Relisez-le.",
+      "sendNow": "Envoyer à {count, plural, one {# personne} other {# personnes}}",
+      "cancel": "Annuler",
+      "dismiss": "Fermer",
+      "sentTo": "Envoyé à {count, plural, one {# personne} other {# personnes}}.",
+      "previewLabel": "Ce qu'elles verront",
+      "previewHint": "La vraie carte de notification, telle qu'elle apparaît dans leur cloche.",
+      "historyTitle": "Déjà envoyées",
+      "historyEmpty": "Aucune annonce pour l'instant.",
+      "historyMeta": "{name} · a touché {count, plural, one {# personne} other {# personnes}}"
+    }
   }
 }

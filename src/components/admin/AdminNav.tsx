@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 
 import type { LucideIcon } from 'lucide-react'
 import {
+  Megaphone,
   BadgeCheck,
   Building2,
   ClipboardList,
@@ -72,6 +73,10 @@ const GROUPS: NavGroup[] = [
       { key: 'users', href: '/admin/users', Icon: Users },
       { key: 'messages', href: '/admin/messages', Icon: MessageSquare },
       { key: 'flagged', href: '/admin/flagged', Icon: Flag },
+      // Announcements sits with the people it goes to, not under SYSTEM: it
+      // is a message to users, and the operator reaches for it in the same
+      // frame of mind as Messages.
+      { key: 'announcements', href: '/admin/announcements', Icon: Megaphone },
     ],
   },
   {
