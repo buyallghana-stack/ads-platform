@@ -60,8 +60,16 @@ export async function signUpAction(formData: {
 
     A no-op unless the operator has set Turnstile keys; see `turnstile.ts`.
   */
-  const bot = await verifyTurnstile(data.turnstileToken, ip)
+  const bot = await verifyTurnstile(data.turnstileToken)
   if (!bot.ok) {
+    /*
+      LOGGED, because the first production report of this was undiagnosable:
+      the operator saw "we could not confirm you are a person" while the widget
+      beside it read Success, and nothing recorded which of Cloudflare's error
+      codes came back. Codes only — no token, no address.
+    */
+    console.error('[turnstile] refused:', bot.reason)
+
     /*
       NO `field` HERE, and it is not a detail. The form routes a field-tagged
       error to that input with `setError`, and the bot check is not an input —
@@ -70,7 +78,7 @@ export async function signUpAction(formData: {
       testing with the challenge script blocked, which is exactly how a real
       person meets this: an ad blocker, a dead network, a proxy.
     */
-    return { ok: false, errorKey: 'botCheckFailed' }
+    return { ok: false, errorKey: bot.retry ? 'botCheckRetry' : 'botCheckFailed' }
   }
 
   /*

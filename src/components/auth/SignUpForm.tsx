@@ -106,6 +106,12 @@ export function SignUpForm() {
      required — a client that simply omits it must not be able to opt out. */
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>(undefined)
 
+  /* Bumped after every failed submit so the challenge issues a FRESH token.
+     Without this the form dies on its first error: the attempt spent the
+     token, the widget still reads "Success", and every retry is refused as a
+     duplicate until the page is reloaded. Reported from production. */
+  const [turnstileReset, setTurnstileReset] = useState(0)
+
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null)
 
@@ -127,6 +133,12 @@ export function SignUpForm() {
       router.push(result.redirectTo ?? '/verify')
       return
     }
+
+    /* The attempt reached the server, so the token it carried is spent
+       whatever went wrong. Ask for a new one now, before they press the
+       button again. */
+    setTurnstileToken(undefined)
+    setTurnstileReset((n) => n + 1)
 
     // Field-specific problems belong on the field; everything else goes to the
     // banner. A "referral code does not exist" shown at the top of the form
@@ -261,6 +273,7 @@ export function SignUpForm() {
         <TurnstileWidget
           siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
           onToken={setTurnstileToken}
+          resetSignal={turnstileReset}
         />
 
         <Button type="submit" size="lg" fullWidth loading={isSubmitting} className="mt-1.5">

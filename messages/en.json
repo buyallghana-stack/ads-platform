@@ -374,7 +374,8 @@
       "emailNotVerified": "Please verify your email address first",
       "identityBlocked": "This email address or phone number cannot be used to open an account.",
       "botCheckFailed": "We could not confirm you are a person. Refresh the page and try again — if you use an ad blocker or a VPN, turn it off for this page.",
-      "emailSendLimit": "We could not send your confirmation email just now. Please try again in a few minutes."
+      "emailSendLimit": "We could not send your confirmation email just now. Please try again in a few minutes.",
+      "botCheckRetry": "The security check needs doing again — it has been reset just below. Please press Create account once more."
     }
   },
   "legal": {

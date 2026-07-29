@@ -22,6 +22,7 @@ declare global {
     turnstile?: {
       render: (el: HTMLElement, opts: Record<string, unknown>) => string
       remove: (id: string) => void
+      reset: (id: string) => void
     }
   }
 }
@@ -58,11 +59,23 @@ export function TurnstileWidget({
   siteKey,
   onToken,
   theme = 'auto',
+  resetSignal = 0,
 }: {
   /** Absent when the operator has not set one — the component renders null. */
   siteKey?: string
   onToken: (token: string | undefined) => void
   theme?: 'auto' | 'light' | 'dark'
+  /**
+   * Bump this to make the challenge issue a NEW token.
+   *
+   * A Turnstile token is SINGLE USE. Any submit that reaches the server spends
+   * it, so after a failed attempt the one in the form's hand is already dead
+   * and every retry is refused as a duplicate — with the widget still showing
+   * "Success", because nothing asked it to run again. That is a form that
+   * locks itself on the first error and only a full page reload can clear.
+   * Reported from production on 2026-07-29.
+   */
+  resetSignal?: number
 }) {
   const box = useRef<HTMLDivElement | null>(null)
   const widgetId = useRef<string | null>(null)
@@ -77,6 +90,17 @@ export function TurnstileWidget({
   useEffect(() => {
     callback.current = onToken
   }, [onToken])
+
+  // Fresh token on demand. Separate from the render effect below so a reset
+  // re-runs the challenge in place rather than tearing the widget down.
+  useEffect(() => {
+    if (!resetSignal || !widgetId.current || !window.turnstile) return
+    try {
+      window.turnstile.reset(widgetId.current)
+    } catch {
+      // Widget already gone; the render effect will make a new one.
+    }
+  }, [resetSignal])
 
   useEffect(() => {
     if (!siteKey || !box.current) return

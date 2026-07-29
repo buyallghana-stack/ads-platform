@@ -29,7 +29,11 @@ export function turnstileEnabled(): boolean {
   return Boolean(process.env.TURNSTILE_SECRET_KEY && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY)
 }
 
-export type TurnstileResult = { ok: true } | { ok: false; reason: string }
+export type TurnstileResult =
+  | { ok: true }
+  /** `retry` means the person did nothing wrong and a fresh challenge will
+   *  pass: a spent or timed-out token. Anything else is a real refusal. */
+  | { ok: false; reason: string; retry: boolean }
 
 /**
  * Verify a token with Cloudflare.
@@ -43,21 +47,25 @@ export type TurnstileResult = { ok: true } | { ok: false; reason: string }
  *
  * An INVALID token is a different thing entirely and is always refused.
  */
-export async function verifyTurnstile(
-  token: string | undefined,
-  ip?: string | null,
-): Promise<TurnstileResult> {
+export async function verifyTurnstile(token: string | undefined): Promise<TurnstileResult> {
   if (!turnstileEnabled()) return { ok: true }
 
-  if (!token) return { ok: false, reason: 'missing' }
+  // No token usually means the challenge expired and cleared itself, or the
+  // script never loaded. Both are fixed by running it again.
+  if (!token) return { ok: false, reason: 'missing', retry: true }
 
   try {
+    /*
+      NO `remoteip`. Cloudflare requires it to match the address that solved
+      the challenge, and on a Ghanaian mobile network the address can rotate
+      between solving the widget and pressing the button — which would refuse
+      a real person for moving between cell towers. The token is already bound
+      to our site key, which is the part that matters.
+    */
     const body = new URLSearchParams({
       secret: process.env.TURNSTILE_SECRET_KEY!,
       response: token,
     })
-    // Cloudflare uses this to spot a token replayed from somewhere else.
-    if (ip) body.set('remoteip', ip)
 
     const res = await fetch(VERIFY_URL, {
       method: 'POST',
@@ -71,7 +79,19 @@ export async function verifyTurnstile(
     const data = (await res.json()) as { success?: boolean; 'error-codes'?: string[] }
     if (data.success) return { ok: true }
 
-    return { ok: false, reason: data['error-codes']?.join(', ') || 'rejected' }
+    const codes = data['error-codes'] ?? []
+
+    /*
+      A SPENT OR EXPIRED TOKEN IS NOT A FAILED HUMAN. Turnstile tokens are
+      single use and short lived, so this is what an honest person gets when
+      their first attempt failed for some other reason, or when they filled
+      the form slowly. It is separated out because the answer is "do the check
+      again", not "you look like a bot" — and because telling somebody to
+      switch off an ad blocker they are not running is how you lose them.
+    */
+    const retry = codes.includes('timeout-or-duplicate')
+
+    return { ok: false, reason: codes.join(', ') || 'rejected', retry }
   } catch {
     // Unreachable or timed out — see the note above.
     return { ok: true }

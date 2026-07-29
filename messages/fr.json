@@ -374,7 +374,8 @@
       "emailNotVerified": "Veuillez d'abord vérifier votre adresse e-mail",
       "identityBlocked": "Cette adresse e-mail ou ce numéro de téléphone ne peut pas servir à créer un compte.",
       "botCheckFailed": "Nous n'avons pas pu confirmer que vous êtes une personne. Actualisez la page et réessayez — si vous utilisez un bloqueur de publicités ou un VPN, désactivez-le pour cette page.",
-      "emailSendLimit": "Nous n'avons pas pu envoyer votre e-mail de confirmation pour le moment. Veuillez réessayer dans quelques minutes."
+      "emailSendLimit": "Nous n'avons pas pu envoyer votre e-mail de confirmation pour le moment. Veuillez réessayer dans quelques minutes.",
+      "botCheckRetry": "La vérification de sécurité doit être refaite — elle vient d'être réinitialisée ci-dessous. Appuyez de nouveau sur Créer un compte."
     }
   },
   "legal": {
