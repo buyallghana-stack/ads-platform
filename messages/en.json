@@ -2130,8 +2130,9 @@
           "label": "How plan benefits combine",
           "description": "When somebody holds more than one plan.",
           "sumBonus": "Add the bonuses up",
-          "highest": "Take the highest only",
-          "multiply": "Multiply them together"
+          "highest": "Use the highest multiplier only",
+          "sum": "Add the multipliers together",
+          "product": "Multiply the multipliers"
         },
         "multiplierCeiling": {
           "label": "Hard ceiling on the combined rate",
@@ -2203,7 +2204,9 @@
       "unsaved": "{count, plural, one {# unsaved change} other {# unsaved changes}}",
       "save": "Save changes",
       "discard": "Discard",
-      "savedPreview": "Nothing was written — this dashboard is running on preview data. Wiring the save is backend work."
+      "saving": "Saving…",
+      "savedCount": "{count, plural, one {# setting updated.} other {# settings updated.}}",
+      "savedNothing": "Nothing to update — those values were already set."
     },
     "adminSettings": {
       "title": "Admin settings",

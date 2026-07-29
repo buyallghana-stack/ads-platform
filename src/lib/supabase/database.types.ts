@@ -1707,6 +1707,14 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["ad_status"]
       }
+      admin_set_config: {
+        Args: { p_admin_id: string; p_values: Json }
+        Returns: {
+          config_key: string
+          new_value: string
+          previous_value: string
+        }[]
+      }
       apply_referral_code: {
         Args: {
           p_code: string
@@ -1894,6 +1902,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      config_allowed_values: { Args: { p_key: string }; Returns: string[] }
       config_bool: { Args: { p_key: string }; Returns: boolean }
       config_decimal: { Args: { p_key: string }; Returns: number }
       config_int: { Args: { p_key: string }; Returns: number }

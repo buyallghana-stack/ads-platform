@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 
 import { AlertTriangle, RotateCcw } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -55,22 +55,71 @@ export type SettingsValues = Record<string, string | number | boolean>
 export function SettingsForm({
   groups,
   initial,
+  onSave,
 }: {
   groups: FieldGroup[]
   initial: SettingsValues
+  /**
+   * Persists the changed settings and reports what the DATABASE actually
+   * changed — not what was submitted. A save that writes nothing must not
+   * claim otherwise, and a save the database refuses must say why.
+   *
+   * Optional: the screens still on preview data pass nothing and keep the
+   * old behaviour of a form that visibly does not save.
+   */
+  onSave?: (changed: SettingsValues) => Promise<
+    { ok: true; changed: { key: string; from: string; to: string }[] } | { ok: false; message: string }
+  >
 }) {
   const t = useTranslations('admin.settingsForm')
+
+  /* `baseline` is what the database currently holds, and it starts as what
+     the server rendered. It is NOT `initial` after the first save: once a
+     save succeeds the saved values become the new "unchanged", otherwise the
+     bar would keep insisting there are edits pending that have already been
+     written. */
+  const [baseline, setBaseline] = useState<SettingsValues>(initial)
   const [values, setValues] = useState<SettingsValues>(initial)
-  const [saved, setSaved] = useState(false)
+  const [saved, setSaved] = useState<number | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [pending, startTransition] = useTransition()
 
   const dirtyKeys = useMemo(
-    () => Object.keys(values).filter((k) => values[k] !== initial[k]),
-    [values, initial],
+    () => Object.keys(values).filter((k) => values[k] !== baseline[k]),
+    [values, baseline],
   )
 
   const set = (key: string, value: string | number | boolean) => {
     setValues((v) => ({ ...v, [key]: value }))
-    setSaved(false)
+    setSaved(null)
+    setError(null)
+  }
+
+  const submit = () => {
+    if (!onSave || pending || dirtyKeys.length === 0) return
+    setError(null)
+    setSaved(null)
+
+    // Only what changed goes to the server. Sending all forty settings would
+    // make every save a rewrite of rows nobody touched, and would turn one
+    // stale field in an old browser tab into forty overwritten values.
+    const changed: SettingsValues = {}
+    for (const key of dirtyKeys) changed[key] = values[key]!
+
+    startTransition(async () => {
+      const result = await onSave(changed)
+
+      if (!result.ok) {
+        setError(result.message)
+        return
+      }
+
+      // Rebase on what was sent, so the bar clears. The count shown is the
+      // database's, which can legitimately be lower than the number of fields
+      // edited — editing a value back to what it already was is not a change.
+      setBaseline((b) => ({ ...b, ...changed }))
+      setSaved(result.changed.length)
+    })
   }
 
   return (
@@ -98,7 +147,7 @@ export function SettingsForm({
                   key={field.key}
                   field={field}
                   value={values[field.key]}
-                  dirty={values[field.key] !== initial[field.key]}
+                  dirty={values[field.key] !== baseline[field.key]}
                   onChange={(v) => set(field.key, v)}
                 />
               ))}
@@ -107,12 +156,29 @@ export function SettingsForm({
         ))}
       </div>
 
-      {saved && (
+      {/* The database's count, not the form's. Saving a field back to the
+          value it already held is not a change, and saying "1 setting
+          updated" when nothing moved is the kind of small lie that stops an
+          operator trusting the screen. */}
+      {saved !== null && (
         <p
           role="status"
           className="mt-4 rounded-(--radius-input) border border-success-500/25 bg-success-50 px-3 py-2.5 text-[0.8125rem] text-success-700"
         >
-          {t('savedPreview')}
+          {saved === 0 ? t('savedNothing') : t('savedCount', { count: saved })}
+        </p>
+      )}
+
+      {error && (
+        <p
+          role="alert"
+          className="mt-4 flex items-start gap-2 rounded-(--radius-input) border border-danger-500/30 bg-danger-50 px-3 py-2.5 text-[0.8125rem] leading-relaxed text-danger-700"
+        >
+          <AlertTriangle aria-hidden className="mt-0.5 size-4 shrink-0" />
+          {/* Shown verbatim: the database names the offending field and its
+              limit, and rewording that here would mean maintaining a second
+              vocabulary for the same rules. */}
+          <span className="min-w-0 font-mono text-[0.75rem]">{error}</span>
         </p>
       )}
 
@@ -127,18 +193,20 @@ export function SettingsForm({
             </p>
             <button
               type="button"
-              onClick={() => setValues(initial)}
-              className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-(--radius-input) px-2.5 text-[0.75rem] font-medium text-canvas/80 transition-colors hover:bg-canvas/10 hover:text-canvas"
+              disabled={pending}
+              onClick={() => setValues(baseline)}
+              className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-(--radius-input) px-2.5 text-[0.75rem] font-medium text-canvas/80 transition-colors hover:bg-canvas/10 hover:text-canvas disabled:opacity-50"
             >
               <RotateCcw aria-hidden className="size-3.5" />
               {t('discard')}
             </button>
             <button
               type="button"
-              onClick={() => setSaved(true)}
-              className="inline-flex h-8 shrink-0 items-center rounded-(--radius-input) bg-canvas px-3 text-[0.75rem] font-semibold text-ink-900 transition-opacity hover:opacity-90"
+              disabled={pending}
+              onClick={submit}
+              className="inline-flex h-8 shrink-0 items-center rounded-(--radius-input) bg-canvas px-3 text-[0.75rem] font-semibold text-ink-900 transition-opacity hover:opacity-90 disabled:opacity-60"
             >
-              {t('save')}
+              {pending ? t('saving') : t('save')}
             </button>
           </div>
         </div>

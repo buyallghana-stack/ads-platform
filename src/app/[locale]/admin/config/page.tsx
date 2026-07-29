@@ -4,7 +4,9 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { PageHeader } from '@/components/admin/AdminChrome'
 import { SettingsForm, type FieldGroup } from '@/components/admin/SettingsForm'
-import { platformConfig } from '@/lib/admin/preview'
+import { getPlatformConfig } from '@/lib/admin/data/config'
+
+import { saveConfig } from './actions'
 
 export const metadata: Metadata = {
   title: 'Admin · Platform settings',
@@ -24,6 +26,23 @@ export const metadata: Metadata = {
  * hopefully never. The two that can quietly cost real money (the points rate
  * and the kill switch) carry a warning stating the consequence in terms of
  * users rather than of columns.
+ *
+ * REAL AS OF 2026-07-29. Values come from `app_config` and saving calls
+ * `admin_set_config`.
+ *
+ * Wiring it turned up five keys on this screen that did not exist in the
+ * database — `ad_cooldown_seconds`, `payout_details_cooloff_hours`,
+ * `subscription_multiplier_ceiling`, `referral_activation_ads`, and a
+ * `multiply` combine mode that `resolve_user_tier` has no branch for. While
+ * the screen only rendered invented numbers that cost nothing; on the first
+ * real save each would have been an "Unknown setting" or, in the combine
+ * mode's case, a value that silently behaved as something else. They are
+ * corrected here, and `admin_set_config` now refuses unknown keys outright so
+ * the next drift fails loudly instead of quietly.
+ *
+ * The min/max on each numeric field below are DISPLAY hints for the input.
+ * The limits that actually hold are the ones on each `app_config` row, which
+ * is what the writer validates against.
  */
 export default async function AdminConfigPage({
   params,
@@ -49,7 +68,7 @@ export default async function AdminConfigPage({
           suffix: t('units.points'),
         },
         {
-          key: 'ad_cooldown_seconds',
+          key: 'ad_cooldown_seconds_default',
           label: t('fields.cooldown.label'),
           description: t('fields.cooldown.description'),
           kind: 'number',
@@ -108,7 +127,7 @@ export default async function AdminConfigPage({
           suffix: t('units.hours'),
         },
         {
-          key: 'payout_details_cooloff_hours',
+          key: 'payout_details_change_cooloff_hours',
           label: t('fields.cooloffHours.label'),
           description: t('fields.cooloffHours.description'),
           kind: 'number',
@@ -136,14 +155,23 @@ export default async function AdminConfigPage({
           label: t('fields.combineMode.label'),
           description: t('fields.combineMode.description'),
           kind: 'select',
+          /* These four are exactly the branches `resolve_user_tier`
+             implements — sum_bonus, sum, product, and the else-branch that
+             takes the highest. The screen used to offer `multiply`, which is
+             not one of them: selecting it would have fallen through to the
+             else and silently applied "highest" instead of multiplying.
+             `config_allowed_values` now refuses anything outside this set, so
+             the two lists cannot drift apart again without a save failing
+             loudly. */
           options: [
             { value: 'sum_bonus', label: t('fields.combineMode.sumBonus') },
+            { value: 'sum', label: t('fields.combineMode.sum') },
+            { value: 'product', label: t('fields.combineMode.product') },
             { value: 'highest', label: t('fields.combineMode.highest') },
-            { value: 'multiply', label: t('fields.combineMode.multiply') },
           ],
         },
         {
-          key: 'subscription_multiplier_ceiling',
+          key: 'subscription_max_combined_multiplier',
           label: t('fields.multiplierCeiling.label'),
           description: t('fields.multiplierCeiling.description'),
           kind: 'number',
@@ -175,7 +203,7 @@ export default async function AdminConfigPage({
           suffix: t('units.points'),
         },
         {
-          key: 'referral_activation_ads',
+          key: 'referral_activation_ads_required',
           label: t('fields.referralAds.label'),
           description: t('fields.referralAds.description'),
           kind: 'number',
@@ -232,10 +260,12 @@ export default async function AdminConfigPage({
     },
   ]
 
+  const { values } = await getPlatformConfig()
+
   return (
     <>
       <PageHeader title={t('title')} description={t('description')} />
-      <SettingsForm groups={groups} initial={platformConfig()} />
+      <SettingsForm groups={groups} initial={values} onSave={saveConfig} />
     </>
   )
 }

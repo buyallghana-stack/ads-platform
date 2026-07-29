@@ -2130,8 +2130,9 @@
           "label": "Combinaison des avantages",
           "description": "Quand une personne détient plusieurs formules.",
           "sumBonus": "Additionner les bonus",
-          "highest": "Garder le plus élevé",
-          "multiply": "Multiplier entre eux"
+          "highest": "Utiliser uniquement le multiplicateur le plus élevé",
+          "sum": "Additionner les multiplicateurs",
+          "product": "Multiplier les multiplicateurs"
         },
         "multiplierCeiling": {
           "label": "Plafond absolu du taux combiné",
@@ -2203,7 +2204,9 @@
       "unsaved": "{count, plural, one {# modification non enregistrée} other {# modifications non enregistrées}}",
       "save": "Enregistrer",
       "discard": "Annuler",
-      "savedPreview": "Rien n'a été écrit — ce tableau de bord fonctionne sur des données de démonstration. Le branchement de l'enregistrement reste à faire côté serveur."
+      "saving": "Enregistrement…",
+      "savedCount": "{count, plural, one {# paramètre mis à jour.} other {# paramètres mis à jour.}}",
+      "savedNothing": "Rien à mettre à jour — ces valeurs étaient déjà en place."
     },
     "adminSettings": {
       "title": "Paramètres d'administration",
