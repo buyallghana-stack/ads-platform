@@ -32,6 +32,40 @@ const check = (name, pass, detail) => {
   console.log(`${pass ? 'PASS' : 'FAIL'}  ${name}${detail ? `  — ${detail}` : ''}`)
 }
 
+/**
+ * Fill and submit the reset form, but only once React owns it.
+ *
+ * The fields are react-hook-form `Controller`s, so a fill that happens before
+ * hydration writes to the DOM and is then thrown away — the form submits
+ * empty, zod puts errors on the fields, and no banner appears. Against
+ * localhost hydration wins the race and everything passes; against production
+ * it does not, which produced a false failure that looked like a real
+ * behavioural difference between the two.
+ */
+async function submitNewPassword(page, password) {
+  await page.waitForLoadState('networkidle')
+  const button = page.getByRole('button', { name: 'Update password' })
+  await button.waitFor({ state: 'visible', timeout: 20_000 })
+
+  const pw = page.getByLabel('New password', { exact: true })
+  const cf = page.getByLabel('Confirm new password', { exact: true })
+
+  // Proof that hydration took the value, rather than a sleep and a hope.
+  await expectFilled(pw, password)
+  await expectFilled(cf, password)
+
+  await button.click()
+}
+
+async function expectFilled(field, value) {
+  for (let attempt = 0; attempt < 20; attempt++) {
+    await field.fill(value)
+    if ((await field.inputValue()) === value) return
+    await field.page().waitForTimeout(250)
+  }
+  throw new Error('field would not accept a value — the form never hydrated')
+}
+
 let userId = null
 let browser = null
 
@@ -88,9 +122,7 @@ try {
   check('recovery link lands on the reset form', true, page.url())
 
   // ---- 2. Setting a new password succeeds --------------------------------
-  await page.getByLabel('New password', { exact: true }).fill(NEW_PASSWORD)
-  await page.getByLabel('Confirm new password', { exact: true }).fill(NEW_PASSWORD)
-  await page.getByRole('button', { name: 'Update password' }).click()
+  await submitNewPassword(page, NEW_PASSWORD)
 
   const success = page.getByText('Password updated', { exact: true })
   await success.waitFor({ timeout: 20_000 }).catch(() => {})
@@ -160,17 +192,26 @@ try {
   const stranger = await browser.newContext()
   const bare = await stranger.newPage()
   await bare.goto(`${BASE}/reset-password`)
-  await bare.getByLabel('New password', { exact: true }).fill(NEW_PASSWORD)
-  await bare.getByLabel('Confirm new password', { exact: true }).fill(NEW_PASSWORD)
-  await bare.getByRole('button', { name: 'Update password' }).click()
+  await submitNewPassword(bare, NEW_PASSWORD)
 
-  const strangerAlert = bare.getByRole('alert').first()
-  await strangerAlert.waitFor({ timeout: 20_000 }).catch(() => {})
-  const strangerText = (await strangerAlert.textContent().catch(() => '')) ?? ''
+  /*
+    Wait for alert TEXT, never for the alert element. The password strength
+    meter keeps an empty aria-live region on the page, so `getByRole('alert')`
+    is already satisfied the instant the form renders — waiting on it returns
+    immediately and reads an empty string before the server action has
+    answered. That produced a failure here that the product did not have.
+  */
+  const strangerText = await bare
+    .getByRole('alert')
+    .filter({ hasText: /\S/ })
+    .first()
+    .textContent({ timeout: 20_000 })
+    .catch(() => '')
+
   check(
     'no recovery session gives the expired-link message, not "something went wrong"',
-    /expired|already been used/i.test(strangerText),
-    strangerText.trim() || 'no banner shown',
+    /expired|already been used/i.test(strangerText ?? ''),
+    (strangerText ?? '').trim() || 'no banner shown',
   )
 
   check('no console errors on the reset page', consoleErrors.length === 0, consoleErrors[0])
