@@ -170,7 +170,29 @@ export async function signUpAction(formData: {
     if (signUpError?.code === 'over_email_send_rate_limit' || signUpError?.status === 429) {
       return { ok: false, errorKey: 'emailSendLimit' }
     }
-    return { ok: false, errorKey: 'generic', message: signUpError?.message }
+
+    /*
+      THE MAIL SERVER REFUSED THE ADDRESS. Seen in production on 2026-07-29:
+      Resend's test sender answers 550 for every recipient except the account
+      owner, GoTrue turns that into a 500, and the account is rolled back. The
+      person did nothing wrong and there is nothing they can do about it, so
+      they are told that rather than blamed.
+    */
+    if (signUpError?.status === 500 || /send email|smtp|550/i.test(signUpError?.message ?? '')) {
+      console.error('[signup] mail send failed:', signUpError?.message)
+      return { ok: false, errorKey: 'emailSendFailed' }
+    }
+
+    /*
+      NEVER SURFACE A MESSAGE THAT IS NOT A SENTENCE. The 500 above arrived as
+      the string "{}" — an empty JSON body — and went straight into the red
+      banner at the top of the signup form, which is what the operator saw.
+      Anything that looks like serialised data is dropped for the generic copy.
+    */
+    const raw = signUpError?.message?.trim()
+    const usable = raw && !/^[[{]/.test(raw) && raw.length > 3 ? raw : undefined
+    if (!usable) console.error('[signup] unusable error from Supabase:', raw)
+    return { ok: false, errorKey: 'generic', message: usable }
   }
 
   const userId = signUp.user.id

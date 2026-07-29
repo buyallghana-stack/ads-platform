@@ -291,7 +291,8 @@
       "referralCodePlaceholder": "8 characters",
       "terms": "I agree to the <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
       "ghanaOnly": "Available in Ghana only.",
-      "referralApplied": "Applied from your invite link."
+      "referralApplied": "Applied from your invite link.",
+      "checking": "Checking…"
     },
     "logIn": {
       "title": "Welcome back 👋",
@@ -375,7 +376,8 @@
       "identityBlocked": "This email address or phone number cannot be used to open an account.",
       "botCheckFailed": "We could not confirm you are a person. Refresh the page and try again — if you use an ad blocker or a VPN, turn it off for this page.",
       "emailSendLimit": "We could not send your confirmation email just now. Please try again in a few minutes.",
-      "botCheckRetry": "The security check needs doing again — it has been reset just below. Please press Create account once more."
+      "botCheckRetry": "The security check needs doing again — it has been reset just below. Please press Create account once more.",
+      "emailSendFailed": "We could not send a confirmation email to that address just now. This is on our side — please try again in a few minutes."
     }
   },
   "legal": {

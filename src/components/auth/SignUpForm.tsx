@@ -112,6 +112,34 @@ export function SignUpForm() {
      duplicate until the page is reloaded. Reported from production. */
   const [turnstileReset, setTurnstileReset] = useState(0)
 
+  /* Whether a bot check is even in play. Read once from the same env value the
+     widget uses, so the button and the widget can never disagree. */
+  const botCheckOn = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY)
+
+  /*
+    THE CHALLENGE MUST NEVER BE ABLE TO LOCK THE FORM SHUT. If the Cloudflare
+    script is blocked or the network drops it, no token ever arrives — so
+    waiting for one forever would leave somebody staring at a dead button with
+    nothing explaining it. After this long the button comes back and the server
+    gives them a real answer, which is the one that can name an ad blocker.
+
+    Set from a timer rather than synchronously in the effect, so this does not
+    trip react-hooks/set-state-in-effect; comparing against the reset counter
+    is what clears it when the challenge runs again.
+  */
+  const [stalledAt, setStalledAt] = useState<number | null>(null)
+  useEffect(() => {
+    const id = setTimeout(() => setStalledAt(turnstileReset), 12_000)
+    return () => clearTimeout(id)
+  }, [turnstileReset])
+
+  /* After a reset the challenge takes about a second to solve again. Pressing
+     the button inside that second sends no token and earns a SECOND error
+     about not being a person, on top of whatever actually went wrong — which
+     is precisely what the operator hit. So the button waits for it, but only
+     for as long as waiting is honest. */
+  const awaitingCheck = botCheckOn && !turnstileToken && stalledAt !== turnstileReset
+
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null)
 
@@ -276,8 +304,15 @@ export function SignUpForm() {
           resetSignal={turnstileReset}
         />
 
-        <Button type="submit" size="lg" fullWidth loading={isSubmitting} className="mt-1.5">
-          {t('submit')}
+        <Button
+          type="submit"
+          size="lg"
+          fullWidth
+          loading={isSubmitting || awaitingCheck}
+          disabled={awaitingCheck}
+          className="mt-1.5"
+        >
+          {awaitingCheck ? t('checking') : t('submit')}
         </Button>
       </form>
 
