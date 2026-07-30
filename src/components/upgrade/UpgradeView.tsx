@@ -27,14 +27,17 @@ export function UpgradeView({
   held,
   benefits,
   freeDailyAdCap,
+  freeName,
   pointsPerCurrencyUnit,
   checkoutEnabled,
 }: {
   plans: Plan[]
   held: HeldPlan[]
   benefits: ResolvedBenefits | null
-  /** The free allowance, so plans can say how many MORE ads they buy. */
+  /** The free allowance and its name, so the cheapest paid plan has a rung
+   *  to compare against. Every plan after it compares to its predecessor. */
   freeDailyAdCap: number
+  freeName: string
   /** Points to one cedi, for showing thresholds in money. */
   pointsPerCurrencyUnit: number
   /** False until mobile money and crypto checkout are wired up. */
@@ -135,7 +138,7 @@ export function UpgradeView({
         style={{ '--rise-delay': '0.15s' } as React.CSSProperties}
         className="animate-rise mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
       >
-        {plans.map((plan) => (
+        {plans.map((plan, index) => (
           <PlanCard
             key={plan.id}
             plan={plan}
@@ -144,7 +147,10 @@ export function UpgradeView({
             // The middle plan carries the badge: it is the one most people
             // should land on, and an unmarked grid makes everyone hesitate.
             recommended={!heldByTier.has(plan.id) && plan.slug === 'silver'}
-            freeDailyAdCap={freeDailyAdCap}
+            previousName={index === 0 ? freeName : plans[index - 1]!.name}
+            previousDailyAdCap={
+              index === 0 ? freeDailyAdCap : plans[index - 1]!.dailyAdCap
+            }
             pointsPerCurrencyUnit={pointsPerCurrencyUnit}
             onChoose={() => setSelected(plan)}
           />

@@ -1215,7 +1215,7 @@
     },
     "benefits": {
       "ads": "{count} ads a day",
-      "adsHint": "{extra} more than the free plan",
+      "adsHint": "{extra} more than {plan}",
       "rate": "+{percent}% points on every ad",
       "rateHint": "an ad worth {base} points pays you {paid}",
       "payout": "Withdraw from {points} points",

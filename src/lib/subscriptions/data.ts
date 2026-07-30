@@ -159,16 +159,19 @@ export const getPlanStanding = cache(async (userId: string): Promise<PlanStandin
  * Both are operator config, so neither is hardcoded in the UI.
  */
 export const getPlanReferences = cache(
-  async (): Promise<{ freeDailyAdCap: number; pointsPerCurrencyUnit: number }> => {
+  async (): Promise<{ freeDailyAdCap: number; freeName: string; pointsPerCurrencyUnit: number }> => {
     const supabase = await createClient()
 
     const [{ data: free }, { data: rate }] = await Promise.all([
-      supabase.from('tiers').select('daily_ad_cap').eq('is_default', true).maybeSingle(),
+      supabase.from('tiers').select('daily_ad_cap, name').eq('is_default', true).maybeSingle(),
       supabase.from('app_config').select('value').eq('key', 'points_per_currency_unit').maybeSingle(),
     ])
 
     return {
       freeDailyAdCap: free?.daily_ad_cap ?? 20,
+      // The plan's own name, not a hardcoded "Free" — an operator who renames
+      // the default tier should see that name on the cards.
+      freeName: free?.name ?? 'Free',
       pointsPerCurrencyUnit: Number(rate?.value ?? 1000),
     }
   },

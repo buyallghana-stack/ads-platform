@@ -1215,7 +1215,7 @@
     },
     "benefits": {
       "ads": "{count} publicités par jour",
-      "adsHint": "{extra} de plus que le forfait gratuit",
+      "adsHint": "{extra} de plus que {plan}",
       "rate": "+{percent}% de points sur chaque publicité",
       "rateHint": "une publicité à {base} points vous en rapporte {paid}",
       "payout": "Retrait dès {points} points",

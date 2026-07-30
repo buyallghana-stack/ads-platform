@@ -23,7 +23,8 @@ export function PlanCard({
   held,
   endsAt,
   recommended,
-  freeDailyAdCap,
+  previousName,
+  previousDailyAdCap,
   pointsPerCurrencyUnit,
   onChoose,
 }: {
@@ -31,8 +32,13 @@ export function PlanCard({
   held: boolean
   endsAt: string | null
   recommended: boolean
-  /** The free allowance, so a plan can say how many MORE ads it buys. */
-  freeDailyAdCap: number
+  /** The plan one rung below this one — Free for the cheapest paid plan.
+   *  Each card says what THIS step buys over the last one, because that is
+   *  the decision somebody on Bronze is actually making. Comparing every
+   *  plan to Free made the top plans look like huge jumps and the middle
+   *  ones look redundant. */
+  previousName: string
+  previousDailyAdCap: number
   /** Points to one cedi, for showing the payout threshold in money. */
   pointsPerCurrencyUnit: number
   onChoose: () => void
@@ -56,13 +62,13 @@ export function PlanCard({
   const ratePercent = Math.round((plan.rewardMultiplier - 1) * 100)
   const referralPercent = Math.round((plan.referralBonusMultiplier - 1) * 100)
   const examplePays = Math.round(EXAMPLE_AD_POINTS * plan.rewardMultiplier)
-  const extraAds = plan.dailyAdCap - freeDailyAdCap
+  const extraAds = plan.dailyAdCap - previousDailyAdCap
 
   const benefits = [
     {
       icon: Zap,
       text: t('benefits.ads', { count: plan.dailyAdCap }),
-      hint: extraAds > 0 ? t('benefits.adsHint', { extra: extraAds }) : null,
+      hint: extraAds > 0 ? t('benefits.adsHint', { extra: extraAds, plan: previousName }) : null,
     },
     {
       icon: Gem,
