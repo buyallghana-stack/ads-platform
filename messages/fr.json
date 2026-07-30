@@ -1219,8 +1219,7 @@
       "rate": "+{percent}% de points sur chaque publicité",
       "rateHint": "une publicité à {base} points vous en rapporte {paid}",
       "payout": "Retrait dès {points} points",
-      "payoutHint": "environ {money}",
-      "referral": "+{percent}% sur les bonus de parrainage"
+      "payoutHint": "environ {money}"
     },
     "card": {
       "period": "pour {months} mois",

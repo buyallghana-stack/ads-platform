@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, Gem, Layers, Zap } from 'lucide-react'
+import { Check, Gem, Zap } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import type { Plan } from '@/lib/subscriptions/data'
@@ -60,7 +60,6 @@ export function PlanCard({
   */
   const EXAMPLE_AD_POINTS = 50
   const ratePercent = Math.round((plan.rewardMultiplier - 1) * 100)
-  const referralPercent = Math.round((plan.referralBonusMultiplier - 1) * 100)
   const examplePays = Math.round(EXAMPLE_AD_POINTS * plan.rewardMultiplier)
   const extraAds = plan.dailyAdCap - previousDailyAdCap
 
@@ -86,11 +85,10 @@ export function PlanCard({
         }),
       }),
     },
-    {
-      icon: Layers,
-      text: t('benefits.referral', { percent: referralPercent }),
-      hint: null,
-    },
+    /* The "+X% on referral bonuses" benefit was removed on 2026-07-30, when
+       referral bonuses became flat for everyone. Only ad earning scales with a
+       plan now — a card promising something the money path no longer does is
+       worse than one benefit fewer. */
   ]
 
   return (

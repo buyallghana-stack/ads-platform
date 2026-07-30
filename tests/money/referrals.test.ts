@@ -111,8 +111,7 @@ describe.skipIf(!HAS_DB)('stage three — commission when a referee buys a plan'
       const { paymentId, plan: gold } = await buy(tx, referee.id, 'gold')
       const after = await balanceOf(tx, referrer.id)
 
-      // The referrer holds no plan, so their referral multiplier is the free
-      // tier's 1.0 and the commission is the percentage alone.
+      // The percentage alone — nothing scales it.
       const expected = saleInPoints(gold) * 0.1
 
       expect(await commissionFor(tx, paymentId)).toMatchObject({ points: expected })
@@ -120,19 +119,56 @@ describe.skipIf(!HAS_DB)('stage three — commission when a referee buys a plan'
     })
   })
 
-  it("applies the referrer's own tier multiplier", async () => {
+  /* Operator correction, 2026-07-30: only AD EARNING scales with a plan.
+     A referral used to be worth 2x to a Platinum holder, so the same invited
+     person doing the same thing paid different amounts depending on who
+     invited them. */
+  it('pays the same commission whatever plan the referrer holds', async () => {
     await withRollback(async (tx) => {
       await enableCommission(tx)
       const { referrer, referee } = await refer(tx)
 
-      // Platinum carries referral_bonus_multiplier 2.0.
+      // Platinum carries referral_bonus_multiplier 2.0 and must not matter.
       await buy(tx, referrer.id, 'platinum')
       const { paymentId, plan: gold } = await buy(tx, referee.id, 'gold')
 
       expect(await commissionFor(tx, paymentId)).toMatchObject({
-        points: saleInPoints(gold) * 0.1 * 2,
-        tier_multiplier: '2.000',
+        points: saleInPoints(gold) * 0.1,
+        tier_multiplier: '1.000',
       })
+    })
+  })
+
+  /* The signup and activation bonuses were multiplied too. Same rule. */
+  it('pays flat signup and activation bonuses whatever plan the referrer holds', async () => {
+    await withRollback(async (tx) => {
+      await setConfig(tx, 'referral_signup_bonus_points', '500')
+      await setConfig(tx, 'referral_activation_bonus_points', '800')
+      await setConfig(tx, 'referral_activation_ads_required', '1')
+
+      const paid = async (plan: string | null) => {
+        const referrer = await createUser(tx, { name: 'Referrer ' + (plan ?? 'free') })
+        const referee = await createUser(tx, { name: 'Referee ' + (plan ?? 'free') })
+        if (plan) await buy(tx, referrer.id, plan)
+
+        const { rows: code } = await tx.query(
+          `select referral_code from public.profiles where id = $1`, [referrer.id])
+        await tx.query(`select public.apply_referral_code($1, $2)`, [referee.id, code[0].referral_code])
+
+        // One ad completion trips activation.
+        await tx.query(`select public.credit_points($1, 100, 'ad_view')`, [referee.id])
+        await tx.query(`select public.check_referral_activation($1)`, [referee.id])
+
+        const { rows } = await tx.query(
+          `select coalesce(sum(amount), 0)::bigint::int as total from public.points_ledger
+            where user_id = $1 and entry_type in ('referral_signup','referral_activation')`,
+          [referrer.id])
+        return rows[0].total
+      }
+
+      // Free referrer and a Platinum referrer must be paid identically.
+      expect(await paid(null)).toBe(1300)
+      expect(await paid('platinum')).toBe(1300)
     })
   })
 
@@ -239,20 +275,19 @@ describe.skipIf(!HAS_DB)('stage three — the limits that stop it running away',
         await buy(tx, referrer.id, slug)
       }
 
-      const { rows: resolved } = await tx.query<{ referral_bonus_multiplier: string }>(
-        `select referral_bonus_multiplier from public.resolve_user_tier($1)`,
-        [referrer.id],
-      )
-      const multiplier = Number(resolved[0]!.referral_bonus_multiplier)
-
       const { paymentId, plan: gold } = await buy(tx, referee.id, 'gold')
       const sale = saleInPoints(gold)
-      const uncapped = Math.floor(sale * 0.5 * multiplier)
 
-      // The test is only meaningful if the clamp actually had something to
-      // clamp — assert that before asserting the clamp worked.
-      expect(uncapped).toBeGreaterThan(sale)
-      expect(await commissionFor(tx, paymentId)).toMatchObject({ points: sale })
+      /*
+        Since bonuses went flat there is nothing that can push a commission
+        past the sale: the percentage is capped at 50 by the config row's own
+        bounds, and nothing multiplies it. The clamp is now an invariant with
+        nothing to clamp, so this asserts the PROPERTY rather than pretending
+        to trigger it — a referral never costs more than the purchase, even
+        with the maximum percentage and every plan held.
+      */
+      expect(await commissionFor(tx, paymentId)).toMatchObject({ points: sale * 0.5 })
+      expect(sale * 0.5).toBeLessThanOrEqual(sale)
     })
   })
 

@@ -1219,8 +1219,7 @@
       "rate": "+{percent}% points on every ad",
       "rateHint": "an ad worth {base} points pays you {paid}",
       "payout": "Withdraw from {points} points",
-      "payoutHint": "about {money}",
-      "referral": "+{percent}% on referral bonuses"
+      "payoutHint": "about {money}"
     },
     "card": {
       "period": "for {months} months",
