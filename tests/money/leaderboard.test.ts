@@ -273,6 +273,71 @@ describe.skipIf(!HAS_DB)('leaderboard', () => {
     })
   })
 
+  /*
+    Migration 068. The operator saw 2 of 4 accounts and asked why; the other
+    two had never earned anything. They chose a setting over a rule.
+
+    The trap this covers: relaxing `having sum(...) > 0` is NOT enough on its
+    own, because an account with no ledger rows never enters the aggregate at
+    all — the query has to start from the live people and left-join points.
+    A test that gave the zero-earner a single ledger row would have passed
+    against the broken version, so this one deliberately gives them nothing.
+  */
+  it('hides people on zero by default and shows them when the operator says so', async () => {
+    await withRollback(async (tx) => {
+      const earner = await createUser(tx, { name: 'Has Earned' })
+      const never = await createUser(tx, { name: 'Never Earned' })
+      await creditAt(tx, earner.id, 3_000, 'now()')
+      await actAs(tx, earner.id)
+
+      expect((await board(tx)).map((r) => r.user_id)).not.toContain(never.id)
+
+      await setConfig(tx, 'leaderboard_shows_zero_earners', 'true')
+      const shown = await board(tx)
+      const row = shown.find((r) => r.user_id === never.id)
+
+      expect(row).toBeDefined()
+      expect(Number(row!.points)).toBe(0)
+      // Below the person who earned, not above them.
+      expect(Number(row!.rank)).toBeGreaterThan(
+        Number(shown.find((r) => r.user_id === earner.id)!.rank),
+      )
+    })
+  })
+
+  /* A display toggle must never resurrect somebody the operator removed. */
+  it('still hides disabled and deleted accounts when zero-earners are shown', async () => {
+    await withRollback(async (tx) => {
+      const viewer = await createUser(tx, { name: 'Still Here' })
+      const banned = await createUser(tx, { name: 'Banned Person' })
+      const gone = await createUser(tx, { name: 'Deleted user' })
+      await creditAt(tx, viewer.id, 10, 'now()')
+      await tx.query(`update public.profiles set disabled_at = now() where id = $1`, [banned.id])
+      await tx.query(`update public.profiles set deleted_at = now() where id = $1`, [gone.id])
+      await setConfig(tx, 'leaderboard_shows_zero_earners', 'true')
+
+      await actAs(tx, viewer.id)
+      const ids = (await board(tx)).map((r) => r.user_id)
+      expect(ids).not.toContain(banned.id)
+      expect(ids).not.toContain(gone.id)
+    })
+  })
+
+  /* With zero-earners shown, everybody is in both windows, so somebody who
+     did nothing in either must read as "no change" — not as "new on the
+     board" every single day, which is what happens if `prev` keeps filtering
+     zeros while `cur` stops. */
+  it('does not call a permanent zero-earner new every period', async () => {
+    await withRollback(async (tx) => {
+      const idle = await createUser(tx, { name: 'Idle Person' })
+      await setConfig(tx, 'leaderboard_shows_zero_earners', 'true')
+
+      await actAs(tx, idle.id)
+      const row = (await board(tx, 'week')).find((r) => r.user_id === idle.id)!
+      expect(row.movement).toBe('same')
+    })
+  })
+
   it('reports a standing to a user far outside the visible ranks', async () => {
     await withRollback(async (tx) => {
       const me = await createUser(tx, { name: 'Way Down' })
