@@ -1,11 +1,18 @@
-import { LEGAL_ENTITY, type LegalDoc } from './types'
+import { businessDetails, LEGAL_ENTITY, type LegalDoc } from './types'
 
 const CONTACT = LEGAL_ENTITY.contactEmail
 
-/** Conditions d'utilisation — français. Traduction de `terms.en.ts`. */
+/**
+ * Conditions d'utilisation — français. Traduction de `terms.en.ts`.
+ *
+ * Révision du 2026-07-30 : sections 5 à 8 (tâches, jeux-récompenses, codes
+ * cadeaux, classement) et 12 (parrainage) ajoutées ou réécrites, 13 et 14
+ * modifiées. Les identifiants d'ancrage restent inchangés même lorsque la
+ * numérotation des titres a bougé.
+ */
 export const termsFr: LegalDoc = {
   title: "Conditions d'utilisation",
-  updated: '2026-07-25',
+  updated: '2026-07-30',
   summary:
     "Ces conditions expliquent comment SidePerks fonctionne, ce que nous attendons de vous et ce que vous pouvez attendre de nous. Merci de les lire avant de commencer à gagner.",
   sections: [
@@ -24,6 +31,10 @@ export const termsFr: LegalDoc = {
         {
           kind: 'p',
           text: "Notre politique de confidentialité explique comment nous traitons vos informations personnelles et fait partie de cet accord.",
+        },
+        {
+          kind: 'p',
+          text: "La section 23 indique qui nous sommes et comment nous joindre, afin que vous sachiez avec qui vous contractez.",
         },
       ],
     },
@@ -71,11 +82,15 @@ export const termsFr: LegalDoc = {
       blocks: [
         {
           kind: 'p',
-          text: "Vous gagnez des points en regardant des publicités via SidePerks et en répondant à la question d'attention qui suit. Les points sont crédités une fois la publicité terminée et la réponse acceptée.",
+          text: "Vous gagnez des points en regardant des publicités via SidePerks et en répondant à la question d'attention qui suit, ainsi qu'en répondant aux sondages lorsqu'ils sont proposés. Les points sont crédités une fois l'activité terminée et la réponse acceptée.",
         },
         {
           kind: 'p',
-          text: "Ce que vous pouvez gagner chaque jour dépend de votre formule. Les publicités proviennent des annonceurs : leur nombre varie d'un jour à l'autre et nous ne pouvons garantir ni quantité, ni fréquence, ni revenu.",
+          text: "Des points peuvent également arriver sur votre solde via les autres fonctionnalités décrites ci-dessous : les tâches (section 5), les jeux-récompenses (section 6), les codes cadeaux (section 7) et le parrainage (section 12). Tout ce qui est crédité sur votre solde est constitué de points, et la section 9 s'y applique quelle que soit leur origine.",
+        },
+        {
+          kind: 'p',
+          text: "Ce que vous pouvez gagner chaque jour dépend de votre formule. Les publicités et les sondages proviennent des annonceurs et de partenaires d'étude : leur nombre varie d'un jour à l'autre et nous ne pouvons garantir ni quantité, ni fréquence, ni revenu.",
         },
         {
           kind: 'note',
@@ -84,12 +99,92 @@ export const termsFr: LegalDoc = {
       ],
     },
     {
-      id: 'points',
-      heading: '5. Ce que sont les points',
+      id: 'tasks',
+      heading: '5. Les tâches',
       blocks: [
         {
           kind: 'p',
-          text: "Les points sont une récompense créditée sur votre compte au titre d'une licence limitée, personnelle et révocable. Ils ne sont ni de l'argent, ni un dépôt, ni une monnaie légale, ni votre propriété.",
+          text: "Une tâche est un défi facultatif assorti d'un objectif — par exemple regarder un certain nombre de publicités, ou maintenir une série quotidienne. Lorsque votre progression atteint l'objectif, la récompense devient disponible et vous pouvez la réclamer.",
+        },
+        {
+          kind: 'p',
+          text: "Les récompenses ne sont pas versées automatiquement : vous les réclamez, et chaque tâche ne peut être réclamée qu'une fois par compte. La progression est calculée à partir de l'activité déjà enregistrée sur votre compte : une tâche peut donc tenir compte d'une activité réalisée avant son apparition.",
+        },
+        {
+          kind: 'p',
+          text: "Nous pouvons ajouter, modifier, suspendre ou retirer des tâches à tout moment. Une tâche retirée avant que vous ne la réclamiez ne verse rien, et la progression accumulée n'est pas indemnisée. Si l'activité à l'origine de votre progression est ensuite annulée au titre de la section 10, votre progression est réduite d'autant.",
+        },
+      ],
+    },
+    {
+      id: 'games',
+      heading: '6. Les jeux-récompenses',
+      blocks: [
+        {
+          kind: 'p',
+          text: "Certaines formules incluent un nombre de parties par semaine sur nos jeux-récompenses — actuellement une roue et une boîte mystère. Ces parties sont un avantage de la formule que vous détenez déjà.",
+        },
+        {
+          kind: 'p',
+          text: "Vous ne pouvez pas acheter de parties, et vous ne pouvez miser ni points, ni argent, ni quoi que ce soit d'autre sur une partie. Aucun frais distinct n'est demandé pour participer, rien n'est parié et rien n'est risqué : chaque résultat possible attribue un lot. Les lots sont des points ou des parties supplémentaires, et relèvent de la section 9.",
+        },
+        {
+          kind: 'p',
+          text: "Chaque partie est tirée sur nos serveurs, et non sur votre appareil. L'application ne fait que révéler un résultat déjà déterminé : fermer l'application pendant l'animation ne fait ni perdre un lot ni en produire un second. Nous déterminons les lots disponibles, le nombre de fois où chacun peut être gagné par jour ou par semaine, ainsi que leur probabilité ; nous ne publions pas la probabilité relative de chaque lot.",
+        },
+        {
+          kind: 'p',
+          text: "Les parties sont attribuées chaque semaine et ne sont pas reportées. Le nombre inclus dans chaque formule peut évoluer, tout comme les lots proposés.",
+        },
+        {
+          kind: 'note',
+          text: "Parce que les parties accompagnent une formule au lieu d'être vendues, et parce que rien n'est payé, misé ni risqué en échange d'une chance de gain, les jeux-récompenses sont une fonctionnalité de fidélité du service. Il ne s'agit pas d'un produit de pari, de jeu d'argent ou de loterie, et nous ne les exploitons pas comme tel.",
+        },
+      ],
+    },
+    {
+      id: 'gift-codes',
+      heading: '7. Les codes cadeaux',
+      blocks: [
+        {
+          kind: 'p',
+          text: "Nous émettons parfois des codes cadeaux — pour une promotion, une campagne, ou pour corriger un problème signalé au support. Saisir un code valide crédite les points qu'il porte.",
+        },
+        {
+          kind: 'p',
+          text: "Un code s'utilise une seule fois, par un seul compte. Un code peut avoir une date d'expiration, être limité en nombre et être retiré avant utilisation. Un code n'est pas une propriété, n'a en lui-même aucune valeur en espèces, et ne peut être vendu, acheté ni échangé.",
+        },
+        {
+          kind: 'p',
+          text: "Nous pouvons annuler les points d'un code publié par erreur, obtenu auprès d'une personne à qui il n'était pas destiné, ou utilisé par génération automatique de codes.",
+        },
+      ],
+    },
+    {
+      id: 'leaderboard',
+      heading: '8. Le classement',
+      blocks: [
+        {
+          kind: 'p',
+          text: "Le classement ordonne les utilisateurs selon les points gagnés au cours d'une période, afin que chacun puisse se situer. Toute personne qui gagne des points y figure ; il n'existe pour l'instant aucun moyen de s'en retirer, et si cela vous importe, contactez-nous.",
+        },
+        {
+          kind: 'p',
+          text: "Les autres utilisateurs connectés voient votre prénom, l'initiale de votre nom de famille et votre photo de profil si vous en avez ajouté une. Ils ne voient ni votre adresse e-mail, ni votre numéro de téléphone, ni votre solde, ni vos retraits.",
+        },
+        {
+          kind: 'p',
+          text: "Les retraits et les remboursements n'affectent pas un classement, et les comptes en cours d'examen peuvent en être exclus. Figurer au classement n'apporte qu'une reconnaissance : aucun lot ni paiement n'y est attaché.",
+        },
+      ],
+    },
+    {
+      id: 'points',
+      heading: '9. Ce que sont les points',
+      blocks: [
+        {
+          kind: 'p',
+          text: "Les points sont une récompense créditée sur votre compte au titre d'une licence limitée, personnelle et révocable. Ils ne sont ni de l'argent, ni un dépôt, ni une monnaie légale, ni votre propriété. Cela vaut pour chaque point, qu'il provienne d'une publicité, d'un sondage, d'une tâche, d'un jeu-récompense, d'un code cadeau ou d'un parrainage.",
         },
         { kind: 'p', text: 'Cela signifie que les points :' },
         {
@@ -109,7 +204,7 @@ export const termsFr: LegalDoc = {
     },
     {
       id: 'verification',
-      heading: '6. Vérification, corrections et annulations',
+      heading: '10. Vérification, corrections et annulations',
       blocks: [
         {
           kind: 'p',
@@ -117,7 +212,7 @@ export const termsFr: LegalDoc = {
         },
         {
           kind: 'p',
-          text: "Si des points ont été crédités par erreur, ou pour une activité qui s'avère non authentique, nous pouvons les corriger ou les annuler, y compris après leur apparition dans votre solde. Lorsqu'une annulation concerne un retrait demandé, nous pouvons suspendre ou refuser ce retrait.",
+          text: "Si des points ont été crédités par erreur, ou pour une activité qui s'avère non authentique, nous pouvons les corriger ou les annuler, y compris après leur apparition dans votre solde. Cela vaut pour les points de toute origine, y compris les récompenses de tâches, les lots de jeux, les codes cadeaux et les récompenses de parrainage. Lorsqu'une annulation concerne un retrait demandé, nous pouvons suspendre ou refuser ce retrait.",
         },
         {
           kind: 'p',
@@ -127,17 +222,18 @@ export const termsFr: LegalDoc = {
     },
     {
       id: 'prohibited',
-      heading: '7. Ce que vous ne devez pas faire',
+      heading: '11. Ce que vous ne devez pas faire',
       blocks: [
         { kind: 'p', text: 'Vous ne devez pas :' },
         {
           kind: 'list',
           items: [
             "ouvrir ou contrôler plus d'un compte, y compris via des proches ou des inscriptions rémunérées ;",
-            "utiliser des robots, scripts, outils d'automatisation, émulateurs ou applications modifiées qui regardent les publicités ou répondent à votre place ;",
+            "utiliser des robots, scripts, outils d'automatisation, émulateurs ou applications modifiées qui regardent les publicités, répondent aux questions, accomplissent des tâches ou jouent aux jeux-récompenses à votre place ;",
             "dissimuler ou falsifier votre localisation, par exemple via un VPN, un proxy ou une usurpation de position ;",
             "lancer des publicités sans les regarder, notamment en coupant le son, en arrière-plan ou en en lançant plusieurs à la fois ;",
-            "interférer avec le lecteur publicitaire, les questions d'attention ou tout contrôle de sécurité ou de fraude ;",
+            "interférer avec le lecteur publicitaire, les questions d'attention, les jeux-récompenses ou tout contrôle de sécurité ou de fraude ;",
+            "tenter de deviner, de générer ou d'utiliser des codes cadeaux qui ne vous ont pas été attribués ;",
             "créer des parrainages qui ne correspondent pas à de vraies personnes, ou rémunérer des inscriptions en votre nom ;",
             'vendre, acheter, louer ou partager des comptes ;',
             "copier, extraire ou republier notre contenu, ou tenter d'accéder à des parties du service qui ne vous sont pas destinées.",
@@ -151,25 +247,50 @@ export const termsFr: LegalDoc = {
     },
     {
       id: 'referrals',
-      heading: '8. Parrainage',
+      heading: '12. Parrainage',
       blocks: [
         {
           kind: 'p',
-          text: "Vous pouvez inviter d'autres personnes avec votre lien de parrainage. Les récompenses ne sont créditées que si la personne invitée est un nouvel utilisateur authentique remplissant les conditions d'activité affichées dans l'application à ce moment-là.",
+          text: "Vous pouvez inviter d'autres personnes avec votre lien ou votre code de parrainage. Lorsqu'une récompense s'applique, elle vous est versée, à vous qui avez invité, et n'est jamais facturée à la personne invitée. Personne ne paie quoi que ce soit pour parrainer ou être parrainé.",
+        },
+        { kind: 'p', text: 'Un parrainage peut vous récompenser à trois moments au plus :' },
+        {
+          kind: 'list',
+          items: [
+            "lorsque la personne invitée crée un compte avec votre code ;",
+            "lorsqu'elle devient active en remplissant la condition d'activité affichée dans l'application à ce moment-là ;",
+            "lorsqu'elle achète une formule — une commission calculée en pourcentage de ce qu'elle a payé, dans la limite d'un plafond par personne invitée.",
+          ],
         },
         {
           kind: 'p',
-          text: "Nous ne versons pas de récompense pour des comptes que vous contrôlez vous-même, pour des personnes qui n'utilisent jamais le service, ni pour des inscriptions obtenues par spam ou par des promesses de gains trompeuses.",
+          text: "Les montants, conditions et plafonds sont ceux affichés dans l'application à ce moment-là, et nous pouvons les modifier. Certains peuvent être fixés à zéro, auquel cas la récompense correspondante n'est pas versée.",
+        },
+        {
+          kind: 'p',
+          text: "Les récompenses de parrainage ne comportent qu'un seul niveau. Nous vous rémunérons pour les personnes que vous avez invitées vous-même, et nous ne vous versons rien pour les personnes qu'elles invitent à leur tour. Vos gains sur SidePerks proviennent de l'utilisation du service et de l'apport de clients, et non de la constitution d'un réseau de recrues.",
+        },
+        {
+          kind: 'p',
+          text: "Nous ne versons pas de récompense pour des comptes que vous contrôlez vous-même, pour des personnes qui n'utilisent jamais le service, ni pour des inscriptions obtenues par spam ou par des promesses de gains trompeuses. Nous pouvons annuler une récompense de parrainage, y compris une commission d'achat, si le paiement à son origine est remboursé ou annulé, ou si le compte s'avère non authentique.",
         },
       ],
     },
     {
       id: 'plans',
-      heading: '9. Formules et paiements',
+      heading: '13. Formules et paiements',
       blocks: [
         {
           kind: 'p',
-          text: "Certaines formules augmentent votre plafond de gains quotidien ou ajoutent d'autres avantages. Le prix, la durée et les avantages sont affichés avant le paiement et sont ceux qui s'appliquent à votre achat.",
+          text: "Certaines formules augmentent votre plafond de gains quotidien ou ajoutent d'autres avantages, comme un multiplicateur de récompense plus élevé ou des parties hebdomadaires sur les jeux-récompenses. Le prix, la durée et les avantages sont affichés avant le paiement et sont ceux qui s'appliquent à votre achat.",
+        },
+        {
+          kind: 'p',
+          text: "Vous pouvez détenir plusieurs formules à la fois, mais une seule de chaque. Lorsque vous en détenez plusieurs, leurs avantages s'additionnent, dans la limite des plafonds globaux indiqués dans l'application.",
+        },
+        {
+          kind: 'note',
+          text: "Une formule vous donne accès au service à de meilleures conditions. Ce n'est pas un achat de points, et ce n'est pas l'achat d'une chance de gagner quoi que ce soit.",
         },
         {
           kind: 'p',
@@ -183,7 +304,7 @@ export const termsFr: LegalDoc = {
     },
     {
       id: 'payouts',
-      heading: '10. Retraits et paiements',
+      heading: '14. Retraits et paiements',
       blocks: [
         {
           kind: 'p',
@@ -199,7 +320,7 @@ export const termsFr: LegalDoc = {
         },
         {
           kind: 'note',
-          text: "Les retraits en cryptomonnaie comportent un risque de change. Le montant reçu est calculé au moment du décaissement, et non au moment de la demande ; la valeur peut varier entre les deux.",
+          text: "Les retraits en cryptomonnaie comportent un risque de change. Lorsque vous en demandez un, nous convertissons le montant au taux dont nous disposons à cet instant et figeons la quantité de cryptomonnaie sur votre demande : le chiffre affiché est celui que nous envoyons. Si aucun taux fiable n'est disponible au moment de la demande, la quantité est calculée lors du traitement du retrait. Ce qui vous est dû est la valeur en cedis de vos points ; la quantité de cryptomonnaie que cette valeur permet d'acheter peut varier entre-temps.",
         },
         {
           kind: 'p',
@@ -209,7 +330,7 @@ export const termsFr: LegalDoc = {
     },
     {
       id: 'suspension',
-      heading: '11. Signalement, suspension et fermeture',
+      heading: '15. Signalement, suspension et fermeture',
       blocks: [
         {
           kind: 'p',
@@ -227,7 +348,7 @@ export const termsFr: LegalDoc = {
     },
     {
       id: 'closing',
-      heading: '12. Fermer votre compte',
+      heading: '16. Fermer votre compte',
       blocks: [
         {
           kind: 'p',
@@ -245,11 +366,11 @@ export const termsFr: LegalDoc = {
     },
     {
       id: 'availability',
-      heading: '13. Évolutions du service',
+      heading: '17. Évolutions du service',
       blocks: [
         {
           kind: 'p',
-          text: "Nous développons encore SidePerks et pouvons ajouter, modifier ou retirer des fonctionnalités, formules, taux de gain, plafonds et options de retrait. Lorsqu'un changement réduit sensiblement ce dont vous disposez déjà, nous vous préviendrons dans un délai raisonnable.",
+          text: "Nous développons encore SidePerks et pouvons ajouter, modifier ou retirer des fonctionnalités, formules, taux de gain, plafonds, tâches, jeux et options de retrait. Lorsqu'un changement réduit sensiblement ce dont vous disposez déjà, nous vous préviendrons dans un délai raisonnable.",
         },
         {
           kind: 'p',
@@ -259,7 +380,7 @@ export const termsFr: LegalDoc = {
     },
     {
       id: 'ip',
-      heading: '14. Nos contenus et les vôtres',
+      heading: '18. Nos contenus et les vôtres',
       blocks: [
         {
           kind: 'p',
@@ -273,7 +394,7 @@ export const termsFr: LegalDoc = {
     },
     {
       id: 'liability',
-      heading: '15. Garanties et responsabilité',
+      heading: '19. Garanties et responsabilité',
       blocks: [
         {
           kind: 'p',
@@ -291,7 +412,7 @@ export const termsFr: LegalDoc = {
     },
     {
       id: 'indemnity',
-      heading: '16. Votre responsabilité envers nous',
+      heading: '20. Votre responsabilité envers nous',
       blocks: [
         {
           kind: 'p',
@@ -301,7 +422,7 @@ export const termsFr: LegalDoc = {
     },
     {
       id: 'changes',
-      heading: '17. Modifications des Conditions',
+      heading: '21. Modifications des Conditions',
       blocks: [
         {
           kind: 'p',
@@ -315,7 +436,7 @@ export const termsFr: LegalDoc = {
     },
     {
       id: 'law',
-      heading: '18. Droit applicable et litiges',
+      heading: '22. Droit applicable et litiges',
       blocks: [
         {
           kind: 'p',
@@ -329,11 +450,13 @@ export const termsFr: LegalDoc = {
     },
     {
       id: 'contact',
-      heading: '19. Nous contacter',
+      heading: '23. Qui nous sommes et comment nous joindre',
       blocks: [
+        { kind: 'p', text: 'SidePerks est exploité par :' },
+        { kind: 'list', items: businessDetails('fr') },
         {
           kind: 'p',
-          text: `Vous pouvez nous écrire à ${CONTACT}. Nous visons une réponse sous quelques jours ouvrés.`,
+          text: `Vous pouvez nous écrire à ${CONTACT}, ou passer par le support dans l'application. Nous visons une réponse sous quelques jours ouvrés.`,
         },
       ],
     },

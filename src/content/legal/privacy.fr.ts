@@ -1,11 +1,18 @@
-import { LEGAL_ENTITY, type LegalDoc } from './types'
+import { businessDetails, LEGAL_ENTITY, type LegalDoc } from './types'
 
 const CONTACT = LEGAL_ENTITY.contactEmail
 
-/** Politique de confidentialité — français. Traduction de `privacy.en.ts`. */
+/**
+ * Politique de confidentialité — français. Traduction de `privacy.en.ts`.
+ *
+ * Révision du 2026-07-30 : ajout des traitements liés aux tâches, aux
+ * jeux-récompenses et aux codes cadeaux, et surtout de la section 5, qui
+ * indique que le CLASSEMENT MONTRE VOTRE NOM ET VOTRE PHOTO aux autres
+ * utilisateurs, sans possibilité de retrait automatique.
+ */
 export const privacyFr: LegalDoc = {
   title: 'Politique de confidentialité',
-  updated: '2026-07-25',
+  updated: '2026-07-30',
   summary:
     "Cette politique explique quelles informations personnelles SidePerks collecte, pourquoi nous en avons besoin, avec qui nous les partageons et le contrôle dont vous disposez.",
   sections: [
@@ -15,7 +22,7 @@ export const privacyFr: LegalDoc = {
       blocks: [
         {
           kind: 'p',
-          text: `${LEGAL_ENTITY.product} (« nous ») est responsable du traitement des informations personnelles décrites ici. Cette politique s'applique à notre site, à notre application et à tout ce que vous y faites.`,
+          text: `${LEGAL_ENTITY.product} (« nous ») est responsable du traitement des informations personnelles décrites ici. Cette politique s'applique à notre site, à notre application et à tout ce que vous y faites. La section 14 indique qui nous sommes et comment nous joindre.`,
         },
         {
           kind: 'p',
@@ -37,18 +44,22 @@ export const privacyFr: LegalDoc = {
             "votre code PIN de retrait, conservé uniquement sous forme d'empreinte à sens unique ;",
             "si vous activez la double authentification, votre secret d'authentification, conservé chiffré, et les empreintes de vos codes de secours ;",
             'une photo de profil, si vous en ajoutez une ;',
-            'tout ce que vous nous écrivez dans un message au support.',
+            "tout ce que vous nous écrivez dans une conversation avec le support, que nous conservons sous forme de fil afin d'en assurer le suivi.",
           ],
         },
         { kind: 'p', text: 'Informations collectées automatiquement lors de votre utilisation :' },
         {
           kind: 'list',
           items: [
-            "les publicités que vous avez regardées, quand, jusqu'où, et vos réponses à la question d'attention ;",
+            "les publicités et sondages que vous avez terminés, quand, jusqu'où, et vos réponses à la question d'attention ;",
             'vos points, transactions, demandes de retrait et historique de formules ;',
+            "votre progression dans les tâches et les récompenses de tâches que vous avez réclamées ;",
+            "les parties de jeux-récompenses utilisées et les lots obtenus ;",
+            'les codes cadeaux que vous avez utilisés ;',
+            "votre position au classement pour chaque période, ainsi que les notifications que nous vous avons envoyées et le fait que vous les ayez lues ou non ;",
             "le type d'appareil et de navigateur, l'adresse réseau utilisée et le pays approximatif qu'elle indique ;",
             'un relevé de vos connexions et des appareils où votre compte est connecté ;',
-            "les informations de parrainage, comme le code utilisé lors de la création d'un compte.",
+            "les informations de parrainage, comme le code utilisé lors de la création d'un compte et, si une personne que vous avez invitée achète une formule, le fait de cet achat et la commission qu'il vous a rapportée.",
           ],
         },
         {
@@ -77,9 +88,11 @@ export const privacyFr: LegalDoc = {
           kind: 'list',
           items: [
             "Pour gérer votre compte et vous payer — impossible de fournir le service sans cela. Base : exécution de notre contrat.",
+            "Pour faire fonctionner les fonctionnalités que vous utilisez — créditer les publicités et sondages, mesurer la progression des tâches, attribuer et enregistrer les lots des jeux-récompenses, appliquer les codes cadeaux et établir le classement. Base : exécution de notre contrat.",
             "Pour confirmer que les visionnages sont authentiques et prévenir la fraude, les comptes multiples et les abus. Base : notre intérêt légitime à protéger le service, les annonceurs et les utilisateurs honnêtes.",
             "Pour sécuriser le service, y compris les relevés de connexion et les protections que vous activez. Base : intérêt légitime et, pour certains enregistrements, obligation légale.",
             "Pour respecter nos obligations légales, fiscales et comptables, dont la conservation des mouvements d'argent. Base : obligation légale.",
+            "Pour vous envoyer les notifications du service — décision de retrait, message du support, annonce. Base : exécution du contrat et intérêt légitime.",
             'Pour répondre à vos messages au support. Base : exécution du contrat et intérêt légitime.',
             "Pour améliorer le service et comprendre les fonctionnalités utilisées. Base : intérêt légitime.",
           ],
@@ -113,8 +126,30 @@ export const privacyFr: LegalDoc = {
       ],
     },
     {
+      id: 'visible',
+      heading: '5. Ce que les autres utilisateurs peuvent voir',
+      blocks: [
+        {
+          kind: 'p',
+          text: "L'essentiel de ce que nous détenons à votre sujet n'est visible que par vous et par notre équipe. Deux fonctionnalités montrent quelque chose à d'autres personnes, et vous devez le savoir avant d'utiliser le service.",
+        },
+        {
+          kind: 'p',
+          text: "Le classement montre aux autres utilisateurs connectés votre prénom, l'initiale de votre nom de famille et votre photo de profil si vous en avez ajouté une, à côté des points gagnés sur la période. Il ne montre ni votre adresse e-mail, ni votre numéro de téléphone, ni votre solde, ni vos retraits, ni votre nom de famille complet. Toute personne qui gagne des points y figure, et il n'existe pour l'instant aucun réglage permettant de s'en retirer. Si vous préférez ne pas y apparaître, contactez-nous et nous vous en retirerons.",
+        },
+        {
+          kind: 'p',
+          text: "Le parrainage indique à la personne qui vous a invité que son invitation a été utilisée et si les conditions d'une récompense sont remplies. Elle ne voit ni votre solde, ni votre activité, ni vos coordonnées.",
+        },
+        {
+          kind: 'p',
+          text: "Si vous préférez ne pas apparaître sous votre propre nom, vous pouvez modifier le nom de votre compte dans Profil → Informations personnelles, sous réserve de la section 2 des Conditions, qui vous demande de vous inscrire sous votre nom exact.",
+        },
+      ],
+    },
+    {
       id: 'sharing',
-      heading: '5. Avec qui nous partageons',
+      heading: '6. Avec qui nous partageons',
       blocks: [
         {
           kind: 'list',
@@ -122,6 +157,7 @@ export const privacyFr: LegalDoc = {
             "Les prestataires de paiement, pour que l'argent vous parvienne. Ils ne reçoivent que le nécessaire.",
             "Les annonceurs et partenaires publicitaires, de façon agrégée — combien de personnes ont vu une publicité et sa performance. Ils ne reçoivent ni votre nom, ni votre e-mail, ni votre téléphone.",
             "Les prestataires techniques qui hébergent et font fonctionner le service (base de données, hébergement, e-mail), liés par contrat à agir sur nos seules instructions.",
+            "Les fournisseurs de taux de change, qui nous indiquent le prix d'une cryptomonnaie afin de chiffrer un retrait. Nous leur demandons un prix et ils ne reçoivent rien vous concernant.",
             "Un prestataire de surveillance des erreurs, qui reçoit un rapport lorsqu'un problème survient — la page concernée, l'erreur et le type de navigateur. Il est configuré pour NE PAS recevoir votre adresse, vos cookies ni votre session, et les jetons des liens de connexion sont retirés avant l'envoi du rapport.",
             "Les autorités et régulateurs, lorsque la loi l'exige ou pour faire valoir ou défendre des droits.",
             "Un acquéreur ou successeur, si l'activité était cédée ou réorganisée. Nous vous préviendrions au préalable.",
@@ -135,7 +171,7 @@ export const privacyFr: LegalDoc = {
     },
     {
       id: 'where',
-      heading: '6. Où vos informations sont conservées',
+      heading: '7. Où vos informations sont conservées',
       blocks: [
         {
           kind: 'p',
@@ -149,7 +185,7 @@ export const privacyFr: LegalDoc = {
     },
     {
       id: 'retention',
-      heading: '7. Durées de conservation',
+      heading: '8. Durées de conservation',
       blocks: [
         {
           kind: 'list',
@@ -159,13 +195,14 @@ export const privacyFr: LegalDoc = {
             "Enregistrements de transactions — points gagnés, retraits et paiements de formules : conservés après la suppression aussi longtemps que l'exigent le droit fiscal, comptable et anti-fraude. Ces enregistrements sont anonymisés et ne peuvent plus vous être rattachés nominativement.",
             "Une empreinte à sens unique de l'e-mail et du téléphone d'un compte supprimé : conservée indéfiniment, afin que les mêmes coordonnées ne puissent servir à créer un nouveau compte. Une empreinte ne peut pas être reconvertie en e-mail ou en numéro.",
             "Enregistrements de sécurité et de connexion : une durée limitée, afin de pouvoir enquêter sur une activité suspecte.",
+            "Positions au classement des périodes passées : conservées comme partie de l'historique des points gagnés, et affichées sans vos informations une fois votre compte supprimé.",
           ],
         },
       ],
     },
     {
       id: 'rights',
-      heading: '8. Vos droits',
+      heading: '9. Vos droits',
       blocks: [
         { kind: 'p', text: 'Vous pouvez :' },
         {
@@ -174,14 +211,14 @@ export const privacyFr: LegalDoc = {
             'consulter et corriger vos informations dans Profil → Informations personnelles ;',
             'demander une copie des informations personnelles vous concernant ;',
             'supprimer votre compte depuis Profil → Supprimer le compte ;',
-            "vous opposer aux traitements fondés sur nos intérêts légitimes ou en demander la limitation ;",
+            "vous opposer aux traitements fondés sur nos intérêts légitimes ou en demander la limitation — y compris demander à ne pas figurer au classement ;",
             "retirer votre consentement lorsque nous nous y sommes fiés, sans effet sur le passé ;",
             'demander le réexamen d’une décision automatisée vous concernant.',
           ],
         },
         {
           kind: 'p',
-          text: `Pour exercer ces droits, écrivez à ${CONTACT}. Certaines informations doivent être conservées même après suppression, comme expliqué à la section 7.`,
+          text: `Pour exercer ces droits, écrivez à ${CONTACT}. Certaines informations doivent être conservées même après suppression, comme expliqué à la section 8.`,
         },
         {
           kind: 'p',
@@ -191,7 +228,7 @@ export const privacyFr: LegalDoc = {
     },
     {
       id: 'security',
-      heading: '9. Comment nous les protégeons',
+      heading: '10. Comment nous les protégeons',
       blocks: [
         {
           kind: 'list',
@@ -211,7 +248,7 @@ export const privacyFr: LegalDoc = {
     },
     {
       id: 'cookies',
-      heading: '10. Cookies et stockage local',
+      heading: '11. Cookies et stockage local',
       blocks: [
         {
           kind: 'p',
@@ -225,7 +262,7 @@ export const privacyFr: LegalDoc = {
     },
     {
       id: 'children',
-      heading: '11. Mineurs',
+      heading: '12. Mineurs',
       blocks: [
         {
           kind: 'p',
@@ -235,7 +272,7 @@ export const privacyFr: LegalDoc = {
     },
     {
       id: 'changes',
-      heading: '12. Modifications de cette politique',
+      heading: '13. Modifications de cette politique',
       blocks: [
         {
           kind: 'p',
@@ -245,8 +282,10 @@ export const privacyFr: LegalDoc = {
     },
     {
       id: 'contact',
-      heading: '13. Nous contacter',
+      heading: '14. Qui nous sommes et comment nous contacter',
       blocks: [
+        { kind: 'p', text: 'SidePerks est exploité par :' },
+        { kind: 'list', items: businessDetails('fr') },
         {
           kind: 'p',
           text: `Pour toute question relative à la confidentialité, ou pour exercer vos droits, écrivez à ${CONTACT}.`,
