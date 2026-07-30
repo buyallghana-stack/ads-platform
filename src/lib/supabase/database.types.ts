@@ -1014,8 +1014,12 @@ export type Database = {
           admin_hold_at: string | null
           approved_early: boolean
           created_at: string
+          coin_amount: number | null
+          coin_usd: number | null
           currency_amount: number
           currency_code: string
+          quoted_at: string | null
+          usd_ghs: number | null
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
@@ -1044,8 +1048,12 @@ export type Database = {
           admin_hold_at?: string | null
           approved_early?: boolean
           created_at?: string
+          coin_amount?: number | null
+          coin_usd?: number | null
           currency_amount: number
           currency_code?: string
+          quoted_at?: string | null
+          usd_ghs?: number | null
           early_approval_reason?: string | null
           external_reference?: string | null
           failure_reason?: string | null
@@ -1074,8 +1082,12 @@ export type Database = {
           admin_hold_at?: string | null
           approved_early?: boolean
           created_at?: string
+          coin_amount?: number | null
+          coin_usd?: number | null
           currency_amount?: number
           currency_code?: string
+          quoted_at?: string | null
+          usd_ghs?: number | null
           early_approval_reason?: string | null
           external_reference?: string | null
           failure_reason?: string | null

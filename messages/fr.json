@@ -724,12 +724,13 @@
       "to": "Vers",
       "amount": "Montant",
       "value": "Valeur",
-      "estimate": "Paiement estimé",
       "fee": "Frais",
       "feeFree": "Gratuit",
       "holdNote": "Les retraits sont vérifiés par sécurité et aboutissent généralement sous 72 heures.",
       "edit": "Modifier",
-      "confirm": "Confirmer"
+      "confirm": "Confirmer",
+      "youReceive": "Vous recevez",
+      "rateUnavailable": "Calculé au moment de l'envoi"
     },
     "pin": {
       "title": "Saisissez votre code PIN de retrait",
@@ -747,7 +748,8 @@
       "title": "Retrait demandé",
       "body": "{points} pts en route vers {account}.",
       "holdNote": "Chaque retrait est vérifié pour des raisons de sécurité. Le vôtre entre dans la file d'examen le {when}, et nous vous préviendrons dès qu'il y aura du nouveau.",
-      "home": "Retour à l'accueil"
+      "home": "Retour à l'accueil",
+      "bodyCoin": "≈ {amount} {coin} en route vers {account}."
     },
     "notYet": {
       "title": "Encore {short} points",
@@ -1410,7 +1412,10 @@
         "firstPayout": "Premier retrait",
         "risk": "Risque",
         "reuse": "{count, plural, one {Ce compte a aussi été utilisé par # autre utilisateur.} other {Ce compte a aussi été utilisé par # autres utilisateurs.}}",
-        "note": "Note envoyée à l'utilisateur"
+        "note": "Note envoyée à l'utilisateur",
+        "cryptoSub": "{ghs} · {points} pts",
+        "quoteLive": "Estimé au taux du jour — aucun taux n'était disponible lors de la demande.",
+        "quoteMissing": "Aucun taux de change disponible : la valeur est affichée en cedis. À convertir avant l'envoi."
       },
       "confirm": {
         "approve": "Approuver {amount} pour {name} ?",

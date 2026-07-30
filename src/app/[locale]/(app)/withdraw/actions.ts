@@ -50,6 +50,13 @@ export type WithdrawResult =
       reference: string
       points: number
       ghs: number
+      /** Crypto only: the coin, and the amount frozen onto the redemption at
+       *  request time. Read back from the written row rather than echoing the
+       *  client's estimate — the success screen must state what was actually
+       *  recorded, not what the form last calculated. Undefined when no rate
+       *  was available, which the screen says plainly. */
+      coin?: string
+      coinAmount?: number
       /** When the fraud-catch hold elapses and it reaches the review queue. */
       holdingUntil: string
     }
@@ -140,6 +147,18 @@ export async function requestWithdrawal(input: {
     holding_until: string
   }
 
+  /*
+    What was actually frozen onto the row. request_redemption returns the
+    cedi figure only, so this is a second read — cheap, by primary key, and
+    the alternative is the success screen quoting a number the client
+    computed rather than the one the platform recorded.
+  */
+  const { data: quoted } = await admin
+    .from('redemptions')
+    .select('snapshot_coin_code, coin_amount')
+    .eq('id', row.redemption_id)
+    .maybeSingle()
+
   // The balance hero and the transaction history both change the instant this
   // succeeds, and the notification trigger has just written a row.
   revalidatePath('/dashboard')
@@ -150,6 +169,11 @@ export async function requestWithdrawal(input: {
     reference: `RDM-${row.redemption_id.replace(/-/g, '').slice(0, 6).toUpperCase()}`,
     points: Number(row.points),
     ghs: Number(row.currency),
+    coin: quoted?.snapshot_coin_code ?? undefined,
+    coinAmount:
+      quoted?.coin_amount === null || quoted?.coin_amount === undefined
+        ? undefined
+        : Number(quoted.coin_amount),
     holdingUntil: row.holding_until,
   }
 }

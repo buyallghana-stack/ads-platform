@@ -37,6 +37,7 @@ import {
   type PayoutAction,
 } from './payout-actions'
 import { PAYOUT_TONE } from './payout-status'
+import { payoutHeadline } from './payout-amount'
 
 /**
  * The payout review panel — one request, everything about it, and the
@@ -141,6 +142,18 @@ function Panel({
   const actions = availableActions(r)
   const ghs = (n: number) =>
     `GHS ${format.number(n, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+
+  /*
+    Operator rule, 2026-07-29: a crypto payout is denominated in the coin.
+    Cedis are for mobile money. This drawer used to lead with a cedi figure on
+    every request — including the one asking an operator to send a Tron
+    transfer, which they cannot do from a cedi amount.
+
+    Falls back to cedis only when there is genuinely no coin figure: no rate
+    was frozen and none can be quoted now. Better a number in the wrong unit
+    with the reason shown than a blank where the amount should be.
+  */
+  const payoutAmount = payoutHeadline(r, format)
 
   const masked = maskDestination(r)
   const nameOk = nameMatches(r.user.name, r.accountName)
@@ -252,14 +265,25 @@ function Panel({
       {/* Amount. The largest thing in the panel, because it is the number
               the decision is actually about. */}
       <p className="text-[2rem] leading-none font-semibold tracking-[-0.02em] text-ink-900 tabular-nums">
-        {ghs(r.ghs)}
+        {payoutAmount.primary}
       </p>
       <p className="mt-1.5 text-[0.75rem] text-ink-500 tabular-nums">
-        {t('drawer.pointsRate', {
-          points: r.points.toLocaleString(),
-          rate: format.number(r.points / r.ghs, { maximumFractionDigits: 0 }),
-        })}
+        {/* The cedi value stays visible underneath on a crypto request. It is
+            what the platform actually owes and what every total is in; the
+            coin figure on top is what gets sent. */}
+        {r.method === 'crypto'
+          ? t('drawer.cryptoSub', {
+              ghs: ghs(r.ghs),
+              points: r.points.toLocaleString(),
+            })
+          : t('drawer.pointsRate', {
+              points: r.points.toLocaleString(),
+              rate: format.number(r.points / r.ghs, { maximumFractionDigits: 0 }),
+            })}
       </p>
+      {payoutAmount.caveat && (
+        <p className="mt-1.5 text-[0.75rem] text-warning-700">{t(payoutAmount.caveat)}</p>
+      )}
 
       {/* ---- Destination ----------------------------------------- */}
       <Section label={t('drawer.destination')}>
@@ -475,16 +499,15 @@ function ConfirmStep({
 
   const until = holdEndsAt(request)
 
-  const ghs = `GHS ${format.number(request.ghs, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`
+  // The sentence an operator reads before they move money. It said
+  // "Send GHS 42.00 to TR7NHq••••Lj6t" — a cedi figure, to a Tron wallet.
+  const amount = payoutHeadline(request, format).primary
 
   return (
     <div>
       <p className="text-[0.8125rem] leading-relaxed font-medium text-ink-900">
         {t(`confirm.${copyKey}`, {
-          amount: ghs,
+          amount,
           destination: masked,
           name: request.user.name,
           until: until

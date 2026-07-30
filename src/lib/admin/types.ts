@@ -80,7 +80,21 @@ export type PayoutRequest = {
     paidBeforeGhs: number
   }
   points: number
+  /** Always present. Cedis stay authoritative for accounting and for any
+   *  total, because the point is pegged to the cedi and two currencies do not
+   *  add up. What a HUMAN is shown for a crypto request is the coin. */
   ghs: number
+  /** Crypto only: the ticker the user is paid in, "USDT" or "USDC". */
+  coin?: string
+  /** Crypto only: the amount frozen when the request was made — what the user
+   *  was quoted, and what the operator should send. */
+  coinAmount?: number
+  /** Crypto only, and only when nothing was frozen because no fresh rate
+   *  existed at request time. Today's rate, never to be presented as the
+   *  amount the user was promised. */
+  liveCoinAmount?: number
+  /** When `coinAmount` was taken. Absent means it was never frozen. */
+  quotedAt?: string
   method: 'mobile_money' | 'crypto'
   /** MTN, Telecel, AirtelTigo, or the chain: "USDT · TRC-20". */
   provider: string

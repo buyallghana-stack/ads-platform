@@ -40,6 +40,10 @@ type QueueRow = {
   paid_before_ghs: number | string
   points: number | string
   ghs: number | string
+  coin_code: string | null
+  coin_amount: number | string | null
+  live_coin_amount: number | string | null
+  quoted_at: string | null
   method: 'crypto' | 'mobile_money'
   provider: string
   destination: string
@@ -119,6 +123,18 @@ function toRequest(row: QueueRow, now: number): PayoutRequest {
     // downstream ever does string arithmetic on money.
     points: Number(row.points),
     ghs: Number(row.ghs),
+    /*
+      What to actually send, for a crypto payout. `coinAmount` is the figure
+      frozen when the user asked; `liveCoinAmount` is only present when
+      nothing was frozen because no fresh rate existed then. The screen must
+      keep them apart — one is what the user was quoted, the other is a
+      figure nobody has been promised.
+    */
+    coin: row.coin_code ?? undefined,
+    coinAmount: row.coin_amount === null ? undefined : Number(row.coin_amount),
+    liveCoinAmount:
+      row.live_coin_amount === null ? undefined : Number(row.live_coin_amount),
+    quotedAt: row.quoted_at ?? undefined,
     method: row.method,
     provider: row.provider,
     destination: row.destination,

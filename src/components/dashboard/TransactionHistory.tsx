@@ -157,7 +157,12 @@ export function TransactionHistory({ rows }: { rows: TxRow[] }) {
       </p>
       {r.points !== null && (
         <p className="text-[0.6875rem] tabular-nums text-ink-400">
-          ≈ GHS {format.number(r.ghs, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          {/* A crypto withdrawal is denominated in the coin it was paid in.
+              Cedis are for mobile money — showing a cedi figure against a
+              USDT payout describes a transfer that never happened in cedis. */}
+          {r.coinAmount !== undefined && r.coin
+            ? `≈ ${format.number(r.coinAmount, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${r.coin}`
+            : `≈ GHS ${format.number(r.ghs, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
         </p>
       )}
     </div>

@@ -724,12 +724,13 @@
       "to": "To",
       "amount": "Amount",
       "value": "Value",
-      "estimate": "Estimated payout",
       "fee": "Fee",
       "feeFree": "Free",
       "holdNote": "Withdrawals are reviewed for security and typically complete within 72 hours.",
       "edit": "Edit",
-      "confirm": "Confirm"
+      "confirm": "Confirm",
+      "youReceive": "You receive",
+      "rateUnavailable": "Worked out when it is sent"
     },
     "pin": {
       "title": "Enter your withdrawal PIN",
@@ -747,7 +748,8 @@
       "title": "Withdrawal requested",
       "body": "{points} pts on their way to {account}.",
       "holdNote": "Every withdrawal is reviewed for security. Yours enters the review queue on {when}, and we will notify you the moment anything changes.",
-      "home": "Back to Home"
+      "home": "Back to Home",
+      "bodyCoin": "≈ {amount} {coin} on their way to {account}."
     },
     "notYet": {
       "title": "{short} points to go",
@@ -1410,7 +1412,10 @@
         "firstPayout": "First payout",
         "risk": "Risk",
         "reuse": "{count, plural, one {This account has also been used by # other user.} other {This account has also been used by # other users.}}",
-        "note": "Note sent to the user"
+        "note": "Note sent to the user",
+        "cryptoSub": "{ghs} · {points} pts",
+        "quoteLive": "Quoted at today's rate — no rate was available when this request was made.",
+        "quoteMissing": "No exchange rate available, so this shows the cedi value. Convert before sending."
       },
       "confirm": {
         "approve": "Approve {amount} for {name}?",

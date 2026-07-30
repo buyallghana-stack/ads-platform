@@ -102,6 +102,8 @@ export function WithdrawWizard({
     reference: string
     points: number
     ghs: number
+    coin?: string
+    coinAmount?: number
     holdingUntil: string
   } | null>(null)
 
@@ -182,6 +184,8 @@ export function WithdrawWizard({
           reference: res.reference,
           points: res.points,
           ghs: res.ghs,
+          coin: res.coin,
+          coinAmount: res.coinAmount,
           holdingUntil: res.holdingUntil,
         })
         setStep('success')
@@ -533,18 +537,33 @@ export function WithdrawWizard({
               {[
                 { label: t('confirm.to'), value: `${account.title}` },
                 { label: t('confirm.amount'), value: `${format.number(points)} ${t('amount.points')}` },
-                { label: t('confirm.value'), value: `GHS ${format.number(ghs, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
-                /* Was `≈ {usd} USDT` — the DOLLAR figure with a coin ticker
-                   glued on, and the ticker hardcoded to USDT even for a USDC
-                   account. Now the coin amount, in the coin they hold. */
-                ...(isCrypto && coinEstimate !== null && quote
-                  ? [
+                /*
+                  Operator rule: a crypto withdrawal is denominated in the
+                  coin, cedis are for mobile money. So the value row IS the
+                  coin amount here, rather than a cedi figure with a coin
+                  estimate repeated underneath it.
+
+                  It previously read `≈ {usd} USDT` — the DOLLAR figure with a
+                  ticker glued on, hardcoded to USDT even for a USDC holder.
+                */
+                ...(isCrypto
+                  ? coinEstimate !== null && quote
+                    ? [
+                        {
+                          label: t('confirm.youReceive'),
+                          value: `≈ ${format.number(coinEstimate, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${quote.coin}`,
+                        },
+                      ]
+                    : /* No rate: say so rather than silently falling back to
+                         cedis, which is the unit the operator asked us to
+                         stop showing for crypto. */
+                      [{ label: t('confirm.youReceive'), value: t('confirm.rateUnavailable') }]
+                  : [
                       {
-                        label: t('confirm.estimate'),
-                        value: `≈ ${format.number(coinEstimate, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${quote.coin}`,
+                        label: t('confirm.value'),
+                        value: `GHS ${format.number(ghs, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
                       },
-                    ]
-                  : []),
+                    ]),
                 { label: t('confirm.fee'), value: t('confirm.feeFree') },
               ].map((row) => (
                 <div key={row.label} className="flex items-baseline justify-between gap-4 px-4 py-3">
@@ -637,10 +656,22 @@ export function WithdrawWizard({
           {/* Every figure here comes from the row the database wrote, not from
               what was typed into the form. */}
           <p className="mt-1.5 max-w-[32ch] text-[0.8125rem] leading-relaxed text-ink-500">
-            {t('success.body', {
-              points: format.number(filed.points),
-              account: account.title,
-            })}
+            {/* Crypto states the coin amount that was actually recorded on the
+                request; mobile money keeps points. Cedis are not shown for a
+                crypto payout — operator rule. */}
+            {filed.coinAmount !== undefined && filed.coin
+              ? t('success.bodyCoin', {
+                  amount: format.number(filed.coinAmount, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }),
+                  coin: filed.coin,
+                  account: account.title,
+                })
+              : t('success.body', {
+                  points: format.number(filed.points),
+                  account: account.title,
+                })}
           </p>
 
           {/* The reference, because this is the thing a user quotes when they

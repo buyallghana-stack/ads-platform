@@ -34,6 +34,7 @@ import {
   type PayoutAction,
 } from './payout-actions'
 import { PAYOUT_TONE } from './payout-status'
+import { payoutHeadline } from './payout-amount'
 
 /**
  * The payout queue — the screen the whole admin area exists for, because
@@ -447,10 +448,14 @@ export function PayoutsTable({
 
                   <td className="px-4 py-3 text-right">
                     <p className="text-[0.8125rem] font-semibold text-ink-900 tabular-nums">
-                      {ghs(r.ghs)}
+                      {payoutHeadline(r, format).primary}
                     </p>
                     <p className="text-[0.6875rem] text-ink-400 tabular-nums">
-                      {r.points.toLocaleString()} pts
+                      {/* Cedis stay in view under a coin figure: it is what
+                          the row contributes to the totals above. */}
+                      {r.method === 'crypto'
+                        ? ghs(r.ghs)
+                        : `${r.points.toLocaleString()} pts`}
                     </p>
                   </td>
 
@@ -509,10 +514,10 @@ export function PayoutsTable({
                 </RowOpener>
                 <div className="shrink-0 text-right">
                   <p className="text-[0.9375rem] font-bold text-ink-900 tabular-nums">
-                    {ghs(r.ghs)}
+                    {payoutHeadline(r, format).primary}
                   </p>
                   <p className="text-[0.6875rem] text-ink-400 tabular-nums">
-                    {r.points.toLocaleString()} pts
+                    {r.method === 'crypto' ? ghs(r.ghs) : `${r.points.toLocaleString()} pts`}
                   </p>
                 </div>
               </div>

@@ -43,6 +43,11 @@ export type TxRow = {
   kind: TxKind
   /** Payout / payment method when one applies (withdrawals, subscriptions). */
   method: string | null
+  /** Crypto withdrawals only: the coin and the amount recorded on the
+   *  redemption. A crypto payout is denominated in the coin, not in cedis —
+   *  cedis are for mobile money (operator rule, 2026-07-29). */
+  coin?: string
+  coinAmount?: number
   /** Signed points delta. Null for subscription rows — they are fiat. */
   points: number | null
   /** Running points balance after the entry. Null for fiat rows. */
@@ -136,12 +141,18 @@ export async function getHomeData(userId: string): Promise<HomeData> {
     .map((e) => e.reference_id as string)
 
   const methodById = new Map<string, string>()
+  const coinById = new Map<string, { coin: string; amount: number }>()
   if (redemptionIds.length > 0) {
     const { data: redemptions } = await supabase
       .from('redemptions')
-      .select('id, method')
+      .select('id, method, snapshot_coin_code, coin_amount')
       .in('id', redemptionIds)
-    for (const r of redemptions ?? []) methodById.set(r.id, r.method)
+    for (const r of redemptions ?? []) {
+      methodById.set(r.id, r.method)
+      if (r.snapshot_coin_code && r.coin_amount !== null) {
+        coinById.set(r.id, { coin: r.snapshot_coin_code, amount: Number(r.coin_amount) })
+      }
+    }
   }
 
   const feed: TxRow[] = [
@@ -154,6 +165,14 @@ export async function getHomeData(userId: string): Promise<HomeData> {
           e.reference_type === 'redemption' && e.reference_id
             ? (methodById.get(e.reference_id) ?? null)
             : null,
+        coin:
+          e.reference_type === 'redemption' && e.reference_id
+            ? coinById.get(e.reference_id)?.coin
+            : undefined,
+        coinAmount:
+          e.reference_type === 'redemption' && e.reference_id
+            ? coinById.get(e.reference_id)?.amount
+            : undefined,
         points: e.amount,
         balanceAfter: e.balance_after,
         // The rate frozen on the entry, so history never silently reprices.
