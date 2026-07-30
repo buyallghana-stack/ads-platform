@@ -203,6 +203,7 @@ export default async function HomePage({
           tasks: t('quick.tasks'),
         }}
         soonLabel={t('quick.soon')}
+        navLabel={t('quick.label')}
       />
 
       {/* ------------------------------------------------------------------ */}

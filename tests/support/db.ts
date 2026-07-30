@@ -177,6 +177,26 @@ export async function setConfig(tx: Tx, key: string, value: string): Promise<voi
   await tx.query(`update public.app_config set value = $2 where key = $1`, [key, value])
 }
 
+/**
+ * Makes `auth.uid()` return this user for the rest of the transaction.
+ *
+ * Most functions under test are revoked from client roles and take the user
+ * id as an argument, which is why the harness connects as the owner and never
+ * needed this. The self-scoped ones are different: `get_leaderboard` and
+ * `get_leaderboard_standing` are granted to `authenticated` precisely BECAUSE
+ * they read the caller's identity rather than trusting a parameter, so a test
+ * that cannot set an identity cannot test them at all.
+ *
+ * `auth.uid()` reads `request.jwt.claims`, and the `true` third argument makes
+ * the setting local to the transaction — so it disappears with the rollback
+ * like everything else.
+ */
+export async function actAs(tx: Tx, userId: string): Promise<void> {
+  await tx.query(`select set_config('request.jwt.claims', json_build_object('sub', $1::text)::text, true)`, [
+    userId,
+  ])
+}
+
 /** One redemption row, whole. */
 export async function redemption(tx: Tx, id: string) {
   const { rows } = await tx.query(`select * from public.redemptions where id = $1`, [id])

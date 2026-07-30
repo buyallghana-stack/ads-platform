@@ -3115,6 +3115,45 @@ export type Database = {
         Returns: Json
       }
       redeem_gift_code: { Args: { p_code: string; p_user_id: string }; Returns: Json }
+      get_leaderboard: {
+        Args: { p_period?: string; p_limit?: number }
+        Returns: {
+          rank: number
+          user_id: string
+          display_name: string
+          avatar_path: string | null
+          points: number
+          previous_rank: number | null
+          movement: string
+        }[]
+      }
+      get_leaderboard_standing: {
+        Args: { p_period?: string }
+        Returns: {
+          rank: number
+          points: number
+          previous_rank: number | null
+          movement: string
+          total_ranked: number
+        }[]
+      }
+      admin_get_leaderboard: {
+        Args: { p_admin_id: string; p_period?: string; p_limit?: number }
+        Returns: {
+          rank: number
+          user_id: string
+          display_name: string
+          full_name: string
+          email: string
+          phone: string | null
+          avatar_path: string | null
+          points: number
+          previous_rank: number | null
+          movement: string
+          flagged: boolean
+        }[]
+      }
+      leaderboard_display_name: { Args: { p_full_name: string }; Returns: string }
       recompute_user_risk: {
         Args: { p_user_id: string }
         Returns: {

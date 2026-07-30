@@ -26,6 +26,15 @@ export function Avatar({
       <img
         src={src}
         alt=""
+        /* Avatars are stored at whatever size the person uploaded — the
+           operator's own is 1.26 MB — and the leaderboard is the first screen
+           that shows many at once. Lazy + async means a phone downloads the
+           handful on screen instead of a hundred, which is the difference
+           between a slow list and an unusable one on a Ghanaian connection.
+           It does NOT fix the underlying size; resizing on upload does, and
+           that belongs with the avatar upload path. */
+        loading="lazy"
+        decoding="async"
         className={cn('shrink-0 rounded-full bg-ink-100 object-cover', className)}
       />
     )

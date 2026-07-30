@@ -33,7 +33,7 @@ type Item = {
 
 const ITEMS: Item[] = [
   { key: 'games', href: '/games', icon: <Gamepad2 />, ready: false },
-  { key: 'leaderboard', href: '/leaderboard', icon: <Trophy />, ready: false },
+  { key: 'leaderboard', href: '/leaderboard', icon: <Trophy />, ready: true },
   { key: 'gift', href: '/gift-code', icon: <Gift />, ready: true },
   { key: 'tasks', href: '/tasks', icon: <ListChecks />, ready: false },
 ]
@@ -78,14 +78,18 @@ function Tile({
 export function QuickLinks({
   labels,
   soonLabel,
+  navLabel,
 }: {
   labels: Record<Item['key'], string>
-  /** Read by assistive tech on the three that are not built yet. */
+  /** Read by assistive tech on the ones that are not built yet. */
   soonLabel: string
+  /** Names the landmark. It was wrongly reading the Gift code label, which
+   *  announced the whole row as "Gift code navigation". */
+  navLabel: string
 }) {
   return (
     <nav
-      aria-label={labels.gift}
+      aria-label={navLabel}
       style={{ '--rise-delay': '0.08s' } as React.CSSProperties}
       className="animate-rise grid grid-cols-4 gap-1 rounded-(--radius-panel) border border-ink-200 bg-surface p-1.5 sm:gap-2 sm:p-2"
     >

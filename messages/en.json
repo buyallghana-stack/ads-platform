@@ -508,7 +508,8 @@
       "leaderboard": "Leaderboard",
       "gift": "Gift code",
       "tasks": "Tasks",
-      "soon": "Coming soon"
+      "soon": "Coming soon",
+      "label": "Shortcuts"
     }
   },
   "nav": {
@@ -1307,7 +1308,8 @@
         "config": "Platform settings",
         "audit": "Audit log",
         "settings": "Admin settings",
-        "giftCodes": "Gift codes"
+        "giftCodes": "Gift codes",
+        "leaderboard": "Leaderboard"
       },
       "viewUserApp": "View user app"
     },
@@ -2451,6 +2453,27 @@
         "save": "Create code",
         "cancel": "Cancel"
       }
+    },
+    "leaderboard": {
+      "title": "Leaderboard",
+      "description": "The ranking users see, with the person behind each place.",
+      "empty": "Nobody has earned points in this period yet.",
+      "flagged": "Flagged",
+      "col": {
+        "rank": "Rank",
+        "person": "Person",
+        "email": "Email",
+        "phone": "Phone",
+        "shownAs": "Shown to users as",
+        "points": "Points",
+        "change": "Change"
+      },
+      "movement": {
+        "up": "Up {places}",
+        "down": "Down {places}",
+        "same": "No change",
+        "new": "New"
+      }
     }
   },
   "giftCode": {
@@ -2476,6 +2499,30 @@
       "earning_paused": "Earning is paused across SidePerks at the moment. Your code has not been used — keep it and try again later.",
       "not_signed_in": "Please log in and try again.",
       "error": "Something went wrong. Please try again."
+    }
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "subtitle": "Every point counts. Where do you stand?",
+    "tabs": {
+      "label": "Leaderboard period",
+      "day": "Today",
+      "week": "Week",
+      "month": "Month",
+      "all": "All time"
+    },
+    "empty": "Nobody has earned points in this period yet. Be the first.",
+    "onlyPodium": "Only the top places have points so far.",
+    "you": "You",
+    "myRank": "My rank",
+    "yourRank": "You are {rank} of {total}",
+    "yourPoints": "{points} points this period",
+    "unranked": "You have not earned points in this period yet — watch an ad and you are on the board.",
+    "movement": {
+      "up": "Up {places} {places, plural, one {place} other {places}}",
+      "down": "Down {places} {places, plural, one {place} other {places}}",
+      "same": "No change",
+      "new": "New on the board"
     }
   }
 }

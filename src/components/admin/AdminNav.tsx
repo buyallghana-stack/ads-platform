@@ -12,6 +12,7 @@ import {
   Flag,
   Gauge,
   Gift,
+  Trophy,
   LayoutGrid,
   Menu,
   MessageSquare,
@@ -78,6 +79,10 @@ const GROUPS: NavGroup[] = [
       // is a message to users, and the operator reaches for it in the same
       // frame of mind as Messages.
       { key: 'announcements', href: '/admin/announcements', Icon: Megaphone },
+      // A view OF people rather than a queue of them — nothing here waits on
+      // the operator — so it sits with Users and Flagged rather than earning
+      // a group heading of its own for one row.
+      { key: 'leaderboard', href: '/admin/leaderboard', Icon: Trophy },
     ],
   },
   {

@@ -508,7 +508,8 @@
       "leaderboard": "Classement",
       "gift": "Code cadeau",
       "tasks": "Tâches",
-      "soon": "Bientôt disponible"
+      "soon": "Bientôt disponible",
+      "label": "Raccourcis"
     }
   },
   "nav": {
@@ -1307,7 +1308,8 @@
         "config": "Paramètres plateforme",
         "audit": "Journal",
         "settings": "Paramètres admin",
-        "giftCodes": "Codes cadeaux"
+        "giftCodes": "Codes cadeaux",
+        "leaderboard": "Classement"
       },
       "viewUserApp": "Voir l’app utilisateur"
     },
@@ -2451,6 +2453,27 @@
         "save": "Créer le code",
         "cancel": "Annuler"
       }
+    },
+    "leaderboard": {
+      "title": "Classement",
+      "description": "Le classement vu par les utilisateurs, avec la personne derrière chaque place.",
+      "empty": "Personne n a encore gagné de points sur cette période.",
+      "flagged": "Signalé",
+      "col": {
+        "rank": "Rang",
+        "person": "Personne",
+        "email": "E-mail",
+        "phone": "Téléphone",
+        "shownAs": "Affiché comme",
+        "points": "Points",
+        "change": "Évolution"
+      },
+      "movement": {
+        "up": "+{places}",
+        "down": "-{places}",
+        "same": "Aucun changement",
+        "new": "Nouveau"
+      }
     }
   },
   "giftCode": {
@@ -2476,6 +2499,30 @@
       "earning_paused": "Les gains sont suspendus sur SidePerks en ce moment. Votre code n'a pas été utilisé — conservez-le et réessayez plus tard.",
       "not_signed_in": "Veuillez vous connecter et réessayer.",
       "error": "Une erreur s'est produite. Veuillez réessayer."
+    }
+  },
+  "leaderboard": {
+    "title": "Classement",
+    "subtitle": "Chaque point compte. Où vous situez-vous ?",
+    "tabs": {
+      "label": "Période du classement",
+      "day": "Aujourd'hui",
+      "week": "Semaine",
+      "month": "Mois",
+      "all": "Tout"
+    },
+    "empty": "Personne n a encore gagné de points sur cette période. Soyez le premier.",
+    "onlyPodium": "Seules les premières places ont des points pour l instant.",
+    "you": "Vous",
+    "myRank": "Mon rang",
+    "yourRank": "Vous êtes {rank} sur {total}",
+    "yourPoints": "{points} points sur cette période",
+    "unranked": "Vous n avez pas encore gagné de points sur cette période — regardez une annonce et vous entrez au classement.",
+    "movement": {
+      "up": "En hausse de {places} {places, plural, one {place} other {places}}",
+      "down": "En baisse de {places} {places, plural, one {place} other {places}}",
+      "same": "Aucun changement",
+      "new": "Nouveau au classement"
     }
   }
 }
