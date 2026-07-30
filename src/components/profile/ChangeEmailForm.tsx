@@ -9,6 +9,7 @@ import { changeEmail } from '@/app/[locale]/(app)/profile/credentials/actions'
 import { Button } from '@/components/ui/Button'
 import { CodeInput } from '@/components/ui/CodeInput'
 import { PasswordField } from '@/components/ui/PasswordField'
+import { ReadOnlyField } from '@/components/ui/ReadOnlyField'
 import { TextField } from '@/components/ui/TextField'
 import { useRouter } from '@/i18n/navigation'
 
@@ -122,12 +123,12 @@ export function ChangeEmailForm({
       </header>
 
       <form onSubmit={submit} className="animate-rise mt-6 flex flex-col gap-4">
-        <TextField
+        {/* Text, not a disabled input: a long address clips inside an input
+            and cannot be scrolled or selected. See ReadOnlyField. */}
+        <ReadOnlyField
           label={t('email.current')}
           value={currentEmail}
           leadingIcon={<Mail />}
-          disabled
-          readOnly
         />
 
         <TextField

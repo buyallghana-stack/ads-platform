@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl'
 
 import { updatePersonalInfo } from './actions'
 import { Button } from '@/components/ui/Button'
+import { ReadOnlyField } from '@/components/ui/ReadOnlyField'
 import { TextField } from '@/components/ui/TextField'
 import { useRouter } from '@/i18n/navigation'
 import { personalSchema } from '@/lib/validation/personal'
@@ -85,13 +86,13 @@ export function PersonalInfoForm({
         hint={t('fields.phoneHint')}
       />
 
-      <TextField
+      {/* Same reason as the change-email screen: a disabled input clips a
+          long address with no way to read the rest. */}
+      <ReadOnlyField
         label={t('fields.email')}
         value={email}
         leadingIcon={<span className="text-[0.9rem]">@</span>}
-        disabled
         hint={t('fields.emailHint')}
-        readOnly
       />
 
       {error && (
