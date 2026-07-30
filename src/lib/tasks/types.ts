@@ -10,6 +10,7 @@ export const TASK_METRICS = [
   'surveys_completed',
   'points_earned',
   'referrals_activated',
+  'referrals_purchased',
   'games_played',
   'gift_codes_redeemed',
   'withdrawals_made',
@@ -29,6 +30,8 @@ export type UserTask = {
   /** Progress needed. A target of 1 is a one-shot task and renders as a tick. */
   target: number
   rewardPoints: number
+  /** An emoji, chosen by the operator. Free text, so never limited to a set
+   *  somebody picked in advance. */
   icon: string
   /** Capped at the target by the database — never shows 812/50. */
   progress: number

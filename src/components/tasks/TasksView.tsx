@@ -2,21 +2,7 @@
 
 import { useState, useTransition } from 'react'
 
-import {
-  Camera,
-  Check,
-  Coins,
-  Gamepad2,
-  Gem,
-  KeyRound,
-  ListChecks,
-  PlayCircle,
-  ShieldCheck,
-  Sparkles,
-  Target,
-  Users,
-  Wallet,
-} from 'lucide-react'
+import { Check, Coins } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import { claimTask } from '@/app/[locale]/(app)/tasks/actions'
@@ -43,22 +29,12 @@ import { isOneShot, type UserTask } from '@/lib/tasks/types'
  * work at all.
  */
 
-/* Icons an operator may pick in the editor. A name that is not in here falls
-   back to Target rather than crashing the screen. */
-const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  Sparkles,
-  Camera,
-  PlayCircle,
-  ListChecks,
-  KeyRound,
-  ShieldCheck,
-  Gem,
-  Coins,
-  Users,
-  Wallet,
-  Gamepad2,
-  Target,
-}
+/* The icon is an EMOJI the operator typed, not a component name. That was the
+   operator's call and it is the right one: a fixed icon list means they can
+   only describe a task with something I thought of in advance, and there is no
+   Lucide glyph for "invite your friends" that reads as well as 🤝 does.
+   Anything empty falls back rather than rendering a gap. */
+const FALLBACK_EMOJI = '🎯'
 
 export function TasksView({ tasks }: { tasks: UserTask[] }) {
   const t = useTranslations('tasks')
@@ -150,7 +126,7 @@ export function TasksView({ tasks }: { tasks: UserTask[] }) {
       ) : (
         <ol className="mt-4 space-y-2.5">
           {rows.map((task, index) => {
-            const Icon = ICONS[task.icon] ?? Target
+            const emoji = task.icon?.trim() || FALLBACK_EMOJI
             const done = task.claimedAt !== null
             const oneShot = isOneShot(task)
             const pct = Math.min(100, Math.round((task.progress / Math.max(task.target, 1)) * 100))
@@ -181,7 +157,12 @@ export function TasksView({ tasks }: { tasks: UserTask[] }) {
                     {done ? (
                       <Check aria-hidden className="size-5" strokeWidth={2.5} />
                     ) : (
-                      <Icon aria-hidden className="size-5" />
+                      /* aria-hidden: the task's name is right beside it, so a
+                         screen reader announcing "party popper" would only
+                         add noise. */
+                      <span aria-hidden className="text-[1.375rem] leading-none">
+                        {emoji}
+                      </span>
                     )}
                   </span>
 

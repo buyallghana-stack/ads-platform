@@ -2585,7 +2585,9 @@
         "metric": "Mesure",
         "target": "Cible",
         "reward": "Récompense (points)",
-        "icon": "Icône"
+        "icon": "Icône",
+        "iconHint": "N importe quel émoji — touchez-en un ci-dessous ou utilisez votre clavier",
+        "useEmoji": "Utiliser {emoji}"
       },
       "errors": {
         "code": "Le code doit contenir des minuscules, chiffres et tirets bas, au moins 3 caractères.",
@@ -2597,13 +2599,14 @@
         "ads_watched": "Annonces regardées",
         "surveys_completed": "Sondages terminés",
         "points_earned": "Points gagnés (total)",
-        "referrals_activated": "Filleuls ayant regardé une annonce",
+        "referrals_activated": "Filleuls ayant regardé une annonce ou répondu à un sondage",
         "games_played": "Parties jouées",
         "gift_codes_redeemed": "Codes cadeaux utilisés",
         "withdrawals_made": "Retraits payés",
         "has_2fa": "Double authentification activée",
         "has_avatar": "Photo de profil définie",
-        "has_withdrawal_pin": "Code de retrait défini"
+        "has_withdrawal_pin": "Code de retrait défini",
+        "referrals_purchased": "Filleuls ayant acheté un forfait"
       }
     }
   },

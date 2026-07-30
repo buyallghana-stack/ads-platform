@@ -33,9 +33,12 @@ const ONE_SHOT_METRICS: TaskMetric[] = [
   'has_withdrawal_pin',
 ]
 
-const ICON_CHOICES = [
-  'Sparkles', 'Camera', 'PlayCircle', 'ListChecks', 'KeyRound', 'ShieldCheck',
-  'Gem', 'Coins', 'Users', 'Wallet', 'Gamepad2', 'Target',
+/* Quick picks, not a limit. The field takes any emoji the operator's keyboard
+   can produce — these are just the ones a rewards platform reaches for most,
+   so the common case is one tap rather than hunting through a picker. */
+const EMOJI_SUGGESTIONS = [
+  '🎉', '📸', '▶️', '🍿', '🗳️', '🔐', '🛡️', '💎',
+  '🪙', '🤝', '🏆', '💸', '🎰', '🎯', '🔥', '⭐',
 ]
 
 const blank = (): TaskInput => ({
@@ -46,7 +49,7 @@ const blank = (): TaskInput => ({
   metric: 'ads_watched',
   target: 10,
   reward_points: 250,
-  icon: 'Target',
+  icon: '🎯',
   sort_order: 0,
   is_active: true,
 })
@@ -203,16 +206,35 @@ export function TasksBoard({ tasks }: { tasks: AdminTask[] }) {
             />
             <label className="block">
               <span className="text-[0.8125rem] font-medium text-ink-700">{t('field.icon')}</span>
-              <select
+              <input
                 value={draft.icon}
                 onChange={(e) => patch({ icon: e.target.value })}
-                className="mt-1 w-full rounded-(--radius-input) border border-ink-200 bg-canvas px-3 py-2 text-[0.875rem] text-ink-900"
-              >
-                {ICON_CHOICES.map((i) => (
-                  <option key={i} value={i}>{i}</option>
-                ))}
-              </select>
+                maxLength={12}
+                aria-label={t('field.icon')}
+                className="mt-1 w-full rounded-(--radius-input) border border-ink-200 bg-canvas px-3 py-2 text-center text-[1.25rem] leading-none text-ink-900"
+              />
+              <span className="text-[0.75rem] text-ink-400">{t('field.iconHint')}</span>
             </label>
+          </div>
+
+          {/* One tap for the common ones; the field above takes anything. */}
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {EMOJI_SUGGESTIONS.map((emoji) => (
+              <button
+                key={emoji}
+                type="button"
+                onClick={() => patch({ icon: emoji })}
+                aria-label={t('field.useEmoji', { emoji })}
+                className={cn(
+                  'grid size-9 place-items-center rounded-(--radius-input) border text-[1.125rem] transition-colors',
+                  draft.icon === emoji
+                    ? 'border-brand-500 bg-brand-50'
+                    : 'border-ink-200 hover:border-ink-300',
+                )}
+              >
+                {emoji}
+              </button>
+            ))}
           </div>
 
           {/* THE COST OF SAVING. */}
@@ -258,6 +280,9 @@ export function TasksBoard({ tasks }: { tasks: AdminTask[] }) {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <p className="flex items-center gap-2 text-[0.9375rem] font-semibold text-ink-900">
+                  <span aria-hidden className="text-[1.125rem] leading-none">
+                    {task.icon?.trim() || '🎯'}
+                  </span>
                   {task.name}
                   {!task.isActive && (
                     <span className="rounded-full bg-ink-100 px-2 py-0.5 text-[0.6875rem] font-semibold text-ink-500">

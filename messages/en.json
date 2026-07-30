@@ -2585,7 +2585,9 @@
         "metric": "Counts",
         "target": "Target",
         "reward": "Reward (points)",
-        "icon": "Icon"
+        "icon": "Icon",
+        "iconHint": "Any emoji — tap one below or use your keyboard",
+        "useEmoji": "Use {emoji}"
       },
       "errors": {
         "code": "The code must be lowercase letters, numbers and underscores, at least 3 characters.",
@@ -2597,13 +2599,14 @@
         "ads_watched": "Ads watched",
         "surveys_completed": "Surveys completed",
         "points_earned": "Points earned (lifetime)",
-        "referrals_activated": "Referrals who watched an ad",
+        "referrals_activated": "Referrals who watched an ad or took a survey",
         "games_played": "Games played",
         "gift_codes_redeemed": "Gift codes redeemed",
         "withdrawals_made": "Withdrawals paid",
         "has_2fa": "Two-factor enabled",
         "has_avatar": "Profile picture set",
-        "has_withdrawal_pin": "Withdrawal PIN set"
+        "has_withdrawal_pin": "Withdrawal PIN set",
+        "referrals_purchased": "Referrals who bought a plan"
       }
     }
   },

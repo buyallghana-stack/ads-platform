@@ -209,6 +209,83 @@ describe.skipIf(!HAS_DB)('tasks', () => {
     })
   })
 
+  /* Operator correction, 2026-07-30: it only looked for `ad_view`, so an
+     invitee who joined and answered three surveys counted for nothing. A
+     survey is more work than a video, not less. */
+  it('counts a referral who took a survey, not only one who watched a video', async () => {
+    await withRollback(async (tx) => {
+      const inviter = await createUser(tx, { name: 'Survey Inviter' })
+      const surveyer = await createUser(tx, { name: 'Answered Surveys' })
+      await tx.query(`update public.profiles set referred_by = $1 where id = $2`, [
+        inviter.id,
+        surveyer.id,
+      ])
+
+      const read = async () => {
+        const { rows } = await tx.query(
+          `select public.user_task_metric($1, 'referrals_activated') as v`,
+          [inviter.id],
+        )
+        return Number(rows[0]!.v)
+      }
+
+      expect(await read()).toBe(0)
+      await credit(tx, surveyer.id, 'survey', 1)
+      expect(await read()).toBe(1)
+    })
+  })
+
+  /* Operator's rule: "a total of 20 purchased plans means 20 referred users".
+     So somebody stacking four plans is ONE referral, which is why this counts
+     people and not payments. */
+  it('counts each paying referral once, however many plans they buy', async () => {
+    await withRollback(async (tx) => {
+      const inviter = await createUser(tx, { name: 'Scout' })
+      const buyer = await createUser(tx, { name: 'Big Spender' })
+      const browser = await createUser(tx, { name: 'Just Looking' })
+      await tx.query(`update public.profiles set referred_by = $1 where id in ($2, $3)`, [
+        inviter.id,
+        buyer.id,
+        browser.id,
+      ])
+
+      const read = async () => {
+        const { rows } = await tx.query(
+          `select public.user_task_metric($1, 'referrals_purchased') as v`,
+          [inviter.id],
+        )
+        return Number(rows[0]!.v)
+      }
+
+      const buy = async (userId: string, slug: string, status: string) =>
+        tx.query(
+          `insert into public.subscription_payments
+             (user_id, tier_id, status, method, amount_minor, currency_code,
+              period_days, confirmed_at)
+           select $1, id, $3::public.subscription_payment_status, 'korapay',
+                  price_minor, 'GHS', billing_period_days,
+                  -- subscription_payments_confirmed_has_time: a confirmed
+                  -- payment must record WHEN, the same shape as the paid
+                  -- redemption guard.
+                  case when $3 = 'confirmed' then now() else null end
+             from public.tiers where slug = $2`,
+          [userId, slug, status],
+        )
+
+      expect(await read()).toBe(0)
+
+      // A pending payment is not a purchase.
+      await buy(browser.id, 'bronze', 'pending')
+      expect(await read()).toBe(0)
+
+      // Four confirmed plans by ONE person is still one referral.
+      for (const slug of ['bronze', 'silver', 'gold', 'platinum']) {
+        await buy(buyer.id, slug, 'confirmed')
+      }
+      expect(await read()).toBe(1)
+    })
+  })
+
   /* Requesting a withdrawal and cancelling in a loop must not complete a
      task, so the metric counts money that actually left. */
   it('counts only withdrawals that were paid', async () => {

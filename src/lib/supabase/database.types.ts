@@ -3619,6 +3619,7 @@ export type Database = {
         | "surveys_completed"
         | "points_earned"
         | "referrals_activated"
+        | "referrals_purchased"
         | "games_played"
         | "gift_codes_redeemed"
         | "withdrawals_made"
@@ -3846,6 +3847,7 @@ export const Constants = {
         "surveys_completed",
         "points_earned",
         "referrals_activated",
+        "referrals_purchased",
         "games_played",
         "gift_codes_redeemed",
         "withdrawals_made",
