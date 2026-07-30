@@ -2473,6 +2473,7 @@
       "expired": "That code has expired.",
       "rate_limited": "Too many tries. Wait an hour and try again.",
       "account_disabled": "Your account is under review and cannot redeem codes right now.",
+      "earning_paused": "Earning is paused across SidePerks at the moment. Your code has not been used — keep it and try again later.",
       "not_signed_in": "Please log in and try again.",
       "error": "Something went wrong. Please try again."
     }

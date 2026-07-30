@@ -2473,6 +2473,7 @@
       "expired": "Ce code a expiré.",
       "rate_limited": "Trop de tentatives. Réessayez dans une heure.",
       "account_disabled": "Votre compte est en cours d'examen et ne peut pas utiliser de codes pour le moment.",
+      "earning_paused": "Les gains sont suspendus sur SidePerks en ce moment. Votre code n'a pas été utilisé — conservez-le et réessayez plus tard.",
       "not_signed_in": "Veuillez vous connecter et réessayer.",
       "error": "Une erreur s'est produite. Veuillez réessayer."
     }

@@ -290,6 +290,68 @@ describe.skipIf(!HAS_DB)('refusing a code', () => {
     })
   })
 
+  /*
+    Migration 066. Before it, `credit_points` raised out of the function, the
+    user was told "something went wrong" about a code that was perfectly good,
+    and Sentry got a report for a refusal the platform meant to make.
+
+    The assertion that matters is the SECOND one: the code has to survive the
+    pause completely intact, because the whole point of answering honestly is
+    telling somebody to keep it and come back.
+  */
+  it('refuses honestly while earning is paused, and leaves the code intact', async () => {
+    await withRollback(async (tx) => {
+      const admin = await createAdmin(tx)
+      const user = await createUser(tx)
+      const code = await newCode(tx, admin.id, 5_000)
+      await setConfig(tx, 'earning_paused_globally', 'true')
+
+      expect(await redeem(tx, user.id, code.code)).toMatchObject({ outcome: 'earning_paused' })
+
+      const { rows } = await tx.query(
+        `select (select status from public.gift_codes where id = $1) status,
+                (select count(*)::int from public.gift_code_redemptions where gift_code_id = $1) redemptions,
+                (select count(*)::int from public.gift_code_attempts where user_id = $2) attempts,
+                (select count(*)::int from public.points_ledger where user_id = $2) ledger`,
+        [code.id, user.id],
+      )
+      expect(rows[0]).toMatchObject({ status: 'active', redemptions: 0, attempts: 0, ledger: 0 })
+      expect(await balanceOf(tx, user.id)).toBe(0)
+
+      // And it works the moment the switch goes back off — the pause delays a
+      // gift, it does not destroy one.
+      await setConfig(tx, 'earning_paused_globally', 'false')
+      expect(await redeem(tx, user.id, code.code)).toMatchObject({ outcome: 'ok', points: 5000 })
+      expect(await balanceOf(tx, user.id)).toBe(5_000)
+    })
+  })
+
+  /*
+    A paused platform does not make a dud code less dud. The pause check sits
+    AFTER every question about the code itself, so somebody holding a used or
+    expired one is told the truth rather than sent away to come back later for
+    a code that will never work.
+  */
+  it('still gives a used or expired code its own answer while paused', async () => {
+    await withRollback(async (tx) => {
+      const admin = await createAdmin(tx)
+      const first = await createUser(tx)
+      const second = await createUser(tx)
+      const spent = await newCode(tx, admin.id, 1_000)
+      const stale = await newCode(tx, admin.id, 1_000)
+
+      expect(await redeem(tx, first.id, spent.code)).toMatchObject({ outcome: 'ok' })
+      await tx.query(`update public.gift_codes set expires_at = now() - interval '1 day' where id = $1`, [
+        stale.id,
+      ])
+      await setConfig(tx, 'earning_paused_globally', 'true')
+
+      expect(await redeem(tx, second.id, spent.code)).toMatchObject({ outcome: 'already_used' })
+      expect(await redeem(tx, second.id, stale.code)).toMatchObject({ outcome: 'expired' })
+      expect(await redeem(tx, second.id, 'ABCDEFGHJKMN')).toMatchObject({ outcome: 'not_found' })
+    })
+  })
+
   it('stops a user guessing after the configured number of tries', async () => {
     await withRollback(async (tx) => {
       const user = await createUser(tx)

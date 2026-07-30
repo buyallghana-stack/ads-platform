@@ -28,6 +28,11 @@ export type RedeemOutcome =
         | 'expired'
         | 'rate_limited'
         | 'account_disabled'
+        /* The §6.6 emergency switch is on. An outcome rather than an
+           exception since migration 066 — before that it escaped as a raise,
+           told the user "something went wrong" about a code that is fine, and
+           filed a Sentry report for a refusal the platform meant to make. */
+        | 'earning_paused'
         | 'not_signed_in'
         | 'error'
     }
@@ -69,6 +74,7 @@ export async function redeemGiftCode(code: string): Promise<RedeemOutcome> {
     'expired',
     'rate_limited',
     'account_disabled',
+    'earning_paused',
   ] as const
   const reason = known.find((r) => r === result.outcome)
 
