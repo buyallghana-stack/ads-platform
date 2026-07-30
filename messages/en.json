@@ -2171,13 +2171,15 @@
       "description": "The numbers that decide how much money leaves. Every field maps to a live column — the name is printed under each one.",
       "units": {
         "points": "points",
-        "seconds": "sec",
+        "seconds": "seconds",
         "attempts": "tries",
         "hours": "hours",
         "perCedi": "per GHS 1",
         "times": "×",
         "ads": "ads",
-        "percent": "% of the price"
+        "percent": "% of the price",
+        "places": "places",
+        "perHour": "per hour"
       },
       "groups": {
         "earning": {
@@ -2207,6 +2209,14 @@
         "killswitch": {
           "title": "Kill switch",
           "description": "One switch, for when something is badly wrong."
+        },
+        "games": {
+          "title": "Games",
+          "description": "The mystery box and the wheel. Prize tables live under Games; these are the switches around them."
+        },
+        "leaderboard": {
+          "title": "Leaderboard and gift codes",
+          "description": "What the public board counts and shows, and how hard a gift code is to guess at."
         }
       },
       "fields": {
@@ -2303,6 +2313,37 @@
         "referralCommissionCap": {
           "label": "Lifetime commission cap per invited person",
           "description": "The most one invited person can ever earn their inviter from purchases. A purchase that crosses it pays the remainder. Zero means no limit."
+        },
+        "gamesEnabled": {
+          "label": "Games are playable",
+          "description": "Turns the mystery box and the wheel on for everyone. While off both screens are unreachable and no play can be made.",
+          "warning": "Paying for more chances at a random prize is what a lottery is, and Ghana licenses games of chance separately from your money transfer licence. Have that cleared before turning this on."
+        },
+        "gameCombineMode": {
+          "label": "Plays for stacked plans",
+          "description": "How weekly plays combine when somebody holds several plans.",
+          "highest": "Highest plan only (Platinum gives 5)",
+          "sumBonus": "Add the bonuses, like ad caps (all four gives 11)"
+        },
+        "gameGap": {
+          "label": "Minimum gap between plays",
+          "description": "Stops a double tap or a stuck button spending two plays on one intention. Not a fraud control — the weekly allowance is that."
+        },
+        "leaderboardRanks": {
+          "label": "Places shown on the leaderboard",
+          "description": "How far the public board goes. Somebody outside it still sees their own standing on a pinned row."
+        },
+        "leaderboardGranted": {
+          "label": "Count gift codes, adjustments and game wins",
+          "description": "On, the board counts every credit a user receives. Off, it counts only what they earned from ads, surveys and referrals. Withdrawals never move the board either way."
+        },
+        "leaderboardZeros": {
+          "label": "Show people who have earned nothing",
+          "description": "Off, the board lists only people with points. On, every active account appears, with the zeros last."
+        },
+        "giftAttempts": {
+          "label": "Gift code guesses per hour",
+          "description": "How many wrong codes one account may try before being refused. The code space makes guessing hopeless; this makes trying pointless."
         }
       }
     },

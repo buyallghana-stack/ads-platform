@@ -2171,13 +2171,15 @@
       "description": "Les chiffres qui décident de combien d'argent sort. Chaque champ correspond à une colonne réelle — son nom est indiqué en dessous.",
       "units": {
         "points": "points",
-        "seconds": "s",
+        "seconds": "secondes",
         "attempts": "essais",
         "hours": "heures",
         "perCedi": "pour 1 GHS",
         "times": "×",
         "ads": "pubs",
-        "percent": "% du prix"
+        "percent": "% du prix",
+        "places": "places",
+        "perHour": "par heure"
       },
       "groups": {
         "earning": {
@@ -2207,6 +2209,14 @@
         "killswitch": {
           "title": "Arrêt d'urgence",
           "description": "Un seul interrupteur, pour quand quelque chose va vraiment mal."
+        },
+        "games": {
+          "title": "Jeux",
+          "description": "La boîte mystère et la roue. Les tables de prix sont sous Jeux ; voici les interrupteurs autour."
+        },
+        "leaderboard": {
+          "title": "Classement et codes cadeaux",
+          "description": "Ce que le classement public compte et affiche, et la difficulté à deviner un code cadeau."
         }
       },
       "fields": {
@@ -2303,6 +2313,37 @@
         "referralCommissionCap": {
           "label": "Plafond de commission à vie par filleul",
           "description": "Le maximum qu'un filleul peut rapporter à son parrain via ses achats. Un achat qui dépasse le plafond verse le reliquat. Zéro = illimité."
+        },
+        "gamesEnabled": {
+          "label": "Jeux activés",
+          "description": "Active la boîte mystère et la roue pour tous. Désactivés, les deux écrans sont inaccessibles et aucune partie ne peut être jouée.",
+          "warning": "Payer pour plus de chances de gagner un prix aléatoire correspond à une loterie, et le Ghana délivre des licences de jeux de hasard séparément de votre licence de transfert d'argent. Faites valider cela avant d'activer."
+        },
+        "gameCombineMode": {
+          "label": "Parties pour forfaits cumulés",
+          "description": "Comment les parties hebdomadaires se combinent lorsqu'un utilisateur détient plusieurs forfaits.",
+          "highest": "Forfait le plus élevé seulement (Platine donne 5)",
+          "sumBonus": "Additionner les bonus, comme les plafonds (les quatre donnent 11)"
+        },
+        "gameGap": {
+          "label": "Intervalle minimum entre parties",
+          "description": "Empêche un double appui de consommer deux parties pour une seule intention. Ce n'est pas un contrôle antifraude — l'allocation hebdomadaire l'est."
+        },
+        "leaderboardRanks": {
+          "label": "Places affichées au classement",
+          "description": "Jusqu'où va le classement public. Une personne au-delà voit tout de même son propre rang sur une ligne épinglée."
+        },
+        "leaderboardGranted": {
+          "label": "Compter codes cadeaux, ajustements et gains de jeux",
+          "description": "Activé, le classement compte chaque crédit reçu. Désactivé, il ne compte que ce qui a été gagné via annonces, sondages et parrainages. Les retraits ne modifient jamais le classement."
+        },
+        "leaderboardZeros": {
+          "label": "Afficher les personnes sans gains",
+          "description": "Désactivé, le classement ne liste que les personnes avec des points. Activé, chaque compte actif apparaît, les zéros en dernier."
+        },
+        "giftAttempts": {
+          "label": "Tentatives de code cadeau par heure",
+          "description": "Combien de codes erronés un compte peut essayer avant d'être refusé."
         }
       }
     },

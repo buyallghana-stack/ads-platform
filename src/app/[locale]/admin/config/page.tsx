@@ -277,6 +277,83 @@ export default async function AdminConfigPage({
       ],
     },
     {
+      /* Added 2026-07-30. These keys existed in `app_config` from the day the
+         games shipped, and `admin_set_config` would have accepted them — but
+         this screen renders a HAND-WRITTEN field list, not every row in the
+         table, so a setting nobody adds here is a setting nobody can reach.
+         The operator went looking for the games switch and found nothing.
+         Any new config row now needs a field here in the same change. */
+      key: 'games',
+      title: t('groups.games.title'),
+      description: t('groups.games.description'),
+      fields: [
+        {
+          key: 'games_enabled',
+          label: t('fields.gamesEnabled.label'),
+          description: t('fields.gamesEnabled.description'),
+          warning: t('fields.gamesEnabled.warning'),
+          danger: true,
+          kind: 'toggle',
+        },
+        {
+          key: 'game_plays_combine_mode',
+          label: t('fields.gameCombineMode.label'),
+          description: t('fields.gameCombineMode.description'),
+          kind: 'select',
+          /* Exactly the two branches `user_weekly_play_allowance` implements.
+             `config_allowed_values` refuses anything else, so this list and
+             the code cannot drift apart without a save failing loudly. */
+          options: [
+            { value: 'highest', label: t('fields.gameCombineMode.highest') },
+            { value: 'sum_bonus', label: t('fields.gameCombineMode.sumBonus') },
+          ],
+        },
+        {
+          key: 'game_min_seconds_between_plays',
+          label: t('fields.gameGap.label'),
+          description: t('fields.gameGap.description'),
+          kind: 'number',
+          min: 0,
+          suffix: t('units.seconds'),
+        },
+      ],
+    },
+    {
+      key: 'leaderboard',
+      title: t('groups.leaderboard.title'),
+      description: t('groups.leaderboard.description'),
+      fields: [
+        {
+          key: 'leaderboard_visible_ranks',
+          label: t('fields.leaderboardRanks.label'),
+          description: t('fields.leaderboardRanks.description'),
+          kind: 'number',
+          min: 3,
+          suffix: t('units.places'),
+        },
+        {
+          key: 'leaderboard_counts_granted_points',
+          label: t('fields.leaderboardGranted.label'),
+          description: t('fields.leaderboardGranted.description'),
+          kind: 'toggle',
+        },
+        {
+          key: 'leaderboard_shows_zero_earners',
+          label: t('fields.leaderboardZeros.label'),
+          description: t('fields.leaderboardZeros.description'),
+          kind: 'toggle',
+        },
+        {
+          key: 'gift_code_max_attempts_per_hour',
+          label: t('fields.giftAttempts.label'),
+          description: t('fields.giftAttempts.description'),
+          kind: 'number',
+          min: 1,
+          suffix: t('units.perHour'),
+        },
+      ],
+    },
+    {
       key: 'killswitch',
       title: t('groups.killswitch.title'),
       description: t('groups.killswitch.description'),
