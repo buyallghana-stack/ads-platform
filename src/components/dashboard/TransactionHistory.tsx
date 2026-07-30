@@ -13,6 +13,7 @@ import {
   SlidersHorizontal,
   Smartphone,
   Gem,
+  Ticket,
   Wrench,
 } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
@@ -35,12 +36,16 @@ import { cn } from '@/lib/cn'
  * server-driven pagination arrives with the full history screen.
  */
 
-const KIND_ORDER: TxKind[] = ['ad', 'survey', 'bonus', 'withdrawal', 'refund', 'subscription', 'adjustment']
+const KIND_ORDER: TxKind[] = ['ad', 'survey', 'bonus', 'gift', 'withdrawal', 'refund', 'subscription', 'adjustment']
 
 const KIND_ICON: Record<TxKind, React.ComponentType<{ className?: string }>> = {
   ad: PlayCircle,
   survey: ListChecks,
   bonus: Gift,
+  // A voucher, not a present: `Gift` is already the referral bonus's icon, and
+  // two orange chips are told apart by their glyph the same way a watched ad
+  // and a survey are.
+  gift: Ticket,
   withdrawal: Smartphone,
   refund: RotateCcw,
   subscription: Gem,
@@ -67,6 +72,9 @@ const KIND_CHIP: Record<TxKind, string> = {
   // hues carry fixed meanings. Format is told apart by the icon and the label.
   survey: 'bg-success-50 text-success-600',
   bonus: 'bg-orange-50 text-orange-600',
+  // Orange too: points that arrived without an ad being watched. The shortcut
+  // tile on Home is the same hue, so the row matches where it came from.
+  gift: 'bg-orange-50 text-orange-600',
   withdrawal: 'bg-brand-50 text-brand-600',
   refund: 'bg-teal-50 text-teal-600',
   subscription: 'bg-violet-50 text-violet-600',

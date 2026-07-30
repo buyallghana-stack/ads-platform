@@ -699,6 +699,86 @@ export type Database = {
         }
         Relationships: []
       }
+      gift_code_attempts: {
+        Row: { attempted: string; created_at: string; id: number; user_id: string }
+        Insert: { attempted: string; created_at?: string; id?: never; user_id: string }
+        Update: { attempted?: string; created_at?: string; id?: never; user_id?: string }
+        Relationships: []
+      }
+      gift_code_redemptions: {
+        Row: {
+          created_at: string
+          gift_code_id: string
+          id: string
+          points_awarded: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          gift_code_id: string
+          id?: string
+          points_awarded: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          gift_code_id?: string
+          id?: string
+          points_awarded?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_code_redemptions_gift_code_id_fkey"
+            columns: ["gift_code_id"]
+            isOneToOne: true
+            referencedRelation: "gift_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gift_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          note: string | null
+          points: number
+          revoked_at: string | null
+          revoked_by: string | null
+          status: Database["public"]["Enums"]["gift_code_status"]
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          note?: string | null
+          points: number
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: Database["public"]["Enums"]["gift_code_status"]
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          note?: string | null
+          points?: number
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: Database["public"]["Enums"]["gift_code_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string
@@ -1863,6 +1943,22 @@ export type Database = {
           withdrawals: number
         }[]
       }
+      admin_create_gift_code: {
+        Args: {
+          p_admin_id: string
+          p_code: string
+          p_expires_at?: string
+          p_note?: string
+          p_points: number
+        }
+        Returns: Database["public"]["Tables"]["gift_codes"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "gift_codes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_decide_redemption: {
         Args: {
           p_action: string
@@ -2086,6 +2182,22 @@ export type Database = {
           sort_order: number
         }[]
       }
+      admin_list_gift_codes: {
+        Args: { p_status?: Database["public"]["Enums"]["gift_code_status"] }
+        Returns: {
+          code: string
+          created_at: string
+          created_by_name: string
+          expires_at: string
+          id: string
+          note: string
+          points: number
+          redeemed_at: string
+          redeemed_by_email: string
+          redeemed_by_name: string
+          status: Database["public"]["Enums"]["gift_code_status"]
+        }[]
+      }
       admin_list_redemptions: {
         Args: { p_status?: Database["public"]["Enums"]["redemption_status"] }
         Returns: {
@@ -2271,6 +2383,16 @@ export type Database = {
           opened_at: string
           status: Database["public"]["Enums"]["support_thread_status"]
           user_id: string
+        }
+      }
+      admin_revoke_gift_code: {
+        Args: { p_admin_id: string; p_code_id: string }
+        Returns: Database["public"]["Tables"]["gift_codes"]["Row"]
+        SetofOptions: {
+          from: "*"
+          to: "gift_codes"
+          isOneToOne: true
+          isSetofReturn: false
         }
       }
       admin_set_config: {
@@ -2704,6 +2826,7 @@ export type Database = {
         Returns: number
       }
       fx_rate: { Args: { p_pair: string }; Returns: number }
+      generate_gift_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       get_active_sessions: {
         Args: never
@@ -2991,6 +3114,7 @@ export type Database = {
         Args: { p_coin: string; p_ghs: number }
         Returns: Json
       }
+      redeem_gift_code: { Args: { p_code: string; p_user_id: string }; Returns: Json }
       recompute_user_risk: {
         Args: { p_user_id: string }
         Returns: {
@@ -3320,12 +3444,14 @@ export type Database = {
       config_value_type: "int" | "decimal" | "bool" | "text"
       fraud_action: "flag" | "block"
       fraud_review_status: "none" | "pending" | "cleared" | "confirmed_fraud"
+      gift_code_status: "active" | "redeemed" | "revoked"
       ledger_entry_type:
         | "ad_view"
         | "survey"
         | "referral_signup"
         | "referral_activation"
         | "referral_purchase"
+        | "gift_code"
         | "redemption_request"
         | "redemption_refund"
         | "admin_adjustment"
@@ -3531,12 +3657,14 @@ export const Constants = {
       config_value_type: ["int", "decimal", "bool", "text"],
       fraud_action: ["flag", "block"],
       fraud_review_status: ["none", "pending", "cleared", "confirmed_fraud"],
+      gift_code_status: ["active", "redeemed", "revoked"],
       ledger_entry_type: [
         "ad_view",
         "survey",
         "referral_signup",
         "referral_activation",
         "referral_purchase",
+        "gift_code",
         "redemption_request",
         "redemption_refund",
         "admin_adjustment",

@@ -33,6 +33,7 @@ export type TxKind =
   | 'ad'
   | 'survey'
   | 'bonus'
+  | 'gift'
   | 'withdrawal'
   | 'refund'
   | 'subscription'
@@ -74,6 +75,11 @@ const LEDGER_KIND: Record<string, TxKind> = {
   // chip should show all of them. Unlike the survey/ad case, the label does
   // not become untrue — this genuinely is a referral bonus.
   referral_purchase: 'bonus',
+  // Its own kind, not folded into `bonus`: that label reads "Referral bonus",
+  // and without a mapping here a redeemed gift code fell through to the
+  // `?? 'adjustment'` default and told the user their gift was an account
+  // correction. Same family of bug as surveys once reading "Ad reward".
+  gift_code: 'gift',
   redemption_request: 'withdrawal',
   redemption_refund: 'refund',
   admin_adjustment: 'adjustment',
@@ -111,6 +117,10 @@ export async function getHomeData(userId: string): Promise<HomeData> {
       .limit(FEED_LIMIT),
     // Separate query: the feed page may not reach 30 days back, and the
     // chart must. Only earning-relevant columns.
+    //
+    // `gift_code` is deliberately absent, like `admin_adjustment`: the chart
+    // plots what the user earned, and a code the operator handed out would
+    // draw a spike on a day they did nothing.
     supabase
       .from('points_ledger')
       .select('entry_type, amount, created_at')

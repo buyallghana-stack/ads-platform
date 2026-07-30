@@ -461,6 +461,7 @@
       },
       "kind": {
         "bonus": "Bonus",
+        "gift": "Gift code",
         "withdrawal": "Withdrawal",
         "refund": "Refund",
         "subscription": "Subscription",
@@ -470,6 +471,7 @@
       },
       "kindHint": {
         "bonus": "Referral bonus",
+        "gift": "Gift code redeemed",
         "withdrawal": "Payout request",
         "refund": "Returned to balance",
         "subscription": "Plan payment",
@@ -500,7 +502,14 @@
       "sharedDone": "Shared",
       "inviteMessage": "Join me on SidePerks — watch short ads and earn real money in Ghana. Sign up with my link: {url}"
     },
-    "withdrawCta": "Withdraw"
+    "withdrawCta": "Withdraw",
+    "quick": {
+      "games": "Games",
+      "leaderboard": "Leaderboard",
+      "gift": "Gift code",
+      "tasks": "Tasks",
+      "soon": "Coming soon"
+    }
   },
   "nav": {
     "label": "Main navigation",
@@ -1297,7 +1306,8 @@
         "ads": "Ads & surveys",
         "config": "Platform settings",
         "audit": "Audit log",
-        "settings": "Admin settings"
+        "settings": "Admin settings",
+        "giftCodes": "Gift codes"
       },
       "viewUserApp": "View user app"
     },
@@ -2405,6 +2415,66 @@
       "historyTitle": "Sent before",
       "historyEmpty": "Nothing has been announced yet.",
       "historyMeta": "{name} · reached {count, plural, one {# person} other {# people}}"
+    },
+    "giftCodes": {
+      "title": "Gift codes",
+      "description": "Generate a code, attach points to it, and hand it out. Each code can be redeemed exactly once.",
+      "intro": "Codes are generated, never chosen — that is what keeps them unguessable.",
+      "create": "New gift code",
+      "empty": "No gift codes yet.",
+      "revoke": "Revoke",
+      "dismiss": "Dismiss",
+      "pts": "{points} pts",
+      "redeemedBy": "Redeemed by {name}",
+      "createdOn": "Created {when}",
+      "status": {
+        "active": "Active",
+        "redeemed": "Redeemed",
+        "revoked": "Revoked"
+      },
+      "col": {
+        "code": "Code",
+        "points": "Points",
+        "status": "Status",
+        "note": "Note",
+        "redeemed": "Redeemed by"
+      },
+      "form": {
+        "code": "Code",
+        "generating": "Generating…",
+        "regenerate": "Generate a different code",
+        "codeHint": "Generated for you. Copy it once you save.",
+        "points": "Points",
+        "pointsHint": "What the person who enters this code receives.",
+        "note": "Note (optional)",
+        "notePlaceholder": "What this code is for",
+        "save": "Create code",
+        "cancel": "Cancel"
+      }
+    }
+  },
+  "giftCode": {
+    "title": "Enter a gift code",
+    "subtitle": "Got a code? Type it below and the points go straight into your balance.",
+    "label": "Gift code",
+    "placeholder": "ABCD EFGH JKMN",
+    "hint": "{entered} of {total} characters",
+    "submit": "Redeem code",
+    "success": {
+      "title": "Code redeemed",
+      "body": "{points} points have been added to your balance.",
+      "home": "Back to Home",
+      "another": "Enter another code"
+    },
+    "errors": {
+      "not_found": "That code is not valid. Check it and try again.",
+      "already_used": "That code has already been used.",
+      "revoked": "That code is no longer active.",
+      "expired": "That code has expired.",
+      "rate_limited": "Too many tries. Wait an hour and try again.",
+      "account_disabled": "Your account is under review and cannot redeem codes right now.",
+      "not_signed_in": "Please log in and try again.",
+      "error": "Something went wrong. Please try again."
     }
   }
 }

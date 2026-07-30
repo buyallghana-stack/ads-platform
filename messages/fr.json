@@ -461,6 +461,7 @@
       },
       "kind": {
         "bonus": "Bonus",
+        "gift": "Code cadeau",
         "withdrawal": "Retrait",
         "refund": "Remboursement",
         "subscription": "Abonnement",
@@ -470,6 +471,7 @@
       },
       "kindHint": {
         "bonus": "Bonus de parrainage",
+        "gift": "Code cadeau utilisé",
         "withdrawal": "Demande de paiement",
         "refund": "Retourné au solde",
         "subscription": "Paiement de forfait",
@@ -500,7 +502,14 @@
       "sharedDone": "Partagé",
       "inviteMessage": "Rejoins-moi sur SidePerks — regarde de courtes pubs et gagne de l'argent réel au Ghana. Inscris-toi avec mon lien : {url}"
     },
-    "withdrawCta": "Retirer"
+    "withdrawCta": "Retirer",
+    "quick": {
+      "games": "Jeux",
+      "leaderboard": "Classement",
+      "gift": "Code cadeau",
+      "tasks": "Tâches",
+      "soon": "Bientôt disponible"
+    }
   },
   "nav": {
     "label": "Navigation principale",
@@ -1297,7 +1306,8 @@
         "ads": "Annonces et sondages",
         "config": "Paramètres plateforme",
         "audit": "Journal",
-        "settings": "Paramètres admin"
+        "settings": "Paramètres admin",
+        "giftCodes": "Codes cadeaux"
       },
       "viewUserApp": "Voir l’app utilisateur"
     },
@@ -2405,6 +2415,66 @@
       "historyTitle": "Déjà envoyées",
       "historyEmpty": "Aucune annonce pour l'instant.",
       "historyMeta": "{name} · a touché {count, plural, one {# personne} other {# personnes}}"
+    },
+    "giftCodes": {
+      "title": "Codes cadeaux",
+      "description": "Générez un code, attribuez-lui des points et distribuez-le. Chaque code ne peut être utilisé qu'une seule fois.",
+      "intro": "Les codes sont générés, jamais choisis — c'est ce qui les rend impossibles à deviner.",
+      "create": "Nouveau code cadeau",
+      "empty": "Aucun code cadeau pour le moment.",
+      "revoke": "Révoquer",
+      "dismiss": "Fermer",
+      "pts": "{points} pts",
+      "redeemedBy": "Utilisé par {name}",
+      "createdOn": "Créé le {when}",
+      "status": {
+        "active": "Actif",
+        "redeemed": "Utilisé",
+        "revoked": "Révoqué"
+      },
+      "col": {
+        "code": "Code",
+        "points": "Points",
+        "status": "Statut",
+        "note": "Note",
+        "redeemed": "Utilisé par"
+      },
+      "form": {
+        "code": "Code",
+        "generating": "Génération…",
+        "regenerate": "Générer un autre code",
+        "codeHint": "Généré pour vous. Copiez-le après enregistrement.",
+        "points": "Points",
+        "pointsHint": "Ce que reçoit la personne qui saisit ce code.",
+        "note": "Note (facultatif)",
+        "notePlaceholder": "À quoi sert ce code",
+        "save": "Créer le code",
+        "cancel": "Annuler"
+      }
+    }
+  },
+  "giftCode": {
+    "title": "Saisir un code cadeau",
+    "subtitle": "Vous avez un code ? Saisissez-le ci-dessous et les points sont ajoutés à votre solde.",
+    "label": "Code cadeau",
+    "placeholder": "ABCD EFGH JKMN",
+    "hint": "{entered} caractères sur {total}",
+    "submit": "Utiliser le code",
+    "success": {
+      "title": "Code utilisé",
+      "body": "{points} points ont été ajoutés à votre solde.",
+      "home": "Retour à l'accueil",
+      "another": "Saisir un autre code"
+    },
+    "errors": {
+      "not_found": "Ce code n'est pas valide. Vérifiez-le et réessayez.",
+      "already_used": "Ce code a déjà été utilisé.",
+      "revoked": "Ce code n'est plus actif.",
+      "expired": "Ce code a expiré.",
+      "rate_limited": "Trop de tentatives. Réessayez dans une heure.",
+      "account_disabled": "Votre compte est en cours d'examen et ne peut pas utiliser de codes pour le moment.",
+      "not_signed_in": "Veuillez vous connecter et réessayer.",
+      "error": "Une erreur s'est produite. Veuillez réessayer."
     }
   }
 }

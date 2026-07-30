@@ -1,0 +1,99 @@
+'use server'
+
+import { revalidatePath } from 'next/cache'
+
+import { getSessionUser } from '@/lib/auth/session'
+import { reportUnexpected } from '@/lib/observability/report'
+import { createAdminClient } from '@/lib/supabase/admin'
+
+/**
+ * Admin gift-code actions.
+ *
+ * All three run through the service client, and all three pass the acting
+ * admin's id explicitly: these functions are called where `auth.uid()` is
+ * null, so `assert_admin(p_admin_id)` inside them is the check, exactly as
+ * `admin_save_ad` and `admin_set_config` do it.
+ *
+ * The id comes from the verified session, never from the payload.
+ */
+export type CodeActionResult<T = undefined> =
+  | { ok: true; data: T }
+  | { ok: false; message: string }
+
+async function actingAdmin() {
+  const user = await getSessionUser()
+  if (!user) return null
+  const admin = createAdminClient()
+  const { data } = await admin
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', user.id)
+    .eq('role', 'admin')
+    .maybeSingle()
+  return data ? user.id : null
+}
+
+/**
+ * A code the form can display while the operator types the points value.
+ *
+ * Creates NOTHING. The operator asked for generation and the points field to
+ * work "parallel just like entering values for a form", so the code appears
+ * as soon as the form opens and the row is written only on save — abandoning
+ * the form leaves no orphan code behind.
+ */
+export async function newCodeCandidate(): Promise<CodeActionResult<string>> {
+  const adminId = await actingAdmin()
+  if (!adminId) return { ok: false, message: 'Not an administrator' }
+
+  const admin = createAdminClient()
+  const { data, error } = await admin.rpc('generate_gift_code')
+  if (error || !data) {
+    reportUnexpected(error, 'admin.gift-codes.generate')
+    return { ok: false, message: error?.message ?? 'Could not generate a code' }
+  }
+  return { ok: true, data }
+}
+
+export async function createGiftCode(input: {
+  code: string
+  points: number
+  note?: string
+  expiresAt?: string | null
+}): Promise<CodeActionResult> {
+  const adminId = await actingAdmin()
+  if (!adminId) return { ok: false, message: 'Not an administrator' }
+
+  const admin = createAdminClient()
+  const { error } = await admin.rpc('admin_create_gift_code', {
+    p_admin_id: adminId,
+    p_code: input.code,
+    p_points: input.points,
+    p_note: input.note ?? undefined,
+    p_expires_at: input.expiresAt || undefined,
+  })
+
+  if (error) {
+    // The function raises in operator language ("Set how many points this
+    // code is worth"), so it is surfaced verbatim rather than reworded.
+    return { ok: false, message: error.message }
+  }
+
+  revalidatePath('/admin/gift-codes')
+  return { ok: true, data: undefined }
+}
+
+export async function revokeGiftCode(codeId: string): Promise<CodeActionResult> {
+  const adminId = await actingAdmin()
+  if (!adminId) return { ok: false, message: 'Not an administrator' }
+
+  const admin = createAdminClient()
+  const { error } = await admin.rpc('admin_revoke_gift_code', {
+    p_admin_id: adminId,
+    p_code_id: codeId,
+  })
+
+  if (error) return { ok: false, message: error.message }
+
+  revalidatePath('/admin/gift-codes')
+  return { ok: true, data: undefined }
+}

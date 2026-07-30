@@ -34,7 +34,14 @@ await loginPage.goto(`${base}/login`, { waitUntil: 'networkidle' })
 await loginPage.getByLabel(/email/i).fill(email)
 await loginPage.locator('input[type="password"]').fill(password)
 await loginPage.getByRole('button', { name: /log in|connexion/i }).click()
-await loginPage.waitForURL('**/dashboard', { timeout: 15000 })
+/*
+  Either landing counts. `landingFor` sends an admin to /admin and everybody
+  else to /dashboard, so waiting only for /dashboard made this script unusable
+  with an admin account — which is the one account that can shoot the admin
+  screens, and (since the demo user has a real authenticator enrolled) often
+  the only one that can log in at all.
+*/
+await loginPage.waitForURL(/\/(dashboard|admin)(\/|$|\?)/, { timeout: 15000 })
 const state = await loginContext.storageState()
 await loginContext.close()
 console.log(`logged in as ${email}`)

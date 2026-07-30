@@ -11,6 +11,7 @@ import {
   ClipboardList,
   Flag,
   Gauge,
+  Gift,
   LayoutGrid,
   Menu,
   MessageSquare,
@@ -81,7 +82,12 @@ const GROUPS: NavGroup[] = [
   },
   {
     key: 'content',
-    items: [{ key: 'ads', href: '/admin/ads', Icon: LayoutGrid }],
+    items: [
+      { key: 'ads', href: '/admin/ads', Icon: LayoutGrid },
+      // Sits with Ads rather than under SYSTEM: a gift code is content the
+      // operator creates and hands out, not a setting they configure.
+      { key: 'giftCodes', href: '/admin/gift-codes', Icon: Gift },
+    ],
   },
   {
     key: 'system',

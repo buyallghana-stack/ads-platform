@@ -5,6 +5,7 @@ import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/serve
 
 import { Logo } from '@/components/brand/Logo'
 import { PerformanceChart } from '@/components/dashboard/PerformanceChart'
+import { QuickLinks } from '@/components/dashboard/QuickLinks'
 import { ReferralCard } from '@/components/dashboard/ReferralCard'
 import { TransactionHistory } from '@/components/dashboard/TransactionHistory'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
@@ -191,6 +192,18 @@ export default async function HomePage({
           </span>
         </div>
       </section>
+
+      {/* Shortcuts, directly under the balance so they are the first thing a
+          thumb reaches. Three are disabled until their features exist. */}
+      <QuickLinks
+        labels={{
+          games: t('quick.games'),
+          leaderboard: t('quick.leaderboard'),
+          gift: t('quick.gift'),
+          tasks: t('quick.tasks'),
+        }}
+        soonLabel={t('quick.soon')}
+      />
 
       {/* ------------------------------------------------------------------ */}
       {/* Stat row — three cards carrying real data visuals: the cap as a    */}
