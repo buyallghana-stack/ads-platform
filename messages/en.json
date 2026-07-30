@@ -467,7 +467,8 @@
         "subscription": "Subscription",
         "adjustment": "Adjustment",
         "survey": "Survey",
-        "ad": "Ads"
+        "ad": "Ads",
+        "game": "Game"
       },
       "kindHint": {
         "bonus": "Referral bonus",
@@ -477,7 +478,8 @@
         "subscription": "Plan payment",
         "adjustment": "Account correction",
         "survey": "Survey reward",
-        "ad": "Ad reward"
+        "ad": "Ad reward",
+        "game": "Game prize"
       },
       "method": {
         "mobile_money": "Mobile Money",
@@ -1309,7 +1311,8 @@
         "audit": "Audit log",
         "settings": "Admin settings",
         "giftCodes": "Gift codes",
-        "leaderboard": "Leaderboard"
+        "leaderboard": "Leaderboard",
+        "games": "Games"
       },
       "viewUserApp": "View user app"
     },
@@ -2474,6 +2477,44 @@
         "same": "No change",
         "new": "New"
       }
+    },
+    "games": {
+      "title": "Games",
+      "description": "Prize tables for the mystery box and the wheel, and what each play costs you.",
+      "gameTabs": "Game",
+      "box": "Mystery Box",
+      "wheel": "Spin the Wheel",
+      "save": "Save prize table",
+      "saved": "Saved",
+      "col": {
+        "slot": "#",
+        "label": "Label",
+        "points": "Points",
+        "extraPlays": "Extra plays",
+        "weight": "Weight",
+        "chance": "Chance",
+        "dailyCap": "Daily cap",
+        "weeklyCap": "Weekly cap",
+        "colour": "Colour",
+        "won": "Won today / week"
+      },
+      "stats": {
+        "expectedRtp": "Cost per play",
+        "actualRtp": "Actual per play",
+        "totalWeight": "Total weight",
+        "perPlay": "Average points the table pays",
+        "last30": "Measured over {plays} plays in 30 days",
+        "weightHint": "Weights are relative — they need not total 100"
+      },
+      "errors": {
+        "mustPay": "Outcome {slot} pays nothing. Every box and every segment must award points or an extra play."
+      },
+      "plans": {
+        "title": "Plays per week, by plan",
+        "hint": "One shared pool across both games. A user holding several plans gets the highest of them, not the total — change that with game_plays_combine_mode in Platform settings.",
+        "free": "Free",
+        "playsFor": "Weekly plays for {plan}"
+      }
     }
   },
   "giftCode": {
@@ -2523,6 +2564,47 @@
       "down": "Down {places} {places, plural, one {place} other {places}}",
       "same": "No change",
       "new": "New on the board"
+    }
+  },
+  "games": {
+    "title": "Games",
+    "subtitle": "Use your weekly plays. Every outcome pays something.",
+    "playsLeft": "{count, plural, =0 {No plays left this week} one {# play left this week} other {# plays left this week}}",
+    "resetsOn": "New plays on {date}",
+    "fairness": "Every result is drawn on our servers the moment you play, from odds set by SidePerks. Unused plays do not carry over to next week.",
+    "box": {
+      "name": "Mystery Box",
+      "tagline": "Pick a box, keep what is inside",
+      "prompt": "Pick any box.",
+      "noPlays": "You have used all your plays this week.",
+      "boxNumber": "Box {number}"
+    },
+    "wheel": {
+      "name": "Spin the Wheel",
+      "tagline": "One spin, twelve prizes",
+      "prompt": "Give it a spin.",
+      "noPlays": "You have used all your plays this week.",
+      "spin": "Spin",
+      "spinning": "Spinning…",
+      "label": "Prize wheel"
+    },
+    "reveal": {
+      "youWon": "You won",
+      "points": "points",
+      "extraPlays": "{count, plural, one {+# extra play} other {+# extra plays}}",
+      "again": "Play again ({count} left)",
+      "spent": "That was your last play this week.",
+      "upgrade": "Get more plays",
+      "backToGames": "Back to games"
+    },
+    "errors": {
+      "games_disabled": "Games are not available right now.",
+      "no_plays_left": "You have no plays left this week. New plays arrive on Monday.",
+      "too_soon": "One moment — try that again in a second.",
+      "account_disabled": "Your account is under review and cannot play right now.",
+      "no_prizes_configured": "This game is not ready yet. Please try later.",
+      "not_signed_in": "Please log in and try again.",
+      "error": "Something went wrong. Please try again."
     }
   }
 }

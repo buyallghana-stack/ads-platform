@@ -34,6 +34,7 @@ export type TxKind =
   | 'survey'
   | 'bonus'
   | 'gift'
+  | 'game'
   | 'withdrawal'
   | 'refund'
   | 'subscription'
@@ -80,6 +81,9 @@ const LEDGER_KIND: Record<string, TxKind> = {
   // `?? 'adjustment'` default and told the user their gift was an account
   // correction. Same family of bug as surveys once reading "Ad reward".
   gift_code: 'gift',
+  // Third time this fall-through has been caught: without a mapping a game
+  // win reads as "Account correction" in the user's own history.
+  game_prize: 'game',
   redemption_request: 'withdrawal',
   redemption_refund: 'refund',
   admin_adjustment: 'adjustment',

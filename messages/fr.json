@@ -467,7 +467,8 @@
         "subscription": "Abonnement",
         "adjustment": "Ajustement",
         "survey": "Sondage",
-        "ad": "Annonces"
+        "ad": "Annonces",
+        "game": "Jeu"
       },
       "kindHint": {
         "bonus": "Bonus de parrainage",
@@ -477,7 +478,8 @@
         "subscription": "Paiement de forfait",
         "adjustment": "Correction de compte",
         "survey": "Récompense de sondage",
-        "ad": "Récompense publicitaire"
+        "ad": "Récompense publicitaire",
+        "game": "Gain de jeu"
       },
       "method": {
         "mobile_money": "Mobile Money",
@@ -1309,7 +1311,8 @@
         "audit": "Journal",
         "settings": "Paramètres admin",
         "giftCodes": "Codes cadeaux",
-        "leaderboard": "Classement"
+        "leaderboard": "Classement",
+        "games": "Jeux"
       },
       "viewUserApp": "Voir l’app utilisateur"
     },
@@ -2474,6 +2477,44 @@
         "same": "Aucun changement",
         "new": "Nouveau"
       }
+    },
+    "games": {
+      "title": "Jeux",
+      "description": "Tables de prix pour la boîte mystère et la roue, et le coût de chaque partie.",
+      "gameTabs": "Jeu",
+      "box": "Boîte mystère",
+      "wheel": "Roue de la fortune",
+      "save": "Enregistrer la table",
+      "saved": "Enregistré",
+      "col": {
+        "slot": "#",
+        "label": "Libellé",
+        "points": "Points",
+        "extraPlays": "Parties bonus",
+        "weight": "Poids",
+        "chance": "Chance",
+        "dailyCap": "Plafond/jour",
+        "weeklyCap": "Plafond/semaine",
+        "colour": "Couleur",
+        "won": "Gagné jour / semaine"
+      },
+      "stats": {
+        "expectedRtp": "Coût par partie",
+        "actualRtp": "Réel par partie",
+        "totalWeight": "Poids total",
+        "perPlay": "Points moyens versés par la table",
+        "last30": "Mesuré sur {plays} parties en 30 jours",
+        "weightHint": "Les poids sont relatifs — ils ne doivent pas totaliser 100"
+      },
+      "errors": {
+        "mustPay": "Le résultat {slot} ne rapporte rien. Chaque boîte et chaque segment doit accorder des points ou une partie bonus."
+      },
+      "plans": {
+        "title": "Parties par semaine, par forfait",
+        "hint": "Un seul pool partagé entre les deux jeux. Un utilisateur détenant plusieurs forfaits obtient le plus élevé, pas le total — modifiable via game_plays_combine_mode dans les paramètres.",
+        "free": "Gratuit",
+        "playsFor": "Parties hebdomadaires pour {plan}"
+      }
     }
   },
   "giftCode": {
@@ -2523,6 +2564,47 @@
       "down": "En baisse de {places} {places, plural, one {place} other {places}}",
       "same": "Aucun changement",
       "new": "Nouveau au classement"
+    }
+  },
+  "games": {
+    "title": "Jeux",
+    "subtitle": "Utilisez vos parties de la semaine. Chaque résultat rapporte quelque chose.",
+    "playsLeft": "{count, plural, =0 {Plus de parties cette semaine} one {# partie restante cette semaine} other {# parties restantes cette semaine}}",
+    "resetsOn": "Nouvelles parties le {date}",
+    "fairness": "Chaque résultat est tiré sur nos serveurs au moment où vous jouez, selon des probabilités définies par SidePerks. Les parties non utilisées ne sont pas reportées.",
+    "box": {
+      "name": "Boîte mystère",
+      "tagline": "Choisissez une boîte, gardez son contenu",
+      "prompt": "Choisissez une boîte.",
+      "noPlays": "Vous avez utilisé toutes vos parties cette semaine.",
+      "boxNumber": "Boîte {number}"
+    },
+    "wheel": {
+      "name": "Roue de la fortune",
+      "tagline": "Un tour, douze prix",
+      "prompt": "Lancez la roue.",
+      "noPlays": "Vous avez utilisé toutes vos parties cette semaine.",
+      "spin": "Tourner",
+      "spinning": "La roue tourne…",
+      "label": "Roue des prix"
+    },
+    "reveal": {
+      "youWon": "Vous avez gagné",
+      "points": "points",
+      "extraPlays": "{count, plural, one {+# partie bonus} other {+# parties bonus}}",
+      "again": "Rejouer ({count} restantes)",
+      "spent": "C'était votre dernière partie cette semaine.",
+      "upgrade": "Obtenir plus de parties",
+      "backToGames": "Retour aux jeux"
+    },
+    "errors": {
+      "games_disabled": "Les jeux ne sont pas disponibles pour le moment.",
+      "no_plays_left": "Plus de parties cette semaine. De nouvelles parties arrivent lundi.",
+      "too_soon": "Un instant — réessayez dans une seconde.",
+      "account_disabled": "Votre compte est en cours d'examen et ne peut pas jouer pour le moment.",
+      "no_prizes_configured": "Ce jeu n'est pas encore prêt. Réessayez plus tard.",
+      "not_signed_in": "Veuillez vous connecter et réessayer.",
+      "error": "Une erreur s'est produite. Veuillez réessayer."
     }
   }
 }

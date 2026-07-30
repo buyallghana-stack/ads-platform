@@ -31,6 +31,9 @@ type Item = {
   ready: boolean
 }
 
+/* Games are built but gated: `games_enabled` is off until the licensing
+   question around paying for chances at a random prize is settled, so the
+   tile follows the switch rather than being hard-coded live. */
 const ITEMS: Item[] = [
   { key: 'games', href: '/games', icon: <Gamepad2 />, ready: false },
   { key: 'leaderboard', href: '/leaderboard', icon: <Trophy />, ready: true },
@@ -79,8 +82,11 @@ export function QuickLinks({
   labels,
   soonLabel,
   navLabel,
+  gamesEnabled = false,
 }: {
   labels: Record<Item['key'], string>
+  /** Drives the Games tile. See the note on ITEMS. */
+  gamesEnabled?: boolean
   /** Read by assistive tech on the ones that are not built yet. */
   soonLabel: string
   /** Names the landmark. It was wrongly reading the Gift code label, which
@@ -93,8 +99,9 @@ export function QuickLinks({
       style={{ '--rise-delay': '0.08s' } as React.CSSProperties}
       className="animate-rise grid grid-cols-4 gap-1 rounded-(--radius-panel) border border-ink-200 bg-surface p-1.5 sm:gap-2 sm:p-2"
     >
-      {ITEMS.map((item) =>
-        item.ready ? (
+      {ITEMS.map((raw) => {
+        const item = raw.key === 'games' ? { ...raw, ready: gamesEnabled } : raw
+        return item.ready ? (
           <Link key={item.key} href={item.href} className="rounded-(--radius-card)">
             <Tile icon={item.icon} label={labels[item.key]} ready />
           </Link>
@@ -109,8 +116,8 @@ export function QuickLinks({
             <Tile icon={item.icon} label={labels[item.key]} ready={false} />
             <span className="sr-only">{soonLabel}</span>
           </span>
-        ),
-      )}
+        )
+      })}
     </nav>
   )
 }

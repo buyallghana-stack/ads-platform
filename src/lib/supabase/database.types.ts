@@ -3154,6 +3154,92 @@ export type Database = {
         }[]
       }
       leaderboard_display_name: { Args: { p_full_name: string }; Returns: string }
+      config_text: { Args: { p_key: string }; Returns: string | null }
+      admin_set_tier_game_plays: {
+        Args: { p_admin_id: string; p_tier_id: string; p_plays: number }
+        Returns: number
+      }
+      admin_list_tier_game_plays: {
+        Args: { p_admin_id: string }
+        Returns: {
+          id: string
+          slug: string
+          name: string
+          price_minor: number
+          weekly_game_plays: number
+          is_default: boolean
+          is_active: boolean
+        }[]
+      }
+      game_week_start: { Args: Record<string, never>; Returns: string }
+      user_weekly_play_allowance: { Args: { p_user_id: string }; Returns: number }
+      play_game: {
+        Args: { p_user_id: string; p_game: Database["public"]["Enums"]["game_kind"] }
+        Returns: Json
+      }
+      get_game_status: {
+        Args: Record<string, never>
+        Returns: {
+          enabled: boolean
+          allowance: number
+          used: number
+          remaining: number
+          week_start: string
+          week_ends_at: string
+        }[]
+      }
+      get_game_board: {
+        Args: { p_game: Database["public"]["Enums"]["game_kind"] }
+        Returns: {
+          slot: number
+          label: string
+          points: number
+          extra_plays: number
+          colour: string
+        }[]
+      }
+      admin_list_game_prizes: {
+        Args: { p_admin_id: string; p_game: Database["public"]["Enums"]["game_kind"] }
+        Returns: {
+          id: string
+          slot: number
+          label: string
+          points: number
+          extra_plays: number
+          weight: number
+          colour: string
+          daily_cap: number
+          weekly_cap: number
+          is_active: boolean
+          chance_percent: number
+          won_today: number
+          won_this_week: number
+        }[]
+      }
+      admin_save_game_prizes: {
+        Args: {
+          p_admin_id: string
+          p_game: Database["public"]["Enums"]["game_kind"]
+          p_prizes: Json
+        }
+        Returns: number
+      }
+      admin_game_stats: {
+        Args: {
+          p_admin_id: string
+          p_game: Database["public"]["Enums"]["game_kind"]
+          p_days?: number
+        }
+        Returns: {
+          plays_total: number
+          plays_period: number
+          points_period: number
+          expected_rtp: number
+          actual_rtp: number
+          players_period: number
+          extra_plays_won: number
+        }[]
+      }
       recompute_user_risk: {
         Args: { p_user_id: string }
         Returns: {
@@ -3484,6 +3570,7 @@ export type Database = {
       fraud_action: "flag" | "block"
       fraud_review_status: "none" | "pending" | "cleared" | "confirmed_fraud"
       gift_code_status: "active" | "redeemed" | "revoked"
+      game_kind: "mystery_box" | "spin_wheel"
       ledger_entry_type:
         | "ad_view"
         | "survey"
@@ -3697,6 +3784,7 @@ export const Constants = {
       fraud_action: ["flag", "block"],
       fraud_review_status: ["none", "pending", "cleared", "confirmed_fraud"],
       gift_code_status: ["active", "redeemed", "revoked"],
+      game_kind: ["mystery_box", "spin_wheel"],
       ledger_entry_type: [
         "ad_view",
         "survey",

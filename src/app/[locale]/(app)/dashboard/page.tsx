@@ -17,6 +17,7 @@ import { Link, redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser } from '@/lib/auth/session'
 import { pickDisplayName } from '@/lib/dashboard/display-name'
 import { getHomeData } from '@/lib/dashboard/home-data'
+import { getGamesEnabled } from '@/lib/games/data'
 import { getNotifications, getUnreadCount } from '@/lib/notifications/data'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { cn } from '@/lib/cn'
@@ -50,7 +51,15 @@ export default async function HomePage({
   const format = await getFormatter()
 
   const admin = createAdminClient()
-  const [{ data: status }, profile, { data: balances }, { feed, daily }, notifications, unreadCount] =
+  const [
+    { data: status },
+    profile,
+    { data: balances },
+    { feed, daily },
+    notifications,
+    unreadCount,
+    gamesEnabled,
+  ] =
     await Promise.all([
       // SECURITY DEFINER with its own authorisation check (§8).
       admin.rpc('get_user_earning_status', { p_user_id: user!.id }).maybeSingle(),
@@ -60,6 +69,8 @@ export default async function HomePage({
       // Own rows via RLS (user client); recent slice feeds the dropdown panel.
       getNotifications(30),
       getUnreadCount(),
+      // Cheap public-config read; drives whether the Games tile is live.
+      getGamesEnabled(),
     ])
   const now = Date.now()
 
@@ -204,6 +215,7 @@ export default async function HomePage({
         }}
         soonLabel={t('quick.soon')}
         navLabel={t('quick.label')}
+        gamesEnabled={gamesEnabled}
       />
 
       {/* ------------------------------------------------------------------ */}

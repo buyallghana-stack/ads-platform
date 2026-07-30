@@ -11,6 +11,7 @@ import {
   ClipboardList,
   Flag,
   Gauge,
+  Gamepad2,
   Gift,
   Trophy,
   LayoutGrid,
@@ -92,6 +93,9 @@ const GROUPS: NavGroup[] = [
       // Sits with Ads rather than under SYSTEM: a gift code is content the
       // operator creates and hands out, not a setting they configure.
       { key: 'giftCodes', href: '/admin/gift-codes', Icon: Gift },
+      // Content the operator authors, like ads and gift codes — the prize
+      // table is the game.
+      { key: 'games', href: '/admin/games', Icon: Gamepad2 },
     ],
   },
   {

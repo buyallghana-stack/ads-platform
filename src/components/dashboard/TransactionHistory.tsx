@@ -12,6 +12,7 @@ import {
   Search,
   SlidersHorizontal,
   Smartphone,
+  Gamepad2,
   Gem,
   Ticket,
   Wrench,
@@ -36,7 +37,7 @@ import { cn } from '@/lib/cn'
  * server-driven pagination arrives with the full history screen.
  */
 
-const KIND_ORDER: TxKind[] = ['ad', 'survey', 'bonus', 'gift', 'withdrawal', 'refund', 'subscription', 'adjustment']
+const KIND_ORDER: TxKind[] = ['ad', 'survey', 'bonus', 'gift', 'game', 'withdrawal', 'refund', 'subscription', 'adjustment']
 
 const KIND_ICON: Record<TxKind, React.ComponentType<{ className?: string }>> = {
   ad: PlayCircle,
@@ -46,6 +47,7 @@ const KIND_ICON: Record<TxKind, React.ComponentType<{ className?: string }>> = {
   // two orange chips are told apart by their glyph the same way a watched ad
   // and a survey are.
   gift: Ticket,
+  game: Gamepad2,
   withdrawal: Smartphone,
   refund: RotateCcw,
   subscription: Gem,
@@ -75,6 +77,8 @@ const KIND_CHIP: Record<TxKind, string> = {
   // Orange too: points that arrived without an ad being watched. The shortcut
   // tile on Home is the same hue, so the row matches where it came from.
   gift: 'bg-orange-50 text-orange-600',
+  // Violet, the premium hue — a game win is the one credit that is luck.
+  game: 'bg-violet-50 text-violet-600',
   withdrawal: 'bg-brand-50 text-brand-600',
   refund: 'bg-teal-50 text-teal-600',
   subscription: 'bg-violet-50 text-violet-600',

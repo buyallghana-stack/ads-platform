@@ -109,7 +109,22 @@ describe.skipIf(!HAS_DB)('leaderboard', () => {
       const byId = new Map(rows.map((r) => [r.user_id, Number(r.rank)]))
 
       expect(byId.get(a.id)).toBe(byId.get(b.id))
-      expect(byId.get(c.id)).toBe(byId.get(a.id)! + 2)
+
+      /*
+        Competition ranking stated in a way the SHARED database cannot break:
+        a row's rank is one more than the number of people strictly above it.
+        The first version asserted `c.rank === a.rank + 2`, which silently
+        depended on no OTHER real user scoring between 100 and 500 — true when
+        it was written, false a few hours later. Same family as the fraud
+        tests counting real committed rows.
+      */
+      const rankOf = (id: string) => byId.get(id)!
+      const above = (points: number) =>
+        rows.filter((r) => Number(r.points) > points).length
+      expect(rankOf(a.id)).toBe(above(500) + 1)
+      expect(rankOf(c.id)).toBe(above(100) + 1)
+      // And the two tied users are both counted as above c.
+      expect(rankOf(c.id)).toBeGreaterThanOrEqual(rankOf(a.id) + 2)
     })
   })
 
@@ -334,7 +349,16 @@ describe.skipIf(!HAS_DB)('leaderboard', () => {
 
       await actAs(tx, idle.id)
       const row = (await board(tx, 'week')).find((r) => r.user_id === idle.id)!
-      expect(row.movement).toBe('same')
+
+      /*
+        The regression being guarded is "new on the board, every week, forever"
+        — which is what happens if `prev` keeps filtering zeros while `cur`
+        stops. Asserting 'same' additionally required that no other live user's
+        points changed between the two windows, which on a shared database is
+        not something a test may assume; real users earn while it runs.
+      */
+      expect(row.movement).not.toBe('new')
+      expect(row.previous_rank).not.toBeNull()
     })
   })
 
