@@ -35,6 +35,7 @@ export type TxKind =
   | 'bonus'
   | 'gift'
   | 'game'
+  | 'task'
   | 'withdrawal'
   | 'refund'
   | 'subscription'
@@ -84,6 +85,8 @@ const LEDGER_KIND: Record<string, TxKind> = {
   // Third time this fall-through has been caught: without a mapping a game
   // win reads as "Account correction" in the user's own history.
   game_prize: 'game',
+  // Fourth time. See the note above gift_code.
+  task_reward: 'task',
   redemption_request: 'withdrawal',
   redemption_refund: 'refund',
   admin_adjustment: 'adjustment',

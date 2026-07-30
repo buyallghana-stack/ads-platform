@@ -468,7 +468,8 @@
         "adjustment": "Adjustment",
         "survey": "Survey",
         "ad": "Ads",
-        "game": "Game"
+        "game": "Game",
+        "task": "Task"
       },
       "kindHint": {
         "bonus": "Referral bonus",
@@ -479,7 +480,8 @@
         "adjustment": "Account correction",
         "survey": "Survey reward",
         "ad": "Ad reward",
-        "game": "Game prize"
+        "game": "Game prize",
+        "task": "Task reward"
       },
       "method": {
         "mobile_money": "Mobile Money",
@@ -1312,7 +1314,8 @@
         "settings": "Admin settings",
         "giftCodes": "Gift codes",
         "leaderboard": "Leaderboard",
-        "games": "Games"
+        "games": "Games",
+        "tasks": "Tasks"
       },
       "viewUserApp": "View user app"
     },
@@ -2556,6 +2559,52 @@
         "free": "Free",
         "playsFor": "Weekly plays for {plan}"
       }
+    },
+    "tasks": {
+      "title": "Tasks",
+      "description": "Milestones users complete for points. A task is a metric, a target and a reward.",
+      "intro": "Tasks count from real history, so a new one is instantly claimable by anyone who already did the thing.",
+      "new": "New task",
+      "save": "Save task",
+      "saved": "Saved",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "remove": "Delete task",
+      "archived": "Archived",
+      "creating": "New task",
+      "editing": "Editing task",
+      "claimedBy": "{count, plural, =0 {not claimed yet} one {claimed by # person} other {claimed by # people}}",
+      "waiting": "{count} can claim now",
+      "cost": "{people} people could claim this immediately — about {points} points if they all do.",
+      "field": {
+        "name": "Name",
+        "code": "Code",
+        "codeHint": "Lowercase handle, fixed once created",
+        "description": "Description",
+        "descriptionHint": "What the user reads to understand the task",
+        "metric": "Counts",
+        "target": "Target",
+        "reward": "Reward (points)",
+        "icon": "Icon"
+      },
+      "errors": {
+        "code": "The code must be lowercase letters, numbers and underscores, at least 3 characters.",
+        "required": "A task needs a name and a description."
+      },
+      "metric": {
+        "account_created": "Signed up",
+        "plans_purchased": "Plans purchased",
+        "ads_watched": "Ads watched",
+        "surveys_completed": "Surveys completed",
+        "points_earned": "Points earned (lifetime)",
+        "referrals_activated": "Referrals who watched an ad",
+        "games_played": "Games played",
+        "gift_codes_redeemed": "Gift codes redeemed",
+        "withdrawals_made": "Withdrawals paid",
+        "has_2fa": "Two-factor enabled",
+        "has_avatar": "Profile picture set",
+        "has_withdrawal_pin": "Withdrawal PIN set"
+      }
     }
   },
   "giftCode": {
@@ -2644,6 +2693,25 @@
       "too_soon": "One moment — try that again in a second.",
       "account_disabled": "Your account is under review and cannot play right now.",
       "no_prizes_configured": "This game is not ready yet. Please try later.",
+      "not_signed_in": "Please log in and try again.",
+      "error": "Something went wrong. Please try again."
+    }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "subtitle": "Milestones that pay. Finish one, then claim it.",
+    "readyToClaim": "{count, plural, one {# task ready to claim} other {# tasks ready to claim}} — {points} points waiting",
+    "claimed": "Claimed! {name} paid {points} points.",
+    "claim": "Claim",
+    "done": "Claimed",
+    "progress": "{done} of {target}",
+    "empty": "No tasks are running right now. Check back soon.",
+    "footer": "{claimed} of {total} completed",
+    "errors": {
+      "not_found": "That task is no longer available.",
+      "not_finished": "That one is not finished yet. Pull to refresh and check your progress.",
+      "already_claimed": "You have already claimed that one.",
+      "account_disabled": "Your account is under review and cannot claim rewards right now.",
       "not_signed_in": "Please log in and try again.",
       "error": "Something went wrong. Please try again."
     }

@@ -3155,6 +3155,47 @@ export type Database = {
       }
       leaderboard_display_name: { Args: { p_full_name: string }; Returns: string }
       config_text: { Args: { p_key: string }; Returns: string | null }
+      user_task_metric: {
+        Args: { p_user_id: string; p_metric: Database["public"]["Enums"]["task_metric"] }
+        Returns: number
+      }
+      claim_task: { Args: { p_user_id: string; p_task_id: string }; Returns: Json }
+      get_tasks: {
+        Args: Record<string, never>
+        Returns: {
+          id: string
+          code: string
+          name: string
+          description: string
+          metric: Database["public"]["Enums"]["task_metric"]
+          target: number
+          reward_points: number
+          icon: string
+          progress: number
+          claimed_at: string | null
+          claimable: boolean
+        }[]
+      }
+      admin_list_tasks: {
+        Args: { p_admin_id: string }
+        Returns: {
+          id: string
+          code: string
+          name: string
+          description: string
+          metric: Database["public"]["Enums"]["task_metric"]
+          target: number
+          reward_points: number
+          icon: string
+          sort_order: number
+          is_active: boolean
+          claimed_count: number
+          points_paid: number
+          eligible_now: number
+        }[]
+      }
+      admin_save_task: { Args: { p_admin_id: string; p_task: Json }; Returns: string }
+      admin_delete_task: { Args: { p_admin_id: string; p_task_id: string }; Returns: string }
       admin_set_tier_game_plays: {
         Args: { p_admin_id: string; p_tier_id: string; p_plays: number }
         Returns: number
@@ -3571,6 +3612,19 @@ export type Database = {
       fraud_review_status: "none" | "pending" | "cleared" | "confirmed_fraud"
       gift_code_status: "active" | "redeemed" | "revoked"
       game_kind: "mystery_box" | "spin_wheel"
+      task_metric:
+        | "account_created"
+        | "plans_purchased"
+        | "ads_watched"
+        | "surveys_completed"
+        | "points_earned"
+        | "referrals_activated"
+        | "games_played"
+        | "gift_codes_redeemed"
+        | "withdrawals_made"
+        | "has_2fa"
+        | "has_avatar"
+        | "has_withdrawal_pin"
       ledger_entry_type:
         | "ad_view"
         | "survey"
@@ -3785,6 +3839,20 @@ export const Constants = {
       fraud_review_status: ["none", "pending", "cleared", "confirmed_fraud"],
       gift_code_status: ["active", "redeemed", "revoked"],
       game_kind: ["mystery_box", "spin_wheel"],
+      task_metric: [
+        "account_created",
+        "plans_purchased",
+        "ads_watched",
+        "surveys_completed",
+        "points_earned",
+        "referrals_activated",
+        "games_played",
+        "gift_codes_redeemed",
+        "withdrawals_made",
+        "has_2fa",
+        "has_avatar",
+        "has_withdrawal_pin",
+      ],
       ledger_entry_type: [
         "ad_view",
         "survey",

@@ -38,7 +38,7 @@ const ITEMS: Item[] = [
   { key: 'games', href: '/games', icon: <Gamepad2 />, ready: false },
   { key: 'leaderboard', href: '/leaderboard', icon: <Trophy />, ready: true },
   { key: 'gift', href: '/gift-code', icon: <Gift />, ready: true },
-  { key: 'tasks', href: '/tasks', icon: <ListChecks />, ready: false },
+  { key: 'tasks', href: '/tasks', icon: <ListChecks />, ready: true },
 ]
 
 /* The tile, shared so an enabled and a disabled one cannot drift apart in

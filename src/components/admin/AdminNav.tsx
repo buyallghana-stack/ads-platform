@@ -13,6 +13,7 @@ import {
   Gauge,
   Gamepad2,
   Gift,
+  Target,
   Trophy,
   LayoutGrid,
   Menu,
@@ -96,6 +97,8 @@ const GROUPS: NavGroup[] = [
       // Content the operator authors, like ads and gift codes — the prize
       // table is the game.
       { key: 'games', href: '/admin/games', Icon: Gamepad2 },
+      // Also content the operator authors: a task is a goal they write.
+      { key: 'tasks', href: '/admin/tasks', Icon: Target },
     ],
   },
   {

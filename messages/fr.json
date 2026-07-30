@@ -468,7 +468,8 @@
         "adjustment": "Ajustement",
         "survey": "Sondage",
         "ad": "Annonces",
-        "game": "Jeu"
+        "game": "Jeu",
+        "task": "Objectif"
       },
       "kindHint": {
         "bonus": "Bonus de parrainage",
@@ -479,7 +480,8 @@
         "adjustment": "Correction de compte",
         "survey": "Récompense de sondage",
         "ad": "Récompense publicitaire",
-        "game": "Gain de jeu"
+        "game": "Gain de jeu",
+        "task": "Récompense d'objectif"
       },
       "method": {
         "mobile_money": "Mobile Money",
@@ -509,7 +511,7 @@
       "games": "Jeux",
       "leaderboard": "Classement",
       "gift": "Code cadeau",
-      "tasks": "Tâches",
+      "tasks": "Objectifs",
       "soon": "Bientôt disponible",
       "label": "Raccourcis"
     }
@@ -1312,7 +1314,8 @@
         "settings": "Paramètres admin",
         "giftCodes": "Codes cadeaux",
         "leaderboard": "Classement",
-        "games": "Jeux"
+        "games": "Jeux",
+        "tasks": "Objectifs"
       },
       "viewUserApp": "Voir l’app utilisateur"
     },
@@ -2556,6 +2559,52 @@
         "free": "Gratuit",
         "playsFor": "Parties hebdomadaires pour {plan}"
       }
+    },
+    "tasks": {
+      "title": "Objectifs",
+      "description": "Étapes que les utilisateurs complètent pour des points. Un objectif est une mesure, une cible et une récompense.",
+      "intro": "Les objectifs comptent l historique réel : un nouvel objectif est immédiatement réclamable par ceux qui l ont déjà fait.",
+      "new": "Nouvel objectif",
+      "save": "Enregistrer",
+      "saved": "Enregistré",
+      "cancel": "Annuler",
+      "edit": "Modifier",
+      "remove": "Supprimer",
+      "archived": "Archivé",
+      "creating": "Nouvel objectif",
+      "editing": "Modification",
+      "claimedBy": "{count, plural, =0 {pas encore réclamé} one {réclamé par # personne} other {réclamé par # personnes}}",
+      "waiting": "{count} peuvent réclamer",
+      "cost": "{people} personnes pourraient le réclamer immédiatement — environ {points} points si toutes le font.",
+      "field": {
+        "name": "Nom",
+        "code": "Code",
+        "codeHint": "Identifiant en minuscules, figé après création",
+        "description": "Description",
+        "descriptionHint": "Ce que l utilisateur lit pour comprendre",
+        "metric": "Mesure",
+        "target": "Cible",
+        "reward": "Récompense (points)",
+        "icon": "Icône"
+      },
+      "errors": {
+        "code": "Le code doit contenir des minuscules, chiffres et tirets bas, au moins 3 caractères.",
+        "required": "Un objectif nécessite un nom et une description."
+      },
+      "metric": {
+        "account_created": "Inscription",
+        "plans_purchased": "Forfaits achetés",
+        "ads_watched": "Annonces regardées",
+        "surveys_completed": "Sondages terminés",
+        "points_earned": "Points gagnés (total)",
+        "referrals_activated": "Filleuls ayant regardé une annonce",
+        "games_played": "Parties jouées",
+        "gift_codes_redeemed": "Codes cadeaux utilisés",
+        "withdrawals_made": "Retraits payés",
+        "has_2fa": "Double authentification activée",
+        "has_avatar": "Photo de profil définie",
+        "has_withdrawal_pin": "Code de retrait défini"
+      }
     }
   },
   "giftCode": {
@@ -2644,6 +2693,25 @@
       "too_soon": "Un instant — réessayez dans une seconde.",
       "account_disabled": "Votre compte est en cours d'examen et ne peut pas jouer pour le moment.",
       "no_prizes_configured": "Ce jeu n'est pas encore prêt. Réessayez plus tard.",
+      "not_signed_in": "Veuillez vous connecter et réessayer.",
+      "error": "Une erreur s'est produite. Veuillez réessayer."
+    }
+  },
+  "tasks": {
+    "title": "Objectifs",
+    "subtitle": "Des étapes qui rapportent. Terminez-en une, puis réclamez-la.",
+    "readyToClaim": "{count, plural, one {# objectif à réclamer} other {# objectifs à réclamer}} — {points} points en attente",
+    "claimed": "Réclamé ! {name} a rapporté {points} points.",
+    "claim": "Réclamer",
+    "done": "Réclamé",
+    "progress": "{done} sur {target}",
+    "empty": "Aucun objectif en cours pour le moment. Revenez bientôt.",
+    "footer": "{claimed} sur {total} terminés",
+    "errors": {
+      "not_found": "Cet objectif n'est plus disponible.",
+      "not_finished": "Celui-ci n'est pas encore terminé. Actualisez pour voir votre progression.",
+      "already_claimed": "Vous avez déjà réclamé celui-ci.",
+      "account_disabled": "Votre compte est en cours d'examen et ne peut pas réclamer de récompenses.",
       "not_signed_in": "Veuillez vous connecter et réessayer.",
       "error": "Une erreur s'est produite. Veuillez réessayer."
     }

@@ -13,6 +13,7 @@ import {
   SlidersHorizontal,
   Smartphone,
   Gamepad2,
+  Target,
   Gem,
   Ticket,
   Wrench,
@@ -37,7 +38,7 @@ import { cn } from '@/lib/cn'
  * server-driven pagination arrives with the full history screen.
  */
 
-const KIND_ORDER: TxKind[] = ['ad', 'survey', 'bonus', 'gift', 'game', 'withdrawal', 'refund', 'subscription', 'adjustment']
+const KIND_ORDER: TxKind[] = ['ad', 'survey', 'bonus', 'gift', 'game', 'task', 'withdrawal', 'refund', 'subscription', 'adjustment']
 
 const KIND_ICON: Record<TxKind, React.ComponentType<{ className?: string }>> = {
   ad: PlayCircle,
@@ -48,6 +49,7 @@ const KIND_ICON: Record<TxKind, React.ComponentType<{ className?: string }>> = {
   // and a survey are.
   gift: Ticket,
   game: Gamepad2,
+  task: Target,
   withdrawal: Smartphone,
   refund: RotateCcw,
   subscription: Gem,
@@ -79,6 +81,9 @@ const KIND_CHIP: Record<TxKind, string> = {
   gift: 'bg-orange-50 text-orange-600',
   // Violet, the premium hue — a game win is the one credit that is luck.
   game: 'bg-violet-50 text-violet-600',
+  // Teal, the 'something you set up' hue this app already uses for refunds
+  // and profile — a task reward is progress, not luck and not earnings.
+  task: 'bg-teal-50 text-teal-600',
   withdrawal: 'bg-brand-50 text-brand-600',
   refund: 'bg-teal-50 text-teal-600',
   subscription: 'bg-violet-50 text-violet-600',
