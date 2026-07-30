@@ -358,7 +358,7 @@
       "emailRequired": "Saisissez votre adresse e-mail",
       "emailInvalid": "Cette adresse e-mail ne semble pas valide",
       "phoneRequired": "Saisissez votre numéro de téléphone",
-      "phoneInvalid": "Saisissez un numéro ghanéen valide, par ex. 024 123 4567",
+      "phoneInvalid": "Saisissez un numéro ghanéen à 10 chiffres commençant par 02 ou 05, ex. 024 123 4567",
       "passwordRequired": "Saisissez un mot de passe",
       "passwordTooWeak": "Votre mot de passe ne remplit pas encore toutes les conditions",
       "passwordMismatch": "Les mots de passe ne correspondent pas",

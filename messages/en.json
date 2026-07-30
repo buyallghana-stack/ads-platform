@@ -358,7 +358,7 @@
       "emailRequired": "Enter your email address",
       "emailInvalid": "That does not look like a valid email address",
       "phoneRequired": "Enter your phone number",
-      "phoneInvalid": "Enter a valid Ghanaian number, e.g. 024 123 4567",
+      "phoneInvalid": "Enter a 10-digit Ghanaian number starting 02 or 05, e.g. 024 123 4567",
       "passwordRequired": "Enter a password",
       "passwordTooWeak": "Your password does not meet all the requirements yet",
       "passwordMismatch": "Passwords do not match",

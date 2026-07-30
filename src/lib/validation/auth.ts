@@ -13,15 +13,22 @@ import { isPasswordAcceptable } from '@/lib/password'
  */
 
 /**
- * Ghanaian mobile numbers. Accepts local (0XX…) and international (+233XX…),
- * with spaces anywhere, since people type them both ways and rejecting a
- * correct number over a space is a bad first impression.
+ * Ghanaian mobile numbers: starts 02 or 05, ten digits. Local (0XX…) and
+ * international (+233XX…) both accepted, with spaces or dashes anywhere,
+ * since people type them every way and rejecting a correct number over a
+ * space is a bad first impression.
  *
- * Prefixes are the allocated ranges: MTN 24/54/55/59, Telecel 20/50,
- * AirtelTigo 26/27/56/57. Deliberately kept in step with the per-provider
- * patterns seeded in migration 017.
+ * DELIBERATELY NOT AN ALLOW-LIST OF NETWORK PREFIXES. It used to be
+ * `2[04679]|5[045679]`, matching the ranges allocated to MTN, Telecel and
+ * AirtelTigo — which refused a genuine 021, 023, 025, 028, 051, 052, 053 or
+ * 058 number, went stale the moment the NCA allocated a new range, and cost
+ * the operator their own signup. The shape of the number is worth checking;
+ * which network issued it is not ours to decide.
+ *
+ * The +233 form is the same number without its leading zero, so the digit
+ * count after the prefix is identical and one pattern covers both.
  */
-const GHANA_PHONE = /^(?:\+233|0)(?:2[04679]|5[045679])\d{7}$/
+const GHANA_PHONE = /^(?:\+233|0)[25]\d{8}$/
 
 const phone = z
   .string()
