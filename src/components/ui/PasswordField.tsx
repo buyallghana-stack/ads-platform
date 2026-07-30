@@ -109,6 +109,23 @@ export function PasswordField({
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
+          /*
+            THE TOGGLE MUST NOT TAKE FOCUS. Without this the press blurs the
+            password input, react-hook-form validates on blur, an error line
+            appears above, and everything below shifts down — measured at 24px
+            on the reset-password screen, which has two of these. The pointer
+            then comes up somewhere that is no longer the button and the click
+            never lands, so the eye "sometimes does nothing".
+
+            Preventing the default on mousedown stops the focus change, which
+            removes the blur, the validation, the error and the shift in one
+            move. The click still fires, and focus stays in the field so the
+            user can carry on typing — which is what they wanted anyway.
+
+            Keyboard users are unaffected: the button is still tabbable and
+            Enter/Space still activate it.
+          */
+          onMouseDown={(e) => e.preventDefault()}
           // Must not submit the form, and needs its own name because the icon
           // alone says nothing to a screen reader.
           aria-label={visible ? tCommon('hidePassword') : tCommon('showPassword')}
