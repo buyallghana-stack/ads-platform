@@ -66,7 +66,18 @@ export default async function AdminGamesPage({
         ))}
       </nav>
 
-      <GamePrizeEditor game={game} prizes={prizes} stats={stats} tiers={tiers} />
+      {/*
+        `key` is load-bearing, not decoration. Switching tabs is a client-side
+        navigation, so React keeps the SAME editor instance and its
+        `useState(prizes)` — which initialises once — went on holding the
+        previous game's rows while the `game` prop changed underneath it.
+        Saving then sent one game's prize ids under the other game's name.
+        Keying on the game remounts the editor, which is the fix React
+        actually intends here; an effect that copies props into state would
+        trip react-hooks/set-state-in-effect and re-introduce a render where
+        the two disagree.
+      */}
+      <GamePrizeEditor key={game} game={game} prizes={prizes} stats={stats} tiers={tiers} />
     </>
   )
 }

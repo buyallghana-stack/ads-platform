@@ -41,13 +41,36 @@ const play = async (tx: Tx, userId: string, game = 'mystery_box') => {
   }
 }
 
-/** Replaces a game's whole prize table, so a test controls its own odds. */
+/**
+ * Replaces a game's whole prize table, so a test controls its own odds.
+ *
+ * It cannot simply DELETE the existing rows: `game_plays.prize_id` is
+ * ON DELETE RESTRICT, deliberately, so the record of what somebody won
+ * outlives a change of mind about the prize table. The moment the operator
+ * played a real game this helper started failing on the foreign key — which
+ * is the protection working, not a problem to route around.
+ *
+ * So the real rows are parked out of slots 1-12 and switched off (weight 0,
+ * so they can never be drawn), the ones nobody has played are deleted, and
+ * the test's board is inserted into the freed slots. All of it is rolled back
+ * with the transaction.
+ */
 const setBoard = async (
   tx: Tx,
   game: string,
   prizes: Array<{ slot: number; points: number; weight: number; extra?: number; label?: string }>,
 ) => {
-  await tx.query(`delete from public.game_prizes where game = $1::public.game_kind`, [game])
+  await tx.query(
+    `update public.game_prizes set is_active = false, weight = 0, slot = slot + 12
+      where game = $1::public.game_kind and slot <= 12`,
+    [game],
+  )
+  await tx.query(
+    `delete from public.game_prizes p
+      where p.game = $1::public.game_kind
+        and not exists (select 1 from public.game_plays g where g.prize_id = p.id)`,
+    [game],
+  )
   for (const p of prizes) {
     await tx.query(
       `insert into public.game_prizes (game, slot, label, points, extra_plays, weight)
@@ -77,7 +100,12 @@ describe.skipIf(!HAS_DB)('games', () => {
   it('refuses to play at all while the switch is off', async () => {
     await withRollback(async (tx) => {
       const user = await createUser(tx, { name: 'Eager Player' })
-      // Not enabled: this is the shipped default and the legal safety valve.
+      /* Set explicitly rather than relying on the shipped default. It WAS
+         false, then the operator turned the games on and this test started
+         failing on a switch it never controlled — a test has to establish its
+         own precondition, not inherit one that a live config row happens to
+         hold today. */
+      await setConfig(tx, 'games_enabled', 'false')
       expect((await play(tx, user.id)).outcome).toBe('games_disabled')
 
       const { rows } = await tx.query(
@@ -335,6 +363,93 @@ describe.skipIf(!HAS_DB)('games', () => {
       // And it drops out with the other granted credits, not on its own rule.
       await setConfig(tx, 'leaderboard_counts_granted_points', 'false')
       expect(await standing()).toBe(0)
+    })
+  })
+
+  /*
+    THE PRODUCTION BUG, 2026-07-30. The operator switched from the box tab to
+    the wheel tab and saved; every wheel prize was deactivated and the game
+    started returning 404. The editor's `useState(prizes)` had kept the box's
+    rows while its `game` prop changed, so it posted box ids under the wheel's
+    name — the UPDATE matched nothing and the tidy-up pass then deactivated
+    everything, because not one wheel id was in the payload.
+
+    The UI fix is a `key` that remounts the editor. This is the database
+    refusing to be talked into it again.
+  */
+  it('refuses a payload holding another game\'s prizes', async () => {
+    await withRollback(async (tx) => {
+      const admin = await createAdmin(tx)
+      const { rows: boxRows } = await tx.query(
+        `select id, slot, label, points, extra_plays, weight, colour
+           from public.game_prizes where game = 'mystery_box' order by slot limit 3`,
+      )
+      const payload = boxRows.map((r) => ({
+        id: r.id,
+        slot: r.slot,
+        label: r.label,
+        points: Number(r.points),
+        extra_plays: r.extra_plays,
+        weight: r.weight,
+        colour: r.colour,
+        daily_cap: 0,
+        weekly_cap: 0,
+        is_active: true,
+      }))
+
+      expect(
+        await expectRejection(tx, () =>
+          tx.query(`select public.admin_save_game_prizes($1, 'spin_wheel', $2::jsonb)`, [
+            admin.id,
+            JSON.stringify(payload),
+          ]),
+        ),
+      ).toMatch(/belong to another game/i)
+
+      // And critically: the wheel is untouched, not half-deactivated.
+      const { rows } = await tx.query(
+        `select count(*)::int n from public.game_prizes
+          where game = 'spin_wheel' and is_active`,
+      )
+      expect(rows[0]!.n).toBeGreaterThan(0)
+    })
+  })
+
+  it('refuses a save that would leave a game with no prizes', async () => {
+    await withRollback(async (tx) => {
+      const admin = await createAdmin(tx)
+      await setBoard(tx, 'spin_wheel', [
+        { slot: 1, points: 10, weight: 1 },
+        { slot: 2, points: 20, weight: 1 },
+      ])
+      const { rows: keep } = await tx.query(
+        `select id, slot from public.game_prizes where game = 'spin_wheel' order by slot limit 1`,
+      )
+
+      // Everything active is switched off in one save.
+      const payload = [
+        {
+          id: keep[0]!.id,
+          slot: keep[0]!.slot,
+          label: 'Off',
+          points: 10,
+          extra_plays: 0,
+          weight: 1,
+          colour: '#2563eb',
+          daily_cap: 0,
+          weekly_cap: 0,
+          is_active: false,
+        },
+      ]
+
+      expect(
+        await expectRejection(tx, () =>
+          tx.query(`select public.admin_save_game_prizes($1, 'spin_wheel', $2::jsonb)`, [
+            admin.id,
+            JSON.stringify(payload),
+          ]),
+        ),
+      ).toMatch(/no prizes at all/i)
     })
   })
 
