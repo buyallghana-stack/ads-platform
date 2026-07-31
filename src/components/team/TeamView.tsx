@@ -50,20 +50,68 @@ import {
  * disclosure the user has to find in a policy is not much of a disclosure.
  */
 
-/** The balance hero's currency treatment, sized for a tile: a small muted
- *  GHS in front of a large tabular number. Defined here rather than inside the
- *  view because a component created during render is a new component type on
- *  every render. */
+/**
+ * The balance hero's currency treatment, sized for a tile: a small muted GHS
+ * in front of a large tabular number. Defined here rather than inside the view
+ * because a component created during render is a new component type on every
+ * render.
+ *
+ * THE SIZE FOLLOWS THE NUMBER, and it has to. A tile at 390px gives the value
+ * about 105px once the padding and the icon chip are taken out, which is nine
+ * or ten characters at 1.5rem — so a team that has paid GHS 3,703,753.67
+ * rendered as `3,703,753.6` with the last digits cut off at the card's edge.
+ * The page did not scroll sideways, which is why it was invisible to every
+ * overflow check we had: the card simply clipped it.
+ *
+ * Steps rather than a clamp, because the breakpoint that matters is the COUNT
+ * of digits, not the viewport. Anything past thirteen characters — a team
+ * paying more than ten million cedis — keeps the exact figure in `title` and
+ * accepts that a tile is the wrong place to read it in full; the per-person
+ * list underneath still carries every digit.
+ */
 function Cedis({ amount }: { amount: string }) {
   return (
-    <>
-      <span className="mr-1 align-top text-[0.8125rem] font-semibold leading-[2.1] text-ink-400">
-        GHS
-      </span>
-      {amount}
-    </>
+    <span className="flex items-baseline gap-1 whitespace-nowrap" title={`GHS ${amount}`}>
+      <span className="shrink-0 text-[0.8125rem] font-semibold text-ink-400">GHS</span>
+      <span className={cedisSize(amount)}>{amount}</span>
+    </span>
   )
 }
+
+/**
+ * How big the figure can be without leaving its card, and whether the card can
+ * still afford its icon.
+ *
+ * MEASURED IN THE BROWSER, not reasoned about. At 390px a tile gives the value
+ * column 103px with its icon chip and 139px without, and the "GHS" prefix plus
+ * its gap costs about 35 of that. So the budget for the digits themselves is
+ * 68px with the icon and 104px without — and "GHS 370.00", which is what the
+ * demo team shows today, needs 111px. It was clipping at the card's edge in
+ * the ordinary case, not only in an invented one.
+ *
+ * Two consequences, in this order:
+ *
+ *   1. A currency tile gives up its ICON rather than its digits. The chip is
+ *      decoration and the label above already says which figure this is; the
+ *      digits are the entire point of a screen built to be checked. Only the
+ *      shortest amounts keep it.
+ *   2. Past that, the type steps down. Steps rather than a clamp because what
+ *      overflows is a COUNT of digits, not a viewport width — and the widths
+ *      above are for the narrowest phone we support, so every larger screen
+ *      has room to spare.
+ *
+ * Nothing here truncates. An ellipsis on a money screen is worse than a small
+ * number: `GHS 3,703…` cannot be checked against anything.
+ */
+export function cedisSize(amount: string): string {
+  if (amount.length > 12) return 'text-[0.875rem]'
+  if (amount.length > 8) return 'text-[1rem]'
+  return 'text-[1.5rem]'
+}
+
+/** Short amounts keep the icon; longer ones spend its 36px on digits. */
+const iconIfItFits = (amount: string, icon: React.ReactNode) =>
+  amount.length > 5 ? undefined : icon
 
 const LEVEL_TONE: Record<number, string> = {
   1: 'bg-brand-50 text-brand-700 border-brand-500/25',
@@ -144,21 +192,21 @@ export function TeamView({ data }: { data: TeamData }) {
               value={<Cedis amount={money(totals.plansValue)} />}
               sublabel={t('stats.worthHint')}
               tone="success"
-              icon={<Coins />}
+              icon={iconIfItFits(money(totals.plansValue), <Coins />)}
             />
             <StatCard
               label={t('stats.withdrawn')}
               value={<Cedis amount={money(totals.redeemed)} />}
               sublabel={t('stats.withdrawnHint')}
               tone="teal"
-              icon={<ArrowUpRight />}
+              icon={iconIfItFits(money(totals.redeemed), <ArrowUpRight />)}
             />
             <StatCard
               label={t('stats.left')}
               value={<Cedis amount={money(totals.remaining)} />}
               sublabel={t('stats.leftHint')}
               tone="orange"
-              icon={<Wallet />}
+              icon={iconIfItFits(money(totals.remaining), <Wallet />)}
             />
           </div>
 

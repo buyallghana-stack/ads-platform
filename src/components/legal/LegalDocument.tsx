@@ -4,6 +4,7 @@ import { getFormatter, getTranslations } from 'next-intl/server'
 import { Logo } from '@/components/brand/Logo'
 import { getLegalDoc, LEGAL_REVIEWED, type LegalKind } from '@/content/legal'
 import { Link } from '@/i18n/navigation'
+import { getSessionUser } from '@/lib/auth/session'
 
 /**
  * Renders a legal document from structured content.
@@ -16,6 +17,14 @@ import { Link } from '@/i18n/navigation'
  * While LEGAL_REVIEWED is false the page carries a visible notice that the
  * wording is a draft. Presenting unreviewed text as binding is the one thing
  * these pages must not do.
+ *
+ * WHERE "BACK" GOES DEPENDS ON WHO IS READING (operator, 2026-07-31). These
+ * pages are reached from two very different places: the signup form, by
+ * somebody who has no account yet, and the Profile tab, by somebody who does.
+ * Sending a signed-in user to the marketing landing page drops them out of the
+ * app they were using, so they now return to their Home tab. A signed-out
+ * reader still goes to the landing page — /dashboard would only bounce them to
+ * /login, which is a worse dead end than the one being fixed.
  */
 export async function LegalDocument({
   kind,
@@ -28,10 +37,13 @@ export async function LegalDocument({
   const t = await getTranslations('legal')
   const format = await getFormatter()
 
+  const user = await getSessionUser()
+  const home = user ? '/dashboard' : '/'
+
   return (
     <div className="flex min-h-dvh flex-col items-center bg-canvas px-5 py-10 sm:px-8">
       <div className="w-full max-w-2xl">
-        <Link href="/" className="inline-flex">
+        <Link href={home} className="inline-flex">
           <Logo variant="dark" />
         </Link>
 
@@ -119,7 +131,7 @@ export async function LegalDocument({
         </div>
 
         <Link
-          href="/"
+          href={home}
           className="mt-10 inline-flex items-center gap-1.5 text-[0.8125rem] font-medium text-ink-500 hover:text-brand-700"
         >
           <ArrowLeft aria-hidden className="size-3.5" />

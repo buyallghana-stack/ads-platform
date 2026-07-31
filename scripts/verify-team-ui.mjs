@@ -26,6 +26,11 @@ import { createClient } from '@supabase/supabase-js'
 import { Client } from 'pg'
 
 const BASE = process.env.BASE ?? 'http://localhost:3100'
+/* BIG=1 replaces the fixtures with figures nobody will ever reach — a plan
+   bill in the millions and a seven-figure balance — because the question this
+   screen has to answer is not "does it fit" but "at what width does it stop
+   fitting". Layout only; the assertions on the amounts are skipped. */
+const BIG = process.env.BIG === '1'
 const OUT = process.env.SHOT_DIR ?? '/tmp/team-shots'
 const PASSWORD = 'Sideperks!2026'
 
@@ -112,22 +117,34 @@ try {
   for (const slug of ['platinum', 'gold', 'bronze']) await buy(a.id, slug)
   await buy(c.id, 'silver')
 
+  if (BIG) {
+    // One absurd bill, to push every currency figure to its widest.
+    await db.query(
+      `update public.subscription_payments set amount_minor = 123456789
+        where user_id = $1 and status = 'confirmed'`,
+      [a.id],
+    )
+  }
+
   // Points, then a paid withdrawal, so both money columns have something in
   // them. credit_points is the real earning path; the redemption is inserted
   // as already-paid because the queue is not what is under test here.
-  await db.query(`select public.credit_points($1, 12000, 'admin_adjustment')`, [a.id])
+  await db.query(`select public.credit_points($1, $2, 'admin_adjustment')`, [
+    a.id,
+    BIG ? 9_876_543_210 : 12_000,
+  ])
   await db.query(`select public.credit_points($1, 3400, 'admin_adjustment')`, [c.id])
   await db.query(
     `insert into public.redemptions
        (user_id, status, method, points_amount, points_per_currency_unit, currency_amount,
         holding_until, paid_at, snapshot_provider_code, snapshot_msisdn, snapshot_account_name)
-     values ($1, 'paid', 'mobile_money', 5000, public.config_int('points_per_currency_unit'),
-             5.00, now(), now(), 'MTN_MOMO', '0551234567', 'Ama Boateng')`,
-    [a.id],
+     values ($1, 'paid', 'mobile_money', $3::bigint, public.config_int('points_per_currency_unit'),
+             $2, now(), now(), 'MTN_MOMO', '0551234567', 'Ama Boateng')`,
+    [a.id, BIG ? 1234567.89 : 5.0, BIG ? 1_234_567_890 : 5_000],
   )
   await db.query(
-    `select public.debit_points($1, 5000, 'redemption_request', 'test', 'team-verify')`,
-    [a.id],
+    `select public.debit_points($1, $2, 'redemption_request', 'test', 'team-verify')`,
+    [a.id, BIG ? 1_234_567_890 : 5_000],
   )
 
   // ---- What the database now says -----------------------------------------
@@ -135,21 +152,22 @@ try {
   const l1 = summary.find((r) => Number(r.member_level) === 1)
   const l2 = summary.find((r) => Number(r.member_level) === 2)
 
+  const money = (name, pass, detail) => (BIG ? null : check(name, pass, detail))
   check('level 1 counts both people', Number(l1.people) === 2, `${l1.people}`)
   check('level 2 counts the person one step further out', Number(l2.people) === 1, `${l2.people}`)
   check('level 1 plans are counted', Number(l1.plans_bought) === 3, `${l1.plans_bought}`)
-  check(
+  money(
     'level 1 plan value is in cedis, not points',
     Number(l1.plans_value) === 320,
     `GHS ${l1.plans_value} (200 + 100 + 20)`,
   )
-  check('withdrawals are counted in cedis', Number(l1.redeemed) === 5, `GHS ${l1.redeemed}`)
-  check(
+  money('withdrawals are counted in cedis', Number(l1.redeemed) === 5, `GHS ${l1.redeemed}`)
+  money(
     'remaining balance is converted to cedis',
     Number(l1.remaining) === 7,
     `GHS ${l1.remaining} (7,000 points at 1,000/GHS)`,
   )
-  check('level 2 stays separate', Number(l2.plans_value) === 50, `GHS ${l2.plans_value}`)
+  money('level 2 stays separate', Number(l2.plans_value) === 50, `GHS ${l2.plans_value}`)
 
   const { rows: members } = await db.query(`select * from public.get_team_members($1)`, [top.id])
   const rowA = members.find((m) => m.member_id === a.id)
@@ -209,12 +227,52 @@ try {
         const body = await page.locator('body').innerText()
         check('the phone number reaches the screen', body.includes('0551234567'))
         check('the plan reads "Platinum + 2"', body.includes('Platinum + 2'))
+        {
+          // Every tile and every cell measured against its own container.
+          const spills = await page.evaluate(() => {
+            const bad = []
+            /* SPANS INCLUDED. The first version of this check listed
+               article/li/td/div only, so when the fix made the number
+               ellipsise inside a span instead of clipping inside a div, the
+               check went green while the screen still read `3,703…`. */
+            for (const el of document.querySelectorAll('article, li, td, div, span, dd')) {
+              if (el.scrollWidth > el.clientWidth + 1 && el.clientWidth > 0) {
+                const text = (el.textContent ?? '').trim().slice(0, 40)
+                if (/GHS/.test(text)) bad.push(`${el.tagName}.${el.className.slice(0, 30)}: ${text}`)
+              }
+            }
+            return bad.slice(0, 6)
+          })
+          check('no currency figure spills its container', spills.length === 0, spills[0])
+
+
+        }
         /* The default scope is All, so the tile is level 1 + level 2:
            320 + 50. Getting this wrong once is what proved the tabs really
            do drive the tiles. */
-        check('money is shown in cedis', /GHS\s*370\.00/.test(body), 'plan value tile, all levels')
+        if (!BIG) check('money is shown in cedis', /GHS\s*370\.00/.test(body), 'plan value tile, all levels')
         check('a member with no phone renders a word too', /no number/i.test(body))
         check('the reciprocity note is on the screen', /same is visible about you/i.test(body))
+          // What the tile actually gives the figure, and what the figure
+        // actually needs. Printed so the size ladder is set from measured
+        // widths rather than from arithmetic about padding.
+        const room = await page.evaluate(() =>
+          [...document.querySelectorAll('div.min-w-0.flex-1')]
+            .filter((el) => /GHS/.test(el.textContent ?? ''))
+            .map((el) => {
+              const value = el.querySelector('p:nth-of-type(2), p + p')
+              const span = el.querySelector('span span:last-child')
+              return {
+                label: (el.querySelector('p')?.textContent ?? '').slice(0, 18),
+                available: el.clientWidth,
+                needed: el.scrollWidth,
+                fontPx: span ? getComputedStyle(span).fontSize : '?',
+                hasIcon: !!el.parentElement?.querySelector('span.grid'),
+                text: (value?.textContent ?? '').slice(0, 20),
+              }
+            }),
+        )
+        console.log('      tile widths:', JSON.stringify(room))
         check('the Team tab is in the navigation', (await page.getByRole('link', { name: /^team$/i }).count()) > 0)
       }
 
