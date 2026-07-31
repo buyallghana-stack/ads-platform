@@ -1,8 +1,8 @@
 import 'server-only'
 
-import { getSessionUser } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { TaskMetric } from '@/lib/tasks/types'
+import { actingSuperAdminId } from '@/lib/admin/roles'
 
 /**
  * The admin's view of the tasks.
@@ -29,18 +29,9 @@ export type AdminTask = {
   eligibleNow: number
 }
 
-async function actingAdmin(): Promise<string | null> {
-  const user = await getSessionUser()
-  if (!user) return null
-  const admin = createAdminClient()
-  const { data } = await admin
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', user.id)
-    .eq('role', 'admin')
-    .maybeSingle()
-  return data ? user.id : null
-}
+/* Shared, since 2026-07-31. Five copies of this asked for the literal
+   role 'admin' and all five went quiet when that row was renamed. */
+const actingAdmin = actingSuperAdminId
 
 export async function getAdminTasks(): Promise<AdminTask[]> {
   const adminId = await actingAdmin()

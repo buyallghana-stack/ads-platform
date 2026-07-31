@@ -134,6 +134,50 @@ try {
     await ctx.close()
   }
 
+  // ---- The super admin's own console still works ---------------------------
+  /* Added after migration 086 quietly broke five screens for the only
+     administrator on the platform. Each of these read `role = 'admin'` as a
+     literal string, and the migration renamed that row to `super_admin`: the
+     Admin link vanished from Profile, sign-in stopped landing on the console,
+     and gift codes, tasks and games refused their own operator. Nothing failed
+     loudly — the screens simply behaved as though nobody was signed in. */
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 } })
+    const page = await ctx.newPage()
+    const errors = []
+    page.on('pageerror', (e) => errors.push(e.message))
+
+    await page.goto(`${BASE}/login`)
+    await page.waitForLoadState('networkidle')
+    await page.getByLabel(/email/i).fill('admin@email.com')
+    await page.locator('input[type="password"]').fill('1234')
+    await page.getByRole('button', { name: /log in/i }).click()
+    await page.waitForURL(/\/(dashboard|admin)/, { timeout: 30_000 })
+
+    check(
+      'signing in as a super admin lands on the console',
+      new URL(page.url()).pathname === '/admin',
+      new URL(page.url()).pathname,
+    )
+
+    await landsOn(page, '/profile')
+    const profile = await page.locator('body').innerText()
+    check('the Admin link is on the Profile screen', /admin/i.test(profile))
+
+    for (const [path, marker] of [
+      ['/admin/gift-codes', /gift code/i],
+      ['/admin/tasks', /task/i],
+      ['/admin/games', /game|prize/i],
+    ]) {
+      const landed = await landsOn(page, path)
+      const body = await page.locator('body').innerText()
+      check(`${path} loads for a super admin`, landed === path && marker.test(body), landed)
+    }
+
+    check('no page errors across the super admin console', errors.length === 0, errors[0])
+    await ctx.close()
+  }
+
   // ---- The database refuses independently of the app ----------------------
   {
     let refused = ''

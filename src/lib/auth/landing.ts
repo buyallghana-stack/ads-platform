@@ -1,8 +1,6 @@
 import 'server-only'
 
-import { cache } from 'react'
-
-import { createAdminClient } from '@/lib/supabase/admin'
+import { homeForRole, staffRoleOf } from '@/lib/admin/roles'
 
 /**
  * Where a person belongs after signing in.
@@ -19,19 +17,23 @@ import { createAdminClient } from '@/lib/supabase/admin'
  * a session is being established — the cookie is not reliably readable yet.
  * The user id comes from the verified session in every caller, never from a
  * payload.
+ *
+ * ANY STAFF ROLE COUNTS, not the literal string 'admin'. This asked for
+ * `role = 'admin'` until 2026-07-31, and migration 086 renamed that row to
+ * `super_admin` — so the operator's own Admin link disappeared from Profile
+ * and their sign-in stopped landing on the console. The role vocabulary now
+ * lives in one place; see `staffRoleOf`.
  */
-export const isAdminUser = cache(async (userId: string): Promise<boolean> => {
-  const { data } = await createAdminClient()
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', userId)
-    .eq('role', 'admin')
-    .maybeSingle()
+export async function isAdminUser(userId: string): Promise<boolean> {
+  return (await staffRoleOf(userId)) !== null
+}
 
-  return Boolean(data)
-})
-
-/** '/admin' for administrators, '/dashboard' for everybody else. */
-export async function landingFor(userId: string): Promise<'/admin' | '/dashboard'> {
-  return (await isAdminUser(userId)) ? '/admin' : '/dashboard'
+/**
+ * Where signing in should land somebody.
+ *
+ * Not just '/admin': support lands on the message queue and an ads manager on
+ * ads, because the overview is a screen neither of them may open.
+ */
+export async function landingFor(userId: string): Promise<string> {
+  return homeForRole(await staffRoleOf(userId))
 }
