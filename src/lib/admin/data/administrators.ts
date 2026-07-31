@@ -1,9 +1,10 @@
 import 'server-only'
 
+import { normaliseRole, type AdminRole } from '@/lib/admin/role-types'
 import { createClient } from '@/lib/supabase/server'
 
 /**
- * Who holds the admin role, and whether they are protected.
+ * Who holds a staff role, which one, and whether they are protected.
  *
  * `twoFactor` is the fact this list exists to show. An administrator without
  * an authenticator is the weakest point in the payout queue, and the screen
@@ -20,6 +21,10 @@ export type Administrator = {
   id: string
   name: string
   email: string
+  /** super_admin | support | ads_manager, already normalised. */
+  role: AdminRole | null
+  /** False while an invitation has been sent but never signed into. */
+  accepted: boolean
   twoFactor: boolean
   grantedAt: string
   lastSeenAt: string | null
@@ -31,6 +36,8 @@ type Row = {
   id: string
   name: string
   email: string
+  role: string | null
+  accepted: boolean | null
   two_factor: boolean
   granted_at: string
   last_seen_at: string | null
@@ -48,6 +55,8 @@ export async function getAdministrators(): Promise<Administrator[]> {
     id: row.id,
     name: row.name,
     email: row.email,
+    role: normaliseRole(row.role),
+    accepted: row.accepted === true,
     twoFactor: row.two_factor,
     grantedAt: row.granted_at,
     lastSeenAt: row.last_seen_at,

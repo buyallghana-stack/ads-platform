@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react'
 import { AlertTriangle, Check, Clock, Coins, PanelRight, Smartphone, X } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
-import { approvePayouts, decidePayout } from '@/app/[locale]/admin/payouts/actions'
+import { approvePayouts, decidePayout } from '@/app/[locale]/admin/(super)/payouts/actions'
 import { MoreMenu, type MenuItem } from '@/components/ui/MoreMenu'
 import { maskDestination } from '@/lib/admin/destination'
 import { needsEarlyApproval, type PayoutRequest, type PayoutStatus } from '@/lib/admin/types'

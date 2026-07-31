@@ -5,7 +5,7 @@ import { useState, useTransition } from 'react'
 import { AlertTriangle, Megaphone, Send, X } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
-import { sendAnnouncement } from '@/app/[locale]/admin/announcements/actions'
+import { sendAnnouncement } from '@/app/[locale]/admin/(super)/announcements/actions'
 import { NotificationCard } from '@/components/notifications/NotificationCard'
 import { Button } from '@/components/ui/Button'
 import type { Announcement } from '@/lib/admin/data/announcements'

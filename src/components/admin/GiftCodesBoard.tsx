@@ -9,7 +9,7 @@ import {
   createGiftCode,
   newCodeCandidate,
   revokeGiftCode,
-} from '@/app/[locale]/admin/gift-codes/actions'
+} from '@/app/[locale]/admin/(super)/gift-codes/actions'
 import { Button } from '@/components/ui/Button'
 import type { GiftCodeRow } from '@/lib/admin/data/gift-codes'
 import { cn } from '@/lib/cn'

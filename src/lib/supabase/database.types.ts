@@ -1966,6 +1966,14 @@ export type Database = {
         }
       }
       admin_count_unread_support: { Args: never; Returns: number }
+      admin_area_allowed: { Args: { p_user_id: string; p_area: string }; Returns: boolean }
+      admin_grant_role: {
+        Args: { p_admin_id: string; p_target_id: string; p_role: string }
+        Returns: undefined
+      }
+      admin_revoke_role: { Args: { p_admin_id: string; p_target_id: string }; Returns: undefined }
+      admin_role: { Args: { p_user_id: string }; Returns: string }
+      admin_user_id_by_email: { Args: { p_admin_id: string; p_email: string }; Returns: string }
       admin_daily_money: {
         Args: { p_days?: number }
         Returns: {
@@ -2115,11 +2123,13 @@ export type Database = {
         Args: never
         Returns: {
           email: string
+          role: string
           granted_at: string
           id: string
           is_you: boolean
           last_seen_at: string
           name: string
+          accepted: boolean
           two_factor: boolean
         }[]
       }

@@ -5,7 +5,7 @@ import { useState, useTransition } from 'react'
 import { AlertTriangle, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { decidePerson } from '@/app/[locale]/admin/users/actions'
+import { decidePerson } from '@/app/[locale]/admin/(super)/users/actions'
 import {
   loadSupportThread,
   replyToSupport,

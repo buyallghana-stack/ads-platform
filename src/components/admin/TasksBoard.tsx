@@ -5,7 +5,7 @@ import { useState, useTransition } from 'react'
 import { AlertTriangle, Check, Plus, Trash2 } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
-import { deleteTask, saveTask, type TaskInput } from '@/app/[locale]/admin/tasks/actions'
+import { deleteTask, saveTask, type TaskInput } from '@/app/[locale]/admin/(super)/tasks/actions'
 import { Button } from '@/components/ui/Button'
 import type { AdminTask } from '@/lib/admin/data/tasks'
 import { cn } from '@/lib/cn'

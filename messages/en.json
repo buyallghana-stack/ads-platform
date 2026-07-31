@@ -2452,14 +2452,30 @@
       },
       "administrators": {
         "title": "Administrators",
-        "description": "Everyone who can reach this area, approve a payout or disable an account.",
+        "description": "Everyone who can get into this area, and what each of them may do.",
         "twoFactorOn": "Two-factor on",
         "twoFactorOff": "No two-factor",
-        "note": "Granting and revoking the admin role stays a deliberate database action. It is the one thing here that cannot be undone from here — a mis-grant hands somebody the payout queue.",
+        "note": "Roles take effect immediately, in both directions: revoking somebody ends their access on their very next click, not when their session expires. Everything a role can do is written down in the migration that created it — support reaches the message queue, an ads manager reaches ads and advertisers, and everything else, including every payout, stays with a super admin.",
         "lastSeen": "Last seen {when}",
         "neverSeen": "Never signed in",
         "you": "You",
-        "noneProtected": "No administrator has an authenticator yet. Turning on the requirement above will send them to enrol, not lock them out."
+        "noneProtected": "No administrator has an authenticator yet. Turning on the requirement above will send them to enrol, not lock them out.",
+        "inviteEmail": "Add an administrator",
+        "invitePlaceholder": "their email address",
+        "inviteRole": "Role",
+        "inviteAction": "Send invite",
+        "sent": "Invitation sent to {email}. They set their own password from the link, and can turn on two-factor afterwards.",
+        "granted": "That address already has an account, so no invitation was needed — the role applies the next time they sign in.",
+        "invited": "Invited",
+        "makeRole": "Make {role}",
+        "revoke": "Revoke access",
+        "cannotRevokeSelf": "You cannot revoke your own access",
+        "actionsFor": "Actions for {name}",
+        "roles": {
+          "super_admin": "Super admin",
+          "support": "Support",
+          "ads_manager": "Ads manager"
+        }
       },
       "appearance": {
         "title": "Appearance",

@@ -20,7 +20,7 @@ import {
   deletePlan,
   savePlan,
   setPlanVisibility,
-} from '@/app/[locale]/admin/subscriptions/actions'
+} from '@/app/[locale]/admin/(super)/subscriptions/actions'
 import { Button } from '@/components/ui/Button'
 import { MoreMenu, type MenuItem } from '@/components/ui/MoreMenu'
 import { checkPlanValue, houseRate, nextDraftPlanId, slugify } from '@/lib/admin/plan-value'

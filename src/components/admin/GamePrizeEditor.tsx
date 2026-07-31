@@ -5,7 +5,7 @@ import { useMemo, useState, useTransition } from 'react'
 import { AlertTriangle, Check } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
-import { saveGamePrizes, setTierPlays, type PrizeInput } from '@/app/[locale]/admin/games/actions'
+import { saveGamePrizes, setTierPlays, type PrizeInput } from '@/app/[locale]/admin/(super)/games/actions'
 import { Button } from '@/components/ui/Button'
 import type { AdminPrize, GameStats, TierPlays } from '@/lib/admin/data/games'
 import { cn } from '@/lib/cn'

@@ -2452,14 +2452,30 @@
       },
       "administrators": {
         "title": "Administrateurs",
-        "description": "Toutes les personnes pouvant accéder à cette zone, approuver un retrait ou désactiver un compte.",
+        "description": "Toutes les personnes ayant accès à cette zone, et ce que chacune peut y faire.",
         "twoFactorOn": "Double authentification active",
         "twoFactorOff": "Pas de double authentification",
-        "note": "Accorder et retirer le rôle d'administrateur reste une action délibérée en base. C'est la seule chose ici qui ne peut pas être annulée depuis ici — une erreur donne à quelqu'un la file des retraits.",
+        "note": "Les rôles prennent effet immédiatement, dans les deux sens : révoquer quelqu'un met fin à son accès dès son prochain clic, et non à l'expiration de sa session. Le support accède aux messages, un gestionnaire de publicités aux publicités et aux annonceurs ; tout le reste, y compris chaque paiement, reste réservé au super administrateur.",
         "lastSeen": "Vu {when}",
         "neverSeen": "Jamais connecté",
         "you": "Vous",
-        "noneProtected": "Aucun administrateur n'a encore d'authentificateur. Activer l'exigence ci-dessus les enverra s'inscrire, sans les bloquer."
+        "noneProtected": "Aucun administrateur n'a encore d'authentificateur. Activer l'exigence ci-dessus les enverra s'inscrire, sans les bloquer.",
+        "inviteEmail": "Ajouter un administrateur",
+        "invitePlaceholder": "son adresse e-mail",
+        "inviteRole": "Rôle",
+        "inviteAction": "Envoyer l'invitation",
+        "sent": "Invitation envoyée à {email}. La personne définit son propre mot de passe depuis le lien, puis peut activer la double authentification.",
+        "granted": "Cette adresse a déjà un compte : aucune invitation n'était nécessaire, le rôle s'appliquera à sa prochaine connexion.",
+        "invited": "Invité",
+        "makeRole": "Définir comme {role}",
+        "revoke": "Révoquer l'accès",
+        "cannotRevokeSelf": "Vous ne pouvez pas révoquer votre propre accès",
+        "actionsFor": "Actions pour {name}",
+        "roles": {
+          "super_admin": "Super administrateur",
+          "support": "Support",
+          "ads_manager": "Gestionnaire de publicités"
+        }
       },
       "appearance": {
         "title": "Apparence",

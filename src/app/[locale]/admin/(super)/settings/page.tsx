@@ -3,10 +3,11 @@ import type { Metadata } from 'next'
 import { ShieldCheck } from 'lucide-react'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
-import { PageHeader, PersonCell, StatusDot } from '@/components/admin/AdminChrome'
+import { PageHeader } from '@/components/admin/AdminChrome'
 import { SettingsForm, type FieldGroup } from '@/components/admin/SettingsForm'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
-import { saveConfig } from '@/app/[locale]/admin/config/actions'
+import { saveConfig } from '@/app/[locale]/admin/(super)/config/actions'
+import { AdministratorsBoard } from '@/components/admin/AdministratorsBoard'
 import { getAdministrators } from '@/lib/admin/data/administrators'
 import { getPlatformConfig } from '@/lib/admin/data/config'
 
@@ -120,31 +121,7 @@ export default async function AdminSettingsPage({
           </p>
         </div>
 
-        <ul className="divide-y divide-ink-200">
-          {admins.map((a) => (
-            <li key={a.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
-              <div className="min-w-0 flex-1">
-                <PersonCell
-                  name={a.isYou ? `${a.name} · ${t('administrators.you')}` : a.name}
-                  secondary={a.email}
-                />
-              </div>
-              <span className="text-[0.6875rem] text-ink-400">
-                {a.lastSeenAt
-                  ? t('administrators.lastSeen', {
-                      when: new Date(a.lastSeenAt).toLocaleDateString('en-GB', {
-                        day: 'numeric',
-                        month: 'short',
-                      }),
-                    })
-                  : t('administrators.neverSeen')}
-              </span>
-              <StatusDot tone={a.twoFactor ? 'success' : 'warning'}>
-                {t(a.twoFactor ? 'administrators.twoFactorOn' : 'administrators.twoFactorOff')}
-              </StatusDot>
-            </li>
-          ))}
-        </ul>
+        <AdministratorsBoard initial={admins} />
 
         {/* Said plainly, because the setting above can send every one of them
             to an enrolment screen and the operator should know that before

@@ -31,6 +31,7 @@ import { useTranslations } from 'next-intl'
 import { Logo } from '@/components/brand/Logo'
 import { Link, usePathname } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
+import { areaAllowed, type AdminRole } from '@/lib/admin/role-types'
 
 /**
  * Admin navigation.
@@ -54,8 +55,25 @@ import { cn } from '@/lib/cn'
 
 export type NavCounts = Partial<Record<string, number>>
 
-type NavItem = { key: string; href: string; Icon: LucideIcon; exact?: boolean }
+type NavItem = {
+  key: string
+  href: string
+  Icon: LucideIcon
+  exact?: boolean
+  /** Which role may reach it. Absent means super admin only. */
+  area?: 'support' | 'ads'
+}
 type NavGroup = { key: string; items: NavItem[] }
+
+/**
+ * WHAT EACH ROLE SEES. `area` marks the two delegated destinations; everything
+ * without one is super admin only.
+ *
+ * Hiding a link is a courtesy, not a permission — the layouts under
+ * `(super)/`, `ads/` and `messages/` are what actually refuse, and the
+ * database refuses again underneath them. This exists so that a support agent
+ * is not looking at fourteen links that would bounce them.
+ */
 
 /* Typed rather than `as const`: the items are not the same shape (only
    Overview needs `exact`), and a const-asserted heterogeneous array makes
@@ -67,7 +85,7 @@ const GROUPS: NavGroup[] = [
       { key: 'overview', href: '/admin', Icon: Gauge, exact: true },
       { key: 'payouts', href: '/admin/payouts', Icon: Wallet },
       { key: 'finance', href: '/admin/finance', Icon: BadgeCheck },
-      { key: 'advertisers', href: '/admin/advertisers', Icon: Building2 },
+      { key: 'advertisers', href: '/admin/advertisers', Icon: Building2, area: 'ads' },
       { key: 'subscriptions', href: '/admin/subscriptions', Icon: ClipboardList },
     ],
   },
@@ -75,7 +93,7 @@ const GROUPS: NavGroup[] = [
     key: 'people',
     items: [
       { key: 'users', href: '/admin/users', Icon: Users },
-      { key: 'messages', href: '/admin/messages', Icon: MessageSquare },
+      { key: 'messages', href: '/admin/messages', Icon: MessageSquare, area: 'support' },
       { key: 'flagged', href: '/admin/flagged', Icon: Flag },
       // Announcements sits with the people it goes to, not under SYSTEM: it
       // is a message to users, and the operator reaches for it in the same
@@ -90,7 +108,7 @@ const GROUPS: NavGroup[] = [
   {
     key: 'content',
     items: [
-      { key: 'ads', href: '/admin/ads', Icon: LayoutGrid },
+      { key: 'ads', href: '/admin/ads', Icon: LayoutGrid, area: 'ads' },
       // Sits with Ads rather than under SYSTEM: a gift code is content the
       // operator creates and hands out, not a setting they configure.
       { key: 'giftCodes', href: '/admin/gift-codes', Icon: Gift },
@@ -110,6 +128,20 @@ const GROUPS: NavGroup[] = [
     ],
   },
 ]
+
+/**
+ * The groups a role may actually reach, with empty groups dropped — a heading
+ * with nothing under it reads as a broken screen.
+ */
+function visibleGroups(role: AdminRole | null): NavGroup[] {
+  if (role === 'super_admin' || role === null) return GROUPS
+  return GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter(
+      (item) => item.area && areaAllowed(role, item.area),
+    ),
+  })).filter((group) => group.items.length > 0)
+}
 
 function useIsActive() {
   const pathname = usePathname()
@@ -135,10 +167,12 @@ function itemClasses(active: boolean, touch?: boolean) {
 /** Shared list body, used by both the sidebar and the drawer. */
 function NavList({
   counts,
+  role,
   onNavigate,
   touch,
 }: {
   counts: NavCounts
+  role: AdminRole | null
   onNavigate?: () => void
   /** Thumb-sized rows and headings. See itemClasses. */
   touch?: boolean
@@ -148,7 +182,7 @@ function NavList({
 
   return (
     <nav aria-label={t('label')} className={cn('flex flex-col', touch ? 'gap-4' : 'gap-5')}>
-      {GROUPS.map((group) => (
+      {visibleGroups(role).map((group) => (
         <div key={group.key}>
           <p
             className={cn(
@@ -208,14 +242,22 @@ function NavList({
 }
 
 /** xl+ : the full sidebar. */
-export function AdminSidebar({ counts, admin }: { counts: NavCounts; admin: AdminChip }) {
+export function AdminSidebar({
+  counts,
+  admin,
+  role,
+}: {
+  counts: NavCounts
+  admin: AdminChip
+  role: AdminRole | null
+}) {
   return (
     <aside className="hidden w-60 shrink-0 flex-col border-r border-ink-200 bg-surface xl:flex">
       <div className="flex h-14 items-center border-b border-ink-200 px-4">
         <Logo variant="dark" />
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto p-3">
-        <NavList counts={counts} />
+        <NavList counts={counts} role={role} />
       </div>
       <AdminIdentity admin={admin} />
     </aside>
@@ -223,7 +265,7 @@ export function AdminSidebar({ counts, admin }: { counts: NavCounts; admin: Admi
 }
 
 /** md–lg : icon rail, following reference 2. */
-export function AdminRail({ counts }: { counts: NavCounts }) {
+export function AdminRail({ counts, role }: { counts: NavCounts; role: AdminRole | null }) {
   const t = useTranslations('admin.nav')
   const isActive = useIsActive()
 
@@ -232,7 +274,7 @@ export function AdminRail({ counts }: { counts: NavCounts }) {
       <div className="mb-2">
         <Logo variant="dark" showWordmark={false} />
       </div>
-      {GROUPS.flatMap((g) => g.items).map((item) => {
+      {visibleGroups(role).flatMap((g) => g.items).map((item) => {
         const active = isActive(item.href, item.exact)
         const count = counts[item.key]
         return (
@@ -306,7 +348,15 @@ function AdminIdentity({ admin, onNavigate }: { admin: AdminChip; onNavigate?: (
  * was unreachable. Portalling moves the panel out from under the filter, and
  * is the same fix MoreMenu already uses for the same reason.
  */
-export function AdminDrawer({ counts, admin }: { counts: NavCounts; admin: AdminChip }) {
+export function AdminDrawer({
+  counts,
+  admin,
+  role,
+}: {
+  counts: NavCounts
+  admin: AdminChip
+  role: AdminRole | null
+}) {
   const t = useTranslations('admin.nav')
   const [open, setOpen] = useState(false)
   const [moreBelow, setMoreBelow] = useState(false)
@@ -419,7 +469,7 @@ export function AdminDrawer({ counts, admin }: { counts: NavCounts; admin: Admin
                   onScroll={measure}
                   className="h-full overflow-y-auto overscroll-contain px-3 py-3"
                 >
-                  <NavList counts={counts} touch onNavigate={() => setOpen(false)} />
+                  <NavList counts={counts} role={role} touch onNavigate={() => setOpen(false)} />
                 </div>
                 {moreBelow && (
                   <div

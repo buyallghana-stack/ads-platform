@@ -8,6 +8,7 @@ import { usePathname } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
 
 import { AdminDrawer, type AdminChip, type NavCounts } from './AdminNav'
+import { type AdminRole } from '@/lib/admin/role-types'
 
 /**
  * The bar across the top of every admin screen (reference 1).
@@ -51,10 +52,12 @@ export function AdminTopBar({
   counts,
   admin,
   preview,
+  role,
 }: {
   counts: NavCounts
   admin: AdminChip
   preview: boolean
+  role: AdminRole | null
 }) {
   const t = useTranslations('admin')
   const pathname = usePathname()
@@ -67,7 +70,7 @@ export function AdminTopBar({
 
   return (
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-ink-200 bg-surface/95 px-3 backdrop-blur sm:px-5">
-      <AdminDrawer counts={counts} admin={admin} />
+      <AdminDrawer counts={counts} admin={admin} role={role} />
 
       {/* Search is the reference's anchor for the bar. It is inert until the
           screens behind it exist — labelled, not faked with a fake result. */}

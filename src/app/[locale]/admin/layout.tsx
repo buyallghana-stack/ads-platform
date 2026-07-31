@@ -7,6 +7,7 @@ import { getProfile, getSessionUser } from '@/lib/auth/session'
 import { countPayoutsAwaitingDecision } from '@/lib/admin/data/payouts'
 import { countFlaggedAccounts, countUnreadSupport } from '@/lib/admin/data/people'
 import { PREVIEW } from '@/lib/admin/preview'
+import { getAdminRole } from '@/lib/admin/roles'
 import { adminNeedsTwoFactor, needsLoginChallenge } from '@/lib/security/login-2fa'
 import { createClient } from '@/lib/supabase/server'
 
@@ -58,6 +59,11 @@ export default async function AdminLayout({
   */
   if (await adminNeedsTwoFactor(user!.id)) redirect({ href: '/profile/2fa', locale })
 
+  /* Which staff role, so the nav offers only what this person can open. The
+     LAYOUTS are what refuse — this is only about not showing somebody
+     fourteen links that would bounce them. */
+  const role = await getAdminRole()
+
   const profile = await getProfile(user!.id)
 
   /*
@@ -90,11 +96,11 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-dvh bg-canvas">
-      <AdminSidebar counts={counts} admin={admin} />
-      <AdminRail counts={counts} />
+      <AdminSidebar counts={counts} admin={admin} role={role} />
+      <AdminRail counts={counts} role={role} />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <AdminTopBar counts={counts} admin={admin} preview={PREVIEW} />
+        <AdminTopBar counts={counts} admin={admin} preview={PREVIEW} role={role} />
         <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8">{children}</main>
       </div>
     </div>
