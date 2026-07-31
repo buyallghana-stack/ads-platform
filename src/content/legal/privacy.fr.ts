@@ -9,10 +9,15 @@ const CONTACT = LEGAL_ENTITY.contactEmail
  * jeux-récompenses et aux codes cadeaux, et surtout de la section 5, qui
  * indique que le CLASSEMENT MONTRE VOTRE NOM ET VOTRE PHOTO aux autres
  * utilisateurs, sans possibilité de retrait automatique.
+ *
+ * Révision du 2026-07-31, section 5 : l'écran Équipe montre désormais le nom,
+ * le NUMÉRO DE TÉLÉPHONE, les formules, les retraits et le solde restant de
+ * chaque personne des deux niveaux de parrainage. La section liste champ par
+ * champ ce qui est visible, par qui, et ce qui ne l'est pas.
  */
 export const privacyFr: LegalDoc = {
   title: 'Politique de confidentialité',
-  updated: '2026-07-30',
+  updated: '2026-07-31',
   summary:
     "Cette politique explique quelles informations personnelles SidePerks collecte, pourquoi nous en avons besoin, avec qui nous les partageons et le contrôle dont vous disposez.",
   sections: [
@@ -139,7 +144,30 @@ export const privacyFr: LegalDoc = {
         },
         {
           kind: 'p',
-          text: "Le parrainage indique à la personne qui vous a invité que son invitation a été utilisée et si les conditions d'une récompense sont remplies. Elle ne voit ni votre solde, ni votre activité, ni vos coordonnées.",
+          text: "Si vous vous êtes inscrit avec le code de parrainage de quelqu'un, cette personne vous voit sur son écran Équipe. La personne qui l'a invitée, s'il y en a une, vous y voit également. Nous le disons clairement parce qu'il vaut mieux le savoir avant de s'inscrire qu'après : un programme qui rémunère ceux qui vous présentent le service ne doit pas pouvoir cacher ce qu'il leur montre de vous.",
+        },
+        {
+          kind: 'p',
+          text: 'Ces deux personnes voient à votre sujet :',
+        },
+        {
+          kind: 'list',
+          items: [
+            "le nom de votre compte, et votre photo de profil si vous en avez ajouté une ;",
+            "le numéro de téléphone de votre compte ;",
+            "votre date d'inscription ;",
+            "les formules que vous détenez actuellement, et le nombre de formules achetées ;",
+            "le montant qui vous a été versé, en cedis ;",
+            "la valeur en cedis des points qu'il vous reste.",
+          ],
+        },
+        {
+          kind: 'p',
+          text: "Personne dans votre chaîne de parrainage ne voit votre adresse e-mail, votre mot de passe, votre code PIN de retrait, votre compte de paiement ou votre portefeuille, les publicités ou sondages que vous avez complétés, vos messages au support, ni les informations conservées pour les contrôles anti-fraude. Ces personnes ne peuvent rien modifier sur votre compte et ne peuvent y déplacer aucun argent. Au-delà de ces deux niveaux, personne ne voit quoi que ce soit : la troisième personne de la chaîne ne voit rien de vous.",
+        },
+        {
+          kind: 'note',
+          text: "C'est réciproque. Les personnes que vous invitez apparaissent sur votre écran Équipe exactement dans les mêmes conditions, avec exactement les mêmes informations.",
         },
         {
           kind: 'p',

@@ -310,6 +310,14 @@ export const termsEn: LegalDoc = {
         },
         {
           kind: 'p',
+          text: 'The Team screen shows you both levels openly. For each person it shows their name, their phone number, which plans they hold, how much has been paid out to them and how much their remaining balance is worth — in cedis, not points, so you can check it against what you know a cedi is worth. We show it because you are entitled to see what the introductions you are being rewarded for actually amount to, rather than taking our word for a total.',
+        },
+        {
+          kind: 'note',
+          text: 'This works both ways, and you should assume it does: whoever invited you, and whoever invited them, see exactly the same information about you. Section 5 of the Privacy Policy lists it field by field, including what they cannot see. If that is not acceptable to you, do not join using somebody’s referral code.',
+        },
+        {
+          kind: 'p',
           text: 'We do not pay referral rewards for accounts you control yourself, for people who never use the service, or for signups obtained by spam or by misleading claims about earnings. We may reverse a referral reward, including a purchase commission, if the payment behind it is refunded or reversed, or if the account turns out not to be genuine.',
         },
       ],

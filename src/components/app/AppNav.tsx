@@ -1,6 +1,6 @@
 'use client'
 
-import { Gem, House, PlayCircle, UserRound } from 'lucide-react'
+import { Gem, House, PlayCircle, UserRound, Users } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Logo } from '@/components/brand/Logo'
@@ -17,15 +17,23 @@ import { cn } from '@/lib/cn'
  *                     destinations. Safe-area padding for gesture-nav phones.
  *   768px+            Slim left sidebar, per the operator's two references.
  *
- * Same four destinations either way, so muscle memory transfers between a
+ * Same five destinations either way, so muscle memory transfers between a
  * phone and a laptop. Active state is by route prefix, not equality, so
  * /profile/payout-details still lights up Profile.
+ *
+ * FIVE, since 2026-07-31: Team was added between Upgrade and Profile at the
+ * operator's instruction. Five is the ceiling both platform guidelines give
+ * for a bottom bar and it is now reached — a sixth destination belongs behind
+ * one of these, not beside them. The labels still fit because the bar divides
+ * evenly and the longest of them ("Upgrade") is seven characters at 11px; a
+ * longer word in either language is the thing to check before adding another.
  */
 
 const DESTINATIONS = [
   { href: '/dashboard', key: 'home', Icon: House },
   { href: '/ads', key: 'ads', Icon: PlayCircle },
   { href: '/upgrade', key: 'upgrade', Icon: Gem },
+  { href: '/team', key: 'team', Icon: Users },
   { href: '/profile', key: 'profile', Icon: UserRound },
 ] as const
 

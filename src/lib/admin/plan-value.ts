@@ -188,7 +188,6 @@ export function validatePlan(
     | 'dailyAdCap'
     | 'rewardMultiplier'
     | 'redemptionMinimumPoints'
-    | 'referralBonusMultiplier'
     | 'adPriority'
     | 'adCooldownSeconds'
     | 'isDefault'
@@ -212,9 +211,6 @@ export function validatePlan(
     errors.rewardMultiplier = 'multiplierRange'
   }
   if (plan.redemptionMinimumPoints < 0) errors.redemptionMinimumPoints = 'negative'
-  if (plan.referralBonusMultiplier <= 0 || plan.referralBonusMultiplier > 100) {
-    errors.referralBonusMultiplier = 'multiplierRange'
-  }
   if (plan.adPriority < 0) errors.adPriority = 'negative'
   if (plan.adCooldownSeconds < 0) errors.adCooldownSeconds = 'negative'
 

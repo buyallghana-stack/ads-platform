@@ -19,10 +19,20 @@ const CONTACT = LEGAL_ENTITY.contactEmail
  * opt-out. That is a disclosure to other data subjects, which the previous
  * version made nowhere, and the absence of an opt-out is stated plainly rather
  * than papered over.
+ *
+ * 2026-07-31 revision, section 5. The Team screen shipped, and the paragraph
+ * that said a referrer "does not see your balance, your activity or your
+ * contact details" became false: they now see the name, PHONE NUMBER, plans,
+ * payouts and remaining balance of everybody in their two levels. The
+ * operator's lawyer asked for the feature and for this policy to be explicit
+ * about it, which is the right instinct — the disclosure is now a list of
+ * exactly which fields travel, exactly who sees them, an equally explicit list
+ * of what does not travel, and a note that it is reciprocal. Nothing here is a
+ * promise about the future: it describes what the screen renders today.
  */
 export const privacyEn: LegalDoc = {
   title: 'Privacy Policy',
-  updated: '2026-07-30',
+  updated: '2026-07-31',
   summary:
     'This policy explains what personal information SidePerks collects, why we need it, who we share it with, and the control you have over it.',
   sections: [
@@ -146,7 +156,30 @@ export const privacyEn: LegalDoc = {
         },
         {
           kind: 'p',
-          text: 'Referrals show the person who invited you that their invitation was used, and whether the conditions for a reward were met. They do not see your balance, your activity or your contact details.',
+          text: 'If you joined using somebody’s referral code, that person can see you on their Team screen. So can the person who invited them, if there is one. We tell you this plainly because we would rather you knew before you signed up than found out afterwards: a programme that pays people for introducing you should not be able to hide what it shows them about you.',
+        },
+        {
+          kind: 'p',
+          text: 'What those two people can see about you is:',
+        },
+        {
+          kind: 'list',
+          items: [
+            'the name on your account, and your profile photo if you have uploaded one;',
+            'the phone number on your account;',
+            'the date you joined;',
+            'which plans you currently hold, and how many plans you have bought;',
+            'how much money you have been paid out, in cedis;',
+            'how much your remaining points balance is worth, in cedis.',
+          ],
+        },
+        {
+          kind: 'p',
+          text: 'Nobody in your referral chain can see your email address, your password, your withdrawal PIN, your payout account or wallet, the individual ads or surveys you completed, your support messages, or anything we hold for fraud checks. They cannot change anything on your account, and they cannot move money into or out of it. Nobody beyond those two levels sees any of it — the third person up the chain sees nothing about you at all.',
+        },
+        {
+          kind: 'note',
+          text: 'This is reciprocal. Whoever you invite appears on your Team screen on exactly the same terms, showing exactly the same fields.',
         },
         {
           kind: 'p',

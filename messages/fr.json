@@ -525,7 +525,53 @@
     "upgradeTeaserTitle": "Allez plus loin",
     "upgradeTeaserBody": "Passez à un forfait supérieur pour augmenter votre plafond de gains quotidien.",
     "addTeaserTitle": "Ajouter une offre",
-    "addTeaserBody": "Les offres se cumulent — chacune augmente votre limite quotidienne."
+    "addTeaserBody": "Les offres se cumulent — chacune augmente votre limite quotidienne.",
+    "team": "Équipe"
+  },
+  "team": {
+    "title": "Équipe",
+    "subtitle": "Toutes les personnes que vous avez invitées, et celles qu'elles ont invitées. Tous les montants sont en cedis.",
+    "tabs": {
+      "label": "Quel niveau afficher",
+      "all": "Tous",
+      "level1": "Niveau 1",
+      "level2": "Niveau 2"
+    },
+    "level": {
+      "1": "Niveau 1",
+      "2": "Niveau 2"
+    },
+    "stats": {
+      "plans": "Formules achetées",
+      "peopleCount": "{count, plural, one {par # personne} other {par # personnes}}",
+      "worth": "Ce qu'elles ont payé",
+      "worthHint": "pour ces formules",
+      "withdrawn": "Retiré",
+      "withdrawnHint": "déjà versé",
+      "left": "Encore sur leur solde",
+      "leftHint": "gagné mais pas retiré"
+    },
+    "list": {
+      "title": "Votre équipe",
+      "count": "{count, plural, one {# personne} other {# personnes}}",
+      "number": "N°",
+      "member": "Membre",
+      "plan": "Formule",
+      "bought": "Formules",
+      "boughtValue": "{count} · GHS {value}",
+      "withdrawn": "Retiré",
+      "left": "Restant",
+      "noName": "Nom non renseigné",
+      "noPhone": "Aucun numéro",
+      "emptyLevel1": "Vous n'avez encore invité personne.",
+      "emptyLevel2": "Les personnes que vous avez invitées n'ont encore invité personne."
+    },
+    "empty": {
+      "title": "Votre équipe commence par une invitation",
+      "body": "Partagez votre code. Qui s'inscrit avec devient votre niveau 1, et les personnes qu'elle invitera ensuite deviennent votre niveau 2."
+    },
+    "note": "Vous voyez ces chiffres parce que ces personnes se sont inscrites grâce à vous. Les mêmes informations vous concernant sont visibles par la personne qui vous a invité : votre nom, votre numéro de téléphone, ce que vous avez retiré et ce qu'il reste sur votre solde. Personne ne peut déplacer d'argent depuis cet écran.",
+    "noteEmpty": "La personne qui vous a invité voit les mêmes informations vous concernant : votre nom, votre numéro de téléphone, ce que vous avez retiré et ce qu'il reste sur votre solde. Celle qui l'a invitée également. Personne ne peut déplacer d'argent depuis cet écran."
   },
   "ads": {
     "tabs": {
@@ -2119,8 +2165,6 @@
         "rewardMultiplierHint": "Multiplie les points de chaque publicité. 1 = taux de base.",
         "redemptionMinimum": "Minimum de retrait",
         "redemptionMinimumHint": "Points requis avant de pouvoir retirer. Meilleure formule, minimum plus bas.",
-        "referralMultiplier": "Bonus de parrainage",
-        "referralMultiplierHint": "Multiplie ce que rapportent leurs invitations.",
         "adPriority": "Priorité publicitaire",
         "adPriorityHint": "Le plus élevé passe devant lors de la distribution. 0 = aucune priorité.",
         "cooldown": "Délai entre pubs",

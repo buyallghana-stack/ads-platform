@@ -197,6 +197,25 @@ export async function actAs(tx: Tx, userId: string): Promise<void> {
   ])
 }
 
+/**
+ * The same, for somebody the database will treat as an administrator.
+ *
+ * `is_admin()` does NOT read `public.user_roles` — it reads the `user_role`
+ * claim, which Supabase's auth hook stamps into the token at sign-in. So
+ * `createAdmin` (which writes the table row) plus `actAs` (which sets only
+ * `sub`) produces a session that is an admin in the data and an ordinary user
+ * to every policy and every SECURITY DEFINER check. That combination silently
+ * fails OPEN in a test — an admin-only path looks correctly refused — so it
+ * needs its own helper rather than a note somewhere.
+ */
+export async function actAsAdmin(tx: Tx, userId: string): Promise<void> {
+  await tx.query(
+    `select set_config('request.jwt.claims',
+       json_build_object('sub', $1::text, 'user_role', 'admin')::text, true)`,
+    [userId],
+  )
+}
+
 /** One redemption row, whole. */
 export async function redemption(tx: Tx, id: string) {
   const { rows } = await tx.query(`select * from public.redemptions where id = $1`, [id])

@@ -525,7 +525,53 @@
     "upgradeTeaserTitle": "Go further",
     "upgradeTeaserBody": "Upgrade your plan to raise your daily earning cap.",
     "addTeaserTitle": "Add another plan",
-    "addTeaserBody": "Plans stack — every one you hold adds to your daily limit."
+    "addTeaserBody": "Plans stack — every one you hold adds to your daily limit.",
+    "team": "Team"
+  },
+  "team": {
+    "title": "Team",
+    "subtitle": "Everyone you invited, and everyone they invited. All amounts are in cedis.",
+    "tabs": {
+      "label": "Which level to show",
+      "all": "All",
+      "level1": "Level 1",
+      "level2": "Level 2"
+    },
+    "level": {
+      "1": "Level 1",
+      "2": "Level 2"
+    },
+    "stats": {
+      "plans": "Plans bought",
+      "peopleCount": "{count, plural, one {by # person} other {by # people}}",
+      "worth": "What they paid",
+      "worthHint": "for those plans",
+      "withdrawn": "Withdrawn",
+      "withdrawnHint": "paid out so far",
+      "left": "Still in their balance",
+      "leftHint": "earned but not withdrawn"
+    },
+    "list": {
+      "title": "Your team",
+      "count": "{count, plural, one {# person} other {# people}}",
+      "number": "#",
+      "member": "Member",
+      "plan": "Plan",
+      "bought": "Plans bought",
+      "boughtValue": "{count} · GHS {value}",
+      "withdrawn": "Withdrawn",
+      "left": "Left",
+      "noName": "No name set",
+      "noPhone": "No number",
+      "emptyLevel1": "You have not invited anybody yet.",
+      "emptyLevel2": "Nobody you invited has invited anybody yet."
+    },
+    "empty": {
+      "title": "Your team starts with one invite",
+      "body": "Share your code. When somebody joins with it they are your level 1, and the people they go on to invite are your level 2."
+    },
+    "note": "You can see these figures because these people joined through you. The same is visible about you to whoever invited you — your name, your phone number, what you have withdrawn and what is left in your balance. Nobody can move money in or out of your account from here.",
+    "noteEmpty": "Whoever invited you can see the same about you: your name, your phone number, what you have withdrawn and what is left in your balance. So can the person who invited them. Nobody can move money in or out of your account from there."
   },
   "ads": {
     "tabs": {
@@ -2119,8 +2165,6 @@
         "rewardMultiplierHint": "Multiplies the points on every ad. 1 is the base rate.",
         "redemptionMinimum": "Payout minimum",
         "redemptionMinimumHint": "Points needed before they can withdraw. Better plans, lower minimum.",
-        "referralMultiplier": "Referral bonus",
-        "referralMultiplierHint": "Multiplies what their invites earn them.",
         "adPriority": "Ad priority",
         "adPriorityHint": "Higher wins when ads are handed out. 0 is no priority.",
         "cooldown": "Cooldown",

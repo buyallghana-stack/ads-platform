@@ -64,6 +64,12 @@ const blank = (rate: HouseRate): Draft => ({
   dailyAdCap: rate.freeAdCap,
   rewardMultiplier: 1,
   redemptionMinimumPoints: 5000,
+  /* Sent because the RPC still takes it, never shown and never changed.
+     Migration 081 made referral rewards flat, so nothing on the money path
+     reads tiers.referral_bonus_multiplier any more — an editable field for it
+     let an operator set "Referral bonus ×2" on a plan and watch it do
+     absolutely nothing. A new plan gets 1, which is the multiplier that is
+     actually applied; an existing plan keeps whatever it has. */
   referralBonusMultiplier: 1,
   adPriority: 0,
   adCooldownSeconds: 0,
@@ -110,7 +116,7 @@ export function PlanPanel({
     setDraft((d) => {
       if (!isNew) return { ...d, priceGhs }
       const aligned = alignedBenefits(priceGhs, rate)
-      return { ...d, priceGhs, ...aligned, referralBonusMultiplier: aligned.rewardMultiplier }
+      return { ...d, priceGhs, ...aligned }
     })
 
   const otherSlugs = plans.filter((p) => p.id !== draft.id).map((p) => p.slug)
@@ -123,7 +129,7 @@ export function PlanPanel({
 
   const alignToPrice = () => {
     const aligned = alignedBenefits(draft.priceGhs, rate)
-    setDraft((d) => ({ ...d, ...aligned, referralBonusMultiplier: aligned.rewardMultiplier }))
+    setDraft((d) => ({ ...d, ...aligned }))
   }
 
   const submit = () => {
@@ -391,23 +397,6 @@ export function PlanPanel({
               value={draft.redemptionMinimumPoints}
               onChange={(e) => set('redemptionMinimumPoints', Number(e.target.value))}
               className={inputClass(Boolean(err('redemptionMinimumPoints')))}
-            />
-          </Field>
-          <Field
-            label={t('fields.referralMultiplier')}
-            hint={t('fields.referralMultiplierHint')}
-            suffix="×"
-            error={err('referralBonusMultiplier') && t(`errors.${err('referralBonusMultiplier')}`)}
-          >
-            <input
-              type="number"
-              inputMode="decimal"
-              min={0.001}
-              max={100}
-              step={0.05}
-              value={draft.referralBonusMultiplier}
-              onChange={(e) => set('referralBonusMultiplier', Number(e.target.value))}
-              className={inputClass(Boolean(err('referralBonusMultiplier')))}
             />
           </Field>
           <Field

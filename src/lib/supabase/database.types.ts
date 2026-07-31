@@ -2972,6 +2972,34 @@ export type Database = {
           total_referred: number
         }[]
       }
+      get_team_members: {
+        Args: { p_user_id: string }
+        Returns: {
+          avatar_path: string | null
+          extra_plans: number
+          full_name: string | null
+          joined_at: string
+          member_id: string
+          member_level: number
+          phone: string | null
+          plans_bought: number
+          plans_value: number
+          redeemed: number
+          remaining: number
+          top_plan: string | null
+        }[]
+      }
+      get_team_summary: {
+        Args: { p_user_id: string }
+        Returns: {
+          member_level: number
+          people: number
+          plans_bought: number
+          plans_value: number
+          redeemed: number
+          remaining: number
+        }[]
+      }
       get_totp_secret_cipher: { Args: { p_user_id: string }; Returns: string }
       get_totp_status: { Args: never; Returns: Json }
       get_user_earning_status: {

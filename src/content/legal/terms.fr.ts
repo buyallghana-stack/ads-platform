@@ -284,6 +284,14 @@ export const termsFr: LegalDoc = {
         },
         {
           kind: 'p',
+          text: "L'écran Équipe vous montre les deux niveaux ouvertement. Pour chaque personne, il indique son nom, son numéro de téléphone, les formules qu'elle détient, ce qui lui a été versé et la valeur de ce qu'il lui reste — en cedis et non en points, afin que vous puissiez vérifier ces chiffres. Nous les affichons parce que vous êtes en droit de voir ce que représentent réellement les inscriptions pour lesquelles vous êtes rémunéré, plutôt que de nous croire sur parole.",
+        },
+        {
+          kind: 'note',
+          text: "Cela fonctionne dans les deux sens, et vous devez le supposer : la personne qui vous a invité, et celle qui l'a invitée, voient exactement les mêmes informations vous concernant. La section 5 de la politique de confidentialité les détaille une par une, y compris ce qui reste invisible. Si cela ne vous convient pas, ne vous inscrivez pas avec le code de parrainage de quelqu'un.",
+        },
+        {
+          kind: 'p',
           text: "Nous ne versons pas de récompense pour des comptes que vous contrôlez vous-même, pour des personnes qui n'utilisent jamais le service, ni pour des inscriptions obtenues par spam ou par des promesses de gains trompeuses. Nous pouvons annuler une récompense de parrainage, y compris une commission d'achat, si le paiement à son origine est remboursé ou annulé, ou si le compte s'avère non authentique.",
         },
       ],
