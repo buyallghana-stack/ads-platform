@@ -7,6 +7,7 @@ import {
   Copy,
   Film,
   GitBranch,
+  Link2,
   ListChecks,
   PanelRight,
   Pause,
@@ -54,10 +55,10 @@ import {
  *      deliberate restriction and gets said out loud, because a survey that
  *      quietly serves to 30 Platinum users looks broken otherwise.
  *
- * Videos and surveys share the table rather than splitting into two, because
- * they compete for the same daily cap and the same budget — the operator's
- * decision is "which of these is worth serving", and a tab per format would
- * hide half the answer.
+ * All three formats share the table rather than splitting up, because they
+ * compete for the same daily cap and the same budget — the operator's decision
+ * is "which of these is worth serving", and a tab per format would hide most
+ * of the answer.
  *
  * TRIAGE / DECIDE / REPEAT, the same split as the payout queue: the row says
  * enough to decide whether to look, the panel carries the detail and the
@@ -154,6 +155,7 @@ export function AdsTable({
       live: live.length,
       videos: live.filter((a) => a.format === 'video').length,
       surveys: live.filter((a) => a.format === 'survey').length,
+      links: live.filter((a) => a.format === 'link').length,
       remaining,
       unlimited: live.some((a) => a.budget === null),
       /* Points still owed if every remaining slot were filled, at the current
@@ -242,6 +244,8 @@ export function AdsTable({
   const FormatIcon = ({ format: f }: { format: AdListItem['format'] }) =>
     f === 'survey' ? (
       <ListChecks aria-hidden className="size-3.5 shrink-0 text-violet-600" />
+    ) : f === 'link' ? (
+      <Link2 aria-hidden className="size-3.5 shrink-0 text-teal-700" />
     ) : (
       <Film aria-hidden className="size-3.5 shrink-0 text-brand-600" />
     )
@@ -307,9 +311,11 @@ export function AdsTable({
       <span>
         {/* "0s" is a lie about an ad whose length was never entered — a
             YouTube spot does not need one. Say the questions instead. */}
-        {a.format === 'video' && a.durationSeconds !== null
-          ? t('meta.video', { seconds: a.durationSeconds, questions: a.questionCount })
-          : t('meta.survey', { questions: a.questionCount })}
+        {a.format === 'link'
+          ? t('meta.link', { seconds: a.minWatchSeconds ?? 0 })
+          : a.format === 'video' && a.durationSeconds !== null
+            ? t('meta.video', { seconds: a.durationSeconds, questions: a.questionCount })
+            : t('meta.survey', { questions: a.questionCount })}
       </span>
       {a.branchingCount > 0 && (
         <span className="inline-flex items-center gap-0.5 font-medium text-violet-700">
@@ -331,7 +337,11 @@ export function AdsTable({
         <SummaryCell
           label={t('summary.live')}
           value={summary.live}
-          detail={t('summary.liveSplit', { videos: summary.videos, surveys: summary.surveys })}
+          detail={t('summary.liveSplit', {
+            videos: summary.videos,
+            surveys: summary.surveys,
+            links: summary.links,
+          })}
         />
         <SummaryCell
           label={t('summary.remaining')}
@@ -355,26 +365,18 @@ export function AdsTable({
         searchPlaceholder={t('searchPlaceholder')}
         actions={
           <>
-            {/* Both buttons share the row evenly on a phone and shrink to
-                their labels from `sm`, so neither crowds the search field. */}
-            <Button
-              type="button"
-              size="sm"
-              variant="secondary"
-              className="flex-1 sm:flex-none"
-              onClick={() => router.push('/admin/ads/new?format=survey')}
-            >
-              <ListChecks aria-hidden className="size-4" />
-              {t('newSurvey')}
-            </Button>
+            {/* ONE button, not one per format. There were two while there
+                were two formats; a third would have meant three truncated
+                labels beside a search field on a phone. The format is chosen
+                on the page it belongs to, where each one gets a sentence. */}
             <Button
               type="button"
               size="sm"
               className="flex-1 sm:flex-none"
-              onClick={() => router.push('/admin/ads/new?format=video')}
+              onClick={() => router.push('/admin/ads/new')}
             >
               <Plus aria-hidden className="size-4" />
-              {t('newVideo')}
+              {t('newAd')}
             </Button>
           </>
         }

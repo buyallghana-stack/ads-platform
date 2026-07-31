@@ -7,6 +7,7 @@ import {
   Check,
   Film,
   GitBranch,
+  Link2,
   ListChecks,
   Loader2,
   Pause,
@@ -124,6 +125,8 @@ export function AdPanel({
         <div className="flex items-center gap-2.5">
           {ad.format === 'survey' ? (
             <ListChecks aria-hidden className="size-3.5 shrink-0 text-violet-600" />
+          ) : ad.format === 'link' ? (
+            <Link2 aria-hidden className="size-3.5 shrink-0 text-teal-700" />
           ) : (
             <Film aria-hidden className="size-3.5 shrink-0 text-brand-600" />
           )}
@@ -280,35 +283,56 @@ export function AdPanel({
 
       <PanelSection label={t('panel.setup')}>
         <PanelFacts>
-          <Fact
-            label={t('panel.length')}
-            value={
-              ad.format === 'survey'
-                ? t('panel.noVideo')
-                : `${ad.durationSeconds ?? 0}s · ${t(`source.${ad.videoSource ?? 'upload'}`)}`
-            }
-          />
-          <Fact
-            label={t('panel.minWatch')}
-            value={
-              ad.format === 'survey'
-                ? '—'
-                : ad.minWatchSeconds === null
-                  ? t('panel.wholeVideo')
-                  : `${ad.minWatchSeconds}s`
-            }
-          />
-          <Fact
-            label={t('panel.questions')}
-            value={t('panel.questionsValue', {
-              total: ad.questionCount,
-              graded: ad.gradedCount,
-            })}
-          />
-          <Fact
-            label={t('panel.branching')}
-            value={ad.branchingCount > 0 ? t('panel.branchingOn', { count: ad.branchingCount }) : t('panel.branchingOff')}
-          />
+          {/* A link ad has no film and no questionnaire, so the two facts that
+              describe one are replaced by the two that describe it: how long
+              the article must be open, and where the link goes. Showing "—"
+              four times would be a panel describing what the ad is not. */}
+          {ad.format === 'link' ? (
+            <>
+              <Fact
+                label={t('panel.dwell')}
+                value={`${ad.minWatchSeconds ?? 0}s`}
+              />
+              <Fact
+                label={t('panel.article')}
+                value={
+                  detail ? t('panel.articleWords', { count: countWords(detail.articleBody) }) : '…'
+                }
+              />
+            </>
+          ) : (
+            <>
+              <Fact
+                label={t('panel.length')}
+                value={
+                  ad.format === 'survey'
+                    ? t('panel.noVideo')
+                    : `${ad.durationSeconds ?? 0}s · ${t(`source.${ad.videoSource ?? 'upload'}`)}`
+                }
+              />
+              <Fact
+                label={t('panel.minWatch')}
+                value={
+                  ad.format === 'survey'
+                    ? '—'
+                    : ad.minWatchSeconds === null
+                      ? t('panel.wholeVideo')
+                      : `${ad.minWatchSeconds}s`
+                }
+              />
+              <Fact
+                label={t('panel.questions')}
+                value={t('panel.questionsValue', {
+                  total: ad.questionCount,
+                  graded: ad.gradedCount,
+                })}
+              />
+              <Fact
+                label={t('panel.branching')}
+                value={ad.branchingCount > 0 ? t('panel.branchingOn', { count: ad.branchingCount }) : t('panel.branchingOff')}
+              />
+            </>
+          )}
           <Fact
             label={t('panel.audience')}
             value={ad.tiers.length === 0 ? t('everyone') : ad.tiers.join(', ')}
@@ -326,7 +350,40 @@ export function AdPanel({
         </PanelFacts>
       </PanelSection>
 
+      {/* ---- What a link ad actually says, and where it sends people ----
+          The two things worth reading back before publishing one: an article
+          nobody proof-read and a destination with a typo in it are both
+          invisible in a table row. */}
+      {ad.format === 'link' && (
+        <PanelSection label={t('panel.articleList')}>
+          {!detail && !loadFailed && (
+            <p className="flex items-center gap-2 text-[0.75rem] text-ink-400">
+              <Loader2 aria-hidden className="size-3.5 animate-spin" />
+              {t('panel.loading')}
+            </p>
+          )}
+          {loadFailed && <p className="text-[0.75rem] text-ink-400">{t('panel.loadFailed')}</p>}
+          {detail && (
+            <>
+              <p className="max-h-64 overflow-y-auto rounded-(--radius-card) border border-ink-200 bg-canvas p-3 text-[0.8125rem] leading-relaxed whitespace-pre-wrap text-ink-700">
+                {detail.articleBody}
+              </p>
+              {detail.ctaLinks.map((link, index) => (
+                <p
+                  key={index}
+                  className="mt-2 flex items-center gap-1.5 text-[0.75rem] text-ink-600"
+                >
+                  <Link2 aria-hidden className="size-3.5 shrink-0 text-teal-700" />
+                  <span className="truncate">{link.value}</span>
+                </p>
+              ))}
+            </>
+          )}
+        </PanelSection>
+      )}
+
       {/* ---- The questions themselves ---------------------------------- */}
+      {ad.format !== 'link' && (
       <PanelSection label={t('panel.questionList')}>
         {!detail && !loadFailed && (
           <p className="flex items-center gap-2 text-[0.75rem] text-ink-400">
@@ -428,6 +485,13 @@ export function AdPanel({
           </ol>
         )}
       </PanelSection>
+      )}
     </DetailPanel>
   )
+}
+
+/** Rough enough for a fact line: is this article 60 words or 600. */
+function countWords(text: string): number {
+  const trimmed = text.trim()
+  return trimmed ? trimmed.split(/\s+/).length : 0
 }

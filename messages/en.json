@@ -577,7 +577,8 @@
     "tabs": {
       "label": "Ad type",
       "video": "Videos",
-      "survey": "Surveys"
+      "survey": "Surveys",
+      "link": "Articles"
     },
     "allowance": {
       "label": "Ads today",
@@ -585,7 +586,7 @@
       "points": "pts",
       "remaining": "{count, plural, one {# ad left on your {tier} plan today} other {# ads left on your {tier} plan today}}",
       "spent": "You've used every ad on your {tier} plan today.",
-      "remainingShared": "{count, plural, one {# ad left today — shared across videos and surveys} other {# ads left today — shared across videos and surveys}}"
+      "remainingShared": "{count, plural, one {# ad left today — shared across every kind of ad} other {# ads left today — shared across every kind of ad}}"
     },
     "card": {
       "reward": "+{points} pts",
@@ -593,23 +594,31 @@
       "questions": "{count, plural, one {# question} other {# questions}}",
       "watchOnly": "Just watch",
       "quick": "Quick",
-      "triesLeft": "{count, plural, one {# try left} other {# tries left}}"
+      "triesLeft": "{count, plural, one {# try left} other {# tries left}}",
+      "readAndTap": "Read, then tap",
+      "readSeconds": "{seconds}s read"
     },
     "caughtUp": {
       "title": "You're all caught up",
       "cappedBody": "You've finished all {cap} ads on your {tier} plan today. Your allowance refills automatically.",
-      "emptyVideoBody": "You've watched every video available to you right now. New ones are added through the day.",
-      "emptySurveyBody": "You've answered every survey available to you right now. New ones are added through the day.",
       "resetLabel": "New ads in",
       "resetHint": "Your daily allowance refills at midnight.",
       "checkNow": "Check now",
       "raiseLimit": "Raise my daily limit",
-      "switchToSurveys": "{count, plural, one {Answer # survey instead} other {Answer # surveys instead}}",
-      "switchToVideos": "{count, plural, one {Watch # video instead} other {Watch # videos instead}}",
       "blockedTitle": "Earning is paused",
       "blockedBody": "Earning is paused right now, so ads would not pay. Your balance is safe. Try again shortly.",
       "pointsCappedBody": "You've reached the most points anyone can earn in a day. There are still ads here, but they would pay nothing until your daily total resets.",
-      "newAdsHint": "New ads are released daily. We'll keep checking while you wait."
+      "newAdsHint": "New ads are released daily. We'll keep checking while you wait.",
+      "empty": {
+        "video": "You've watched every video available to you right now. New ones are added through the day.",
+        "survey": "You've answered every survey available to you right now. New ones are added through the day.",
+        "link": "You've read every article available to you right now. New ones are added through the day."
+      },
+      "switchTo": {
+        "video": "{count, plural, one {Watch # video instead} other {Watch # videos instead}}",
+        "survey": "{count, plural, one {Answer # survey instead} other {Answer # surveys instead}}",
+        "link": "{count, plural, one {Read # article instead} other {Read # articles instead}}"
+      }
     },
     "player": {
       "close": "Close",
@@ -700,7 +709,16 @@
       },
       "keepWatching": "Keep watching",
       "nextAd": "Next ad",
-      "backToAds": "Back to ads"
+      "backToAds": "Back to ads",
+      "readAgain": "Read it again",
+      "tooFastLink": {
+        "title": "A few seconds more",
+        "body": "Keep the article open until the countdown ends, then tap the link."
+      },
+      "notWatchedLink": {
+        "title": "Open the article first",
+        "body": "Open the article and let the reading time run before following the link."
+      }
     },
     "blocked": {
       "pausedTitle": "Earning is paused",
@@ -734,6 +752,15 @@
       "noAttempt": "Leaving does not use up one of your tries — only answering does.",
       "stay": "Stay and finish",
       "leave": "Leave the ad"
+    },
+    "disclosure": "SidePerks is not affiliated with these advertisers and does not endorse them. Anything you do on an advertiser's website or app is between you and them — we are not responsible for money you spend or lose there, or for a product or service that disappoints you.",
+    "link": {
+      "visit": "Go to the advertiser",
+      "waiting": "{seconds}s of reading to go",
+      "waitingHint": "The link pays once this runs out. Stay on the page.",
+      "readyHint": "Tap the link and {points} points land straight away.",
+      "claiming": "Recording your visit",
+      "noDestination": "This ad has no link right now. Nothing was counted against you."
     }
   },
   "upgradeTab": {
@@ -1382,7 +1409,7 @@
       "pending": "Awaiting your decision",
       "reviewQueue": "Review queue",
       "adsLive": "Ads live",
-      "adsSplit": "{videos} videos · {surveys} surveys",
+      "adsSplit": "{videos} videos · {surveys} surveys · {links} links",
       "managePool": "Manage pool",
       "status": {
         "held": "On hold",
@@ -1613,8 +1640,6 @@
       "deliveredUnlimited": "{done} completed · no budget cap",
       "branching": "Branching",
       "cues": "{count, plural, one {# cue point} other {# cue points}}",
-      "newVideo": "New video",
-      "newSurvey": "New survey",
       "status": {
         "draft": "Draft",
         "active": "Live",
@@ -1624,7 +1649,8 @@
       },
       "format": {
         "video": "Video",
-        "survey": "Survey"
+        "survey": "Survey",
+        "link": "Link"
       },
       "source": {
         "upload": "In-house file",
@@ -1632,7 +1658,8 @@
       },
       "meta": {
         "video": "{seconds}s · {questions, plural, =0 {watch only} one {# question} other {# questions}}",
-        "survey": "{questions, plural, =0 {watch only} one {# question} other {# questions}}"
+        "survey": "{questions, plural, =0 {watch only} one {# question} other {# questions}}",
+        "link": "{seconds}s read · link out"
       },
       "columns": {
         "ad": "Ad",
@@ -1644,7 +1671,7 @@
       },
       "summary": {
         "live": "Live now",
-        "liveSplit": "{videos, plural, one {# video} other {# videos}} · {surveys, plural, one {# survey} other {# surveys}}",
+        "liveSplit": "{videos, plural, one {# video} other {# videos}} · {surveys, plural, one {# survey} other {# surveys}} · {links, plural, one {# link} other {# links}}",
         "remaining": "Completions left",
         "remainingHint": "across every live ad",
         "remainingUnlimited": "excludes ads with no budget cap",
@@ -1708,17 +1735,20 @@
         "confirmDeleteBody": "Nobody has watched it, so it will be removed outright along with its questions. This cannot be undone.",
         "confirmArchive": "Archive this ad?",
         "confirmArchiveBody": "People have already watched it, so it is kept on the record rather than deleted — the attempts behind their earnings have to survive. It will never be served again.",
-        "keep": "Keep it"
+        "keep": "Keep it",
+        "dwell": "Reading time",
+        "article": "Article",
+        "articleWords": "{count, plural, one {# word} other {# words}}",
+        "articleList": "The article and where it goes"
       },
       "editor": {
         "backToPool": "Ads & surveys",
-        "newVideo": "New video ad",
-        "newSurvey": "New survey",
         "untitled": "Untitled ad",
         "copySuffix": "(copy)",
         "format": {
           "video": "Video",
-          "survey": "Survey"
+          "survey": "Survey",
+          "link": "Link"
         },
         "status": {
           "draft": "Draft",
@@ -1912,7 +1942,14 @@
             "tiktok": "Use a handle like @advertiser, or the full link.",
             "youtube": "Use a handle like @advertiser, or the full link.",
             "linkedin": "Use a handle or the full link."
-          }
+          },
+          "articleShort": "The article needs at least 40 characters.",
+          "articleLong": "Articles are limited to 8,000 characters.",
+          "dwellRequired": "Set a reading time. Without one this ad is a button that hands out points.",
+          "dwellMin": "The reading time must be at least 3 seconds.",
+          "dwellMax": "The reading time cannot be more than 600 seconds.",
+          "linkDestinationMissing": "Add the link out to the advertiser.",
+          "linkOneDestination": "A link ad may only have one destination."
         },
         "statusLabel": "Status",
         "cta": "Call to action",
@@ -1963,7 +2000,51 @@
         "ruleIsNot": "Q{n} is not “{answer}”",
         "andJoin": " and ",
         "orJoin": " or ",
-        "shownWhen": "Asked only when {rule}"
+        "shownWhen": "Asked only when {rule}",
+        "new": {
+          "video": "New video ad",
+          "survey": "New survey",
+          "link": "New link ad"
+        },
+        "article": "The article",
+        "articleHint": "What the reader sees before the link. Write it the way the advertiser wants to be introduced — this is the whole ad.",
+        "articleBody": "Text",
+        "articlePlaceholder": "Who the advertiser is, what they are offering, and why the link is worth a tap…",
+        "articleShortOf": "{count, plural, one {# more character needed} other {# more characters needed}}",
+        "articleCount": "{count} of {max} characters",
+        "dwell": "Reading time",
+        "dwellHint": "Seconds the article must stay open before the link will pay. This is the only brake this format has.",
+        "destination": "Destination",
+        "destinationHint": "The one link out to the advertiser. The click is what gets paid for, so there can only be one.",
+        "ctaDestination": "Destination",
+        "ctaNoteLink": "The link opens in a new tab, and the points are credited at the moment of the tap — provided the reading time has run.",
+        "summaryWords": "{count, plural, =0 {No article yet} one {Article of # word} other {Article of # words}}",
+        "summaryDwell": "{seconds}s of reading before the link pays",
+        "summaryDestination": "One destination set",
+        "summaryNoDestination": "No destination — this ad cannot be saved",
+        "summaryLinkCaveat": "Nobody can check that the article was read, or what happens after the tap."
+      },
+      "newAd": "New ad",
+      "chooser": {
+        "back": "Back to the pool",
+        "title": "What kind of ad?",
+        "subtitle": "The three buy different attention and defend themselves differently against farming. The choice is final — an ad cannot change format once it exists.",
+        "choose": "Choose",
+        "video": {
+          "name": "Video",
+          "body": "A film to watch, with questions at seconds you choose — or none at all.",
+          "proof": "Proved by: watch time measured on the server, plus the answers."
+        },
+        "survey": {
+          "name": "Survey",
+          "body": "Questions to answer. Not a quiz — with no right answer ticked, any answer is accepted.",
+          "proof": "Proved by: the answers themselves, which are the advertiser's research."
+        },
+        "link": {
+          "name": "Link",
+          "body": "An article to read, then one link out to the advertiser. The click is what pays.",
+          "proof": "Proved by: the reading time before the click, and nothing else — nobody can see what happens on the advertiser’s side."
+        }
       }
     },
     "advertisers": {

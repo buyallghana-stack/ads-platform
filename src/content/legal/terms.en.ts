@@ -116,11 +116,15 @@ export const termsEn: LegalDoc = {
         },
         {
           kind: 'p',
+          text: 'Some advertisements are articles rather than videos. You read the article, and at the end there is a link to the advertiser. Points are credited when you follow that link, provided the article has been open for the reading time shown on the screen. We are paid for delivering you to the advertiser, and that is all we can see: whether the link was followed. What you do on the advertiser\u2019s website or app after that is between you and them, and section 19 says what we are and are not responsible for.',
+        },
+        {
+          kind: 'p',
           text: 'Points can also reach your balance through the other features described below: tasks (section 5), reward games (section 6), gift codes (section 7) and referrals (section 12). Everything credited to your balance is points, and everything in section 9 applies to it however it was earned.',
         },
         {
           kind: 'p',
-          text: 'How much you can earn each day depends on your plan. Ads and surveys are supplied by advertisers and research partners, so the number available to you on any given day varies, and we cannot promise a particular quantity, frequency or income.',
+          text: 'How much you can earn each day depends on your plan. Ads, articles and surveys are supplied by advertisers and research partners, so the number available to you on any given day varies, and we cannot promise a particular quantity, frequency or income.',
         },
         {
           kind: 'note',
@@ -214,7 +218,7 @@ export const termsEn: LegalDoc = {
       blocks: [
         {
           kind: 'p',
-          text: 'Points are a reward we credit to your account under a limited, personal, revocable licence. They are not money, not a deposit, not legal tender and not your property. This is true of every point, whether it came from an ad, a survey, a task, a reward game, a gift code or a referral.',
+          text: 'Points are a reward we credit to your account under a limited, personal, revocable licence. They are not money, not a deposit, not legal tender and not your property. This is true of every point, whether it came from an ad, an article, a survey, a task, a reward game, a gift code or a referral.',
         },
         { kind: 'p', text: 'This means points:' },
         {
@@ -445,6 +449,10 @@ export const termsEn: LegalDoc = {
         {
           kind: 'p',
           text: 'The service is provided as it is. We do not promise that it will be error-free, that ads will always be available, or that you will earn any particular amount.',
+        },
+        {
+          kind: 'p',
+          text: 'We are not affiliated with the advertisers whose ads, articles and links appear on SidePerks, and showing one is not a recommendation of them. When you follow a link to an advertiser you leave SidePerks, and what happens there is a matter between you and them: we are not responsible for their website or app, for anything you buy, pay or lose there, or for a product or service that disappoints you. Never send money to anyone who tells you it is required to earn or withdraw on SidePerks — nothing here ever asks you to pay an advertiser.',
         },
         {
           kind: 'p',

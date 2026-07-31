@@ -396,6 +396,36 @@ const ADS = [
       },
     ],
   },
+  {
+    /*
+      A LINK ad. No video, no questions — an article, a reading time, and one
+      link out. The reward is deliberately the smallest in the pool: it asks
+      for a read and one tap, where the video above asks somebody to sit
+      through a film and answer a question about it.
+    */
+    ad: {
+      title: 'Kente Collective — the co-op behind the cloth',
+      description: 'Read about the weavers, then visit their shop.',
+      advertiser_name: 'Kente Collective',
+      format: 'link',
+      points_reward: 25,
+      // The only brake this format has: the article must be open this long
+      // before the link will pay.
+      min_watch_seconds: 15,
+      max_completions: 500,
+      weight: 100,
+      thumbnail_path: 'seed/thumb-payments-survey.jpg',
+      cta_label: 'Visit the shop',
+      cta_links: [{ kind: 'website', value: 'kentecollective.example.com' }],
+      article_body: [
+        'Kente Collective is a group of forty weavers working out of two workshops in Bonwire, the town where kente has been woven for three hundred years. Every cloth they sell is made on a traditional loom, by hand, by somebody whose name is on the label.',
+        'The co-op was started in 2019 by six weavers who were tired of selling through middlemen for a third of what their work was worth. Today they sell directly — online and from a small shop in Accra — and the weavers keep seventy per cent of every sale.',
+        'A full cloth takes between two and six weeks depending on the pattern. Their most popular design, Adwinasa, uses more than a dozen colours and is traditionally reserved for occasions worth remembering.',
+        'They deliver anywhere in Ghana within three days, and ship worldwide. Tap the link below to see what is on the loom this month.',
+      ].join('\n\n'),
+    },
+    questions: [],
+  },
 ]
 
 /* --- seed ---------------------------------------------------------------- */

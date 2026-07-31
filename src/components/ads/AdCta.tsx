@@ -21,8 +21,9 @@ import { cn } from '@/lib/cn'
 /**
  * What the advertiser wants the viewer to do next.
  *
- * Shown on video ads only — a survey deliberately carries none, so nothing
- * here is reachable from one.
+ * Shown on video ads. A survey deliberately carries none, so nothing here is
+ * reachable from one; a link ad has exactly one destination and draws it as
+ * the single paying button in LinkAdReader rather than through this.
  *
  * TWO PLACES, TWO SKINS. Under the video it sits on black, so it is drawn in
  * white-on-transparent; on the result card it sits on the surface, so it uses

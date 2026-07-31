@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   Check,
   Film,
+  Link2,
   ListChecks,
   Trash2,
 } from 'lucide-react'
@@ -15,7 +16,13 @@ import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/Button'
 import { deleteAd, saveAd } from '@/app/[locale]/admin/ads/actions'
 import { Link, useRouter } from '@/i18n/navigation'
-import { hasBranching, validateAd, type AdErrors } from '@/lib/admin/ad-draft'
+import {
+  ARTICLE_MAX,
+  ARTICLE_MIN,
+  hasBranching,
+  validateAd,
+  type AdErrors,
+} from '@/lib/admin/ad-draft'
 import { CHOOSABLE_STATUSES, type AdDraft, type AdStatus, type TierOption } from '@/lib/admin/types'
 import { cn } from '@/lib/cn'
 
@@ -158,16 +165,14 @@ export function AdEditor({
             {t('backToPool')}
           </Link>
           <h1 className="mt-1.5 text-[1.375rem] font-semibold tracking-[-0.02em] text-ink-900 sm:text-[1.5rem]">
-            {isNew
-              ? draft.format === 'survey'
-                ? t('newSurvey')
-                : t('newVideo')
-              : draft.title || t('untitled')}
+            {isNew ? t(`new.${draft.format}`) : draft.title || t('untitled')}
           </h1>
           <div className="mt-1.5 flex flex-wrap items-center gap-2.5">
             <span className="inline-flex items-center gap-1.5 text-[0.75rem] font-medium text-ink-600">
               {draft.format === 'survey' ? (
                 <ListChecks aria-hidden className="size-3.5 text-violet-600" />
+              ) : draft.format === 'link' ? (
+                <Link2 aria-hidden className="size-3.5 text-teal-700" />
               ) : (
                 <Film aria-hidden className="size-3.5 text-brand-600" />
               )}
@@ -296,29 +301,93 @@ export function AdEditor({
             </FormSection>
           )}
 
+          {/* ---- The article -------------------------------------------- */}
+          {draft.format === 'link' && (
+            <FormSection title={t('article')} description={t('articleHint')}>
+              <Field label={t('articleBody')} error={err('article')}>
+                <textarea
+                  rows={14}
+                  value={draft.articleBody}
+                  maxLength={ARTICLE_MAX}
+                  placeholder={t('articlePlaceholder')}
+                  onChange={(e) => set({ articleBody: e.target.value })}
+                  className={inputClass(Boolean(err('article')), 'h-auto resize-y py-2 leading-relaxed')}
+                />
+              </Field>
+              {/* Counted against the number the database will judge it by,
+                  and it counts UP to the minimum first — "40 characters
+                  needed" is useful, "7,960 remaining" is not, on a field
+                  nobody will fill. */}
+              <p className="mt-1.5 text-[0.6875rem] text-ink-400 tabular-nums">
+                {draft.articleBody.trim().length < ARTICLE_MIN
+                  ? t('articleShortOf', {
+                      count: ARTICLE_MIN - draft.articleBody.trim().length,
+                    })
+                  : t('articleCount', {
+                      count: draft.articleBody.trim().length,
+                      max: ARTICLE_MAX,
+                    })}
+              </p>
+
+              <div className="mt-3 max-w-xs">
+                <Field
+                  label={t('dwell')}
+                  suffix={t('units.seconds')}
+                  hint={t('dwellHint')}
+                  error={err('minWatch')}
+                >
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={3}
+                    value={draft.minWatchSeconds ?? ''}
+                    onChange={(e) =>
+                      set({
+                        minWatchSeconds: e.target.value === '' ? null : Number(e.target.value),
+                      })
+                    }
+                    className={inputClass(Boolean(err('minWatch')), 'tabular-nums')}
+                  />
+                </Field>
+              </div>
+            </FormSection>
+          )}
+
           {/* ---- Questions ---------------------------------------------- */}
-          <FormSection
-            title={t('questions')}
-            description={
-              draft.format === 'survey'
-                ? t('questionsHintSurvey')
-                : t('questionsHintVideo')
-            }
-          >
-            <AdQuestions draft={draft} errors={showErrors ? errors : {}} onChange={(questions) => set({ questions })} />
-          </FormSection>
+          {/* Not on a link ad: there is no film to have watched and no
+              questionnaire to answer, and an answer would have no bearing on
+              whether the link was clicked. The database refuses one with a
+              trigger, so the form does not offer what the save would reject. */}
+          {draft.format !== 'link' && (
+            <FormSection
+              title={t('questions')}
+              description={
+                draft.format === 'survey'
+                  ? t('questionsHintSurvey')
+                  : t('questionsHintVideo')
+              }
+            >
+              <AdQuestions draft={draft} errors={showErrors ? errors : {}} onChange={(questions) => set({ questions })} />
+            </FormSection>
+          )}
 
           {/* ---- Call to action ------------------------------------------ */}
-          {/* Video only. A survey is research: sending the respondent to the
-              advertiser's shop mid-questionnaire changes what the answers
-              mean, and the database refuses it outright. */}
-          {draft.format === 'video' && (
-            <FormSection title={t('cta')} description={t('ctaHint')}>
+          {/* Never on a survey. That is research: sending the respondent to
+              the advertiser's shop mid-questionnaire changes what the answers
+              mean, and the database refuses it outright. On a link ad this is
+              not an extra beside the ad — it IS the ad, and there may be
+              exactly one of them. */}
+          {draft.format !== 'survey' && (
+            <FormSection
+              title={draft.format === 'link' ? t('destination') : t('cta')}
+              description={draft.format === 'link' ? t('destinationHint') : t('ctaHint')}
+            >
               <AdCallToAction
                 label={draft.ctaLabel}
                 links={draft.ctaLinks}
                 errors={errors}
                 showErrors={showErrors}
+                max={draft.format === 'link' ? 1 : 6}
                 onLabel={(ctaLabel) => set({ ctaLabel })}
                 onLinks={(ctaLinks) => set({ ctaLinks })}
               />
@@ -510,26 +579,44 @@ export function AdEditor({
               opinion or a video whose cue points went missing. */}
           <FormSection title={t('summary')}>
             <ul className="flex flex-col gap-1.5 text-[0.75rem] text-ink-600">
-              <li>{t('summaryQuestions', { count: draft.questions.length })}</li>
-              <li>
-                {t('summaryGraded', {
-                  count: draft.questions.filter((q) =>
-                    q.format === 'short_text'
-                      ? Boolean(q.correctAnswer?.trim())
-                      : q.options.some((o) => o.correct),
-                  ).length,
-                })}
-              </li>
-              {draft.format === 'video' && (
-                <li>
-                  {t('summaryCues', {
-                    count: draft.questions.filter((q) => q.showAtSeconds !== null).length,
-                  })}
-                </li>
+              {draft.format === 'link' ? (
+                <>
+                  <li>{t('summaryWords', { count: countWords(draft.articleBody) })}</li>
+                  <li>{t('summaryDwell', { seconds: draft.minWatchSeconds ?? 0 })}</li>
+                  <li>
+                    {draft.ctaLinks.filter((l) => l.value.trim()).length === 1
+                      ? t('summaryDestination')
+                      : t('summaryNoDestination')}
+                  </li>
+                  {/* Said on the screen where the reward is set, because it is
+                      the one thing about this format that cannot be fixed
+                      later: the platform sees the click and nothing after it. */}
+                  <li className="text-ink-400">{t('summaryLinkCaveat')}</li>
+                </>
+              ) : (
+                <>
+                  <li>{t('summaryQuestions', { count: draft.questions.length })}</li>
+                  <li>
+                    {t('summaryGraded', {
+                      count: draft.questions.filter((q) =>
+                        q.format === 'short_text'
+                          ? Boolean(q.correctAnswer?.trim())
+                          : q.options.some((o) => o.correct),
+                      ).length,
+                    })}
+                  </li>
+                  {draft.format === 'video' && (
+                    <li>
+                      {t('summaryCues', {
+                        count: draft.questions.filter((q) => q.showAtSeconds !== null).length,
+                      })}
+                    </li>
+                  )}
+                  <li className={cn(hasBranching(draft.questions) && 'font-medium text-violet-700')}>
+                    {hasBranching(draft.questions) ? t('summaryBranching') : t('summaryStraight')}
+                  </li>
+                </>
               )}
-              <li className={cn(hasBranching(draft.questions) && 'font-medium text-violet-700')}>
-                {hasBranching(draft.questions) ? t('summaryBranching') : t('summaryStraight')}
-              </li>
             </ul>
           </FormSection>
 
@@ -609,6 +696,13 @@ export function AdEditor({
 }
 
 /* ------------------------------------------------------------------ */
+
+/** Rough enough for the summary line — the operator wants to know whether the
+ *  article is 60 words or 600, not its exact length. */
+function countWords(text: string): number {
+  const trimmed = text.trim()
+  return trimmed ? trimmed.split(/\s+/).length : 0
+}
 
 /**
  * ISO to the value a datetime-local input wants, in UTC.

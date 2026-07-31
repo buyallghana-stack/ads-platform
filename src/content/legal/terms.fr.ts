@@ -90,11 +90,15 @@ export const termsFr: LegalDoc = {
         },
         {
           kind: 'p',
+          text: "Certaines publicités sont des articles plutôt que des vidéos. Vous lisez l'article, et à la fin se trouve un lien vers l'annonceur. Les points sont crédités lorsque vous suivez ce lien, à condition que l'article soit resté ouvert pendant le temps de lecture affiché à l'écran. Nous sommes rémunérés pour vous amener chez l'annonceur, et c'est tout ce que nous pouvons constater : que le lien a été suivi. Ce que vous faites ensuite sur le site ou l'application de l'annonceur relève de votre relation avec lui, et la section 19 précise ce dont nous sommes ou non responsables.",
+        },
+        {
+          kind: 'p',
           text: "Des points peuvent également arriver sur votre solde via les autres fonctionnalités décrites ci-dessous : les tâches (section 5), les jeux-récompenses (section 6), les codes cadeaux (section 7) et le parrainage (section 12). Tout ce qui est crédité sur votre solde est constitué de points, et la section 9 s'y applique quelle que soit leur origine.",
         },
         {
           kind: 'p',
-          text: "Ce que vous pouvez gagner chaque jour dépend de votre formule. Les publicités et les sondages proviennent des annonceurs et de partenaires d'étude : leur nombre varie d'un jour à l'autre et nous ne pouvons garantir ni quantité, ni fréquence, ni revenu.",
+          text: "Ce que vous pouvez gagner chaque jour dépend de votre formule. Les publicités, les articles et les sondages proviennent des annonceurs et de partenaires d'étude : leur nombre varie d'un jour à l'autre et nous ne pouvons garantir ni quantité, ni fréquence, ni revenu.",
         },
         {
           kind: 'note',
@@ -188,7 +192,7 @@ export const termsFr: LegalDoc = {
       blocks: [
         {
           kind: 'p',
-          text: "Les points sont une récompense créditée sur votre compte au titre d'une licence limitée, personnelle et révocable. Ils ne sont ni de l'argent, ni un dépôt, ni une monnaie légale, ni votre propriété. Cela vaut pour chaque point, qu'il provienne d'une publicité, d'un sondage, d'une tâche, d'un jeu-récompense, d'un code cadeau ou d'un parrainage.",
+          text: "Les points sont une récompense créditée sur votre compte au titre d'une licence limitée, personnelle et révocable. Ils ne sont ni de l'argent, ni un dépôt, ni une monnaie légale, ni votre propriété. Cela vaut pour chaque point, qu'il provienne d'une publicité, d'un article, d'un sondage, d'une tâche, d'un jeu-récompense, d'un code cadeau ou d'un parrainage.",
         },
         { kind: 'p', text: 'Cela signifie que les points :' },
         {
@@ -419,6 +423,10 @@ export const termsFr: LegalDoc = {
         {
           kind: 'p',
           text: "Le service est fourni en l'état. Nous ne garantissons ni son absence d'erreurs, ni la disponibilité permanente des publicités, ni un montant de gains.",
+        },
+        {
+          kind: 'p',
+          text: "Nous ne sommes affiliés à aucun des annonceurs dont les publicités, les articles et les liens apparaissent sur SidePerks, et leur diffusion ne vaut pas recommandation. En suivant un lien vers un annonceur, vous quittez SidePerks : ce qui s'y passe relève de votre relation avec lui. Nous ne sommes responsables ni de son site ou de son application, ni de ce que vous y achetez, payez ou perdez, ni d'un produit ou service décevant. N'envoyez jamais d'argent à quiconque prétend que c'est nécessaire pour gagner ou retirer sur SidePerks : rien ici ne vous demande de payer un annonceur.",
         },
         {
           kind: 'p',

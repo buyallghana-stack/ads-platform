@@ -41,7 +41,7 @@ export type OverviewMetrics = {
   users: Trend & { newToday: number }
   subscriptions: Trend & { active: number }
   pendingPayouts: { count: number; ghs: number }
-  adsLive: { total: number; videos: number; surveys: number }
+  adsLive: { total: number; videos: number; surveys: number; links: number }
 }
 
 /** One bar per day: money in against money out. */
@@ -219,7 +219,11 @@ export type Person = {
 /** Mirrors public.ad_status exactly. `exhausted` is set by the database when
  *  an ad delivers its budget; no operator ever picks it. */
 export type AdStatus = 'draft' | 'active' | 'paused' | 'exhausted' | 'archived'
-export type AdFormat = 'video' | 'survey'
+/**
+ * Mirrors public.ad_format. `link` since 2026-07-31: an article the user
+ * reads, ending in one link out to the advertiser — the click is what pays.
+ */
+export type AdFormat = 'video' | 'survey' | 'link'
 export type VideoSource = 'upload' | 'youtube'
 export type AnswerFormat = 'multiple_choice' | 'short_text'
 export type ConditionMode = 'all' | 'any'
@@ -347,6 +351,13 @@ export type AdDraft = {
    */
   ctaLabel: string
   ctaLinks: CtaLink[]
+
+  /**
+   * The piece a LINK ad asks the reader to read, before the link that pays.
+   * Empty on every other format — a video says what it has to say in the
+   * video, and a survey asks rather than tells.
+   */
+  articleBody: string
 
   /* Read-only context, carried so the form can explain itself. */
   completions: number

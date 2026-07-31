@@ -86,10 +86,10 @@ export function AdResult({
   onNextAd,
 }: {
   result: SubmitAdResult
-  /** A survey has nothing to re-watch, so "Watch again" is the wrong word for
-   *  half of these screens. The copy branches on format rather than pretending
-   *  every ad is a video. */
-  format: 'video' | 'survey'
+  /** A survey has nothing to re-watch and a link ad has nothing to watch at
+   *  all, so "Watch again" is the wrong word for two thirds of these screens.
+   *  The copy branches on format rather than pretending every ad is a video. */
+  format: 'video' | 'survey' | 'link'
   /** Close and move on to the rest of the feed. */
   onNext: () => void
   /** The ad just watched, for the advertiser's links. */
@@ -113,13 +113,18 @@ export function AdResult({
   const shape = SHAPES[result.outcome] ?? SHAPES.error
   const { Icon } = shape
   const isSurvey = format === 'survey'
+  const isLink = format === 'link'
 
-  /* Only the two retry-flavoured outcomes read differently for a survey;
-     everything else ("daily limit", "no tries left") is format-neutral. */
+  /* Only the retry-flavoured outcomes read differently per format; everything
+     else ("daily limit", "no tries left") is format-neutral. A link ad cannot
+     be "incorrect" — it has no questions — but it CAN be too fast, which on
+     this format means the article was not open long enough. */
   const bodyKey =
     isSurvey && (shape.key === 'incorrect' || shape.key === 'notWatched')
       ? `${shape.key}Survey`
-      : shape.key
+      : isLink && (shape.key === 'tooFast' || shape.key === 'notWatched')
+        ? `${shape.key}Link`
+        : shape.key
 
   return (
     <div className="flex flex-col items-center gap-4 px-6 py-8 text-center">
@@ -134,7 +139,11 @@ export function AdResult({
 
       <div className="space-y-1.5">
         <h2 className="text-[1.125rem] font-semibold text-ink-900">
-          {t(`result.${shape.key}.title`)}
+          {/* The survey variants restate the body only — "Not quite" is still
+              the right heading for one. The link variants restate both, because
+              "Watch it first" is a heading about a thing this format does not
+              have. */}
+          {t(`result.${isLink && bodyKey !== shape.key ? bodyKey : shape.key}.title`)}
         </h2>
         <p className="max-w-[34ch] text-[0.875rem] leading-relaxed text-ink-500">
           {t(`result.${bodyKey}.body`, { count: result.attemptsRemaining })}
@@ -189,7 +198,11 @@ export function AdResult({
 
         {shape.retry && result.attemptsRemaining > 0 && (
           <Button fullWidth onClick={onRetry} leadingIcon={<RotateCcw />}>
-            {isSurvey ? t('result.tryAgain') : t('result.watchAgain')}
+            {isLink
+              ? t('result.readAgain')
+              : isSurvey
+                ? t('result.tryAgain')
+                : t('result.watchAgain')}
           </Button>
         )}
 

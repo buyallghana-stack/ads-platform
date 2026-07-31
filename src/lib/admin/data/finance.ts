@@ -43,7 +43,7 @@ type MetricsJson = {
   users: TrendRow & { newToday: number }
   subscriptions: TrendRow & { active: number }
   pendingPayouts: { count: number; ghs: number | string }
-  adsLive: { total: number; videos: number; surveys: number }
+  adsLive: { total: number; videos: number; surveys: number; links: number }
 }
 
 export async function getOverviewMetrics(): Promise<OverviewMetrics> {

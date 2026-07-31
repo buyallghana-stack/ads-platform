@@ -20,6 +20,7 @@ import { AdCta } from './AdCta'
 import { AdResult } from './AdResult'
 import { QuestionSheet } from './QuestionSheet'
 import { VideoStage } from './VideoStage'
+import { AdDisclosure } from '@/components/ads/AdDisclosure'
 
 /**
  * The watching surface: a full-screen overlay rather than its own route.
@@ -29,10 +30,11 @@ import { VideoStage } from './VideoStage'
  * open a lot of them in a row. An overlay keeps the feed alive underneath, so
  * finishing an ad returns straight to where they were with one fewer card.
  *
- * It drives both formats because they are the same transaction with the
+ * It drives videos and surveys because they are the same transaction with the
  * timeline removed: a survey is a video ad whose questions all happen at
  * second zero. Sharing the component keeps answer collection and submission
- * identical for both.
+ * identical for both. It does NOT drive link ads — those have no timeline and
+ * no questions at all, and live in LinkAdReader for the reasons set out there.
  *
  * WHERE THE QUESTIONS COME FROM
  * -----------------------------
@@ -634,6 +636,9 @@ export function AdPlayer({
       {isVideo && (phase === 'playing' || phase === 'intro') && (
         <div className="shrink-0 px-3 pb-4 sm:px-5">
           <AdCta label={ad.ctaLabel} links={ad.ctaLinks} tone="onVideo" />
+          {/* Beside the links that leave the app, which is where it means
+              something — the lawyer's requirement, 2026-07-31. */}
+          <AdDisclosure tone="onDark" className="mt-2.5" />
         </div>
       )}
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-import { CheckCheck, Gem, ListChecks, PlayCircle, RefreshCw } from 'lucide-react'
+import { CheckCheck, Gem, Link2, ListChecks, PlayCircle, RefreshCw } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/Button'
@@ -92,6 +92,15 @@ function Digits({ value }: { value: string }) {
 
 export type CaughtUpVariant = 'capped' | 'pointsCapped' | 'blocked' | 'empty'
 
+/** One of the other tabs, and how many ads are waiting on it. */
+export type OtherTab = { key: 'video' | 'survey' | 'link'; count: number }
+
+const SWITCH_ICON = {
+  video: PlayCircle,
+  survey: ListChecks,
+  link: Link2,
+} as const
+
 export function CaughtUp({
   variant,
   format,
@@ -99,21 +108,21 @@ export function CaughtUp({
   serverNow,
   dailyCap,
   tierName,
-  otherCount,
+  others,
   onSwitch,
 }: {
   variant: CaughtUpVariant
-  format: 'video' | 'survey'
+  format: 'video' | 'survey' | 'link'
   /** Epoch ms of the next midnight — when the daily allowance refills. */
   resetAt: number
   /** Server clock at render time; keeps the first countdown frame in step. */
   serverNow: number
   dailyCap: number
   tierName: string
-  /** How many ads wait on the other tab, so the offer to switch is only made
-   *  when there is something to switch to. */
-  otherCount: number
-  onSwitch: () => void
+  /** The other tabs that have ads waiting. Empty means no offer to switch —
+   *  a button leading to another empty tab is worse than no button. */
+  others: OtherTab[]
+  onSwitch: (key: OtherTab['key']) => void
 }) {
   const t = useTranslations('ads')
   const router = useRouter()
@@ -158,7 +167,7 @@ export function CaughtUp({
             ? t('caughtUp.pointsCappedBody')
             : blocked
               ? t('caughtUp.blockedBody')
-              : t(format === 'video' ? 'caughtUp.emptyVideoBody' : 'caughtUp.emptySurveyBody')}
+              : t(`caughtUp.empty.${format}`)}
       </p>
 
       {/* ---- Countdown ---------------------------------------------------
@@ -185,17 +194,25 @@ export function CaughtUp({
           option. Leading with "upgrade" on a screen that says "come back
           later" reads as a shakedown. */}
       <div className="mt-6 flex w-full max-w-[22rem] flex-col gap-2">
-        {otherCount > 0 && !pointsCapped && !blocked && (
-          <Button
-            fullWidth
-            onClick={onSwitch}
-            leadingIcon={format === 'video' ? <ListChecks /> : <PlayCircle />}
-          >
-            {t(format === 'video' ? 'caughtUp.switchToSurveys' : 'caughtUp.switchToVideos', {
-              count: otherCount,
-            })}
-          </Button>
-        )}
+        {!pointsCapped &&
+          !blocked &&
+          others.map(({ key, count }, i) => {
+            const Icon = SWITCH_ICON[key]
+            return (
+              <Button
+                key={key}
+                fullWidth
+                /* Only the first offer is the loud one. Two primary buttons
+                   stacked read as a choice between equals, when what is meant
+                   is "here is something to do, and here is another". */
+                variant={i === 0 ? 'primary' : 'secondary'}
+                onClick={() => onSwitch(key)}
+                leadingIcon={<Icon />}
+              >
+                {t(`caughtUp.switchTo.${key}`, { count })}
+              </Button>
+            )
+          })}
 
         {(empty || blocked) && (
           <Button

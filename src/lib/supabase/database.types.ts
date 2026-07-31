@@ -230,6 +230,38 @@ export type Database = {
           },
         ]
       }
+      ad_link_clicks: {
+        Row: {
+          ad_id: string
+          clicked_at: string
+          id: string
+          points_awarded: number
+          user_id: string
+        }
+        Insert: {
+          ad_id: string
+          clicked_at?: string
+          id?: string
+          points_awarded?: number
+          user_id: string
+        }
+        Update: {
+          ad_id?: string
+          clicked_at?: string
+          id?: string
+          points_awarded?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_link_clicks_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "ads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ad_questions: {
         Row: {
           ad_id: string
@@ -352,6 +384,7 @@ export type Database = {
       ads: {
         Row: {
           advertiser_name: string | null
+          article_body: string | null
           completions_count: number
           created_at: string
           created_by: string | null
@@ -377,6 +410,7 @@ export type Database = {
         }
         Insert: {
           advertiser_name?: string | null
+          article_body?: string | null
           completions_count?: number
           created_at?: string
           created_by?: string | null
@@ -402,6 +436,7 @@ export type Database = {
         }
         Update: {
           advertiser_name?: string | null
+          article_body?: string | null
           completions_count?: number
           created_at?: string
           created_by?: string | null
@@ -2891,6 +2926,7 @@ export type Database = {
           advertiser_name: string
           attempts_remaining: number
           attempts_used: number
+          article_body: string | null
           cta_label: string
           cta_links: Json
           description: string
@@ -3407,6 +3443,17 @@ export type Database = {
         }
         Returns: undefined
       }
+      record_ad_link_click: {
+        Args: { p_user_id: string; p_ad_id: string }
+        Returns: {
+          outcome: string
+          points_awarded: number
+          attempts_used: number
+          attempts_remaining: number
+          new_balance: number | null
+          message: string | null
+        }
+      }
       register_ad_view: {
         Args: { p_ad_id: string; p_user_id: string }
         Returns: string
@@ -3668,7 +3715,7 @@ export type Database = {
         | "earning_blocked"
         | "cooldown_active"
         | "points_cap_reached"
-      ad_format: "video" | "survey"
+      ad_format: "video" | "survey" | "link"
       ad_status: "draft" | "active" | "paused" | "exhausted" | "archived"
       alert_severity: "info" | "warning" | "critical"
       answer_format: "multiple_choice" | "short_text"
@@ -3895,7 +3942,7 @@ export const Constants = {
         "cooldown_active",
         "points_cap_reached",
       ],
-      ad_format: ["video", "survey"],
+      ad_format: ["video", "survey", "link"],
       ad_status: ["draft", "active", "paused", "exhausted", "archived"],
       alert_severity: ["info", "warning", "critical"],
       answer_format: ["multiple_choice", "short_text"],

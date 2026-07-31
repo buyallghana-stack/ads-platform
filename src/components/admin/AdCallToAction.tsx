@@ -65,6 +65,7 @@ export function AdCallToAction({
   links,
   errors,
   showErrors,
+  max = 6,
   onLabel,
   onLinks,
 }: {
@@ -72,6 +73,13 @@ export function AdCallToAction({
   links: CtaLink[]
   errors: AdErrors
   showErrors: boolean
+  /**
+   * How many destinations this ad may carry. Six for a video, where the links
+   * are an offer beside the film — but ONE for a link ad, where the link is
+   * the ad: two destinations would make "was the link clicked" a question
+   * with two different answers, and the database refuses it outright.
+   */
+  max?: number
   onLabel: (value: string) => void
   onLinks: (links: CtaLink[]) => void
 }) {
@@ -106,7 +114,11 @@ export function AdCallToAction({
             <div className="mb-2 flex items-center justify-between gap-2">
               <span className="inline-flex items-center gap-1.5 text-[0.6875rem] font-semibold tracking-[0.05em] text-ink-400 uppercase">
                 <Icon aria-hidden className="size-3.5" />
-                {index === 0 ? t('ctaPrimary') : t('ctaLinkN', { n: index + 1 })}
+                {max === 1
+                  ? t('ctaDestination')
+                  : index === 0
+                    ? t('ctaPrimary')
+                    : t('ctaLinkN', { n: index + 1 })}
               </span>
               <button
                 type="button"
@@ -159,7 +171,15 @@ export function AdCallToAction({
         )
       })}
 
-      {links.length < 6 && (
+      {/* A problem with the SET of links rather than with one of them: a link
+          ad with no destination, or with two. */}
+      {err('ctaLinks') && (
+        <p role="alert" className="text-[0.75rem] font-medium text-danger-600">
+          {err('ctaLinks')}
+        </p>
+      )}
+
+      {links.length < max && (
         <Button
           type="button"
           variant="secondary"
@@ -189,7 +209,9 @@ export function AdCallToAction({
         </Field>
       )}
 
-      <p className={cn('text-[0.6875rem] leading-relaxed text-ink-400')}>{t('ctaNote')}</p>
+      <p className={cn('text-[0.6875rem] leading-relaxed text-ink-400')}>
+        {t(max === 1 ? 'ctaNoteLink' : 'ctaNote')}
+      </p>
     </div>
   )
 }

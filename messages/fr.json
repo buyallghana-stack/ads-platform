@@ -577,7 +577,8 @@
     "tabs": {
       "label": "Type d'annonce",
       "video": "Vidéos",
-      "survey": "Sondages"
+      "survey": "Sondages",
+      "link": "Articles"
     },
     "allowance": {
       "label": "Annonces aujourd'hui",
@@ -585,7 +586,7 @@
       "points": "pts",
       "remaining": "{count, plural, one {# annonce restante aujourd'hui sur votre offre {tier}} other {# annonces restantes aujourd'hui sur votre offre {tier}}}",
       "spent": "Vous avez utilisé toutes les annonces de votre offre {tier} aujourd'hui.",
-      "remainingShared": "{count, plural, one {# annonce restante aujourd'hui — partagée entre vidéos et sondages} other {# annonces restantes aujourd'hui — partagées entre vidéos et sondages}}"
+      "remainingShared": "{count, plural, one {# publicité restante aujourd’hui — toutes catégories confondues} other {# publicités restantes aujourd’hui — toutes catégories confondues}}"
     },
     "card": {
       "reward": "+{points} pts",
@@ -593,23 +594,31 @@
       "questions": "{count, plural, one {# question} other {# questions}}",
       "watchOnly": "À regarder",
       "quick": "Rapide",
-      "triesLeft": "{count, plural, one {# essai restant} other {# essais restants}}"
+      "triesLeft": "{count, plural, one {# essai restant} other {# essais restants}}",
+      "readAndTap": "Lire, puis toucher",
+      "readSeconds": "lecture {seconds}s"
     },
     "caughtUp": {
       "title": "Vous êtes à jour",
       "cappedBody": "Vous avez terminé les {cap} annonces de votre offre {tier} aujourd'hui. Votre quota se recharge automatiquement.",
-      "emptyVideoBody": "Vous avez regardé toutes les vidéos disponibles pour l'instant. D'autres arrivent au fil de la journée.",
-      "emptySurveyBody": "Vous avez répondu à tous les sondages disponibles pour l'instant. D'autres arrivent au fil de la journée.",
       "resetLabel": "Nouvelles annonces dans",
       "resetHint": "Votre quota quotidien se recharge à minuit.",
       "checkNow": "Vérifier maintenant",
       "raiseLimit": "Augmenter ma limite quotidienne",
-      "switchToSurveys": "{count, plural, one {Répondre à # sondage à la place} other {Répondre à # sondages à la place}}",
-      "switchToVideos": "{count, plural, one {Regarder # vidéo à la place} other {Regarder # vidéos à la place}}",
       "blockedTitle": "Les gains sont en pause",
       "blockedBody": "Les gains sont en pause pour le moment : les annonces ne rapporteraient rien. Votre solde est intact. Réessayez sous peu.",
       "pointsCappedBody": "Vous avez atteint le maximum de points qu'il est possible de gagner en une journée. Il reste des annonces ici, mais elles ne rapporteraient rien jusqu'à la réinitialisation de votre total quotidien.",
-      "newAdsHint": "De nouvelles annonces paraissent chaque jour. Nous continuons de vérifier pendant que vous attendez."
+      "newAdsHint": "De nouvelles annonces paraissent chaque jour. Nous continuons de vérifier pendant que vous attendez.",
+      "empty": {
+        "video": "Vous avez regardé toutes les vidéos disponibles pour l'instant. D'autres arrivent au fil de la journée.",
+        "survey": "Vous avez répondu à tous les sondages disponibles pour l'instant. D'autres arrivent au fil de la journée.",
+        "link": "Vous avez lu tous les articles disponibles pour l’instant. D’autres arrivent au fil de la journée."
+      },
+      "switchTo": {
+        "video": "{count, plural, one {Regarder # vidéo à la place} other {Regarder # vidéos à la place}}",
+        "survey": "{count, plural, one {Répondre à # sondage à la place} other {Répondre à # sondages à la place}}",
+        "link": "{count, plural, one {Lire # article à la place} other {Lire # articles à la place}}"
+      }
     },
     "player": {
       "close": "Fermer",
@@ -700,7 +709,16 @@
       },
       "keepWatching": "Continuer à regarder",
       "nextAd": "Publicité suivante",
-      "backToAds": "Retour aux publicités"
+      "backToAds": "Retour aux publicités",
+      "readAgain": "Relire",
+      "tooFastLink": {
+        "title": "Encore quelques secondes",
+        "body": "Gardez l’article ouvert jusqu’au bout du compte à rebours, puis touchez le lien."
+      },
+      "notWatchedLink": {
+        "title": "Ouvrez d’abord l’article",
+        "body": "Ouvrez l’article et laissez le temps de lecture s’écouler avant de suivre le lien."
+      }
     },
     "blocked": {
       "pausedTitle": "Les gains sont en pause",
@@ -734,6 +752,15 @@
       "noAttempt": "Quitter ne consomme aucun de vos essais — seule une réponse en consomme un.",
       "stay": "Rester et terminer",
       "leave": "Quitter la publicité"
+    },
+    "disclosure": "SidePerks n'est pas affilié à ces annonceurs et ne les recommande pas. Tout ce que vous faites sur le site ou l'application d'un annonceur relève de votre relation avec lui : nous ne sommes pas responsables de l'argent que vous y dépensez ou perdez, ni d'un produit ou service décevant.",
+    "link": {
+      "visit": "Aller chez l’annonceur",
+      "waiting": "Encore {seconds}s de lecture",
+      "waitingHint": "Le lien paie une fois ce temps écoulé. Restez sur la page.",
+      "readyHint": "Touchez le lien et {points} points sont crédités immédiatement.",
+      "claiming": "Enregistrement de votre visite",
+      "noDestination": "Cette publicité n’a pas de lien pour l’instant. Rien n’a été décompté."
     }
   },
   "upgradeTab": {
@@ -1382,7 +1409,7 @@
       "pending": "En attente de décision",
       "reviewQueue": "Voir la file",
       "adsLive": "Annonces actives",
-      "adsSplit": "{videos} vidéos · {surveys} sondages",
+      "adsSplit": "{videos} vidéos · {surveys} sondages · {links} liens",
       "managePool": "Gérer le pool",
       "status": {
         "held": "En attente",
@@ -1613,8 +1640,6 @@
       "deliveredUnlimited": "{done} terminées · sans plafond de budget",
       "branching": "Conditionnel",
       "cues": "{count, plural, one {# point d’interruption} other {# points d’interruption}}",
-      "newVideo": "Nouvelle vidéo",
-      "newSurvey": "Nouveau sondage",
       "status": {
         "draft": "Brouillon",
         "active": "En ligne",
@@ -1624,7 +1649,8 @@
       },
       "format": {
         "video": "Vidéo",
-        "survey": "Sondage"
+        "survey": "Sondage",
+        "link": "Lien"
       },
       "source": {
         "upload": "Fichier interne",
@@ -1632,7 +1658,8 @@
       },
       "meta": {
         "video": "{seconds} s · {questions, plural, =0 {visionnage seul} one {# question} other {# questions}}",
-        "survey": "{questions, plural, =0 {visionnage seul} one {# question} other {# questions}}"
+        "survey": "{questions, plural, =0 {visionnage seul} one {# question} other {# questions}}",
+        "link": "lecture de {seconds}s · lien sortant"
       },
       "columns": {
         "ad": "Publicité",
@@ -1644,7 +1671,7 @@
       },
       "summary": {
         "live": "En ligne",
-        "liveSplit": "{videos, plural, one {# vidéo} other {# vidéos}} · {surveys, plural, one {# sondage} other {# sondages}}",
+        "liveSplit": "{videos, plural, one {# vidéo} other {# vidéos}} · {surveys, plural, one {# sondage} other {# sondages}} · {links, plural, one {# lien} other {# liens}}",
         "remaining": "Complétions restantes",
         "remainingHint": "sur toutes les publicités en ligne",
         "remainingUnlimited": "hors publicités sans plafond",
@@ -1708,17 +1735,20 @@
         "confirmDeleteBody": "Personne ne l’a regardée : elle sera supprimée avec ses questions. Action irréversible.",
         "confirmArchive": "Archiver cette publicité ?",
         "confirmArchiveBody": "Des personnes l’ont déjà regardée : elle est conservée plutôt que supprimée, car les tentatives qui justifient leurs gains doivent subsister. Elle ne sera plus jamais diffusée.",
-        "keep": "La conserver"
+        "keep": "La conserver",
+        "dwell": "Temps de lecture",
+        "article": "Article",
+        "articleWords": "{count, plural, one {# mot} other {# mots}}",
+        "articleList": "L'article et sa destination"
       },
       "editor": {
         "backToPool": "Publicités et sondages",
-        "newVideo": "Nouvelle publicité vidéo",
-        "newSurvey": "Nouveau sondage",
         "untitled": "Publicité sans titre",
         "copySuffix": "(copie)",
         "format": {
           "video": "Vidéo",
-          "survey": "Sondage"
+          "survey": "Sondage",
+          "link": "Lien"
         },
         "status": {
           "draft": "Brouillon",
@@ -1912,7 +1942,14 @@
             "tiktok": "Utilisez un identifiant comme @annonceur, ou le lien complet.",
             "youtube": "Utilisez un identifiant comme @annonceur, ou le lien complet.",
             "linkedin": "Utilisez un identifiant ou le lien complet."
-          }
+          },
+          "articleShort": "L'article doit faire au moins 40 caractères.",
+          "articleLong": "Les articles sont limités à 8 000 caractères.",
+          "dwellRequired": "Donnez un temps de lecture : sans lui, la publicité est un bouton qui distribue des points.",
+          "dwellMin": "Le temps de lecture doit être d’au moins 3 secondes.",
+          "dwellMax": "Le temps de lecture ne peut pas dépasser 600 secondes.",
+          "linkDestinationMissing": "Ajoutez le lien vers l'annonceur.",
+          "linkOneDestination": "Une publicité lien ne peut avoir qu’une seule destination."
         },
         "statusLabel": "Statut",
         "cta": "Appel à l’action",
@@ -1963,7 +2000,51 @@
         "ruleIsNot": "Q{n} n’est pas « {answer} »",
         "andJoin": " et ",
         "orJoin": " ou ",
-        "shownWhen": "Posée seulement si {rule}"
+        "shownWhen": "Posée seulement si {rule}",
+        "new": {
+          "video": "Nouvelle vidéo",
+          "survey": "Nouveau sondage",
+          "link": "Nouvelle publicité lien"
+        },
+        "article": "Article",
+        "articleHint": "Ce que la personne lit avant le lien. Écrivez-le comme l'annonceur veut être présenté — c'est la totalité de la publicité.",
+        "articleBody": "Texte",
+        "articlePlaceholder": "Qui est l'annonceur, ce qu'il propose, et pourquoi cliquer…",
+        "articleShortOf": "{count, plural, one {encore # caractère} other {encore # caractères}}",
+        "articleCount": "{count} / {max} caractères",
+        "dwell": "Temps de lecture",
+        "dwellHint": "Secondes pendant lesquelles l'article doit rester ouvert avant que le lien ne paie. C'est le seul frein de ce format.",
+        "destination": "Destination",
+        "destinationHint": "Le seul lien vers l'annonceur. Le clic est ce qui est payé, donc il ne peut y en avoir qu'un.",
+        "ctaDestination": "Destination",
+        "ctaNoteLink": "Le lien s'ouvre dans un nouvel onglet, et les points sont crédités au moment du clic — si le temps de lecture est écoulé.",
+        "summaryWords": "{count, plural, =0 {Aucun article encore} one {Article de # mot} other {Article de # mots}}",
+        "summaryDwell": "{seconds}s de lecture avant que le lien ne paie",
+        "summaryDestination": "Une destination définie",
+        "summaryNoDestination": "Aucune destination — la publicité ne peut pas être enregistrée",
+        "summaryLinkCaveat": "Personne ne peut vérifier si l'article a été lu, ni ce qui se passe après le clic."
+      },
+      "newAd": "Nouvelle publicité",
+      "chooser": {
+        "back": "Retour au parc",
+        "title": "Quel type de publicité ?",
+        "subtitle": "Les trois achètent une attention différente et se défendent différemment contre la fraude. Le choix est définitif : une publicité ne change pas de type une fois créée.",
+        "choose": "Choisir",
+        "video": {
+          "name": "Vidéo",
+          "body": "Un film à regarder, avec des questions au moment de votre choix ou aucune.",
+          "proof": "Prouvé par : le temps de visionnage mesuré par le serveur, et les réponses."
+        },
+        "survey": {
+          "name": "Sondage",
+          "body": "Des questions à répondre. Ce n'est pas un quiz : sans bonne réponse cochée, toute réponse est acceptée.",
+          "proof": "Prouvé par : les réponses elles-mêmes, qui sont la recherche de l'annonceur."
+        },
+        "link": {
+          "name": "Lien",
+          "body": "Un article à lire, puis un seul lien vers l'annonceur. Le clic paie.",
+          "proof": "Prouvé par : le temps de lecture avant le clic, et rien d'autre — personne ne peut voir ce qui se passe chez l'annonceur."
+        }
       }
     },
     "advertisers": {

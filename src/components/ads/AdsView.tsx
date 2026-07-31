@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-import { AlertTriangle, ListChecks, PauseCircle, PlayCircle } from 'lucide-react'
+import { AlertTriangle, ListChecks, PauseCircle, PlayCircle, Link2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import type { SubmitAdResult } from '@/app/[locale]/(app)/ads/actions'
@@ -12,7 +12,9 @@ import { cn } from '@/lib/cn'
 
 import { AdCard } from './AdCard'
 import { AdPlayer } from './AdPlayer'
+import { LinkAdReader } from './LinkAdReader'
 import { CaughtUp, type CaughtUpVariant } from './CaughtUp'
+import { AdDisclosure } from '@/components/ads/AdDisclosure'
 
 /**
  * The Ads tab.
@@ -45,7 +47,11 @@ import { CaughtUp, type CaughtUpVariant } from './CaughtUp'
  * registered the ad the user just finished.
  */
 
-type Tab = 'video' | 'survey'
+/* Three since 2026-07-31. Kept as a list rather than a union of hard-coded
+   branches, because the previous shape had the two formats spelled out in
+   seven places and a third could not be added without touching all of them. */
+const TABS = ['video', 'survey', 'link'] as const
+type Tab = (typeof TABS)[number]
 
 /** Outcomes that mean the ad is gone from this user's feed for good. */
 const CLOSES_AD = new Set(['correct', 'locked', 'already_completed', 'not_eligible'])
@@ -95,8 +101,12 @@ export function AdsView({ data }: { data: AdsData }) {
   const stopped: null | 'points' | 'blocked' =
     sessionStop ?? (data.status.pointsCapReached ? 'points' : null)
 
-  const videos = data.videos.filter((a) => !completedIds.includes(a.id))
-  const surveys = data.surveys.filter((a) => !completedIds.includes(a.id))
+  const unfinished = (list: FeedAd[]) => list.filter((a) => !completedIds.includes(a.id))
+  const byTab: Record<Tab, FeedAd[]> = {
+    video: unfinished(data.videos),
+    survey: unfinished(data.surveys),
+    link: unfinished(data.links),
+  }
 
   const remainingToday = Math.max(data.status.remainingToday - spent, 0)
   const completedToday = data.status.completedToday + spent
@@ -105,17 +115,33 @@ export function AdsView({ data }: { data: AdsData }) {
   /* Zeroed while earning is stopped: the ads still exist, but offering "4"
      on the tab beside a body that says you cannot earn today is the screen
      arguing with itself. */
-  const videoCount = stopped ? 0 : Math.min(videos.length, remainingToday)
-  const surveyCount = stopped ? 0 : Math.min(surveys.length, remainingToday)
+  /* The badge is min(ads of that format, allowance) because the daily cap is
+     SHARED across formats — showing supply alone would promise twelve videos
+     to somebody with two ads left. Zeroed while earning is stopped: offering
+     "4" beside a body that says you cannot earn today is the screen arguing
+     with itself. */
+  const countFor = (key: Tab) => (stopped ? 0 : Math.min(byTab[key].length, remainingToday))
+  const counts: Record<Tab, number> = {
+    video: countFor('video'),
+    survey: countFor('survey'),
+    link: countFor('link'),
+  }
 
-  // Open on whichever side has something to do, so a user with no videos left
-  // does not land on an empty tab and assume the product is broken.
-  const [tab, setTab] = useState<Tab>(() => (videoCount === 0 && surveyCount > 0 ? 'survey' : 'video'))
+  // Open on whichever tab has something to do, so somebody with no videos left
+  // does not land on an empty one and assume the product is broken.
+  const [tab, setTab] = useState<Tab>(() => TABS.find((key) => counts[key] > 0) ?? 'video')
   const [playing, setPlaying] = useState<FeedAd | null>(null)
 
-  const list = tab === 'video' ? videos : surveys
-  const count = tab === 'video' ? videoCount : surveyCount
-  const otherCount = tab === 'video' ? surveyCount : videoCount
+  const list = byTab[tab]
+  const count = counts[tab]
+  /* The OTHER tabs that have something on them. A list rather than a total
+     since there are three: "answer 2 surveys instead" is an offer somebody can
+     act on, where "6 ads on other tabs" is a number they then have to go and
+     hunt through. */
+  const others = TABS.filter((key) => key !== tab && counts[key] > 0).map((key) => ({
+    key,
+    count: counts[key],
+  }))
 
   const caughtUpVariant: CaughtUpVariant =
     stopped === 'points'
@@ -232,7 +258,7 @@ export function AdsView({ data }: { data: AdsData }) {
         <p className="mt-2 text-[0.75rem] text-ink-500">
           {remainingToday === 0
             ? t('allowance.spent', { tier: data.status.tierName })
-            : remainingToday < videos.length + surveys.length
+            : remainingToday < byTab.video.length + byTab.survey.length + byTab.link.length
               ? t('allowance.remainingShared', { count: remainingToday })
               : t('allowance.remaining', { count: remainingToday, tier: data.status.tierName })}
         </p>
@@ -249,10 +275,10 @@ export function AdsView({ data }: { data: AdsData }) {
         className="animate-rise mt-4 flex gap-1 rounded-(--radius-input) bg-ink-100 p-1"
         style={{ '--rise-delay': '0.05s' } as React.CSSProperties}
       >
-        {(['video', 'survey'] as const).map((key) => {
+        {TABS.map((key) => {
           const selected = key === tab
-          const badge = key === 'video' ? videoCount : surveyCount
-          const Icon = key === 'video' ? PlayCircle : ListChecks
+          const badge = counts[key]
+          const Icon = key === 'video' ? PlayCircle : key === 'survey' ? ListChecks : Link2
           return (
             <button
               key={key}
@@ -260,21 +286,30 @@ export function AdsView({ data }: { data: AdsData }) {
               aria-selected={selected}
               onClick={() => setTab(key)}
               className={cn(
-                'flex flex-1 items-center justify-center gap-2 rounded-[calc(var(--radius-input)-0.25rem)]',
-                'px-3 py-2.5 text-[0.875rem] font-semibold transition-colors',
+                /* min-w-0 and the truncate below are what keep THREE tabs
+                   inside a 390px phone. Without them the strip is wider than
+                   the viewport and the whole page scrolls sideways — which is
+                   exactly what happened the first time a third format was
+                   added. */
+                'flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-[calc(var(--radius-input)-0.25rem)]',
+                'px-2 py-2.5 text-[0.8125rem] font-semibold transition-colors',
+                'sm:gap-2 sm:px-3 sm:text-[0.875rem]',
                 selected
                   ? 'bg-surface text-ink-900 shadow-[0_1px_2px_0_rgb(15_23_42/0.08)]'
                   : 'text-ink-500 hover:text-ink-700',
               )}
             >
+              {/* The icon is the first thing to go on the narrowest screens:
+                  the label already says which format this is, and the count
+                  beside it is the thing being read. */}
               <Icon
                 aria-hidden
-                className={cn('size-4', selected ? 'text-brand-600' : 'text-ink-400')}
+                className={cn('hidden size-4 shrink-0 sm:block', selected ? 'text-brand-600' : 'text-ink-400')}
               />
-              {t(`tabs.${key}`)}
+              <span className="truncate">{t(`tabs.${key}`)}</span>
               <span
                 className={cn(
-                  'min-w-6 rounded-full px-1.5 py-0.5 text-[0.6875rem] font-bold tabular-nums',
+                  'min-w-5 shrink-0 rounded-full px-1.5 py-0.5 text-[0.6875rem] font-bold tabular-nums sm:min-w-6',
                   selected
                     ? badge > 0
                       ? 'bg-brand-600 text-white'
@@ -289,8 +324,12 @@ export function AdsView({ data }: { data: AdsData }) {
         })}
       </div>
 
+      {/* Required by the operator's lawyer: seen every time somebody arrives
+          to watch, not only inside an ad. */}
+      <AdDisclosure className="mt-3" />
+
       {/* ---- Feed --------------------------------------------------------- */}
-      <div role="tabpanel" className="mt-4">
+      <div role="tabpanel" className="mt-3">
         {count === 0 ? (
           <CaughtUp
             variant={caughtUpVariant}
@@ -299,8 +338,8 @@ export function AdsView({ data }: { data: AdsData }) {
             serverNow={data.now}
             dailyCap={data.status.dailyAdCap}
             tierName={data.status.tierName}
-            otherCount={otherCount}
-            onSwitch={() => setTab(tab === 'video' ? 'survey' : 'video')}
+            others={others}
+            onSwitch={setTab}
           />
         ) : (
           <ul
@@ -332,7 +371,25 @@ export function AdsView({ data }: { data: AdsData }) {
         )}
       </div>
 
-      {playing && (
+      {/* Two surfaces, chosen by format. A link ad has no timeline and no
+          questions, so it gets a reader rather than a player — see
+          LinkAdReader for why that is a separate component and not a third
+          branch inside the player. */}
+      {playing && playing.format === 'link' && (
+        <LinkAdReader
+          key={playing.id}
+          ad={playing}
+          nextAd={list.slice(0, count).find((a) => a.id !== playing.id) ?? null}
+          onClose={() => setPlaying(null)}
+          onNextAd={() => {
+            const next = list.slice(0, count).find((a) => a.id !== playing.id)
+            setPlaying(next ?? null)
+          }}
+          onResolved={handleResolved}
+        />
+      )}
+
+      {playing && playing.format !== 'link' && (
         <AdPlayer
           // Keyed by ad so opening a second ad gets a genuinely fresh player
           // rather than a reused one holding the previous ad's questions.

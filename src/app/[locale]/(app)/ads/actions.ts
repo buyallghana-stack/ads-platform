@@ -163,3 +163,46 @@ export async function submitAd(
     message: data.message ?? null,
   }
 }
+
+
+/**
+ * The user tapped through to the advertiser on a LINK ad.
+ *
+ * The award is decided by the database, not here: `record_ad_link_click`
+ * writes the visit and then calls the same `submit_ad_answers` that pays for a
+ * video, so the dwell time, the daily caps, the earning pause and the
+ * double-credit guard all apply exactly as they do to every other format.
+ * This function proves who is asking and hands back what the database decided.
+ *
+ * The user id comes from the verified session and never from the payload, and
+ * the RPC is revoked from `authenticated` — a browser cannot award itself
+ * points by calling it directly.
+ */
+export async function clickAdLink(adId: string): Promise<SubmitAdResult> {
+  const empty: SubmitAdResult = {
+    outcome: 'error',
+    pointsAwarded: 0,
+    attemptsRemaining: 0,
+    newBalance: null,
+    message: null,
+  }
+
+  const user = await getSessionUser()
+  if (!user) return empty
+
+  const admin = createAdminClient()
+  const { data, error } = await admin.rpc('record_ad_link_click', {
+    p_user_id: user.id,
+    p_ad_id: adId,
+  })
+
+  if (error || !data) return empty
+
+  return {
+    outcome: (data.outcome ?? 'error') as AdOutcome,
+    pointsAwarded: Number(data.points_awarded ?? 0),
+    attemptsRemaining: Number(data.attempts_remaining ?? 0),
+    newBalance: data.new_balance === null ? null : Number(data.new_balance),
+    message: data.message ?? null,
+  }
+}

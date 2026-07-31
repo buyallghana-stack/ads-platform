@@ -14,10 +14,10 @@ import type { Database } from '@/lib/supabase/database.types'
  * lives in the database and no service key is needed on a screen that is
  * loaded on every visit.
  *
- * The feed deliberately arrives in ONE call covering both formats rather than
- * one call per tab. Switching between Videos and Surveys is a local state
- * change with no spinner and no round trip — which matters much more on a
- * Ghanaian mobile connection than the few extra rows cost.
+ * The feed deliberately arrives in ONE call covering all three formats rather
+ * than one call per tab. Switching between Videos, Surveys and Articles is a
+ * local state change with no spinner and no round trip — which matters much
+ * more on a Ghanaian mobile connection than the few extra rows cost.
  */
 
 export type AdFormat = Database['public']['Enums']['ad_format']
@@ -51,11 +51,21 @@ export type FeedAd = {
   attemptsRemaining: number
   attemptsUsed: number
   /**
-   * The advertiser's call to action. Video ads only: the database refuses one
-   * on a survey, so this is always empty there and the player never asks.
+   * The advertiser's call to action. Never on a survey — the database refuses
+   * one there, so it is always empty and the player never asks. On a LINK ad
+   * there is exactly one, and it is the thing that pays.
    */
   ctaLabel: string | null
   ctaLinks: CtaLink[]
+  /**
+   * The piece the user reads on a LINK ad, before the link that pays.
+   *
+   * Travels with the feed rather than waiting for a second call: it is a few
+   * hundred words, the tab already fetches everything it shows in one round
+   * trip, and a spinner between tapping a card and reading it is what makes a
+   * cheap phone feel broken. Null on every other format.
+   */
+  articleBody: string | null
 }
 
 export type EarningStatus = {
@@ -83,6 +93,8 @@ export type AdsData = {
   status: EarningStatus
   videos: FeedAd[]
   surveys: FeedAd[]
+  /** Read-an-article-then-click-through ads (2026-07-31). */
+  links: FeedAd[]
   /** Epoch ms of the next daily reset. The counters key off utc_today(), and
    *  Ghana keeps GMT all year, so this is local midnight for this audience. */
   resetAt: number
@@ -134,6 +146,7 @@ export async function getAdsData(userId: string): Promise<AdsData> {
     // jsonb arrives as unknown; anything malformed simply renders nothing,
     // and ctaHref refuses whatever it cannot turn into a safe link.
     ctaLinks: Array.isArray(r.cta_links) ? (r.cta_links as unknown as CtaLink[]) : [],
+    articleBody: r.article_body ?? null,
   }))
 
   return {
@@ -156,6 +169,7 @@ export async function getAdsData(userId: string): Promise<AdsData> {
     },
     videos: ads.filter((a) => a.format === 'video'),
     surveys: ads.filter((a) => a.format === 'survey'),
+    links: ads.filter((a) => a.format === 'link'),
     resetAt: nextDailyReset(),
     now: Date.now(),
   }

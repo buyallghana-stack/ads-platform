@@ -1,4 +1,4 @@
-import { ListChecks, Play } from 'lucide-react'
+import { FileText, ListChecks, Play } from 'lucide-react'
 
 import { cn } from '@/lib/cn'
 
@@ -50,10 +50,10 @@ export function AdCover({
   seed: string
   src: string | null
   title: string
-  format: 'video' | 'survey'
+  format: 'video' | 'survey' | 'link'
   className?: string
 }) {
-  const Icon = format === 'video' ? Play : ListChecks
+  const Icon = format === 'video' ? Play : format === 'link' ? FileText : ListChecks
 
   return (
     <div

@@ -57,6 +57,7 @@ export const privacyFr: LegalDoc = {
           kind: 'list',
           items: [
             "les publicités et sondages que vous avez terminés, quand, jusqu'où, et vos réponses à la question d'attention ;",
+            "les annonceurs vers lesquels vous avez suivi un lien depuis une publicité article, et quand — nous enregistrons que le lien a été suivi et ce qu'il vous a rapporté, et rien de ce que vous avez fait sur le site de l'annonceur ;",
             'vos points, transactions, demandes de retrait et historique de formules ;',
             "votre progression dans les tâches et les récompenses de tâches que vous avez réclamées ;",
             "les parties de jeux-récompenses utilisées et les lots obtenus ;",
@@ -93,7 +94,7 @@ export const privacyFr: LegalDoc = {
           kind: 'list',
           items: [
             "Pour gérer votre compte et vous payer — impossible de fournir le service sans cela. Base : exécution de notre contrat.",
-            "Pour faire fonctionner les fonctionnalités que vous utilisez — créditer les publicités et sondages, mesurer la progression des tâches, attribuer et enregistrer les lots des jeux-récompenses, appliquer les codes cadeaux et établir le classement. Base : exécution de notre contrat.",
+            "Pour faire fonctionner les fonctionnalités que vous utilisez — créditer les publicités, les articles et les sondages, mesurer la progression des tâches, attribuer et enregistrer les lots des jeux-récompenses, appliquer les codes cadeaux et établir le classement. Base : exécution de notre contrat.",
             "Pour confirmer que les visionnages sont authentiques et prévenir la fraude, les comptes multiples et les abus. Base : notre intérêt légitime à protéger le service, les annonceurs et les utilisateurs honnêtes.",
             "Pour sécuriser le service, y compris les relevés de connexion et les protections que vous activez. Base : intérêt légitime et, pour certains enregistrements, obligation légale.",
             "Pour respecter nos obligations légales, fiscales et comptables, dont la conservation des mouvements d'argent. Base : obligation légale.",

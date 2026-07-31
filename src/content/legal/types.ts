@@ -47,7 +47,7 @@ export const LEGAL_ENTITY = {
   registrationNumber: null as string | null,
   /** Business address users can write to. */
   address: 'East Legon, BLK54, Vantage Office' as string | null,
-  contactEmail: 'buyallghana@gmail.com',
+  contactEmail: 'info@sideperks.org',
   country: 'Ghana',
 }
 
@@ -95,12 +95,17 @@ export function businessDetails(locale: 'en' | 'fr' = 'en'): string[] {
 }
 
 /**
- * Flip to true once a qualified lawyer has reviewed the wording AND the entity
- * details above are filled in. Until then every legal page carries a banner
- * saying the document is a draft under review — which is the honest state, and
- * far better than silently presenting unreviewed text as binding.
+ * True since 2026-07-31: the operator reports that their lawyer has reviewed
+ * and approved both documents, so the draft banner comes down.
+ *
+ * WHAT FLIPPING THIS MEANS, and why it is one line rather than a setting: the
+ * pages stop saying the wording is provisional, which is a claim about the
+ * text as it stands TODAY. Any material change to what the product does —
+ * a new earning route, a new disclosure, another referral level — makes that
+ * claim stale. The honest move then is to set this back to false until it has
+ * been looked at again, not to leave it true because it once was.
  */
-export const LEGAL_REVIEWED = false
+export const LEGAL_REVIEWED = true
 
 /** The trading name to use in prose until a legal name is registered. */
 export function entityName(): string {

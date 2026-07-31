@@ -1,6 +1,6 @@
 'use client'
 
-import { HelpCircle, ListChecks, Play, RotateCcw } from 'lucide-react'
+import { BookOpen, HelpCircle, ListChecks, Play, RotateCcw } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import type { FeedAd } from '@/lib/ads/data'
@@ -19,11 +19,12 @@ import { AdCover } from './AdCover'
  * the reward as the one piece of chrome that belongs to us rather than to the
  * genre.
  *
- * Surveys reuse the same card with a different lead icon and a question count
- * where a duration would be. They are deliberately NOT given their own colour:
- * the platform's accent hues carry fixed meanings (violet = plans, orange =
- * referrals) and inventing a sixth for "survey" would erode that. Format is
- * signalled by icon and by what the metadata says, which is enough.
+ * Surveys and link ads reuse the same card with a different lead icon, and a
+ * question count or a reading time where a duration would be. None of them is
+ * given its own colour: the platform's accent hues carry fixed meanings
+ * (violet = plans, orange = referrals) and inventing one per format would
+ * erode that. Format is signalled by icon and by what the metadata says, which
+ * is enough.
  */
 
 /** Advertiser initial in a tinted tile — the "who posted this" affordance. */
@@ -64,6 +65,7 @@ export function AdCard({
 }) {
   const t = useTranslations('ads')
   const isVideo = ad.format === 'video'
+  const isLink = ad.format === 'link'
   const duration = formatDuration(ad.durationSeconds)
   const retried = ad.attemptsUsed > 0
 
@@ -119,6 +121,8 @@ export function AdCard({
           >
             {isVideo ? (
               <Play className="size-6 translate-x-[1px] fill-current" strokeWidth={0} />
+            ) : isLink ? (
+              <BookOpen className="size-6" strokeWidth={2.2} />
             ) : (
               <ListChecks className="size-6" strokeWidth={2.2} />
             )}
@@ -134,7 +138,12 @@ export function AdCard({
             'bg-black/55 px-2 py-1 text-[0.6875rem] font-medium text-white backdrop-blur-[2px]',
           )}
         >
-          {ad.questionCount === 0 ? (
+          {/* A link ad asks for a read and one tap, and says so — being told
+              afterwards that you were expected to leave the app is the kind
+              of surprise that makes somebody distrust the whole feed. */}
+          {isLink ? (
+            t('card.readAndTap')
+          ) : ad.questionCount === 0 ? (
             t('card.watchOnly')
           ) : (
             <>
@@ -153,7 +162,11 @@ export function AdCard({
               'text-[0.6875rem] font-semibold text-white tabular-nums backdrop-blur-[2px]',
             )}
           >
-            {duration ?? t('card.quick')}
+            {/* A link ad's reading time is a real number the user is held to,
+                so it goes where a video puts its length. */}
+            {isLink && ad.minWatchSeconds
+              ? t('card.readSeconds', { seconds: ad.minWatchSeconds })
+              : (duration ?? t('card.quick'))}
           </span>
         )}
 

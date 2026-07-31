@@ -62,7 +62,17 @@ export function blankQuestion(format: AdFormat): AdQuestionDraft {
   }
 }
 
-export function blankDraft(format: AdFormat): AdDraft {
+/**
+ * A new ad of the given format.
+ *
+ * `linkDwellSeconds` comes from `link_dwell_seconds_default`, which is the
+ * operator's one lever over how hard this format is to farm. It is passed in
+ * rather than read here because this module is pure — and defaulted to the
+ * same 15 the config row ships with, so a caller that cannot reach the
+ * database still produces a legal ad rather than one the shape constraint
+ * rejects.
+ */
+export function blankDraft(format: AdFormat, linkDwellSeconds = 15): AdDraft {
   return {
     id: null,
     title: '',
@@ -72,13 +82,18 @@ export function blankDraft(format: AdFormat): AdDraft {
     // Nothing is ever created live. An ad reaches the pool because somebody
     // read it back and chose to publish it.
     status: 'draft',
-    points: format === 'survey' ? 80 : 40,
+    // A link ad asks for a read and one tap, which is less of somebody's day
+    // than a survey and less than sitting through a film — so it starts
+    // cheaper. Every one of these is only a starting point in a field.
+    points: format === 'survey' ? 80 : format === 'link' ? 25 : 40,
     videoSource: format === 'video' ? 'youtube' : null,
     storagePath: null,
     youtubeId: null,
     thumbnailPath: null,
     durationSeconds: null,
-    minWatchSeconds: null,
+    // On a link ad this is the reading time before the link will pay, and the
+    // database requires it — so it is never null for one.
+    minWatchSeconds: format === 'link' ? linkDwellSeconds : null,
     maxCompletions: 5000,
     weight: 100,
     startsAt: null,
@@ -86,7 +101,10 @@ export function blankDraft(format: AdFormat): AdDraft {
     tierIds: [],
     questions: [],
     ctaLabel: '',
-    ctaLinks: [],
+    // A link ad IS a call to action, so it starts with the one row it must
+    // end up with rather than making the operator go and find the button.
+    ctaLinks: format === 'link' ? [{ kind: 'website', value: '' }] : [],
+    articleBody: '',
     completions: 0,
     attempts: 0,
     questionsLocked: false,
@@ -163,9 +181,19 @@ export function hasBranching(questions: AdQuestionDraft[]): boolean {
 
 export type AdErrors = Record<string, string>
 
+/* The article's limits are `ads_article_body_length`, and the dwell time's are
+   the min/max on `link_dwell_seconds_default` — both from migration 090. They
+   are named here so the form can show a counter against the same number the
+   database will judge the save by. */
+export const ARTICLE_MIN = 40
+export const ARTICLE_MAX = 8000
+export const DWELL_MIN = 3
+export const DWELL_MAX = 600
+
 /**
  * Field paths used as error keys:
- *   title, points, weight, budget, media, duration, minWatch, schedule
+ *   title, points, weight, budget, media, duration, minWatch, schedule,
+ *   article, ctaLabel, ctaLinks, cta.<index>
  *   q.<key>.text, q.<key>.options, q.<key>.answer, q.<key>.cue, q.<key>.rules
  */
 export function validateAd(draft: AdDraft): AdErrors {
@@ -209,21 +237,48 @@ export function validateAd(draft: AdDraft): AdErrors {
     }
   }
 
+  /*
+    The link ad's own shape, mirroring `ads_video_shape` (migration 090) field
+    by field. Everything here is a hard database constraint, so the point of
+    repeating it is only that the operator is told which field is wrong while
+    they are typing, instead of being handed a constraint name after a save.
+  */
+  if (draft.format === 'link') {
+    const article = draft.articleBody.trim()
+    if (article.length < ARTICLE_MIN) errors.article = 'articleShort'
+    else if (article.length > ARTICLE_MAX) errors.article = 'articleLong'
+
+    // The dwell time is the only brake this format has: without it the ad is
+    // a button that prints points. The database refuses a link ad without
+    // one, and refuses anything under three seconds.
+    if (draft.minWatchSeconds === null) errors.minWatch = 'dwellRequired'
+    else if (draft.minWatchSeconds < DWELL_MIN) errors.minWatch = 'dwellMin'
+    else if (draft.minWatchSeconds > DWELL_MAX) errors.minWatch = 'dwellMax'
+  }
+
   if (draft.startsAt && draft.endsAt && new Date(draft.endsAt) <= new Date(draft.startsAt)) {
     errors.schedule = 'scheduleOrder'
   }
 
-  // The call to action. Video only — the database has a check constraint for
-  // it, so a survey carrying one would be rejected with a constraint name
-  // instead of a sentence.
-  if (draft.format === 'video') {
+  // The call to action. Never on a survey — the database has a check
+  // constraint for it, so a survey carrying one would be rejected with a
+  // constraint name instead of a sentence. A link ad must carry EXACTLY one:
+  // it is the destination, not an extra.
+  if (draft.format === 'video' || draft.format === 'link') {
     const label = draft.ctaLabel.trim()
     if (label && (label.length < 2 || label.length > 40)) errors.ctaLabel = 'ctaLabelLength'
     draft.ctaLinks.forEach((link, index) => {
       const problem = ctaProblem(link)
       if (problem) errors[`cta.${index}`] = problem
     })
-    if (draft.ctaLinks.length > 6) errors.ctaLinks = 'ctaTooMany'
+
+    if (draft.format === 'link') {
+      const filled = draft.ctaLinks.filter((link) => link.value.trim())
+      if (filled.length === 0) errors.ctaLinks = 'linkDestinationMissing'
+      else if (filled.length > 1) errors.ctaLinks = 'linkOneDestination'
+    } else if (draft.ctaLinks.length > 6) {
+      errors.ctaLinks = 'ctaTooMany'
+    }
   }
 
   // A survey with no questions is not a survey. A video with none is a
@@ -311,6 +366,10 @@ export function adDraftPayload(draft: AdDraft): Payload {
   }
 
   const video = draft.format === 'video'
+  const link = draft.format === 'link'
+  /* Both formats that may carry a destination. A survey sends an empty list
+     and no label, which is what ads_cta_video_or_link requires. */
+  const linked = video || link
   const questionIndex = new Map(draft.questions.map((q, i) => [q.key, i]))
 
   return {
@@ -327,19 +386,25 @@ export function adDraftPayload(draft: AdDraft): Payload {
       youtube_video_id: video && draft.videoSource === 'youtube' ? draft.youtubeId : null,
       thumbnail_path: draft.thumbnailPath,
       duration_seconds: video ? draft.durationSeconds : null,
-      min_watch_seconds: video ? draft.minWatchSeconds : null,
+      // On a link ad this column is the reading time before the link pays —
+      // the same column, doing the same job for `submit_ad_answers`, which is
+      // exactly why the format needed no second money path.
+      min_watch_seconds: video || link ? draft.minWatchSeconds : null,
       max_completions: draft.maxCompletions,
       weight: draft.weight,
       starts_at: draft.startsAt,
       ends_at: draft.endsAt,
       // A survey sends an empty list and no label, which is what the
-      // ads_cta_video_only constraint requires.
-      cta_label: video ? trimmed(draft.ctaLabel) : null,
-      cta_links: video
+      // ads_cta_video_or_link constraint requires.
+      cta_label: linked ? trimmed(draft.ctaLabel) : null,
+      cta_links: linked
         ? draft.ctaLinks
-            .filter((link) => link.value.trim())
-            .map((link) => ({ kind: link.kind, value: link.value.trim() }))
+            .filter((entry) => entry.value.trim())
+            .map((entry) => ({ kind: entry.kind, value: entry.value.trim() }))
         : [],
+      // Only a link ad has one, and the constraint refuses anything else
+      // carrying an article.
+      article_body: link ? trimmed(draft.articleBody) : null,
     },
     questions: draft.questions.map((question) => {
       const multi = question.format === 'multiple_choice'
@@ -412,6 +477,7 @@ export type RawAd = {
   ends_at: string | null
   cta_label: string | null
   cta_links: CtaLink[] | null
+  article_body: string | null
   completions_count: number
   attempts_count: number
   questions_locked: boolean
@@ -473,6 +539,7 @@ export function draftFromRaw(raw: RawAd): AdDraft {
     questions,
     ctaLabel: raw.cta_label ?? '',
     ctaLinks: raw.cta_links ?? [],
+    articleBody: raw.article_body ?? '',
     completions: raw.completions_count,
     attempts: raw.attempts_count,
     questionsLocked: raw.questions_locked,

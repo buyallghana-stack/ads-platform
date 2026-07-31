@@ -64,7 +64,7 @@ const draftSchema = z.object({
   title: z.string(),
   description: z.string(),
   advertiser: z.string(),
-  format: z.enum(['video', 'survey']),
+  format: z.enum(['video', 'survey', 'link']),
   status: z.enum(['draft', 'active', 'paused', 'exhausted', 'archived']),
   points: z.number().int(),
   videoSource: z.enum(['upload', 'youtube']).nullable(),
@@ -81,6 +81,10 @@ const draftSchema = z.object({
   questions: z.array(questionSchema).max(40),
   ctaLabel: z.string().max(60),
   ctaLinks: z.array(ctaLinkSchema).max(6),
+  /* Structural only, and deliberately looser than the 8,000 the database
+     allows: an article one character over the limit deserves the form's
+     sentence about it, not the schema's silent generic refusal. */
+  articleBody: z.string().max(20_000),
   completions: z.number().int(),
   attempts: z.number().int(),
   questionsLocked: z.boolean(),

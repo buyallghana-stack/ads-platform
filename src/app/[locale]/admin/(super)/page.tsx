@@ -128,7 +128,11 @@ export default async function AdminOverviewPage({
         <SummaryCell
           label={t('adsLive')}
           value={m.adsLive.total.toLocaleString()}
-          detail={t('adsSplit', { videos: m.adsLive.videos, surveys: m.adsLive.surveys })}
+          detail={t('adsSplit', {
+            videos: m.adsLive.videos,
+            surveys: m.adsLive.surveys,
+            links: m.adsLive.links,
+          })}
         />
       </SummaryStrip>
 

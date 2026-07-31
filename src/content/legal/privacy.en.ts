@@ -72,6 +72,7 @@ export const privacyEn: LegalDoc = {
           kind: 'list',
           items: [
             'which advertisements and surveys you completed, when, how far through, and how you answered the attention question;',
+            'which advertisers you followed a link to from an article ad, and when — we record that the link was followed and what it earned you, and nothing about what you did on the advertiser\u2019s own site;',
             'your points, transactions, payout requests and plan history;',
             'your progress towards tasks, and which task rewards you have claimed;',
             'the reward-game plays you have used and the prizes they produced;',
@@ -105,7 +106,7 @@ export const privacyEn: LegalDoc = {
           kind: 'list',
           items: [
             'To run your account and pay you — we cannot provide the service or send a payout without it. Basis: performance of our contract with you.',
-            'To run the features you use — crediting ads and surveys, measuring progress towards tasks, awarding and recording reward-game prizes, applying gift codes, and building the leaderboard. Basis: performance of our contract with you.',
+            'To run the features you use — crediting ads, articles and surveys, measuring progress towards tasks, awarding and recording reward-game prizes, applying gift codes, and building the leaderboard. Basis: performance of our contract with you.',
             'To confirm that ad views are genuine and to prevent fraud, multiple accounts and abuse. Basis: our legitimate interest in protecting the service, advertisers and honest users.',
             'To keep the service secure, including sign-in records and the security features you switch on. Basis: legitimate interest and, for some records, legal obligation.',
             'To meet legal, tax and accounting duties, including keeping records of money moved. Basis: legal obligation.',

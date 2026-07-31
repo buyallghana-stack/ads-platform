@@ -105,14 +105,23 @@ export async function getAdsScreenData(): Promise<AdsScreenData> {
 export async function getAdEditorContext(): Promise<{
   tiers: TierOption[]
   pointsPerGhs: number
+  /** Reading time a NEW link ad starts with, before its link will pay. The
+   *  operator's one lever over how hard the format is to farm, so a new ad
+   *  inherits the current setting rather than a number frozen in the code. */
+  linkDwellSeconds: number
 }> {
   const supabase = await createClient()
   const admin = createAdminClient()
 
-  const [tiersRes, rateRes] = await Promise.all([
+  const [tiersRes, configRes] = await Promise.all([
     supabase.from('tiers').select('id, name, slug, is_default, sort_order').order('sort_order'),
-    admin.from('app_config').select('value').eq('key', 'points_per_currency_unit').maybeSingle(),
+    admin
+      .from('app_config')
+      .select('key, value')
+      .in('key', ['points_per_currency_unit', 'link_dwell_seconds_default']),
   ])
+
+  const config = new Map((configRes.data ?? []).map((row) => [row.key, row.value]))
 
   return {
     tiers: (tiersRes.data ?? []).map((t) => ({
@@ -121,7 +130,8 @@ export async function getAdEditorContext(): Promise<{
       slug: t.slug,
       isDefault: t.is_default,
     })),
-    pointsPerGhs: Number(rateRes.data?.value ?? 1000),
+    pointsPerGhs: Number(config.get('points_per_currency_unit') ?? 1000),
+    linkDwellSeconds: Number(config.get('link_dwell_seconds_default') ?? 15),
   }
 }
 
