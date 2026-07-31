@@ -22,7 +22,7 @@ import { createClient } from '@supabase/supabase-js'
 import { Client } from 'pg'
 
 const BASE = process.env.BASE ?? 'http://localhost:3100'
-const NEXT = '/profile/credentials'
+const NEXT = '/reset-password'
 
 const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SECRET_KEY, {
   auth: { persistSession: false },
@@ -84,7 +84,21 @@ try {
   await page.waitForTimeout(600)
   const landed = new URL(page.url()).pathname
 
+  /* THE PAGE MUST HAVE RENDERED, not merely have the right address. The
+     first version of this check compared pathnames only — and /profile/credentials
+     is a folder containing actions.ts and no page, so Next served its 404 AT
+     that path and the assertion passed while every real invitation dead-ended.
+     A 404 keeps the URL you asked for; that is exactly why the URL is not the
+     thing to assert. */
+  const body = await page.locator('body').innerText()
+  const missing = /404|could not be found|page not found/i.test(body)
   check('the link signs them in and lands on the password screen', landed === NEXT, landed)
+  check('that screen actually renders', !missing && body.length > 200, missing ? 'a 404 page' : `${body.length} chars`)
+  check(
+    'and it is a screen where a password can be set',
+    (await page.locator('input[type="password"]').count()) > 0,
+    'password field present',
+  )
   check('no page errors on the way in', errors.length === 0, errors[0])
 
   // A second use must fail: an invitation is one link, once.

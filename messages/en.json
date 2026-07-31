@@ -2475,7 +2475,15 @@
           "super_admin": "Super admin",
           "support": "Support",
           "ads_manager": "Ads manager"
-        }
+        },
+        "inviteHint": "They get an email with a link that signs them in once and asks them to set a password. Until they do, they show as invited and cannot get in. Two-factor is theirs to turn on afterwards.",
+        "roleBlurb": {
+          "super_admin": "Everything, including payouts, settings and adding administrators.",
+          "support": "The message queue only. No payouts, no settings, no ads.",
+          "ads_manager": "Ads and advertisers only. Never their payments, and no payouts."
+        },
+        "resend": "Send a new sign-in link",
+        "resent": "A fresh link is on its way to {email}. It signs them in once and asks them to set a password."
       },
       "appearance": {
         "title": "Appearance",

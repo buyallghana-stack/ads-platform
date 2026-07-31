@@ -2475,7 +2475,15 @@
           "super_admin": "Super administrateur",
           "support": "Support",
           "ads_manager": "Gestionnaire de publicités"
-        }
+        },
+        "inviteHint": "La personne reçoit un e-mail contenant un lien qui la connecte une fois et lui demande de définir un mot de passe. Tant qu'elle ne l'a pas fait, elle apparaît comme invitée et ne peut pas entrer. La double authentification lui appartient ensuite.",
+        "roleBlurb": {
+          "super_admin": "Tout, y compris les paiements, les réglages et l'ajout d'administrateurs.",
+          "support": "Uniquement la messagerie. Ni paiements, ni réglages, ni publicités.",
+          "ads_manager": "Uniquement les publicités et les annonceurs. Jamais leurs paiements, ni les retraits."
+        },
+        "resend": "Envoyer un nouveau lien de connexion",
+        "resent": "Un nouveau lien part vers {email}. Il connecte la personne une fois et lui demande de définir un mot de passe."
       },
       "appearance": {
         "title": "Apparence",

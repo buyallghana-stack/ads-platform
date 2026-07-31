@@ -1,7 +1,5 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
-
 import { z } from 'zod'
 
 import { getAdministrators, type Administrator } from '@/lib/admin/data/administrators'
@@ -25,6 +23,15 @@ import { createAdminClient } from '@/lib/supabase/admin'
  * `admin_revoke_role` are revoked from `authenticated` — a signed-in browser
  * token cannot hand out administrator access under any circumstances.
  *
+ * WHERE AN INVITATION LANDS: `/reset-password`. Not `/profile/credentials`,
+ * which is where it pointed until 2026-07-31 and which HAS NEVER EXISTED —
+ * that folder holds `actions.ts` and no page, so every invitation ended on a
+ * 404. The screens that use those actions live at /profile/password and
+ * /profile/email. `/profile/password` would be wrong here anyway: it asks for
+ * the CURRENT password, and somebody who has just been invited does not have
+ * one. `/reset-password` sets a password from the session alone, which is
+ * exactly the situation an invited administrator is in.
+ *
  * ⚠️ THE INVITATION EMAIL DEPENDS ON SUPABASE CONFIGURATION WE DO NOT CONTROL
  * FROM THIS REPOSITORY. The invite is sent with an explicit `redirectTo`
  * pointing at our own `/auth/confirm` route, which is correct and will work as
@@ -46,6 +53,24 @@ const inviteSchema = z.object({
   email: z.string().trim().min(3).max(320).email(),
   role: z.enum(ADMIN_ROLES),
 })
+
+/**
+ * The list, or an empty one — never a throw.
+ *
+ * `getAdministrators` raises when the query fails, and an exception escaping a
+ * server action is not an error message: it is the global error boundary, the
+ * one that says "something went wrong, your points are unaffected". The
+ * operator saw exactly that once while inviting somebody. A failure here is
+ * worth reporting, and it is not worth taking the screen down for.
+ */
+async function safeList(): Promise<Administrator[]> {
+  try {
+    return await getAdministrators()
+  } catch (error) {
+    reportUnexpected(error, 'administrators list')
+    return []
+  }
+}
 
 /** Refuses anybody but a super admin, and returns their id. */
 async function requireSuperAdmin(): Promise<string> {
@@ -87,7 +112,7 @@ export async function inviteAdmin(input: { email: string; role: string }): Promi
          would email a link into production. */
       const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(
         email,
-        { redirectTo: `${await getOrigin()}/auth/confirm?next=/profile/credentials` },
+        { redirectTo: `${await getOrigin()}/auth/confirm?next=/reset-password` },
       )
       if (inviteError) throw inviteError
       targetId = invited.user?.id ?? null
@@ -103,8 +128,13 @@ export async function inviteAdmin(input: { email: string; role: string }): Promi
     })
     if (grantError) throw grantError
 
-    revalidatePath('/admin/settings')
-    return { ok: true, admins: await getAdministrators(), emailed, existing: !emailed }
+    /* NO revalidatePath HERE. It re-renders the page this action was called
+       from, which remounts the board and throws away the notice that says
+       whether the invitation was sent — so an operator pressed the button and
+       saw nothing happen at all. The fresh list comes back in this result
+       instead, which is the pattern the payout queue and people board already
+       use. */
+    return { ok: true, admins: await safeList(), emailed, existing: !emailed }
   } catch (error) {
     /* An address that is already registered as an admin, a Supabase rate
        limit, a refused role — all of these are things the operator can act on,
@@ -142,10 +172,9 @@ export async function changeAdminRole(input: {
     p_role: input.role,
   })
 
-  if (error) return { ok: false, error: error.message, admins: await getAdministrators() }
+  if (error) return { ok: false, error: error.message, admins: await safeList() }
 
-  revalidatePath('/admin/settings')
-  return { ok: true, admins: await getAdministrators() }
+  return { ok: true, admins: await safeList() }
 }
 
 export async function revokeAdmin(input: { userId: string }): Promise<RoleResult> {
@@ -166,8 +195,57 @@ export async function revokeAdmin(input: { userId: string }): Promise<RoleResult
      revoking the last super admin — and both messages are worth showing
      verbatim, because each explains a rule the operator did not know they
      were about to break. */
-  if (error) return { ok: false, error: error.message, admins: await getAdministrators() }
+  if (error) return { ok: false, error: error.message, admins: await safeList() }
 
-  revalidatePath('/admin/settings')
-  return { ok: true, admins: await getAdministrators() }
+  return { ok: true, admins: await safeList() }
+}
+
+
+/**
+ * Send somebody a fresh link to set their password.
+ *
+ * NEEDED BECAUSE THE FIRST LINK COULD BE DEAD. Every invitation sent before
+ * 2026-07-31 pointed at /profile/credentials, a route that has never existed,
+ * so the recipient clicked it and got a 404 — while the account and the role
+ * were created perfectly well. Inviting them again does nothing: the address
+ * now HAS an account, so the invite branch is skipped and no mail goes out.
+ * Without this they are stranded, holding a role they cannot sign in to use.
+ *
+ * It sends the RECOVERY email rather than the invitation, on purpose: an
+ * invitation is for an address with no account, and this one has one. The
+ * recovery template already points at our own confirm route, and
+ * `/reset-password` sets a password from the session alone — which is the
+ * position somebody who has never had one is in.
+ */
+export async function resendInvite(input: { userId: string }): Promise<RoleResult> {
+  let actorId: string
+  try {
+    actorId = await requireSuperAdmin()
+  } catch {
+    return { ok: false, error: 'notAllowed' }
+  }
+  void actorId
+
+  const admin = createAdminClient()
+
+  try {
+    // The address comes from the DATABASE, never from the payload — a server
+    // action is a public endpoint, and "send a password link to this address"
+    // is not a thing to take on trust from a browser.
+    const { data: found, error: lookupError } = await admin.auth.admin.getUserById(input.userId)
+    if (lookupError) throw lookupError
+    const email = found.user?.email
+    if (!email) return { ok: false, error: 'unexpected' }
+
+    const { error } = await admin.auth.resetPasswordForEmail(email, {
+      redirectTo: `${await getOrigin()}/auth/confirm?next=/reset-password`,
+    })
+    if (error) throw error
+
+    return { ok: true, admins: await safeList() }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    if (!/rate limit/i.test(message)) reportUnexpected(error, 'resendInvite')
+    return { ok: false, error: message, admins: await safeList() }
+  }
 }
