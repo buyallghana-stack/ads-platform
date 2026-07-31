@@ -195,9 +195,25 @@ export default async function AdminConfigPage({
           suffix: t('units.points'),
         },
         {
+          key: 'referral_signup_bonus_points_l2',
+          label: t('fields.referralSignupL2.label'),
+          description: t('fields.referralSignupL2.description'),
+          kind: 'number',
+          min: 0,
+          suffix: t('units.points'),
+        },
+        {
           key: 'referral_activation_bonus_points',
           label: t('fields.referralActivation.label'),
           description: t('fields.referralActivation.description'),
+          kind: 'number',
+          min: 0,
+          suffix: t('units.points'),
+        },
+        {
+          key: 'referral_activation_bonus_points_l2',
+          label: t('fields.referralActivationL2.label'),
+          description: t('fields.referralActivationL2.description'),
           kind: 'number',
           min: 0,
           suffix: t('units.points'),
@@ -214,6 +230,20 @@ export default async function AdminConfigPage({
           key: 'referral_purchase_commission_percent',
           label: t('fields.referralCommission.label'),
           description: t('fields.referralCommission.description'),
+          kind: 'number',
+          min: 0,
+          max: 50,
+          step: 0.5,
+          suffix: t('units.percent'),
+        },
+        {
+          /* Level two is paid out of what level one leaves, so these two are
+             not independent: the screen shows them together because setting
+             the second without seeing the first is how somebody ends up
+             giving away the whole sale. */
+          key: 'referral_purchase_commission_percent_l2',
+          label: t('fields.referralCommissionL2.label'),
+          description: t('fields.referralCommissionL2.description'),
           kind: 'number',
           min: 0,
           max: 50,

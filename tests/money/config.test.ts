@@ -277,6 +277,44 @@ describe.skipIf(!HAS_DB)('settings that gate money', () => {
     })
   })
 
+  /* The second level ships switched off, which is exactly the state in which
+     a stranded setting goes unnoticed: three fields on the admin screen that
+     look saved and change nothing would be indistinguishable from three
+     fields set to zero. This is the test that says the keys are real, the
+     screen can reach them, and the bounds hold. */
+  it('can arm the second referral level, which is 0 today', async () => {
+    await withRollback(async (tx) => {
+      const admin = await createAdmin(tx)
+
+      await setConfigAs(tx, admin.id, {
+        referral_signup_bonus_points_l2: '50',
+        referral_activation_bonus_points_l2: '120',
+        referral_purchase_commission_percent_l2: '2.5',
+      })
+
+      expect(await configValue(tx, 'referral_signup_bonus_points_l2')).toBe('50')
+      expect(await configValue(tx, 'referral_activation_bonus_points_l2')).toBe('120')
+      expect(await configValue(tx, 'referral_purchase_commission_percent_l2')).toBe('2.5')
+    })
+  })
+
+  it('refuses a second-level commission above the row maximum', async () => {
+    await withRollback(async (tx) => {
+      const admin = await createAdmin(tx)
+
+      // 50 is the ceiling on each level. The clamp inside the money path is
+      // what stops the two together exceeding a sale, but the config row is
+      // the first place an unreasonable number should be refused.
+      const message = await expectRejection(tx, () =>
+        tx.query(`select public.admin_set_config($1, $2::jsonb)`, [
+          admin.id,
+          JSON.stringify({ referral_purchase_commission_percent_l2: '60' }),
+        ]),
+      )
+      expect(message).toMatch(/at most|maximum/i)
+    })
+  })
+
   it('can flip the two kill switches both ways', async () => {
     await withRollback(async (tx) => {
       const admin = await createAdmin(tx)

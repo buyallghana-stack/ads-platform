@@ -1200,6 +1200,7 @@ export type Database = {
           created_at: string
           currency_code: string
           id: string
+          level: number
           payment_id: string
           percent_applied: number
           points: number
@@ -1208,6 +1209,7 @@ export type Database = {
           referrer_id: string
           reversed_at: string | null
           scope_at_payment: string
+          source_referral_id: string
           tier_id: string
           tier_multiplier: number
         }
@@ -1216,6 +1218,7 @@ export type Database = {
           created_at?: string
           currency_code: string
           id?: string
+          level?: number
           payment_id: string
           percent_applied: number
           points: number
@@ -1224,6 +1227,7 @@ export type Database = {
           referrer_id: string
           reversed_at?: string | null
           scope_at_payment: string
+          source_referral_id: string
           tier_id: string
           tier_multiplier: number
         }
@@ -1232,6 +1236,7 @@ export type Database = {
           created_at?: string
           currency_code?: string
           id?: string
+          level?: number
           payment_id?: string
           percent_applied?: number
           points?: number
@@ -1240,6 +1245,7 @@ export type Database = {
           referrer_id?: string
           reversed_at?: string | null
           scope_at_payment?: string
+          source_referral_id?: string
           tier_id?: string
           tier_multiplier?: number
         }
@@ -1247,13 +1253,20 @@ export type Database = {
           {
             foreignKeyName: "referral_commissions_payment_id_fkey"
             columns: ["payment_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "subscription_payments"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "referral_commissions_referral_id_fkey"
             columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "referrals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_commissions_source_referral_id_fkey"
+            columns: ["source_referral_id"]
             isOneToOne: false
             referencedRelation: "referrals"
             referencedColumns: ["id"]
@@ -1275,6 +1288,12 @@ export type Database = {
           code_used: string
           created_at: string
           id: string
+          l2_activation_bonus_paid_at: string | null
+          l2_activation_bonus_points: number
+          l2_referrer_id: string | null
+          l2_reversed_at: string | null
+          l2_signup_bonus_paid_at: string | null
+          l2_signup_bonus_points: number
           referee_id: string
           referrer_id: string
           rejected_by: string | null
@@ -1291,6 +1310,12 @@ export type Database = {
           code_used: string
           created_at?: string
           id?: string
+          l2_activation_bonus_paid_at?: string | null
+          l2_activation_bonus_points?: number
+          l2_referrer_id?: string | null
+          l2_reversed_at?: string | null
+          l2_signup_bonus_paid_at?: string | null
+          l2_signup_bonus_points?: number
           referee_id: string
           referrer_id: string
           rejected_by?: string | null
@@ -1307,6 +1332,12 @@ export type Database = {
           code_used?: string
           created_at?: string
           id?: string
+          l2_activation_bonus_paid_at?: string | null
+          l2_activation_bonus_points?: number
+          l2_referrer_id?: string | null
+          l2_reversed_at?: string | null
+          l2_signup_bonus_paid_at?: string | null
+          l2_signup_bonus_points?: number
           referee_id?: string
           referrer_id?: string
           rejected_by?: string | null
@@ -2932,6 +2963,8 @@ export type Database = {
           activated_count: number
           ads_required: number
           commission_points: number
+          level_two_count: number
+          level_two_points: number
           pending_count: number
           points_earned: number
           purchases_count: number

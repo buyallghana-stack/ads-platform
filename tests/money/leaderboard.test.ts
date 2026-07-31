@@ -202,7 +202,17 @@ describe.skipIf(!HAS_DB)('leaderboard', () => {
 
   /* Movement is derived, not stored, so the test that matters is that the
      comparison window is really the PREVIOUS period rather than the current
-     one. Last week this user was behind; this week they are ahead. */
+     one. Last week this user was behind; this week they are ahead.
+
+     THE AMOUNTS ARE ENORMOUS ON PURPOSE, and this is the only test in the
+     file that needs them to be. Every other assertion here filters the board
+     down to the users it created; `movement` cannot be filtered, because it
+     is a rank against EVERYONE — and everyone, on a shared dev project,
+     includes the operator and the seeded demo accounts. With 100 and 900 the
+     two fixtures sat below several real accounts in both windows, so the
+     climber's rank did not change and the arrow read `same`: a red test
+     caused entirely by other people's data. Nine-figure credits put the pair
+     at the top of both windows whatever the rest of the project is doing. */
   it('reports the arrow against where the user stood last period', async () => {
     await withRollback(async (tx) => {
       const climber = await createUser(tx, { name: 'Climbing Up' })
@@ -211,10 +221,10 @@ describe.skipIf(!HAS_DB)('leaderboard', () => {
       const lastWeek = "date_trunc('week', now()) - interval '3 days'"
       const thisWeek = "date_trunc('week', now()) + interval '1 second'"
 
-      await creditAt(tx, climber.id, 100, lastWeek)
-      await creditAt(tx, faller.id, 900, lastWeek)
-      await creditAt(tx, climber.id, 900, thisWeek)
-      await creditAt(tx, faller.id, 100, thisWeek)
+      await creditAt(tx, climber.id, 90_000_000, lastWeek)
+      await creditAt(tx, faller.id, 99_000_000, lastWeek)
+      await creditAt(tx, climber.id, 99_000_000, thisWeek)
+      await creditAt(tx, faller.id, 90_000_000, thisWeek)
 
       await actAs(tx, climber.id)
       const rows = await board(tx, 'week')

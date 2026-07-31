@@ -171,7 +171,7 @@
         },
         "bonus": {
           "title": "You get your bonus",
-          "body": "Credited to your balance like any other earning and listed in your statement. Paid plans multiply what a referral is worth."
+          "body": "Credited to your balance like any other earning and listed in your statement. It is the same amount for everybody — what an invite is worth depends on what they do, not on which plan you hold."
         }
       }
     },
@@ -2276,9 +2276,17 @@
           "label": "Bonus on signup",
           "description": "Paid to the referrer the moment somebody signs up with their code."
         },
+        "referralSignupL2": {
+          "label": "Signup bonus, second level",
+          "description": "Paid to whoever invited the referrer, for the same signup. Zero switches the second level of this stage off."
+        },
         "referralActivation": {
           "label": "Bonus on activation",
           "description": "Paid once the referred person has actually watched some ads — the anti-farming half."
+        },
+        "referralActivationL2": {
+          "label": "Activation bonus, second level",
+          "description": "Paid to whoever invited the referrer, once the referred person has watched enough ads. Zero switches it off."
         },
         "referralAds": {
           "label": "Ads that count as activation",
@@ -2303,7 +2311,11 @@
         },
         "referralCommission": {
           "label": "Commission when a referred person buys a plan",
-          "description": "A percentage of what they pay, credited to whoever invited them as points. The inviter’s own plan multiplies it, so the real share of a sale is this figure times their referral multiplier — 10% paid to a Platinum holder costs 20% of the sale. Zero switches this off completely."
+          "description": "A percentage of what they pay, credited to whoever invited them as points. Flat — the inviter’s own plan does not change it. Zero switches this off completely."
+        },
+        "referralCommissionL2": {
+          "label": "Commission, second level",
+          "description": "A percentage of the same purchase, credited to whoever invited the inviter. Paid out of what is left of the sale, so the two levels together can never exceed what was paid. Zero switches the second level off."
         },
         "referralCommissionScope": {
           "label": "Which purchases pay a commission",

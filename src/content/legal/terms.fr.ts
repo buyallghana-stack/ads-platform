@@ -9,10 +9,14 @@ const CONTACT = LEGAL_ENTITY.contactEmail
  * cadeaux, classement) et 12 (parrainage) ajoutées ou réécrites, 13 et 14
  * modifiées. Les identifiants d'ancrage restent inchangés même lorsque la
  * numérotation des titres a bougé.
+ *
+ * Révision du 2026-07-31, section 12 uniquement : le parrainage compte
+ * désormais deux niveaux (migration 083). Le texte décrit ce que le code
+ * verse, jamais ce qui serait simplement permis.
  */
 export const termsFr: LegalDoc = {
   title: "Conditions d'utilisation",
-  updated: '2026-07-30',
+  updated: '2026-07-31',
   summary:
     "Ces conditions expliquent comment SidePerks fonctionne, ce que nous attendons de vous et ce que vous pouvez attendre de nous. Merci de les lire avant de commencer à gagner.",
   sections: [
@@ -251,9 +255,9 @@ export const termsFr: LegalDoc = {
       blocks: [
         {
           kind: 'p',
-          text: "Vous pouvez inviter d'autres personnes avec votre lien ou votre code de parrainage. Lorsqu'une récompense s'applique, elle vous est versée, à vous qui avez invité, et n'est jamais facturée à la personne invitée. Personne ne paie quoi que ce soit pour parrainer ou être parrainé.",
+          text: "Vous pouvez inviter d'autres personnes avec votre lien ou votre code de parrainage. Lorsqu'une récompense s'applique, elle est versée aux personnes à l'origine de l'inscription — celle qui a invité, et, à un taux inférieur, celle qui avait invité cette dernière. Elle n'est jamais facturée à la personne invitée. Personne ne paie quoi que ce soit pour parrainer ou être parrainé.",
         },
-        { kind: 'p', text: 'Un parrainage peut vous récompenser à trois moments au plus :' },
+        { kind: 'p', text: 'Un parrainage peut donner lieu à une récompense à trois moments au plus :' },
         {
           kind: 'list',
           items: [
@@ -268,7 +272,15 @@ export const termsFr: LegalDoc = {
         },
         {
           kind: 'p',
-          text: "Les récompenses de parrainage ne comportent qu'un seul niveau. Nous vous rémunérons pour les personnes que vous avez invitées vous-même, et nous ne vous versons rien pour les personnes qu'elles invitent à leur tour. Vos gains sur SidePerks proviennent de l'utilisation du service et de l'apport de clients, et non de la constitution d'un réseau de recrues.",
+          text: "Les récompenses de parrainage comportent deux niveaux au maximum. Vous pouvez être rémunéré pour les personnes que vous avez invitées vous-même et, à un taux distinct, pour celles qu'elles invitent à leur tour. Cela s'arrête là : nous ne versons rien pour un troisième niveau ou au-delà, et aucun réglage du service ne peut étendre cette limite — elle est inscrite dans le calcul de la récompense, et non dans une préférence.",
+        },
+        {
+          kind: 'p',
+          text: "Une récompense de deuxième niveau est prélevée sur le même événement que la première, jamais en supplément de sa valeur : lorsqu'il s'agit d'une commission sur un achat, les deux niveaux réunis ne peuvent jamais dépasser le montant réellement payé pour cet achat. Les taux de deuxième niveau peuvent être fixés à zéro, et le sont, sauf indication contraire dans l'application.",
+        },
+        {
+          kind: 'p',
+          text: "Vos gains sur SidePerks proviennent de l'utilisation du service et de l'apport de clients, et non de la constitution d'un réseau de recrues. Rien n'est facturé pour parrainer ou être parrainé, aucune récompense ne dépend du nombre de niveaux de personnes que vous rassemblez, et nous n'exploitons aucun autre plan de rémunération.",
         },
         {
           kind: 'p',

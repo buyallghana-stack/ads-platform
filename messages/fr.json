@@ -171,7 +171,7 @@
         },
         "bonus": {
           "title": "Vous recevez votre bonus",
-          "body": "Crédité sur votre solde comme n'importe quel gain et inscrit dans votre relevé. Les formules payantes multiplient ce que rapporte un parrainage."
+          "body": "Crédité sur votre solde comme n'importe quel gain et inscrit dans votre relevé. Le montant est le même pour tout le monde : ce que rapporte un parrainage dépend de ce que fait la personne invitée, pas de la formule que vous détenez."
         }
       }
     },
@@ -2276,9 +2276,17 @@
           "label": "Bonus à l'inscription",
           "description": "Versé au parrain dès qu'une personne s'inscrit avec son code."
         },
+        "referralSignupL2": {
+          "label": "Bonus à l'inscription, deuxième niveau",
+          "description": "Versé à la personne qui a invité le parrain, pour la même inscription. Zéro désactive le deuxième niveau de cette étape."
+        },
         "referralActivation": {
           "label": "Bonus à l'activation",
           "description": "Versé une fois que la personne parrainée a réellement regardé des publicités — le volet anti-fraude."
+        },
+        "referralActivationL2": {
+          "label": "Bonus à l'activation, deuxième niveau",
+          "description": "Versé à la personne qui a invité le parrain, une fois que le filleul a regardé assez de publicités. Zéro le désactive."
         },
         "referralAds": {
           "label": "Publicités valant activation",
@@ -2303,7 +2311,11 @@
         },
         "referralCommission": {
           "label": "Commission quand un filleul achète une formule",
-          "description": "Un pourcentage de ce qu'il paie, crédité en points à la personne qui l'a invité. La formule du parrain le multiplie : 10 % versés à un détenteur Platinum coûtent 20 % de la vente. Zéro désactive complètement."
+          "description": "Un pourcentage de ce qu'il paie, crédité en points à la personne qui l'a invité. Montant fixe : la formule du parrain n'y change rien. Zéro désactive complètement."
+        },
+        "referralCommissionL2": {
+          "label": "Commission, deuxième niveau",
+          "description": "Un pourcentage du même achat, crédité à la personne qui a invité le parrain. Versé sur ce qui reste de la vente : les deux niveaux réunis ne peuvent jamais dépasser le montant payé. Zéro désactive le deuxième niveau."
         },
         "referralCommissionScope": {
           "label": "Quels achats donnent droit à une commission",

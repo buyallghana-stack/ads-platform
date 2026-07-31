@@ -25,16 +25,24 @@ const CONTACT = LEGAL_ENTITY.contactEmail
  *     feature outside the Gaming Act, 2006 (Act 721). If the product ever
  *     charges for a play, this section becomes false BEFORE it becomes
  *     unlawful — treat it as a tripwire, not decoration.
- *  2. The referral section states that rewards are one level deep, because
- *     that is what the code does: `profiles.referred_by` is never walked
- *     upward. The lawyer's clearance is for a structure of at most two levels.
+ *  2. The referral section describes exactly the depth the code pays, and
+ *     never the depth that is merely permitted. A document promising money
+ *     the code does not pay is the worse mistake of the two.
+ *
+ * 2026-07-31 revision, section 12 only. The operator reports that the lawyer
+ * has approved a two-level programme and it has been built (migration 083), so
+ * "rewards are one level deep" became false the moment that shipped. The
+ * section now says two levels, says that a third is not reachable by any
+ * setting, and states that the two levels of a purchase commission together
+ * cannot exceed the purchase — all three are properties the code enforces, not
+ * intentions. Second-level rates ship at zero.
  *
  * Anchor ids are unchanged from the previous version even where the heading
  * numbers moved, so existing links keep working.
  */
 export const termsEn: LegalDoc = {
   title: 'Terms of Service',
-  updated: '2026-07-30',
+  updated: '2026-07-31',
   summary:
     'These terms explain how SidePerks works, what we expect from you, and what you can expect from us. Please read them before you start earning.',
   sections: [
@@ -273,9 +281,9 @@ export const termsEn: LegalDoc = {
       blocks: [
         {
           kind: 'p',
-          text: 'You may invite other people using your referral link or code. Where a referral reward applies, it is paid to you, the person who invited them, and never charged to the person you invited. Nobody pays anything to refer or to be referred.',
+          text: 'You may invite other people using your referral link or code. Where a referral reward applies, it is paid to the people who introduced them — the person who invited them, and, at a lower rate, whoever invited that person. It is never charged to the person invited. Nobody pays anything to refer or to be referred.',
         },
-        { kind: 'p', text: 'A referral can reward you at up to three moments:' },
+        { kind: 'p', text: 'A referral can pay a reward at up to three moments:' },
         {
           kind: 'list',
           items: [
@@ -290,7 +298,15 @@ export const termsEn: LegalDoc = {
         },
         {
           kind: 'p',
-          text: 'Referral rewards are one level deep. We pay you for people you invited yourself, and we do not pay you anything for people they in turn invite. Your earnings on SidePerks come from using the service and from introducing customers to it, not from building a network of recruits.',
+          text: 'Referral rewards go at most two levels deep. You may be rewarded for the people you invited yourself, and, at a separate rate, for the people they in turn invite. That is where it stops: we do not pay you anything for a third level or beyond, and no setting anywhere in the service can extend it — the limit is built into how the reward is calculated, not into a preference.',
+        },
+        {
+          kind: 'p',
+          text: 'A second-level reward is paid out of the same event as the first, never in addition to the value of it: where the reward is a commission on a purchase, the first and second levels together can never exceed what was actually paid for that purchase. Second-level rates may be set to zero, and are, unless the app shows otherwise.',
+        },
+        {
+          kind: 'p',
+          text: 'Your earnings on SidePerks come from using the service and from introducing customers to it, not from building a network of recruits. Nothing is charged to refer or to be referred, no reward depends on how many levels of people you assemble, and we do not operate an earnings plan of any other kind.',
         },
         {
           kind: 'p',
