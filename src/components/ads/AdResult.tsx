@@ -229,11 +229,15 @@ export function AdResult({
           fullWidth
           onClick={onNext}
         >
-          {result.outcome === 'correct'
-            ? onKeepWatching || onNextAd
-              ? t('result.backToAds')
-              : t('result.next')
-            : t('result.done')}
+          {/*
+            "Back to ads" whenever this button is the way out, which is always
+            — it closes the player and returns to the feed. It used to read
+            "Next ad" when it was the ONLY button, which is exactly when there
+            is no next ad to go to: on the last ad of the tab it promised
+            another one and delivered the feed. A button that names an action
+            it does not perform reads as a broken button.
+          */}
+          {result.outcome === 'correct' ? t('result.backToAds') : t('result.done')}
         </Button>
       </div>
     </div>

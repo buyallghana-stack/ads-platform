@@ -270,11 +270,16 @@ export function AdPlayer({
 
   const handleEnded = useCallback(() => {
     if (phaseRef.current !== 'playing') return
-    // Watching on after the credit — the film simply finishes.
-    if (submittedRef.current) {
-      setPhaseNow('result')
-      return
-    }
+    /*
+      Watching on after the credit — the film simply finishes, and NOTHING
+      moves. It used to bring the result card back, which put a full-screen
+      backdrop over the bar at the bottom at the exact moment the film ran
+      out: somebody reaching for "Next ad" or "Done" there had their tap taken
+      by the backdrop instead, and the button looked broken. The bar already
+      carries what the card would say — the points earned and both ways on —
+      so there is nothing to come back for.
+    */
+    if (submittedRef.current) return
     const waiting = pendingSubmitRef.current
     if (waiting) {
       pendingSubmitRef.current = null
@@ -282,7 +287,7 @@ export function AdPlayer({
       return
     }
     askNextPending(answers)
-  }, [answers, askNextPending, setPhaseNow, submit])
+  }, [answers, askNextPending, submit])
 
   // ---- Answering ---------------------------------------------------------
   function answerCurrent() {
@@ -383,6 +388,10 @@ export function AdPlayer({
     phase !== 'starting' &&
     phase !== 'unavailable' &&
     phase !== 'submitting' &&
+    /* Nor once the server has ruled. The answers are submitted, the attempt is
+       spent, and there is nothing left to lose — asking "leave this ad?" over
+       a result card is a confirmation about something that already happened. */
+    phase !== 'result' &&
     (answeredSoFar > 0 || askedIds.length > 0 || elapsed > 0)
 
   const requestClose = useCallback(() => {
@@ -435,10 +444,21 @@ export function AdPlayer({
       {/* ---- Top bar ------------------------------------------------------ */}
       <header
         className={cn(
-          /* z-20 puts the close button above the question sheet's z-10. From
-             md the sheet spans the whole overlay, and it was covering the X —
-             so on a tablet or a desktop there was no way out of an ad. */
-          'relative z-20 flex shrink-0 items-center gap-3 px-3 py-3 sm:px-5',
+          /*
+            THE STACK, IN ONE PLACE, because two of these have already cost a
+            dead close button:
+              10  question sheet
+              20  the result card and its dim backdrop
+              30  this header — the way out has to stay on top of both
+              40  the "leave this ad?" dialog, which must cover everything
+                  including the way out, since it IS the way out asking
+            The X was at 20, tying with the result overlay — and a tie is
+            decided by document order, so the backdrop that comes later won.
+            Tapping the X while the result card was up did nothing at all, on
+            every ad and every format; only Escape worked, which a phone does
+            not have. Any new layer here belongs in this list.
+          */
+          'relative z-30 flex shrink-0 items-center gap-3 px-3 py-3 sm:px-5',
           isVideo ? 'text-white' : 'border-b border-ink-200 bg-surface text-ink-900',
         )}
       >
@@ -754,10 +774,10 @@ export function AdPlayer({
           progress" means nothing until you see that it is four answers and
           two minutes of watching.
 
-          z-30 puts it above the question sheet (z-10) and the header (z-20);
-          the result overlay is z-20 and cannot be open at the same time. */}
+          z-40 puts it above everything else on this screen — see the stack
+          written out on the header. */}
       {confirmingClose && (
-        <div className="absolute inset-0 z-30 grid place-items-center bg-black/70 p-4">
+        <div className="absolute inset-0 z-40 grid place-items-center bg-black/70 p-4">
           <div
             role="alertdialog"
             aria-modal="true"

@@ -145,8 +145,11 @@ export function LinkAdReader({
       aria-label={ad.title}
       className="fixed inset-0 z-50 flex flex-col bg-canvas"
     >
-      {/* ---- Top bar ------------------------------------------------------ */}
-      <header className="relative z-20 flex shrink-0 items-center gap-3 border-b border-ink-200 bg-surface px-3 py-3 text-ink-900 sm:px-5">
+      {/* ---- Top bar ------------------------------------------------------
+          z-40 keeps the way out above the result card's backdrop (z-30). The
+          player had these tied at z-20, and the backdrop — later in the DOM —
+          won: the X did nothing at all once an ad had been graded. */}
+      <header className="relative z-40 flex shrink-0 items-center gap-3 border-b border-ink-200 bg-surface px-3 py-3 text-ink-900 sm:px-5">
         <button
           type="button"
           onClick={onClose}
