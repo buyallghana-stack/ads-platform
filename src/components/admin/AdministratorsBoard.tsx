@@ -119,18 +119,18 @@ export function AdministratorsBoard({ initial }: { initial: Administrator[] }) {
     })
 
   const menuFor = (person: Administrator): MenuItem[] => [
-    // Only for somebody who has never signed in. Everybody else has a
-    // password and a Forgot-password link of their own.
-    ...(person.accepted
-      ? []
-      : [
-          {
-            key: 'resend',
-            label: t('resend'),
-            icon: <Mail />,
-            onSelect: () => resend(person),
-          },
-        ]),
+    /* Offered to EVERYBODY, not only to accounts that look stranded. We
+       cannot see whether somebody has chosen a password — redeeming an
+       invitation writes a hash before they pick one, so every signal we have
+       flips on the click rather than on the choice. An operator whose
+       colleague cannot get in wants a lever, not our diagnosis. */
+    {
+      key: 'resend',
+      label: t('resend'),
+      icon: <Mail />,
+      hint: person.accepted ? undefined : t('neverSignedIn'),
+      onSelect: () => resend(person),
+    },
     ...ADMIN_ROLES.filter((r) => r !== person.role).map((r) => ({
       key: r,
       label: t('makeRole', { role: t(`roles.${r}`) }),
@@ -297,7 +297,7 @@ export function AdministratorsBoard({ initial }: { initial: Administrator[] }) {
                   {!a.accepted && (
                     <span className="inline-flex items-center gap-1 rounded-full border border-warning-500/25 bg-warning-50 px-2 py-0.5 text-[0.6875rem] font-medium text-warning-700">
                       <Mail aria-hidden className="size-3" />
-                      {t('invited')}
+                      {t('neverSignedIn')}
                     </span>
                   )}
 

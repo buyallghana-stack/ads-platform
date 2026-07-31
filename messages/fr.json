@@ -2483,7 +2483,8 @@
           "ads_manager": "Uniquement les publicités et les annonceurs. Jamais leurs paiements, ni les retraits."
         },
         "resend": "Envoyer un nouveau lien de connexion",
-        "resent": "Un nouveau lien part vers {email}. Il connecte la personne une fois et lui demande de définir un mot de passe."
+        "resent": "Un nouveau lien part vers {email}. Il connecte la personne une fois et lui demande de définir un mot de passe.",
+        "neverSignedIn": "Jamais connecté"
       },
       "appearance": {
         "title": "Apparence",

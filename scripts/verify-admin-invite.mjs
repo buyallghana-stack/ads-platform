@@ -72,7 +72,11 @@ try {
     `select accepted from public.admin_list_administrators() where id = $1`,
     [userId],
   )
-  check('they are listed as invited, not as accepted', listed[0]?.accepted === false)
+  /* `accepted` means ONE observable thing: they have signed in at least once.
+     It is not "they set a password" — redeeming an invitation writes a bcrypt
+     hash before the recipient chooses anything, so every signal available
+     flips on the click rather than on the choice. Measured, not assumed. */
+  check('they are listed as never having signed in', listed[0]?.accepted === false)
 
   browser = await chromium.launch()
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } })
@@ -117,7 +121,9 @@ try {
     `select accepted from public.admin_list_administrators() where id = $1`,
     [userId],
   )
-  check('accepting the invitation shows on the list', after[0]?.accepted === true)
+  // Redeeming the link IS a sign-in, so this flips — which is exactly what
+  // the badge now claims and nothing more.
+  check('following the link counts as having signed in', after[0]?.accepted === true)
 
   console.log('')
   const failed = results.filter((r) => !r.pass)

@@ -2483,7 +2483,8 @@
           "ads_manager": "Ads and advertisers only. Never their payments, and no payouts."
         },
         "resend": "Send a new sign-in link",
-        "resent": "A fresh link is on its way to {email}. It signs them in once and asks them to set a password."
+        "resent": "A fresh link is on its way to {email}. It signs them in once and asks them to set a password.",
+        "neverSignedIn": "Never signed in"
       },
       "appearance": {
         "title": "Appearance",
