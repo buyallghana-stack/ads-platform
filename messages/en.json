@@ -744,13 +744,16 @@
       "title": "Leave this ad?",
       "bodyVideo": "Your progress is not saved. If you come back, this ad starts again from the beginning.",
       "bodySurvey": "Your answers are not saved. If you come back, this survey starts again from the first question.",
+      "bodyLink": "Your reading time is not saved. If you come back, the article starts again from the beginning.",
       "progress": "Where you are",
       "watched": "{seconds}s watched",
       "answered": "{done, plural, =0 {No questions answered yet} one {# question answered} other {# questions answered}}",
       "answeredOf": "{done} of {total} answered",
       "noAttempt": "Leaving does not use up one of your tries — only answering does.",
       "stay": "Stay and finish",
-      "leave": "Leave the ad"
+      "leave": "Leave the ad",
+      "read": "{seconds}s read of {total}s",
+      "noCostLink": "Leaving costs you nothing — the article stays in your list."
     },
     "disclosure": "SidePerks is not affiliated with these advertisers and does not endorse them. Anything you do on an advertiser's website or app is between you and them — we are not responsible for money you spend or lose there, or for a product or service that disappoints you.",
     "link": {

@@ -744,13 +744,16 @@
       "title": "Quitter cette publicité ?",
       "bodyVideo": "Votre progression n’est pas enregistrée. En revenant, la publicité repart du début.",
       "bodySurvey": "Vos réponses ne sont pas enregistrées. En revenant, le sondage repart de la première question.",
+      "bodyLink": "Votre temps de lecture n'est pas conservé. Si vous revenez, l'article recommence depuis le début.",
       "progress": "Où vous en êtes",
       "watched": "{seconds} s regardées",
       "answered": "{done, plural, =0 {Aucune question répondue} one {# question répondue} other {# questions répondues}}",
       "answeredOf": "{done} sur {total} répondues",
       "noAttempt": "Quitter ne consomme aucun de vos essais — seule une réponse en consomme un.",
       "stay": "Rester et terminer",
-      "leave": "Quitter la publicité"
+      "leave": "Quitter la publicité",
+      "read": "{seconds}s lues sur {total}s",
+      "noCostLink": "Quitter ne coûte rien : l'article reste dans votre liste."
     },
     "disclosure": "SidePerks n'est pas affilié à ces annonceurs et ne les recommande pas. Tout ce que vous faites sur le site ou l'application d'un annonceur relève de votre relation avec lui : nous ne sommes pas responsables de l'argent que vous y dépensez ou perdez, ni d'un produit ou service décevant.",
     "link": {

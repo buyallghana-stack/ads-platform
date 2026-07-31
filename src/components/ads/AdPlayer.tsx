@@ -18,6 +18,7 @@ import { cn } from '@/lib/cn'
 
 import { AdCta } from './AdCta'
 import { AdResult } from './AdResult'
+import { LeaveAdDialog, LeaveBar, LeaveFact } from './LeaveAdDialog'
 import { QuestionSheet } from './QuestionSheet'
 import { VideoStage } from './VideoStage'
 import { AdDisclosure } from '@/components/ads/AdDisclosure'
@@ -777,72 +778,32 @@ export function AdPlayer({
           z-40 puts it above everything else on this screen — see the stack
           written out on the header. */}
       {confirmingClose && (
-        <div className="absolute inset-0 z-40 grid place-items-center bg-black/70 p-4">
-          <div
-            role="alertdialog"
-            aria-modal="true"
-            aria-label={t('leave.title')}
-            className="w-full max-w-[24rem] rounded-(--radius-panel) bg-surface p-5 shadow-[0_16px_48px_-12px_rgb(15_23_42/0.5)]"
-          >
-            <h2 className="text-[1.0625rem] font-semibold text-ink-900">{t('leave.title')}</h2>
-            <p className="mt-1.5 text-[0.875rem] leading-relaxed text-ink-500">
-              {isVideo ? t('leave.bodyVideo') : t('leave.bodySurvey')}
-            </p>
-
-            {/* What is actually on the table. */}
-            <div className="mt-3.5 rounded-(--radius-card) border border-ink-200 bg-ink-50/60 px-3.5 py-3">
-              <p className="text-[0.6875rem] font-medium tracking-[0.04em] text-ink-400 uppercase">
-                {t('leave.progress')}
-              </p>
-
+        <LeaveAdDialog
+          body={isVideo ? t('leave.bodyVideo') : t('leave.bodySurvey')}
+          note={t('leave.noAttempt')}
+          onStay={() => setConfirmingClose(false)}
+          onLeave={onClose}
+          progress={
+            <>
               {isVideo && (
                 <>
-                  <p className="mt-1.5 text-[0.8125rem] font-medium text-ink-900 tabular-nums">
+                  <LeaveFact className="mt-1.5">
                     {t('leave.watched', { seconds: Math.floor(elapsed) })}
-                  </p>
-                  {duration > 0 && (
-                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink-200">
-                      <span
-                        className="block h-full rounded-full bg-brand-600"
-                        style={{ width: `${Math.min(progress * 100, 100)}%` }}
-                      />
-                    </div>
-                  )}
+                  </LeaveFact>
+                  {duration > 0 && <LeaveBar fraction={progress} />}
                 </>
               )}
 
               {questions.length > 0 && (
-                <p
-                  className={cn(
-                    'text-[0.8125rem] font-medium text-ink-900 tabular-nums',
-                    isVideo ? 'mt-2' : 'mt-1.5',
-                  )}
-                >
+                <LeaveFact className={isVideo ? 'mt-2' : 'mt-1.5'}>
                   {branching
                     ? t('leave.answered', { done: answeredSoFar })
                     : t('leave.answeredOf', { done: answeredSoFar, total: visible.length })}
-                </p>
+                </LeaveFact>
               )}
-
-              {/* The reassurance that matters most: leaving is not a failed
-                  attempt. Without this line people stay in an ad they no
-                  longer want to watch because they think quitting is
-                  penalised. */}
-              <p className="mt-2.5 border-t border-ink-200 pt-2.5 text-[0.75rem] leading-relaxed text-ink-500">
-                {t('leave.noAttempt')}
-              </p>
-            </div>
-
-            <div className="mt-4 flex flex-col gap-2">
-              <Button fullWidth onClick={() => setConfirmingClose(false)}>
-                {t('leave.stay')}
-              </Button>
-              <Button variant="ghost" fullWidth onClick={onClose} className="text-danger-700 hover:bg-danger-50">
-                {t('leave.leave')}
-              </Button>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+        />
       )}
 
       {/* ---- Submitting / result ------------------------------------------ */}

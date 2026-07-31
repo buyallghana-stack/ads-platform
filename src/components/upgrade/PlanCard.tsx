@@ -145,6 +145,12 @@ export function PlanCard({
         ))}
       </ul>
 
+      {/* EVERY plan gets the primary button, not just the popular one.
+          Operator, 2026-07-31: a blue button on one card and grey ones beside
+          it read as "this is the only plan you can actually buy" — which is
+          the opposite of the point, since plans stack and any of them can be
+          added. The "Popular" tag already tells that story, and it is the only
+          thing that should. */}
       {held && endsAt ? (
         <p className="mt-4 rounded-(--radius-input) bg-success-50 px-3 py-2 text-center text-[0.75rem] font-medium text-success-700">
           {t('card.endsOn', {
@@ -156,12 +162,7 @@ export function PlanCard({
           })}
         </p>
       ) : (
-        <Button
-          variant={recommended ? 'primary' : 'secondary'}
-          fullWidth
-          className="mt-4"
-          onClick={onChoose}
-        >
+        <Button variant="primary" fullWidth className="mt-4" onClick={onChoose}>
           {t('card.choose', { plan: plan.name })}
         </Button>
       )}

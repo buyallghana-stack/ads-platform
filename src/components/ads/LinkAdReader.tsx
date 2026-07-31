@@ -13,6 +13,7 @@ import { cn } from '@/lib/cn'
 
 import { AdDisclosure } from './AdDisclosure'
 import { AdResult } from './AdResult'
+import { LeaveAdDialog, LeaveBar, LeaveFact } from './LeaveAdDialog'
 
 /**
  * A LINK ad: an article to read, then one link out to the advertiser.
@@ -67,6 +68,8 @@ export function LinkAdReader({
   const [remaining, setRemaining] = useState(ad.minWatchSeconds ?? 0)
   /** Bumped by a retry, which re-registers the view and restarts the clock. */
   const [runKey, setRunKey] = useState(0)
+  /** The "leave this ad?" dialog — the same one a video and a survey show. */
+  const [confirmingClose, setConfirmingClose] = useState(false)
 
   /* Read synchronously by the click handler: two taps 100ms apart would
      otherwise both fire the server call before React re-rendered. The second
@@ -100,11 +103,42 @@ export function LinkAdReader({
     return () => clearInterval(id)
   }, [phase, remaining])
 
+  /**
+   * Whether leaving now would throw something away.
+   *
+   * The reading clock is the same kind of progress a video's watch time is:
+   * `register_ad_view` restarts it from zero on the next open, so somebody
+   * twelve seconds into a fifteen-second read genuinely loses those twelve
+   * seconds. Operator, 2026-07-31: the X here "just takes you to the ads tab"
+   * while a video and a survey stop to say what leaving costs — so it asks
+   * now, in the same words and the same dialog.
+   *
+   * Nothing to lose means no dialog: before the clock has moved, or once the
+   * points are already paid, leaving costs nothing and a confirmation would
+   * only teach people to dismiss confirmations without reading them.
+   */
+  const secondsRead = Math.max((ad.minWatchSeconds ?? 0) - remaining, 0)
+  const hasProgress = phase === 'reading' && secondsRead > 0
+
+  const requestClose = useCallback(() => {
+    if (!hasProgress) {
+      onClose()
+      return
+    }
+    setConfirmingClose(true)
+  }, [hasProgress, onClose])
+
   // The overlay owns the screen, so the page behind it must not scroll, and
-  // Escape closes it — there is no half-finished work here to protect.
+  // Escape asks exactly what the X asks.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key !== 'Escape') return
+      // While the dialog is up, Escape is "stay" — the conventional cancel.
+      if (confirmingClose) {
+        setConfirmingClose(false)
+        return
+      }
+      requestClose()
     }
     window.addEventListener('keydown', onKey)
     const previousOverflow = document.body.style.overflow
@@ -113,7 +147,7 @@ export function LinkAdReader({
       window.removeEventListener('keydown', onKey)
       document.body.style.overflow = previousOverflow
     }
-  }, [onClose])
+  }, [confirmingClose, requestClose])
 
   const claim = useCallback(() => {
     if (clickedRef.current) return
@@ -152,7 +186,7 @@ export function LinkAdReader({
       <header className="relative z-40 flex shrink-0 items-center gap-3 border-b border-ink-200 bg-surface px-3 py-3 text-ink-900 sm:px-5">
         <button
           type="button"
-          onClick={onClose}
+          onClick={requestClose}
           aria-label={t('player.close')}
           className="grid size-9 shrink-0 place-items-center rounded-full transition-colors hover:bg-ink-100 focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:outline-none"
         >
@@ -273,6 +307,26 @@ export function LinkAdReader({
             <AdDisclosure className="mt-2.5" />
           </div>
         </div>
+      )}
+
+      {/* ---- Leaving mid-read ---------------------------------------------
+          The same dialog a video and a survey put up, with the reading clock
+          in place of watch time and answers. */}
+      {confirmingClose && (
+        <LeaveAdDialog
+          body={t('leave.bodyLink')}
+          note={t('leave.noCostLink')}
+          onStay={() => setConfirmingClose(false)}
+          onLeave={onClose}
+          progress={
+            <>
+              <LeaveFact className="mt-1.5">
+                {t('leave.read', { seconds: secondsRead, total: ad.minWatchSeconds ?? 0 })}
+              </LeaveFact>
+              <LeaveBar fraction={secondsRead / Math.max(ad.minWatchSeconds ?? 1, 1)} />
+            </>
+          }
+        />
       )}
 
       {/* ---- Claiming, and the outcome ------------------------------------ */}

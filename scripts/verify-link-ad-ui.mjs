@@ -192,6 +192,29 @@ try {
   )
   await shootPage(page, 'link-ad-waiting-mobile')
 
+  /*
+    Leaving mid-read asks first, exactly as a video and a survey do. The
+    operator's words: the X here "just takes you to the ads tab without showing
+    the progress as it looks or behaves for the video and survey".
+  */
+  // After a couple of seconds of reading, so there is genuinely something to
+  // lose — the first second costs nothing and is deliberately not confirmed,
+  // which is the same rule the video player uses for watch time.
+  await page.waitForTimeout(2200)
+  await page.getByRole('button', { name: /close/i }).first().click()
+  const leaving = page.getByRole('alertdialog')
+  check('leaving mid-read asks, rather than dropping you on the feed',
+    (await leaving.count()) > 0, 'the leave dialog is up')
+  const leaveText = (await leaving.innerText().catch(() => '')).replace(/\s+/g, ' ')
+  check('it shows how far into the article they are', /\d+s read of \d+s/.test(leaveText),
+    leaveText.match(/\d+s read of \d+s/)?.[0] ?? leaveText.slice(0, 60))
+  check('it says leaving costs nothing', /costs you nothing/i.test(leaveText), 'reassurance shown')
+  await page.getByRole('button', { name: /stay and finish/i }).click()
+  check('staying keeps them in the article',
+    (await page.getByRole('alertdialog').count()) === 0 &&
+      (await page.getByText(/Bonwire/).count()) > 0,
+    'back on the article')
+
   const before = await balance()
 
   const cta = page.getByRole('link', { name: /go to the advertiser|visit/i })
