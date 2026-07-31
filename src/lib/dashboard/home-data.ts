@@ -140,10 +140,29 @@ export async function getHomeData(userId: string): Promise<HomeData> {
         'referral_activation',
         'referral_purchase',
       ]),
+    /*
+      ONLY PAYMENTS THAT COMPLETED. A `pending` row is a checkout somebody
+      opened, not money that moved: Paystack is handed the row before the user
+      reaches the card form, so abandoning the page — or paying on a second
+      attempt after the first one stalled — leaves a pending row behind
+      permanently.
+
+      Reported 2026-07-31: the operator bought Silver on the .icloud account,
+      the purchase went through (confirmed 16:30:05, plan active), and the
+      statement still showed "pending" — because it was showing the ABANDONED
+      attempt from 16:27, two minutes earlier, alongside the successful one.
+      Nothing was stuck; the statement was listing an unfinished checkout as
+      though it were a transaction.
+
+      `refunded` is included because a refund is money moving, and it is
+      excluded from nothing else. No code path sets it today — when the refund
+      flow is built it needs its own kind and label, not this one.
+    */
     supabase
       .from('subscription_payments')
       .select('id, method, status, amount_minor, currency_code, created_at')
       .eq('user_id', userId)
+      .in('status', ['confirmed', 'refunded'])
       .order('created_at', { ascending: false })
       .limit(20),
   ])
@@ -209,8 +228,11 @@ export async function getHomeData(userId: string): Promise<HomeData> {
         ghs: s.amount_minor / 100,
         at: s.created_at,
         direction: 'out',
-        status:
-          s.status === 'confirmed' ? 'settled' : s.status === 'failed' ? 'failed' : 'pending',
+        /* Both statuses that reach here are finished states, so neither
+           renders a chip. The `failed` arm is kept because the query filter
+           is what excludes it, and a filter is easier to widen by accident
+           than a mapping is. */
+        status: s.status === 'failed' ? 'failed' : 'settled',
       }),
     ),
   ].sort((a, b) => (a.at < b.at ? 1 : -1))
