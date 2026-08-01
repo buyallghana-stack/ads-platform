@@ -39,6 +39,21 @@ async function requestedRedemption(tx: Tx) {
   await givePayoutDetails(tx, user.id)
   await creditPoints(tx, user.id, POINTS_EARNED)
 
+  /*
+    THE FEE IS PINNED, and every cedi figure in this file depends on it.
+
+    These tests run against the SHARED project, so `redemption_fee_percent` is
+    whatever the operator has it set to — they put it to 10% on 2026-08-01,
+    hours after it shipped, and this file's GHS 12 quietly became GHS 10.80.
+    That is the fee working, not a regression, but a test that inherits a live
+    money setting is a test that fails on a day nobody touched the code.
+
+    Anything asserting an AMOUNT must set the keys it depends on. The fee's own
+    behaviour is proved in free-window-minimum-and-fee.test.ts, which sets it
+    deliberately.
+  */
+  await setConfig(tx, 'redemption_fee_percent', '0')
+
   /* `select * from f(...)`, NEVER `select (f(...)).*`.
      Postgres expands the second form by calling the function once PER OUTPUT
      COLUMN — six times for this return type, which would quietly create six

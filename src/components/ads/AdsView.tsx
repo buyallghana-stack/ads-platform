@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-import { AlertTriangle, Gem, ListChecks, PauseCircle, PlayCircle, Link2 } from 'lucide-react'
+import { AlertTriangle, Gem, ListChecks, PauseCircle, PlayCircle, Link2, RotateCcw } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import type { SubmitAdResult } from '@/app/[locale]/(app)/ads/actions'
@@ -355,6 +355,18 @@ export function AdsView({ data }: { data: AdsData }) {
           )
         })}
       </div>
+
+      {/* You have seen these before, and they pay again.
+          Only when the feed is genuinely repeats — which happens once
+          somebody has finished everything else — because being served an ad
+          you recognise with no explanation reads as a broken app, and the
+          honest sentence costs one line. */}
+      {data.repeating && count > 0 && (
+        <p className="animate-rise mt-3 flex items-start gap-2 rounded-(--radius-card) border border-brand-600/20 bg-brand-50 px-3.5 py-2.5 text-[0.75rem] leading-relaxed text-brand-700">
+          <RotateCcw aria-hidden className="mt-px size-3.5 shrink-0" />
+          {t('repeating')}
+        </p>
+      )}
 
       {/* Required by the operator's lawyer: seen every time somebody arrives
           to watch, not only inside an ad. */}

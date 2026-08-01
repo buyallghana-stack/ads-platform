@@ -103,6 +103,16 @@ export type AdsData = {
   surveys: FeedAd[]
   /** Read-an-article-then-click-through ads (2026-07-31). */
   links: FeedAd[]
+  /**
+   * True when this feed is made of ads they have ALREADY finished — which
+   * happens only once they have run out of everything else, and only while
+   * `ad_repeat_when_exhausted` is on.
+   *
+   * Worth saying out loud on the screen: somebody who recognises an ad from
+   * yesterday should be told it pays again, not left wondering whether the
+   * app is stuck.
+   */
+  repeating: boolean
   /** Epoch ms of the next daily reset. The counters key off utc_today(), and
    *  Ghana keeps GMT all year, so this is local midnight for this audience. */
   resetAt: number
@@ -126,9 +136,13 @@ export function nextDailyReset(now = Date.now()): number {
 export async function getAdsData(userId: string): Promise<AdsData> {
   const supabase = await createClient()
 
-  const [feedRes, statusRes] = await Promise.all([
+  const [feedRes, statusRes, repeatRes] = await Promise.all([
     supabase.rpc('get_ad_feed', { p_user_id: userId, p_limit: 60 }),
     supabase.rpc('get_user_earning_status', { p_user_id: userId }),
+    /* Whether this feed is repeats. The same function the feed itself asked,
+       rather than anything inferred here — a screen guessing at a money rule
+       is how the screen and the rule end up disagreeing. */
+    supabase.rpc('may_repeat_ads', { p_user_id: userId }),
   ])
 
   const rows = feedRes.data ?? []
@@ -180,6 +194,7 @@ export async function getAdsData(userId: string): Promise<AdsData> {
     videos: ads.filter((a) => a.format === 'video'),
     surveys: ads.filter((a) => a.format === 'survey'),
     links: ads.filter((a) => a.format === 'link'),
+    repeating: repeatRes.data === true,
     resetAt: nextDailyReset(),
     now: Date.now(),
   }

@@ -760,6 +760,7 @@
       "noCostLink": "Leaving costs you nothing — the article stays in your list."
     },
     "disclosure": "SidePerks is not affiliated with these advertisers and does not endorse them. Anything you do on an advertiser's website or app is between you and them — we are not responsible for money you spend or lose there, or for a product or service that disappoints you.",
+    "repeating": "You've finished every new ad. These are ones you've already watched — they pay again.",
     "link": {
       "visit": "Go to the advertiser",
       "waiting": "{seconds}s of reading to go",

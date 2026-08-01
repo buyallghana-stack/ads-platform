@@ -3126,6 +3126,10 @@ export type Database = {
       }
       mark_all_notifications_read: { Args: never; Returns: undefined }
       mark_notification_read: { Args: { p_id: string }; Returns: undefined }
+      may_repeat_ads: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       mark_redemption_failed: {
         Args: { p_admin_id: string; p_reason: string; p_redemption_id: string }
         Returns: {

@@ -760,6 +760,7 @@
       "noCostLink": "Quitter ne coûte rien : l'article reste dans votre liste."
     },
     "disclosure": "SidePerks n'est pas affilié à ces annonceurs et ne les recommande pas. Tout ce que vous faites sur le site ou l'application d'un annonceur relève de votre relation avec lui : nous ne sommes pas responsables de l'argent que vous y dépensez ou perdez, ni d'un produit ou service décevant.",
+    "repeating": "Vous avez terminé toutes les nouvelles publicités. Celles-ci, vous les avez déjà vues — elles rapportent à nouveau.",
     "link": {
       "visit": "Aller chez l’annonceur",
       "waiting": "Encore {seconds}s de lecture",
