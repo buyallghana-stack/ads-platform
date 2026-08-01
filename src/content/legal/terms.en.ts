@@ -120,6 +120,10 @@ export const termsEn: LegalDoc = {
         },
         {
           kind: 'p',
+          text: 'A free account can earn for a limited period after it is created — the app shows you when that period ends, and buying any plan lifts the limit for as long as the plan runs. Points you have already earned are unaffected: they stay in your balance and can still be withdrawn.',
+        },
+        {
+          kind: 'p',
           text: 'Points can also reach your balance through the other features described below: tasks (section 5), reward games (section 6), gift codes (section 7) and referrals (section 12). Everything credited to your balance is points, and everything in section 9 applies to it however it was earned.',
         },
         {
@@ -359,6 +363,10 @@ export const termsEn: LegalDoc = {
         {
           kind: 'p',
           text: 'You may request a payout once your balance reaches the minimum shown in the app. Payouts are made to a mobile money account or a cryptocurrency wallet that you have set up and that belongs to you.',
+        },
+        {
+          kind: 'p',
+          text: 'A fee may be deducted from a payout to cover transaction costs and taxes. Where one applies, the rate and the amount are shown to you before you confirm the request, and the amount is fixed at that moment — a later change to the rate does not affect a request you have already made.',
         },
         {
           kind: 'p',

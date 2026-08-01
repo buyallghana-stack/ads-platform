@@ -145,7 +145,7 @@
       "rowThreshold": "Withdraw from",
       "free": {
         "title": "{name} plan — GHS 0",
-        "body": "{ads} ads a day, for as long as you want, and you can withdraw from {threshold} points. No card needed to start.",
+        "body": "{ads} ads a day for your first {days} days, and you can withdraw from {threshold} points. No card needed to start.",
         "cta": "Start free"
       },
       "stacking": "Plans stack. Hold more than one and the daily limits add up, the earning bonuses add together, and the lowest withdrawal threshold is the one that applies. Every plan runs for a fixed period and nothing renews on its own — you are never charged again without asking."
@@ -215,7 +215,7 @@
       "items": {
         "free": {
           "q": "Is SidePerks free?",
-          "a": "Yes. The free plan gives you {freeAds} ads a day and never expires. Paid plans exist, but nothing is locked behind them — they raise your daily limit and the points you get per ad."
+          "a": "Yes. The free plan gives you {freeAds} ads a day for your first {days} days. After that a paid plan is needed to keep earning — the points you already have stay yours. Nothing else is locked behind them: plans raise your daily limit and the points you get per ad."
         },
         "worth": {
           "q": "What is a point actually worth?",
@@ -223,7 +223,7 @@
         },
         "withdraw": {
           "q": "When can I withdraw?",
-          "a": "Once your balance passes your plan's threshold — {freeThreshold} points on the free plan, down to {bestThreshold} points on the top plan. Payouts switch on when our payout licensing is complete; until then you can set up your payout account and keep earning, and the app tells you plainly where a request stands rather than pretending."
+          "a": "Once your balance passes {threshold} points — the same threshold for everybody, whatever plan you hold. Payouts switch on when our payout licensing is complete; until then you can set up your payout account and keep earning, and the app tells you plainly where a request stands rather than pretending."
         },
         "questions": {
           "q": "Do I have to answer questions?",
@@ -723,7 +723,11 @@
       "pausedTitle": "Earning is paused",
       "pausedBody": "Earning is paused across the platform right now. Your balance is safe and ads will return shortly.",
       "disabledTitle": "Your account is on hold",
-      "disabledBody": "Earning is disabled on this account. Check your notifications, or contact support if you think this is a mistake."
+      "disabledBody": "Earning is disabled on this account. Check your notifications, or contact support if you think this is a mistake.",
+      "freeOverTitle": "Your free days are over",
+      "freeOverBody": "The free plan earns for your first few days after joining. A plan turns earning back on straight away, for as long as it runs.",
+      "freeOverCta": "See the plans",
+      "freeOverKeep": "The points you already earned stay yours, and can still be withdrawn."
     },
     "cta": {
       "heading": "From the advertiser",
@@ -801,7 +805,8 @@
         "max": "Max"
       },
       "coinEstimate": "≈ {coinAmount} {coin} (about ${usd}) at today's indicative rate, GHS {rate} to the dollar.",
-      "estimateUnavailable": "We cannot show a crypto estimate right now — today's exchange rate has not come through. Your withdrawal is recorded in cedis and the coin amount is worked out when it is sent."
+      "estimateUnavailable": "We cannot show a crypto estimate right now — today's exchange rate has not come through. Your withdrawal is recorded in cedis and the coin amount is worked out when it is sent.",
+      "afterFee": "You'll receive GHS {net} after the {percent}% fee."
     },
     "usdtNotice": "USDT amounts are estimates. Your points convert to cedis at the fixed rate; the cedi–dollar rate updates daily, and the final USDT amount is calculated when your payout is sent — it may differ slightly from this estimate.",
     "errors": {
@@ -1508,7 +1513,8 @@
         "note": "Note sent to the user",
         "cryptoSub": "{ghs} · {points} pts",
         "quoteLive": "Quoted at today's rate — no rate was available when this request was made.",
-        "quoteMissing": "No exchange rate available, so this shows the cedi value. Convert before sending."
+        "quoteMissing": "No exchange rate available, so this shows the cedi value. Convert before sending.",
+        "feeBreakdown": "{gross} less {fee} fee ({percent}%)"
       },
       "confirm": {
         "approve": "Approve {amount} for {name}?",
@@ -2307,9 +2313,10 @@
         "perCedi": "per GHS 1",
         "times": "×",
         "ads": "ads",
-        "percent": "% of the price",
+        "percent": "%",
         "places": "places",
-        "perHour": "per hour"
+        "perHour": "per hour",
+        "days": "days"
       },
       "groups": {
         "earning": {
@@ -2486,6 +2493,19 @@
         "giftAttempts": {
           "label": "Gift code guesses per hour",
           "description": "How many wrong codes one account may try before being refused. The code space makes guessing hopeless; this makes trying pointless."
+        },
+        "redemptionMinimum": {
+          "label": "Smallest withdrawal",
+          "description": "The fewest points anyone can withdraw — the same for everybody, whatever plans they hold. No plan has its own threshold."
+        },
+        "redemptionFee": {
+          "label": "Withdrawal fee",
+          "description": "Percentage taken off each withdrawal to cover transaction costs and taxes. Frozen onto each request the moment it is filed.",
+          "warning": "Applies only to requests filed afterwards — anything already waiting keeps the rate it was quoted."
+        },
+        "freeEarningDays": {
+          "label": "Free earning window",
+          "description": "How many days after signing up a free account can earn. Buying any plan lifts it immediately. 0 means no limit. This is the ceiling on what a farmed account can ever be worth."
         }
       }
     },

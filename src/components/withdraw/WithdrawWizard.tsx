@@ -60,6 +60,7 @@ const STEPS: Step[] = ['account', 'amount', 'confirm', 'pin']
 export function WithdrawWizard({
   balance,
   minPoints,
+  feePercent,
   pointsPerCurrencyUnit,
   tierName,
   accounts,
@@ -68,6 +69,17 @@ export function WithdrawWizard({
   balance: number
   /** The user's RESOLVED payout threshold — lower on every paid plan. */
   minPoints: number
+  /**
+   * What the platform takes off a withdrawal for transaction costs and taxes,
+   * as a percentage. Shown before anybody confirms — the row that used to read
+   * "No fee" is the one place a surprise would be least forgivable.
+   *
+   * The database freezes its own copy onto the request, so this is what the
+   * user is QUOTED and the row is what they are OWED. They can only differ if
+   * the operator changes the rate in the seconds between, and the stored one
+   * wins.
+   */
+  feePercent: number
   /** Operator config, not a constant: the rate can be changed. */
   pointsPerCurrencyUnit: number
   /** Named in the "not enough yet" copy so a subscriber can see their plan
@@ -131,10 +143,14 @@ export function WithdrawWizard({
   }, [raw, unit, POINTS_PER_GHS])
 
   const ghs = points / POINTS_PER_GHS
+  /* Rounded to the cedi cent exactly as request_redemption rounds it, so the
+     number on this screen is the number that gets stored. */
+  const fee = Math.round(((ghs * feePercent) / 100) * 100) / 100
+  const net = Math.max(ghs - fee, 0)
 
   /* Linear in the amount, so the rates come down once and the arithmetic
      happens here rather than a server round trip per keystroke. */
-  const usdEstimate = quote ? ghs / quote.ghsPerUsd : null
+  const usdEstimate = quote ? net / quote.ghsPerUsd : null
   const coinEstimate =
     quote && usdEstimate !== null
       ? (usdEstimate / quote.coinUsd) * (1 - quote.spreadPct / 100)
@@ -489,6 +505,18 @@ export function WithdrawWizard({
               ))}
             </div>
 
+            {/* Mobile money's version of the coin estimate below: what will
+                actually arrive, said on the screen where the amount is being
+                chosen rather than one step later. */}
+            {!isCrypto && points > 0 && fee > 0 && (
+              <p className="mt-4 text-[0.8125rem] text-ink-600">
+                {t('amount.afterFee', {
+                  net: format.number(net, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                  percent: format.number(feePercent, { maximumFractionDigits: 2 }),
+                })}
+              </p>
+            )}
+
             {isCrypto && points > 0 && quote && usdEstimate !== null && coinEstimate !== null && (
               <p className="mt-4 text-[0.8125rem] text-ink-600">
                 {t('amount.coinEstimate', {
@@ -564,7 +592,25 @@ export function WithdrawWizard({
                         value: `GHS ${format.number(ghs, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
                       },
                     ]),
-                { label: t('confirm.fee'), value: t('confirm.feeFree') },
+                {
+                  label: t('confirm.fee'),
+                  value:
+                    fee > 0
+                      ? `− GHS ${format.number(fee, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${format.number(feePercent, { maximumFractionDigits: 2 })}%)`
+                      : t('confirm.feeFree'),
+                },
+                /* The bottom line, and only on mobile money: on crypto the
+                   coin figure above IS the bottom line, and a cedi total
+                   underneath it would be the second currency the operator
+                   asked us to stop showing. */
+                ...(!isCrypto && fee > 0
+                  ? [
+                      {
+                        label: t('confirm.youReceive'),
+                        value: `GHS ${format.number(net, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                      },
+                    ]
+                  : []),
               ].map((row) => (
                 <div key={row.label} className="flex items-baseline justify-between gap-4 px-4 py-3">
                   <dt className="text-[0.8125rem] text-ink-500">{row.label}</dt>

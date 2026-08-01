@@ -37,7 +37,14 @@ export type PayoutHeadline = {
 type Formatter = Pick<ReturnType<typeof useFormatter>, 'number'>
 
 export function payoutHeadline(request: PayoutRequest, format: Formatter): PayoutHeadline {
-  const cedis = `GHS ${format.number(request.ghs, {
+  /*
+    THE NET, NOT THE GROSS. Since 2026-08-01 a withdrawal can carry a fee for
+    transaction costs and taxes, and this function answers "what do I send?" —
+    the gross is what left the user's balance, which is a different question
+    and not one anybody is acting on here. On a row filed before fees existed
+    the two are equal, so nothing about the past changes.
+  */
+  const cedis = `GHS ${format.number(request.netGhs, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`

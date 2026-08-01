@@ -51,6 +51,10 @@ export type MarketingFigures = {
   best: MarketingPlan | null
   /** Points that make up one cedi. */
   pointsPerCedi: number
+  /** The one withdrawal minimum, for every plan. */
+  withdrawFrom: number
+  /** How long a free account earns for. */
+  freeEarningDays: number
 }
 
 /**
@@ -65,6 +69,8 @@ const FALLBACK: MarketingFigures = {
   free: null,
   best: null,
   pointsPerCedi: 1000,
+  withdrawFrom: 5000,
+  freeEarningDays: 21,
 }
 
 export async function getMarketingFigures(): Promise<MarketingFigures> {
@@ -78,7 +84,16 @@ export async function getMarketingFigures(): Promise<MarketingFigures> {
       )
       .eq('is_active', true)
       .order('sort_order', { ascending: true }),
-    supabase.from('app_config').select('key, value').eq('key', 'points_per_currency_unit').maybeSingle(),
+    /* Both keys are public, which is what lets the marketing page read them
+       with the anonymous client at all. */
+    supabase
+      .from('app_config')
+      .select('key, value')
+      .in('key', [
+        'points_per_currency_unit',
+        'redemption_minimum_points',
+        'free_earning_days',
+      ]),
   ])
 
   if (tiersRes.error || !tiersRes.data?.length) return FALLBACK
@@ -93,11 +108,26 @@ export async function getMarketingFigures(): Promise<MarketingFigures> {
     months: Math.max(1, Math.round(t.billing_period_days / 30)),
     adsPerDay: t.daily_ad_cap,
     rewardMultiplier: Number(t.reward_multiplier),
+    // Overwritten below with the platform-wide minimum; the column is history.
     withdrawFrom: t.redemption_minimum_points,
     isDefault: t.is_default,
   }))
 
-  const parsed = Number(configRes.data?.value)
+  const config = new Map((configRes.data ?? []).map((row) => [row.key, row.value]))
+
+  /*
+    ONE withdrawal minimum for every plan since 2026-08-01, so it is read from
+    the config rather than from each tier's own column — which still holds the
+    old per-plan numbers and is no longer what anybody is held to.
+  */
+  const withdrawFrom = Number(config.get('redemption_minimum_points'))
+  const minimum = Number.isFinite(withdrawFrom) && withdrawFrom > 0 ? withdrawFrom : FALLBACK.withdrawFrom
+  for (const plan of plans) plan.withdrawFrom = minimum
+
+  const days = Number(config.get('free_earning_days'))
+  const freeEarningDays = Number.isFinite(days) && days > 0 ? days : 21
+
+  const parsed = Number(config.get('points_per_currency_unit'))
   const pointsPerCedi = Number.isFinite(parsed) && parsed > 0 ? parsed : FALLBACK.pointsPerCedi
 
   return {
@@ -110,5 +140,7 @@ export async function getMarketingFigures(): Promise<MarketingFigures> {
       null,
     ),
     pointsPerCedi,
+    withdrawFrom: minimum,
+    freeEarningDays,
   }
 }

@@ -382,23 +382,12 @@ export function PlanPanel({
             line most often — could not see what their number had just done. */}
         {valueCheck}
 
+        {/* The withdrawal threshold used to be here. Operator, 2026-08-01:
+            "no plan should have its own withdrawal threshold" — it is one
+            number for the whole platform now, in Settings, and a field here
+            would be a field that changes nothing. The column still holds what
+            this plan used to promise, and nothing reads it. */}
         <div className="mt-3 grid grid-cols-2 gap-3">
-          <Field
-            label={t('fields.redemptionMinimum')}
-            hint={t('fields.redemptionMinimumHint')}
-            suffix={t('units.points')}
-            error={err('redemptionMinimumPoints') && t(`errors.${err('redemptionMinimumPoints')}`)}
-          >
-            <input
-              type="number"
-              inputMode="numeric"
-              min={0}
-              step={500}
-              value={draft.redemptionMinimumPoints}
-              onChange={(e) => set('redemptionMinimumPoints', Number(e.target.value))}
-              className={inputClass(Boolean(err('redemptionMinimumPoints')))}
-            />
-          </Field>
           <Field
             label={t('fields.adPriority')}
             hint={t('fields.adPriorityHint')}

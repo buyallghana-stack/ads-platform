@@ -87,6 +87,14 @@ export type EarningStatus = {
    * because finding out costs the user a whole ad watched for nothing.
    */
   pointsCapReached: boolean
+  /**
+   * When this account's free earning window closes — null for a plan holder,
+   * and null when the platform has no limit set. Null therefore means "no
+   * deadline" rather than "we don't know".
+   */
+  freeEarningEndsAt: number | null
+  /** True once it has closed: the ads are still there, but they cannot pay. */
+  freeEarningOver: boolean
 }
 
 export type AdsData = {
@@ -166,6 +174,8 @@ export async function getAdsData(userId: string): Promise<AdsData> {
       // user and the flag would sit permanently false — silently, and only
       // visibly correct when testing as an admin.
       pointsCapReached: s?.points_cap_reached ?? false,
+      freeEarningEndsAt: s?.free_earning_ends_at ? Date.parse(s.free_earning_ends_at) : null,
+      freeEarningOver: s?.free_earning_over ?? false,
     },
     videos: ads.filter((a) => a.format === 'video'),
     surveys: ads.filter((a) => a.format === 'survey'),

@@ -2,12 +2,12 @@
 
 import { useState } from 'react'
 
-import { AlertTriangle, ListChecks, PauseCircle, PlayCircle, Link2 } from 'lucide-react'
+import { AlertTriangle, Gem, ListChecks, PauseCircle, PlayCircle, Link2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import type { SubmitAdResult } from '@/app/[locale]/(app)/ads/actions'
 import type { AdsData, FeedAd } from '@/lib/ads/data'
-import { useRouter } from '@/i18n/navigation'
+import { Link, useRouter } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
 
 import { AdCard } from './AdCard'
@@ -171,33 +171,65 @@ export function AdsView({ data }: { data: AdsData }) {
   }
 
   // ---- Blocking states ---------------------------------------------------
-  // Both are decided by the database on every submission anyway; showing them
-  // up front stops a user watching a whole ad only to be told it paid nothing.
-  if (data.status.accountDisabled || data.status.earningPaused) {
-    const disabled = data.status.accountDisabled
+  // All three are decided by the database on every submission anyway; showing
+  // them up front stops a user watching a whole ad only to be told it paid
+  // nothing. The free window is last because it is the only one of the three
+  // that has something to offer: a plan lifts it immediately.
+  if (data.status.accountDisabled || data.status.earningPaused || data.status.freeEarningOver) {
+    const kind = data.status.accountDisabled
+      ? 'disabled'
+      : data.status.earningPaused
+        ? 'paused'
+        : 'freeOver'
+
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
         <div className="flex flex-col items-center gap-4 text-center">
           <span
             className={cn(
               'grid size-14 place-items-center rounded-full ring-8',
-              disabled
+              kind === 'disabled'
                 ? 'bg-danger-50 text-danger-600 ring-danger-500/15'
-                : 'bg-warning-50 text-warning-600 ring-warning-500/15',
+                : kind === 'paused'
+                  ? 'bg-warning-50 text-warning-600 ring-warning-500/15'
+                  : 'bg-violet-50 text-violet-700 ring-violet-600/15',
             )}
           >
-            {disabled ? (
+            {kind === 'disabled' ? (
               <AlertTriangle aria-hidden className="size-6" />
-            ) : (
+            ) : kind === 'paused' ? (
               <PauseCircle aria-hidden className="size-6" />
+            ) : (
+              <Gem aria-hidden className="size-6" />
             )}
           </span>
           <h1 className="text-[1.125rem] font-semibold text-ink-900">
-            {t(disabled ? 'blocked.disabledTitle' : 'blocked.pausedTitle')}
+            {t(`blocked.${kind}Title`)}
           </h1>
           <p className="max-w-[38ch] text-[0.875rem] leading-relaxed text-ink-500">
-            {t(disabled ? 'blocked.disabledBody' : 'blocked.pausedBody')}
+            {t(`blocked.${kind}Body`)}
           </p>
+
+          {/* The only one of the three with a way out, so it gets a button —
+              and the balance stays theirs either way, which is said plainly
+              because "you can no longer earn" is easily read as "you have
+              lost what you earned". */}
+          {kind === 'freeOver' && (
+            <>
+              <Link
+                href="/upgrade"
+                className={cn(
+                  'inline-flex h-11 items-center justify-center gap-2 rounded-(--radius-input) px-5',
+                  'border border-violet-600/25 bg-violet-50 text-[0.875rem] font-semibold text-violet-700',
+                  'transition-colors hover:border-violet-600/45',
+                )}
+              >
+                <Gem aria-hidden className="size-4" />
+                {t('blocked.freeOverCta')}
+              </Link>
+              <p className="text-[0.75rem] text-ink-400">{t('blocked.freeOverKeep')}</p>
+            </>
+          )}
         </div>
       </div>
     )

@@ -94,6 +94,10 @@ export const termsFr: LegalDoc = {
         },
         {
           kind: 'p',
+          text: "Un compte gratuit peut gagner pendant une période limitée après sa création : l'application indique quand cette période se termine, et souscrire une formule lève la limite tant que la formule est active. Les points déjà gagnés ne sont pas affectés : ils restent sur votre solde et peuvent être retirés.",
+        },
+        {
+          kind: 'p',
           text: "Des points peuvent également arriver sur votre solde via les autres fonctionnalités décrites ci-dessous : les tâches (section 5), les jeux-récompenses (section 6), les codes cadeaux (section 7) et le parrainage (section 12). Tout ce qui est crédité sur votre solde est constitué de points, et la section 9 s'y applique quelle que soit leur origine.",
         },
         {
@@ -333,6 +337,9 @@ export const termsFr: LegalDoc = {
         {
           kind: 'p',
           text: "Vous pouvez demander un retrait dès que votre solde atteint le minimum indiqué dans l'application. Les paiements sont effectués vers un compte mobile money ou un portefeuille de cryptomonnaie qui vous appartient.",
+        },        {
+          kind: 'p',
+          text: "Des frais peuvent être déduits d'un retrait pour couvrir les coûts de transaction et les taxes. Le cas échéant, le taux et le montant vous sont indiqués avant la confirmation de la demande, et le montant est figé à ce moment-là : une modification ultérieure du taux ne change pas une demande déjà déposée.",
         },
         {
           kind: 'p',

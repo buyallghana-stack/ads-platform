@@ -221,7 +221,10 @@ export function PayoutsTable({
 
   /* ---- The three numbers above the queue --------------------------- */
   const summary = useMemo(() => {
-    const sum = (list: PayoutRequest[]) => list.reduce((n, r) => n + r.ghs, 0)
+    /* NET, not gross: these strips answer "how much is going out", and since
+       2026-08-01 a withdrawal can carry a fee that never leaves the platform.
+       On rows filed before fees the two are identical. */
+    const sum = (list: PayoutRequest[]) => list.reduce((n, r) => n + r.netGhs, 0)
     const waiting = rows.filter(inQueue)
     const approved = rows.filter((r) => r.status === 'approved')
     const paidToday = rows.filter(
@@ -454,7 +457,7 @@ export function PayoutsTable({
                       {/* Cedis stay in view under a coin figure: it is what
                           the row contributes to the totals above. */}
                       {r.method === 'crypto'
-                        ? ghs(r.ghs)
+                        ? ghs(r.netGhs)
                         : `${r.points.toLocaleString()} pts`}
                     </p>
                   </td>
@@ -517,7 +520,7 @@ export function PayoutsTable({
                     {payoutHeadline(r, format).primary}
                   </p>
                   <p className="text-[0.6875rem] text-ink-400 tabular-nums">
-                    {r.method === 'crypto' ? ghs(r.ghs) : `${r.points.toLocaleString()} pts`}
+                    {r.method === 'crypto' ? ghs(r.netGhs) : `${r.points.toLocaleString()} pts`}
                   </p>
                 </div>
               </div>
@@ -552,7 +555,7 @@ export function PayoutsTable({
         <SelectionBar
           summary={t('bulk.selected', {
             count: selectedRows.length,
-            total: ghs(selectedRows.reduce((n, r) => n + r.ghs, 0)),
+            total: ghs(selectedRows.reduce((n, r) => n + r.netGhs, 0)),
           })}
           onClear={() => setSelected(new Set())}
           clearLabel={t('bulk.clear')}

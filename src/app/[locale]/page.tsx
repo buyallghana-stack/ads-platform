@@ -124,8 +124,11 @@ export default async function LandingPage({
     a: t(`faq.items.${k}.a`, {
       freeAds: num(freeAds),
       points: num(figures.pointsPerCedi),
-      freeThreshold: num(figures.free?.withdrawFrom ?? 5000),
-      bestThreshold: num(figures.best?.withdrawFrom ?? 1000),
+      // One threshold for every plan since 2026-08-01, and the free plan now
+      // earns for a fixed window rather than forever — both are config, both
+      // are read here rather than written into the copy.
+      threshold: num(figures.withdrawFrom),
+      days: num(figures.freeEarningDays),
     }),
   }))
 
@@ -501,10 +504,6 @@ export default async function LandingPage({
                             +{Math.round((plan.rewardMultiplier - 1) * 100)}%
                           </dd>
                         </div>
-                        <div className="flex items-baseline justify-between gap-3">
-                          <dt className="text-ink-500">{t('plans.rowThreshold')}</dt>
-                          <dd className="font-semibold text-ink-900">{num(plan.withdrawFrom)}</dd>
-                        </div>
                       </dl>
                     </article>
                   )
@@ -523,7 +522,8 @@ export default async function LandingPage({
                     <p className="mt-1.5 text-sm text-pretty text-ink-600">
                       {t('plans.free.body', {
                         ads: num(figures.free.adsPerDay),
-                        threshold: num(figures.free.withdrawFrom),
+                        threshold: num(figures.withdrawFrom),
+                        days: num(figures.freeEarningDays),
                       })}
                     </p>
                   </div>

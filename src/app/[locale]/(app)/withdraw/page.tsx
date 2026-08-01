@@ -49,7 +49,7 @@ export default async function WithdrawPage({
   const supabase = await createClient()
   const admin = createAdminClient()
 
-  const [{ data: status }, benefits, { data: rateRow }, detailsRes] = await Promise.all([
+  const [{ data: status }, benefits, { data: configRows }, detailsRes] = await Promise.all([
     admin.rpc('get_user_earning_status', { p_user_id: user!.id }).maybeSingle(),
     /*
       The user's RESOLVED tier, not the default one.
@@ -64,9 +64,17 @@ export default async function WithdrawPage({
       combining; this screen must not second-guess it.
     */
     getResolvedBenefits(user!.id),
-    // The points→GHS rate is operator config, not a constant. Every other
-    // screen reads it; this one used to hardcode 1000.
-    admin.from('app_config').select('value').eq('key', 'points_per_currency_unit').maybeSingle(),
+    /* Operator config, not constants. The rate turns points into cedis; the
+       fee is what comes off the top for transaction costs and taxes, and the
+       user has to see it BEFORE they confirm, not discover it in the
+       statement. Read with the service client because app_config's select
+       policy is `is_public OR is_admin()` — these two happen to be public,
+       but reading config through the user client is the trap that has already
+       bitten this repo once, so it does not start here. */
+    admin
+      .from('app_config')
+      .select('key, value')
+      .in('key', ['points_per_currency_unit', 'redemption_fee_percent']),
     supabase
       .from('user_payout_details')
       .select(
@@ -111,6 +119,10 @@ export default async function WithdrawPage({
      GHS/USD, about 12% adrift of the real rate and in the direction that
      promises more than gets sent. Showing nothing is worse UX and better
      honesty. */
+  const config = new Map((configRows ?? []).map((row) => [row.key, row.value]))
+  const pointsPerCurrencyUnit = Number(config.get('points_per_currency_unit') ?? 1000)
+  const feePercent = Number(config.get('redemption_fee_percent') ?? 0)
+
   const quote = await getCryptoQuote(cryptoCoin)
 
   return (
@@ -118,7 +130,8 @@ export default async function WithdrawPage({
       balance={status?.balance ?? 0}
       quote={quote}
       minPoints={benefits?.redemptionMinimumPoints ?? 5000}
-      pointsPerCurrencyUnit={Number(rateRow?.value ?? 1000)}
+      pointsPerCurrencyUnit={pointsPerCurrencyUnit}
+      feePercent={Number.isFinite(feePercent) ? feePercent : 0}
       tierName={benefits?.name ?? ''}
       accounts={accounts}
     />

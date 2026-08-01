@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, Gem, Zap } from 'lucide-react'
+import { Gem, Zap } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import type { Plan } from '@/lib/subscriptions/data'
@@ -25,7 +25,6 @@ export function PlanCard({
   recommended,
   previousName,
   previousDailyAdCap,
-  pointsPerCurrencyUnit,
   onChoose,
 }: {
   plan: Plan
@@ -39,8 +38,6 @@ export function PlanCard({
    *  ones look redundant. */
   previousName: string
   previousDailyAdCap: number
-  /** Points to one cedi, for showing the payout threshold in money. */
-  pointsPerCurrencyUnit: number
   onChoose: () => void
 }) {
   const t = useTranslations('upgrade')
@@ -74,17 +71,10 @@ export function PlanCard({
       text: t('benefits.rate', { percent: ratePercent }),
       hint: t('benefits.rateHint', { base: EXAMPLE_AD_POINTS, paid: examplePays }),
     },
-    {
-      icon: Check,
-      text: t('benefits.payout', { points: format.number(plan.redemptionMinimumPoints) }),
-      hint: t('benefits.payoutHint', {
-        money: format.number(plan.redemptionMinimumPoints / pointsPerCurrencyUnit, {
-          style: 'currency',
-          currency: plan.currencyCode,
-          maximumFractionDigits: 0,
-        }),
-      }),
-    },
+    /* "Withdraw from X points" was here until 2026-08-01, when the operator
+       made the threshold platform-wide: "no plan should have its own
+       withdrawal threshold". A card may only list what buying THIS actually
+       changes, and that no longer does. */
     /* The "+X% on referral bonuses" benefit was removed on 2026-07-30, when
        referral bonuses became flat for everyone. Only ad earning scales with a
        plan now — a card promising something the money path no longer does is

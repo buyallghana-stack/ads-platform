@@ -1133,6 +1133,9 @@ export type Database = {
           coin_usd: number | null
           currency_amount: number
           currency_code: string
+          fee_amount: number
+          fee_percent: number
+          net_amount: number | null
           quoted_at: string | null
           usd_ghs: number | null
           early_approval_reason: string | null
@@ -1167,6 +1170,9 @@ export type Database = {
           coin_usd?: number | null
           currency_amount: number
           currency_code?: string
+          fee_amount?: number
+          fee_percent?: number
+          net_amount?: number | null
           quoted_at?: string | null
           usd_ghs?: number | null
           early_approval_reason?: string | null
@@ -1201,6 +1207,9 @@ export type Database = {
           coin_usd?: number | null
           currency_amount?: number
           currency_code?: string
+          fee_amount?: number
+          fee_percent?: number
+          net_amount?: number | null
           quoted_at?: string | null
           usd_ghs?: number | null
           early_approval_reason?: string | null
@@ -2282,7 +2291,10 @@ export type Database = {
           approved_early: boolean
           decision_note: string
           destination: string
+          fee_ghs: number
+          fee_percent: number
           ghs: number
+          net_ghs: number
           holding_until: string
           id: string
           method: Database["public"]["Enums"]["payout_method"]
@@ -3058,6 +3070,8 @@ export type Database = {
           currency_value: number
           daily_ad_cap: number
           earning_paused: boolean
+          free_earning_ends_at: string | null
+          free_earning_over: boolean
           points_cap_reached: boolean
           points_earned_today: number
           tier_name: string

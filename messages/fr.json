@@ -145,7 +145,7 @@
       "rowThreshold": "Retrait dès",
       "free": {
         "title": "Formule {name} — 0 GHS",
-        "body": "{ads} publicités par jour, aussi longtemps que vous voulez, et un retrait possible dès {threshold} points. Aucune carte nécessaire pour commencer.",
+        "body": "{ads} publicités par jour pendant vos {days} premiers jours, et un retrait possible à partir de {threshold} points. Aucune carte requise pour commencer.",
         "cta": "Commencer gratuitement"
       },
       "stacking": "Les formules se cumulent. Si vous en détenez plusieurs, les limites quotidiennes s'additionnent, les bonus de gain s'additionnent, et c'est le seuil de retrait le plus bas qui s'applique. Chaque formule court sur une durée fixe et rien ne se renouvelle tout seul : vous n'êtes jamais débité de nouveau sans le demander."
@@ -215,7 +215,7 @@
       "items": {
         "free": {
           "q": "SidePerks est-il gratuit ?",
-          "a": "Oui. La formule gratuite vous donne {freeAds} publicités par jour et n'expire jamais. Des formules payantes existent, mais rien n'est verrouillé derrière : elles augmentent votre limite quotidienne et les points obtenus par publicité."
+          "a": "Oui. La formule gratuite donne {freeAds} publicités par jour pendant vos {days} premiers jours. Ensuite, une formule payante est nécessaire pour continuer à gagner — les points déjà gagnés restent les vôtres. Rien d'autre n'est verrouillé : les formules augmentent votre limite quotidienne et vos points par publicité."
         },
         "worth": {
           "q": "Que vaut réellement un point ?",
@@ -223,7 +223,7 @@
         },
         "withdraw": {
           "q": "Quand puis-je retirer ?",
-          "a": "Dès que votre solde dépasse le seuil de votre formule — {freeThreshold} points avec la formule gratuite, et jusqu'à {bestThreshold} points avec la meilleure. Les retraits seront activés une fois notre autorisation de paiement obtenue ; en attendant, vous pouvez enregistrer votre compte de retrait et continuer à gagner, et l'application vous dit clairement où en est une demande."
+          "a": "Dès que votre solde dépasse {threshold} points — le même seuil pour tout le monde, quelle que soit la formule. Les retraits s'activent une fois notre agrément finalisé ; d'ici là vous pouvez enregistrer votre compte de retrait et continuer à gagner, et l'application dit clairement où en est une demande."
         },
         "questions": {
           "q": "Suis-je obligé de répondre aux questions ?",
@@ -723,7 +723,11 @@
       "pausedTitle": "Les gains sont en pause",
       "pausedBody": "Les gains sont en pause sur toute la plateforme pour le moment. Votre solde est intact et les annonces reviendront bientôt.",
       "disabledTitle": "Votre compte est suspendu",
-      "disabledBody": "Les gains sont désactivés sur ce compte. Consultez vos notifications ou contactez le support si vous pensez qu’il s’agit d’une erreur."
+      "disabledBody": "Les gains sont désactivés sur ce compte. Consultez vos notifications ou contactez le support si vous pensez qu’il s’agit d’une erreur.",
+      "freeOverTitle": "Vos jours gratuits sont terminés",
+      "freeOverBody": "La formule gratuite permet de gagner pendant les premiers jours suivant l'inscription. Prenez une formule pour continuer à gagner — elle s'active immédiatement.",
+      "freeOverCta": "Voir les formules",
+      "freeOverKeep": "Les points déjà gagnés restent les vôtres et peuvent être retirés."
     },
     "cta": {
       "heading": "De l’annonceur",
@@ -801,7 +805,8 @@
         "max": "Max"
       },
       "coinEstimate": "≈ {coinAmount} {coin} (environ {usd} $) au taux indicatif du jour, GHS {rate} pour un dollar.",
-      "estimateUnavailable": "Nous ne pouvons pas afficher d'estimation en crypto pour le moment — le taux du jour n'est pas disponible. Votre retrait est enregistré en cedis et le montant en crypto est calculé au moment de l'envoi."
+      "estimateUnavailable": "Nous ne pouvons pas afficher d'estimation en crypto pour le moment — le taux du jour n'est pas disponible. Votre retrait est enregistré en cedis et le montant en crypto est calculé au moment de l'envoi.",
+      "afterFee": "Vous recevrez GHS {net} après les frais de {percent} %."
     },
     "usdtNotice": "Les montants en USDT sont des estimations. Vos points se convertissent en cédis au taux fixe ; le taux cédi–dollar est mis à jour quotidiennement, et le montant final en USDT est calculé à l'envoi du paiement — il peut différer légèrement de cette estimation.",
     "errors": {
@@ -1508,7 +1513,8 @@
         "note": "Note envoyée à l'utilisateur",
         "cryptoSub": "{ghs} · {points} pts",
         "quoteLive": "Estimé au taux du jour — aucun taux n'était disponible lors de la demande.",
-        "quoteMissing": "Aucun taux de change disponible : la valeur est affichée en cedis. À convertir avant l'envoi."
+        "quoteMissing": "Aucun taux de change disponible : la valeur est affichée en cedis. À convertir avant l'envoi.",
+        "feeBreakdown": "{gross} moins {fee} de frais ({percent} %)"
       },
       "confirm": {
         "approve": "Approuver {amount} pour {name} ?",
@@ -2307,9 +2313,10 @@
         "perCedi": "pour 1 GHS",
         "times": "×",
         "ads": "pubs",
-        "percent": "% du prix",
+        "percent": "%",
         "places": "places",
-        "perHour": "par heure"
+        "perHour": "par heure",
+        "days": "jours"
       },
       "groups": {
         "earning": {
@@ -2486,6 +2493,19 @@
         "giftAttempts": {
           "label": "Tentatives de code cadeau par heure",
           "description": "Combien de codes erronés un compte peut essayer avant d'être refusé."
+        },
+        "redemptionMinimum": {
+          "label": "Retrait minimum",
+          "description": "Le plus petit retrait possible, identique pour tous quels que soient les forfaits détenus. Aucun forfait n'a son propre seuil."
+        },
+        "redemptionFee": {
+          "label": "Frais de retrait",
+          "description": "Pourcentage retenu sur chaque retrait pour couvrir les frais de transaction et les taxes. Figé sur chaque demande au moment où elle est déposée.",
+          "warning": "Ne s'applique qu'aux demandes déposées ensuite : les demandes en attente gardent le taux qui était en vigueur."
+        },
+        "freeEarningDays": {
+          "label": "Durée de gain gratuite",
+          "description": "Nombre de jours après l'inscription pendant lesquels un compte gratuit peut gagner. Prendre un forfait lève la limite immédiatement. 0 = aucune limite. C'est le plafond de ce que peut rapporter un compte créé pour de la fraude."
         }
       }
     },

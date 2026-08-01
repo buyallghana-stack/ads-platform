@@ -84,6 +84,12 @@ export type PayoutRequest = {
    *  total, because the point is pegged to the cedi and two currencies do not
    *  add up. What a HUMAN is shown for a crypto request is the coin. */
   ghs: number
+  /** The fee rate frozen onto this request when it was filed. */
+  feePercent: number
+  /** What that rate took, in cedis. */
+  feeGhs: number
+  /** ghs − feeGhs: what the user is owed and what the operator sends. */
+  netGhs: number
   /** Crypto only: the ticker the user is paid in, "USDT" or "USDC". */
   coin?: string
   /** Crypto only: the amount frozen when the request was made — what the user

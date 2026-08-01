@@ -28,7 +28,6 @@ export function UpgradeView({
   benefits,
   freeDailyAdCap,
   freeName,
-  pointsPerCurrencyUnit,
   checkoutEnabled,
 }: {
   plans: Plan[]
@@ -38,8 +37,6 @@ export function UpgradeView({
    *  to compare against. Every plan after it compares to its predecessor. */
   freeDailyAdCap: number
   freeName: string
-  /** Points to one cedi, for showing thresholds in money. */
-  pointsPerCurrencyUnit: number
   /** False until mobile money and crypto checkout are wired up. */
   checkoutEnabled: boolean
 }) {
@@ -103,7 +100,12 @@ export function UpgradeView({
         </div>
 
         {benefits && (
-          <dl className="mt-4 grid grid-cols-3 gap-2">
+          /* Two, not three: "withdraw from" used to sit here as if a plan
+             bought you a lower threshold, and since 2026-08-01 every account
+             has the same one. A stat that is identical for everybody is not a
+             standing, it is a platform fact, and it belongs on the screen
+             where somebody is actually withdrawing. */
+          <dl className="mt-4 grid grid-cols-2 gap-2">
             <Stat
               label={t('current.dailyAds')}
               value={format.number(benefits.dailyAdCap)}
@@ -111,14 +113,6 @@ export function UpgradeView({
             <Stat
               label={t('current.rate')}
               value={`+${Math.round((benefits.rewardMultiplier - 1) * 100)}%`}
-            />
-            <Stat
-              label={t('current.payoutFrom')}
-              value={format.number(benefits.redemptionMinimumPoints / pointsPerCurrencyUnit, {
-                style: 'currency',
-                currency: 'GHS',
-                maximumFractionDigits: 0,
-              })}
             />
           </dl>
         )}
@@ -151,7 +145,6 @@ export function UpgradeView({
             previousDailyAdCap={
               index === 0 ? freeDailyAdCap : plans[index - 1]!.dailyAdCap
             }
-            pointsPerCurrencyUnit={pointsPerCurrencyUnit}
             onChoose={() => setSelected(plan)}
           />
         ))}

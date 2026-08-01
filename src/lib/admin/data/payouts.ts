@@ -40,6 +40,9 @@ type QueueRow = {
   paid_before_ghs: number | string
   points: number | string
   ghs: number | string
+  fee_percent: number | string
+  fee_ghs: number | string
+  net_ghs: number | string
   coin_code: string | null
   coin_amount: number | string | null
   live_coin_amount: number | string | null
@@ -123,6 +126,12 @@ function toRequest(row: QueueRow, now: number): PayoutRequest {
     // downstream ever does string arithmetic on money.
     points: Number(row.points),
     ghs: Number(row.ghs),
+    /* Frozen when the request was filed. `netGhs` is what the operator
+       actually sends — paying the gross would be sending the fee back out
+       with the money. */
+    feePercent: Number(row.fee_percent),
+    feeGhs: Number(row.fee_ghs),
+    netGhs: Number(row.net_ghs),
     /*
       What to actually send, for a crypto payout. `coinAmount` is the figure
       frozen when the user asked; `liveCoinAmount` is only present when

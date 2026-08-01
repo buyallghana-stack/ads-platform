@@ -281,6 +281,19 @@ function Panel({
               rate: format.number(r.points / r.ghs, { maximumFractionDigits: 0 }),
             })}
       </p>
+      {/* The fee, spelled out, and ONLY when there is one. The big number
+          above is the net — what to send — so the gross has to appear
+          somewhere or the arithmetic against the user's balance looks wrong.
+          The rate shown is the one frozen onto this request, not today's. */}
+      {r.feeGhs > 0 && (
+        <p className="mt-1.5 text-[0.75rem] text-ink-500 tabular-nums">
+          {t('drawer.feeBreakdown', {
+            gross: ghs(r.ghs),
+            fee: ghs(r.feeGhs),
+            percent: format.number(r.feePercent, { maximumFractionDigits: 2 }),
+          })}
+        </p>
+      )}
       {payoutAmount.caveat && (
         <p className="mt-1.5 text-[0.75rem] text-warning-700">{t(payoutAmount.caveat)}</p>
       )}
