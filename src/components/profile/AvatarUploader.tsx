@@ -10,10 +10,28 @@ import { useRouter } from '@/i18n/navigation'
 import { Avatar } from '@/components/profile/Avatar'
 import { createClient } from '@/lib/supabase/client'
 import { avatarPublicUrl } from '@/lib/profile/avatar'
+import { compressAvatar } from '@/lib/profile/compress-image'
 import { cn } from '@/lib/cn'
 
 const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp']
-const MAX_BYTES = 5 * 1024 * 1024
+
+/*
+  What may be CHOSEN, not what is uploaded — every picture is shrunk to a few
+  tens of kilobytes first (see compressAvatar). The limit is generous because a
+  photo straight off a modern phone is routinely 5-12 MB, and refusing those
+  would mean telling people to go and resize a picture themselves, which is
+  exactly the work this now does for them. It exists only to keep a phone from
+  trying to decode something absurd.
+*/
+const MAX_BYTES = 15 * 1024 * 1024
+
+/*
+  And what may be UPLOADED if compression could not run at all — an old browser
+  with no usable canvas. Small enough that the fallback can never put a
+  megabyte on the wire; the bucket enforces its own ceiling underneath, since
+  the browser is not the last word on what reaches storage.
+*/
+const MAX_UNCOMPRESSED_BYTES = 400 * 1024
 const EXT: Record<string, string> = {
   'image/jpeg': 'jpg',
   'image/png': 'png',
@@ -71,13 +89,26 @@ export function AvatarUploader({
     setError(null)
     setDone(null)
     setBusy(true)
+
+    /*
+      Shrunk BEFORE the upload, so the slow part never happens on the sender's
+      connection either. compressAvatar returns the original file rather than
+      throwing when it cannot work, which is why the size is re-checked after:
+      "compression did not run" must not become "a 12 MB photo was uploaded".
+    */
+    const image = await compressAvatar(file)
+    if (image.size > MAX_UNCOMPRESSED_BYTES) {
+      setBusy(false)
+      return setError(t('couldNotShrink'))
+    }
+
     const supabase = createClient()
     const previous = path
-    const next = `${userId}/${crypto.randomUUID()}.${EXT[file.type]}`
+    const next = `${userId}/${crypto.randomUUID()}.${EXT[image.type] ?? 'jpg'}`
 
     const { error: upErr } = await supabase.storage
       .from('avatars')
-      .upload(next, file, { contentType: file.type, upsert: false })
+      .upload(next, image, { contentType: image.type, upsert: false })
     if (upErr) {
       setBusy(false)
       return setError(t('failed'))

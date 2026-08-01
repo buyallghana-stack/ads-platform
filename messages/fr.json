@@ -1037,8 +1037,9 @@
       "updated": "Photo enregistrée",
       "removed": "Photo supprimée",
       "badType": "Veuillez choisir une image JPG, PNG ou WebP.",
-      "tooBig": "Cette image dépasse 5 Mo. Veuillez en choisir une plus petite.",
-      "failed": "Impossible de mettre à jour votre photo. Veuillez réessayer."
+      "tooBig": "Cette image dépasse 15 Mo. Choisissez-en une plus petite.",
+      "failed": "Impossible de mettre à jour votre photo. Veuillez réessayer.",
+      "couldNotShrink": "Cette image n'a pas pu être réduite sur cet appareil. Choisissez une photo plus petite (environ 400 Ko)."
     },
     "errors": {
       "nameTooShort": "Veuillez saisir votre nom.",

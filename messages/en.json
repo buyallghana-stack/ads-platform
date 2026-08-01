@@ -1037,8 +1037,9 @@
       "updated": "Photo saved",
       "removed": "Photo removed",
       "badType": "Please choose a JPG, PNG or WebP image.",
-      "tooBig": "That image is over 5 MB. Please choose a smaller one.",
-      "failed": "Could not update your photo. Please try again."
+      "tooBig": "That image is over 15 MB. Please choose a smaller one.",
+      "failed": "Could not update your photo. Please try again.",
+      "couldNotShrink": "That picture could not be resized on this device. Please choose a smaller one — about 400 KB."
     },
     "errors": {
       "nameTooShort": "Please enter your name.",
