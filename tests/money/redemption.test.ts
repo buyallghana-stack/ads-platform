@@ -24,8 +24,8 @@ import {
  * The figures are deliberately ordinary for this market: a user earns
  * 20,000 points (GHS 20 at the 1,000-points-to-the-cedi peg), cashes out
  * 12,000 of them (GHS 12), and keeps 8,000. They are small enough to read at
- * a glance and large enough to clear the Free tier's 5,000-point minimum, so
- * a test failing on the minimum is failing for the reason it says.
+ * a glance and large enough to clear the platform's 5,000-point minimum, so a
+ * test failing on the minimum is failing for the reason it says.
  */
 
 const POINTS_EARNED = 20_000
@@ -127,17 +127,20 @@ describe.skipIf(!HAS_DB)('requesting a payout', () => {
     })
   })
 
-  it('refuses an amount below the tier minimum', async () => {
+  it('refuses an amount below the platform minimum', async () => {
     await withRollback(async (tx) => {
       const user = await createUser(tx)
       await givePayoutDetails(tx, user.id)
       await creditPoints(tx, user.id, POINTS_EARNED)
 
-      // Free tier's minimum is 5,000.
+      /* `redemption_minimum_points`, and no longer the tier's own column:
+         since 2026-08-01 one number covers every plan. The wording moved with
+         it — "the tier minimum" was a sentence about a rule that no longer
+         exists. See tests/money/free-window-minimum-and-fee.test.ts. */
       const message = await expectRejection(tx, () =>
         tx.query(`select public.request_redemption($1, 'mobile_money', 4000)`, [user.id]),
       )
-      expect(message).toMatch(/minimum/i)
+      expect(message).toMatch(/smallest withdrawal is 5000 points/i)
       expect(await balanceOf(tx, user.id)).toBe(POINTS_EARNED)
     })
   })

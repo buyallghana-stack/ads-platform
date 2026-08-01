@@ -190,13 +190,26 @@ describe.skipIf(!HAS_DB)('leaderboard', () => {
       const month = Number((await standing(tx, 'month'))!.points)
       const all = Number((await standing(tx, 'all'))!.points)
 
-      // Each window contains the ones inside it, so the totals only grow.
+      /*
+        WEEK AND MONTH DO NOT NEST, and asserting that they do fails on a few
+        days of every month. These windows are CALENDAR truncations: on the
+        1st of August the month begins that morning while the week began the
+        previous Monday, so the week legitimately holds MORE than the month.
+        This test asserted `month >= week` and passed for eight days until the
+        calendar caught it.
+
+        What is true on every date: the day is inside both the week and the
+        month, and both are inside all-time. That is what is asserted.
+      */
       expect(day).toBeGreaterThanOrEqual(7)
       expect(week).toBeGreaterThanOrEqual(day)
-      expect(month).toBeGreaterThanOrEqual(week)
+      expect(month).toBeGreaterThanOrEqual(day)
+      expect(all).toBeGreaterThanOrEqual(week)
+      expect(all).toBeGreaterThanOrEqual(month)
       expect(all).toBe(7_777)
       // The oldest credit is outside every calendar period but all-time.
       expect(month).toBeLessThan(all)
+      expect(week).toBeLessThan(all)
     })
   })
 
