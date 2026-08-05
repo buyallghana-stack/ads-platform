@@ -48,6 +48,11 @@ const planSchema = z.object({
   adPriority: z.number().int().min(0).max(1000),
   adCooldownSeconds: z.number().int().min(0).max(86_400),
   sortOrder: z.number().int().min(0).max(1000),
+  /* The top rung's own ceiling. Nullable rather than optional: null is the
+     instruction to CLEAR it, which is a different thing from not mentioning
+     it, and `admin_save_plan` distinguishes the two by key presence. */
+  bandMaxGhs: z.number().min(0).max(1_000_000).nullable().optional(),
+  bandMaxMultiplier: z.number().gt(0).max(1000).nullable().optional(),
 })
 
 export type PlanInput = z.input<typeof planSchema>

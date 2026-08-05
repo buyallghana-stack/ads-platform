@@ -7,13 +7,15 @@ import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/Button'
 import {
-  alignedBenefits,
-  checkPlanValue,
+  bandFor,
+  benefitsBetween,
+  checkBand,
+  earningPerCedi,
+  ladder,
   nextDraftPlanId,
   slugify,
   undercutBy,
   validatePlan,
-  type HouseRate,
 } from '@/lib/admin/plan-value'
 import type { PlanRow } from '@/lib/admin/types'
 import { cn } from '@/lib/cn'
@@ -25,24 +27,27 @@ import { DetailPanel, PanelFooter, PanelSection } from './DetailPanel'
  * The plan editor — one plan, every column, and the rule that keeps the
  * ladder honest.
  *
- * THE VALUE CHECK IS THE POINT OF THIS SCREEN
- * Migration 037 aligned every plan to one value per cedi, and closed with an
- * instruction: "If the admin dashboard later sets a plan's benefits out of
- * proportion to its price, the ordering can break again. That rule belongs on
- * the admin plan editor when it is built." So the editor does three things
- * about it, in increasing order of insistence:
+ * THE PRICE FIELD IS NOT A PRICE, AND THAT IS THE POINT OF THIS SCREEN
+ * Since migration 098 a plan is a BAND. The number typed into "Price" is the
+ * FLOOR — the least somebody may pay — and the ceiling comes from the next
+ * plan up. Two consequences an operator cannot be expected to guess, so the
+ * editor states both, live, under the field:
  *
- *   1. Fills the benefits in from the price on a new plan, so the default
- *      path is the correct one and nobody has to know the arithmetic.
- *   2. Shows what the price should buy, live, whenever the numbers drift.
- *   3. Names the actual harm when it can find it — "Bronze + Silver costs
- *      GHS 70 and would give more than this" — because a slope means nothing
- *      to somebody pricing a plan and a cheaper combination beating a dearer
- *      one means everything.
+ *   1. This plan's real range. "Bronze: GHS 65 – 139, and what a buyer pays
+ *      inside it moves their earning rate between ×1.5 and ×2.0."
+ *   2. What it does to the plan BELOW. Repricing Silver from GHS 140 to
+ *      GHS 200 silently widens Bronze's band to GHS 65 – 199 and changes what
+ *      every future Bronze buyer earns. Nothing else on the screen would say
+ *      so.
  *
- * It never blocks. A promotional plan priced off the line is a legitimate
- * thing to want, and an operator who reads the warning is entitled to
- * overrule it. Warnings that cannot be overruled get worked around.
+ * It also warns about the three ways a rung goes wrong — a band nobody can
+ * buy in, and an earning rate or ad count that FALLS as the price rises, which
+ * makes the buyer's slider run backwards — and names the concrete harm when a
+ * cheaper pair beats this plan, because plans stack.
+ *
+ * It never blocks. A promotional plan is a legitimate thing to want, and an
+ * operator who reads the warning is entitled to overrule it. Warnings that
+ * cannot be overruled get worked around.
  *
  * WHAT IS NOT EDITABLE, AND WHY
  * The slug is fixed once a plan exists: subscriptions, payments and the seed
@@ -52,16 +57,24 @@ import { DetailPanel, PanelFooter, PanelSection } from './DetailPanel'
  * migration rather than a form field.
  */
 
-type Draft = Omit<PlanRow, 'active' | 'activeLastMonth' | 'monthlyGhs'>
+/* Everything a plan IS, without anything about how it has sold. The DERIVED
+   band ceiling is left out too: it is worked out from the plan above, so a
+   draft carrying one would be a second source of truth. `ownBandMaxGhs` is a
+   different thing and stays — it is a real column, and on the top rung it is
+   the only place a ceiling can come from. */
+type Draft = Omit<
+  PlanRow,
+  'active' | 'activeLastMonth' | 'monthlyGhs' | 'paidCount' | 'paidAboveFloor' | 'paidAvgGhs' | 'bandMaxGhs'
+>
 
-const blank = (rate: HouseRate): Draft => ({
+const blank = (free: number): Draft => ({
   id: nextDraftPlanId(),
   slug: '',
   name: '',
   description: '',
   priceGhs: 0,
   billingPeriodDays: 90,
-  dailyAdCap: rate.freeAdCap,
+  dailyAdCap: free,
   rewardMultiplier: 1,
   redemptionMinimumPoints: 5000,
   /* Sent because the RPC still takes it, never shown and never changed.
@@ -76,26 +89,31 @@ const blank = (rate: HouseRate): Draft => ({
   isDefault: false,
   status: 'hidden',
   sortOrder: 0,
+  /* A new plan is created at the bottom of the ladder, never the top, so it
+     has a plan above it to end its band against and no ceiling of its own. */
+  ownBandMaxGhs: null,
+  ownBandMaxMultiplier: null,
 })
 
 export function PlanPanel({
   plan,
   plans,
-  rate,
+  free,
   onClose,
   onSave,
 }: {
   /** null when creating. */
   plan: PlanRow | null
   plans: PlanRow[]
-  rate: HouseRate
+  /** Ads a day the free plan gives, which every stacking sum counts once. */
+  free: number
   onClose: () => void
   onSave: (plan: PlanRow) => void
 }) {
   const t = useTranslations('admin.subscriptions')
   const isNew = plan === null
 
-  const [draft, setDraft] = useState<Draft>(() => (plan ? { ...plan } : blank(rate)))
+  const [draft, setDraft] = useState<Draft>(() => (plan ? { ...plan } : blank(free)))
   /** Only set once the operator has typed a slug themselves, so the suggestion
    *  stops following the name the moment they take control of it. */
   const [slugTouched, setSlugTouched] = useState(!isNew)
@@ -108,28 +126,49 @@ export function PlanPanel({
   const setName = (name: string) =>
     setDraft((d) => ({ ...d, name, slug: slugTouched ? d.slug : slugify(name) }))
 
-  /* Pricing a NEW plan fills the benefits in from the line, so the correct
-     answer is the one you get by doing nothing. An existing plan is left
-     alone — silently rewriting a live plan's benefits because somebody
-     adjusted its price is not a favour. */
+  /* Pricing a NEW plan fills the benefits in from the line between the two
+     plans it lands between, so the correct answer is the one you get by doing
+     nothing — and under bands that is not merely tidy: a rung on the line
+     leaves the interpolated earning rate continuous across the boundary, so
+     nobody paying one cedi more sees their rate jump. An existing plan is left
+     alone; silently rewriting a live plan's benefits because somebody adjusted
+     its price is not a favour. */
   const setPrice = (priceGhs: number) =>
     setDraft((d) => {
       if (!isNew) return { ...d, priceGhs }
-      const aligned = alignedBenefits(priceGhs, rate)
-      return { ...d, priceGhs, ...aligned }
+      return { ...d, priceGhs, ...benefitsBetween(priceGhs, plans) }
     })
 
   const otherSlugs = plans.filter((p) => p.id !== draft.id).map((p) => p.slug)
   const errors = useMemo(() => validatePlan(draft, otherSlugs), [draft, otherSlugs])
-  const check = useMemo(() => checkPlanValue(draft, rate), [draft, rate])
+
+  /* The draft is checked BESIDE the other plans, with its own saved row taken
+     out — otherwise an edit is measured against the version being replaced. */
+  const others = useMemo(() => plans.filter((p) => p.id !== draft.id), [plans, draft.id])
+  const check = useMemo(() => checkBand(draft, [...others, draft]), [others, draft])
+  const band = check.band
   const undercut = useMemo(
-    () => (check.aligned ? null : undercutBy(draft, plans, rate)),
-    [check.aligned, draft, plans, rate],
+    () => (draft.priceGhs > 0 ? undercutBy(draft, others, free) : null),
+    [draft, others, free],
   )
 
-  const alignToPrice = () => {
-    const aligned = alignedBenefits(draft.priceGhs, rate)
-    setDraft((d) => ({ ...d, ...aligned }))
+  /* The plan directly BELOW this one, whose ceiling this plan's price sets.
+     The single most surprising thing about the band model: repricing a plan
+     changes what buyers of a DIFFERENT plan earn, and nothing else on the
+     screen would mention it. */
+  const below = useMemo(() => {
+    const rungs = ladder(others)
+    return [...rungs].reverse().find((p) => p.sortOrder < draft.sortOrder) ?? null
+  }, [others, draft.sortOrder])
+
+  const belowBand = useMemo(
+    () => (below ? bandFor(below, [...others, draft]) : null),
+    [below, others, draft],
+  )
+  const belowWas = below?.bandMaxGhs ?? null
+
+  const alignToLine = () => {
+    setDraft((d) => ({ ...d, ...benefitsBetween(d.priceGhs, others) }))
   }
 
   const submit = () => {
@@ -143,81 +182,151 @@ export function PlanPanel({
       active: plan?.active ?? 0,
       activeLastMonth: plan?.activeLastMonth ?? 0,
       monthlyGhs: plan?.monthlyGhs ?? 0,
+      paidCount: plan?.paidCount ?? 0,
+      paidAboveFloor: plan?.paidAboveFloor ?? 0,
+      paidAvgGhs: plan?.paidAvgGhs ?? null,
+      /* Carried, never computed here. The save returns the refreshed list and
+         that is what gets rendered, so the authoritative band arrives from
+         `plan_band_max_minor` a moment later. */
+      bandMaxGhs: plan?.bandMaxGhs ?? null,
     })
   }
 
   const err = (field: string) => (showErrors ? errors[field] : undefined)
 
-  /* The value-per-cedi verdict. An element rather than a component: declaring
-     a component inside render remounts it — and its state — on every
-     keystroke, which is exactly the field this thing reacts to. */
-  const valueCheck = draft.priceGhs > 0 ? (
+  const ghs = (n: number) => `GHS ${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+  /* Floored to whole cedis. The band really ends at GHS 139.99, and rounding
+     that prints the next plan's own price, which reads as an overlap. */
+  const top = band ? Math.floor(band.toGhs) : null
+  /* GROUPED, like every other figure on this screen. A bare `{to}` in an ICU
+     message is substituted rather than number-formatted, so passing the raw
+     number printed "GHS 1000" in the band line while the table beside it and
+     the sentence below it both said "GHS 1,000" — the same amount, spelled two
+     ways, in one panel. Only visible once a plan's ceiling passed a thousand,
+     which nothing on the ladder did until the top plan got a band. */
+  const topLabel = (top ?? draft.priceGhs).toLocaleString()
 
-            <div
-              className={cn(
-                'mt-3 rounded-(--radius-card) border p-3.5',
-                check.aligned
-                  ? 'border-success-500/25 bg-success-50'
-                  : 'border-warning-500/30 bg-warning-50',
-              )}
-            >
-              <p
-                className={cn(
-                  'flex items-center gap-1.5 text-[0.8125rem] font-semibold',
-                  check.aligned ? 'text-success-700' : 'text-warning-600',
-                )}
-              >
-                {check.aligned ? (
-                  <Check aria-hidden className="size-4 shrink-0" />
-                ) : (
-                  <AlertTriangle aria-hidden className="size-4 shrink-0" />
-                )}
-                {check.aligned ? t('valueWarn.okTitle') : t('valueWarn.title')}
-              </p>
+  /* The band, and what a buyer moving across it actually changes. An element
+     rather than a component: declaring a component inside render remounts it —
+     and its state — on every keystroke, which is exactly the field this thing
+     reacts to. */
+  const bandBox =
+    draft.priceGhs > 0 && draft.status === 'live' ? (
+      <div
+        className={cn(
+          'mt-3 rounded-(--radius-card) border p-3.5',
+          check.ok
+            ? 'border-brand-600/25 bg-brand-50/50'
+            : check.problems.includes('unbuyable')
+              ? 'border-danger-500/30 bg-danger-50'
+              : 'border-warning-500/30 bg-warning-50',
+        )}
+      >
+        <p
+          className={cn(
+            'flex items-center gap-1.5 text-[0.8125rem] font-semibold',
+            check.ok
+              ? 'text-brand-700'
+              : check.problems.includes('unbuyable')
+                ? 'text-danger-700'
+                : 'text-warning-600',
+          )}
+        >
+          {check.ok ? (
+            <Check aria-hidden className="size-4 shrink-0" />
+          ) : (
+            <AlertTriangle aria-hidden className="size-4 shrink-0" />
+          )}
+          {check.ok
+            ? band?.isTop && draft.ownBandMaxGhs === null
+              ? t('band.topTitle')
+              : t('band.title', { from: ghs(draft.priceGhs), to: topLabel })
+            : t(`bandWarn.${check.problems.includes('unbuyable') ? 'unbuyable' : check.problems[0]!}.short`)}
+        </p>
 
-              <p
-                className={cn(
-                  'mt-1.5 text-[0.75rem] leading-relaxed',
-                  check.aligned ? 'text-success-700/90' : 'text-warning-600/90',
-                )}
-              >
-                {check.aligned
-                  ? t('valueWarn.okBody', {
-                      ads: rate.adsPerCedi,
-                      pct: Math.round(rate.ratePerCedi * 1000) / 10,
-                    })
-                  : t('valueWarn.body', {
-                      price: draft.priceGhs,
-                      ads: check.expected.dailyAdCap,
-                      multiplier: check.expected.rewardMultiplier,
-                    })}
-              </p>
+        <p
+          className={cn(
+            'mt-1.5 text-[0.75rem] leading-relaxed',
+            check.ok ? 'text-ink-600' : 'text-warning-600/90',
+          )}
+        >
+          {!check.ok
+            ? t(
+                `bandWarn.${check.problems.includes('unbuyable') ? 'unbuyable' : check.problems[0]!}.body`,
+                { next: check.next?.name ?? '', name: draft.name || t('panel.newTitle') },
+              )
+            : band?.isTop
+              ? draft.ownBandMaxGhs === null
+                ? t('band.topBody', { price: ghs(draft.priceGhs) })
+                : /* A top rung with a ceiling behaves like any other band, but
+                     it climbs towards a number rather than towards a plan —
+                     there is no next plan to name. */
+                  t('band.topRangeBody', {
+                    from: draft.rewardMultiplier,
+                    to: draft.ownBandMaxMultiplier ?? draft.rewardMultiplier,
+                    price: ghs(draft.ownBandMaxGhs),
+                    ads: draft.dailyAdCap,
+                  })
+              : t('band.body', {
+                  from: draft.rewardMultiplier,
+                  to: check.next?.rewardMultiplier ?? draft.rewardMultiplier,
+                  next: check.next?.name ?? '',
+                  ads: draft.dailyAdCap,
+                })}
+        </p>
 
-              {/* The concrete harm, when there is one to name. */}
-              {undercut && (
-                <p className="mt-2 rounded-(--radius-input) bg-warning-500/10 px-2.5 py-2 text-[0.75rem] leading-relaxed font-medium text-warning-600">
-                  {t('valueWarn.undercut', {
-                    plans: undercut.names.join(' + '),
-                    price: undercut.priceGhs,
-                    ads: undercut.dailyAdCap,
-                    multiplier: undercut.rewardMultiplier,
-                  })}
-                </p>
-              )}
+        {/* What one cedi buys here. Shown, never judged: the ladder gives less
+            per cedi as it climbs, and that is a decision, not a defect. */}
+        {check.ok && !band?.isTop && (
+          <p className="mt-2 text-[0.6875rem] leading-relaxed text-ink-500">
+            {t('band.perCedi', { pct: earningPerCedi(draft) })}
+          </p>
+        )}
 
-              {!check.aligned && (
-                <button
-                  type="button"
-                  onClick={alignToPrice}
-                  className="mt-2.5 inline-flex items-center gap-1.5 rounded-(--radius-input) border border-warning-500/40 bg-surface px-2.5 py-1.5 text-[0.75rem] font-semibold text-warning-600 transition-colors hover:bg-warning-50"
-                >
-                  <Wand2 aria-hidden className="size-3.5" />
-                  {t('valueWarn.fix')}
-                </button>
-              )}
-            </div>
-  ) : null
+        {/* The concrete harm, when there is one to name. */}
+        {undercut && (
+          <p className="mt-2 rounded-(--radius-input) bg-warning-500/10 px-2.5 py-2 text-[0.75rem] leading-relaxed font-medium text-warning-600">
+            {t('bandWarn.undercut', {
+              plans: undercut.names.join(' + '),
+              price: undercut.priceGhs,
+              ads: undercut.dailyAdCap,
+              multiplier: undercut.rewardMultiplier,
+            })}
+          </p>
+        )}
 
+        {/* Offered ONLY for the two inversions, which putting the benefits on
+            the line genuinely resolves. An empty band is a PRICE problem —
+            rewriting the ads and the rate would leave the plan just as
+            unsellable, and a button that does not do what it says is worse
+            than no button. The warning above says exactly what to change. */}
+        {!check.ok && !check.problems.includes('unbuyable') && (
+          <button
+            type="button"
+            onClick={alignToLine}
+            className="mt-2.5 inline-flex items-center gap-1.5 rounded-(--radius-input) border border-warning-500/40 bg-surface px-2.5 py-1.5 text-[0.75rem] font-semibold text-warning-600 transition-colors hover:bg-warning-50"
+          >
+            <Wand2 aria-hidden className="size-3.5" />
+            {t('bandWarn.fix')}
+          </button>
+        )}
+      </div>
+    ) : null
+
+  /* What this price does to the plan BELOW. Only when it actually moves it,
+     so an operator editing anything else is not told about a neighbour that
+     has not changed. */
+  const neighbourBox =
+    below && belowBand && belowWas !== null && Math.floor(belowBand.toGhs) !== Math.floor(belowWas) ? (
+      <p className="mt-2.5 rounded-(--radius-input) border border-ink-200 bg-ink-50/60 px-2.5 py-2 text-[0.75rem] leading-relaxed text-ink-600">
+        {t('band.neighbour', {
+          name: below.name,
+          from: ghs(below.priceGhs),
+          was: Math.floor(belowWas),
+          to: Math.floor(belowBand.toGhs),
+        })}
+      </p>
+    ) : null
 
   return (
     <DetailPanel
@@ -308,6 +417,7 @@ export function PlanPanel({
         <div className="grid grid-cols-2 gap-3">
           <Field
             label={t('fields.price')}
+            hint={t('fields.priceHint')}
             suffix="GHS"
             error={err('priceGhs') && t(`errors.${err('priceGhs')}`)}
           >
@@ -336,6 +446,85 @@ export function PlanPanel({
             />
           </Field>
         </div>
+
+        {/* ---- The top rung's own ceiling -------------------------------
+            Only here, and only at the top. Every other plan's band ends at the
+            plan above it — `plan_band_max_minor` ignores a stored ceiling
+            wherever there is a next rung — so offering the field lower down
+            would be offering a setting the database throws away.
+
+            Both or neither, which the table enforces as a constraint: a
+            ceiling with no rate to climb towards cannot be priced, and a rate
+            with no ceiling is a number nothing reads. */}
+        {band?.isTop && draft.priceGhs > 0 && (
+          <div className="mt-3">
+            <label className="flex items-start gap-2.5 text-[0.8125rem] text-ink-700">
+              <input
+                type="checkbox"
+                className="mt-0.5 size-4 accent-[var(--color-brand-600)]"
+                checked={draft.ownBandMaxGhs !== null}
+                onChange={(e) =>
+                  setDraft((d) => ({
+                    ...d,
+                    /* Opening it suggests double the floor and the rate that
+                       continues the ladder's own line, so the honest answer is
+                       the one you get by doing nothing. Closing it clears BOTH,
+                       because a half-set pair is refused by the database. */
+                    ownBandMaxGhs: e.target.checked ? d.priceGhs * 2 : null,
+                    ownBandMaxMultiplier: e.target.checked
+                      ? Math.round(d.rewardMultiplier * 1000 * 2 - 1000) / 1000
+                      : null,
+                  }))
+                }
+              />
+              <span>
+                {t('fields.topBand')}
+                <span className="mt-0.5 block text-[0.75rem] text-ink-500">
+                  {t('fields.topBandHint')}
+                </span>
+              </span>
+            </label>
+
+            {draft.ownBandMaxGhs !== null && (
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <Field label={t('fields.topBandMax')} suffix="GHS">
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={draft.priceGhs}
+                    value={draft.ownBandMaxGhs}
+                    onChange={(e) => set('ownBandMaxGhs', Number(e.target.value))}
+                    className={inputClass(false)}
+                  />
+                </Field>
+                <Field label={t('fields.topBandRate')} suffix="×">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    step="0.01"
+                    min={draft.rewardMultiplier}
+                    value={draft.ownBandMaxMultiplier ?? draft.rewardMultiplier}
+                    onChange={(e) => set('ownBandMaxMultiplier', Number(e.target.value))}
+                    className={inputClass(false)}
+                  />
+                </Field>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* The range this floor really sells at, and — the part nobody would
+            guess — what moving it does to the plan underneath. */}
+        {band && !band.empty && (
+          <p className="mt-2.5 text-[0.75rem] leading-relaxed text-ink-600">
+            {band.isTop
+              ? draft.ownBandMaxGhs !== null
+                ? t('band.line', { from: ghs(draft.priceGhs), to: topLabel })
+                : t('band.topLine', { price: ghs(draft.priceGhs) })
+              : t('band.line', { from: ghs(draft.priceGhs), to: topLabel })}
+          </p>
+        )}
+        {neighbourBox}
       </PanelSection>
 
       {/* ---- Benefits --------------------------------------------------- */}
@@ -343,7 +532,7 @@ export function PlanPanel({
         <div className="grid grid-cols-2 gap-3">
           <Field
             label={t('fields.dailyAdCap')}
-            hint={t('fields.dailyAdCapHint', { free: rate.freeAdCap })}
+            hint={t('fields.dailyAdCapHint', { free })}
             suffix={t('units.perDay')}
             error={err('dailyAdCap') && t(`errors.${err('dailyAdCap')}`)}
           >
@@ -375,12 +564,13 @@ export function PlanPanel({
           </Field>
         </div>
 
-        {/* ---- The rule -------------------------------------------------
-            Directly under the two fields it governs, not at the end of the
-            section. On a laptop the rest of the perks push it below the fold,
-            so an operator typing into "Ads a day" — the field that breaks the
-            line most often — could not see what their number had just done. */}
-        {valueCheck}
+        {/* The band verdict lives under the PRICE, which is what cuts it,
+            but the two fields that can invert it are here — so it is repeated
+            where the damage is done. Directly under them rather than at the
+            end of the section: on a laptop the rest of the perks push it below
+            the fold, and an operator typing into "Ads a day" could not see
+            what their number had just done. */}
+        {bandBox}
 
         {/* The withdrawal threshold used to be here. Operator, 2026-08-01:
             "no plan should have its own withdrawal threshold" — it is one

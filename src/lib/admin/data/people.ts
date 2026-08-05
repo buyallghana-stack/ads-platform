@@ -47,6 +47,8 @@ type PersonRow = {
   referrals: number
   last_active_at: string
   paid_out_ghs: number | string
+  tier_multiplier: number | string | null
+  tier_paid_ghs: number | string
   last_message: string | null
   last_message_at: string | null
   unread: number | null
@@ -65,6 +67,10 @@ function toPerson(row: PersonRow): Person {
     // arithmetic on a balance.
     balancePoints: Number(row.balance_points),
     tier: row.tier,
+    // Null only if the tier could not be resolved at all, which the left
+    // lateral join deliberately allows rather than dropping the account.
+    tierMultiplier: row.tier_multiplier === null ? 1 : Number(row.tier_multiplier),
+    tierPaidGhs: Number(row.tier_paid_ghs),
     status: row.status,
     flaggedBy: row.flagged_by ?? undefined,
     flagReason: row.flag_reason ?? undefined,

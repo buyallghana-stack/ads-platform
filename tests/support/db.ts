@@ -220,6 +220,114 @@ export async function pinEconomy(
   await setConfig(tx, 'ad_cooldown_seconds_default', String(cooldownSeconds))
 }
 
+/**
+ * One rung of a pinned ladder. Price in whole cedis, because that is how the
+ * operator's pricing list is written and how a band is labelled.
+ */
+export type LadderRung = {
+  slug: string
+  name: string
+  priceGhs: number
+  multiplier: number
+  dailyAdCap: number
+  /** A ceiling of its own, for the TOP rung — the most somebody may pay for it
+   *  and what they earn at if they do. Meaningless on any rung that has a plan
+   *  above it, and pinned to null there so a production ceiling cannot leak
+   *  into the fixture. */
+  bandMaxGhs?: number
+  bandMaxMultiplier?: number
+}
+
+/**
+ * The ladder the band tests are written against.
+ *
+ * NOT a claim about what is on sale today. `pinEconomy` pins the free plan and
+ * the value of a point; this pins the PAID rungs, which are just as much an
+ * operator setting — on 2026-08-05 they moved Bronze from ×1.5 to ×1.39, Silver
+ * from ×2.0 to ×1.84, Platinum from ×3.0 to ×4.12 and deleted Diamond outright,
+ * and seven tests went red with no code change behind them.
+ *
+ * Interpolation, band boundaries and stacking are rules about the SHAPE of a
+ * ladder, so they need a ladder that holds still. What is actually on sale is
+ * checked separately, against the live tables, by the sweep in
+ * `flexible-pricing.test.ts` — that one must read production or it guards
+ * nothing.
+ */
+export const PINNED_LADDER: LadderRung[] = [
+  { slug: 'free', name: 'Free', priceGhs: 0, multiplier: 1.0, dailyAdCap: 1 },
+  { slug: 'bronze', name: 'Bronze', priceGhs: 65, multiplier: 1.5, dailyAdCap: 3 },
+  { slug: 'silver', name: 'Silver', priceGhs: 140, multiplier: 2.0, dailyAdCap: 4 },
+  { slug: 'gold', name: 'Gold', priceGhs: 250, multiplier: 2.5, dailyAdCap: 7 },
+  { slug: 'platinum', name: 'Platinum', priceGhs: 520, multiplier: 3.0, dailyAdCap: 13 },
+  { slug: 'diamond', name: 'Diamond', priceGhs: 1000, multiplier: 3.5, dailyAdCap: 15 },
+]
+
+/**
+ * Puts the plan ladder into a known state for the length of the transaction.
+ *
+ * Every band function selects `where is_active` and orders by `sort_order`, so
+ * pinning means three things and not one: upsert each rung (the operator may
+ * have DELETED one — Diamond is gone from production), and switch off anything
+ * else that would otherwise sit in the middle of the ladder and cut a band
+ * somewhere unexpected.
+ *
+ * The peg goes with it. A rung's published points-per-ad is a product of its
+ * multiplier AND `points_per_currency_unit`, so pinning one without the other
+ * leaves the figures only half held down.
+ */
+export async function pinLadder(
+  tx: Tx,
+  options: { rungs?: LadderRung[]; pointsPerCedi?: number } = {},
+): Promise<void> {
+  const { rungs = PINNED_LADDER, pointsPerCedi = 100 } = options
+
+  for (const [index, rung] of rungs.entries()) {
+    await tx.query(
+      `insert into public.tiers
+         (slug, name, description, price_minor, currency_code, billing_period_days,
+          daily_ad_cap, reward_multiplier, redemption_minimum_points,
+          referral_bonus_multiplier, ad_priority, ad_cooldown_seconds,
+          weekly_game_plays, is_default, is_active, sort_order,
+          band_max_minor, band_max_multiplier)
+       values ($1, $2, $2, $3, 'GHS', 30, $4, $5, 5000, 1.000, $6, 0, 5, $7, true, $6, $8, $9)
+       on conflict (slug) do update set
+         name = excluded.name,
+         price_minor = excluded.price_minor,
+         daily_ad_cap = excluded.daily_ad_cap,
+         reward_multiplier = excluded.reward_multiplier,
+         ad_priority = excluded.ad_priority,
+         sort_order = excluded.sort_order,
+         is_default = excluded.is_default,
+         is_active = true,
+         /* Written even when absent. Platinum carries a real ceiling in
+            production, and inheriting it would silently give the fixture a
+            top band no test asked for. */
+         band_max_minor = excluded.band_max_minor,
+         band_max_multiplier = excluded.band_max_multiplier`,
+      [
+        rung.slug,
+        rung.name,
+        Math.round(rung.priceGhs * 100),
+        rung.dailyAdCap,
+        rung.multiplier,
+        index,
+        rung.priceGhs === 0,
+        rung.bandMaxGhs === undefined ? null : Math.round(rung.bandMaxGhs * 100),
+        rung.bandMaxMultiplier ?? null,
+      ],
+    )
+  }
+
+  /* Anything the operator has added since. Left active it would cut a band
+     against a price this file never mentions, and the failure would read as
+     broken interpolation rather than an extra rung. */
+  await tx.query(`update public.tiers set is_active = false where slug <> all($1::text[])`, [
+    rungs.map((r) => r.slug),
+  ])
+
+  await setConfig(tx, 'points_per_currency_unit', String(pointsPerCedi))
+}
+
 /** Sets a config value for the length of the transaction only. */
 export async function setConfig(tx: Tx, key: string, value: string): Promise<void> {
   await tx.query(`update public.app_config set value = $2 where key = $1`, [key, value])

@@ -14,84 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      advertiser_payments: {
-        Row: {
-          advertiser_id: string
-          amount_minor: number
-          created_at: string
-          currency_code: string
-          id: string
-          method: string | null
-          note: string | null
-          received_at: string
-          recorded_by: string | null
-          reference: string | null
-        }
-        Insert: {
-          advertiser_id: string
-          amount_minor: number
-          created_at?: string
-          currency_code?: string
-          id?: string
-          method?: string | null
-          note?: string | null
-          received_at?: string
-          recorded_by?: string | null
-          reference?: string | null
-        }
-        Update: {
-          advertiser_id?: string
-          amount_minor?: number
-          created_at?: string
-          currency_code?: string
-          id?: string
-          method?: string | null
-          note?: string | null
-          received_at?: string
-          recorded_by?: string | null
-          reference?: string | null
-        }
-        Relationships: []
-      }
-      advertisers: {
-        Row: {
-          contact: string | null
-          created_at: string
-          created_by: string | null
-          ends_at: string | null
-          id: string
-          name: string
-          notes: string | null
-          started_at: string
-          status: Database["public"]["Enums"]["advertiser_status"]
-          updated_at: string
-        }
-        Insert: {
-          contact?: string | null
-          created_at?: string
-          created_by?: string | null
-          ends_at?: string | null
-          id?: string
-          name: string
-          notes?: string | null
-          started_at?: string
-          status?: Database["public"]["Enums"]["advertiser_status"]
-          updated_at?: string
-        }
-        Update: {
-          contact?: string | null
-          created_at?: string
-          created_by?: string | null
-          ends_at?: string | null
-          id?: string
-          name?: string
-          notes?: string | null
-          started_at?: string
-          status?: Database["public"]["Enums"]["advertiser_status"]
-          updated_at?: string
-        }
-        Relationships: []
-      }
       ad_attempts: {
         Row: {
           ad_id: string
@@ -139,6 +61,38 @@ export type Database = {
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "ad_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ad_link_clicks: {
+        Row: {
+          ad_id: string
+          clicked_at: string
+          id: string
+          points_awarded: number
+          user_id: string
+        }
+        Insert: {
+          ad_id: string
+          clicked_at?: string
+          id?: string
+          points_awarded?: number
+          user_id: string
+        }
+        Update: {
+          ad_id?: string
+          clicked_at?: string
+          id?: string
+          points_awarded?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_link_clicks_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "ads"
             referencedColumns: ["id"]
           },
         ]
@@ -226,38 +180,6 @@ export type Database = {
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "ad_questions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      ad_link_clicks: {
-        Row: {
-          ad_id: string
-          clicked_at: string
-          id: string
-          points_awarded: number
-          user_id: string
-        }
-        Insert: {
-          ad_id: string
-          clicked_at?: string
-          id?: string
-          points_awarded?: number
-          user_id: string
-        }
-        Update: {
-          ad_id?: string
-          clicked_at?: string
-          id?: string
-          points_awarded?: number
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ad_link_clicks_ad_id_fkey"
-            columns: ["ad_id"]
-            isOneToOne: false
-            referencedRelation: "ads"
             referencedColumns: ["id"]
           },
         ]
@@ -383,6 +305,7 @@ export type Database = {
       }
       ads: {
         Row: {
+          advertiser_id: string | null
           advertiser_name: string | null
           article_body: string | null
           completions_count: number
@@ -409,6 +332,7 @@ export type Database = {
           youtube_video_id: string | null
         }
         Insert: {
+          advertiser_id?: string | null
           advertiser_name?: string | null
           article_body?: string | null
           completions_count?: number
@@ -435,6 +359,7 @@ export type Database = {
           youtube_video_id?: string | null
         }
         Update: {
+          advertiser_id?: string | null
           advertiser_name?: string | null
           article_body?: string | null
           completions_count?: number
@@ -460,7 +385,139 @@ export type Database = {
           weight?: number
           youtube_video_id?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "ads_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertisers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      advertiser_payments: {
+        Row: {
+          advertiser_id: string
+          amount_minor: number
+          created_at: string
+          currency_code: string
+          id: string
+          method: string | null
+          note: string | null
+          received_at: string
+          recorded_by: string | null
+          reference: string | null
+        }
+        Insert: {
+          advertiser_id: string
+          amount_minor: number
+          created_at?: string
+          currency_code?: string
+          id?: string
+          method?: string | null
+          note?: string | null
+          received_at?: string
+          recorded_by?: string | null
+          reference?: string | null
+        }
+        Update: {
+          advertiser_id?: string
+          amount_minor?: number
+          created_at?: string
+          currency_code?: string
+          id?: string
+          method?: string | null
+          note?: string | null
+          received_at?: string
+          recorded_by?: string | null
+          reference?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advertiser_payments_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "advertisers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      advertisers: {
+        Row: {
+          contact: string | null
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          name: string
+          notes: string | null
+          started_at: string
+          status: Database["public"]["Enums"]["advertiser_status"]
+          updated_at: string
+        }
+        Insert: {
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          started_at?: string
+          status?: Database["public"]["Enums"]["advertiser_status"]
+          updated_at?: string
+        }
+        Update: {
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          started_at?: string
+          status?: Database["public"]["Enums"]["advertiser_status"]
+          updated_at?: string
+        }
         Relationships: []
+      }
+      announcements: {
+        Row: {
+          audience: string
+          body: string
+          created_at: string
+          id: string
+          recipient_count: number
+          sent_by: string | null
+          title: string
+        }
+        Insert: {
+          audience?: string
+          body: string
+          created_at?: string
+          id?: string
+          recipient_count: number
+          sent_by?: string | null
+          title: string
+        }
+        Update: {
+          audience?: string
+          body?: string
+          created_at?: string
+          id?: string
+          recipient_count?: number
+          sent_by?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcements_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       app_config: {
         Row: {
@@ -734,10 +791,123 @@ export type Database = {
         }
         Relationships: []
       }
+      game_plays: {
+        Row: {
+          created_at: string
+          extra_plays_awarded: number
+          game: Database["public"]["Enums"]["game_kind"]
+          id: string
+          points_awarded: number
+          prize_id: string
+          roll: number
+          slot: number
+          user_id: string
+          week_start: string
+          weight_total: number
+        }
+        Insert: {
+          created_at?: string
+          extra_plays_awarded?: number
+          game: Database["public"]["Enums"]["game_kind"]
+          id?: string
+          points_awarded: number
+          prize_id: string
+          roll: number
+          slot: number
+          user_id: string
+          week_start: string
+          weight_total: number
+        }
+        Update: {
+          created_at?: string
+          extra_plays_awarded?: number
+          game?: Database["public"]["Enums"]["game_kind"]
+          id?: string
+          points_awarded?: number
+          prize_id?: string
+          roll?: number
+          slot?: number
+          user_id?: string
+          week_start?: string
+          weight_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_plays_prize_id_fkey"
+            columns: ["prize_id"]
+            isOneToOne: false
+            referencedRelation: "game_prizes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_prizes: {
+        Row: {
+          colour: string
+          created_at: string
+          daily_cap: number
+          extra_plays: number
+          game: Database["public"]["Enums"]["game_kind"]
+          id: string
+          is_active: boolean
+          label: string
+          points: number
+          slot: number
+          updated_at: string
+          weekly_cap: number
+          weight: number
+        }
+        Insert: {
+          colour?: string
+          created_at?: string
+          daily_cap?: number
+          extra_plays?: number
+          game: Database["public"]["Enums"]["game_kind"]
+          id?: string
+          is_active?: boolean
+          label: string
+          points?: number
+          slot: number
+          updated_at?: string
+          weekly_cap?: number
+          weight?: number
+        }
+        Update: {
+          colour?: string
+          created_at?: string
+          daily_cap?: number
+          extra_plays?: number
+          game?: Database["public"]["Enums"]["game_kind"]
+          id?: string
+          is_active?: boolean
+          label?: string
+          points?: number
+          slot?: number
+          updated_at?: string
+          weekly_cap?: number
+          weight?: number
+        }
+        Relationships: []
+      }
       gift_code_attempts: {
-        Row: { attempted: string; created_at: string; id: number; user_id: string }
-        Insert: { attempted: string; created_at?: string; id?: never; user_id: string }
-        Update: { attempted?: string; created_at?: string; id?: never; user_id?: string }
+        Row: {
+          attempted: string
+          created_at: string
+          id: number
+          user_id: string
+        }
+        Insert: {
+          attempted: string
+          created_at?: string
+          id?: never
+          user_id: string
+        }
+        Update: {
+          attempted?: string
+          created_at?: string
+          id?: never
+          user_id?: string
+        }
         Relationships: []
       }
       gift_code_redemptions: {
@@ -1128,25 +1298,24 @@ export type Database = {
         Row: {
           admin_hold_at: string | null
           approved_early: boolean
-          created_at: string
           coin_amount: number | null
           coin_usd: number | null
+          created_at: string
           currency_amount: number
           currency_code: string
-          fee_amount: number
-          fee_percent: number
-          net_amount: number | null
-          quoted_at: string | null
-          usd_ghs: number | null
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
+          fee_amount: number
+          fee_percent: number
           holding_until: string
           id: string
           method: Database["public"]["Enums"]["payout_method"]
+          net_amount: number | null
           paid_at: string | null
           points_amount: number
           points_per_currency_unit: number
+          quoted_at: string | null
           review_notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -1160,30 +1329,30 @@ export type Database = {
           snapshot_wallet: string | null
           status: Database["public"]["Enums"]["redemption_status"]
           updated_at: string
+          usd_ghs: number | null
           user_id: string
         }
         Insert: {
           admin_hold_at?: string | null
           approved_early?: boolean
-          created_at?: string
           coin_amount?: number | null
           coin_usd?: number | null
+          created_at?: string
           currency_amount: number
           currency_code?: string
-          fee_amount?: number
-          fee_percent?: number
-          net_amount?: number | null
-          quoted_at?: string | null
-          usd_ghs?: number | null
           early_approval_reason?: string | null
           external_reference?: string | null
           failure_reason?: string | null
+          fee_amount?: number
+          fee_percent?: number
           holding_until: string
           id?: string
           method: Database["public"]["Enums"]["payout_method"]
+          net_amount?: number | null
           paid_at?: string | null
           points_amount: number
           points_per_currency_unit: number
+          quoted_at?: string | null
           review_notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -1197,30 +1366,30 @@ export type Database = {
           snapshot_wallet?: string | null
           status?: Database["public"]["Enums"]["redemption_status"]
           updated_at?: string
+          usd_ghs?: number | null
           user_id: string
         }
         Update: {
           admin_hold_at?: string | null
           approved_early?: boolean
-          created_at?: string
           coin_amount?: number | null
           coin_usd?: number | null
+          created_at?: string
           currency_amount?: number
           currency_code?: string
-          fee_amount?: number
-          fee_percent?: number
-          net_amount?: number | null
-          quoted_at?: string | null
-          usd_ghs?: number | null
           early_approval_reason?: string | null
           external_reference?: string | null
           failure_reason?: string | null
+          fee_amount?: number
+          fee_percent?: number
           holding_until?: string
           id?: string
           method?: Database["public"]["Enums"]["payout_method"]
+          net_amount?: number | null
           paid_at?: string | null
           points_amount?: number
           points_per_currency_unit?: number
+          quoted_at?: string | null
           review_notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -1234,6 +1403,7 @@ export type Database = {
           snapshot_wallet?: string | null
           status?: Database["public"]["Enums"]["redemption_status"]
           updated_at?: string
+          usd_ghs?: number | null
           user_id?: string
         }
         Relationships: []
@@ -1449,6 +1619,96 @@ export type Database = {
           },
         ]
       }
+      support_messages: {
+        Row: {
+          author: Database["public"]["Enums"]["support_author"]
+          author_id: string | null
+          body: string
+          context: Json | null
+          created_at: string
+          id: string
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          author: Database["public"]["Enums"]["support_author"]
+          author_id?: string | null
+          body: string
+          context?: Json | null
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          author?: Database["public"]["Enums"]["support_author"]
+          author_id?: string | null
+          body?: string
+          context?: Json | null
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "support_threads"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      support_threads: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          last_message_at: string
+          opened_at: string
+          status: Database["public"]["Enums"]["support_thread_status"]
+          user_id: string
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          last_message_at?: string
+          opened_at?: string
+          status?: Database["public"]["Enums"]["support_thread_status"]
+          user_id: string
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          last_message_at?: string
+          opened_at?: string
+          status?: Database["public"]["Enums"]["support_thread_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_threads_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_threads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_alerts: {
         Row: {
           acknowledged_at: string | null
@@ -1482,10 +1742,92 @@ export type Database = {
         }
         Relationships: []
       }
+      task_completions: {
+        Row: {
+          claimed_at: string
+          id: string
+          progress_at_claim: number
+          reward_points: number
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string
+          id?: string
+          progress_at_claim: number
+          reward_points: number
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string
+          id?: string
+          progress_at_claim?: number
+          reward_points?: number
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_completions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          code: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          is_active: boolean
+          metric: Database["public"]["Enums"]["task_metric"]
+          name: string
+          reward_points: number
+          sort_order: number
+          target: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          metric: Database["public"]["Enums"]["task_metric"]
+          name: string
+          reward_points: number
+          sort_order?: number
+          target: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          metric?: Database["public"]["Enums"]["task_metric"]
+          name?: string
+          reward_points?: number
+          sort_order?: number
+          target?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tiers: {
         Row: {
           ad_cooldown_seconds: number
           ad_priority: number
+          band_max_minor: number | null
+          band_max_multiplier: number | null
           billing_period_days: number
           created_at: string
           currency_code: string
@@ -1502,10 +1844,13 @@ export type Database = {
           slug: string
           sort_order: number
           updated_at: string
+          weekly_game_plays: number
         }
         Insert: {
           ad_cooldown_seconds?: number
           ad_priority?: number
+          band_max_minor?: number | null
+          band_max_multiplier?: number | null
           billing_period_days?: number
           created_at?: string
           currency_code?: string
@@ -1522,10 +1867,13 @@ export type Database = {
           slug: string
           sort_order?: number
           updated_at?: string
+          weekly_game_plays?: number
         }
         Update: {
           ad_cooldown_seconds?: number
           ad_priority?: number
+          band_max_minor?: number | null
+          band_max_multiplier?: number | null
           billing_period_days?: number
           created_at?: string
           currency_code?: string
@@ -1542,6 +1890,7 @@ export type Database = {
           slug?: string
           sort_order?: number
           updated_at?: string
+          weekly_game_plays?: number
         }
         Relationships: []
       }
@@ -1553,6 +1902,7 @@ export type Database = {
           created_at: string
           locked_at: string | null
           status: Database["public"]["Enums"]["user_ad_status"]
+          times_completed: number
           updated_at: string
           user_id: string
           watch_completed_at: string | null
@@ -1565,6 +1915,7 @@ export type Database = {
           created_at?: string
           locked_at?: string | null
           status?: Database["public"]["Enums"]["user_ad_status"]
+          times_completed?: number
           updated_at?: string
           user_id: string
           watch_completed_at?: string | null
@@ -1577,6 +1928,7 @@ export type Database = {
           created_at?: string
           locked_at?: string | null
           status?: Database["public"]["Enums"]["user_ad_status"]
+          times_completed?: number
           updated_at?: string
           user_id?: string
           watch_completed_at?: string | null
@@ -1636,96 +1988,6 @@ export type Database = {
           lifetime_earned?: number
           lifetime_spent?: number
           updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      announcements: {
-        Row: {
-          audience: string
-          body: string
-          created_at: string
-          id: string
-          recipient_count: number
-          sent_by: string | null
-          title: string
-        }
-        Insert: {
-          audience?: string
-          body: string
-          created_at?: string
-          id?: string
-          recipient_count: number
-          sent_by?: string | null
-          title: string
-        }
-        Update: {
-          audience?: string
-          body?: string
-          created_at?: string
-          id?: string
-          recipient_count?: number
-          sent_by?: string | null
-          title?: string
-        }
-        Relationships: []
-      }
-      support_messages: {
-        Row: {
-          author: Database["public"]["Enums"]["support_author"]
-          author_id: string | null
-          body: string
-          context: Json | null
-          created_at: string
-          id: string
-          read_at: string | null
-          user_id: string
-        }
-        Insert: {
-          author: Database["public"]["Enums"]["support_author"]
-          author_id?: string | null
-          body: string
-          context?: Json | null
-          created_at?: string
-          id?: string
-          read_at?: string | null
-          user_id: string
-        }
-        Update: {
-          author?: Database["public"]["Enums"]["support_author"]
-          author_id?: string | null
-          body?: string
-          context?: Json | null
-          created_at?: string
-          id?: string
-          read_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      support_threads: {
-        Row: {
-          closed_at: string | null
-          closed_by: string | null
-          last_message_at: string
-          opened_at: string
-          status: Database["public"]["Enums"]["support_thread_status"]
-          user_id: string
-        }
-        Insert: {
-          closed_at?: string | null
-          closed_by?: string | null
-          last_message_at?: string
-          opened_at?: string
-          status?: Database["public"]["Enums"]["support_thread_status"]
-          user_id: string
-        }
-        Update: {
-          closed_at?: string | null
-          closed_by?: string | null
-          last_message_at?: string
-          opened_at?: string
-          status?: Database["public"]["Enums"]["support_thread_status"]
           user_id?: string
         }
         Relationships: []
@@ -1946,6 +2208,7 @@ export type Database = {
       }
       user_subscriptions: {
         Row: {
+          amount_minor: number | null
           cancelled_at: string | null
           created_at: string
           current_period_end: string
@@ -1958,6 +2221,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          amount_minor?: number | null
           cancelled_at?: string | null
           created_at?: string
           current_period_end: string
@@ -1970,6 +2234,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          amount_minor?: number | null
           cancelled_at?: string | null
           created_at?: string
           current_period_end?: string
@@ -1996,7 +2261,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ad_occasion_ref: {
+        Args: { p_ad_id: string; p_occasion: number }
+        Returns: string
+      }
       admin_announcement_audience: { Args: never; Returns: number }
+      admin_area_allowed: {
+        Args: { p_area: string; p_user_id: string }
+        Returns: boolean
+      }
       admin_broadcast_announcement: {
         Args: { p_admin: string; p_body: string; p_title: string }
         Returns: {
@@ -2008,24 +2281,14 @@ export type Database = {
           sent_by: string | null
           title: string
         }
+        SetofOptions: {
+          from: "*"
+          to: "announcements"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       admin_count_unread_support: { Args: never; Returns: number }
-      admin_area_allowed: { Args: { p_user_id: string; p_area: string }; Returns: boolean }
-      admin_grant_role: {
-        Args: { p_admin_id: string; p_target_id: string; p_role: string }
-        Returns: undefined
-      }
-      admin_revoke_role: { Args: { p_admin_id: string; p_target_id: string }; Returns: undefined }
-      admin_role: { Args: { p_user_id: string }; Returns: string }
-      admin_user_id_by_email: { Args: { p_admin_id: string; p_email: string }; Returns: string }
-      admin_daily_money: {
-        Args: { p_days?: number }
-        Returns: {
-          day: string
-          deposits: number
-          withdrawals: number
-        }[]
-      }
       admin_create_gift_code: {
         Args: {
           p_admin_id: string
@@ -2034,13 +2297,33 @@ export type Database = {
           p_note?: string
           p_points: number
         }
-        Returns: Database["public"]["Tables"]["gift_codes"]["Row"]
+        Returns: {
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          note: string | null
+          points: number
+          revoked_at: string | null
+          revoked_by: string | null
+          status: Database["public"]["Enums"]["gift_code_status"]
+          updated_at: string
+        }
         SetofOptions: {
           from: "*"
           to: "gift_codes"
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      admin_daily_money: {
+        Args: { p_days?: number }
+        Returns: {
+          day: string
+          deposits: number
+          withdrawals: number
+        }[]
       }
       admin_decide_redemption: {
         Args: {
@@ -2055,18 +2338,24 @@ export type Database = {
         Returns: {
           admin_hold_at: string | null
           approved_early: boolean
+          coin_amount: number | null
+          coin_usd: number | null
           created_at: string
           currency_amount: number
           currency_code: string
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
+          fee_amount: number
+          fee_percent: number
           holding_until: string
           id: string
           method: Database["public"]["Enums"]["payout_method"]
+          net_amount: number | null
           paid_at: string | null
           points_amount: number
           points_per_currency_unit: number
+          quoted_at: string | null
           review_notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -2080,6 +2369,7 @@ export type Database = {
           snapshot_wallet: string | null
           status: Database["public"]["Enums"]["redemption_status"]
           updated_at: string
+          usd_ghs: number | null
           user_id: string
         }
         SetofOptions: {
@@ -2105,6 +2395,10 @@ export type Database = {
         Args: { p_admin_id: string; p_plan_id: string }
         Returns: string
       }
+      admin_delete_task: {
+        Args: { p_admin_id: string; p_task_id: string }
+        Returns: string
+      }
       admin_finance_statement: {
         Args: { p_months?: number }
         Returns: {
@@ -2114,24 +2408,62 @@ export type Database = {
           withdrawals_ghs: number
         }[]
       }
+      admin_game_stats: {
+        Args: {
+          p_admin_id: string
+          p_days?: number
+          p_game: Database["public"]["Enums"]["game_kind"]
+        }
+        Returns: {
+          actual_rtp: number
+          expected_rtp: number
+          extra_plays_won: number
+          players_period: number
+          plays_period: number
+          plays_total: number
+          points_period: number
+        }[]
+      }
       admin_get_ad: {
         Args: { p_ad_id: string; p_admin_id: string }
         Returns: Json
+      }
+      admin_get_leaderboard: {
+        Args: { p_admin_id: string; p_limit?: number; p_period?: string }
+        Returns: {
+          avatar_path: string
+          display_name: string
+          email: string
+          flagged: boolean
+          full_name: string
+          movement: string
+          phone: string
+          points: number
+          previous_rank: number
+          rank: number
+          user_id: string
+        }[]
       }
       admin_get_support_thread: {
         Args: { p_admin: string; p_user: string }
         Returns: Json
       }
-      admin_list_announcements: {
-        Args: { p_limit?: number }
+      admin_grant_role: {
+        Args: { p_admin_id: string; p_role: string; p_target_id: string }
+        Returns: undefined
+      }
+      admin_list_administrators: {
+        Args: never
         Returns: {
-          audience: string
-          body: string
-          created_at: string
+          accepted: boolean
+          email: string
+          granted_at: string
           id: string
-          recipient_count: number
-          sent_by_name: string
-          title: string
+          is_you: boolean
+          last_seen_at: string
+          name: string
+          role: string
+          two_factor: boolean
         }[]
       }
       admin_list_ads: {
@@ -2161,20 +2493,6 @@ export type Database = {
           updated_at: string
           video_source: Database["public"]["Enums"]["video_source"]
           weight: number
-        }[]
-      }
-      admin_list_administrators: {
-        Args: never
-        Returns: {
-          email: string
-          role: string
-          granted_at: string
-          id: string
-          is_you: boolean
-          last_seen_at: string
-          name: string
-          accepted: boolean
-          two_factor: boolean
         }[]
       }
       admin_list_advertiser_payments: {
@@ -2207,6 +2525,18 @@ export type Database = {
           status: string
         }[]
       }
+      admin_list_announcements: {
+        Args: { p_limit?: number }
+        Returns: {
+          audience: string
+          body: string
+          created_at: string
+          id: string
+          recipient_count: number
+          sent_by_name: string
+          title: string
+        }[]
+      }
       admin_list_audit: {
         Args: { p_limit?: number }
         Returns: {
@@ -2220,51 +2550,25 @@ export type Database = {
           target: string
         }[]
       }
-      admin_list_people: {
-        Args: { p_scope?: string }
+      admin_list_game_prizes: {
+        Args: {
+          p_admin_id: string
+          p_game: Database["public"]["Enums"]["game_kind"]
+        }
         Returns: {
-          ads_watched: number
-          avatar_path: string
-          balance_points: number
-          email: string
-          flag_reason: string
-          flagged_by: string
-          id: string
-          joined_at: string
-          last_active_at: string
-          lifetime_points: number
-          name: string
-          last_message: string
-          last_message_at: string
-          paid_out_ghs: number
-          phone: string
-          referrals: number
-          status: string
-          tier: string
-          unread: number
-        }[]
-      }
-      admin_list_plans: {
-        Args: never
-        Returns: {
-          active: number
-          active_last_month: number
-          ad_cooldown_seconds: number
-          ad_priority: number
-          billing_period_days: number
-          daily_ad_cap: number
-          description: string
+          chance_percent: number
+          colour: string
+          daily_cap: number
+          extra_plays: number
           id: string
           is_active: boolean
-          is_default: boolean
-          monthly_ghs: number
-          name: string
-          price_ghs: number
-          redemption_minimum_points: number
-          referral_bonus_multiplier: number
-          reward_multiplier: number
-          slug: string
-          sort_order: number
+          label: string
+          points: number
+          slot: number
+          weekly_cap: number
+          weight: number
+          won_this_week: number
+          won_today: number
         }[]
       }
       admin_list_gift_codes: {
@@ -2283,25 +2587,84 @@ export type Database = {
           status: Database["public"]["Enums"]["gift_code_status"]
         }[]
       }
+      admin_list_people: {
+        Args: { p_scope?: string }
+        Returns: {
+          ads_watched: number
+          avatar_path: string
+          balance_points: number
+          email: string
+          flag_reason: string
+          flagged_by: string
+          id: string
+          joined_at: string
+          last_active_at: string
+          last_message: string
+          last_message_at: string
+          lifetime_points: number
+          name: string
+          paid_out_ghs: number
+          phone: string
+          referrals: number
+          status: string
+          tier: string
+          tier_multiplier: number
+          tier_paid_ghs: number
+          unread: number
+        }[]
+      }
+      admin_list_plans: {
+        Args: never
+        Returns: {
+          active: number
+          active_last_month: number
+          ad_cooldown_seconds: number
+          ad_priority: number
+          band_max_ghs: number
+          billing_period_days: number
+          daily_ad_cap: number
+          description: string
+          id: string
+          is_active: boolean
+          is_default: boolean
+          monthly_ghs: number
+          name: string
+          own_band_max_ghs: number
+          own_band_max_multiplier: number
+          paid_above_floor: number
+          paid_avg_ghs: number
+          paid_count: number
+          price_ghs: number
+          redemption_minimum_points: number
+          referral_bonus_multiplier: number
+          reward_multiplier: number
+          slug: string
+          sort_order: number
+        }[]
+      }
       admin_list_redemptions: {
         Args: { p_status?: Database["public"]["Enums"]["redemption_status"] }
         Returns: {
           account_name: string
           admin_hold_at: string
           approved_early: boolean
+          coin_amount: number
+          coin_code: string
           decision_note: string
           destination: string
           fee_ghs: number
           fee_percent: number
           ghs: number
-          net_ghs: number
           holding_until: string
           id: string
+          live_coin_amount: number
           method: Database["public"]["Enums"]["payout_method"]
+          net_ghs: number
           paid_before: number
           paid_before_ghs: number
           points: number
           provider: string
+          quoted_at: string
           reference: string
           requested_at: string
           reuse: number
@@ -2316,14 +2679,41 @@ export type Database = {
           user_name: string
         }[]
       }
-      admin_overview_metrics: {
-        Args: never
-        Returns: Json
+      admin_list_tasks: {
+        Args: { p_admin_id: string }
+        Returns: {
+          claimed_count: number
+          code: string
+          description: string
+          eligible_now: number
+          icon: string
+          id: string
+          is_active: boolean
+          metric: Database["public"]["Enums"]["task_metric"]
+          name: string
+          points_paid: number
+          reward_points: number
+          sort_order: number
+          target: number
+        }[]
+      }
+      admin_list_tier_game_plays: {
+        Args: { p_admin_id: string }
+        Returns: {
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          price_minor: number
+          slug: string
+          weekly_game_plays: number
+        }[]
       }
       admin_mark_support_read: {
         Args: { p_admin: string; p_user: string }
         Returns: number
       }
+      admin_overview_metrics: { Args: never; Returns: Json }
       admin_record_advertiser_payment: {
         Args: {
           p_admin_id: string
@@ -2353,6 +2743,36 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_revoke_gift_code: {
+        Args: { p_admin_id: string; p_code_id: string }
+        Returns: {
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          note: string | null
+          points: number
+          revoked_at: string | null
+          revoked_by: string | null
+          status: Database["public"]["Enums"]["gift_code_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "gift_codes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_revoke_role: {
+        Args: { p_admin_id: string; p_target_id: string }
+        Returns: undefined
+      }
+      admin_role: {
+        Args: { p_user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       admin_save_ad: {
         Args: {
           p_ad: Json
@@ -2361,14 +2781,6 @@ export type Database = {
           p_tier_ids?: string[]
         }
         Returns: string
-      }
-      admin_set_ad_status: {
-        Args: {
-          p_ad_id: string
-          p_admin_id: string
-          p_status: Database["public"]["Enums"]["ad_status"]
-        }
-        Returns: Database["public"]["Enums"]["ad_status"]
       }
       admin_save_advertiser: {
         Args: { p_admin_id: string; p_advertiser: Json }
@@ -2391,11 +2803,21 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_save_game_prizes: {
+        Args: {
+          p_admin_id: string
+          p_game: Database["public"]["Enums"]["game_kind"]
+          p_prizes: Json
+        }
+        Returns: number
+      }
       admin_save_plan: {
         Args: { p_admin_id: string; p_plan: Json }
         Returns: {
           ad_cooldown_seconds: number
           ad_priority: number
+          band_max_minor: number | null
+          band_max_multiplier: number | null
           billing_period_days: number
           created_at: string
           currency_code: string
@@ -2412,6 +2834,7 @@ export type Database = {
           slug: string
           sort_order: number
           updated_at: string
+          weekly_game_plays: number
         }
         SetofOptions: {
           from: "*"
@@ -2420,34 +2843,9 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      admin_set_plan_visibility: {
-        Args: { p_active: boolean; p_admin_id: string; p_plan_id: string }
-        Returns: {
-          ad_cooldown_seconds: number
-          ad_priority: number
-          billing_period_days: number
-          created_at: string
-          currency_code: string
-          daily_ad_cap: number
-          description: string | null
-          id: string
-          is_active: boolean
-          is_default: boolean
-          name: string
-          price_minor: number
-          redemption_minimum_points: number
-          referral_bonus_multiplier: number
-          reward_multiplier: number
-          slug: string
-          sort_order: number
-          updated_at: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "tiers"
-          isOneToOne: true
-          isSetofReturn: false
-        }
+      admin_save_task: {
+        Args: { p_admin_id: string; p_task: Json }
+        Returns: string
       }
       admin_send_support_message: {
         Args: { p_admin: string; p_body: string; p_user: string }
@@ -2461,6 +2859,60 @@ export type Database = {
           read_at: string | null
           user_id: string
         }
+        SetofOptions: {
+          from: "*"
+          to: "support_messages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_set_ad_status: {
+        Args: {
+          p_ad_id: string
+          p_admin_id: string
+          p_status: Database["public"]["Enums"]["ad_status"]
+        }
+        Returns: Database["public"]["Enums"]["ad_status"]
+      }
+      admin_set_config: {
+        Args: { p_admin_id: string; p_values: Json }
+        Returns: {
+          config_key: string
+          new_value: string
+          previous_value: string
+        }[]
+      }
+      admin_set_plan_visibility: {
+        Args: { p_active: boolean; p_admin_id: string; p_plan_id: string }
+        Returns: {
+          ad_cooldown_seconds: number
+          ad_priority: number
+          band_max_minor: number | null
+          band_max_multiplier: number | null
+          billing_period_days: number
+          created_at: string
+          currency_code: string
+          daily_ad_cap: number
+          description: string | null
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          price_minor: number
+          redemption_minimum_points: number
+          referral_bonus_multiplier: number
+          reward_multiplier: number
+          slug: string
+          sort_order: number
+          updated_at: string
+          weekly_game_plays: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tiers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       admin_set_support_status: {
         Args: { p_admin: string; p_closed: boolean; p_user: string }
@@ -2472,24 +2924,20 @@ export type Database = {
           status: Database["public"]["Enums"]["support_thread_status"]
           user_id: string
         }
-      }
-      admin_revoke_gift_code: {
-        Args: { p_admin_id: string; p_code_id: string }
-        Returns: Database["public"]["Tables"]["gift_codes"]["Row"]
         SetofOptions: {
           from: "*"
-          to: "gift_codes"
+          to: "support_threads"
           isOneToOne: true
           isSetofReturn: false
         }
       }
-      admin_set_config: {
-        Args: { p_admin_id: string; p_values: Json }
-        Returns: {
-          config_key: string
-          new_value: string
-          previous_value: string
-        }[]
+      admin_set_tier_game_plays: {
+        Args: { p_admin_id: string; p_plays: number; p_tier_id: string }
+        Returns: number
+      }
+      admin_user_id_by_email: {
+        Args: { p_admin_id: string; p_email: string }
+        Returns: string
       }
       apply_referral_code: {
         Args: {
@@ -2505,6 +2953,12 @@ export type Database = {
           code_used: string
           created_at: string
           id: string
+          l2_activation_bonus_paid_at: string | null
+          l2_activation_bonus_points: number
+          l2_referrer_id: string | null
+          l2_reversed_at: string | null
+          l2_signup_bonus_paid_at: string | null
+          l2_signup_bonus_points: number
           referee_id: string
           referrer_id: string
           rejected_by: string | null
@@ -2532,18 +2986,24 @@ export type Database = {
         Returns: {
           admin_hold_at: string | null
           approved_early: boolean
+          coin_amount: number | null
+          coin_usd: number | null
           created_at: string
           currency_amount: number
           currency_code: string
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
+          fee_amount: number
+          fee_percent: number
           holding_until: string
           id: string
           method: Database["public"]["Enums"]["payout_method"]
+          net_amount: number | null
           paid_at: string | null
           points_amount: number
           points_per_currency_unit: number
+          quoted_at: string | null
           review_notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -2557,6 +3017,7 @@ export type Database = {
           snapshot_wallet: string | null
           status: Database["public"]["Enums"]["redemption_status"]
           updated_at: string
+          usd_ghs: number | null
           user_id: string
         }
         SetofOptions: {
@@ -2567,6 +3028,10 @@ export type Database = {
         }
       }
       assert_admin: { Args: { p_admin_id: string }; Returns: undefined }
+      assert_admin_area: {
+        Args: { p_admin_id: string; p_area: string }
+        Returns: undefined
+      }
       broadcast_notification: {
         Args: {
           p_body: string
@@ -2582,18 +3047,24 @@ export type Database = {
         Returns: {
           admin_hold_at: string | null
           approved_early: boolean
+          coin_amount: number | null
+          coin_usd: number | null
           created_at: string
           currency_amount: number
           currency_code: string
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
+          fee_amount: number
+          fee_percent: number
           holding_until: string
           id: string
           method: Database["public"]["Enums"]["payout_method"]
+          net_amount: number | null
           paid_at: string | null
           points_amount: number
           points_per_currency_unit: number
+          quoted_at: string | null
           review_notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -2607,6 +3078,7 @@ export type Database = {
           snapshot_wallet: string | null
           status: Database["public"]["Enums"]["redemption_status"]
           updated_at: string
+          usd_ghs: number | null
           user_id: string
         }
         SetofOptions: {
@@ -2619,6 +3091,7 @@ export type Database = {
       cancel_subscription: {
         Args: { p_user_id: string }
         Returns: {
+          amount_minor: number | null
           cancelled_at: string | null
           created_at: string
           current_period_end: string
@@ -2640,6 +3113,19 @@ export type Database = {
       check_referral_activation: {
         Args: { p_referee_id: string }
         Returns: boolean
+      }
+      claim_task: {
+        Args: { p_task_id: string; p_user_id: string }
+        Returns: Json
+      }
+      claw_back_referral_points: {
+        Args: {
+          p_amount: number
+          p_meta: Json
+          p_referral_id: string
+          p_user: string
+        }
+        Returns: number
       }
       clear_notifications: { Args: never; Returns: undefined }
       clear_totp_failures: { Args: { p_user_id: string }; Returns: undefined }
@@ -2676,9 +3162,11 @@ export type Database = {
       config_bool: { Args: { p_key: string }; Returns: boolean }
       config_decimal: { Args: { p_key: string }; Returns: number }
       config_int: { Args: { p_key: string }; Returns: number }
+      config_text: { Args: { p_key: string }; Returns: string }
       confirm_subscription_payment: {
         Args: { p_payload?: Json; p_payment_id: string; p_reference: string }
         Returns: {
+          amount_minor: number | null
           cancelled_at: string | null
           created_at: string
           current_period_end: string
@@ -2813,6 +3301,12 @@ export type Database = {
           user_id: string
         }[]
       }
+      eligible_ad_ids: {
+        Args: { p_user_id: string }
+        Returns: {
+          ad_id: string
+        }[]
+      }
       email_is_registered: { Args: { p_email: string }; Returns: boolean }
       enable_user_account: {
         Args: { p_admin_id: string; p_user_id: string }
@@ -2914,6 +3408,34 @@ export type Database = {
         Returns: number
       }
       fx_rate: { Args: { p_pair: string }; Returns: number }
+      game_eligible_prizes: {
+        Args: {
+          p_game: Database["public"]["Enums"]["game_kind"]
+          p_week: string
+        }
+        Returns: {
+          colour: string
+          created_at: string
+          daily_cap: number
+          extra_plays: number
+          game: Database["public"]["Enums"]["game_kind"]
+          id: string
+          is_active: boolean
+          label: string
+          points: number
+          slot: number
+          updated_at: string
+          weekly_cap: number
+          weight: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "game_prizes"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      game_week_start: { Args: never; Returns: string }
       generate_gift_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       get_active_sessions: {
@@ -2936,9 +3458,9 @@ export type Database = {
         }
         Returns: {
           advertiser_name: string
+          article_body: string
           attempts_remaining: number
           attempts_used: number
-          article_body: string | null
           cta_label: string
           cta_links: Json
           description: string
@@ -2984,7 +3506,9 @@ export type Database = {
       get_eligible_ads: {
         Args: { p_limit?: number; p_user_id: string }
         Returns: {
+          advertiser_id: string | null
           advertiser_name: string | null
+          article_body: string | null
           completions_count: number
           created_at: string
           created_by: string | null
@@ -3015,6 +3539,49 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_game_board: {
+        Args: { p_game: Database["public"]["Enums"]["game_kind"] }
+        Returns: {
+          colour: string
+          extra_plays: number
+          label: string
+          points: number
+          slot: number
+        }[]
+      }
+      get_game_status: {
+        Args: never
+        Returns: {
+          allowance: number
+          enabled: boolean
+          remaining: number
+          used: number
+          week_ends_at: string
+          week_start: string
+        }[]
+      }
+      get_leaderboard: {
+        Args: { p_limit?: number; p_period?: string }
+        Returns: {
+          avatar_path: string
+          display_name: string
+          movement: string
+          points: number
+          previous_rank: number
+          rank: number
+          user_id: string
+        }[]
+      }
+      get_leaderboard_standing: {
+        Args: { p_period?: string }
+        Returns: {
+          movement: string
+          points: number
+          previous_rank: number
+          rank: number
+          total_ranked: number
+        }[]
+      }
       get_referral_summary: {
         Args: { p_user_id: string }
         Returns: {
@@ -3030,21 +3597,37 @@ export type Database = {
           total_referred: number
         }[]
       }
+      get_tasks: {
+        Args: never
+        Returns: {
+          claimable: boolean
+          claimed_at: string
+          code: string
+          description: string
+          icon: string
+          id: string
+          metric: Database["public"]["Enums"]["task_metric"]
+          name: string
+          progress: number
+          reward_points: number
+          target: number
+        }[]
+      }
       get_team_members: {
         Args: { p_user_id: string }
         Returns: {
-          avatar_path: string | null
+          avatar_path: string
           extra_plans: number
-          full_name: string | null
+          full_name: string
           joined_at: string
           member_id: string
           member_level: number
-          phone: string | null
+          phone: string
           plans_bought: number
           plans_value: number
           redeemed: number
           remaining: number
-          top_plan: string | null
+          top_plan: string
         }[]
       }
       get_team_summary: {
@@ -3070,7 +3653,7 @@ export type Database = {
           currency_value: number
           daily_ad_cap: number
           earning_paused: boolean
-          free_earning_ends_at: string | null
+          free_earning_ends_at: string
           free_earning_over: boolean
           points_cap_reached: boolean
           points_earned_today: number
@@ -3084,18 +3667,24 @@ export type Database = {
         Returns: {
           admin_hold_at: string | null
           approved_early: boolean
+          coin_amount: number | null
+          coin_usd: number | null
           created_at: string
           currency_amount: number
           currency_code: string
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
+          fee_amount: number
+          fee_percent: number
           holding_until: string
           id: string
           method: Database["public"]["Enums"]["payout_method"]
+          net_amount: number | null
           paid_at: string | null
           points_amount: number
           points_per_currency_unit: number
+          quoted_at: string | null
           review_notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -3109,6 +3698,7 @@ export type Database = {
           snapshot_wallet: string | null
           status: Database["public"]["Enums"]["redemption_status"]
           updated_at: string
+          usd_ghs: number | null
           user_id: string
         }
         SetofOptions: {
@@ -3124,29 +3714,44 @@ export type Database = {
         Args: { p_email: string; p_phone: string }
         Returns: boolean
       }
+      is_super_admin: { Args: { p_user_id?: string }; Returns: boolean }
+      leaderboard_counted_types: {
+        Args: never
+        Returns: Database["public"]["Enums"]["ledger_entry_type"][]
+      }
+      leaderboard_display_name: {
+        Args: { p_full_name: string }
+        Returns: string
+      }
+      leaderboard_period_bounds: {
+        Args: { p_period: string }
+        Returns: Record<string, unknown>
+      }
       mark_all_notifications_read: { Args: never; Returns: undefined }
       mark_notification_read: { Args: { p_id: string }; Returns: undefined }
-      may_repeat_ads: {
-        Args: { p_user_id: string }
-        Returns: boolean
-      }
       mark_redemption_failed: {
         Args: { p_admin_id: string; p_reason: string; p_redemption_id: string }
         Returns: {
           admin_hold_at: string | null
           approved_early: boolean
+          coin_amount: number | null
+          coin_usd: number | null
           created_at: string
           currency_amount: number
           currency_code: string
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
+          fee_amount: number
+          fee_percent: number
           holding_until: string
           id: string
           method: Database["public"]["Enums"]["payout_method"]
+          net_amount: number | null
           paid_at: string | null
           points_amount: number
           points_per_currency_unit: number
+          quoted_at: string | null
           review_notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -3160,6 +3765,7 @@ export type Database = {
           snapshot_wallet: string | null
           status: Database["public"]["Enums"]["redemption_status"]
           updated_at: string
+          usd_ghs: number | null
           user_id: string
         }
         SetofOptions: {
@@ -3178,18 +3784,24 @@ export type Database = {
         Returns: {
           admin_hold_at: string | null
           approved_early: boolean
+          coin_amount: number | null
+          coin_usd: number | null
           created_at: string
           currency_amount: number
           currency_code: string
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
+          fee_amount: number
+          fee_percent: number
           holding_until: string
           id: string
           method: Database["public"]["Enums"]["payout_method"]
+          net_amount: number | null
           paid_at: string | null
           points_amount: number
           points_per_currency_unit: number
+          quoted_at: string | null
           review_notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -3203,6 +3815,7 @@ export type Database = {
           snapshot_wallet: string | null
           status: Database["public"]["Enums"]["redemption_status"]
           updated_at: string
+          usd_ghs: number | null
           user_id: string
         }
         SetofOptions: {
@@ -3214,16 +3827,122 @@ export type Database = {
       }
       mark_support_read: { Args: never; Returns: number }
       mask_payout_value: { Args: { p_value: string }; Returns: string }
+      may_repeat_ads: { Args: { p_user_id: string }; Returns: boolean }
       normalise_phone: { Args: { p_phone: string }; Returns: string }
-      pay_referral_purchase_commission: {
-        Args: { p_payment_id: string }
-        Returns: Database["public"]["Tables"]["referral_commissions"]["Row"]
+      notify_admins: {
+        Args: {
+          p_body: string
+          p_data?: Json
+          p_title: string
+          p_type: Database["public"]["Enums"]["notification_type"]
+        }
+        Returns: number
+      }
+      pay_one_referral_commission: {
+        Args: {
+          p_beneficiary: string
+          p_gross: number
+          p_headroom: number
+          p_level: number
+          p_payment_id: string
+          p_percent: number
+          p_referral_id: string
+          p_scope: string
+          p_source_referral_id: string
+        }
+        Returns: {
+          amount_minor: number
+          created_at: string
+          currency_code: string
+          id: string
+          level: number
+          payment_id: string
+          percent_applied: number
+          points: number
+          referee_id: string
+          referral_id: string
+          referrer_id: string
+          reversed_at: string | null
+          scope_at_payment: string
+          source_referral_id: string
+          tier_id: string
+          tier_multiplier: number
+        }
         SetofOptions: {
           from: "*"
           to: "referral_commissions"
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      pay_referral_purchase_commission: {
+        Args: { p_payment_id: string }
+        Returns: {
+          amount_minor: number
+          created_at: string
+          currency_code: string
+          id: string
+          level: number
+          payment_id: string
+          percent_applied: number
+          points: number
+          referee_id: string
+          referral_id: string
+          referrer_id: string
+          reversed_at: string | null
+          scope_at_payment: string
+          source_referral_id: string
+          tier_id: string
+          tier_multiplier: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "referral_commissions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      pct_change: { Args: { p_now: number; p_prev: number }; Returns: number }
+      plan_band_for_amount: {
+        Args: { p_minor: number }
+        Returns: {
+          ad_cooldown_seconds: number
+          ad_priority: number
+          band_max_minor: number | null
+          band_max_multiplier: number | null
+          billing_period_days: number
+          created_at: string
+          currency_code: string
+          daily_ad_cap: number
+          description: string | null
+          id: string
+          is_active: boolean
+          is_default: boolean
+          name: string
+          price_minor: number
+          redemption_minimum_points: number
+          referral_bonus_multiplier: number
+          reward_multiplier: number
+          slug: string
+          sort_order: number
+          updated_at: string
+          weekly_game_plays: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tiers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      plan_band_max_minor: { Args: { p_tier_id: string }; Returns: number }
+      plan_multiplier_for_amount: { Args: { p_minor: number }; Returns: number }
+      play_game: {
+        Args: {
+          p_game: Database["public"]["Enums"]["game_kind"]
+          p_user_id: string
+        }
+        Returns: Json
       }
       precheck_signup_fraud: {
         Args: { p_email: string; p_ip?: unknown }
@@ -3238,173 +3957,6 @@ export type Database = {
       quote_crypto_payout: {
         Args: { p_coin: string; p_ghs: number }
         Returns: Json
-      }
-      redeem_gift_code: { Args: { p_code: string; p_user_id: string }; Returns: Json }
-      get_leaderboard: {
-        Args: { p_period?: string; p_limit?: number }
-        Returns: {
-          rank: number
-          user_id: string
-          display_name: string
-          avatar_path: string | null
-          points: number
-          previous_rank: number | null
-          movement: string
-        }[]
-      }
-      get_leaderboard_standing: {
-        Args: { p_period?: string }
-        Returns: {
-          rank: number
-          points: number
-          previous_rank: number | null
-          movement: string
-          total_ranked: number
-        }[]
-      }
-      admin_get_leaderboard: {
-        Args: { p_admin_id: string; p_period?: string; p_limit?: number }
-        Returns: {
-          rank: number
-          user_id: string
-          display_name: string
-          full_name: string
-          email: string
-          phone: string | null
-          avatar_path: string | null
-          points: number
-          previous_rank: number | null
-          movement: string
-          flagged: boolean
-        }[]
-      }
-      leaderboard_display_name: { Args: { p_full_name: string }; Returns: string }
-      config_text: { Args: { p_key: string }; Returns: string | null }
-      user_task_metric: {
-        Args: { p_user_id: string; p_metric: Database["public"]["Enums"]["task_metric"] }
-        Returns: number
-      }
-      claim_task: { Args: { p_user_id: string; p_task_id: string }; Returns: Json }
-      get_tasks: {
-        Args: Record<string, never>
-        Returns: {
-          id: string
-          code: string
-          name: string
-          description: string
-          metric: Database["public"]["Enums"]["task_metric"]
-          target: number
-          reward_points: number
-          icon: string
-          progress: number
-          claimed_at: string | null
-          claimable: boolean
-        }[]
-      }
-      admin_list_tasks: {
-        Args: { p_admin_id: string }
-        Returns: {
-          id: string
-          code: string
-          name: string
-          description: string
-          metric: Database["public"]["Enums"]["task_metric"]
-          target: number
-          reward_points: number
-          icon: string
-          sort_order: number
-          is_active: boolean
-          claimed_count: number
-          points_paid: number
-          eligible_now: number
-        }[]
-      }
-      admin_save_task: { Args: { p_admin_id: string; p_task: Json }; Returns: string }
-      admin_delete_task: { Args: { p_admin_id: string; p_task_id: string }; Returns: string }
-      admin_set_tier_game_plays: {
-        Args: { p_admin_id: string; p_tier_id: string; p_plays: number }
-        Returns: number
-      }
-      admin_list_tier_game_plays: {
-        Args: { p_admin_id: string }
-        Returns: {
-          id: string
-          slug: string
-          name: string
-          price_minor: number
-          weekly_game_plays: number
-          is_default: boolean
-          is_active: boolean
-        }[]
-      }
-      game_week_start: { Args: Record<string, never>; Returns: string }
-      user_weekly_play_allowance: { Args: { p_user_id: string }; Returns: number }
-      play_game: {
-        Args: { p_user_id: string; p_game: Database["public"]["Enums"]["game_kind"] }
-        Returns: Json
-      }
-      get_game_status: {
-        Args: Record<string, never>
-        Returns: {
-          enabled: boolean
-          allowance: number
-          used: number
-          remaining: number
-          week_start: string
-          week_ends_at: string
-        }[]
-      }
-      get_game_board: {
-        Args: { p_game: Database["public"]["Enums"]["game_kind"] }
-        Returns: {
-          slot: number
-          label: string
-          points: number
-          extra_plays: number
-          colour: string
-        }[]
-      }
-      admin_list_game_prizes: {
-        Args: { p_admin_id: string; p_game: Database["public"]["Enums"]["game_kind"] }
-        Returns: {
-          id: string
-          slot: number
-          label: string
-          points: number
-          extra_plays: number
-          weight: number
-          colour: string
-          daily_cap: number
-          weekly_cap: number
-          is_active: boolean
-          chance_percent: number
-          won_today: number
-          won_this_week: number
-        }[]
-      }
-      admin_save_game_prizes: {
-        Args: {
-          p_admin_id: string
-          p_game: Database["public"]["Enums"]["game_kind"]
-          p_prizes: Json
-        }
-        Returns: number
-      }
-      admin_game_stats: {
-        Args: {
-          p_admin_id: string
-          p_game: Database["public"]["Enums"]["game_kind"]
-          p_days?: number
-        }
-        Returns: {
-          plays_total: number
-          plays_period: number
-          points_period: number
-          expected_rtp: number
-          actual_rtp: number
-          players_period: number
-          extra_plays_won: number
-        }[]
       }
       recompute_user_risk: {
         Args: { p_user_id: string }
@@ -3436,6 +3988,16 @@ export type Database = {
           user_id: string
         }[]
       }
+      record_ad_link_click: {
+        Args: { p_ad_id: string; p_user_id: string }
+        Returns: Database["public"]["CompositeTypes"]["ad_answer_result"]
+        SetofOptions: {
+          from: "*"
+          to: "ad_answer_result"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       record_auth_signal: {
         Args: {
           p_country?: string
@@ -3461,16 +4023,9 @@ export type Database = {
         }
         Returns: undefined
       }
-      record_ad_link_click: {
-        Args: { p_user_id: string; p_ad_id: string }
-        Returns: {
-          outcome: string
-          points_awarded: number
-          attempts_used: number
-          attempts_remaining: number
-          new_balance: number | null
-          message: string | null
-        }
+      redeem_gift_code: {
+        Args: { p_code: string; p_user_id: string }
+        Returns: Json
       }
       register_ad_view: {
         Args: { p_ad_id: string; p_user_id: string }
@@ -3482,18 +4037,24 @@ export type Database = {
         Returns: {
           admin_hold_at: string | null
           approved_early: boolean
+          coin_amount: number | null
+          coin_usd: number | null
           created_at: string
           currency_amount: number
           currency_code: string
           early_approval_reason: string | null
           external_reference: string | null
           failure_reason: string | null
+          fee_amount: number
+          fee_percent: number
           holding_until: string
           id: string
           method: Database["public"]["Enums"]["payout_method"]
+          net_amount: number | null
           paid_at: string | null
           points_amount: number
           points_per_currency_unit: number
+          quoted_at: string | null
           review_notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -3507,6 +4068,7 @@ export type Database = {
           snapshot_wallet: string | null
           status: Database["public"]["Enums"]["redemption_status"]
           updated_at: string
+          usd_ghs: number | null
           user_id: string
         }
         SetofOptions: {
@@ -3525,6 +4087,12 @@ export type Database = {
           code_used: string
           created_at: string
           id: string
+          l2_activation_bonus_paid_at: string | null
+          l2_activation_bonus_points: number
+          l2_referrer_id: string | null
+          l2_reversed_at: string | null
+          l2_signup_bonus_paid_at: string | null
+          l2_signup_bonus_points: number
           referee_id: string
           referrer_id: string
           rejected_by: string | null
@@ -3571,6 +4139,8 @@ export type Database = {
         Returns: {
           ad_cooldown_seconds: number
           ad_priority: number
+          band_max_minor: number | null
+          band_max_multiplier: number | null
           billing_period_days: number
           created_at: string
           currency_code: string
@@ -3587,6 +4157,7 @@ export type Database = {
           slug: string
           sort_order: number
           updated_at: string
+          weekly_game_plays: number
         }
         SetofOptions: {
           from: "*"
@@ -3596,17 +4167,38 @@ export type Database = {
         }
       }
       revoke_other_sessions: { Args: never; Returns: number }
-      set_fx_rate: {
-        Args: { p_pair: string; p_rate: number; p_source: string }
-        Returns: Database["public"]["Tables"]["fx_rates"]["Row"]
+      revoke_session: { Args: { p_session_id: string }; Returns: boolean }
+      second_level_referral: {
+        Args: { p_referee_id: string }
+        Returns: {
+          activation_bonus_paid_at: string | null
+          activation_bonus_points: number
+          ads_at_activation: number | null
+          code_used: string
+          created_at: string
+          id: string
+          l2_activation_bonus_paid_at: string | null
+          l2_activation_bonus_points: number
+          l2_referrer_id: string | null
+          l2_reversed_at: string | null
+          l2_signup_bonus_paid_at: string | null
+          l2_signup_bonus_points: number
+          referee_id: string
+          referrer_id: string
+          rejected_by: string | null
+          rejected_reason: string | null
+          signup_bonus_paid_at: string | null
+          signup_bonus_points: number
+          status: Database["public"]["Enums"]["referral_status"]
+          updated_at: string
+        }
         SetofOptions: {
           from: "*"
-          to: "fx_rates"
+          to: "referrals"
           isOneToOne: true
           isSetofReturn: false
         }
       }
-      revoke_session: { Args: { p_session_id: string }; Returns: boolean }
       send_support_message: {
         Args: { p_body: string; p_context?: Json }
         Returns: {
@@ -3618,6 +4210,28 @@ export type Database = {
           id: string
           read_at: string | null
           user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "support_messages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      set_fx_rate: {
+        Args: { p_pair: string; p_rate: number; p_source: string }
+        Returns: {
+          fetched_at: string
+          pair: string
+          rate: number
+          source: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "fx_rates"
+          isOneToOne: true
+          isSetofReturn: false
         }
       }
       set_payout_details: {
@@ -3658,6 +4272,7 @@ export type Database = {
       }
       start_subscription_payment: {
         Args: {
+          p_amount_minor?: number
           p_method: Database["public"]["Enums"]["subscription_payment_method"]
           p_tier_id: string
           p_user_id: string
@@ -3698,13 +4313,32 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      team_member_ids: {
+        Args: { p_user_id: string }
+        Returns: {
+          member_id: string
+          member_level: number
+        }[]
+      }
       totp_lock_state: { Args: { p_user_id: string }; Returns: Json }
+      user_has_fresh_ads: { Args: { p_user_id: string }; Returns: boolean }
       user_target_tiers: {
         Args: { p_user_id: string }
         Returns: {
           sort_order: number
           tier_id: string
         }[]
+      }
+      user_task_metric: {
+        Args: {
+          p_metric: Database["public"]["Enums"]["task_metric"]
+          p_user_id: string
+        }
+        Returns: number
+      }
+      user_weekly_play_allowance: {
+        Args: { p_user_id: string }
+        Returns: number
       }
       utc_today: { Args: never; Returns: string }
       verify_withdrawal_pin: {
@@ -3720,7 +4354,6 @@ export type Database = {
       }
     }
     Enums: {
-      advertiser_status: "pending" | "active" | "ended"
       ad_answer_outcome:
         | "correct"
         | "incorrect"
@@ -3735,9 +4368,10 @@ export type Database = {
         | "points_cap_reached"
       ad_format: "video" | "survey" | "link"
       ad_status: "draft" | "active" | "paused" | "exhausted" | "archived"
+      advertiser_status: "pending" | "active" | "ended"
       alert_severity: "info" | "warning" | "critical"
       answer_format: "multiple_choice" | "short_text"
-      app_role: "user" | "admin"
+      app_role: "user" | "admin" | "super_admin" | "support" | "ads_manager"
       auth_event_type:
         | "signup"
         | "login"
@@ -3746,32 +4380,20 @@ export type Database = {
       config_value_type: "int" | "decimal" | "bool" | "text"
       fraud_action: "flag" | "block"
       fraud_review_status: "none" | "pending" | "cleared" | "confirmed_fraud"
-      gift_code_status: "active" | "redeemed" | "revoked"
       game_kind: "mystery_box" | "spin_wheel"
-      task_metric:
-        | "account_created"
-        | "plans_purchased"
-        | "ads_watched"
-        | "surveys_completed"
-        | "points_earned"
-        | "referrals_activated"
-        | "referrals_purchased"
-        | "games_played"
-        | "gift_codes_redeemed"
-        | "withdrawals_made"
-        | "has_2fa"
-        | "has_avatar"
-        | "has_withdrawal_pin"
+      gift_code_status: "active" | "redeemed" | "revoked"
       ledger_entry_type:
         | "ad_view"
         | "survey"
         | "referral_signup"
         | "referral_activation"
-        | "referral_purchase"
-        | "gift_code"
         | "redemption_request"
         | "redemption_refund"
         | "admin_adjustment"
+        | "referral_purchase"
+        | "gift_code"
+        | "game_prize"
+        | "task_reward"
       notification_type: "announcement" | "payout" | "flag" | "support"
       payout_method: "crypto" | "mobile_money"
       question_condition_mode: "all" | "any"
@@ -3786,8 +4408,6 @@ export type Database = {
         | "disputed"
       referral_status: "pending" | "activated" | "rejected"
       risk_level: "low" | "medium" | "high" | "critical"
-      support_author: "user" | "admin"
-      support_thread_status: "open" | "closed"
       subscription_payment_method: "korapay" | "crypto" | "paystack"
       subscription_payment_status:
         | "pending"
@@ -3795,6 +4415,22 @@ export type Database = {
         | "failed"
         | "refunded"
       subscription_status: "active" | "grace" | "expired" | "cancelled"
+      support_author: "user" | "admin"
+      support_thread_status: "open" | "closed"
+      task_metric:
+        | "account_created"
+        | "plans_purchased"
+        | "ads_watched"
+        | "surveys_completed"
+        | "points_earned"
+        | "referrals_activated"
+        | "games_played"
+        | "gift_codes_redeemed"
+        | "withdrawals_made"
+        | "has_2fa"
+        | "has_avatar"
+        | "has_withdrawal_pin"
+        | "referrals_purchased"
       user_ad_status: "in_progress" | "completed" | "failed_locked"
       video_source: "upload" | "youtube"
     }
@@ -3946,7 +4582,6 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      advertiser_status: ["pending", "active", "ended"],
       ad_answer_outcome: [
         "correct",
         "incorrect",
@@ -3962,9 +4597,10 @@ export const Constants = {
       ],
       ad_format: ["video", "survey", "link"],
       ad_status: ["draft", "active", "paused", "exhausted", "archived"],
+      advertiser_status: ["pending", "active", "ended"],
       alert_severity: ["info", "warning", "critical"],
       answer_format: ["multiple_choice", "short_text"],
-      app_role: ["user", "admin"],
+      app_role: ["user", "admin", "super_admin", "support", "ads_manager"],
       auth_event_type: [
         "signup",
         "login",
@@ -3974,33 +4610,20 @@ export const Constants = {
       config_value_type: ["int", "decimal", "bool", "text"],
       fraud_action: ["flag", "block"],
       fraud_review_status: ["none", "pending", "cleared", "confirmed_fraud"],
-      gift_code_status: ["active", "redeemed", "revoked"],
       game_kind: ["mystery_box", "spin_wheel"],
-      task_metric: [
-        "account_created",
-        "plans_purchased",
-        "ads_watched",
-        "surveys_completed",
-        "points_earned",
-        "referrals_activated",
-        "referrals_purchased",
-        "games_played",
-        "gift_codes_redeemed",
-        "withdrawals_made",
-        "has_2fa",
-        "has_avatar",
-        "has_withdrawal_pin",
-      ],
+      gift_code_status: ["active", "redeemed", "revoked"],
       ledger_entry_type: [
         "ad_view",
         "survey",
         "referral_signup",
         "referral_activation",
-        "referral_purchase",
-        "gift_code",
         "redemption_request",
         "redemption_refund",
         "admin_adjustment",
+        "referral_purchase",
+        "gift_code",
+        "game_prize",
+        "task_reward",
       ],
       notification_type: ["announcement", "payout", "flag", "support"],
       payout_method: ["crypto", "mobile_money"],
@@ -4017,8 +4640,6 @@ export const Constants = {
       ],
       referral_status: ["pending", "activated", "rejected"],
       risk_level: ["low", "medium", "high", "critical"],
-      support_author: ["user", "admin"],
-      support_thread_status: ["open", "closed"],
       subscription_payment_method: ["korapay", "crypto", "paystack"],
       subscription_payment_status: [
         "pending",
@@ -4027,6 +4648,23 @@ export const Constants = {
         "refunded",
       ],
       subscription_status: ["active", "grace", "expired", "cancelled"],
+      support_author: ["user", "admin"],
+      support_thread_status: ["open", "closed"],
+      task_metric: [
+        "account_created",
+        "plans_purchased",
+        "ads_watched",
+        "surveys_completed",
+        "points_earned",
+        "referrals_activated",
+        "games_played",
+        "gift_codes_redeemed",
+        "withdrawals_made",
+        "has_2fa",
+        "has_avatar",
+        "has_withdrawal_pin",
+        "referrals_purchased",
+      ],
       user_ad_status: ["in_progress", "completed", "failed_locked"],
       video_source: ["upload", "youtube"],
     },

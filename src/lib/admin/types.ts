@@ -193,6 +193,17 @@ export type Person = {
   joinedAt: string
   balancePoints: number
   tier: string
+  /**
+   * What this account actually earns at, and what it is paying.
+   *
+   * The plan's NAME stopped being the whole answer when plans became bands:
+   * two people on Gold who paid GHS 250 and GHS 480 earn at ×2.50 and ×2.92.
+   * The multiplier here is the resolved one — interpolation and stacking
+   * already applied — so it is the figure the ad path actually pays by.
+   */
+  tierMultiplier: number
+  /** Total currently being paid across every live plan, in cedis. 0 on Free. */
+  tierPaidGhs: number
   status: 'active' | 'flagged' | 'disabled'
   /** Set on flagged accounts: who raised it and why. */
   flaggedBy?: 'system' | 'admin'
@@ -392,7 +403,27 @@ export type PlanRow = {
   slug: string
   name: string
   description: string
+  /** The FLOOR of the band, not a fixed price. Since migration 098 a buyer
+   *  chooses what to pay from here up to `bandMaxGhs`, and what they choose
+   *  decides what an ad is worth to them. */
   priceGhs: number
+  /** The top of the band, as the database computes it (`plan_band_max_minor`)
+   *  — one pesewa under the next plan's floor, or the top plan's own ceiling,
+   *  or its price when it has neither. Null for the free plan and any hidden
+   *  plan: neither is sold, so neither has a band. */
+  bandMaxGhs: number | null
+  /**
+   * The top rung's OWN ceiling and the rate reached there — the two numbers
+   * the plan above would otherwise supply.
+   *
+   * Null on every plan that has one above it, where the ladder answers both
+   * questions and a stored ceiling would be ignored. Distinct from
+   * `bandMaxGhs`, which is derived and always has a value: this is what is
+   * actually stored, and it is what the editor must show, because offering to
+   * "save" a derived number would give a plan a ceiling it never had.
+   */
+  ownBandMaxGhs: number | null
+  ownBandMaxMultiplier: number | null
   billingPeriodDays: number
   /** Ads per day this plan allows IN TOTAL, free allowance included. */
   dailyAdCap: number
@@ -411,6 +442,13 @@ export type PlanRow = {
   active: number
   activeLastMonth: number
   monthlyGhs: number
+  /** What buyers chose inside the band, over the same thirty days as the
+   *  revenue. `paidAboveFloor` is the number that says whether letting people
+   *  pick their own amount is earning its keep; `paidAvgGhs` is null when
+   *  nobody has bought, because "no average" and "paid nothing" differ. */
+  paidCount: number
+  paidAboveFloor: number
+  paidAvgGhs: number | null
 }
 
 /** An advertiser contract, keyed in by hand until self-serve exists. */

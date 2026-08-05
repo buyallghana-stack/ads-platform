@@ -1610,7 +1610,8 @@
         "contact": "Contact",
         "email": "Email",
         "phone": "Phone",
-        "conversation": "Conversation"
+        "conversation": "Conversation",
+        "planPaid": "On the {tier} plan · paying GHS {ghs} · earning at {rate}×"
       },
       "confirm": {
         "flag": "Flag {name}. They keep earning, but every payout of theirs stops for review first.",
@@ -2199,7 +2200,10 @@
         "monthly": "Plan revenue",
         "monthlyHint": "current period",
         "conversion": "Conversion",
-        "conversionHint": "free to paid"
+        "conversionHint": "free to paid",
+        "aboveFloor": "Paid above floor",
+        "aboveFloorHint": "{above} of {of} purchases",
+        "aboveFloorNone": "no purchases yet"
       },
       "columns": {
         "plan": "Plan",
@@ -2208,7 +2212,8 @@
         "active": "Active",
         "change": "vs last month",
         "revenue": "Revenue",
-        "action": "Actions"
+        "action": "Actions",
+        "chosen": "They paid"
       },
       "status": {
         "live": "On sale",
@@ -2227,15 +2232,6 @@
         "show": "Put on sale",
         "hideHint": "{count} keep their plan",
         "delete": "Delete plan"
-      },
-      "valueWarn": {
-        "short": "Off the value line",
-        "title": "This price does not buy what the other plans buy",
-        "body": "At GHS {price} this plan should give {ads} ads a day at {multiplier}× to sit on the same value per cedi as the rest.",
-        "okTitle": "On the value line",
-        "okBody": "Every GHS 1 buys +{ads} ads a day and +{pct}% on the earning rate, the same as every other plan. Any combination of plans lands on the same line, so nobody who paid more can end up behind somebody who paid less.",
-        "undercut": "{plans} together cost GHS {price} and would give {ads} ads a day at {multiplier}× — more, for less money.",
-        "fix": "Set benefits from the price"
       },
       "units": {
         "days": "days",
@@ -2283,7 +2279,12 @@
         "onSaleKeeps": "Taken off sale — the {count} who already hold it keep it until it expires.",
         "onSaleDefault": "The default plan is always on sale. Every new account starts here and expiring plans fall back to it.",
         "sortOrder": "Order",
-        "sortOrderHint": "Position in the list users see. Low numbers first."
+        "sortOrderHint": "Position in the list users see. Low numbers first.",
+        "priceHint": "The floor of the band, not a fixed price.",
+        "topBand": "This plan sells as a range",
+        "topBandHint": "It is the top plan, so nothing above it sets a ceiling. Give it one and buyers choose what to pay, exactly as they do lower down.",
+        "topBandMax": "Up to",
+        "topBandRate": "Rate at the top"
       },
       "errors": {
         "slugFormat": "Lowercase letters, numbers, - and _ only, starting with a letter.",
@@ -2295,7 +2296,35 @@
         "defaultMustBeFree": "The default plan has to be free."
       },
       "dismissError": "Dismiss",
-      "hiddenInstead": "{name} has been bought, so it was taken off sale rather than deleted — the payments behind it are part of the statement."
+      "hiddenInstead": "{name} has been bought, so it was taken off sale rather than deleted — the payments behind it are part of the statement.",
+      "chosenAbove": "{count} of {of} above floor",
+      "band": {
+        "title": "Sells from {from} to GHS {to}",
+        "body": "A buyer choosing inside that range earns between {from}× and {to}× — the rate slides towards {next} as they pay more. All of them get {ads} ads a day; only the value of an ad changes.",
+        "topTitle": "One exact price",
+        "topBody": "This is the top of the ladder, so there is nothing above it to slide towards. Buyers pay exactly {price}.",
+        "line": "Buyers choose any amount from {from} to GHS {to}.",
+        "topLine": "The top plan sells at exactly {price} — there is no plan above it to set a ceiling.",
+        "perCedi": "At this floor, GHS 1 buys +{pct}% on the earning rate. Plans higher up the ladder deliberately buy less per cedi.",
+        "neighbour": "This also moves {name}: its range was {from} – {was} and becomes {from} – {to}. Everyone who buys {name} after this earns at the new rate.",
+        "topRangeBody": "Paying the floor earns {from}×, paying {price} earns {to}×, and anything between lands on the line. Ads a day stay at {ads} whatever they pay."
+      },
+      "bandWarn": {
+        "unbuyable": {
+          "short": "Nobody can buy this plan",
+          "body": "Its price is at or above {next}, which sits directly above it — so the range has nothing in it and the server refuses every amount. Price it below {next}, or move it above {next} in the sort order."
+        },
+        "earningInversion": {
+          "short": "Paying more would earn less",
+          "body": "{next} sits above this plan but earns at a LOWER rate, so inside this band the rate falls as the price rises: a buyer moving the slider up would watch their earning go down. Raise {next} or lower this one."
+        },
+        "adsInversion": {
+          "short": "The plan above shows fewer ads",
+          "body": "{next} costs more than this plan but allows fewer ads a day, so paying to move up the ladder buys less. Ad counts do not slide inside a band — they step at the boundary — which makes this the moment it is felt."
+        },
+        "undercut": "{plans} together cost GHS {price} and would give {ads} ads a day at {multiplier}× — more, for less money.",
+        "fix": "Put the benefits on the line"
+      }
     },
     "finance": {
       "title": "Finance",

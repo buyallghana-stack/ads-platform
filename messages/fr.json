@@ -1610,7 +1610,8 @@
         "contact": "Contact",
         "email": "E-mail",
         "phone": "Téléphone",
-        "conversation": "Conversation"
+        "conversation": "Conversation",
+        "planPaid": "Forfait {tier} · paie GHS {ghs} · gagne à {rate}×"
       },
       "confirm": {
         "flag": "Signaler {name}. La personne continue de gagner, mais chacun de ses retraits passe d'abord en révision.",
@@ -2199,7 +2200,10 @@
         "monthly": "Revenu des formules",
         "monthlyHint": "période en cours",
         "conversion": "Conversion",
-        "conversionHint": "gratuit vers payant"
+        "conversionHint": "gratuit vers payant",
+        "aboveFloor": "Au-dessus du plancher",
+        "aboveFloorHint": "{above} achats sur {of}",
+        "aboveFloorNone": "aucun achat pour le moment"
       },
       "columns": {
         "plan": "Formule",
@@ -2208,7 +2212,8 @@
         "active": "Actifs",
         "change": "vs mois dernier",
         "revenue": "Revenu",
-        "action": "Actions"
+        "action": "Actions",
+        "chosen": "Montant payé"
       },
       "status": {
         "live": "En vente",
@@ -2227,15 +2232,6 @@
         "show": "Mettre en vente",
         "hideHint": "{count} la conservent",
         "delete": "Supprimer le forfait"
-      },
-      "valueWarn": {
-        "short": "Hors de la ligne de valeur",
-        "title": "Ce prix n'achète pas ce qu'achètent les autres formules",
-        "body": "À {price} GHS, cette formule devrait donner {ads} pubs par jour à ×{multiplier} pour offrir la même valeur par cedi que les autres.",
-        "okTitle": "Sur la ligne de valeur",
-        "okBody": "Chaque 1 GHS achète +{ads} pubs par jour et +{pct} % sur le taux de gain, comme toutes les autres formules. Toute combinaison retombe sur la même ligne : personne ayant payé plus ne peut se retrouver derrière quelqu'un ayant payé moins.",
-        "undercut": "{plans} ensemble coûtent {price} GHS et donneraient {ads} pubs par jour à ×{multiplier} — davantage, pour moins cher.",
-        "fix": "Calculer les avantages depuis le prix"
       },
       "units": {
         "days": "jours",
@@ -2283,7 +2279,12 @@
         "onSaleKeeps": "Retirée de la vente — les {count} qui la détiennent la gardent jusqu'à expiration.",
         "onSaleDefault": "La formule par défaut est toujours en vente. Chaque nouveau compte y démarre et les formules expirées y retombent.",
         "sortOrder": "Ordre",
-        "sortOrderHint": "Position dans la liste vue par les utilisateurs. Les petits nombres d'abord."
+        "sortOrderHint": "Position dans la liste vue par les utilisateurs. Les petits nombres d'abord.",
+        "priceHint": "Le plancher de la plage, pas un prix fixe.",
+        "topBand": "Ce forfait se vend sous forme de fourchette",
+        "topBandHint": "C'est le forfait le plus élevé : rien au-dessus ne fixe de plafond. Donnez-lui-en un et les acheteurs choisissent leur montant, comme pour les autres.",
+        "topBandMax": "Jusqu'à",
+        "topBandRate": "Taux au sommet"
       },
       "errors": {
         "slugFormat": "Minuscules, chiffres, - et _ uniquement, en commençant par une lettre.",
@@ -2295,7 +2296,35 @@
         "defaultMustBeFree": "La formule par défaut doit être gratuite."
       },
       "dismissError": "Fermer",
-      "hiddenInstead": "{name} a été acheté : il a été retiré de la vente plutôt que supprimé — les paiements associés font partie du relevé."
+      "hiddenInstead": "{name} a été acheté : il a été retiré de la vente plutôt que supprimé — les paiements associés font partie du relevé.",
+      "chosenAbove": "{count} sur {of} au-dessus du plancher",
+      "band": {
+        "title": "Se vend de {from} à GHS {to}",
+        "body": "Un acheteur qui choisit dans cette plage gagne entre {from}× et {to}× — le taux glisse vers {next} à mesure qu'il paie plus. Tous ont {ads} publicités par jour ; seule la valeur d'une publicité change.",
+        "topTitle": "Un prix unique",
+        "topBody": "C'est le sommet de l'échelle : il n'y a rien au-dessus vers quoi glisser. Les acheteurs paient exactement {price}.",
+        "line": "Les acheteurs choisissent un montant entre {from} et GHS {to}.",
+        "topLine": "Le forfait le plus élevé se vend exactement à {price} — aucun forfait au-dessus ne lui fixe de plafond.",
+        "perCedi": "À ce plancher, GHS 1 achète +{pct}% de taux de gain. Les forfaits plus élevés achètent délibérément moins par cédi.",
+        "neighbour": "Cela déplace aussi {name} : sa plage allait de {from} à {was} et devient {from} – {to}. Tous ceux qui achèteront {name} désormais gagneront au nouveau taux.",
+        "topRangeBody": "Payer le plancher rapporte {from}×, payer {price} rapporte {to}×, et tout montant intermédiaire se place sur la ligne. Le nombre d'annonces par jour reste à {ads} quel que soit le montant."
+      },
+      "bandWarn": {
+        "unbuyable": {
+          "short": "Personne ne peut acheter ce forfait",
+          "body": "Son prix atteint ou dépasse {next}, qui se situe juste au-dessus : la plage est vide et le serveur refuse tout montant. Fixez-le sous {next}, ou placez-le après {next} dans l'ordre d'affichage."
+        },
+        "earningInversion": {
+          "short": "Payer plus rapporterait moins",
+          "body": "{next} se situe au-dessus de ce forfait mais rapporte MOINS : dans cette plage, le taux baisse quand le prix monte, et un acheteur qui pousse le curseur verrait ses gains diminuer. Augmentez {next} ou baissez celui-ci."
+        },
+        "adsInversion": {
+          "short": "Le forfait au-dessus montre moins de publicités",
+          "body": "{next} coûte plus cher que ce forfait mais autorise moins de publicités par jour : payer pour monter achète moins. Le nombre de publicités ne glisse pas dans une plage — il change au passage d'un forfait à l'autre — et c'est là que cela se ressent."
+        },
+        "undercut": "{plans} ensemble coûtent GHS {price} et donneraient {ads} publicités par jour à {multiplier}× — plus, pour moins cher.",
+        "fix": "Aligner les avantages"
+      }
     },
     "finance": {
       "title": "Finances",

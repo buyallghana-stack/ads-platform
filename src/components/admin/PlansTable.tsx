@@ -23,7 +23,7 @@ import {
 } from '@/app/[locale]/admin/(super)/subscriptions/actions'
 import { Button } from '@/components/ui/Button'
 import { MoreMenu, type MenuItem } from '@/components/ui/MoreMenu'
-import { checkPlanValue, houseRate, nextDraftPlanId, slugify } from '@/lib/admin/plan-value'
+import { checkBand, freeAdCap, nextDraftPlanId, slugify } from '@/lib/admin/plan-value'
 import type { PlanRow } from '@/lib/admin/types'
 import { cn } from '@/lib/cn'
 
@@ -56,13 +56,20 @@ import { PlanPanel } from './PlanPanel'
  * also the plan that sets the free allowance every other plan is measured
  * against, so editing it moves the whole ladder.
  *
- * THE VALUE WARNING
- * Migration 037 aligned every plan to one value per cedi so that no
- * combination of cheap plans can beat a dear one, and left an instruction for
- * whoever built this screen: keep it that way. A row whose benefits are out
- * of proportion to its price is flagged here and explained in the editor.
- * It is a warning, not a block — a promotional plan is a legitimate thing to
- * want, and the operator is entitled to overrule a warning they understand.
+ * A PRICE IS A FLOOR, NOT A PRICE
+ * Since migration 098 a plan is a BAND: Bronze sells from GHS 65 to GHS 139,
+ * and what somebody pays inside it decides what an ad is worth to them. So the
+ * price column shows the range, and there is a column for what buyers actually
+ * chose — the one question flexible pricing exists to raise is whether anybody
+ * pays above the floor, and no other screen can answer it.
+ *
+ * THE WARNING
+ * A band is cut against the NEXT plan, so a plan can be broken by an edit to
+ * its neighbour. The row flags the three ways that goes wrong — a band nobody
+ * can buy in, and a rate or an ad count that falls as the price rises — and
+ * the editor names which. It is a warning, not a block: a promotional plan is
+ * a legitimate thing to want, and the operator is entitled to overrule a
+ * warning they understand.
  */
 
 type Filter = 'all' | 'live' | 'hidden'
@@ -70,6 +77,11 @@ type Filter = 'all' | 'live' | 'hidden'
 const FILTERS: Filter[] = ['all', 'live', 'hidden']
 
 const ghs = (n: number) => `GHS ${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+
+/* The top of a band is one pesewa under the next plan (GHS 139.99), which
+   rounds UP to the next plan's own price in whole cedis and reads as though
+   the two overlap. Floored, exactly as the upgrade screen floors it. */
+const bandTop = (n: number) => Math.floor(n)
 
 export function PlansTable({ initial }: { initial: PlanRow[] }) {
   const t = useTranslations('admin.subscriptions')
@@ -84,7 +96,8 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
   /** The plan being edited, or 'new' while creating one. */
   const [editing, setEditing] = useState<PlanRow | 'new' | null>(null)
 
-  const rate = useMemo(() => houseRate(rows), [rows])
+  /* The free allowance, which every stacking sum counts once. */
+  const free = useMemo(() => freeAdCap(rows), [rows])
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -98,11 +111,19 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
     const paid = rows.filter((p) => p.priceGhs > 0)
     const activePaid = paid.reduce((n, p) => n + p.active, 0)
     const everyone = rows.reduce((n, p) => n + p.active, 0)
+    /* Purchases that took the offer up on itself. Across the ladder rather
+       than per plan, because "are people paying more than they have to" is a
+       question about the pricing MODEL, not about Bronze. */
+    const bought = paid.reduce((n, p) => n + p.paidCount, 0)
+    const above = paid.reduce((n, p) => n + p.paidAboveFloor, 0)
     return {
       activePaid,
       everyone,
       monthly: paid.reduce((n, p) => n + p.monthlyGhs, 0),
       conversion: everyone === 0 ? 0 : Math.round((activePaid / everyone) * 1000) / 10,
+      bought,
+      above,
+      abovePct: bought === 0 ? 0 : Math.round((above / bought) * 1000) / 10,
     }
   }, [rows])
 
@@ -131,6 +152,12 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
         adPriority: plan.adPriority,
         adCooldownSeconds: plan.adCooldownSeconds,
         sortOrder: plan.sortOrder,
+        /* Always sent, null included — `admin_save_plan` reads these two by
+           KEY PRESENCE precisely so that null can mean "clear it". Omitting
+           them would mean "leave alone", and the top plan could never go back
+           to a single price once it had a range. */
+        bandMaxGhs: plan.ownBandMaxGhs,
+        bandMaxMultiplier: plan.ownBandMaxMultiplier,
       })
       if (result.plans) setRows(result.plans)
       if (!result.ok) return setError(result.message)
@@ -174,6 +201,12 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
       active: 0,
       activeLastMonth: 0,
       monthlyGhs: 0,
+      paidCount: 0,
+      paidAboveFloor: 0,
+      paidAvgGhs: null,
+      // The band is cut by the database once the copy has a sort order it
+      // actually holds. Until then there is nothing honest to show.
+      bandMaxGhs: null,
     }
     setRows((all) => [...all, copy])
     setEditing(copy)
@@ -231,9 +264,63 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
     return items
   }
 
-  /* A plan whose benefits are off the line. Computed once per render rather
-     than per cell, since the row and the panel both ask. */
-  const offLine = (p: PlanRow) => !checkPlanValue(p, rate).aligned
+  /* What is wrong with where this plan sits, if anything — checked against
+     the whole ladder, because a plan is broken by its NEIGHBOUR as often as
+     by itself. */
+  const trouble = (p: PlanRow) => checkBand(p, rows).problems
+
+  /* The band, in the two lines the row has room for. A hidden plan and the
+     free plan have no band at all — `bandMaxGhs` is null for both — so they
+     show the plain figure rather than a range invented on the client. */
+  const Price = ({ p }: { p: PlanRow }) => {
+    const top = p.bandMaxGhs === null ? null : bandTop(p.bandMaxGhs)
+    if (top === null || top <= p.priceGhs) return <>{ghs(p.priceGhs)}</>
+    return (
+      <>
+        {ghs(p.priceGhs)}
+        <span className="text-ink-400"> – </span>
+        {top.toLocaleString()}
+      </>
+    )
+  }
+
+  /* What buyers picked inside the band. An em dash rather than "0 of 0": no
+     sales is not the same finding as sales that all sat on the floor. */
+  const Chosen = ({ p }: { p: PlanRow }) => {
+    if (p.priceGhs === 0) return <span className="text-[0.75rem] text-ink-400">—</span>
+    if (p.paidCount === 0) return <span className="text-[0.75rem] text-ink-400">—</span>
+    return (
+      <span className="block">
+        <span className="block text-[0.8125rem] font-medium text-ink-900 tabular-nums">
+          {p.paidAvgGhs === null ? '—' : ghs(p.paidAvgGhs)}
+        </span>
+        <span className="block text-[0.6875rem] text-ink-400 tabular-nums">
+          {t('chosenAbove', { count: p.paidAboveFloor, of: p.paidCount })}
+        </span>
+      </span>
+    )
+  }
+
+  /* Every way a plan's position in the ladder can be wrong, named. The first
+     one is the serious one — a band nobody can buy in — so it is the one
+     shown when several are true at once. */
+  const Trouble = ({ p, card }: { p: PlanRow; card?: boolean }) => {
+    const problems = trouble(p)
+    if (problems.length === 0) return null
+    const worst = problems.includes('unbuyable') ? 'unbuyable' : problems[0]!
+    return (
+      <p
+        className={cn(
+          'flex items-center gap-1 font-medium',
+          card ? 'mt-2 gap-1.5 text-[0.6875rem]' : 'mt-1 text-[0.625rem]',
+          worst === 'unbuyable' ? 'text-danger-600' : 'text-warning-600',
+        )}
+      >
+        <AlertTriangle aria-hidden className="size-3 shrink-0" />
+        {t(`bandWarn.${worst}.short`)}
+      </p>
+    )
+  }
 
   const Benefits = ({ p }: { p: PlanRow }) =>
     p.priceGhs === 0 ? (
@@ -282,7 +369,7 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
         </div>
       )}
 
-      <SummaryStrip className="mb-5">
+      <SummaryStrip cols={4} className="mb-5">
         <SummaryCell
           label={t('summary.paying')}
           value={summary.activePaid.toLocaleString()}
@@ -297,6 +384,17 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
           label={t('summary.conversion')}
           value={`${summary.conversion}%`}
           detail={t('summary.conversionHint')}
+        />
+        {/* The verdict on flexible pricing itself. If this stays at 0% then
+            the band is decoration and everybody is buying at the floor. */}
+        <SummaryCell
+          label={t('summary.aboveFloor')}
+          value={summary.bought === 0 ? '—' : `${summary.abovePct}%`}
+          detail={
+            summary.bought === 0
+              ? t('summary.aboveFloorNone')
+              : t('summary.aboveFloorHint', { above: summary.above, of: summary.bought })
+          }
         />
       </SummaryStrip>
 
@@ -327,6 +425,7 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
               <Th>{t('columns.price')}</Th>
               <Th>{t('columns.benefits')}</Th>
               <Th align="right">{t('columns.active')}</Th>
+              <Th align="right">{t('columns.chosen')}</Th>
               <Th align="right">{t('columns.change')}</Th>
               <Th align="right">{t('columns.revenue')}</Th>
               <Th width="w-12" srOnly>
@@ -367,7 +466,7 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
 
                 <td className="px-4 py-3">
                   <p className="text-[0.8125rem] font-medium text-ink-900 tabular-nums">
-                    {p.priceGhs === 0 ? t('freeLabel') : ghs(p.priceGhs)}
+                    {p.priceGhs === 0 ? t('freeLabel') : <Price p={p} />}
                   </p>
                   {p.priceGhs > 0 && (
                     <p className="text-[0.6875rem] text-ink-400 tabular-nums">
@@ -378,18 +477,17 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
 
                 <td className="px-4 py-3">
                   <Benefits p={p} />
-                  {/* The warning migration 037 asked for, on the row so it is
-                      seen while scanning rather than only once opened. */}
-                  {offLine(p) && (
-                    <p className="mt-1 flex items-center gap-1 text-[0.625rem] font-medium text-warning-600">
-                      <AlertTriangle aria-hidden className="size-3 shrink-0" />
-                      {t('valueWarn.short')}
-                    </p>
-                  )}
+                  {/* On the row, so it is seen while scanning rather than only
+                      once the plan is opened. */}
+                  <Trouble p={p} />
                 </td>
 
                 <td className="px-4 py-3 text-right text-[0.8125rem] font-medium text-ink-900 tabular-nums">
                   {p.active.toLocaleString()}
+                </td>
+
+                <td className="px-4 py-3 text-right">
+                  <Chosen p={p} />
                 </td>
 
                 <td className="px-4 py-3 text-right">
@@ -439,7 +537,7 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
                 </RowOpener>
                 <div className="flex shrink-0 items-start gap-1">
                   <p className="text-[0.9375rem] font-semibold text-ink-900 tabular-nums">
-                    {p.priceGhs === 0 ? t('freeLabel') : ghs(p.priceGhs)}
+                    {p.priceGhs === 0 ? t('freeLabel') : <Price p={p} />}
                   </p>
                   <span className="relative z-10">
                     <MoreMenu label={t('menuLabel', { name: p.name })} items={menuFor(p)} />
@@ -447,12 +545,7 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
                 </div>
               </div>
 
-              {offLine(p) && (
-                <p className="mt-2 flex items-center gap-1.5 text-[0.6875rem] font-medium text-warning-600">
-                  <AlertTriangle aria-hidden className="size-3 shrink-0" />
-                  {t('valueWarn.short')}
-                </p>
-              )}
+              <Trouble p={p} card />
 
               <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-ink-200 pt-2.5">
                 <StatusDot tone={p.status === 'live' ? 'success' : 'neutral'}>
@@ -465,6 +558,14 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
                   </span>
                 </span>
                 <Trend p={p} />
+                {p.paidCount > 0 && p.paidAvgGhs !== null && (
+                  <span className="text-[0.75rem] text-ink-500">
+                    {t('columns.chosen')}{' '}
+                    <span className="font-semibold text-ink-900 tabular-nums">
+                      {ghs(p.paidAvgGhs)}
+                    </span>
+                  </span>
+                )}
                 {p.monthlyGhs > 0 && (
                   <span className="ml-auto text-[0.8125rem] font-semibold text-ink-900 tabular-nums">
                     {ghs(p.monthlyGhs)}
@@ -480,7 +581,7 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
         <PlanPanel
           plan={editing === 'new' ? null : editing}
           plans={rows}
-          rate={rate}
+          free={free}
           onClose={() => setEditing(null)}
           onSave={(plan) => {
             save(plan)

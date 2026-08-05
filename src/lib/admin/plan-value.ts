@@ -1,133 +1,235 @@
 import type { PlanRow } from './types'
 
 /**
- * The rule that keeps "more money paid" meaning "more benefit".
+ * The rules that keep a LADDER OF BANDS honest.
  *
- * WHY THIS FILE EXISTS
- * Migration 037 (`value_per_cedi`) fixed an ordering bug where Bronze+Silver
- * at GHS 70 beat Gold at GHS 100, and it closes with an instruction:
+ * WHAT CHANGED, AND WHY THIS FILE WAS REWRITTEN
+ * Until migration 098 a plan had a price, and this file enforced one rule:
+ * every plan on the same value per cedi, so that no combination of cheap plans
+ * could beat a dear one (migration 037).
  *
- *   "it holds only while every plan shares that value per cedi. If the admin
- *    dashboard later sets a plan's benefits out of proportion to its price,
- *    the ordering can break again. That rule belongs on the admin plan editor
- *    when it is built."
+ * A plan is now a BAND. It runs from its own price to one pesewa under the
+ * next plan's, and `plan_multiplier_for_amount` interpolates the earning rate
+ * in a straight line between the two rungs. That changes what can go wrong:
  *
- * This is that rule. Plans stack, and stacking adds up what each plan BUYS on
- * top of the free allowance — so as long as every plan is priced at the same
- * value per cedi, any combination lands on the same straight line and no
- * combination can be gamed. Break the line on one plan and the guarantee is
- * gone platform-wide, not just for that plan.
+ *   - Inside a band, value per cedi is straight BY CONSTRUCTION. There is
+ *     nothing left to check there.
+ *   - Between rungs, the operator deliberately chose a curve — GHS 1 buys
+ *     +0.77% of earning at Bronze and +0.25% at Diamond. Measuring that
+ *     against a single "house rate" flagged four of the five plans as broken
+ *     the day bands shipped. It was not a warning; it was noise about a
+ *     decision that had already been made.
  *
- * The line the seeded plans sit on:
+ * So the checks here are the ones that are still real, and every one of them
+ * is a thing that MAKES A PLAN MISBEHAVE rather than a matter of taste:
  *
- *   daily ads   = free allowance + price × 0.5
- *   rate        = 1 + price × 0.005          (so GHS 1 buys +0.5%)
+ *   unbuyable         the band is empty, so `start_subscription_payment`
+ *                     rejects every amount — the plan cannot be sold at all.
+ *   earningInversion  the plan above earns LESS, so inside this band paying
+ *                     more lowers the rate. The slider would run backwards.
+ *   adsInversion      the plan above shows fewer ads a day.
+ *   undercut          two cheaper plans held together still beat this one.
+ *                     Plans stack, so this survived the restructure intact.
  *
- *     Bronze    GHS  20  →  30 ads,  ×1.10
- *     Silver    GHS  50  →  45 ads,  ×1.25
- *     Gold      GHS 100  →  70 ads,  ×1.50
- *     Platinum  GHS 200  → 120 ads,  ×2.00
+ * THE BAND IS CUT BY SORT ORDER, NOT BY PRICE. `plan_band_max_minor` uses
+ * `lead(price_minor) over (order by sort_order)`, so a plan that sorts after a
+ * cheaper one ends its band BELOW its own floor and quietly becomes unsellable.
+ * That is the whole reason `unbuyable` exists, and why everything here walks
+ * the ladder in sort order. `tests/admin/plan-bands.test.ts` checks this
+ * agrees with the database on the real ladder.
  *
- * Pure functions only. The editor uses them to warn and to offer a fix; it
- * does not block a deliberate change, because the operator may genuinely want
- * a promotional plan and is entitled to overrule a warning they understand.
+ * Pure functions only. Nothing here blocks a save — a promotional plan is a
+ * legitimate thing to want, and warnings that cannot be overruled get worked
+ * around — except that the operator is told, in their own terms, what the
+ * database will do with it.
  */
 
-export type HouseRate = {
-  /** Ads per day bought by one cedi. */
-  adsPerCedi: number
-  /** Added to the multiplier by one cedi. 0.005 = +0.5% per GHS 1. */
-  ratePerCedi: number
-  /** Ads per day everyone gets without paying — the free tier's cap. */
-  freeAdCap: number
+/** Anything the rules need. Lets a draft that has never been saved be checked
+ *  beside the plans it will sit between. */
+export type Rung = Pick<
+  PlanRow,
+  'id' | 'name' | 'priceGhs' | 'dailyAdCap' | 'rewardMultiplier' | 'sortOrder' | 'status'
+> & {
+  isDefault?: boolean
+  /** Set only on the top rung, where there is no plan above to end the band.
+   *  The plan's OWN stored ceiling — deliberately not the derived `bandMaxGhs`,
+   *  which a draft does not carry precisely because it is worked out from the
+   *  plan above. See `bandFor`. */
+  ownBandMaxGhs?: number | null
+  ownBandMaxMultiplier?: number | null
 }
 
 /**
- * Work the house rate out from the plans themselves rather than hard-coding
- * it, so that if the operator deliberately re-prices the whole ladder the
- * editor follows them instead of nagging forever about the old numbers.
- *
- * The free tier sets the baseline; the paid plans vote on the slope, and the
- * median wins so that one plan already out of line cannot drag the rate it is
- * about to be measured against.
+ * The plans a band can end against: on sale, and not the free plan. In sort
+ * order, because that is the order the database cuts bands in.
  */
-export function houseRate(plans: PlanRow[]): HouseRate {
+export function ladder<T extends Rung>(plans: T[]): T[] {
+  return plans
+    .filter((p) => p.status === 'live' && !p.isDefault && p.priceGhs > 0)
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+}
+
+/** Ads a day everybody gets without paying — the free plan's cap. */
+export function freeAdCap(plans: Rung[]): number {
   const free = plans.find((p) => p.isDefault) ?? plans.find((p) => p.priceGhs === 0)
-  const freeAdCap = free?.dailyAdCap ?? 20
-
-  const paid = plans.filter((p) => p.priceGhs > 0)
-  if (paid.length === 0) return { adsPerCedi: 0.5, ratePerCedi: 0.005, freeAdCap }
-
-  const median = (xs: number[]) => {
-    const s = [...xs].sort((a, b) => a - b)
-    const mid = Math.floor(s.length / 2)
-    return s.length % 2 ? s[mid]! : (s[mid - 1]! + s[mid]!) / 2
-  }
-
-  return {
-    adsPerCedi: median(paid.map((p) => (p.dailyAdCap - freeAdCap) / p.priceGhs)),
-    ratePerCedi: median(paid.map((p) => (p.rewardMultiplier - 1) / p.priceGhs)),
-    freeAdCap,
-  }
+  return free?.dailyAdCap ?? 1
 }
 
-/** What this price should buy, if the plan sits on the line. */
-export function alignedBenefits(priceGhs: number, rate: HouseRate) {
-  return {
-    dailyAdCap: Math.round(rate.freeAdCap + priceGhs * rate.adsPerCedi),
-    // Three decimals is what the column stores.
-    rewardMultiplier: Math.round((1 + priceGhs * rate.ratePerCedi) * 1000) / 1000,
-  }
+/** The plan directly above this one, or null at the top. */
+export function nextRung<T extends Rung>(plan: Rung, plans: T[]): T | null {
+  const rungs = ladder(plans).filter((p) => p.id !== plan.id)
+  return rungs.find((p) => p.sortOrder > plan.sortOrder) ?? null
 }
 
-export type ValueCheck = {
-  aligned: boolean
-  /** Signed difference against the line: positive means over-generous. */
-  adsDelta: number
-  rateDelta: number
-  expected: { dailyAdCap: number; rewardMultiplier: number }
+export type Band = {
+  fromGhs: number
+  toGhs: number
+  /** No plan above this one. It is still a range if it carries a ceiling of
+   *  its own; without one it is a single exact price. */
+  isTop: boolean
+  /** True when the range is impossible — the top is below the floor. */
+  empty: boolean
 }
 
 /**
- * Is this plan on the line?
+ * What this plan may be paid, mirroring `plan_band_max_minor`.
  *
- * The free plan is exempt — it defines the baseline rather than sitting on
- * the slope, and dividing its benefits by a price of zero is meaningless.
- *
- * Tolerances are one whole ad and 0.005 on the multiplier: rounding a
- * multiplier to three decimals must not be reported as a policy breach.
+ * Null for the free plan and any hidden plan: neither is sold, so neither has
+ * a band. A saved row should be shown the band the DATABASE returned; this is
+ * for a draft the database has not seen yet.
  */
-export function checkPlanValue(
-  plan: Pick<PlanRow, 'priceGhs' | 'dailyAdCap' | 'rewardMultiplier'>,
-  rate: HouseRate,
-): ValueCheck {
-  const expected = alignedBenefits(plan.priceGhs, rate)
-  const adsDelta = plan.dailyAdCap - expected.dailyAdCap
-  const rateDelta = Math.round((plan.rewardMultiplier - expected.rewardMultiplier) * 1000) / 1000
+export function bandFor(plan: Rung, plans: Rung[]): Band | null {
+  if (plan.isDefault || plan.status !== 'live' || plan.priceGhs <= 0) return null
 
-  return {
-    aligned: plan.priceGhs === 0 || (Math.abs(adsDelta) <= 1 && Math.abs(rateDelta) <= 0.005),
-    adsDelta,
-    rateDelta,
-    expected,
+  const next = nextRung(plan, plans)
+  if (!next) {
+    /* THE PLAN ABOVE STILL WINS WHEREVER THERE IS ONE, which is why this is
+       only read at the top: a ceiling set on a middle rung would overlap the
+       plan above it, and `plan_band_max_minor` ignores it for exactly that
+       reason. Since migration 102 the top rung may carry its own. */
+    const toGhs = plan.ownBandMaxGhs ?? plan.priceGhs
+    return { fromGhs: plan.priceGhs, toGhs, isTop: true, empty: toGhs < plan.priceGhs }
   }
+
+  // One pesewa under the next plan's price, exactly as the SQL does it.
+  const toGhs = Math.round((next.priceGhs - 0.01) * 100) / 100
+  return { fromGhs: plan.priceGhs, toGhs, isTop: false, empty: toGhs < plan.priceGhs }
+}
+
+/**
+ * What a price should buy to sit on the straight line between its neighbours.
+ *
+ * This is the auto-fill for a new plan, and under bands it is the RIGHT
+ * default rather than merely a tidy one: a rung placed on the line between the
+ * two it sits between leaves the interpolated rate continuous across both
+ * bands, so nobody crossing the boundary sees their earning rate jump.
+ *
+ * Below the cheapest plan the line runs up from Free (price 0, no bonus).
+ * Above the dearest it continues the slope of the last segment, because there
+ * is nothing to aim at.
+ */
+export function benefitsBetween(
+  priceGhs: number,
+  plans: Rung[],
+): { dailyAdCap: number; rewardMultiplier: number } {
+  const free = { priceGhs: 0, dailyAdCap: freeAdCap(plans), rewardMultiplier: 1 }
+  const rungs = ladder(plans)
+    .filter((p) => p.priceGhs !== priceGhs)
+    .sort((a, b) => a.priceGhs - b.priceGhs)
+
+  const round = (m: number) => Math.round(m * 1000) / 1000
+
+  if (rungs.length === 0) {
+    return { dailyAdCap: free.dailyAdCap, rewardMultiplier: 1 }
+  }
+
+  const below = [free, ...rungs].filter((p) => p.priceGhs < priceGhs).pop() ?? free
+  const above = rungs.find((p) => p.priceGhs > priceGhs) ?? null
+
+  if (!above) {
+    // Continue the last segment rather than inventing a slope.
+    const previous = [free, ...rungs].filter((p) => p.priceGhs < below.priceGhs).pop() ?? free
+    const span = below.priceGhs - previous.priceGhs
+    if (span <= 0) return { dailyAdCap: below.dailyAdCap, rewardMultiplier: below.rewardMultiplier }
+    const over = (priceGhs - below.priceGhs) / span
+    return {
+      dailyAdCap: Math.max(
+        0,
+        Math.round(below.dailyAdCap + (below.dailyAdCap - previous.dailyAdCap) * over),
+      ),
+      rewardMultiplier: round(
+        below.rewardMultiplier + (below.rewardMultiplier - previous.rewardMultiplier) * over,
+      ),
+    }
+  }
+
+  const span = above.priceGhs - below.priceGhs
+  const share = span <= 0 ? 0 : (priceGhs - below.priceGhs) / span
+  return {
+    dailyAdCap: Math.round(below.dailyAdCap + (above.dailyAdCap - below.dailyAdCap) * share),
+    rewardMultiplier: round(
+      below.rewardMultiplier + (above.rewardMultiplier - below.rewardMultiplier) * share,
+    ),
+  }
+}
+
+export type BandProblem = 'unbuyable' | 'earningInversion' | 'adsInversion'
+
+export type BandCheck = {
+  ok: boolean
+  problems: BandProblem[]
+  band: Band | null
+  /** The plan the band ends against — named in every warning, because "the
+   *  plan above" means nothing while looking at one row. */
+  next: Rung | null
+}
+
+/**
+ * Everything that can be wrong with where this plan sits in the ladder.
+ *
+ * A hidden plan and the free plan are not checked: neither is sold, so neither
+ * has a band to be wrong about.
+ */
+export function checkBand(plan: Rung, plans: Rung[]): BandCheck {
+  const band = bandFor(plan, plans)
+  const next = nextRung(plan, plans)
+  const problems: BandProblem[] = []
+
+  if (band && !band.isTop && next) {
+    if (band.empty) problems.push('unbuyable')
+    if (next.rewardMultiplier < plan.rewardMultiplier) problems.push('earningInversion')
+    if (next.dailyAdCap < plan.dailyAdCap) problems.push('adsInversion')
+  }
+
+  /* The top rung is checked against its OWN ceiling, which is the only thing
+     it has to be wrong about. Same two failures, one rung: a range that runs
+     backwards cannot be bought, and a top rate below the floor rate would mean
+     paying more to earn less inside a single plan. */
+  if (band && band.isTop && plan.ownBandMaxGhs != null) {
+    if (band.empty) problems.push('unbuyable')
+    if (plan.ownBandMaxMultiplier != null && plan.ownBandMaxMultiplier < plan.rewardMultiplier) {
+      problems.push('earningInversion')
+    }
+  }
+
+  return { ok: problems.length === 0, problems, band, next }
 }
 
 /**
  * Would this plan be beaten by a cheaper combination of other plans?
  *
- * The concrete harm the rule prevents, stated in the operator's terms rather
- * than as a slope: "Bronze + Silver costs GHS 70 and gives more than this
- * GHS 100 plan". Only checks pairs — that is where it actually bit, and an
- * exhaustive subset search over a handful of plans would be more machinery
- * than the warning is worth.
+ * Plans stack and their benefits add up, so this survived the move to bands
+ * unchanged in spirit — but it now compares against FLOOR prices, because the
+ * floor is what a combination really costs. Only pairs: that is where it
+ * actually bit, and an exhaustive subset search over a handful of plans would
+ * be more machinery than the warning is worth.
  */
 export function undercutBy(
-  plan: Pick<PlanRow, 'id' | 'priceGhs' | 'dailyAdCap' | 'rewardMultiplier'>,
-  others: PlanRow[],
-  rate: HouseRate,
+  plan: Rung,
+  others: Rung[],
+  free: number,
 ): { names: string[]; priceGhs: number; dailyAdCap: number; rewardMultiplier: number } | null {
-  const candidates = others.filter((p) => p.id !== plan.id && p.priceGhs > 0 && p.status === 'live')
+  const candidates = ladder(others).filter((p) => p.id !== plan.id)
 
   for (let i = 0; i < candidates.length; i++) {
     for (let j = i + 1; j < candidates.length; j++) {
@@ -137,10 +239,9 @@ export function undercutBy(
       if (priceGhs >= plan.priceGhs) continue
 
       /* Stacking counts the free allowance ONCE and adds what each plan buys
-         — the arithmetic migration 037 introduced. Summing the raw caps would
+         — the arithmetic `resolve_user_tier` does. Summing the raw caps would
          hand out the free allowance twice and overstate every combination. */
-      const dailyAdCap =
-        rate.freeAdCap + (a.dailyAdCap - rate.freeAdCap) + (b.dailyAdCap - rate.freeAdCap)
+      const dailyAdCap = free + (a.dailyAdCap - free) + (b.dailyAdCap - free)
       const rewardMultiplier =
         Math.round((1 + (a.rewardMultiplier - 1) + (b.rewardMultiplier - 1)) * 1000) / 1000
 
@@ -150,6 +251,17 @@ export function undercutBy(
     }
   }
   return null
+}
+
+/**
+ * What one cedi buys at this rung, as a percentage on the earning rate.
+ *
+ * Shown, never judged. The ladder deliberately gives less per cedi as it goes
+ * up, and this is how an operator sees that curve while pricing a new plan.
+ */
+export function earningPerCedi(plan: Rung): number {
+  if (plan.priceGhs <= 0) return 0
+  return Math.round(((plan.rewardMultiplier - 1) / plan.priceGhs) * 10000) / 100
 }
 
 /**

@@ -84,11 +84,30 @@ try {
   await page.goto(`${BASE}/upgrade`, { waitUntil: 'networkidle' })
   await page.waitForTimeout(600)
 
+  /* WHAT AN AMOUNT PAYS COMES FROM THE DATABASE, NOT FROM THIS FILE.
+     `plan_multiplier_for_amount` is the authority the ad path itself uses, so
+     asking it is the only way this check keeps meaning something after the
+     operator retunes — which they did on 2026-08-05, moving Bronze from ×1.5
+     to ×1.39 and turning the two figures hardcoded here into false failures
+     about a perfectly correct screen. Every ad is worth 100 points before a
+     multiplier (migration 098), which is the scale the card previews in. */
+  const pointsAt = async (ghs) => {
+    const { rows } = await db.query(
+      `select floor(100 * public.plan_multiplier_for_amount($1::bigint))::int as p`,
+      [Math.round(ghs * 100)],
+    )
+    return String(rows[0].p)
+  }
+
   // ---- The headline is a range -------------------------------------------
   const first = await preview(page)
   check('the card is priced as a range, not a fixed figure', first.heading === '65 – 139', first.heading)
   check('it opens at the floor of that range', first.chosen === '65', `GHS ${first.chosen}`)
-  check('and previews what the floor buys', first.points === '150', `${first.points} pts an ad`)
+  check(
+    'and previews what the floor buys',
+    first.points === (await pointsAt(65)),
+    `${first.points} pts an ad`,
+  )
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/picker-initial.png` })
 
   // ---- The + button ------------------------------------------------------
@@ -132,7 +151,11 @@ try {
   const atTop = await preview(page)
   check('+ cannot push past the top of the band', atTop.chosen === '139', `GHS ${atTop.chosen}`)
   check('the plus is disabled there', await plus.isDisabled(), 'nothing above GHS 139')
-  check('the top of the band pays what it should', atTop.points === '199', `${atTop.points} pts`)
+  check(
+    'the top of the band pays what it should',
+    atTop.points === (await pointsAt(139)),
+    `${atTop.points} pts`,
+  )
 
   // ---- The notice --------------------------------------------------------
   // A fresh page, so nothing has been touched on it.

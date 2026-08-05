@@ -256,8 +256,26 @@ function Panel({
             {t('panel.points')}
           </span>
         </p>
+        {/* The plan's NAME is no longer the whole answer. Since plans became
+            bands, two people on Gold can earn at different rates because they
+            paid different amounts inside it — so the rate they actually earn
+            at, and what they are paying for it, sit right here. It is the
+            first thing support is asked about ("why does my friend earn more
+            than me on the same plan") and it was only answerable in SQL. */}
         <p className="mt-1.5 text-[0.75rem] text-ink-500">
-          {t('panel.plan', { tier: p.tier })}
+          {p.tierPaidGhs > 0
+            ? t('panel.planPaid', {
+                tier: p.tier,
+                /* Pesewas shown when there are any. The amount is the thing
+                   that sets the rate now, so rounding GHS 102.50 to "103"
+                   hides the very number this line exists to report. */
+                ghs: p.tierPaidGhs.toLocaleString(undefined, {
+                  minimumFractionDigits: Number.isInteger(p.tierPaidGhs) ? 0 : 2,
+                  maximumFractionDigits: 2,
+                }),
+                rate: p.tierMultiplier,
+              })
+            : t('panel.plan', { tier: p.tier })}
         </p>
       </PanelSection>
 

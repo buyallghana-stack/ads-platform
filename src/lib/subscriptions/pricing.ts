@@ -17,13 +17,21 @@ export function multiplierForAmount(plan: Plan, amountMinor: number): number {
   const ceiling = plan.bandMaxMinor
   const amount = Math.min(Math.max(amountMinor, floor), ceiling)
 
-  // The top plan is a single price: there is nothing above it to move towards.
+  // A single price with nothing above it: no line to walk.
   if (ceiling <= floor) return plan.rewardMultiplier
 
-  /* The band runs to one pesewa under the next plan, so the span used for the
-     proportion is that gap plus the pesewa — otherwise paying the very top of
-     a band would give slightly more than it should. */
-  const span = ceiling + 1 - floor
+  /* THE SPAN IS TO WHERE THE LINE ENDS, NOT TO THE TOP OF THE BAND, and those
+     are one pesewa apart between rungs: the band stops just below the next
+     plan's price, so paying the very top of it earns just under the next
+     plan's rate and the bands meet without a step.
+
+     On the top plan the two coincide — its ceiling IS the end of its line,
+     because there is no rung above to hand off to — so paying GHS 1,000 for
+     Platinum earns exactly the ×7 the card promises rather than a hair under
+     it. Writing this as `ceiling + 1 - floor`, as it was before the top plan
+     had a band, would quietly shave that last pesewa's worth off. */
+  const span = plan.lineEndMinor - floor
+  if (span <= 0) return plan.rewardMultiplier
   const share = (amount - floor) / span
   const exact = plan.rewardMultiplier + (plan.nextMultiplier - plan.rewardMultiplier) * share
 

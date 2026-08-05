@@ -2,7 +2,16 @@ import { describe, expect, it } from 'vitest'
 
 import { multiplierForAmount, pointsPerAd } from '../../src/lib/subscriptions/pricing'
 import type { Plan } from '../../src/lib/subscriptions/data'
-import { HAS_DB, type Tx, createUser, expectRejection, withRollback } from '../support/db'
+import {
+  HAS_DB,
+  type LadderRung,
+  PINNED_LADDER,
+  type Tx,
+  createUser,
+  expectRejection,
+  pinLadder,
+  withRollback,
+} from '../support/db'
 
 /**
  * Plans as price BANDS: what you pay inside one decides what an ad is worth.
@@ -11,11 +20,20 @@ import { HAS_DB, type Tx, createUser, expectRejection, withRollback } from '../s
  * ad may be worth a few points more than my fellow bronze plan holder because
  * of the amount i paid from within the range."*
  *
- * THE PUBLISHED NUMBERS ARE THE CONTRACT. Every price in the operator's list
- * has a figure printed beside it, and those figures are what somebody will
- * screenshot and hold us to — so each one is asserted exactly rather than
- * approximately, and a change to the interpolation that moves any of them
- * fails here.
+ * THE LADDER IS PINNED, AND THAT IS THE POINT. This file used to assert the
+ * prices that were on sale on the day bands shipped, on the reasoning that a
+ * published figure is a promise somebody will screenshot. The operator then did
+ * what the admin screen exists to let them do — moved Bronze to ×1.39, Silver
+ * to ×1.84, Platinum to ×4.12 and deleted Diamond, all in eight minutes on
+ * 2026-08-05 — and seven tests went red without a line of code changing.
+ *
+ * What is being tested here is not a price list. It is the SHAPE of a ladder:
+ * that a rung pays exactly its own multiplier, that the rate climbs smoothly
+ * across a band, that there is no step to jump at a boundary, that the top
+ * clamps rather than selling nothing, and that stacking cannot beat paying the
+ * same money once. None of that is a fact about GHS 65, so every test below
+ * runs against `PINNED_LADDER` and none of them can be broken by a price
+ * change again.
  *
  * THE ARITHMETIC EXISTS TWICE, which is the real risk in this feature.
  * Postgres decides what an ad actually pays; TypeScript decides what the
@@ -23,17 +41,22 @@ import { HAS_DB, type Tx, createUser, expectRejection, withRollback } from '../s
  * not an option on a Ghanaian connection. Two implementations of one rule
  * drift, and the drift would be a screen quoting a number the database will
  * not honour — so the last test sweeps the whole ladder and compares them
- * pesewa by pesewa.
+ * pesewa by pesewa. THAT ONE READS THE LIVE TABLES ON PURPOSE: pinning it
+ * would prove the two agree about a ladder nobody can buy.
  */
 
-const PUBLISHED: { ghs: number; band: string; multiplier: number; pointsPerAd: number }[] = [
-  { ghs: 0, band: 'Free', multiplier: 1.0, pointsPerAd: 100 },
-  { ghs: 65, band: 'Bronze', multiplier: 1.5, pointsPerAd: 150 },
-  { ghs: 140, band: 'Silver', multiplier: 2.0, pointsPerAd: 200 },
-  { ghs: 250, band: 'Gold', multiplier: 2.5, pointsPerAd: 250 },
-  { ghs: 520, band: 'Platinum', multiplier: 3.0, pointsPerAd: 300 },
-  { ghs: 1000, band: 'Diamond', multiplier: 3.5, pointsPerAd: 350 },
-]
+/* Derived from the pinned rungs rather than typed out beside them — two lists
+   of the same numbers is exactly how a fixture starts lying about itself. The
+   peg is 100 points to the cedi, which `pinLadder` also holds. */
+const PUBLISHED = PINNED_LADDER.map((rung) => ({
+  ghs: rung.priceGhs,
+  band: rung.name,
+  multiplier: rung.multiplier,
+  pointsPerAd: Math.floor(100 * rung.multiplier),
+}))
+
+/** The rung above a given one, for a boundary the fixture must not hardcode. */
+const rungAbove = (ghs: number) => PINNED_LADDER.find((r) => r.priceGhs > ghs) ?? null
 
 const multiplierAt = async (tx: Tx, ghs: number) => {
   const { rows } = await tx.query<{ m: string }>(
@@ -87,6 +110,7 @@ const resolved = async (tx: Tx, userId: string) => {
 describe.skipIf(!HAS_DB)('the published ladder', () => {
   it('pays exactly what the pricing list promises at every plan price', async () => {
     await withRollback(async (tx) => {
+      await pinLadder(tx)
       for (const rung of PUBLISHED) {
         expect([rung.ghs, await multiplierAt(tx, rung.ghs)]).toEqual([rung.ghs, rung.multiplier])
         expect([rung.ghs, await bandAt(tx, rung.ghs)]).toEqual([rung.ghs, rung.band])
@@ -96,6 +120,7 @@ describe.skipIf(!HAS_DB)('the published ladder', () => {
 
   it('turns those multipliers into the advertised points and cedis', async () => {
     await withRollback(async (tx) => {
+      await pinLadder(tx)
       const { rows } = await tx.query<{ v: string }>(
         `select value as v from public.app_config where key = 'points_per_currency_unit'`,
       )
@@ -112,6 +137,7 @@ describe.skipIf(!HAS_DB)('the published ladder', () => {
 
   it('moves between the rungs, so two Bronze holders can differ', async () => {
     await withRollback(async (tx) => {
+      await pinLadder(tx)
       const floor = await multiplierAt(tx, 65)
       const middle = await multiplierAt(tx, 99)
       const top = await multiplierAt(tx, 139)
@@ -127,25 +153,30 @@ describe.skipIf(!HAS_DB)('the published ladder', () => {
 
   it('has no step to jump at a band boundary', async () => {
     await withRollback(async (tx) => {
+      await pinLadder(tx)
       /* The top of one band and the floor of the next must almost touch. A gap
          either way is money somebody can find: a jump up rewards paying one
-         cedi more than the band allows, a jump down punishes it. */
-      for (const [top, next] of [
-        [139, 140],
-        [249, 250],
-        [519, 520],
-        [999, 1000],
-      ]) {
-        const below = await multiplierAt(tx, top)
-        const above = await multiplierAt(tx, next)
-        expect(above).toBeGreaterThan(below)
-        expect(above - below).toBeLessThan(0.02)
+         cedi more than the band allows, a jump down punishes it.
+
+         Every boundary the ladder actually has, walked rather than listed —
+         a hardcoded pair outlives the rung it belongs to, and the version of
+         this test that named GHS 1000 kept comparing the top plan against
+         ITSELF once Diamond was deleted, then failed on `4.12 > 4.12` and
+         looked like a broken interpolation. */
+      for (const rung of PINNED_LADDER) {
+        const next = rungAbove(rung.priceGhs)
+        if (!next) continue
+        const below = await multiplierAt(tx, next.priceGhs - 1)
+        const above = await multiplierAt(tx, next.priceGhs)
+        expect([next.slug, above > below]).toEqual([next.slug, true])
+        expect([next.slug, above - below < 0.02]).toEqual([next.slug, true])
       }
     })
   })
 
   it('stops at the top of the ladder rather than selling nothing', async () => {
     await withRollback(async (tx) => {
+      await pinLadder(tx)
       expect(await multiplierAt(tx, 1000)).toBe(3.5)
       expect(await multiplierAt(tx, 5000)).toBe(3.5)
 
@@ -157,9 +188,110 @@ describe.skipIf(!HAS_DB)('the published ladder', () => {
   })
 })
 
+describe.skipIf(!HAS_DB)('the top plan, when it carries its own ceiling', () => {
+  /**
+   * Operator, 2026-08-05: *"make the platinum plan a range of GHS 520–GHS 1000,
+   * that's why i deleted the diamond plan."*
+   *
+   * Deleting the rung above did not hand its price to the plan below — it left
+   * that plan at the top of the ladder, sold at one figure. So the top rung
+   * carries the two numbers the deleted rung used to supply: where its line
+   * ends, and what is earned there.
+   *
+   * The pinned ladder here is the real one, cut short: Platinum on top, at the
+   * prices and rates the operator actually set.
+   */
+  const CAPPED: LadderRung[] = [
+    { slug: 'free', name: 'Free', priceGhs: 0, multiplier: 1.0, dailyAdCap: 1 },
+    { slug: 'bronze', name: 'Bronze', priceGhs: 65, multiplier: 1.39, dailyAdCap: 3 },
+    { slug: 'silver', name: 'Silver', priceGhs: 140, multiplier: 1.84, dailyAdCap: 4 },
+    { slug: 'gold', name: 'Gold', priceGhs: 250, multiplier: 2.5, dailyAdCap: 7 },
+    {
+      slug: 'platinum',
+      name: 'Platinum',
+      priceGhs: 520,
+      multiplier: 4.12,
+      dailyAdCap: 13,
+      bandMaxGhs: 1000,
+      bandMaxMultiplier: 7.0,
+    },
+  ]
+
+  it('sells the top plan as a range rather than one price', async () => {
+    await withRollback(async (tx) => {
+      await pinLadder(tx, { rungs: CAPPED })
+      const { rows } = await tx.query<{ max: string }>(
+        `select public.plan_band_max_minor(id)::text as max from public.tiers where slug = 'platinum'`,
+      )
+      expect(Number(rows[0]!.max)).toBe(100000)
+    })
+  })
+
+  it('reaches the advertised rate exactly at the top of the band', async () => {
+    await withRollback(async (tx) => {
+      await pinLadder(tx, { rungs: CAPPED })
+      /* EXACTLY ×7, not a hair under. Between two rungs a band stops one
+         pesewa short so the next one can take over without a step; the top
+         rung has nothing to hand off to, so the last pesewa is ours to pay. */
+      expect(await multiplierAt(tx, 1000)).toBe(7)
+      expect(await multiplierAt(tx, 520)).toBe(4.12)
+      expect(await multiplierAt(tx, 760)).toBe(5.56) // halfway, on the line
+    })
+  })
+
+  it('stops at the ceiling instead of extrapolating past it', async () => {
+    await withRollback(async (tx) => {
+      await pinLadder(tx, { rungs: CAPPED })
+      /* The failure this guards is not a rounding error. Below the top rung an
+         over-payment lands on the NEXT rung, so nothing ever ran past the end
+         of a line; at the top there is no next rung to catch it, and an
+         unclamped line would pay ×31 for GHS 5,000. */
+      expect(await multiplierAt(tx, 1001)).toBe(7)
+      expect(await multiplierAt(tx, 5000)).toBe(7)
+      expect(await multiplierAt(tx, 100000)).toBe(7)
+    })
+  })
+
+  it('refuses money above the ceiling at the checkout, too', async () => {
+    await withRollback(async (tx) => {
+      await pinLadder(tx, { rungs: CAPPED })
+      const user = await createUser(tx, { name: 'Over The Top' })
+      const message = await expectRejection(tx, () => buy(tx, user.id, 'platinum', 1200))
+      expect(message).toMatch(/most you can pay/i)
+
+      // …and takes the ceiling itself, which is the point of the range.
+      await buy(tx, user.id, 'platinum', 1000)
+      expect((await resolved(tx, user.id)).multiplier).toBe(7)
+    })
+  })
+
+  it('is not trimmed by the runaway-configuration ceiling', async () => {
+    await withRollback(async (tx) => {
+      await pinLadder(tx, { rungs: CAPPED })
+      /* THE BUG THIS FEATURE UNCOVERED. `resolve_user_tier` ends with
+         `least(multiplier, subscription_max_combined_multiplier)`, and that key
+         sat at 3.500 while Platinum's own rate was already ×4.120 — so every
+         Platinum holder was being paid ×3.5 and the plan screen promised
+         ×4.12. A safety net that trims real customers is not a safety net. */
+      const { rows } = await tx.query<{ v: string }>(
+        `select value as v from public.app_config
+          where key = 'subscription_max_combined_multiplier'`,
+      )
+      const ceiling = Number(rows[0]!.v)
+      const topOfLadder = CAPPED[CAPPED.length - 1]!.bandMaxMultiplier!
+      expect([ceiling > topOfLadder, ceiling]).toEqual([true, ceiling])
+
+      const user = await createUser(tx, { name: 'Top Payer' })
+      await buy(tx, user.id, 'platinum', 1000)
+      expect((await resolved(tx, user.id)).multiplier).toBe(7)
+    })
+  })
+})
+
 describe.skipIf(!HAS_DB)('buying at your own amount', () => {
   it('gives a Bronze holder who paid more a better rate than one who paid the floor', async () => {
     await withRollback(async (tx) => {
+      await pinLadder(tx)
       const thrifty = await createUser(tx, { name: 'Paid The Floor' })
       const generous = await createUser(tx, { name: 'Paid More' })
 
@@ -183,6 +315,7 @@ describe.skipIf(!HAS_DB)('buying at your own amount', () => {
 
   it('refuses an amount below the plan it claims to be buying', async () => {
     await withRollback(async (tx) => {
+      await pinLadder(tx)
       const user = await createUser(tx, { name: 'Underpayer' })
       const message = await expectRejection(tx, () => buy(tx, user.id, 'silver', 100))
       expect(message).toMatch(/least you can pay/i)
@@ -191,6 +324,7 @@ describe.skipIf(!HAS_DB)('buying at your own amount', () => {
 
   it('refuses an amount that belongs to the plan above', async () => {
     await withRollback(async (tx) => {
+      await pinLadder(tx)
       const user = await createUser(tx, { name: 'Sneaky' })
       /* GHS 200 buys Silver's rate, not Bronze's — paying it under Bronze's
          name would be buying the higher rate at the lower plan's ad cap. */
@@ -201,6 +335,7 @@ describe.skipIf(!HAS_DB)('buying at your own amount', () => {
 
   it('adds up what somebody holds, so stacking cannot beat paying the same total', async () => {
     await withRollback(async (tx) => {
+      await pinLadder(tx)
       const stacker = await createUser(tx, { name: 'Two Plans' })
       const single = await createUser(tx, { name: 'One Payment' })
 
@@ -220,6 +355,7 @@ describe.skipIf(!HAS_DB)('buying at your own amount', () => {
 
   it('treats a renewal as the new amount, not as more money on top', async () => {
     await withRollback(async (tx) => {
+      await pinLadder(tx)
       const user = await createUser(tx, { name: 'Renewer' })
       await buy(tx, user.id, 'bronze', 65)
       expect((await resolved(tx, user.id)).multiplier).toBe(1.5)
@@ -237,6 +373,7 @@ describe.skipIf(!HAS_DB)('buying at your own amount', () => {
 
   it('leaves somebody who has paid nothing on Free', async () => {
     await withRollback(async (tx) => {
+      await pinLadder(tx)
       const user = await createUser(tx, { name: 'Free Rider' })
       const standing = await resolved(tx, user.id)
       expect(standing.name).toBe('Free')
@@ -249,13 +386,23 @@ describe.skipIf(!HAS_DB)('buying at your own amount', () => {
 describe.skipIf(!HAS_DB)('the slider and the database agree', () => {
   it('quotes the same rate the database will pay, at every cedi on the ladder', async () => {
     await withRollback(async (tx) => {
+      /* DELIBERATELY NOT PINNED — the only test in this file that is not.
+         Every other one asks whether the rule is right; this one asks whether
+         the screen and the database say the same thing about the prices REALLY
+         ON SALE, and a fixture ladder would prove they agree about a ladder
+         nobody can buy. It is the one that must survive the operator retuning. */
       const { rows } = await tx.query(
         `select id, slug, name, price_minor, reward_multiplier, sort_order,
+                band_max_minor, band_max_multiplier,
                 lead(price_minor)       over (order by sort_order) as next_price,
                 lead(reward_multiplier) over (order by sort_order) as next_multiplier
            from public.tiers where is_active order by sort_order`,
       )
 
+      /* Built the way `getPlans` builds it, including the top rung's own
+         ceiling — otherwise this proves the screen agrees with the database
+         about a Platinum that stops at GHS 520, which is not the one on
+         sale. */
       const plans = rows
         .filter((r) => Number(r.price_minor) > 0)
         .map((r) => ({
@@ -265,9 +412,17 @@ describe.skipIf(!HAS_DB)('the slider and the database agree', () => {
           rewardMultiplier: Number(r.reward_multiplier),
           bandMinMinor: Number(r.price_minor),
           bandMaxMinor:
-            r.next_price === null ? Number(r.price_minor) : Number(r.next_price) - 1,
+            r.next_price === null
+              ? Number(r.band_max_minor ?? r.price_minor)
+              : Number(r.next_price) - 1,
           nextMultiplier:
-            r.next_multiplier === null ? Number(r.reward_multiplier) : Number(r.next_multiplier),
+            r.next_multiplier === null
+              ? Number(r.band_max_multiplier ?? r.reward_multiplier)
+              : Number(r.next_multiplier),
+          lineEndMinor:
+            r.next_price === null
+              ? Number(r.band_max_minor ?? r.price_minor)
+              : Number(r.next_price),
         })) as unknown as Plan[]
 
       /* Every amount in ONE query rather than one query per amount: a round

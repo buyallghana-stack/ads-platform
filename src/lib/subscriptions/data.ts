@@ -31,6 +31,20 @@ export type Plan = {
   /** The multiplier of the NEXT plan up — the value this band interpolates
    *  towards. Equal to this plan's own on the top plan, where the line ends. */
   nextMultiplier: number
+  /**
+   * The amount at which `nextMultiplier` is reached exactly.
+   *
+   * NOT the same as `bandMaxMinor`, and the difference is one pesewa that
+   * matters. Between two rungs the band stops one pesewa BELOW the next plan's
+   * price, so the line ends past the top of the band and the two bands meet
+   * without a step. The top rung has no plan above it to hand off to, so when
+   * it carries its own ceiling the line ends ON it, and paying the ceiling
+   * pays exactly that rate.
+   *
+   * Equal to `bandMinMinor` on a top plan with no ceiling — a band of one
+   * price, where there is no line to walk.
+   */
+  lineEndMinor: number
 }
 
 export type HeldPlan = {
@@ -58,10 +72,21 @@ export const getPlans = cache(async (): Promise<Plan[]> => {
        pointing at a gap — the same rule plan_band_max_minor() applies in the
        database, which is what the server validates against. */
     bandMinMinor: Number(row.price_minor),
+    /* The top plan may carry its own ceiling since migration 102 — Platinum
+       sells from GHS 520 to GHS 1,000 with no rung above it. Where it has
+       none, the band is still the single price it always was. */
     bandMaxMinor:
-      i + 1 < rows.length ? Number(rows[i + 1].price_minor) - 1 : Number(row.price_minor),
+      i + 1 < rows.length
+        ? Number(rows[i + 1].price_minor) - 1
+        : Number(row.band_max_minor ?? row.price_minor),
     nextMultiplier:
-      i + 1 < rows.length ? Number(rows[i + 1].reward_multiplier) : Number(row.reward_multiplier),
+      i + 1 < rows.length
+        ? Number(rows[i + 1].reward_multiplier)
+        : Number(row.band_max_multiplier ?? row.reward_multiplier),
+    lineEndMinor:
+      i + 1 < rows.length
+        ? Number(rows[i + 1].price_minor)
+        : Number(row.band_max_minor ?? row.price_minor),
     id: row.id,
     slug: row.slug,
     name: row.name,
