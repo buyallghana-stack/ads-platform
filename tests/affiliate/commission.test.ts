@@ -136,7 +136,7 @@ describe.skipIf(!HAS_DB)('what a sale pays', () => {
     })
   })
 
-  it('pays level two out of the REMAINDER, not the whole sale', async () => {
+  it('pays BOTH levels a percentage of the whole sale', async () => {
     await withRollback(async (tx) => {
       const by = await admin(tx)
       const upline = await makeAffiliate(tx, by, 'Upline', 'professional')
@@ -157,12 +157,15 @@ describe.skipIf(!HAS_DB)('what a sale pays', () => {
       await click(tx, sellerAccount.affiliate_code, product, buyer.id)
       await buy(tx, buyer.id, product)
 
-      /* L1 = 30% of 20,000 = 6,000. L2 = 10% of the REMAINING 14,000 = 1,400
-         — not 10% of 20,000. Rounding level one first and taking level two
-         from what is left is what makes the pair incapable of exceeding the
-         sale, whatever the rates are. */
+      /* Operator decision, 2026-08-06, uniform across every product: both
+         levels are a percentage of the TOTAL. L1 = 30% of 20,000 = 6,000 and
+         L2 = 10% of 20,000 = 2,000 — not 10% of what was left.
+
+         This reverses the remainder rule approved earlier the same day. The
+         "cannot exceed the sale" guarantee now rests on the constraint that
+         refuses rate pairs above 100%, rather than on the arithmetic. */
       expect(await balance(tx, sellerAccount.id)).toBe(6_000)
-      expect((await balance(tx, upline.account.id)) - uplineBefore).toBe(1_400)
+      expect((await balance(tx, upline.account.id)) - uplineBefore).toBe(2_000)
     })
   })
 
@@ -186,6 +189,11 @@ describe.skipIf(!HAS_DB)('what a sale pays', () => {
         .filter((r) => r.entry_type === 'credit')
         .reduce((n, r) => n + Number(r.amount_minor), 0)
 
+      /* 60% + 40% of an amount that does not divide evenly. Both levels round
+         independently now, so without the clamp on level two this pays out one
+         pesewa MORE than the sale brought in — and reconciliation would report
+         a ledger that does not balance, which is a bad way to find out about a
+         rounding rule. */
       expect(paid).toBeLessThanOrEqual(12_345)
     })
   })
@@ -316,7 +324,7 @@ describe.skipIf(!HAS_DB)('a refund unwinds the commission', () => {
       const order = await buy(tx, buyer.id, product)
 
       expect(await balance(tx, sellerAccount.id)).toBe(6_000)
-      expect((await balance(tx, upline.account.id)) - uplineBefore).toBe(1_400)
+      expect((await balance(tx, upline.account.id)) - uplineBefore).toBe(2_000)
 
       await tx.query(`select public.refund_product_order($1, $2, 'faulty content')`, [order, by])
 
