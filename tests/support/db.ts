@@ -281,42 +281,54 @@ export async function pinLadder(
 ): Promise<void> {
   const { rungs = PINNED_LADDER, pointsPerCedi = 100 } = options
 
-  for (const [index, rung] of rungs.entries()) {
-    await tx.query(
-      `insert into public.tiers
-         (slug, name, description, price_minor, currency_code, billing_period_days,
-          daily_ad_cap, reward_multiplier, redemption_minimum_points,
-          referral_bonus_multiplier, ad_priority, ad_cooldown_seconds,
-          weekly_game_plays, is_default, is_active, sort_order,
-          band_max_minor, band_max_multiplier)
-       values ($1, $2, $2, $3, 'GHS', 30, $4, $5, 5000, 1.000, $6, 0, 5, $7, true, $6, $8, $9)
-       on conflict (slug) do update set
-         name = excluded.name,
-         price_minor = excluded.price_minor,
-         daily_ad_cap = excluded.daily_ad_cap,
-         reward_multiplier = excluded.reward_multiplier,
-         ad_priority = excluded.ad_priority,
-         sort_order = excluded.sort_order,
-         is_default = excluded.is_default,
-         is_active = true,
-         /* Written even when absent. Platinum carries a real ceiling in
-            production, and inheriting it would silently give the fixture a
-            top band no test asked for. */
-         band_max_minor = excluded.band_max_minor,
-         band_max_multiplier = excluded.band_max_multiplier`,
-      [
-        rung.slug,
-        rung.name,
-        Math.round(rung.priceGhs * 100),
-        rung.dailyAdCap,
-        rung.multiplier,
-        index,
-        rung.priceGhs === 0,
-        rung.bandMaxGhs === undefined ? null : Math.round(rung.bandMaxGhs * 100),
-        rung.bandMaxMultiplier ?? null,
-      ],
-    )
-  }
+  /* ONE ROUND TRIP, not one per rung. This runs in eleven tests in
+     flexible-pricing alone, and each round trip is 200-300ms to a database in
+     Paris — six inserts per call was ~15 seconds of pure latency across that
+     file, which is what pushed its two heaviest tests past the 30s timeout the
+     day the link slowed down. Unnesting the arrays makes it a single
+     statement. */
+  await tx.query(
+    `insert into public.tiers
+       (slug, name, description, price_minor, currency_code, billing_period_days,
+        daily_ad_cap, reward_multiplier, redemption_minimum_points,
+        referral_bonus_multiplier, ad_priority, ad_cooldown_seconds,
+        weekly_game_plays, is_default, is_active, sort_order,
+        band_max_minor, band_max_multiplier)
+     select r.slug, r.name, r.name, r.price_minor, 'GHS', 30,
+            r.daily_ad_cap, r.reward_multiplier, 5000,
+            1.000, r.sort_order, 0,
+            5, r.price_minor = 0, true, r.sort_order,
+            r.band_max_minor, r.band_max_multiplier
+       from unnest(
+              $1::text[], $2::text[], $3::bigint[], $4::int[],
+              $5::numeric[], $6::int[], $7::bigint[], $8::numeric[]
+            ) as r(slug, name, price_minor, daily_ad_cap,
+                   reward_multiplier, sort_order, band_max_minor, band_max_multiplier)
+     on conflict (slug) do update set
+       name = excluded.name,
+       price_minor = excluded.price_minor,
+       daily_ad_cap = excluded.daily_ad_cap,
+       reward_multiplier = excluded.reward_multiplier,
+       ad_priority = excluded.ad_priority,
+       sort_order = excluded.sort_order,
+       is_default = excluded.is_default,
+       is_active = true,
+       /* Written even when absent. Platinum carries a real ceiling in
+          production, and inheriting it would silently give the fixture a top
+          band no test asked for. */
+       band_max_minor = excluded.band_max_minor,
+       band_max_multiplier = excluded.band_max_multiplier`,
+    [
+      rungs.map((r) => r.slug),
+      rungs.map((r) => r.name),
+      rungs.map((r) => Math.round(r.priceGhs * 100)),
+      rungs.map((r) => r.dailyAdCap),
+      rungs.map((r) => r.multiplier),
+      rungs.map((_, index) => index),
+      rungs.map((r) => (r.bandMaxGhs === undefined ? null : Math.round(r.bandMaxGhs * 100))),
+      rungs.map((r) => r.bandMaxMultiplier ?? null),
+    ],
+  )
 
   /* Anything the operator has added since. Left active it would cut a band
      against a price this file never mentions, and the failure would read as
