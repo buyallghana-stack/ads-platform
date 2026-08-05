@@ -6,6 +6,7 @@ import {
   balanceOf,
   createUser,
   expectRejection,
+  pinEconomy,
   setConfig,
   withRollback,
 } from '../support/db'
@@ -87,6 +88,10 @@ const ledgerRows = async (tx: Tx, userId: string) => {
  * again — and uses the targeting rules rather than working around them.
  */
 const onlyTheseAds = async (tx: Tx, userId: string, keep: string[]) => {
+  /* Repeats are about watching the SAME ad twice, which needs an allowance of
+     more than one a day — and the free plan is on one since the pricing
+     restructure. */
+  await pinEconomy(tx)
   await tx.query(
     `insert into public.ad_tiers (ad_id, tier_id)
      select a.id, (select id from public.tiers where slug = 'platinum')

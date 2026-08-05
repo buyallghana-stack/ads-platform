@@ -9,6 +9,7 @@ import {
   expectRejection,
   setConfig,
   withRollback,
+  pinEconomy,
 } from '../support/db'
 
 /**
@@ -99,6 +100,7 @@ describe.skipIf(!HAS_DB)('games', () => {
 
   it('refuses to play at all while the switch is off', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const user = await createUser(tx, { name: 'Eager Player' })
       /* Set explicitly rather than relying on the shipped default. It WAS
          false, then the operator turned the games on and this test started
@@ -118,6 +120,7 @@ describe.skipIf(!HAS_DB)('games', () => {
 
   it('pays the prize it drew, once, and records the play', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const user = await createUser(tx, { name: 'Lucky Person' })
       await enable(tx)
       await setBoard(tx, 'mystery_box', [{ slot: 1, points: 750, weight: 1 }])
@@ -142,6 +145,10 @@ describe.skipIf(!HAS_DB)('games', () => {
      allowance mechanic in one assertion. */
   it('spends the weekly allowance and then refuses', async () => {
     await withRollback(async (tx) => {
+      /* One play a week, because that is the number this test asserts. The
+         free plan grants zero in production since the pricing restructure,
+         and a test that inherits it can only ever prove that zero is zero. */
+      await pinEconomy(tx, { freeGamePlays: 1 })
       const user = await createUser(tx, { name: 'Free Player' })
       await enable(tx)
       await setBoard(tx, 'mystery_box', [{ slot: 1, points: 100, weight: 1 }])
@@ -157,6 +164,7 @@ describe.skipIf(!HAS_DB)('games', () => {
   /* The operator's choice: plays are the ONE benefit that does not stack. */
   it('gives a stacked user the highest plan, not the total', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { freeGamePlays: 1 })
       const user = await createUser(tx, { name: 'Big Spender' })
       await grantPlan(tx, user.id, 'bronze')
       await grantPlan(tx, user.id, 'gold')
@@ -169,13 +177,24 @@ describe.skipIf(!HAS_DB)('games', () => {
         return Number(rows[0]!.n)
       }
 
-      // Gold is 4, Bronze is 2. Highest wins; the sum would be 6 (or 7 with
-      // the free base).
-      expect(await allowance()).toBe(4)
+      /* READ FROM THE PLANS, not written down here. The operator reprices
+         these — Gold's plays went from 4 to 3 in the 2026-08-04 restructure —
+         and a test that hardcodes them fails the day the business changes,
+         which tells nobody anything about whether the RULE still holds. The
+         rule is what is asserted: highest wins, and the sum does not. */
+      const { rows: plays } = await tx.query<{ free: number; bronze: number; gold: number }>(
+        `select max(weekly_game_plays) filter (where is_default)      as free,
+                max(weekly_game_plays) filter (where slug = 'bronze') as bronze,
+                max(weekly_game_plays) filter (where slug = 'gold')   as gold
+           from public.tiers`,
+      )
+      const { free, bronze, gold } = plays[0]!
+
+      expect(await allowance()).toBe(Math.max(free, bronze, gold))
 
       await setConfig(tx, 'game_plays_combine_mode', 'sum_bonus')
-      // Free 1 + bronze bonus 1 + gold bonus 3.
-      expect(await allowance()).toBe(5)
+      // The free base, plus what each held plan adds on top of it.
+      expect(await allowance()).toBe(free + (bronze - free) + (gold - free))
     })
   })
 
@@ -183,6 +202,7 @@ describe.skipIf(!HAS_DB)('games', () => {
      the thing that would silently double the platform's cost if wrong. */
   it('shares one play pool across both games', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { freeGamePlays: 1 })
       const user = await createUser(tx, { name: 'Two Games' })
       await enable(tx)
       await setBoard(tx, 'mystery_box', [{ slot: 1, points: 10, weight: 1 }])
@@ -196,6 +216,7 @@ describe.skipIf(!HAS_DB)('games', () => {
 
   it('lets a won extra play actually be played', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const user = await createUser(tx, { name: 'Bonus Winner' })
       await enable(tx)
       await setBoard(tx, 'mystery_box', [{ slot: 1, points: 25, weight: 1, extra: 1 }])
@@ -217,6 +238,7 @@ describe.skipIf(!HAS_DB)('games', () => {
      must own exactly `weight` roll values and no others. */
   it('maps every roll to the slot that owns it', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       await setBoard(tx, 'mystery_box', [
         { slot: 1, points: 10, weight: 3 },
         { slot: 2, points: 20, weight: 1 },
@@ -241,6 +263,7 @@ describe.skipIf(!HAS_DB)('games', () => {
 
   it('never draws a prize whose daily cap is spent', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const user = await createUser(tx, { name: 'Capped Out' })
       // Somebody else exhausted the stock earlier today. Spending it with
       // `user` would also spend their weekly play, and the test would prove
@@ -276,6 +299,7 @@ describe.skipIf(!HAS_DB)('games', () => {
      worst possible way to break it. */
   it('still pays when every prize is capped out', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const user = await createUser(tx, { name: 'Everything Capped' })
       const earlier = await createUser(tx, { name: 'Took The Stock' })
       await enable(tx)
@@ -297,6 +321,7 @@ describe.skipIf(!HAS_DB)('games', () => {
 
   it('refuses a disabled account', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const user = await createUser(tx, { name: 'Under Review' })
       await enable(tx)
       await setBoard(tx, 'mystery_box', [{ slot: 1, points: 10, weight: 1 }])
@@ -309,6 +334,7 @@ describe.skipIf(!HAS_DB)('games', () => {
 
   it('will not let a prize pay nothing at all', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       // The constraint, not the editor, is what guarantees the operator's
       // "every outcome pays something" rule.
       expect(
@@ -324,6 +350,7 @@ describe.skipIf(!HAS_DB)('games', () => {
 
   it('keeps a play out of last week', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const user = await createUser(tx, { name: 'Last Week' })
       await enable(tx)
       await setBoard(tx, 'mystery_box', [{ slot: 1, points: 60, weight: 1 }])
@@ -344,6 +371,7 @@ describe.skipIf(!HAS_DB)('games', () => {
 
   it('counts a game win on the leaderboard, with the other granted credits', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const user = await createUser(tx, { name: 'Game Climber' })
       await enable(tx)
       await setBoard(tx, 'mystery_box', [{ slot: 1, points: 4_000, weight: 1 }])
@@ -379,6 +407,7 @@ describe.skipIf(!HAS_DB)('games', () => {
   */
   it('refuses a payload holding another game\'s prizes', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const admin = await createAdmin(tx)
       const { rows: boxRows } = await tx.query(
         `select id, slot, label, points, extra_plays, weight, colour
@@ -417,6 +446,7 @@ describe.skipIf(!HAS_DB)('games', () => {
 
   it('refuses a save that would leave a game with no prizes', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const admin = await createAdmin(tx)
       await setBoard(tx, 'spin_wheel', [
         { slot: 1, points: 10, weight: 1 },
@@ -455,6 +485,7 @@ describe.skipIf(!HAS_DB)('games', () => {
 
   it('refuses the admin prize table to a normal user', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const user = await createUser(tx, { name: 'Curious Player' })
       expect(
         await expectRejection(tx, () =>
@@ -466,6 +497,7 @@ describe.skipIf(!HAS_DB)('games', () => {
 
   it('reports what the table costs so it can be priced', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const admin = await createAdmin(tx)
       await setBoard(tx, 'spin_wheel', [
         { slot: 1, points: 100, weight: 9 },

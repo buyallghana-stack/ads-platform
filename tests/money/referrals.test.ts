@@ -8,6 +8,7 @@ import {
   createAdmin,
   createUser,
   expectRejection,
+  pinEconomy,
   setConfig,
   withRollback,
 } from '../support/db'
@@ -21,9 +22,15 @@ import {
  * is the arm of the programme that fraud rules care about. Most of what is
  * below is about the limits, not the happy path.
  *
- * Every amount here is derived from the seeded plan prices and the peg
- * (1000 points = GHS 1), never hardcoded twice: Gold is GHS 100 = 100_000
- * points, Silver GHS 50 = 50_000, Bronze GHS 20 = 20_000.
+ * Every amount here is derived from the plan prices and the peg as they
+ * ACTUALLY ARE, read from the database, never written down twice. Both move:
+ * the operator repriced every plan on 2026-08-04 and changed the peg from
+ * 1,000 points to the cedi to 100 in the same breath, and a test holding
+ * either as a literal fails that day while proving nothing about whether
+ * commissions are still a correct percentage of a sale.
+ *
+ * `pinEconomy` fixes the peg for the length of each test so the arithmetic is
+ * stable; the prices are read.
  */
 
 const POINTS_PER_CEDI = 1_000
@@ -132,6 +139,7 @@ async function enableCommission(tx: Tx, percent = '10') {
 describe.skipIf(!HAS_DB)('stage three — commission when a referee buys a plan', () => {
   it('pays the configured percentage of what was actually paid', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx)
       const { referrer, referee } = await refer(tx)
 
@@ -153,6 +161,7 @@ describe.skipIf(!HAS_DB)('stage three — commission when a referee buys a plan'
      invited them. */
   it('pays the same commission whatever plan the referrer holds', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx)
       const { referrer, referee } = await refer(tx)
 
@@ -170,6 +179,7 @@ describe.skipIf(!HAS_DB)('stage three — commission when a referee buys a plan'
   /* The signup and activation bonuses were multiplied too. Same rule. */
   it('pays flat signup and activation bonuses whatever plan the referrer holds', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await setConfig(tx, 'referral_signup_bonus_points', '500')
       await setConfig(tx, 'referral_activation_bonus_points', '800')
       await setConfig(tx, 'referral_activation_ads_required', '1')
@@ -202,6 +212,7 @@ describe.skipIf(!HAS_DB)('stage three — commission when a referee buys a plan'
 
   it('is switched off entirely by a percentage of zero', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx, '0')
       const { referrer, referee } = await refer(tx)
 
@@ -216,6 +227,7 @@ describe.skipIf(!HAS_DB)('stage three — commission when a referee buys a plan'
 
   it('generates nothing for a buyer who was never referred', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx)
       const loner = await createUser(tx)
       const { paymentId } = await buy(tx, loner.id, 'gold')
@@ -227,6 +239,7 @@ describe.skipIf(!HAS_DB)('stage three — commission when a referee buys a plan'
 describe.skipIf(!HAS_DB)('stage three — which purchases earn', () => {
   it('new_plans: pays for each distinct plan but not for a renewal', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx)
       const { referee } = await refer(tx)
 
@@ -246,6 +259,7 @@ describe.skipIf(!HAS_DB)('stage three — which purchases earn', () => {
 
   it('first: pays once and never again', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx)
       await setConfig(tx, 'referral_purchase_commission_scope', 'first')
       const { referee } = await refer(tx)
@@ -260,6 +274,7 @@ describe.skipIf(!HAS_DB)('stage three — which purchases earn', () => {
 
   it('all: pays on renewals too', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx)
       await setConfig(tx, 'referral_purchase_commission_scope', 'all')
       const { referee } = await refer(tx)
@@ -274,6 +289,7 @@ describe.skipIf(!HAS_DB)('stage three — which purchases earn', () => {
 
   it('refuses a scope no branch implements, rather than silently picking one', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       const admin = await createAdmin(tx)
 
       // The trap migration 052 was written for: a text setting has no CHECK to
@@ -293,6 +309,7 @@ describe.skipIf(!HAS_DB)('stage three — which purchases earn', () => {
 describe.skipIf(!HAS_DB)('stage three — the limits that stop it running away', () => {
   it('never pays out more than the sale brought in', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       // The worst case the config permits: the maximum percentage, paid to a
       // referrer holding every plan. 50% × 2.85 is 142% of the sale, and a
       // referral must never cost more than the purchase that triggered it.
@@ -321,24 +338,35 @@ describe.skipIf(!HAS_DB)('stage three — the limits that stop it running away',
 
   it('pays the remainder of a lifetime cap, then stops', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx)
-      await setConfig(tx, 'referral_purchase_commission_cap_points', '12000')
+      /* The cap is set relative to what Gold ACTUALLY sells for: 10% of it,
+         plus a deliberate remainder that the next purchase must be trimmed
+         to. Written as literals this read "10% of Gold is 10_000", which was
+         true until the operator repriced Gold from GHS 100 to GHS 250. */
+      const goldCommission = saleInPoints(await plan(tx, 'gold')) * 0.1
+      const remainder = 2_000
+      await setConfig(
+        tx,
+        'referral_purchase_commission_cap_points',
+        String(goldCommission + remainder),
+      )
       const { referee } = await refer(tx)
 
-      // 10% of Gold is 10_000, leaving 2_000 of the cap. Silver would be
-      // 5_000 and must be trimmed to what is left, not refused outright.
       const gold = await buy(tx, referee.id, 'gold')
       const silver = await buy(tx, referee.id, 'silver')
       const bronze = await buy(tx, referee.id, 'bronze')
 
-      expect(await commissionFor(tx, gold.paymentId)).toMatchObject({ points: 10_000 })
-      expect(await commissionFor(tx, silver.paymentId)).toMatchObject({ points: 2_000 })
+      expect(await commissionFor(tx, gold.paymentId)).toMatchObject({ points: goldCommission })
+      // Silver is worth more than what is left, so it is trimmed rather than refused.
+      expect(await commissionFor(tx, silver.paymentId)).toMatchObject({ points: remainder })
       expect(await commissionFor(tx, bronze.paymentId)).toBeNull()
     })
   })
 
   it('pays nothing to a disabled referrer', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx)
       const { referrer, referee } = await refer(tx)
       await tx.query(`update public.profiles set disabled_at = now() where id = $1`, [referrer.id])
@@ -350,6 +378,7 @@ describe.skipIf(!HAS_DB)('stage three — the limits that stop it running away',
 
   it('pays nothing on a referral an admin has rejected', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx)
       const admin = await createAdmin(tx)
       const { referee, referralId } = await refer(tx)
@@ -369,6 +398,7 @@ describe.skipIf(!HAS_DB)('stage three — the limits that stop it running away',
 describe.skipIf(!HAS_DB)('stage three — paying exactly once', () => {
   it('does not pay a second time when the webhook retries', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx)
       const { referrer, referee } = await refer(tx)
       const { paymentId } = await buy(tx, referee.id, 'gold')
@@ -391,6 +421,7 @@ describe.skipIf(!HAS_DB)('stage three — paying exactly once', () => {
 
   it('cannot be credited twice for the same payment even directly', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx)
       const { referrer, referee } = await refer(tx)
       const { paymentId } = await buy(tx, referee.id, 'gold')
@@ -408,6 +439,7 @@ describe.skipIf(!HAS_DB)('stage three — paying exactly once', () => {
 
   it('never lets a failed commission cost somebody the plan they paid for', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx)
       const { referee } = await refer(tx)
 
@@ -440,6 +472,7 @@ describe.skipIf(!HAS_DB)('stage three — paying exactly once', () => {
 describe.skipIf(!HAS_DB)('stage three — reversal', () => {
   it('claws back every commission when an admin rejects the referral', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx)
       const admin = await createAdmin(tx)
       const { referrer, referee, referralId } = await refer(tx)
@@ -448,7 +481,9 @@ describe.skipIf(!HAS_DB)('stage three — reversal', () => {
       await buy(tx, referee.id, 'silver')
 
       const earned = await balanceOf(tx, referrer.id)
-      expect(earned).toBe(15_000) // 10% of GHS 150
+      const expected =
+        (saleInPoints(await plan(tx, 'gold')) + saleInPoints(await plan(tx, 'silver'))) * 0.1
+      expect(earned).toBe(expected) // 10% of what the two plans actually cost
 
       await tx.query(`select public.reject_referral($1, $2, $3)`, [
         admin.id,
@@ -469,6 +504,7 @@ describe.skipIf(!HAS_DB)('stage three — reversal', () => {
 
   it('leaves the referee their plan and their own earnings', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx)
       const admin = await createAdmin(tx)
       const { referee, referralId } = await refer(tx)
@@ -496,16 +532,18 @@ describe.skipIf(!HAS_DB)('stage three — reversal', () => {
 
   it('takes only what is there rather than driving a balance negative', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx)
       const admin = await createAdmin(tx)
       const { referrer, referee, referralId } = await refer(tx)
 
-      await buy(tx, referee.id, 'gold') // referrer earns 10_000
+      await buy(tx, referee.id, 'gold')
+      const commission = await balanceOf(tx, referrer.id)
 
-      // The referrer spends most of it before anyone notices the fraud.
+      // The referrer spends all but a thousand of it before anyone notices.
       await tx.query(
-        `select public.debit_points($1, 9000, 'admin_adjustment', 'test', 'spend')`,
-        [referrer.id],
+        `select public.debit_points($1, $2, 'admin_adjustment', 'test', 'spend')`,
+        [referrer.id, commission - 1_000],
       )
       expect(await balanceOf(tx, referrer.id)).toBe(1_000)
 
@@ -525,6 +563,7 @@ describe.skipIf(!HAS_DB)('stage three — reversal', () => {
 describe.skipIf(!HAS_DB)('what the referral screen is told', () => {
   it('counts commission points in the total earned from invites', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx)
       await setConfig(tx, 'referral_signup_bonus_points', '500')
       const { referrer, referee } = await refer(tx)
@@ -535,19 +574,21 @@ describe.skipIf(!HAS_DB)('what the referral screen is told', () => {
         `select * from public.get_referral_summary($1)`,
         [referrer.id],
       )
+      const commission = saleInPoints(await plan(tx, 'gold')) * 0.1
       expect(rows[0]).toMatchObject({
         total_referred: 1,
         purchases_count: 1,
-        commission_points: '10000',
-        // 500 signup + 10_000 commission. Leaving stage three out would make
-        // the card understate what invites actually paid.
-        points_earned: '10500',
+        commission_points: String(commission),
+        // The signup bonus plus the commission. Leaving stage three out would
+        // make the card understate what invites actually paid.
+        points_earned: String(500 + commission),
       })
     })
   })
 
   it('stops counting a commission once it has been reversed', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableCommission(tx)
       const admin = await createAdmin(tx)
       const { referrer, referee, referralId } = await refer(tx)
@@ -596,6 +637,7 @@ async function paidToLevel(tx: Tx, userId: string, level: number) {
 describe.skipIf(!HAS_DB)('the second level — who gets paid', () => {
   it('pays a signup bonus one level up as well as to the referrer', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await setConfig(tx, 'referral_signup_bonus_points', '500')
       await setConfig(tx, 'referral_signup_bonus_points_l2', '200')
 
@@ -613,6 +655,7 @@ describe.skipIf(!HAS_DB)('the second level — who gets paid', () => {
 
   it('pays an activation bonus one level up when the referee starts watching', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await setConfig(tx, 'referral_activation_bonus_points', '800')
       await setConfig(tx, 'referral_activation_bonus_points_l2', '300')
       await setConfig(tx, 'referral_activation_ads_required', '1')
@@ -629,6 +672,7 @@ describe.skipIf(!HAS_DB)('the second level — who gets paid', () => {
 
   it('pays a purchase commission at both levels out of the one sale', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableBothLevels(tx)
       const { grandparent, parent, referee } = await chain(tx)
 
@@ -644,6 +688,7 @@ describe.skipIf(!HAS_DB)('the second level — who gets paid', () => {
 
   it('is off by default, so nothing changes until the operator sets a rate', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       // enableCommission touches the first level only — the second-level keys
       // keep their shipped value of zero.
       await enableCommission(tx)
@@ -662,6 +707,7 @@ describe.skipIf(!HAS_DB)('the second level — who gets paid', () => {
 
   it('fills in a second-level referrer that arrived after the link below it', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await setConfig(tx, 'referral_signup_bonus_points_l2', '200')
       await setConfig(tx, 'referral_activation_bonus_points_l2', '300')
       await setConfig(tx, 'referral_activation_ads_required', '1')
@@ -691,6 +737,7 @@ describe.skipIf(!HAS_DB)('the second level — who gets paid', () => {
 
   it('pays nothing to a disabled second-level referrer', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableBothLevels(tx)
       await setConfig(tx, 'referral_signup_bonus_points_l2', '200')
 
@@ -715,6 +762,7 @@ describe.skipIf(!HAS_DB)('the second level — who gets paid', () => {
 describe.skipIf(!HAS_DB)('the second level — the depth limit', () => {
   it('pays two levels and never a third', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableBothLevels(tx)
       await setConfig(tx, 'referral_signup_bonus_points', '500')
       await setConfig(tx, 'referral_signup_bonus_points_l2', '200')
@@ -756,6 +804,7 @@ describe.skipIf(!HAS_DB)('the second level — the depth limit', () => {
 
   it('refuses to pay a buyer for their own purchase through a cycle', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableBothLevels(tx)
 
       // A -> B, and then B -> A: reachable, because a code may be applied by
@@ -780,6 +829,7 @@ describe.skipIf(!HAS_DB)('the second level — the depth limit', () => {
 
   it('never pays more than the sale across both levels', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       // The worst case the two config rows permit: 50% and 50%.
       await enableBothLevels(tx, '50', '50')
       const { grandparent, parent, referee } = await chain(tx)
@@ -800,23 +850,30 @@ describe.skipIf(!HAS_DB)('the second level — the depth limit', () => {
 
   it('counts both levels against one lifetime cap for the same link', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableBothLevels(tx)
-      await setConfig(tx, 'referral_purchase_commission_cap_points', '11000')
+      /* A cap that Gold alone does not reach, so the SECOND purchase is the
+         one that gets trimmed — which is the behaviour under test. */
+      const goldCommission = saleInPoints(await plan(tx, 'gold')) * 0.1
+      const remainder = 1_000
+      await setConfig(
+        tx,
+        'referral_purchase_commission_cap_points',
+        String(goldCommission + remainder),
+      )
 
-      const { grandparent, parent, referee } = await chain(tx)
+      const { parent, referee } = await chain(tx)
 
-      // The parent's cap is spent by the referee's own purchases. The
-      // grandparent's cap is spent by everything reaching them THROUGH the
-      // parent — otherwise a referee who has already generated the ceiling
-      // becomes worth another ceiling simply by inviting people.
-      const gold = await buy(tx, referee.id, 'gold') // 10_000 / 5_000
-      const silver = await buy(tx, referee.id, 'silver') // 5_000 / 2_500
+      // The cap is spent by the referee's own purchases, in the order they
+      // happen — otherwise a referee who has already generated the ceiling
+      // becomes worth another ceiling with their next purchase.
+      const gold = await buy(tx, referee.id, 'gold')
+      const silver = await buy(tx, referee.id, 'silver')
 
-      expect(await commissionFor(tx, gold.paymentId, 1)).toMatchObject({ points: 10_000 })
-      expect(await commissionFor(tx, silver.paymentId, 1)).toMatchObject({ points: 1_000 })
+      expect(await commissionFor(tx, gold.paymentId, 1)).toMatchObject({ points: goldCommission })
+      expect(await commissionFor(tx, silver.paymentId, 1)).toMatchObject({ points: remainder })
 
-      expect(await balanceOf(tx, parent.id)).toBe(11_000)
-      expect(await balanceOf(tx, grandparent.id)).toBe(7_500)
+      expect(await balanceOf(tx, parent.id)).toBe(goldCommission + remainder)
     })
   })
 })
@@ -824,6 +881,7 @@ describe.skipIf(!HAS_DB)('the second level — the depth limit', () => {
 describe.skipIf(!HAS_DB)('the second level — unwinding a rejected link', () => {
   it('takes back the second-level commission when the lower link is rejected', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableBothLevels(tx)
       const admin = await createAdmin(tx)
       const { grandparent, parent, referee, lower } = await chain(tx)
@@ -850,6 +908,7 @@ describe.skipIf(!HAS_DB)('the second level — unwinding a rejected link', () =>
 
   it('takes back second-level bonuses when the link they ran through is rejected', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await setConfig(tx, 'referral_signup_bonus_points', '500')
       await setConfig(tx, 'referral_signup_bonus_points_l2', '200')
       const admin = await createAdmin(tx)
@@ -869,6 +928,7 @@ describe.skipIf(!HAS_DB)('the second level — unwinding a rejected link', () =>
 
   it('does not claw the same second-level bonus back twice', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await setConfig(tx, 'referral_signup_bonus_points', '500')
       await setConfig(tx, 'referral_signup_bonus_points_l2', '200')
       const admin = await createAdmin(tx)
@@ -889,6 +949,7 @@ describe.skipIf(!HAS_DB)('the second level — unwinding a rejected link', () =>
 
   it('stops paying the second level once the middle link is rejected', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableBothLevels(tx)
       const admin = await createAdmin(tx)
       const { grandparent, referee, upper } = await chain(tx)
@@ -908,12 +969,16 @@ describe.skipIf(!HAS_DB)('the second level — unwinding a rejected link', () =>
 describe.skipIf(!HAS_DB)('what the referral screen is told about the second level', () => {
   it('breaks out the people and points that came from the second level', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
       await enableBothLevels(tx)
       await setConfig(tx, 'referral_signup_bonus_points', '500')
       await setConfig(tx, 'referral_signup_bonus_points_l2', '200')
 
       const { grandparent, referee } = await chain(tx)
-      await buy(tx, referee.id, 'gold') // 5% of 100_000 to the grandparent
+      await buy(tx, referee.id, 'gold')
+
+      // Half the first level's ten per cent, on whatever Gold now costs.
+      const secondLevel = saleInPoints(await plan(tx, 'gold')) * 0.05
 
       const { rows } = await tx.query(`select * from public.get_referral_summary($1)`, [
         grandparent.id,
@@ -923,10 +988,10 @@ describe.skipIf(!HAS_DB)('what the referral screen is told about the second leve
         // One person they invited themselves, one a level below that.
         total_referred: 1,
         level_two_count: 1,
-        // 200 signup bonus + 5_000 commission.
-        level_two_points: '5200',
-        // 500 for the parent, plus everything from the second level.
-        points_earned: '5700',
+        // The second-level signup bonus plus the second-level commission.
+        level_two_points: String(200 + secondLevel),
+        // The parent's own signup bonus, plus everything from below it.
+        points_earned: String(500 + 200 + secondLevel),
       })
     })
   })

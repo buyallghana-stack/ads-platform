@@ -1316,7 +1316,9 @@
       "previewPerAd": "Per ad",
       "previewPerDay": "Per day",
       "previewAds": "{count, plural, one {if you watch # a day} other {if you watch all # a day}}",
-      "points": "pts"
+      "points": "pts",
+      "less": "Lower by {step}",
+      "more": "Raise by {step}"
     },
     "checkout": {
       "title": "{plan} plan",
@@ -1350,6 +1352,14 @@
         "body": "Nothing has been charged to your plan. If money left your account, contact support with the date and amount and we will sort it out.",
         "cta": "Back to plans"
       }
+    },
+    "flexible": {
+      "title": "You choose what to pay",
+      "body": "{plan} runs from {from} to {to}. The more you pay, the more each ad is worth to you — and you stay on the same plan.",
+      "same": "The number of ads a day does not change — it is {ads} either way. Only what they are worth to you does.",
+      "adjust": "Set my amount",
+      "continue": "Continue at {amount}",
+      "dontShow": "Don't show this again"
     }
   },
   "support": {

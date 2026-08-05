@@ -7,6 +7,7 @@ import {
   createUser,
   creditPoints,
   expectRejection,
+  pinEconomy,
   givePayoutDetails,
   redemption,
   setConfig,
@@ -48,11 +49,11 @@ async function requestedRedemption(tx: Tx) {
     That is the fee working, not a regression, but a test that inherits a live
     money setting is a test that fails on a day nobody touched the code.
 
-    Anything asserting an AMOUNT must set the keys it depends on. The fee's own
-    behaviour is proved in free-window-minimum-and-fee.test.ts, which sets it
-    deliberately.
+    Anything asserting an AMOUNT must set the keys it depends on — which is
+    what `pinEconomy` at the top of each test does, the fee and the peg
+    together. The fee's own behaviour is proved in
+    free-window-minimum-and-fee.test.ts, which sets it deliberately.
   */
-  await setConfig(tx, 'redemption_fee_percent', '0')
 
   /* `select * from f(...)`, NEVER `select (f(...)).*`.
      Postgres expands the second form by calling the function once PER OUTPUT
@@ -90,6 +91,7 @@ describe('the harness itself', () => {
 describe.skipIf(!HAS_DB)('requesting a payout', () => {
   it('debits the points immediately, not at approval', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { user, id } = await requestedRedemption(tx)
 
       // The whole reason the debit happens here: a user with 20,000 points
@@ -105,6 +107,7 @@ describe.skipIf(!HAS_DB)('requesting a payout', () => {
 
   it('writes exactly one debit to the ledger, and the ledger agrees with the balance', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { user } = await requestedRedemption(tx)
 
       const { rows } = await tx.query<{ entry_type: string; amount: string; balance_after: string }>(
@@ -127,6 +130,7 @@ describe.skipIf(!HAS_DB)('requesting a payout', () => {
 
   it('refuses a second request the balance cannot cover', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { user } = await requestedRedemption(tx)
 
       // 8,000 left, another 12,000 asked for. If this ever succeeds the
@@ -144,6 +148,7 @@ describe.skipIf(!HAS_DB)('requesting a payout', () => {
 
   it('refuses an amount below the platform minimum', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const user = await createUser(tx)
       await givePayoutDetails(tx, user.id)
       await creditPoints(tx, user.id, POINTS_EARNED)
@@ -162,6 +167,7 @@ describe.skipIf(!HAS_DB)('requesting a payout', () => {
 
   it('refuses a disabled account, without taking its points', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const user = await createUser(tx)
       await givePayoutDetails(tx, user.id)
       await creditPoints(tx, user.id, POINTS_EARNED)
@@ -179,6 +185,7 @@ describe.skipIf(!HAS_DB)('requesting a payout', () => {
 
   it('honours the cool-off after payout details change', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const user = await createUser(tx)
       await givePayoutDetails(tx, user.id)
       await creditPoints(tx, user.id, POINTS_EARNED)
@@ -204,6 +211,7 @@ describe.skipIf(!HAS_DB)('requesting a payout', () => {
 describe.skipIf(!HAS_DB)('the holding period', () => {
   it('will not approve a request still inside it', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { admin, id } = await requestedRedemption(tx)
 
       const message = await expectRejection(tx, () =>
@@ -216,6 +224,7 @@ describe.skipIf(!HAS_DB)('the holding period', () => {
 
   it('releases a matured request into the review queue', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { id } = await requestedRedemption(tx)
       await matureTheHold(tx, id)
 
@@ -225,6 +234,7 @@ describe.skipIf(!HAS_DB)('the holding period', () => {
 
   it('records an early approval as early, with its reason and an alert', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { admin, id } = await requestedRedemption(tx)
 
       await tx.query(
@@ -251,6 +261,7 @@ describe.skipIf(!HAS_DB)('the holding period', () => {
 
   it('refuses an early approval with no reason', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { admin, id } = await requestedRedemption(tx)
 
       const message = await expectRejection(tx, () =>
@@ -267,6 +278,7 @@ describe.skipIf(!HAS_DB)('the holding period', () => {
 describe.skipIf(!HAS_DB)('an operator holding a request', () => {
   it('holds it, and the maturity sweep does not undo that', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { admin, id } = await requestedRedemption(tx)
       await matureTheHold(tx, id)
 
@@ -292,6 +304,7 @@ describe.skipIf(!HAS_DB)('an operator holding a request', () => {
 
   it('requires a reason', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { admin, id } = await requestedRedemption(tx)
       await matureTheHold(tx, id)
 
@@ -304,6 +317,7 @@ describe.skipIf(!HAS_DB)('an operator holding a request', () => {
 
   it('returns the request by itself when a timed hold is configured', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { admin, id } = await requestedRedemption(tx)
       await matureTheHold(tx, id)
       await setConfig(tx, 'admin_hold_auto_return_hours', '24')
@@ -328,6 +342,7 @@ describe.skipIf(!HAS_DB)('an operator holding a request', () => {
 describe.skipIf(!HAS_DB)('refunds', () => {
   it('gives every point back when a request is declined', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { user, admin, id } = await requestedRedemption(tx)
       await matureTheHold(tx, id)
 
@@ -344,6 +359,7 @@ describe.skipIf(!HAS_DB)('refunds', () => {
 
   it('gives every point back when the user cancels during the hold', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { user, id } = await requestedRedemption(tx)
 
       await tx.query(`select public.cancel_redemption($1, $2)`, [user.id, id])
@@ -355,6 +371,7 @@ describe.skipIf(!HAS_DB)('refunds', () => {
 
   it('gives every point back when a disbursement fails', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { user, admin, id } = await requestedRedemption(tx)
       await matureTheHold(tx, id)
       await tx.query(`select public.admin_decide_redemption($1, $2, 'approve')`, [admin.id, id])
@@ -372,6 +389,7 @@ describe.skipIf(!HAS_DB)('refunds', () => {
 
   it('cannot be made to refund twice', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { user, admin, id } = await requestedRedemption(tx)
       await matureTheHold(tx, id)
       await tx.query(`select public.admin_decide_redemption($1, $2, 'decline', $3)`, [
@@ -395,6 +413,7 @@ describe.skipIf(!HAS_DB)('refunds', () => {
 
   it('still works while earning is paused platform-wide', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { user, admin, id } = await requestedRedemption(tx)
       await matureTheHold(tx, id)
       await setConfig(tx, 'earning_paused_globally', 'true')
@@ -416,6 +435,7 @@ describe.skipIf(!HAS_DB)('refunds', () => {
 
   it('lets a user cancel while earning is paused platform-wide', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { user, id } = await requestedRedemption(tx)
       await setConfig(tx, 'earning_paused_globally', 'true')
 
@@ -428,6 +448,7 @@ describe.skipIf(!HAS_DB)('refunds', () => {
 
   it('reaches a disabled account — disabling must not confiscate points', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { user, admin, id } = await requestedRedemption(tx)
       await matureTheHold(tx, id)
       await tx.query(`update public.profiles set disabled_at = now() where id = $1`, [user.id])
@@ -446,6 +467,7 @@ describe.skipIf(!HAS_DB)('refunds', () => {
 describe.skipIf(!HAS_DB)('the licence kill switch', () => {
   it('refuses to mark anything paid while payouts are disabled', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { admin, id } = await requestedRedemption(tx)
       await matureTheHold(tx, id)
       await tx.query(`select public.admin_decide_redemption($1, $2, 'approve')`, [admin.id, id])
@@ -466,6 +488,7 @@ describe.skipIf(!HAS_DB)('the licence kill switch', () => {
 
   it('marks it paid, with its reference, once payouts are enabled', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { admin, id } = await requestedRedemption(tx)
       await matureTheHold(tx, id)
       await tx.query(`select public.admin_decide_redemption($1, $2, 'approve')`, [admin.id, id])
@@ -486,6 +509,7 @@ describe.skipIf(!HAS_DB)('the licence kill switch', () => {
 
   it('will not pay a request that was never approved', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { admin, id } = await requestedRedemption(tx)
       await matureTheHold(tx, id)
       await setConfig(tx, 'payouts_enabled', 'true')
@@ -530,6 +554,7 @@ describe.skipIf(!HAS_DB)('a paid payout is the end of the line', () => {
   */
   it('refuses the removed dispute verb outright', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { admin, id } = await paidRedemption(tx)
 
       const message = await expectRejection(tx, () =>
@@ -546,6 +571,7 @@ describe.skipIf(!HAS_DB)('a paid payout is the end of the line', () => {
 
   it('cannot be put back into any other state', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { user, admin, id } = await paidRedemption(tx)
       const before = await balanceOf(tx, user.id)
 
@@ -567,6 +593,7 @@ describe.skipIf(!HAS_DB)('a paid payout is the end of the line', () => {
 
   it('cannot be written into the disputed state directly', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { id } = await paidRedemption(tx)
 
       // The enum label still exists — Postgres cannot drop a value from a
@@ -583,6 +610,7 @@ describe.skipIf(!HAS_DB)('a paid payout is the end of the line', () => {
 describe.skipIf(!HAS_DB)('who is allowed to decide', () => {
   it('refuses a decision from an account that is not an administrator', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { user, id } = await requestedRedemption(tx)
       await matureTheHold(tx, id)
 
@@ -598,6 +626,7 @@ describe.skipIf(!HAS_DB)('who is allowed to decide', () => {
 
   it('refuses an action it does not recognise', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { admin, id } = await requestedRedemption(tx)
 
       const message = await expectRejection(tx, () =>
@@ -614,6 +643,7 @@ describe.skipIf(!HAS_DB)('who is allowed to decide', () => {
 describe.skipIf(!HAS_DB)('the admin queue listing', () => {
   it('reports the destination whole, the reuse count, and what was paid before', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const shared = '0244555666'
 
       const first = await createUser(tx, { name: 'First Earner' })
@@ -664,6 +694,7 @@ describe.skipIf(!HAS_DB)('the admin queue listing', () => {
 
   it('counts a user’s previous payouts and their value', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { user, admin, id } = await requestedRedemption(tx)
       await matureTheHold(tx, id)
       await tx.query(`select public.admin_decide_redemption($1, $2, 'approve')`, [admin.id, id])
@@ -693,6 +724,7 @@ describe.skipIf(!HAS_DB)('the admin queue listing', () => {
 
   it('refuses a caller who is not an administrator', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const user = await createUser(tx)
 
       // Simulates a signed-in browser token: is_admin() is asked of the

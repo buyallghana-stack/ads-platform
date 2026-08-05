@@ -1,14 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
-import { Gem, Zap } from 'lucide-react'
+import { Gem, Minus, Plus, Zap } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import type { Plan } from '@/lib/subscriptions/data'
 import { multiplierForAmount, pointsPerAd } from '@/lib/subscriptions/pricing'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/cn'
+
+/** Where "don't show me this again" is remembered. */
+const NOTICE_KEY = 'sideperks.flexiblePricingNotice'
 
 /**
  * One purchasable plan.
@@ -62,8 +66,80 @@ export function PlanCard({
     somebody makes rather than one made for them.
   */
   const [amountMinor, setAmountMinor] = useState(plan.bandMinMinor)
+  /* Whether they have actually chosen, as opposed to accepting the floor
+     because it was already there. It decides whether "Get Bronze" stops to
+     mention that the price is theirs to set. */
+  const [touched, setTouched] = useState(false)
+  const [noticeOpen, setNoticeOpen] = useState(false)
+  const [suppressNotice, setSuppressNotice] = useState(false)
+  const sliderRef = useRef<HTMLInputElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
+
+  /*
+    A modal has to be reachable and escapable from the keyboard. Opening it
+    moves focus into it — otherwise the next Tab carries on through the card
+    BEHIND the dimmed screen — and Escape closes it, which is what every
+    dialog on the platform does and the only thing somebody will try.
+    Escape means "not now": it takes them back to the card without buying,
+    and without recording a preference they did not confirm.
+  */
+  useEffect(() => {
+    if (!noticeOpen) return
+    dialogRef.current?.focus()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setNoticeOpen(false)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [noticeOpen])
+
   const flexible = plan.bandMaxMinor > plan.bandMinMinor
   const topOfBand = Math.floor(plan.bandMaxMinor / 100) * 100
+
+  /** One tap of the −/+ pair. A cedi at a time would need seventy-four taps to
+   *  cross Bronze; five crosses it in fifteen and still lands on every price
+   *  the slider can reach. */
+  const STEP_MINOR = 500
+
+  const nudge = (by: number) => {
+    setTouched(true)
+    setAmountMinor((current) =>
+      Math.min(Math.max(current + by, plan.bandMinMinor), topOfBand),
+    )
+  }
+
+  /*
+    Read at the moment of the click rather than into state on mount: reading
+    localStorage during render is a hydration mismatch, and an effect to work
+    around that would run on every card on the screen for a value only one of
+    them will ever need. Private-mode Safari throws on access, so the whole
+    thing is a try/catch and the fallback is to show the notice — being told
+    twice is better than never being told.
+  */
+  const noticeDismissed = () => {
+    try {
+      return window.localStorage.getItem(NOTICE_KEY) === 'dismissed'
+    } catch {
+      return false
+    }
+  }
+
+  const rememberIfAsked = () => {
+    if (!suppressNotice) return
+    try {
+      window.localStorage.setItem(NOTICE_KEY, 'dismissed')
+    } catch {
+      // Nothing to do: they simply see it again next time.
+    }
+  }
+
+  const choose = () => {
+    if (flexible && !touched && !noticeDismissed()) {
+      setNoticeOpen(true)
+      return
+    }
+    onChoose(amountMinor)
+  }
 
   const multiplier = multiplierForAmount(plan, amountMinor)
   const perAdPoints = pointsPerAd(baseAdPoints, multiplier)
@@ -85,10 +161,11 @@ export function PlanCard({
   })
 
   /*
-    Expressed as percentages with a worked example rather than "x1.10".
-    A multiplier is an abstraction; "+10% — a 50-point ad pays 55" is the same
-    fact in a form someone can check against the ad they just watched.
-    EXAMPLE_AD_POINTS sits in the middle of the seeded ads (35–80 points).
+    The benefits never state the multiplier. It is an abstraction, and since
+    2026-08-04 it is not even a fixed property of the plan — it moves with the
+    amount. What the list carries instead is the worked figure for the amount
+    currently chosen ("150 pts an ad"), which is the same fact in a form
+    somebody can check against the ad they just watched.
   */
   const extraAds = plan.dailyAdCap - previousDailyAdCap
 
@@ -142,8 +219,14 @@ export function PlanCard({
           {plan.name}
         </h3>
         <div className="text-right">
+          {/* The RANGE, not a single figure: the price is the thing the
+              buyer chooses, and a card headed "GHS 65" reads as a fixed one.
+              What they have actually chosen sits in the panel below, where
+              they are choosing it. */}
           <p className="text-[1.125rem] font-semibold tracking-[-0.02em] text-ink-900">
-            {flexible ? money(amountMinor / 100, 0) : price}
+            {flexible
+              ? `${money(plan.bandMinMinor / 100, 0)} – ${money(topOfBand / 100, 0).replace(/^[^\d]+/, '')}`
+              : price}
           </p>
           <p className="text-[0.6875rem] text-ink-500">
             {t('card.days', { days: plan.periodDays })}
@@ -171,17 +254,21 @@ export function PlanCard({
         ))}
       </ul>
 
-      {/* EVERY plan gets the primary button, not just the popular one.
-          Operator, 2026-07-31: a blue button on one card and grey ones beside
-          it read as "this is the only plan you can actually buy" — which is
-          the opposite of the point, since plans stack and any of them can be
-          added. The "Popular" tag already tells that story, and it is the only
-          thing that should. */}
       {/* ---- Choose your amount ------------------------------------------
           Only where there is genuinely a range: the top plan is a single
           price, and a slider that cannot move is a control that lies. */}
       {!held && (
-        <div className="mt-4 rounded-(--radius-card) border border-ink-200 bg-ink-50/60 p-3.5">
+        <div
+          className={cn(
+            'mt-4 rounded-(--radius-card) p-3.5',
+            /* Brand-bordered where the price is actually chosen, so the
+               control reads as the point of the card rather than as small
+               print under it. A plain grey panel was being scrolled past. */
+            flexible
+              ? 'border-2 border-brand-600/40 bg-brand-50/40 shadow-[0_0_0_3px] shadow-brand-600/5'
+              : 'border border-ink-200 bg-ink-50/60',
+          )}
+        >
           {flexible && (
           <div className="flex items-baseline justify-between gap-3">
             <label htmlFor={`amount-${plan.id}`} className="text-[0.75rem] font-medium text-ink-600">
@@ -194,22 +281,62 @@ export function PlanCard({
           )}
 
           {flexible && (<>
-          <input
-            id={`amount-${plan.id}`}
-            type="range"
-            min={plan.bandMinMinor}
-            /* Whole cedis, floored. The band really runs to one pesewa under
-               the next plan (GHS 139.99), and a slider that ends there both
-               labels itself "GHS 140" — the next plan's price — and leaves a
-               step the thumb can never land on. */
-            max={topOfBand}
-            /* Whole cedis. Pesewa-level steps would make the slider fussy on a
-               phone and change the answer by fractions nobody can see. */
-            step={100}
-            value={amountMinor}
-            onChange={(e) => setAmountMinor(Number(e.target.value))}
-            className="mt-2.5 w-full accent-brand-600"
-          />
+          <div className="mt-2.5 flex items-center gap-2">
+            {/* The buttons are not decoration. A range input is awkward with a
+                thumb on a small screen, harder with a tremor, and unusable
+                with some assistive setups — and this control is now the price
+                of the product, so it cannot have only one way in. */}
+            <button
+              type="button"
+              onClick={() => nudge(-STEP_MINOR)}
+              disabled={amountMinor <= plan.bandMinMinor}
+              aria-label={t('card.less', { step: money(STEP_MINOR / 100, 0) })}
+              className={cn(
+                'grid size-9 shrink-0 place-items-center rounded-full border transition-colors',
+                'border-brand-600/30 bg-surface text-brand-700',
+                'hover:border-brand-600 hover:bg-brand-50',
+                'disabled:border-ink-200 disabled:text-ink-300 disabled:hover:bg-surface',
+                'focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 focus-visible:outline-none',
+              )}
+            >
+              <Minus aria-hidden className="size-4" />
+            </button>
+
+            <input
+              ref={sliderRef}
+              id={`amount-${plan.id}`}
+              type="range"
+              min={plan.bandMinMinor}
+              /* Whole cedis, floored. The band really runs to one pesewa under
+                 the next plan (GHS 139.99), and a slider that ends there both
+                 labels itself "GHS 140" — the next plan's price — and leaves a
+                 step the thumb can never land on. */
+              max={topOfBand}
+              step={100}
+              value={amountMinor}
+              onChange={(e) => {
+                setTouched(true)
+                setAmountMinor(Number(e.target.value))
+              }}
+              className="min-w-0 flex-1 accent-brand-600"
+            />
+
+            <button
+              type="button"
+              onClick={() => nudge(STEP_MINOR)}
+              disabled={amountMinor >= topOfBand}
+              aria-label={t('card.more', { step: money(STEP_MINOR / 100, 0) })}
+              className={cn(
+                'grid size-9 shrink-0 place-items-center rounded-full border transition-colors',
+                'border-brand-600/30 bg-surface text-brand-700',
+                'hover:border-brand-600 hover:bg-brand-50',
+                'disabled:border-ink-200 disabled:text-ink-300 disabled:hover:bg-surface',
+                'focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 focus-visible:outline-none',
+              )}
+            >
+              <Plus aria-hidden className="size-4" />
+            </button>
+          </div>
 
           <div className="flex justify-between text-[0.6875rem] text-ink-400 tabular-nums">
             <span>{money(plan.bandMinMinor / 100, 0)}</span>
@@ -265,9 +392,100 @@ export function PlanCard({
           })}
         </p>
       ) : (
-        <Button variant="primary" fullWidth className="mt-4" onClick={() => onChoose(amountMinor)}>
+        /* EVERY plan gets the primary button, not just the popular one.
+           Operator, 2026-07-31: a blue button on one card and grey ones beside
+           it read as "this is the only plan you can actually buy" — which is
+           the opposite of the point, since plans stack and any of them can be
+           added. The "Popular" tag already tells that story, and it is the
+           only thing that should. */
+        <Button variant="primary" fullWidth className="mt-4" onClick={choose}>
           {t('card.choose', { plan: plan.name })}
         </Button>
+      )}
+
+      {/* ---- "You can choose what to pay" --------------------------------
+          Shown when somebody reaches for the button without having moved the
+          amount at all — because the floor is pre-selected, and a price that
+          was already sitting there does not read as a choice. It is not shown
+          again once they have adjusted anything, and never again at all if
+          they ask. */}
+      {/*
+        PORTALLED TO THE BODY, and it has to be. This card sits inside the
+        plans grid, which carries `animate-rise` — and an ancestor with a
+        transform becomes the containing block for `position: fixed`, so a
+        "full-screen" overlay rendered here would be centred inside the grid
+        instead of the viewport: a dimmed screen with the dialog somewhere
+        below the fold. The same trap once left the admin nav drawer 56px
+        tall. Playwright still finds it either way, which is why the
+        verification script now measures where it actually lands.
+      */}
+      {noticeOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4">
+          <div
+            ref={dialogRef}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby={`flexible-${plan.id}`}
+            tabIndex={-1}
+            className="w-full max-w-[26rem] rounded-(--radius-panel) bg-surface p-5 shadow-[0_16px_48px_-12px_rgb(15_23_42/0.5)] focus:outline-none"
+          >
+            <h2
+              id={`flexible-${plan.id}`}
+              className="text-[1.0625rem] font-semibold text-ink-900"
+            >
+              {t('flexible.title')}
+            </h2>
+            <p className="mt-1.5 text-[0.875rem] leading-relaxed text-ink-500">
+              {t('flexible.body', {
+                plan: plan.name,
+                from: money(plan.bandMinMinor / 100, 0),
+                to: money(topOfBand / 100, 0),
+              })}
+            </p>
+            <p className="mt-2 text-[0.875rem] leading-relaxed text-ink-500">
+              {t('flexible.same', { ads: plan.dailyAdCap })}
+            </p>
+
+            <label className="mt-4 flex items-start gap-2.5 text-[0.8125rem] text-ink-600">
+              <input
+                type="checkbox"
+                checked={suppressNotice}
+                onChange={(e) => setSuppressNotice(e.target.checked)}
+                className="mt-0.5 size-4 shrink-0 accent-brand-600"
+              />
+              {t('flexible.dontShow')}
+            </label>
+
+            <div className="mt-4 flex flex-col gap-2">
+              <Button
+                fullWidth
+                onClick={() => {
+                  rememberIfAsked()
+                  setNoticeOpen(false)
+                  /* Straight to the control, and focused: "set my own amount"
+                     that leaves somebody hunting for the slider they could not
+                     see in the first place has helped nobody. */
+                  sliderRef.current?.focus()
+                  sliderRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+                }}
+              >
+                {t('flexible.adjust')}
+              </Button>
+              <Button
+                variant="secondary"
+                fullWidth
+                onClick={() => {
+                  rememberIfAsked()
+                  setNoticeOpen(false)
+                  onChoose(amountMinor)
+                }}
+              >
+                {t('flexible.continue', { amount: money(amountMinor / 100, 0) })}
+              </Button>
+            </div>
+          </div>
+        </div>,
+        document.body,
       )}
     </div>
   )

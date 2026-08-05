@@ -9,6 +9,7 @@ import {
   createAdmin,
   createUser,
   expectRejection,
+  pinEconomy,
   setConfig,
   withRollback,
 } from '../support/db'
@@ -93,6 +94,7 @@ async function members(tx: Tx, userId: string) {
 describe.skipIf(!HAS_DB)('the team — who is on it', () => {
   it('separates the people you invited from the people they invited', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { top, first, second } = await chain(tx)
 
       const rows = await members(tx, top.id)
@@ -108,6 +110,7 @@ describe.skipIf(!HAS_DB)('the team — who is on it', () => {
 
   it('stops at two levels, exactly as the payments do', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { top, second } = await chain(tx)
       const third = await createUser(tx, { name: 'Third Level' })
       await applyCode(tx, second.id, third.id)
@@ -122,6 +125,7 @@ describe.skipIf(!HAS_DB)('the team — who is on it', () => {
 
   it('never puts somebody on their own team through a cycle', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       // A refers B, then B refers A — reachable, because a code may be applied
       // by anybody who has not started earning. Without the guard A's own
       // balance would be reported as A's team's.
@@ -138,6 +142,7 @@ describe.skipIf(!HAS_DB)('the team — who is on it', () => {
 
   it('drops somebody an admin has rejected, and the level below them', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const admin = await createAdmin(tx)
       const { top, first } = await chain(tx)
 
@@ -157,22 +162,33 @@ describe.skipIf(!HAS_DB)('the team — who is on it', () => {
 describe.skipIf(!HAS_DB)('the team — the figures', () => {
   it('reports plans and their value in cedis, per level', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { top, first, second } = await chain(tx)
 
-      await buy(tx, first.id, 'platinum') // GHS 200
-      await buy(tx, first.id, 'gold') //     GHS 100
-      await buy(tx, second.id, 'silver') //  GHS 50
+      await buy(tx, first.id, 'platinum')
+      await buy(tx, first.id, 'gold')
+      await buy(tx, second.id, 'silver')
+
+      /* Read from the plans rather than written beside them as comments. The
+         operator repriced the whole ladder on 2026-08-04, and the figure this
+         screen shows a referrer is the sum of what their team actually paid —
+         which is the thing worth asserting, not last month's prices. */
+      const { rows: prices } = await tx.query<{ slug: string; ghs: string }>(
+        `select slug, (price_minor / 100.0)::text as ghs from public.tiers`,
+      )
+      const price = (slug: string) => Number(prices.find((r) => r.slug === slug)!.ghs)
 
       const totals = await summary(tx, top.id)
       expect(Number(totals[1].plans_bought)).toBe(2)
-      expect(Number(totals[1].plans_value)).toBe(300)
+      expect(Number(totals[1].plans_value)).toBe(price('platinum') + price('gold'))
       expect(Number(totals[2].plans_bought)).toBe(1)
-      expect(Number(totals[2].plans_value)).toBe(50)
+      expect(Number(totals[2].plans_value)).toBe(price('silver'))
     })
   })
 
   it('converts what is left to cedis at the peg, never showing points', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { top, first } = await chain(tx)
       await tx.query(`select public.credit_points($1, 8_400, 'admin_adjustment')`, [first.id])
 
@@ -186,6 +202,7 @@ describe.skipIf(!HAS_DB)('the team — the figures', () => {
 
   it('counts money that left, not money that was asked for', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { top, first } = await chain(tx)
       await tx.query(`select public.credit_points($1, 60_000, 'admin_adjustment')`, [first.id])
 
@@ -203,6 +220,7 @@ describe.skipIf(!HAS_DB)('the team — the figures', () => {
 
   it('names the highest plan and counts the rest — "Platinum + 2"', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { top, first } = await chain(tx)
       for (const slug of ['bronze', 'platinum', 'gold']) await buy(tx, first.id, slug)
 
@@ -214,6 +232,7 @@ describe.skipIf(!HAS_DB)('the team — the figures', () => {
 
   it('shows the default tier for somebody who holds no plan', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { top } = await chain(tx)
       const row = (await members(tx, top.id))[0]!
 
@@ -225,6 +244,7 @@ describe.skipIf(!HAS_DB)('the team — the figures', () => {
 
   it('returns both levels even when the team is empty', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const loner = await createUser(tx)
       const totals = await summary(tx, loner.id)
 
@@ -240,6 +260,7 @@ describe.skipIf(!HAS_DB)('the team — the figures', () => {
 describe.skipIf(!HAS_DB)('the team — where the disclosure stops', () => {
   it('refuses to show anybody else their team', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { top, first } = await chain(tx)
       const nosy: TestUser = await createUser(tx, { name: 'Nosy' })
 
@@ -259,6 +280,7 @@ describe.skipIf(!HAS_DB)('the team — where the disclosure stops', () => {
 
   it('lets an admin look, because somebody has to answer a complaint', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const admin = await createAdmin(tx)
       const { top } = await chain(tx)
 
@@ -274,6 +296,7 @@ describe.skipIf(!HAS_DB)('the team — where the disclosure stops', () => {
 
   it('hands out the phone number, which is the point and the risk', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { top, first } = await chain(tx)
       await tx.query(`update public.profiles set phone = '0551234567' where id = $1`, [first.id])
 
@@ -284,6 +307,7 @@ describe.skipIf(!HAS_DB)('the team — where the disclosure stops', () => {
 
   it('can retract the phone number without a deploy', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { top, first } = await chain(tx)
       await tx.query(`update public.profiles set phone = '0551234567' where id = $1`, [first.id])
 
@@ -299,6 +323,7 @@ describe.skipIf(!HAS_DB)('the team — where the disclosure stops', () => {
 
   it('never returns the things that were never asked for', async () => {
     await withRollback(async (tx) => {
+      await pinEconomy(tx)
       const { top } = await chain(tx)
       const row = (await members(tx, top.id))[0]!
       const columns = Object.keys(row)

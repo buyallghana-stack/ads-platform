@@ -1316,7 +1316,9 @@
       "previewPerAd": "Par publicité",
       "previewPerDay": "Par jour",
       "previewAds": "{count, plural, one {si vous en regardez #} other {si vous en regardez #}}",
-      "points": "pts"
+      "points": "pts",
+      "less": "Réduire de {step}",
+      "more": "Augmenter de {step}"
     },
     "checkout": {
       "title": "Forfait {plan}",
@@ -1350,6 +1352,14 @@
         "body": "Rien n'a été imputé à votre forfait. Si votre compte a été débité, contactez le support avec la date et le montant et nous régulariserons.",
         "cta": "Retour aux forfaits"
       }
+    },
+    "flexible": {
+      "title": "Vous choisissez le prix",
+      "body": "{plan} va de {from} à {to}. Plus vous payez, plus chaque publicité vaut de points — et vous restez sur la même formule.",
+      "same": "Le nombre de publicités par jour ne change pas : {ads} dans tous les cas. Seule leur valeur change.",
+      "adjust": "Choisir mon montant",
+      "continue": "Continuer à {amount}",
+      "dontShow": "Ne plus afficher ce message"
     }
   },
   "support": {

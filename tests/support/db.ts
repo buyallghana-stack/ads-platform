@@ -172,6 +172,54 @@ export async function givePayoutDetails(
   )
 }
 
+/**
+ * Pins the parts of the ECONOMY a test depends on.
+ *
+ * These tests run against the shared project, where the operator changes plan
+ * prices, daily caps and the value of a point whenever the business needs it
+ * to change — and every one of those is an input to what a test asserts. A
+ * test that inherits them passes until the day somebody moves a slider in the
+ * admin, then fails with no code change behind it. It has happened twice: a
+ * withdrawal fee set to 10% turned "GHS 12 of payout history" into GHS 10.80,
+ * and the free plan dropping to one ad a day turned a second watch into
+ * `daily_cap_reached`.
+ *
+ * So: anything asserting an amount, or watching more than one ad, says so here
+ * first. Everything is inside the test's transaction and disappears with it.
+ */
+export async function pinEconomy(
+  tx: Tx,
+  options: {
+    /** Ads a day allowed on the FREE plan — what a fixture user is on. */
+    freeAdsPerDay?: number
+    /** Points to one cedi. */
+    pointsPerCedi?: number
+    /** Withdrawal fee, as a percentage. */
+    feePercent?: number
+    /** Seconds a user must wait between ads. Zero unless a test is about it. */
+    cooldownSeconds?: number
+    /** Game plays a week on the FREE plan. Zero in production since the
+     *  pricing restructure, which is not a useful default for testing games. */
+    freeGamePlays?: number
+  } = {},
+): Promise<void> {
+  const {
+    freeAdsPerDay = 50,
+    pointsPerCedi = 1000,
+    feePercent = 0,
+    cooldownSeconds = 0,
+    freeGamePlays = 5,
+  } = options
+
+  await tx.query(
+    `update public.tiers set daily_ad_cap = $1, weekly_game_plays = $2 where is_default`,
+    [freeAdsPerDay, freeGamePlays],
+  )
+  await setConfig(tx, 'points_per_currency_unit', String(pointsPerCedi))
+  await setConfig(tx, 'redemption_fee_percent', String(feePercent))
+  await setConfig(tx, 'ad_cooldown_seconds_default', String(cooldownSeconds))
+}
+
 /** Sets a config value for the length of the transaction only. */
 export async function setConfig(tx: Tx, key: string, value: string): Promise<void> {
   await tx.query(`update public.app_config set value = $2 where key = $1`, [key, value])
