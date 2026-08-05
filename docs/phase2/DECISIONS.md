@@ -233,8 +233,26 @@ the one place Phase 2 is not purely additive.
 
 ---
 
-## 8. Still unanswered
+## 8. Closed without an answer
 
-- **A1** — catalogue size at launch and at six months. Needed before bandwidth is budgeted.
-- **The affiliate green** — the exact pair, light and dark.
-- **Design references** — see the UI section of the README in this folder.
+**A1 — catalogue size at launch and at six months.** Carried on the open list for a while, and
+withdrawn 2026-08-06 as a question that decides nothing.
+
+It was being kept for three reasons, none of which survived checking:
+
+- *Catalogue layout* — already decided by call 5 of DESIGN.md. Search is built in but does not
+  lead, so the shelf handles ten products and does not have to be rebuilt for two hundred.
+- *Query strategy* — the reads paginate from the first commit either way. Fetching a whole
+  catalogue because it happens to be small today is exactly the thing that breaks quietly later.
+- *Bandwidth* — plainly wrong. Bandwidth follows video minutes streamed, not the length of a list.
+
+**And A2 already answers it.** Vendors are offline: the Owner enlists each one, uploads their
+content and creates the product, with no vendor login and no self-serve. A catalogue where every
+entry passes through one person by hand cannot be thousands of items. The closed-network decision
+structurally caps the catalogue at the size the shelf assumes, so asking for the number was asking
+the Owner to restate a decision already made.
+
+**The affiliate green** was likewise resolved rather than answered — jade, see DESIGN.md call 2.
+The operator may still override the exact pair, but nothing is waiting on it.
+
+Nothing is currently blocked on an unanswered question.

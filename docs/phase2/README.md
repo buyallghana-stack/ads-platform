@@ -37,8 +37,10 @@ decision can overturn one deliberately.
 The affiliate green (F38) is resolved there: **jade** is an identity colour for Market mode and
 never a status colour, so `success` green keeps meaning *money in* in both businesses.
 
-Two answers are still outstanding and neither blocks building:
+**Nothing is blocked on an unanswered question.** A1 (catalogue size) was closed on 2026-08-06 as
+a question that decides nothing — the shelf handles either scale, the reads paginate regardless,
+and A2 already caps the catalogue by making the Owner create every product by hand. See §8 of
+[DECISIONS.md](DECISIONS.md).
 
-- **A1** — how many products at launch, and at six months. Needed before bandwidth is budgeted,
-  and it decides whether the shop ever needs search-first chrome.
-- Whether the operator wants to override jade with a specific pair.
+The only thing still open is optional: whether the operator wants to override jade with a
+specific pair. The build does not wait on it.
