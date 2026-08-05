@@ -176,7 +176,7 @@ describe.skipIf(!HAS_DB)('activation', () => {
     })
   })
 
-  it('counts a lesson only when watched AND the quiz is passed', async () => {
+  it('counts a lesson only when watched AND its quiz is passed', async () => {
     await withRollback(async (tx) => {
       const by = await admin(tx)
       const user = await createUser(tx, { name: 'Skipper' })
@@ -187,17 +187,44 @@ describe.skipIf(!HAS_DB)('activation', () => {
       })
       await buy(tx, user.id, productId)
 
-      // Watched to the end, quiz not passed: B10 requires both.
-      await tx.query(`select public.record_lesson_progress($1, $2, 600, 100, false)`, [
+      /* B10 wants BOTH, and since migration 119 that means a real quiz rather
+         than a boolean the caller asserts. The old shape of this test passed
+         `quiz_passed: false` to a lesson with no quiz attached — which under
+         the old rule made the lesson permanently uncompletable unless a caller
+         passed `true`, i.e. unless something lied. */
+      const { rows: q } = await tx.query<{ id: string }>(
+        `insert into public.quizzes (lesson_id, title, at_seconds, pass_percent)
+         values ($1, 'Check', 30, 70) returning id`,
+        [lessonIds[0]!],
+      )
+      const { rows: question } = await tx.query<{ id: string }>(
+        `insert into public.quiz_questions (quiz_id, position, prompt)
+         values ($1, 0, 'Did you watch?') returning id`,
+        [q[0]!.id],
+      )
+      const { rows: right } = await tx.query<{ id: string }>(
+        `insert into public.quiz_options (question_id, position, body, is_correct)
+         values ($1, 0, 'Yes', true) returning id`,
+        [question[0]!.id],
+      )
+      await tx.query(
+        `insert into public.quiz_options (question_id, position, body, is_correct)
+         values ($1, 1, 'No', false)`,
+        [question[0]!.id],
+      )
+
+      // Watched to the end, questions untouched.
+      await tx.query(`select public.record_lesson_progress($1, $2, 600, 100, null)`, [
         user.id,
         lessonIds[0]!,
       ])
       expect((await accountOf(tx, user.id))?.status).toBe('pending')
 
-      await tx.query(`select public.record_lesson_progress($1, $2, 600, 100, true)`, [
-        user.id,
-        lessonIds[0]!,
-      ])
+      // …and now answered.
+      await tx.query(
+        `select public.submit_quiz_attempt($1, $2, $3::jsonb)`,
+        [user.id, q[0]!.id, JSON.stringify({ [question[0]!.id]: right[0]!.id })],
+      )
       expect((await accountOf(tx, user.id))?.status).toBe('active')
     })
   })
