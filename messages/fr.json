@@ -527,7 +527,11 @@
     "addTeaserTitle": "Ajouter une offre",
     "addTeaserBody": "Les offres se cumulent — chacune augmente votre limite quotidienne.",
     "team": "Équipe",
-    "viewAsFallbackName": "ce compte"
+    "viewAsFallbackName": "ce compte",
+    "marketHome": "Marché",
+    "shop": "Boutique",
+    "learn": "Formation",
+    "links": "Liens"
   },
   "team": {
     "title": "Équipe",
@@ -2957,5 +2961,135 @@
     "viewing": "Vous consultez le compte de {name}",
     "readOnly": "Lecture seule — rien n'est enregistré ici.",
     "exit": "Quitter"
+  },
+  "mode": {
+    "earn": "Gagner",
+    "market": "Vendre"
+  },
+  "market": {
+    "dashboard": {
+      "title": "Marché",
+      "balance": "Solde de commissions",
+      "withdraw": "Retirer mes commissions",
+      "payoutsOff": "Les retraits de commissions ne sont pas encore ouverts. Votre solde continue d'augmenter.",
+      "payoutsBlocked": "Les retraits sont suspendus jusqu'à ce que votre solde repasse au-dessus de zéro.",
+      "belowMinimum": "Vous pourrez retirer dès que votre solde atteindra {min}.",
+      "none": {
+        "title": "Vendez et gagnez des commissions",
+        "body": "Suivez une formation pour commencer à promouvoir des produits. Les deux niveaux enseignent la même chose — ils diffèrent par la portée de votre commission."
+      },
+      "pending": {
+        "toGo": "Encore {n}% de la formation et vous pourrez promouvoir",
+        "unlocked": "Vous pouvez promouvoir. Terminez la formation pour obtenir votre certificat.",
+        "complete": "Formation terminée",
+        "threshold": "Promotion débloquée ici",
+        "continue": "Continuer la formation"
+      },
+      "stats": {
+        "earned": "Gagné au total",
+        "earnedHint": "Avant remboursements",
+        "clicks": "Clics",
+        "conversions": "Ventes",
+        "epc": "Par clic",
+        "epcHint": "Ce qu'un clic moyen a rapporté",
+        "window": "30 derniers jours",
+        "noClicks": "Aucun clic",
+        "noConversions": "Aucune vente"
+      },
+      "links": {
+        "title": "Vos liens",
+        "code": "Votre code est {code}"
+      },
+      "expiring": {
+        "title": "Votre droit de promouvoir se termine dans {days} jours",
+        "body": "Ensuite, vos liens cessent de générer des commissions. Ce que vous avez déjà gagné vous reste acquis.",
+        "renew": "Renouvelez depuis la page de la formation pour continuer."
+      },
+      "lapsed": {
+        "title": "Votre droit de promouvoir a pris fin",
+        "body": "Vos liens ne génèrent plus de commissions. Votre formation et vos gains vous restent acquis.",
+        "renew": "Renouvelez depuis la page de la formation pour recommencer à gagner."
+      },
+      "negative": {
+        "title": "Votre solde est négatif",
+        "why": "Une vente sur laquelle vous aviez touché une commission a été remboursée, et {amount} a été repris après versement.",
+        "effect": "Les retraits sont suspendus jusqu'à ce que de nouvelles commissions ramènent le solde au-dessus de zéro.",
+        "reassure": "Vous ne devez rien — rien ne vous sera réclamé."
+      },
+      "suspended": {
+        "title": "Votre compte affilié est suspendu",
+        "body": "Vos liens ne génèrent plus de gains. Votre accès à la formation n'est pas affecté.",
+        "contact": "Écrivez au support depuis l'onglet Profil et nous examinerons la situation."
+      }
+    },
+    "training": {
+      "cta": "Voir la formation",
+      "beginner": {
+        "summary": "Apprenez à promouvoir et touchez une commission sur les personnes qui achètent via votre lien."
+      },
+      "professional": {
+        "summary": "La même formation, plus une commission sur les ventes des affiliés que vous recrutez."
+      },
+      "perks": {
+        "levels": "{n, plural, one {Commission sur # niveau} other {Commission sur # niveaux}}",
+        "year": "Promouvoir pendant un an à compter de l'achat",
+        "keep": "La formation vous reste acquise après cette année",
+        "certificate": "Certificat à la fin"
+      },
+      "soon": {
+        "title": "Les formations ne sont pas encore en vente",
+        "body": "La formation d'affiliation est en cours de finalisation. Elle apparaîtra ici."
+      }
+    },
+    "course": {
+      "section": "Section {n} — {title}",
+      "done": "Terminé",
+      "locked": "Verrouillé",
+      "read": "Lire",
+      "markRead": "Marquer comme lu",
+      "resources": "Ressources",
+      "noVideo": "Votre navigateur ne peut pas lire cette vidéo.",
+      "meta": {
+        "video": "Vidéo · {n} min",
+        "remaining": "Vidéo · {n} min restantes",
+        "article": "Article · {n} min de lecture",
+        "pdf": "{n, plural, one {Lecture · # fichier} other {Lecture · # fichiers}}",
+        "quiz": "{n, plural, =0 {Quiz} one {Quiz · # question} other {Quiz · # questions}}"
+      },
+      "videoUnavailable": {
+        "title": "Cette vidéo ne se charge pas",
+        "body": "Réessayez dans un instant. Si cela persiste, contactez le support — votre progression est enregistrée."
+      },
+      "progress": "{done} / {total}"
+    },
+    "quiz": {
+      "checkpoint": "Petite vérification",
+      "sectionQuiz": "Quiz de section",
+      "submit": "Vérifier mes réponses",
+      "checking": "Vérification…",
+      "answerAll": "Répondez à toutes les questions pour continuer.",
+      "skipPreview": "Passer — ceci est un aperçu",
+      "passed": {
+        "title": "Correct",
+        "body": "Vous avez obtenu {score}%.",
+        "resume": "Retour à la vidéo",
+        "next": "Continuer"
+      },
+      "failed": {
+        "title": "Pas tout à fait",
+        "body": "Vous avez obtenu {score}%, et il en faut {pass}%. Réessayez — rien n'est perdu.",
+        "retry": "Réessayer"
+      }
+    },
+    "learn": {
+      "title": "Mes formations",
+      "complete": "Terminée",
+      "percentDone": "{n}% terminé",
+      "empty": {
+        "title": "Aucune formation",
+        "body": "Les formations que vous achetez apparaissent ici, avec votre progression enregistrée.",
+        "cta": "Voir la formation"
+      }
+    }
   }
 }

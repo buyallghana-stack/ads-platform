@@ -527,7 +527,11 @@
     "addTeaserTitle": "Add another plan",
     "addTeaserBody": "Plans stack — every one you hold adds to your daily limit.",
     "team": "Team",
-    "viewAsFallbackName": "this account"
+    "viewAsFallbackName": "this account",
+    "marketHome": "Market",
+    "shop": "Shop",
+    "learn": "Learn",
+    "links": "Links"
   },
   "team": {
     "title": "Team",
@@ -2957,5 +2961,135 @@
     "viewing": "Viewing as {name}",
     "readOnly": "Read only — nothing you do here is saved.",
     "exit": "Exit"
+  },
+  "mode": {
+    "earn": "Earn",
+    "market": "Market"
+  },
+  "market": {
+    "dashboard": {
+      "title": "Market",
+      "balance": "Commission balance",
+      "withdraw": "Withdraw commission",
+      "payoutsOff": "Commission withdrawals are not open yet. Your balance keeps building in the meantime.",
+      "payoutsBlocked": "Withdrawals are paused until your balance is back above zero.",
+      "belowMinimum": "You can withdraw once your balance reaches {min}.",
+      "none": {
+        "title": "Sell and earn commission",
+        "body": "Take a training course to start promoting products. Both levels of the course teach the same thing — they differ in how far your commission reaches."
+      },
+      "pending": {
+        "toGo": "{n}% more of the course and you can start promoting",
+        "unlocked": "You can promote now. Finish the course to earn your certificate.",
+        "complete": "Course complete",
+        "threshold": "Promoting unlocks here",
+        "continue": "Continue the course"
+      },
+      "stats": {
+        "earned": "Earned all time",
+        "earnedHint": "Before any refunds",
+        "clicks": "Clicks",
+        "conversions": "Sales",
+        "epc": "Per click",
+        "epcHint": "What an average click has earned",
+        "window": "Last 30 days",
+        "noClicks": "No clicks yet",
+        "noConversions": "No sales yet"
+      },
+      "links": {
+        "title": "Your links",
+        "code": "Your code is {code}"
+      },
+      "expiring": {
+        "title": "Your right to promote ends in {days} days",
+        "body": "After that your links stop earning commission. Anything you have already earned stays yours.",
+        "renew": "Renew from the course page to keep going."
+      },
+      "lapsed": {
+        "title": "Your right to promote has ended",
+        "body": "Your links no longer earn commission. Your course and everything you have already earned stay yours.",
+        "renew": "Renew from the course page to start earning again."
+      },
+      "negative": {
+        "title": "Your balance is below zero",
+        "why": "A sale you earned commission on was refunded, and {amount} was taken back after it had already been paid out.",
+        "effect": "Withdrawals are paused until new commission brings the balance back above zero.",
+        "reassure": "You do not owe anything — nothing will be collected from you."
+      },
+      "suspended": {
+        "title": "Your affiliate account is suspended",
+        "body": "Your links have stopped earning. Your course access is unaffected.",
+        "contact": "Message support from the Profile tab and we will look at it."
+      }
+    },
+    "training": {
+      "cta": "See the course",
+      "beginner": {
+        "summary": "Learn to promote, and earn commission on the people who buy through your link."
+      },
+      "professional": {
+        "summary": "The same course, plus commission on sales made by the affiliates you bring in."
+      },
+      "perks": {
+        "levels": "{n, plural, one {Commission on # level} other {Commission on # levels}}",
+        "year": "Promote for one year from the day you buy",
+        "keep": "The course stays yours after the year ends",
+        "certificate": "Certificate when you finish it"
+      },
+      "soon": {
+        "title": "Courses are not on sale yet",
+        "body": "The affiliate training is being finished. This is where it will appear."
+      }
+    },
+    "course": {
+      "section": "Section {n} — {title}",
+      "done": "Completed",
+      "locked": "Locked",
+      "read": "Read",
+      "markRead": "Mark as read",
+      "resources": "Resources",
+      "noVideo": "Your browser cannot play this video.",
+      "meta": {
+        "video": "Video · {n} min",
+        "remaining": "Video · {n} min left",
+        "article": "Article · {n} min read",
+        "pdf": "{n, plural, one {Reading · # file} other {Reading · # files}}",
+        "quiz": "{n, plural, =0 {Quiz} one {Quiz · # question} other {Quiz · # questions}}"
+      },
+      "videoUnavailable": {
+        "title": "This video will not load",
+        "body": "Try again in a moment. If it keeps happening, message support — your place in the course is saved."
+      },
+      "progress": "{done} / {total}"
+    },
+    "quiz": {
+      "checkpoint": "Quick check",
+      "sectionQuiz": "Section quiz",
+      "submit": "Check my answers",
+      "checking": "Checking…",
+      "answerAll": "Answer every question to continue.",
+      "skipPreview": "Skip — this is a preview",
+      "passed": {
+        "title": "Correct",
+        "body": "You scored {score}%.",
+        "resume": "Back to the video",
+        "next": "Continue"
+      },
+      "failed": {
+        "title": "Not quite",
+        "body": "You scored {score}%, and {pass}% is needed. Have another go — nothing is lost.",
+        "retry": "Try again"
+      }
+    },
+    "learn": {
+      "title": "My courses",
+      "complete": "Complete",
+      "percentDone": "{n}% complete",
+      "empty": {
+        "title": "No courses yet",
+        "body": "Courses you buy appear here, with your place in each one saved.",
+        "cta": "See the training"
+      }
+    }
   }
 }
