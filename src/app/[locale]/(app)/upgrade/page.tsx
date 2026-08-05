@@ -51,6 +51,8 @@ export default async function UpgradePage({
       benefits={benefits}
       freeDailyAdCap={references.freeDailyAdCap}
       freeName={references.freeName}
+      baseAdPoints={references.baseAdPoints}
+      pointsPerCurrencyUnit={references.pointsPerCurrencyUnit}
       checkoutEnabled={Boolean(serverEnv().PAYSTACK_SECRET_KEY)}
     />
   )

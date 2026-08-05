@@ -1284,8 +1284,8 @@
   "upgrade": {
     "title": "Upgrade",
     "subtitle": "Raise your daily limit and earn at a better rate.",
-    "stacking": "Plans stack. Hold more than one and your daily limits add up and your earning rates add together, while the lowest payout threshold applies. Every plan you hold counts. You can hold each plan once.",
-    "footnote": "Every plan runs for three months. Prices are one-off for that period — nothing renews automatically.",
+    "stacking": "Plans stack by what you paid. Hold more than one and we add the amounts together — two payments of GHS 100 land exactly where one payment of GHS 200 lands. You can hold each plan once.",
+    "footnote": "Each plan runs for the period shown on its card. Prices are one-off for that period — nothing renews automatically.",
     "current": {
       "free": "You're on the Free plan",
       "freeHint": "Buy a plan to watch more ads a day and earn at a better rate.",
@@ -1301,14 +1301,22 @@
       "rate": "+{percent}% points on every ad",
       "rateHint": "an ad worth {base} points pays you {paid}",
       "payout": "Withdraw from {points} points",
-      "payoutHint": "about {money}"
+      "payoutHint": "about {money}",
+      "perAd": "{points} points an ad",
+      "perAdHint": "that is {money} for every ad you watch"
     },
     "card": {
       "period": "for {months} months",
       "choose": "Get {plan}",
       "held": "Active",
       "popular": "Most popular",
-      "endsOn": "Runs until {date}"
+      "endsOn": "Runs until {date}",
+      "days": "for {days} days",
+      "chooseAmount": "Choose your amount",
+      "previewPerAd": "Per ad",
+      "previewPerDay": "Per day",
+      "previewAds": "{count, plural, one {if you watch # a day} other {if you watch all # a day}}",
+      "points": "pts"
     },
     "checkout": {
       "title": "{plan} plan",

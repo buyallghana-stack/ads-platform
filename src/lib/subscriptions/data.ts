@@ -21,6 +21,16 @@ export type Plan = {
   referralBonusMultiplier: number
   adPriority: number
   sortOrder: number
+  /**
+   * The band this plan covers, in minor units — what somebody may choose to
+   * pay for it. `bandMaxMinor` equals the price on the top plan, which has
+   * nothing above it to interpolate towards.
+   */
+  bandMinMinor: number
+  bandMaxMinor: number
+  /** The multiplier of the NEXT plan up — the value this band interpolates
+   *  towards. Equal to this plan's own on the top plan, where the line ends. */
+  nextMultiplier: number
 }
 
 export type HeldPlan = {
@@ -40,7 +50,18 @@ export const getPlans = cache(async (): Promise<Plan[]> => {
     .eq('is_default', false)
     .order('sort_order', { ascending: true })
 
-  return (data ?? []).map((row) => ({
+  const rows = data ?? []
+
+  return rows.map((row, i) => ({
+    /* The band runs to one pesewa under the NEXT plan. Derived from the
+       ordered list rather than stored, so a price change cannot leave a band
+       pointing at a gap — the same rule plan_band_max_minor() applies in the
+       database, which is what the server validates against. */
+    bandMinMinor: Number(row.price_minor),
+    bandMaxMinor:
+      i + 1 < rows.length ? Number(rows[i + 1].price_minor) - 1 : Number(row.price_minor),
+    nextMultiplier:
+      i + 1 < rows.length ? Number(rows[i + 1].reward_multiplier) : Number(row.reward_multiplier),
     id: row.id,
     slug: row.slug,
     name: row.name,
@@ -159,15 +180,31 @@ export const getPlanStanding = cache(async (userId: string): Promise<PlanStandin
  * Both are operator config, so neither is hardcoded in the UI.
  */
 export const getPlanReferences = cache(
-  async (): Promise<{ freeDailyAdCap: number; freeName: string; pointsPerCurrencyUnit: number }> => {
+  async (): Promise<{
+    freeDailyAdCap: number
+    freeName: string
+    pointsPerCurrencyUnit: number
+    baseAdPoints: number
+  }> => {
     const supabase = await createClient()
 
-    const [{ data: free }, { data: rate }] = await Promise.all([
+    const [{ data: free }, { data: rate }, { data: ads }] = await Promise.all([
       supabase.from('tiers').select('daily_ad_cap, name').eq('is_default', true).maybeSingle(),
       supabase.from('app_config').select('value').eq('key', 'points_per_currency_unit').maybeSingle(),
+      /* What a typical ad is worth before any multiplier. Read from the POOL
+         rather than assumed, so the preview on the upgrade screen matches the
+         ads that are actually out there — if the operator prices ads at 200,
+         the slider says what 200 becomes. */
+      supabase.from('ads').select('points_reward').eq('status', 'active').limit(200),
     ])
 
+    const rewards = (ads ?? []).map((a) => Number(a.points_reward)).filter((n) => n > 0).sort((a, b) => a - b)
+    // The median, not the mean: one 5,000-point launch ad should not drag the
+    // number everybody sees.
+    const baseAdPoints = rewards.length ? rewards[Math.floor(rewards.length / 2)]! : 100
+
     return {
+      baseAdPoints,
       freeDailyAdCap: free?.daily_ad_cap ?? 20,
       // The plan's own name, not a hardcoded "Free" — an operator who renames
       // the default tier should see that name on the cards.

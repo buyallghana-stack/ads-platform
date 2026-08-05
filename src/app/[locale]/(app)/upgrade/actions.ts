@@ -8,16 +8,25 @@ import { createAdminClient } from '@/lib/supabase/admin'
 /**
  * Starting a plan purchase.
  *
- * The browser sends only WHICH plan. Everything that decides the charge — the
- * price, the currency, the period — is read from the tier row inside
- * start_subscription_payment, so a tampered request cannot buy Platinum for
- * one pesewa. The user id comes from the verified session, never the payload.
+ * The browser sends which plan AND how much — because since 2026-08-04 the
+ * amount is part of the product: what you pay inside a plan's band decides
+ * what an ad is worth to you.
+ *
+ * WHICH MAKES THE AMOUNT EXACTLY THE FIELD A TAMPERED REQUEST WOULD CHANGE.
+ * It is not trusted here: `start_subscription_payment` re-reads the plan's
+ * band from the tiers table and refuses anything outside it, so the worst a
+ * forged request can do is pay a legal price for the plan it names. The
+ * currency and period still come from the tier, and the user id from the
+ * verified session, never from the payload.
  */
 export type CheckoutResult =
   | { ok: true; authorizationUrl: string }
   | { ok: false; errorKey?: string; message?: string }
 
-export async function startPaystackCheckout(tierId: string): Promise<CheckoutResult> {
+export async function startPaystackCheckout(
+  tierId: string,
+  amountMinor?: number,
+): Promise<CheckoutResult> {
   const user = await getSessionUser()
   if (!user?.email) return { ok: false, errorKey: 'notSignedIn' }
 
@@ -27,6 +36,9 @@ export async function startPaystackCheckout(tierId: string): Promise<CheckoutRes
     p_user_id: user.id,
     p_tier_id: tierId,
     p_method: 'paystack',
+    // Undefined means "the floor price", which is what the database defaults
+    // to — the cheapest way into the band, never the dearest.
+    p_amount_minor: Number.isFinite(amountMinor) ? amountMinor : undefined,
   })
 
   if (error || !payment) {

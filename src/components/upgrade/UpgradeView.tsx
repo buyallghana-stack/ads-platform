@@ -28,6 +28,8 @@ export function UpgradeView({
   benefits,
   freeDailyAdCap,
   freeName,
+  baseAdPoints,
+  pointsPerCurrencyUnit,
   checkoutEnabled,
 }: {
   plans: Plan[]
@@ -37,12 +39,18 @@ export function UpgradeView({
    *  to compare against. Every plan after it compares to its predecessor. */
   freeDailyAdCap: number
   freeName: string
+  /** What a typical ad is worth before any multiplier, for the previews. */
+  baseAdPoints: number
+  /** Points to one cedi. */
+  pointsPerCurrencyUnit: number
   /** False until mobile money and crypto checkout are wired up. */
   checkoutEnabled: boolean
 }) {
   const t = useTranslations('upgrade')
   const format = useFormatter()
-  const [selected, setSelected] = useState<Plan | null>(null)
+  /* The plan AND what they chose to pay for it — the amount is half the
+     product now, so it cannot be dropped between the card and the checkout. */
+  const [selected, setSelected] = useState<{ plan: Plan; amountMinor: number } | null>(null)
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
@@ -50,10 +58,10 @@ export function UpgradeView({
     Hands off to Paystack's hosted page. A full document navigation, not the
     client router — we are leaving the app for another origin.
   */
-  const pay = (plan: Plan) => {
+  const pay = (plan: Plan, amountMinor: number) => {
     setError(null)
     startTransition(async () => {
-      const res = await startPaystackCheckout(plan.id)
+      const res = await startPaystackCheckout(plan.id, amountMinor)
       if (!res.ok) {
         setError(res.message ?? t('checkout.failed'))
         return
@@ -130,7 +138,14 @@ export function UpgradeView({
       {/* Plans ------------------------------------------------------------ */}
       <div
         style={{ '--rise-delay': '0.15s' } as React.CSSProperties}
-        className="animate-rise mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+        className={cn(
+          'animate-rise mt-5 grid gap-4',
+          /* Six plans, and each card now carries a slider and a two-column
+             preview. Five across a 1440px screen leaves ~170px a card, which
+             is where "150 pts" and "GHS 4.50" start overlapping — so five is
+             only offered on a screen that can actually seat them. */
+          'sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5',
+        )}
       >
         {plans.map((plan, index) => (
           <PlanCard
@@ -145,7 +160,9 @@ export function UpgradeView({
             previousDailyAdCap={
               index === 0 ? freeDailyAdCap : plans[index - 1]!.dailyAdCap
             }
-            onChoose={() => setSelected(plan)}
+            baseAdPoints={baseAdPoints}
+            pointsPerCurrencyUnit={pointsPerCurrencyUnit}
+            onChoose={(amountMinor) => setSelected({ plan, amountMinor })}
           />
         ))}
       </div>
@@ -160,14 +177,14 @@ export function UpgradeView({
           className="fixed inset-0 z-50 flex items-end justify-center bg-ink-900/40 p-0 sm:items-center sm:p-6"
           role="dialog"
           aria-modal="true"
-          aria-label={t('checkout.title', { plan: selected.name })}
+          aria-label={t('checkout.title', { plan: selected.plan.name })}
           onClick={(e) => e.target === e.currentTarget && setSelected(null)}
         >
           <div className="w-full max-w-md rounded-t-(--radius-panel) bg-surface p-5 sm:rounded-(--radius-panel) sm:p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-[1.0625rem] font-semibold text-ink-900">
-                  {t('checkout.title', { plan: selected.name })}
+                  {t('checkout.title', { plan: selected.plan.name })}
                 </h2>
                 <p className="mt-0.5 text-[0.8125rem] text-ink-500">
                   {t('checkout.subtitle', { months: 3 })}
@@ -186,9 +203,9 @@ export function UpgradeView({
             <div className="mt-4 flex items-center justify-between rounded-(--radius-card) border border-ink-200 bg-ink-50 px-4 py-3">
               <span className="text-[0.8125rem] text-ink-600">{t('checkout.total')}</span>
               <span className="text-[1.125rem] font-semibold tracking-[-0.02em] text-ink-900">
-                {format.number(selected.priceMinor / 100, {
+                {format.number(selected.amountMinor / 100, {
                   style: 'currency',
-                  currency: selected.currencyCode,
+                  currency: selected.plan.currencyCode,
                   maximumFractionDigits: 0,
                 })}
               </span>
@@ -242,12 +259,12 @@ export function UpgradeView({
                 fullWidth
                 className="mt-4"
                 loading={pending}
-                onClick={() => pay(selected)}
+                onClick={() => pay(selected.plan, selected.amountMinor)}
               >
                 {t('checkout.pay', {
-                  amount: format.number(selected.priceMinor / 100, {
+                  amount: format.number(selected.amountMinor / 100, {
                     style: 'currency',
-                    currency: selected.currencyCode,
+                    currency: selected.plan.currencyCode,
                     maximumFractionDigits: 0,
                   }),
                 })}

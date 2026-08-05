@@ -1284,8 +1284,8 @@
   "upgrade": {
     "title": "Passer à un forfait",
     "subtitle": "Augmentez votre limite quotidienne et gagnez à un meilleur taux.",
-    "stacking": "Les forfaits se cumulent. Si vous en détenez plusieurs, vos limites quotidiennes s'additionnent et vos taux de gain s'additionnent également, et le seuil de retrait le plus bas s'applique. Chaque forfait détenu compte. Chaque forfait ne peut être détenu qu'une fois.",
-    "footnote": "Chaque forfait dure trois mois. Le prix est unique pour cette période — rien ne se renouvelle automatiquement.",
+    "stacking": "Les forfaits s'additionnent par le montant payé : si vous en détenez plusieurs, nous additionnons ce que vous avez payé et votre position sur l'échelle en découle. Deux paiements de GHS 100 valent exactement un paiement de GHS 200. Chaque forfait ne peut être détenu qu'une fois.",
+    "footnote": "Chaque forfait a sa propre durée, indiquée sur la carte. Les prix sont uniques pour cette période : rien ne se renouvelle automatiquement.",
     "current": {
       "free": "Vous êtes sur le forfait Gratuit",
       "freeHint": "Prenez un forfait pour regarder plus de publicités par jour et gagner à un meilleur taux.",
@@ -1301,14 +1301,22 @@
       "rate": "+{percent}% de points sur chaque publicité",
       "rateHint": "une publicité à {base} points vous en rapporte {paid}",
       "payout": "Retrait dès {points} points",
-      "payoutHint": "environ {money}"
+      "payoutHint": "environ {money}",
+      "perAd": "{points} points par publicité",
+      "perAdHint": "soit {money} par publicité regardée"
     },
     "card": {
       "period": "pour {months} mois",
       "choose": "Prendre {plan}",
       "held": "Actif",
       "popular": "Le plus choisi",
-      "endsOn": "Valable jusqu'au {date}"
+      "endsOn": "Valable jusqu'au {date}",
+      "days": "pour {days} jours",
+      "chooseAmount": "Choisissez votre montant",
+      "previewPerAd": "Par publicité",
+      "previewPerDay": "Par jour",
+      "previewAds": "{count, plural, one {si vous en regardez #} other {si vous en regardez #}}",
+      "points": "pts"
     },
     "checkout": {
       "title": "Forfait {plan}",

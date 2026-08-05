@@ -1,9 +1,12 @@
 'use client'
 
+import { useState } from 'react'
+
 import { Gem, Zap } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import type { Plan } from '@/lib/subscriptions/data'
+import { multiplierForAmount, pointsPerAd } from '@/lib/subscriptions/pricing'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/cn'
 
@@ -25,6 +28,8 @@ export function PlanCard({
   recommended,
   previousName,
   previousDailyAdCap,
+  baseAdPoints,
+  pointsPerCurrencyUnit,
   onChoose,
 }: {
   plan: Plan
@@ -38,10 +43,40 @@ export function PlanCard({
    *  ones look redundant. */
   previousName: string
   previousDailyAdCap: number
-  onChoose: () => void
+  /** Points a typical ad is worth before any plan multiplier — the number the
+   *  preview is worked out from, read from the ad pool rather than assumed. */
+  baseAdPoints: number
+  /** Points to one cedi, for turning the preview into money. */
+  pointsPerCurrencyUnit: number
+  onChoose: (amountMinor: number) => void
 }) {
   const t = useTranslations('upgrade')
   const format = useFormatter()
+
+  /*
+    THE AMOUNT IS THE PRODUCT NOW. A plan is a band, and what somebody pays
+    inside it decides what one ad is worth to them — "we may be in the same
+    bronze plan but my points per ad may be worth a few points more than my
+    fellow bronze plan holder". So the card carries a slider, and it starts at
+    the floor: the cheapest way in is the default, and paying more is a choice
+    somebody makes rather than one made for them.
+  */
+  const [amountMinor, setAmountMinor] = useState(plan.bandMinMinor)
+  const flexible = plan.bandMaxMinor > plan.bandMinMinor
+  const topOfBand = Math.floor(plan.bandMaxMinor / 100) * 100
+
+  const multiplier = multiplierForAmount(plan, amountMinor)
+  const perAdPoints = pointsPerAd(baseAdPoints, multiplier)
+  const perAdMoney = perAdPoints / pointsPerCurrencyUnit
+  const perDay = perAdMoney * plan.dailyAdCap
+
+  const money = (value: number, digits = 2) =>
+    format.number(value, {
+      style: 'currency',
+      currency: plan.currencyCode,
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    })
 
   const price = format.number(plan.priceMinor / 100, {
     style: 'currency',
@@ -55,9 +90,6 @@ export function PlanCard({
     fact in a form someone can check against the ad they just watched.
     EXAMPLE_AD_POINTS sits in the middle of the seeded ads (35–80 points).
   */
-  const EXAMPLE_AD_POINTS = 50
-  const ratePercent = Math.round((plan.rewardMultiplier - 1) * 100)
-  const examplePays = Math.round(EXAMPLE_AD_POINTS * plan.rewardMultiplier)
   const extraAds = plan.dailyAdCap - previousDailyAdCap
 
   const benefits = [
@@ -68,8 +100,8 @@ export function PlanCard({
     },
     {
       icon: Gem,
-      text: t('benefits.rate', { percent: ratePercent }),
-      hint: t('benefits.rateHint', { base: EXAMPLE_AD_POINTS, paid: examplePays }),
+      text: t('benefits.perAd', { points: format.number(perAdPoints) }),
+      hint: t('benefits.perAdHint', { money: money(perAdMoney) }),
     },
     /* "Withdraw from X points" was here until 2026-08-01, when the operator
        made the threshold platform-wide: "no plan should have its own
@@ -110,8 +142,12 @@ export function PlanCard({
           {plan.name}
         </h3>
         <div className="text-right">
-          <p className="text-[1.125rem] font-semibold tracking-[-0.02em] text-ink-900">{price}</p>
-          <p className="text-[0.6875rem] text-ink-500">{t('card.period', { months: 3 })}</p>
+          <p className="text-[1.125rem] font-semibold tracking-[-0.02em] text-ink-900">
+            {flexible ? money(amountMinor / 100, 0) : price}
+          </p>
+          <p className="text-[0.6875rem] text-ink-500">
+            {t('card.days', { days: plan.periodDays })}
+          </p>
         </div>
       </div>
 
@@ -141,6 +177,83 @@ export function PlanCard({
           the opposite of the point, since plans stack and any of them can be
           added. The "Popular" tag already tells that story, and it is the only
           thing that should. */}
+      {/* ---- Choose your amount ------------------------------------------
+          Only where there is genuinely a range: the top plan is a single
+          price, and a slider that cannot move is a control that lies. */}
+      {!held && (
+        <div className="mt-4 rounded-(--radius-card) border border-ink-200 bg-ink-50/60 p-3.5">
+          {flexible && (
+          <div className="flex items-baseline justify-between gap-3">
+            <label htmlFor={`amount-${plan.id}`} className="text-[0.75rem] font-medium text-ink-600">
+              {t('card.chooseAmount')}
+            </label>
+            <span className="text-[0.9375rem] font-semibold text-ink-900 tabular-nums">
+              {money(amountMinor / 100, 0)}
+            </span>
+          </div>
+          )}
+
+          {flexible && (<>
+          <input
+            id={`amount-${plan.id}`}
+            type="range"
+            min={plan.bandMinMinor}
+            /* Whole cedis, floored. The band really runs to one pesewa under
+               the next plan (GHS 139.99), and a slider that ends there both
+               labels itself "GHS 140" — the next plan's price — and leaves a
+               step the thumb can never land on. */
+            max={topOfBand}
+            /* Whole cedis. Pesewa-level steps would make the slider fussy on a
+               phone and change the answer by fractions nobody can see. */
+            step={100}
+            value={amountMinor}
+            onChange={(e) => setAmountMinor(Number(e.target.value))}
+            className="mt-2.5 w-full accent-brand-600"
+          />
+
+          <div className="flex justify-between text-[0.6875rem] text-ink-400 tabular-nums">
+            <span>{money(plan.bandMinMinor / 100, 0)}</span>
+            <span>{money(topOfBand / 100, 0)}</span>
+          </div>
+          </>)}
+
+          {/* What that amount actually buys — the whole point of the control.
+              Points first, because that is what lands in the balance, then
+              what those points are worth, because that is what people
+              actually compare. */}
+          <dl
+            className={cn(
+              'grid grid-cols-2 gap-2',
+              flexible ? 'mt-3 border-t border-ink-200 pt-3' : '',
+            )}
+          >
+            <div>
+              <dt className="text-[0.625rem] tracking-[0.04em] text-ink-400 uppercase">
+                {t('card.previewPerAd')}
+              </dt>
+              <dd className="text-[0.9375rem] font-semibold text-ink-900 tabular-nums">
+                {format.number(perAdPoints)}
+                <span className="ml-1 text-[0.6875rem] font-medium text-ink-500">
+                  {t('card.points')}
+                </span>
+              </dd>
+              <dd className="text-[0.6875rem] text-success-700 tabular-nums">{money(perAdMoney)}</dd>
+            </div>
+            <div>
+              <dt className="text-[0.625rem] tracking-[0.04em] text-ink-400 uppercase">
+                {t('card.previewPerDay')}
+              </dt>
+              <dd className="text-[0.9375rem] font-semibold text-ink-900 tabular-nums">
+                {money(perDay)}
+              </dd>
+              <dd className="text-[0.6875rem] text-ink-500">
+                {t('card.previewAds', { count: plan.dailyAdCap })}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      )}
+
       {held && endsAt ? (
         <p className="mt-4 rounded-(--radius-input) bg-success-50 px-3 py-2 text-center text-[0.75rem] font-medium text-success-700">
           {t('card.endsOn', {
@@ -152,7 +265,7 @@ export function PlanCard({
           })}
         </p>
       ) : (
-        <Button variant="primary" fullWidth className="mt-4" onClick={onChoose}>
+        <Button variant="primary" fullWidth className="mt-4" onClick={() => onChoose(amountMinor)}>
           {t('card.choose', { plan: plan.name })}
         </Button>
       )}
