@@ -526,7 +526,8 @@
     "upgradeTeaserBody": "Passez à un forfait supérieur pour augmenter votre plafond de gains quotidien.",
     "addTeaserTitle": "Ajouter une offre",
     "addTeaserBody": "Les offres se cumulent — chacune augmente votre limite quotidienne.",
-    "team": "Équipe"
+    "team": "Équipe",
+    "viewAsFallbackName": "ce compte"
   },
   "team": {
     "title": "Équipe",
@@ -1611,7 +1612,8 @@
         "email": "E-mail",
         "phone": "Téléphone",
         "conversation": "Conversation",
-        "planPaid": "Forfait {tier} · paie GHS {ghs} · gagne à {rate}×"
+        "planPaid": "Forfait {tier} · paie GHS {ghs} · gagne à {rate}×",
+        "viewAs": "Voir comme l'utilisateur"
       },
       "confirm": {
         "flag": "Signaler {name}. La personne continue de gagner, mais chacun de ses retraits passe d'abord en révision.",
@@ -2950,5 +2952,10 @@
       "not_signed_in": "Veuillez vous connecter et réessayer.",
       "error": "Une erreur s'est produite. Veuillez réessayer."
     }
+  },
+  "viewAs": {
+    "viewing": "Vous consultez le compte de {name}",
+    "readOnly": "Lecture seule — rien n'est enregistré ici.",
+    "exit": "Quitter"
   }
 }

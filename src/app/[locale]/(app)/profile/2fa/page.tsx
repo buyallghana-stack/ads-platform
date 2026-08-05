@@ -4,7 +4,7 @@ import { setRequestLocale } from 'next-intl/server'
 
 import { TwoFactorFlow } from '@/components/profile/TwoFactorFlow'
 import { redirect } from '@/i18n/navigation'
-import { getSessionUser } from '@/lib/auth/session'
+import { getViewerUser } from '@/lib/auth/session'
 import { getTwoFactorStatus } from '@/lib/security/two-factor-data'
 
 export const metadata: Metadata = {
@@ -25,7 +25,7 @@ export default async function TwoFactorPage({
   const { locale } = await params
   setRequestLocale(locale)
 
-  const user = await getSessionUser()
+  const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
 
   const status = await getTwoFactorStatus()

@@ -14,7 +14,7 @@ import { ThemeSwitchButton } from '@/components/theme/ThemeSwitchButton'
 import { Card, CardHeader, StatCard as Stat } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Link, redirect } from '@/i18n/navigation'
-import { getProfile, getSessionUser } from '@/lib/auth/session'
+import { getProfile, getViewerUser } from '@/lib/auth/session'
 import { pickDisplayName } from '@/lib/dashboard/display-name'
 import { getHomeData } from '@/lib/dashboard/home-data'
 import { getGamesEnabled } from '@/lib/games/data'
@@ -44,7 +44,7 @@ export default async function HomePage({
 
   // Deduplicated with the (app) layout: same request, so getUser and the
   // profile fetch resolve from React's cache rather than repeating.
-  const user = await getSessionUser()
+  const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
 
   const t = await getTranslations('dashboard')

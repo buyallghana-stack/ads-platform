@@ -4,7 +4,7 @@ import { setRequestLocale } from 'next-intl/server'
 
 import { WithdrawalPinFlow } from '@/components/profile/WithdrawalPinFlow'
 import { redirect } from '@/i18n/navigation'
-import { getSessionUser } from '@/lib/auth/session'
+import { getViewerUser } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export const metadata: Metadata = {
@@ -25,7 +25,7 @@ export default async function PinPage({
   const { locale } = await params
   setRequestLocale(locale)
 
-  const user = await getSessionUser()
+  const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
 
   const admin = createAdminClient()

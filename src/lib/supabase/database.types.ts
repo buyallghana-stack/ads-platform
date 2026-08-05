@@ -303,6 +303,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_view_sessions: {
+        Row: {
+          admin_id: string
+          ended_at: string | null
+          expires_at: string
+          id: string
+          started_at: string
+          target_user_id: string
+          token: string
+        }
+        Insert: {
+          admin_id: string
+          ended_at?: string | null
+          expires_at: string
+          id?: string
+          started_at?: string
+          target_user_id: string
+          token: string
+        }
+        Update: {
+          admin_id?: string
+          ended_at?: string | null
+          expires_at?: string
+          id?: string
+          started_at?: string
+          target_user_id?: string
+          token?: string
+        }
+        Relationships: []
+      }
       ads: {
         Row: {
           advertiser_id: string | null
@@ -2265,6 +2295,14 @@ export type Database = {
         Args: { p_ad_id: string; p_occasion: number }
         Returns: string
       }
+      admin_active_view_session: {
+        Args: { p_token: string }
+        Returns: {
+          admin_id: string
+          expires_at: string
+          target_user_id: string
+        }[]
+      }
       admin_announcement_audience: { Args: never; Returns: number }
       admin_area_allowed: {
         Args: { p_area: string; p_user_id: string }
@@ -2399,6 +2437,7 @@ export type Database = {
         Args: { p_admin_id: string; p_task_id: string }
         Returns: string
       }
+      admin_end_view_session: { Args: { p_token: string }; Returns: undefined }
       admin_finance_statement: {
         Args: { p_months?: number }
         Returns: {
@@ -2935,6 +2974,13 @@ export type Database = {
         Args: { p_admin_id: string; p_plays: number; p_tier_id: string }
         Returns: number
       }
+      admin_start_view_session: {
+        Args: { p_admin_id: string; p_target_user_id: string }
+        Returns: {
+          expires_at: string
+          token: string
+        }[]
+      }
       admin_user_id_by_email: {
         Args: { p_admin_id: string; p_email: string }
         Returns: string
@@ -3032,6 +3078,7 @@ export type Database = {
         Args: { p_admin_id: string; p_area: string }
         Returns: undefined
       }
+      assert_not_anonymous: { Args: never; Returns: undefined }
       broadcast_notification: {
         Args: {
           p_body: string

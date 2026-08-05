@@ -1,9 +1,35 @@
-import { type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
 import createIntlMiddleware from 'next-intl/middleware'
 
 import { routing } from '@/i18n/routing'
 import { updateSession } from '@/lib/supabase/middleware'
+
+/* Inlined rather than imported from `@/lib/admin/view-as`: that module is
+   `server-only` and pulls in the service client, neither of which belongs in
+   the middleware bundle. */
+const VIEW_AS_COOKIE = 'sp_view_as'
+
+/*
+  Screens that stay shut even while viewing.
+
+  The operator asked for this to look through somebody's ACTIVITIES. Their
+  two-factor state, their active sessions, their saved payout destination and
+  the screens for changing an email, PIN or password are not activities — they
+  are the account's security surface, and there is no support reason to read
+  them. Matched by prefix, so a screen added under `profile/` tomorrow is shut
+  by default rather than open until somebody notices.
+*/
+const SHUT_WHILE_VIEWING = [
+  '/profile/2fa',
+  '/profile/backup-codes',
+  '/profile/credentials',
+  '/profile/password',
+  '/profile/email',
+  '/profile/pin',
+  '/profile/sessions',
+  '/profile/delete',
+]
 
 const handleI18n = createIntlMiddleware(routing)
 
@@ -20,6 +46,37 @@ const handleI18n = createIntlMiddleware(routing)
  * GEO_RESTRICTION_ENABLED is switched on.
  */
 export default async function middleware(request: NextRequest) {
+  /*
+    "VIEW AS USER" IS READ ONLY, AND THIS IS WHERE THAT IS TRUE.
+
+    While a super admin is viewing somebody's account, every request that could
+    change something is refused here — before it reaches a route, a server
+    action or the database. Server actions are POSTs to the page's own URL, so
+    one method check covers every action in the app, including ones written
+    after this line.
+
+    Enforcing it here rather than inside each action is the entire point: a
+    per-action check is a list somebody has to remember to add to, and the cost
+    of forgetting once is an administrator moving a user's money. A method
+    check cannot be forgotten by a new feature.
+
+    Ending the look is a GET to /api/impersonate/stop, which this matcher does
+    not cover at all — so there is no way to get stuck inside a session that
+    refuses the request that would end it.
+  */
+  if (request.cookies.has(VIEW_AS_COOKIE)) {
+    if (request.method !== 'GET') {
+      return new NextResponse('Read-only while viewing as a user.', { status: 403 })
+    }
+
+    /* `en` carries no locale prefix and `fr` does, so the tail is what to
+       match on — see the note in the build log about /en/… being a 307. */
+    const path = request.nextUrl.pathname.replace(/^\/(en|fr)(?=\/|$)/, '')
+    if (SHUT_WHILE_VIEWING.some((shut) => path.startsWith(shut))) {
+      return NextResponse.redirect(new URL('/profile', request.nextUrl.origin))
+    }
+  }
+
   const response = handleI18n(request)
   await updateSession(request, response)
   return response

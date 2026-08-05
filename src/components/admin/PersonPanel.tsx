@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-import { ArrowRight, Flag, MessageSquare, ShieldCheck, ShieldOff } from 'lucide-react'
+import { ArrowRight, Eye, Flag, MessageSquare, ShieldCheck, ShieldOff } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/Button'
@@ -15,6 +15,7 @@ import { PERSON_RULES, personActions, type PersonAction } from './person-actions
 import type { PeopleMode } from './PeopleGrid'
 import { SupportConversation } from './SupportConversation'
 import type { AdminSupportThread } from '@/lib/admin/data/support'
+import { viewAsUser } from '@/app/[locale]/admin/(super)/users/actions'
 
 /**
  * One account, everything about it, and the decision at the bottom.
@@ -116,6 +117,11 @@ function Panel({
 
   const [pending, setPending] = useState<PersonAction | null>(null)
   const [reason, setReason] = useState('')
+  /* Latched until the page navigates away, so a second tap cannot open a
+     second look — the database ends the first one, and the two redirects
+     would race. */
+  const [viewing, setViewing] = useState(false)
+  const [viewError, setViewError] = useState<string | null>(null)
 
   const actions = personActions(p)
   const requestClose = () => (pending ? setPending(null) : onClose())
@@ -277,6 +283,38 @@ function Panel({
               })
             : t('panel.plan', { tier: p.tier })}
         </p>
+
+        {/* Looking at what THEY see, rather than inferring it from this panel.
+            Read-only: the whole app refuses writes while a look is open, so
+            this is a window, not a way in. It sits here rather than in the
+            footer because the footer is for decisions ABOUT the account —
+            flag, disable — and this changes nothing. */}
+        <Button
+          type="button"
+          size="sm"
+          variant="secondary"
+          className="mt-3 w-full"
+          disabled={viewing}
+          onClick={async () => {
+            setViewing(true)
+            const result = await viewAsUser(p.id)
+            if (!result.ok) {
+              setViewing(false)
+              setViewError(result.message ?? null)
+              return
+            }
+            // A full document load: the viewing cookie has to be on the
+            // request that renders the dashboard, and a client transition
+            // would reuse the router cache from before it was set.
+            window.location.assign('/dashboard')
+          }}
+        >
+          <Eye aria-hidden className="size-3.5" />
+          {t('panel.viewAs')}
+        </Button>
+        {viewError && (
+          <p className="mt-1.5 text-[0.75rem] text-danger-700">{viewError}</p>
+        )}
       </PanelSection>
 
       <PanelSection label={t('panel.activity')}>

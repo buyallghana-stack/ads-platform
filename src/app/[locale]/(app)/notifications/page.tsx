@@ -6,7 +6,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { NotificationsView } from '@/components/notifications/NotificationsView'
 import { Card } from '@/components/ui/Card'
 import { Link, redirect } from '@/i18n/navigation'
-import { getSessionUser } from '@/lib/auth/session'
+import { getViewerUser } from '@/lib/auth/session'
 import { getNotifications } from '@/lib/notifications/data'
 
 export const metadata: Metadata = {
@@ -27,7 +27,7 @@ export default async function NotificationsPage({
   const { locale } = await params
   setRequestLocale(locale)
 
-  const user = await getSessionUser()
+  const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
 
   const t = await getTranslations('notifications')

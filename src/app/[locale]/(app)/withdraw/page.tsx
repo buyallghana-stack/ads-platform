@@ -4,7 +4,7 @@ import { setRequestLocale } from 'next-intl/server'
 
 import { WithdrawWizard, type WithdrawAccount } from '@/components/withdraw/WithdrawWizard'
 import { redirect } from '@/i18n/navigation'
-import { getSessionUser } from '@/lib/auth/session'
+import { getViewerUser } from '@/lib/auth/session'
 import { getCryptoQuote } from '@/lib/pricing/quote'
 import { getResolvedBenefits } from '@/lib/subscriptions/data'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -43,7 +43,7 @@ export default async function WithdrawPage({
   const { locale } = await params
   setRequestLocale(locale)
 
-  const user = await getSessionUser()
+  const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
 
   const supabase = await createClient()

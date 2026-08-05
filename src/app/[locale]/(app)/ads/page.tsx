@@ -4,7 +4,7 @@ import { setRequestLocale } from 'next-intl/server'
 
 import { AdsView } from '@/components/ads/AdsView'
 import { getAdsData } from '@/lib/ads/data'
-import { getSessionUser } from '@/lib/auth/session'
+import { getViewerUser } from '@/lib/auth/session'
 
 export const metadata: Metadata = {
   title: 'Ads',
@@ -27,7 +27,7 @@ export default async function AdsPage({
   const { locale } = await params
   setRequestLocale(locale)
 
-  const user = await getSessionUser()
+  const user = await getViewerUser()
   if (!user) return null
 
   const data = await getAdsData(user.id)

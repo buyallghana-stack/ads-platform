@@ -141,3 +141,43 @@ function humanise(message: string): string {
   }
   return clean
 }
+
+/**
+ * Open a read-only look at somebody's own screens.
+ *
+ * Operator, 2026-08-05: they wanted to see what a user sees rather than infer
+ * it from the admin console, without a password and without being able to act.
+ *
+ * NO SESSION IS SWAPPED. This sets a short-lived viewing cookie; the admin
+ * keeps their own Supabase session throughout. See `@/lib/admin/view-as` for
+ * why that matters and what stops a write. Every refusal that decides WHO may
+ * be viewed — super admin only, never another staff member, never yourself,
+ * never a deleted account — lives in `admin_start_view_session`, so the screen
+ * cannot be the thing that gets it wrong.
+ */
+export async function viewAsUser(userId: string): Promise<{ ok: boolean; message?: string }> {
+  const user = await getSessionUser()
+  if (!user) return { ok: false, message: 'You are not signed in as an administrator.' }
+  if (!z.uuid().safeParse(userId).success) return { ok: false, message: 'Unknown user' }
+
+  const { data, error } = await createAdminClient()
+    .rpc('admin_start_view_session', { p_admin_id: user.id, p_target_user_id: userId })
+    .maybeSingle()
+
+  if (error || !data) {
+    return { ok: false, message: error?.message ?? 'That could not be started.' }
+  }
+
+  const { cookies } = await import('next/headers')
+  const { VIEW_AS_COOKIE } = await import('@/lib/admin/view-as')
+  const store = await cookies()
+  store.set(VIEW_AS_COOKIE, data.token as string, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    expires: new Date(data.expires_at as string),
+  })
+
+  return { ok: true }
+}

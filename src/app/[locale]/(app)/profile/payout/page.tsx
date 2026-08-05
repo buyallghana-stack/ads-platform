@@ -4,7 +4,7 @@ import { setRequestLocale } from 'next-intl/server'
 
 import { PayoutAccountsForm } from '@/components/profile/PayoutAccountsForm'
 import { redirect } from '@/i18n/navigation'
-import { getSessionUser } from '@/lib/auth/session'
+import { getViewerUser } from '@/lib/auth/session'
 import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
@@ -29,7 +29,7 @@ export default async function PayoutPage({
   const { locale } = await params
   setRequestLocale(locale)
 
-  const user = await getSessionUser()
+  const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
 
   const supabase = await createClient()

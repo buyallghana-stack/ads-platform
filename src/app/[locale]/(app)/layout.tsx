@@ -3,7 +3,9 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { BottomTabBar, Sidebar } from '@/components/app/AppNav'
 import { Link } from '@/i18n/navigation'
 import { redirect } from '@/i18n/navigation'
-import { getProfile, getSessionUser } from '@/lib/auth/session'
+import { getProfile, getSessionUser, getViewerUser } from '@/lib/auth/session'
+import { getViewAsSession } from '@/lib/admin/view-as'
+import { ViewAsBanner } from '@/components/app/ViewAsBanner'
 import { avatarPublicUrl } from '@/lib/profile/avatar'
 import { needsLoginChallenge } from '@/lib/security/login-2fa'
 import { getPlanStanding } from '@/lib/subscriptions/data'
@@ -30,16 +32,29 @@ export default async function AppLayout({
   const { locale } = await params
   setRequestLocale(locale)
 
-  const user = await getSessionUser()
-  if (!user) redirect({ href: '/login', locale })
+  const signedIn = await getSessionUser()
+  if (!signedIn) redirect({ href: '/login', locale })
 
   /*
     A session alone is not enough for an enrolled account. Supabase issues it
     on a correct password, so the second factor is enforced HERE — the one
     place every signed-in screen passes through — rather than at the login
     form, which a direct URL would simply skip.
+
+    Checked against the SIGNED-IN account, never the one being viewed: a super
+    admin looking at somebody's screens has already passed their own challenge,
+    and asking for the target's second factor is both impossible and meaningless.
   */
-  if (await needsLoginChallenge(user!.id)) redirect({ href: '/verify-2fa', locale })
+  if (await needsLoginChallenge(signedIn!.id)) redirect({ href: '/verify-2fa', locale })
+
+  /*
+    From here down the layout renders the VIEWED account, which is the
+    signed-in one unless a super admin has opened a look. Reads only — see
+    `getViewerUser`.
+  */
+  const viewing = await getViewAsSession()
+  const user = await getViewerUser()
+  if (!user) redirect({ href: '/login', locale })
 
   const t = await getTranslations('nav')
 
@@ -64,7 +79,13 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="flex min-h-dvh bg-canvas">
+    /* The banner sits ABOVE the app shell rather than inside it, so the
+       sidebar/content/tab-bar row below is byte-identical to what it was
+       before "view as user" existed. Nothing about the normal signed-in
+       layout changes when nobody is viewing. */
+    <>
+      {viewing && <ViewAsBanner name={profile?.full_name ?? t('viewAsFallbackName')} />}
+      <div className="flex min-h-dvh bg-canvas">
       <Sidebar
         user={navUser}
         upgradeSlot={
@@ -90,6 +111,7 @@ export default async function AppLayout({
       </div>
 
       <BottomTabBar user={navUser} />
-    </div>
+      </div>
+    </>
   )
 }

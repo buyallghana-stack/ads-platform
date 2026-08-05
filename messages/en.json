@@ -526,7 +526,8 @@
     "upgradeTeaserBody": "Upgrade your plan to raise your daily earning cap.",
     "addTeaserTitle": "Add another plan",
     "addTeaserBody": "Plans stack — every one you hold adds to your daily limit.",
-    "team": "Team"
+    "team": "Team",
+    "viewAsFallbackName": "this account"
   },
   "team": {
     "title": "Team",
@@ -1611,7 +1612,8 @@
         "email": "Email",
         "phone": "Phone",
         "conversation": "Conversation",
-        "planPaid": "On the {tier} plan · paying GHS {ghs} · earning at {rate}×"
+        "planPaid": "On the {tier} plan · paying GHS {ghs} · earning at {rate}×",
+        "viewAs": "View as user"
       },
       "confirm": {
         "flag": "Flag {name}. They keep earning, but every payout of theirs stops for review first.",
@@ -2950,5 +2952,10 @@
       "not_signed_in": "Please log in and try again.",
       "error": "Something went wrong. Please try again."
     }
+  },
+  "viewAs": {
+    "viewing": "Viewing as {name}",
+    "readOnly": "Read only — nothing you do here is saved.",
+    "exit": "Exit"
   }
 }

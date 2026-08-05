@@ -6,7 +6,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { AvatarUploader } from '@/components/profile/AvatarUploader'
 import { Card } from '@/components/ui/Card'
 import { Link, redirect } from '@/i18n/navigation'
-import { getProfile, getSessionUser } from '@/lib/auth/session'
+import { getProfile, getViewerUser } from '@/lib/auth/session'
 
 import { PersonalInfoForm } from './PersonalInfoForm'
 
@@ -29,7 +29,7 @@ export default async function PersonalInfoPage({
   const { locale } = await params
   setRequestLocale(locale)
 
-  const user = await getSessionUser()
+  const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
 
   const t = await getTranslations('personal')

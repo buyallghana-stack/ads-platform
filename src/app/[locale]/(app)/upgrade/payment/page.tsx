@@ -5,7 +5,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { Button } from '@/components/ui/Button'
 import { Link, redirect } from '@/i18n/navigation'
-import { getSessionUser } from '@/lib/auth/session'
+import { getViewerUser } from '@/lib/auth/session'
 import { confirmPaystackReference } from '@/lib/payments/confirm'
 
 export const metadata: Metadata = {
@@ -35,7 +35,7 @@ export default async function PaymentReturnPage({
   const { reference, trxref } = await searchParams
   setRequestLocale(locale)
 
-  const user = await getSessionUser()
+  const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
 
   const t = await getTranslations('upgrade.result')

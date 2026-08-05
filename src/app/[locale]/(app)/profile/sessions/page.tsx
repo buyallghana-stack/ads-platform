@@ -4,7 +4,7 @@ import { setRequestLocale } from 'next-intl/server'
 
 import { SessionsList, type SessionRow } from '@/components/profile/SessionsList'
 import { redirect } from '@/i18n/navigation'
-import { getSessionUser } from '@/lib/auth/session'
+import { getViewerUser } from '@/lib/auth/session'
 import { describeUserAgent } from '@/lib/security/user-agent'
 import { createClient } from '@/lib/supabase/server'
 
@@ -26,7 +26,7 @@ export default async function SessionsPage({
   const { locale } = await params
   setRequestLocale(locale)
 
-  const user = await getSessionUser()
+  const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
 
   const supabase = await createClient()

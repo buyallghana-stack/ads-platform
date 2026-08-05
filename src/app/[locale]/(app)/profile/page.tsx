@@ -27,7 +27,7 @@ import { DeletionPendingBanner } from '@/components/profile/DeletionPendingBanne
 import { SettingsGroup, SettingsRow } from '@/components/profile/SettingsRow'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { Link, redirect } from '@/i18n/navigation'
-import { getProfile, getSessionUser } from '@/lib/auth/session'
+import { getProfile, getViewerUser } from '@/lib/auth/session'
 import { avatarPublicUrl } from '@/lib/profile/avatar'
 import { getDeletionStatus } from '@/lib/security/deletion-data'
 import { getTwoFactorStatus } from '@/lib/security/two-factor-data'
@@ -59,7 +59,7 @@ export default async function ProfilePage({
   const { locale } = await params
   setRequestLocale(locale)
 
-  const user = await getSessionUser()
+  const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
 
   const t = await getTranslations('profile')

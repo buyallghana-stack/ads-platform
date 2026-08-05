@@ -4,7 +4,7 @@ import { setRequestLocale } from 'next-intl/server'
 
 import { UpgradeView } from '@/components/upgrade/UpgradeView'
 import { redirect } from '@/i18n/navigation'
-import { getSessionUser } from '@/lib/auth/session'
+import { getViewerUser } from '@/lib/auth/session'
 import { serverEnv } from '@/lib/env'
 import {
   getHeldPlans,
@@ -34,7 +34,7 @@ export default async function UpgradePage({
   const { locale } = await params
   setRequestLocale(locale)
 
-  const user = await getSessionUser()
+  const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
 
   const [plans, held, benefits, references] = await Promise.all([

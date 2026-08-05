@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { LeaderboardView } from '@/components/leaderboard/LeaderboardView'
-import { getSessionUser } from '@/lib/auth/session'
+import { getViewerUser } from '@/lib/auth/session'
 import { getLeaderboardData } from '@/lib/leaderboard/data'
 
 export async function generateMetadata({
@@ -27,7 +27,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   const { locale } = await params
   setRequestLocale(locale)
 
-  const user = await getSessionUser()
+  const user = await getViewerUser()
   if (!user) return null
 
   const data = await getLeaderboardData(user.id)

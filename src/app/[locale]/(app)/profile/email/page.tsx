@@ -4,7 +4,7 @@ import { setRequestLocale } from 'next-intl/server'
 
 import { ChangeEmailForm } from '@/components/profile/ChangeEmailForm'
 import { redirect } from '@/i18n/navigation'
-import { getSessionUser } from '@/lib/auth/session'
+import { getViewerUser } from '@/lib/auth/session'
 import { isTwoFactorEnabled } from '@/lib/security/login-2fa'
 
 export const metadata: Metadata = {
@@ -21,7 +21,7 @@ export default async function ChangeEmailPage({
   const { locale } = await params
   setRequestLocale(locale)
 
-  const user = await getSessionUser()
+  const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
 
   return (
