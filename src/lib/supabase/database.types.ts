@@ -3454,6 +3454,17 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_commission_totals: {
+        Args: { p_from?: string; p_to?: string }
+        Returns: {
+          affiliates_owed: number
+          cleared_minor: number
+          owed_minor: number
+          paid_minor: number
+          pending_minor: number
+          reversed_minor: number
+        }[]
+      }
       admin_count_unread_support: { Args: never; Returns: number }
       admin_course_curriculum: {
         Args: { p_product_id: string }
@@ -3727,6 +3738,31 @@ export type Database = {
           status: string
         }[]
       }
+      admin_list_affiliates: {
+        Args: { p_scope?: string }
+        Returns: {
+          activated_at: string
+          affiliate_code: string
+          affiliate_id: string
+          balance_minor: number
+          clicks: number
+          conversions: number
+          depth_now: number
+          email: string
+          gross_minor: number
+          joined_at: string
+          name: string
+          paid_out_minor: number
+          pending_minor: number
+          promotion_ends: string
+          recruits: number
+          reversed_minor: number
+          status: string
+          tier: string
+          upline_name: string
+          user_id: string
+        }[]
+      }
       admin_list_announcements: {
         Args: { p_limit?: number }
         Returns: {
@@ -3750,6 +3786,49 @@ export type Database = {
           id: string
           note: string
           target: string
+        }[]
+      }
+      admin_list_commissions: {
+        Args: { p_affiliate_id?: string; p_from?: string; p_status?: string }
+        Returns: {
+          affiliate_code: string
+          affiliate_id: string
+          affiliate_name: string
+          amount_minor: number
+          clears_at: string
+          created_at: string
+          entry_type: string
+          ledger_id: string
+          level: number
+          order_id: string
+          product_title: string
+          reason: string
+          status: string
+        }[]
+      }
+      admin_list_conversions: {
+        Args: { p_affiliate_id?: string; p_from?: string; p_to?: string }
+        Returns: {
+          affiliate_code: string
+          affiliate_name: string
+          attributed_at: string
+          attributed_by: string
+          base_minor: number
+          buyer_name: string
+          clicked_at: string
+          conversion_id: string
+          l1_minor: number
+          l1_rate: number
+          l2_affiliate_name: string
+          l2_depth_at_conversion: number
+          l2_minor: number
+          l2_rate: number
+          order_id: string
+          order_kind: string
+          product_purpose: string
+          product_title: string
+          status: string
+          subid: string
         }[]
       }
       admin_list_game_prizes: {
@@ -4257,6 +4336,32 @@ export type Database = {
           p_status: Database["public"]["Enums"]["ad_status"]
         }
         Returns: Database["public"]["Enums"]["ad_status"]
+      }
+      admin_set_affiliate_status: {
+        Args: {
+          p_admin_id: string
+          p_affiliate_id: string
+          p_reason?: string
+          p_status: Database["public"]["Enums"]["affiliate_status"]
+        }
+        Returns: {
+          activated_at: string | null
+          affiliate_code: string
+          created_at: string
+          id: string
+          parent_affiliate_id: string | null
+          status: Database["public"]["Enums"]["affiliate_status"]
+          terms_accepted_at: string | null
+          terms_version: number | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "affiliate_accounts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       admin_set_config: {
         Args: { p_admin_id: string; p_values: Json }
@@ -4904,6 +5009,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      expire_affiliate_entitlements: { Args: never; Returns: number }
       expire_subscriptions: {
         Args: never
         Returns: {
@@ -5276,6 +5382,10 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { p_user_id?: string }; Returns: boolean }
+      issue_certificate_if_earned: {
+        Args: { p_product_id: string; p_user_id: string }
+        Returns: string
+      }
       leaderboard_counted_types: {
         Args: never
         Returns: Database["public"]["Enums"]["ledger_entry_type"][]
@@ -5825,6 +5935,15 @@ export type Database = {
       }
       revoke_other_sessions: { Args: never; Returns: number }
       revoke_session: { Args: { p_session_id: string }; Returns: boolean }
+      run_affiliate_maintenance: {
+        Args: never
+        Returns: {
+          cleared: number
+          errors: string[]
+          expired: number
+          warned: number
+        }[]
+      }
       second_level_referral: {
         Args: { p_referee_id: string }
         Returns: {
@@ -6111,6 +6230,7 @@ export type Database = {
           question_position: number
         }[]
       }
+      warn_expiring_entitlements: { Args: never; Returns: number }
     }
     Enums: {
       ad_answer_outcome:

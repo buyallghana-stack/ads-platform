@@ -15,6 +15,18 @@ import { createAdminClient } from '@/lib/supabase/admin'
  * Guarded by CRON_SECRET: the route would otherwise be an unauthenticated
  * endpoint that erases accounts. Vercel sends the secret as a bearer token on
  * its scheduled invocations.
+ *
+ * ⚠️ IT ALSO RUNS THE PHASE 2 NIGHTLY MAINTENANCE, and that is a workaround
+ * rather than a design. The Vercel plan is Hobby: two cron jobs, daily only,
+ * and both slots were already taken by this route and `refresh-fx`. Affiliate
+ * maintenance — expiring lapsed entitlements, clearing commissions whose hold
+ * has passed, warning people whose year is running out — had nowhere to be
+ * scheduled, so it rides here.
+ *
+ * It is deliberately LAST and deliberately cannot fail this route: deletions
+ * are a promise in the privacy policy and must not be skipped because a
+ * commission did not clear. If a third cron slot ever exists, this belongs in
+ * its own route at its own hour.
  */
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -59,10 +71,26 @@ export async function GET(request: Request) {
     outcomes[outcome] = (outcomes[outcome] ?? 0) + 1
   }
 
+  /*
+    Phase 2 maintenance, in its own try. The SQL function already isolates its
+    three steps from each other and raises a system alert if any of them fail;
+    this catch is the outer belt, so a Phase 2 problem can never turn a
+    successful deletion run into a 500 that looks like deletions broke.
+  */
+  let maintenance: unknown = null
+  try {
+    const { data, error: maintenanceError } = await admin.rpc('run_affiliate_maintenance')
+    if (maintenanceError) throw maintenanceError
+    maintenance = Array.isArray(data) ? data[0] : data
+  } catch (maintenanceError) {
+    reportUnexpected(maintenanceError, 'cron.affiliate-maintenance')
+  }
+
   return NextResponse.json({
     due: rows.length,
     outcomes,
     failures: failures.length,
+    maintenance,
     ranAt: new Date().toISOString(),
   })
 }
