@@ -1,3 +1,4 @@
+import { afterAll } from 'vitest'
 import { Client } from 'pg'
 
 /**
@@ -40,6 +41,85 @@ export const HAS_DB = Boolean(CONNECTION)
 export type Tx = Client
 
 /**
+ * ONE CONNECTION, REUSED, rather than one per test.
+ *
+ * WHY THIS CHANGED. Opening a connection to Supabase costs a TCP round trip
+ * plus a TLS handshake plus authentication — measured at ~1.7 SECONDS from
+ * here. At 430 tests that was about twelve minutes of every run spent
+ * connecting, and worse than the time was the variance: two separate runs
+ * failed with a different random pair of tests timing out at exactly the
+ * limit, every one of them passing in isolation. The tests were not slow; the
+ * connecting was.
+ *
+ * WHY IT IS SAFE, which is the part worth checking before copying this
+ * pattern anywhere else:
+ *
+ *   The suite runs STRICTLY SERIALLY — `fileParallelism: false` and
+ *   `sequence.concurrent: false` in vitest.config.ts. Two tests are never in
+ *   flight at once, so they cannot interleave on one connection.
+ *
+ *   Nothing leaks between tests through session state. Everything a test
+ *   changes is either a row (undone by the rollback) or transaction-local:
+ *   `actAs`/`actAsAdmin` pass `true` to `set_config`, and the one place a role
+ *   is switched uses `set local role`. Checked before this was written, and it
+ *   is the thing to re-check if a test ever starts using a plain `set`.
+ *
+ * A POISONED SESSION IS DISCARDED, NOT REUSED. If the rollback itself fails —
+ * a dropped link, a session left in an aborted state — the connection is
+ * closed and the next test opens a fresh one. Without that, one bad test would
+ * fail every test after it, which is a far worse failure than the flakiness
+ * this replaces.
+ */
+let shared: Client | null = null
+
+async function discard(): Promise<void> {
+  const dying = shared
+  shared = null
+  if (!dying) return
+  try {
+    await dying.end()
+  } catch {
+    // Already gone. Nothing to do but stop referring to it.
+  }
+}
+
+async function connection(): Promise<Client> {
+  if (shared) return shared
+
+  const client = new Client({
+    connectionString: CONNECTION,
+    // Supabase terminates TLS with its own chain. Verification is off because
+    // the alternative is shipping their CA bundle into the repo for a test
+    // harness; the connection is still encrypted.
+    ssl: { rejectUnauthorized: false },
+    statement_timeout: 15_000,
+  })
+
+  /* pg throws an unhandled 'error' event on an unexpected disconnect, which
+     takes the whole worker down rather than failing one test. Catching it and
+     dropping the reference means the next test simply reconnects. */
+  client.on('error', () => {
+    shared = null
+  })
+
+  await client.connect()
+  shared = client
+  return client
+}
+
+/* Closed when the file's tests finish, or the open handle keeps the worker
+   alive and the run never exits. Wrapped because this module is imported by
+   test files only — if it is ever pulled into a plain script there is no hook
+   context to register against, and that should not be fatal. */
+try {
+  afterAll(async () => {
+    await discard()
+  })
+} catch {
+  // No test context. The connection closes when the process does.
+}
+
+/**
  * Runs `body` inside a transaction and rolls it back.
  *
  * The rollback is in a `finally`, so a failing assertion cleans up exactly as
@@ -54,24 +134,16 @@ export async function withRollback<T>(body: (tx: Tx) => Promise<T>): Promise<T> 
     )
   }
 
-  const client = new Client({
-    connectionString: CONNECTION,
-    // Supabase terminates TLS with its own chain. Verification is off because
-    // the alternative is shipping their CA bundle into the repo for a test
-    // harness; the connection is still encrypted.
-    ssl: { rejectUnauthorized: false },
-    statement_timeout: 15_000,
-  })
+  const client = await connection()
 
-  await client.connect()
   try {
     await client.query('begin')
     return await body(client)
   } finally {
     try {
       await client.query('rollback')
-    } finally {
-      await client.end()
+    } catch {
+      await discard()
     }
   }
 }

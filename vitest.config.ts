@@ -51,22 +51,23 @@ export default defineConfig({
       The suite talks to a database in Paris over the network. The default 5s
       is enough for a fast test and not for a slow one on a bad line.
 
-      RAISED FROM 30s TO 60s ON 2026-08-06, and the reason is worth writing
-      down because "just raise the timeout" is usually the wrong answer.
+      HISTORY, because the number looks arbitrary otherwise. This was 30s,
+      chosen when a round trip was ~130ms and the suite was ~200 tests. On
+      2026-08-06 two consecutive runs failed with a different random pair of
+      tests timing out at exactly the limit, every one of them passing in
+      isolation — the signature of an environment problem, not a logic one.
 
-      This value was chosen when a round trip was ~130ms and the suite was
-      ~200 tests. It is now 430 tests and a round trip measures ~200ms, but the
-      dominant cost is not the queries: `withRollback` opens a FRESH
-      CONNECTION per test, and a connect-plus-TLS-handshake to Supabase
-      measures ~1.7 SECONDS. That is roughly twelve minutes of every run spent
-      connecting, and its variance is what pushes a random test past the limit
-      — a different two each run, all of them passing in isolation.
+      The cause was measured rather than guessed: `withRollback` opened a FRESH
+      CONNECTION per test, and a connect-plus-TLS to Supabase costs ~1.7
+      SECONDS. Across 430 tests that was ~14 minutes of every run, and its
+      variance was what pushed a random test over. The harness now reuses one
+      connection (see tests/support/db.ts) and the run went 1850s → 1030s.
 
-      So the timeout is not masking slow tests; it is a hang detector that was
-      calibrated against different conditions. The real fix is to reuse one
-      connection across the serial suite, which would remove those twelve
-      minutes outright. That is a change to the harness every test depends on
-      and belongs in its own commit, not tacked onto a pricing change.
+      60s is kept rather than restored to 30s: the churn is gone, but the link
+      to Paris measurably varies on this project — it was ~130ms this morning
+      and ~200ms this evening — and this value only ever bounds a HANG. It is
+      not a performance budget, and nothing is hidden behind it now that the
+      per-test overhead has been removed at the source.
     */
     testTimeout: 60_000,
     hookTimeout: 60_000,
