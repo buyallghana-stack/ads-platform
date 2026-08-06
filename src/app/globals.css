@@ -125,26 +125,6 @@
   --color-orange-600: #ea580c;
   --color-orange-700: #c2410c;
 
-  /* --- Jade: the affiliate business (2026-08-06) -------------------------
-     Phase 2 is a second business sharing this login, and the operator chose
-     green for it (F38). But `success` green already means MONEY IN by the
-     fixed assignment above, so a green chip would stop having one meaning.
-
-     Jade is therefore an IDENTITY colour and never a status colour. It marks
-     Market mode — the switch, the active nav item, section accents — and
-     nothing else. Inside Market mode, money in is still `success` and money
-     out is still `danger`, exactly as on the ads side.
-
-     It reads as distinct from success beside it (deeper, and markedly bluer:
-     #059669 against #22c55e), but the separation that actually holds is that
-     the two are never used for the same KIND of thing — one fills a status
-     pill, the other marks which business you are looking at. */
-  --color-jade-50:  #ecfdf5;
-  --color-jade-100: #d1fae5;
-  --color-jade-500: #10b981;
-  --color-jade-600: #059669;
-  --color-jade-700: #047857;
-
   /* --- Type ------------------------------------------------------------- */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
     'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -377,89 +357,6 @@
 }
 
 /* ===========================================================================
-   THE MARKET SKIN
-   ---------------------------------------------------------------------------
-   A second design language for the affiliate business, from the operator's
-   references (docs/phase2/DESIGN.md).
-
-   The first Phase 2 build extended the ads system with jade as an accent, and
-   the verdict was that it looked generic. The diagnosis was in the method
-   rather than the taste: affiliate screens assembled out of ads parts come out
-   looking like ads screens with green in them.
-
-     "the affiliate business does not inherit the design pattern of the ads"
-
-   A SKIN, NOT A FORK. This overrides the same custom properties the existing
-   primitives already read — canvas, surface, the radii — so `Card`, `Badge`,
-   `Button` and everything built on them change wholesale without a second copy
-   of any of them existing. One class on a layout, and the entire language
-   beneath it changes.
-
-   What it actually changes, measured off the references:
-     canvas    cool slate #f1f5f9  ->  warm cream #faf8f5
-     dark      navy #0a0f1c        ->  TRUE BLACK #0a0a0a
-     radius    14px cards          ->  20px cards, full-pill buttons
-     action    brand blue          ->  near-black in light, jade in dark
-
-   Jade survives as the accent because F38 is an operator decision and nothing
-   has rescinded it. What changed is everything around it.
-   =========================================================================== */
-
-@layer base {
-  .market-skin {
-    /* Warm, paper-like. The single biggest reason these screens stop reading
-       as the ads app. */
-    --color-canvas: #faf8f5;
-    --color-surface: #ffffff;
-
-    /* Softer and rounder than the ads shell, per every reference. */
-    --radius-input: 0.875rem;
-    --radius-card: 1.25rem;
-    --radius-panel: 1.75rem;
-
-    /* Hairlines warm with the canvas, or a cream page framed in cool grey
-       looks like two designs fighting. */
-    --color-ink-50: #f5f2ed;
-    --color-ink-100: #efeae3;
-    --color-ink-200: #e4ddd3;
-    --color-ink-300: #d3c9bb;
-
-    /* The primary action. Near-black on cream is the reference's most
-       distinctive move and the thing that makes it read as considered rather
-       than as a template. */
-    --market-action: #17150f;
-    --market-action-hover: #2c2820;
-    --market-on-action: #ffffff;
-  }
-
-  .dark .market-skin {
-    /* TRUE black, not the ads app's navy. On an OLED phone — which is most of
-       this audience — it is a different physical thing, not a darker shade. */
-    --color-canvas: #0a0a0a;
-    --color-surface: #161616;
-
-    --color-ink-50: #141414;
-    --color-ink-100: #1e1e1e;
-    --color-ink-200: #2b2b2b;
-    --color-ink-300: #3d3d3d;
-
-    /* Near-black cannot be the action on a black page, so the accent takes
-       over — exactly the swap the reference makes in its dark variant. */
-    --market-action: #2ee6a8;
-    --market-action-hover: #6ff2c6;
-    --market-on-action: #06231a;
-  }
-}
-
-@utility bg-action {
-  background-color: var(--market-action);
-}
-
-@utility text-on-action {
-  color: var(--market-on-action);
-}
-
-/* ===========================================================================
    Themeable gradients + dark overrides
    =========================================================================== */
 
@@ -548,15 +445,6 @@
     --color-orange-100: #3c2410;
     --color-orange-600: #fb923c;
     --color-orange-700: #fdba74;
-
-    /* Jade lifts further than the other accents on purpose. It has to stay
-       separable from success green on a dark surface, where both compress
-       toward the same lightness — and success's dark step is #5ee29a, so
-       jade goes cooler rather than merely lighter. */
-    --color-jade-50:  #0a2a22;
-    --color-jade-100: #0f3a2f;
-    --color-jade-600: #2ee6a8;
-    --color-jade-700: #6ff2c6;
 
     /* Chart series hues — lifted steps for the dark surface. brand-600 and
        violet-600 sit outside the dark lightness band (validated with the

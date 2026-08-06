@@ -13,7 +13,6 @@ import { SupportChatButton } from '@/components/support/SupportChatButton'
 import { ThemeSwitchButton } from '@/components/theme/ThemeSwitchButton'
 import { Card, CardHeader, StatCard as Stat } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { ModeSwitch } from '@/components/app/ModeSwitch'
 import { Link, redirect } from '@/i18n/navigation'
 import { getProfile, getViewerUser } from '@/lib/auth/session'
 import { pickDisplayName } from '@/lib/dashboard/display-name'
@@ -109,24 +108,6 @@ export default async function HomePage({
           <SupportChatButton />
         </div>
       </header>
-
-      {/*
-        The way to the second business, on a phone.
-
-        From md up the switch is pinned in the sidebar and this is hidden. Below
-        md there is no sidebar and the bottom tab bar is full at its documented
-        five-destination ceiling, so each mode's home screen carries the switch
-        OUT of itself — Market's lives in MarketHeader, and this is Earn's.
-
-        Its own row rather than the header above: that row already holds the
-        logo and three icon buttons, and a ~200px segmented control does not
-        fit beside them at 390px.
-
-        ⚠️ Without this, a phone user in Earn mode has NO route to Market at
-        all — the entrance to a whole business simply does not exist on the
-        device this audience actually uses. It shipped that way in 33fa705.
-      */}
-      <ModeSwitch className="md:hidden" />
 
       <div className="animate-rise">
         <h1

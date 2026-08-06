@@ -177,17 +177,43 @@ export const getShopProduct = cache(
   },
 )
 
-/** What an affiliate needs before promoting a product: what they earn on it in
- *  cash, whether they may, and their link. Null when signed out. */
+/**
+ * What an affiliate needs before promoting a product: what they earn on it in
+ * cash, whether they may, and their link.
+ *
+ * The shape lives here rather than beside a component, so the read survives the
+ * UI being rebuilt. `l1EarnMinor` is computed in Postgres with the same price
+ * source and rounding `pay_conversion_commissions` uses — never multiplied in a
+ * browser, or the number shown drifts from the number paid.
+ */
+export type PromoteInfo = {
+  ok: boolean
+  canPromote?: boolean
+  /** Four distinct ways to be unable to promote, each needing its own sentence
+   *  and its own next step. Never collapsed to a boolean. */
+  reason?: 'no_account' | 'pending' | 'lapsed' | 'tier' | 'suspended' | null
+  code?: string | null
+  tier?: 'beginner' | 'professional' | null
+  depth?: number
+  minTier?: 'beginner' | 'professional'
+  priceMinor?: number
+  l1Rate?: number | null
+  l2Rate?: number | null
+  l1EarnMinor?: number | null
+  l2EarnMinor?: number | null
+  windowDays?: number
+  holdDays?: number
+}
+
 export const getPromoteInfo = cache(
-  async (userId: string, productId: string) => {
+  async (userId: string, productId: string): Promise<PromoteInfo | null> => {
     const supabase = createAdminClient()
     const { data, error } = await supabase.rpc('affiliate_promote_info', {
       p_user_id: userId,
       p_product_id: productId,
     })
     if (error || !data) return null
-    return data as unknown as import('@/components/market/PromotePanel').PromoteInfo
+    return data as unknown as PromoteInfo
   },
 )
 

@@ -1,24 +1,12 @@
 'use client'
 
-import {
-  Gem,
-  GraduationCap,
-  House,
-  LayoutGrid,
-  Link2,
-  PlayCircle,
-  Store,
-  UserRound,
-  Users,
-} from 'lucide-react'
+import { Gem, House, PlayCircle, UserRound, Users } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Logo } from '@/components/brand/Logo'
-import { ModeSwitch } from '@/components/app/ModeSwitch'
 import { Avatar } from '@/components/profile/Avatar'
 import { Link, usePathname } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
-import { type AppMode, modeForPath } from '@/lib/market/mode'
 
 /**
  * App navigation, one component per breakpoint convention (2026-07-24
@@ -41,58 +29,17 @@ import { type AppMode, modeForPath } from '@/lib/market/mode'
  * longer word in either language is the thing to check before adding another.
  */
 
-/*
-  TWO SETS, since 2026-08-06. Phase 2 is a second business, and the note above
-  is the reason it could not simply be a sixth tab: five is the ceiling and the
-  bar was already at it. Rather than demote an ads destination to make room for
-  a whole other business, each business gets its own five and the ModeSwitch
-  moves between them. See src/lib/market/mode.ts for the full reasoning.
-
-  Both sets end with Profile in the same slot, because the account is shared
-  and its position should not move under the thumb when the mode changes.
-  Everything before it differs, so nothing else is in a misleading place.
-*/
-const DESTINATIONS: Record<AppMode, ReadonlyArray<{ href: string; key: string; Icon: typeof House }>> =
-  {
-    earn: [
-      { href: '/dashboard', key: 'home', Icon: House },
-      { href: '/ads', key: 'ads', Icon: PlayCircle },
-      { href: '/upgrade', key: 'upgrade', Icon: Gem },
-      { href: '/team', key: 'team', Icon: Users },
-      { href: '/profile', key: 'profile', Icon: UserRound },
-    ],
-    market: [
-      { href: '/market', key: 'marketHome', Icon: LayoutGrid },
-      { href: '/shop', key: 'shop', Icon: Store },
-      { href: '/learn', key: 'learn', Icon: GraduationCap },
-      { href: '/links', key: 'links', Icon: Link2 },
-      { href: '/profile', key: 'profile', Icon: UserRound },
-    ],
-  }
+const DESTINATIONS = [
+  { href: '/dashboard', key: 'home', Icon: House },
+  { href: '/ads', key: 'ads', Icon: PlayCircle },
+  { href: '/upgrade', key: 'upgrade', Icon: Gem },
+  { href: '/team', key: 'team', Icon: Users },
+  { href: '/profile', key: 'profile', Icon: UserRound },
+] as const
 
 function useActive() {
   const pathname = usePathname()
   return (href: string) => pathname === href || pathname.startsWith(href + '/')
-}
-
-/*
-  The lit colour is the MODE's colour, not a fixed brand blue — it is the one
-  place the two businesses are told apart at a glance while you are inside one
-  of them. Jade is identity here, never status; see globals.css.
-*/
-const ACTIVE_TEXT: Record<AppMode, string> = {
-  earn: 'text-brand-600',
-  market: 'text-jade-700',
-}
-
-const ACTIVE_RAIL: Record<AppMode, string> = {
-  earn: 'bg-brand-50 text-brand-700',
-  market: 'bg-jade-50 text-jade-700',
-}
-
-const ACTIVE_RING: Record<AppMode, string> = {
-  earn: 'ring-brand-600',
-  market: 'ring-jade-600',
 }
 
 /**
@@ -108,13 +55,11 @@ function ProfileGlyph({
   avatarUrl,
   name,
   active,
-  mode,
   className,
 }: {
   avatarUrl: string | null
   name: string | null
   active: boolean
-  mode: AppMode
   className: string
 }) {
   if (!avatarUrl) {
@@ -124,7 +69,7 @@ function ProfileGlyph({
     <Avatar
       name={name}
       src={avatarUrl}
-      className={cn(className, active && ['ring-2', ACTIVE_RING[mode]])}
+      className={cn(className, active && 'ring-2 ring-brand-600')}
     />
   )
 }
@@ -136,7 +81,6 @@ export type NavUser = { avatarUrl: string | null; name: string | null }
 export function BottomTabBar({ user }: { user?: NavUser }) {
   const t = useTranslations('nav')
   const isActive = useActive()
-  const mode = modeForPath(usePathname())
 
   return (
     <nav
@@ -149,7 +93,7 @@ export function BottomTabBar({ user }: { user?: NavUser }) {
       )}
     >
       <ul className="mx-auto flex max-w-md">
-        {DESTINATIONS[mode].map(({ href, key, Icon }) => {
+        {DESTINATIONS.map(({ href, key, Icon }) => {
           const active = isActive(href)
           return (
             <li key={key} className="flex-1">
@@ -159,7 +103,7 @@ export function BottomTabBar({ user }: { user?: NavUser }) {
                 className={cn(
                   'flex flex-col items-center gap-1 pb-2 pt-2.5 text-[0.6875rem] font-medium',
                   'transition-colors',
-                  active ? ACTIVE_TEXT[mode] : 'text-ink-500 active:text-ink-700',
+                  active ? 'text-brand-600' : 'text-ink-500 active:text-ink-700',
                 )}
               >
                 {key === 'profile' ? (
@@ -167,7 +111,6 @@ export function BottomTabBar({ user }: { user?: NavUser }) {
                     avatarUrl={user?.avatarUrl ?? null}
                     name={user?.name ?? null}
                     active={active}
-                    mode={mode}
                     className="size-5"
                   />
                 ) : (
@@ -204,7 +147,6 @@ export function Sidebar({
 }) {
   const t = useTranslations('nav')
   const isActive = useActive()
-  const mode = modeForPath(usePathname())
 
   return (
     <aside className="sticky top-0 hidden h-dvh w-56 shrink-0 flex-col border-r border-ink-200 bg-surface px-3 py-5 md:flex xl:w-60">
@@ -212,16 +154,9 @@ export function Sidebar({
         <Logo variant="dark" />
       </div>
 
-      {/* Directly under the brand, above the destinations it governs — the
-          reading order matches the hierarchy: which business, then where in
-          it. On a phone there is nowhere to put this (the bar is full and
-          there is no global header), so the switch lives in each mode's
-          dashboard header instead. */}
-      <ModeSwitch className="mt-5" />
-
-      <nav aria-label={t('label')} className="mt-6 flex flex-1 flex-col">
+      <nav aria-label={t('label')} className="mt-7 flex flex-1 flex-col">
         <ul className="flex flex-col gap-1">
-          {DESTINATIONS[mode].map(({ href, key, Icon }) => {
+          {DESTINATIONS.map(({ href, key, Icon }) => {
             const active = isActive(href)
             return (
               <li key={key}>
@@ -232,7 +167,7 @@ export function Sidebar({
                     'flex items-center gap-2.5 rounded-(--radius-input) px-3 py-2 text-sm font-medium',
                     'transition-colors',
                     active
-                      ? ACTIVE_RAIL[mode]
+                      ? 'bg-brand-50 text-brand-700'
                       : 'text-ink-600 hover:bg-ink-100 hover:text-ink-900',
                   )}
                 >
@@ -241,8 +176,7 @@ export function Sidebar({
                       avatarUrl={user?.avatarUrl ?? null}
                       name={user?.name ?? null}
                       active={active}
-                      mode={mode}
-                      className="size-4.5"
+                        className="size-4.5"
                     />
                   ) : (
                     <Icon aria-hidden className="size-4.5" strokeWidth={active ? 2.2 : 2} />
@@ -254,10 +188,7 @@ export function Sidebar({
           })}
         </ul>
 
-        {/* Earn mode only. The teaser sells an ADS plan, and offering one at
-            the foot of the affiliate navigation would be the exact confusion
-            the two modes exist to prevent. */}
-        <div className="mt-auto flex flex-col gap-3">{mode === 'earn' && upgradeSlot}</div>
+        <div className="mt-auto flex flex-col gap-3">{upgradeSlot}</div>
       </nav>
     </aside>
   )
