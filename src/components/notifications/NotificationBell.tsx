@@ -59,7 +59,13 @@ export function NotificationBell({
         aria-hidden
         className={cn(
           'absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-danger-600 px-1',
-          'text-[0.625rem] font-bold leading-4 text-white ring-2 ring-[--color-canvas]',
+          /* Ring is `surface`, not `canvas`: since the Home header grouped the
+             three icons into a bordered pill the bell sits on a raised sheet,
+             and a canvas-coloured ring cut a visible notch out of it.
+             (`ring-[--color-canvas]` was also the v3 arbitrary-value syntax,
+             which Tailwind 4 does not compile — so this ring was not being
+             drawn at all.) */
+          'text-[0.625rem] font-bold leading-4 text-white ring-2 ring-surface',
         )}
       >
         {unreadCount > 9 ? '9+' : unreadCount}

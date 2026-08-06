@@ -521,7 +521,8 @@
     },
     "adsWaiting": "{n} ads waiting for you today",
     "capReachedToday": "That is every ad for today — back at midnight",
-    "tierCap": "{n} ads a day"
+    "tierCap": "{n} ads a day",
+    "tierMultiplier": "×{x} on every ad"
   },
   "nav": {
     "label": "Main navigation",

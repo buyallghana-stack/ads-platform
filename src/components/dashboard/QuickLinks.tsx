@@ -24,21 +24,50 @@ import { cn } from '@/lib/cn'
  * balance.
  */
 
+type Tone = 'violet' | 'orange' | 'brand' | 'success'
+
 type Item = {
   key: 'games' | 'leaderboard' | 'gift' | 'tasks'
   href: string
   icon: React.ReactNode
   ready: boolean
+  tone: Tone
+}
+
+/*
+  WHY THESE FOUR COLOURS AND NOT FOUR OF THE SAME.
+
+  The row used to be four orange chips. Orange appears nowhere else on the
+  dashboard — the stat cards above it are brand blue, violet and success green
+  — so the band read as a strip lifted from another product and dropped in.
+
+  Four identical chips also do no work. Colour on a row of shortcuts is the
+  cheapest way to make a destination findable by memory rather than by reading,
+  which is the whole point of a shortcut; when every tile is the same hue the
+  eye has to read all four labels every time.
+
+  So each tile takes a tone that is (a) already on this screen and (b) means
+  something: violet for Games matches the tier card it sits under, orange stays
+  on the Leaderboard trophy where a gold-ish tone is the obvious one, brand blue
+  marks Gift code as the one that puts money in, and success green marks Tasks
+  as the things-to-complete tile. The tokens are the same accent set StatCard
+  uses, so nothing new enters the palette.
+*/
+const TONE_ON: Record<Tone, string> = {
+  violet: 'border-violet-600/20 bg-violet-50 text-violet-600',
+  orange: 'border-orange-500/25 bg-orange-50 text-orange-600',
+  brand: 'border-brand-600/20 bg-brand-50 text-brand-600',
+  success: 'border-success-500/25 bg-success-50 text-success-600',
 }
 
 /* Games are built but gated: `games_enabled` is off until the licensing
    question around paying for chances at a random prize is settled, so the
    tile follows the switch rather than being hard-coded live. */
 const ITEMS: Item[] = [
-  { key: 'games', href: '/games', icon: <Gamepad2 />, ready: false },
-  { key: 'leaderboard', href: '/leaderboard', icon: <Trophy />, ready: true },
-  { key: 'gift', href: '/gift-code', icon: <Gift />, ready: true },
-  { key: 'tasks', href: '/tasks', icon: <ListChecks />, ready: true },
+  { key: 'games', href: '/games', icon: <Gamepad2 />, ready: false, tone: 'violet' },
+  { key: 'leaderboard', href: '/leaderboard', icon: <Trophy />, ready: true, tone: 'orange' },
+  { key: 'gift', href: '/gift-code', icon: <Gift />, ready: true, tone: 'brand' },
+  { key: 'tasks', href: '/tasks', icon: <ListChecks />, ready: true, tone: 'success' },
 ]
 
 /* The tile, shared so an enabled and a disabled one cannot drift apart in
@@ -47,10 +76,12 @@ function Tile({
   icon,
   label,
   ready,
+  tone,
 }: {
   icon: React.ReactNode
   label: string
   ready: boolean
+  tone: Tone
 }) {
   return (
     <span
@@ -65,9 +96,7 @@ function Tile({
         aria-hidden
         className={cn(
           'grid size-11 place-items-center rounded-full border transition-colors',
-          ready
-            ? 'border-orange-500/25 bg-orange-50 text-orange-600'
-            : 'border-ink-200 bg-ink-50 text-ink-300',
+          ready ? TONE_ON[tone] : 'border-ink-200 bg-ink-50 text-ink-300',
         )}
       >
         {/* Sized here rather than on each icon so the four are identical. */}
@@ -103,7 +132,7 @@ export function QuickLinks({
         const item = raw.key === 'games' ? { ...raw, ready: gamesEnabled } : raw
         return item.ready ? (
           <Link key={item.key} href={item.href} className="rounded-(--radius-card)">
-            <Tile icon={item.icon} label={labels[item.key]} ready />
+            <Tile icon={item.icon} label={labels[item.key]} ready tone={item.tone} />
           </Link>
         ) : (
           <span
@@ -113,7 +142,7 @@ export function QuickLinks({
                the markup has to say the same thing. */
             title={`${labels[item.key]} — ${soonLabel}`}
           >
-            <Tile icon={item.icon} label={labels[item.key]} ready={false} />
+            <Tile icon={item.icon} label={labels[item.key]} ready={false} tone={item.tone} />
             <span className="sr-only">{soonLabel}</span>
           </span>
         )

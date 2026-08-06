@@ -521,7 +521,8 @@
     },
     "adsWaiting": "{n} publicités vous attendent aujourd’hui",
     "capReachedToday": "C’est tout pour aujourd’hui — retour à minuit",
-    "tierCap": "{n} publicités par jour"
+    "tierCap": "{n} publicités par jour",
+    "tierMultiplier": "×{x} sur chaque publicité"
   },
   "nav": {
     "label": "Navigation principale",

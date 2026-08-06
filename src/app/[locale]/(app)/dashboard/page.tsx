@@ -79,6 +79,8 @@ export default async function HomePage({
   const cap = status?.daily_ad_cap ?? 0
   const done = status?.ads_completed_today ?? 0
   const remaining = status?.ads_remaining_today ?? 0
+  // Resolved across stacked plans and already clamped by the database.
+  const multiplier = Number(status?.reward_multiplier ?? 1)
   const { name: pickedName, sizeClass } = pickDisplayName(profile?.full_name)
   const greetName = pickedName ?? t('there')
 
@@ -106,8 +108,23 @@ export default async function HomePage({
           their session on a phone. */}
       <header className="flex items-center gap-3">
         <Logo variant="dark" className="md:hidden" />
-        <div className="ml-auto flex items-center gap-0.5">
+        {/*
+          The three icons used to float loose on the wash: no container, no
+          edge, nothing saying they belong together or that they are controls
+          at all. Against `bg-field` they read as decoration.
+
+          Grouping them in one bordered pill fixes both problems at once — it
+          gives the glyphs a surface to sit on so they have contrast wherever
+          the gradient happens to be, and it says "toolbar" without adding
+          three text labels that would eat the header on a 390px phone.
+
+          The bell keeps a divider after it because it is the only one of the
+          three that carries state (the unread badge); the theme switch and
+          support chat are stateless twins and sit together.
+        */}
+        <div className="ml-auto flex items-center rounded-full border border-ink-200 bg-surface/80 p-0.5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] backdrop-blur-sm">
           <NotificationBell notifications={notifications} unreadCount={unreadCount} now={now} />
+          <span aria-hidden className="mx-0.5 h-5 w-px bg-ink-200" />
           <ThemeSwitchButton />
           <SupportChatButton />
         </div>
@@ -248,18 +265,27 @@ export default async function HomePage({
           progress={cap > 0 ? done / cap : 0}
         />
         {/* The plan NAME alone is a label; the multiplier is what the plan
-            actually does, and it appeared nowhere on this screen. "Gold" tells
-            somebody which box they are in — "×2.50 on every ad" tells them why
-            they paid for it. */}
+            actually does. "Gold" tells somebody which box they are in —
+            "×2.50 on every ad" tells them why they paid for it.
+
+            It arrives from `get_user_earning_status` (migration 147) rather
+            than from a `tiers` read, because stacked subscriptions combine and
+            are then clamped: the effective multiplier of a user holding two
+            plans is in no single row of that table.
+
+            At ×1 there is nothing to boast about, so the card falls back to the
+            cap. Printing "×1.00 on every ad" to a free user would dress the
+            absence of a benefit up as one. */}
         <Stat
           label={t('tier')}
           value={status?.tier_name ?? '—'}
-          /* The daily cap, which the plan grants and `get_user_earning_status`
-             already returns. The reward MULTIPLIER would be the better line —
-             it is the plan's real value — but the RPC does not return it, and a
-             migration to widen a widely-called function is not worth a subtitle.
-             The cap is true, concrete, and already in hand. */
-          sublabel={cap > 0 ? t('tierCap', { n: cap }) : undefined}
+          sublabel={
+            multiplier > 1
+              ? t('tierMultiplier', { x: format.number(multiplier, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) })
+              : cap > 0
+                ? t('tierCap', { n: cap })
+                : undefined
+          }
           icon={<Trophy />}
           tone="violet"
         />

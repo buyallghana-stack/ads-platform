@@ -5331,6 +5331,7 @@ export type Database = {
           free_earning_over: boolean
           points_cap_reached: boolean
           points_earned_today: number
+          reward_multiplier: number
           tier_name: string
           tier_slug: string
         }[]
