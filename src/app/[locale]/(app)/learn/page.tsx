@@ -29,7 +29,7 @@ export default async function LearnPage({
   const courses = data.training ?? []
 
   return (
-    <>
+    <div className="market-skin min-h-full bg-canvas">
       <MarketHeader title={t('title')} />
       <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 md:px-8 md:py-7">
         {courses.length === 0 ? (
@@ -77,6 +77,6 @@ export default async function LearnPage({
           </ul>
         )}
       </div>
-    </>
+    </div>
   )
 }

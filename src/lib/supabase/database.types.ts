@@ -4477,6 +4477,7 @@ export type Database = {
       admin_delete_quiz: { Args: { p_admin_id: string; p_quiz_id: string }; Returns: undefined }
       shop_products: { Args: { p_user_id?: string }; Returns: Json[] }
       shop_product: { Args: { p_slug: string; p_user_id?: string }; Returns: Json }
+      affiliate_promote_info: { Args: { p_product_id: string; p_user_id: string }; Returns: Json }
       affiliate_dashboard: { Args: { p_user_id: string }; Returns: Json }
       lesson_for_learner: { Args: { p_lesson_id: string; p_user_id: string }; Returns: Json }
       affiliate_depth_now: { Args: { p_affiliate_id: string }; Returns: number }

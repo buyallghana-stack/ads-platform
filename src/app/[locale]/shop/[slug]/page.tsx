@@ -6,7 +6,8 @@ import { ProductDetail } from '@/components/market/ProductDetail'
 import { Link } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
 import { recordClick } from '@/lib/market/attribution'
-import { getShopProduct } from '@/lib/market/data'
+import { getPromoteInfo, getShopProduct } from '@/lib/market/data'
+import { getOrigin } from '@/lib/request-context'
 
 /**
  * One product.
@@ -53,6 +54,15 @@ export default async function ProductPage({
     })
   }
 
+  /* What this person could earn from promoting it, and whether they may. Null
+     when signed out — a stranger has no affiliate standing to report. The
+     origin is resolved here because the link has to be absolute to be
+     copyable, and `window.location` does not exist while this renders. */
+  const [promote, origin] = await Promise.all([
+    user ? getPromoteInfo(user.id, detail.product.id) : Promise.resolve(null),
+    getOrigin(),
+  ])
+
   return (
     <>
       <MarketHeader title={detail.product.title} bare={!user} />
@@ -63,7 +73,12 @@ export default async function ProductPage({
         >
           ← Shop
         </Link>
-        <ProductDetail detail={detail} signedIn={Boolean(user)} />
+        <ProductDetail
+          detail={detail}
+          signedIn={Boolean(user)}
+          promote={promote}
+          origin={origin}
+        />
       </div>
     </>
   )

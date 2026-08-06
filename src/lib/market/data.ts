@@ -153,3 +153,17 @@ export const getShopProduct = cache(
     return data as unknown as ShopDetail
   },
 )
+
+/** What an affiliate needs before promoting a product: what they earn on it in
+ *  cash, whether they may, and their link. Null when signed out. */
+export const getPromoteInfo = cache(
+  async (userId: string, productId: string) => {
+    const supabase = createAdminClient()
+    const { data, error } = await supabase.rpc('affiliate_promote_info', {
+      p_user_id: userId,
+      p_product_id: productId,
+    })
+    if (error || !data) return null
+    return data as unknown as import('@/components/market/PromotePanel').PromoteInfo
+  },
+)

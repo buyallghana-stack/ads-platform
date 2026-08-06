@@ -1,37 +1,44 @@
-import { Check, Layers } from 'lucide-react'
+import { Layers } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
-import { Link } from '@/i18n/navigation'
+import { OfferPanel, PanelAction } from '@/components/market/OfferPanel'
 import { cedis } from '@/lib/market/money'
 import type { TrainingOffer } from '@/lib/market/data'
 
 /**
- * What somebody with no affiliate account sees.
+ * What somebody with no affiliate account sees on the Market dashboard.
  *
- * This is a sales screen, and the honest one is better than the enthusiastic
- * one: paid entry into a programme that pays for recruiting is the part of
- * Phase 2 under real regulatory scrutiny (DECISIONS.md §6). Copy that promises
- * earnings is the single fastest way to turn a defensible structure into an
- * indefensible one, so this screen states what you get and what it costs, and
- * makes no claim about what you will make.
+ *   "if no purchase of the training program is made should only display
+ *    the pricing there"  — operator, 2026-08-06
  *
- * The two courses differ in exactly one thing that matters — one commission
- * level or two — so that difference is the comparison, stated in words rather
- * than left for the reader to infer from a feature list.
+ * So: the courses and what they cost. No statistics, no explanation of a
+ * programme they have not joined, no preview of a dashboard they cannot fill.
  *
- * EMPTY IS A REAL STATE. Both courses ship as `draft`, so until the operator
- * publishes them this list is empty for everybody. It must not render as a
- * broken page.
+ * ---------------------------------------------------------------------------
+ * THE COMPARISON IS ONE FACT, NOT A FEATURE TABLE
+ *
+ * The two courses teach the same material. The ONLY thing that differs is how
+ * far the commission reaches — one level or two — so that is the difference the
+ * panels lead with. A feature matrix would invent distinctions that do not
+ * exist in order to fill it.
+ *
+ * ---------------------------------------------------------------------------
+ * NO EARNINGS CLAIM
+ *
+ * Not a projection, not an average, not "affiliates typically…". This is the
+ * screen where an income claim would most naturally appear and it is the exact
+ * thing that turns a defensible programme into an indefensible one
+ * (DECISIONS.md §6). What it says is what you get and what it costs.
  */
 export async function TrainingOffers({ offers }: { offers: TrainingOffer[] }) {
   const t = await getTranslations('market.training')
 
   if (offers.length === 0) {
     return (
-      <div className="rounded-(--radius-card) border border-dashed border-ink-300 bg-surface px-4 py-10 text-center">
-        <Layers aria-hidden className="mx-auto size-6 text-ink-400" />
-        <p className="mt-3 text-sm font-semibold text-ink-900">{t('soon.title')}</p>
-        <p className="mx-auto mt-1 max-w-sm text-[0.8125rem] leading-snug text-ink-600">
+      <div className="rounded-(--radius-panel) border border-dashed border-ink-300 bg-surface px-4 py-12 text-center">
+        <Layers aria-hidden className="mx-auto size-7 text-ink-400" strokeWidth={1.5} />
+        <p className="mt-3 text-[0.9375rem] font-semibold text-ink-900">{t('soon.title')}</p>
+        <p className="mx-auto mt-1 max-w-sm text-[0.875rem] leading-snug text-ink-600">
           {t('soon.body')}
         </p>
       </div>
@@ -39,46 +46,25 @@ export async function TrainingOffers({ offers }: { offers: TrainingOffer[] }) {
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid gap-3 lg:grid-cols-2">
       {offers.map((offer) => {
         const two = offer.depth >= 2
         return (
-          <div
+          <OfferPanel
             key={offer.product_id}
-            className="flex flex-col rounded-(--radius-card) border border-ink-200 bg-surface p-5"
+            tone={two ? 'earn' : 'buy'}
+            label={offer.title}
+            headline={cedis(offer.price_minor)}
+            sub={t(two ? 'professional.summary' : 'beginner.summary')}
+            benefits={[
+              <span key="levels">{t('perks.levels', { n: offer.depth })}</span>,
+              <span key="year">{t('perks.year')}</span>,
+              <span key="keep">{t('perks.keep')}</span>,
+              <span key="cert">{t('perks.certificate')}</span>,
+            ]}
           >
-            <div className="flex items-baseline justify-between gap-3">
-              <h2 className="text-base font-semibold text-ink-900">{offer.title}</h2>
-              <p className="shrink-0 text-lg font-semibold tabular-nums text-ink-900">
-                {cedis(offer.price_minor)}
-              </p>
-            </div>
-
-            <p className="mt-1 text-[0.8125rem] leading-snug text-ink-600">
-              {t(two ? 'professional.summary' : 'beginner.summary')}
-            </p>
-
-            <ul className="mt-4 flex-1 space-y-2">
-              {[
-                t('perks.levels', { n: offer.depth }),
-                t('perks.year'),
-                t('perks.keep'),
-                t('perks.certificate'),
-              ].map((line) => (
-                <li key={line} className="flex gap-2.5 text-[0.8125rem] leading-snug text-ink-700">
-                  <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-jade-600" />
-                  {line}
-                </li>
-              ))}
-            </ul>
-
-            <Link
-              href={`/shop/${offer.slug}`}
-              className="mt-5 flex items-center justify-center rounded-(--radius-input) bg-jade-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-jade-700"
-            >
-              {t('cta')}
-            </Link>
-          </div>
+            <PanelAction href={`/shop/${offer.slug}`}>{t('cta')}</PanelAction>
+          </OfferPanel>
         )
       })}
     </div>

@@ -1,7 +1,6 @@
 import { BookOpen, GraduationCap, Store } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
-import { Badge } from '@/components/ui/Badge'
 import { Link } from '@/i18n/navigation'
 import { cedis } from '@/lib/market/money'
 import type { ShopProduct } from '@/lib/market/data'
@@ -9,31 +8,25 @@ import type { ShopProduct } from '@/lib/market/data'
 /**
  * The shop.
  *
- * DESIGN.md call 5: a curated shelf, not a marketplace.
+ * A curated shelf, not a marketplace: this is a closed vendor network the
+ * operator personally enlists, so search-first chrome and star ratings would be
+ * furniture for a problem we do not have. Nothing in the schema stores a rating
+ * anyway, and an empty five-star row reads as broken rather than as new.
  *
- * Marketplace chrome — search-first, filter rails, star ratings, "12,481
- * students" — exists to make thousands of items navigable and to substitute for
- * trust between strangers. This is a closed vendor network the operator
- * personally enlists, which is tens of products. Copy that chrome onto ten
- * items and the shop looks abandoned.
- *
- * So: cover-led cards, grouped by what they are. No ratings and no enrolment
- * counts — nothing in the schema stores them, and an empty five-star row reads
- * as broken rather than as new.
- *
- * The AFFILIATE TIER REQUIREMENT is on the card rather than buried in the
- * detail page, because an affiliate browsing for something to promote is asking
- * exactly that question and should not have to open six pages to answer it.
+ * Rebuilt in the market skin (DESIGN.md): larger covers, softer radii, and the
+ * price given room rather than tucked under a metadata line. The card is
+ * cover-led because that is what the references do and because a course is
+ * bought on its promise before its detail.
  */
 export async function ShopShelf({ products }: { products: ShopProduct[] }) {
   const t = await getTranslations('market.shop')
 
   if (products.length === 0) {
     return (
-      <div className="rounded-(--radius-card) border border-dashed border-ink-300 bg-surface px-4 py-12 text-center">
-        <Store aria-hidden className="mx-auto size-6 text-ink-400" />
-        <p className="mt-3 text-sm font-semibold text-ink-900">{t('empty.title')}</p>
-        <p className="mx-auto mt-1 max-w-sm text-[0.8125rem] leading-snug text-ink-600">
+      <div className="rounded-(--radius-panel) border border-dashed border-ink-300 bg-surface px-4 py-14 text-center">
+        <Store aria-hidden className="mx-auto size-7 text-ink-400" strokeWidth={1.5} />
+        <p className="mt-3 text-[0.9375rem] font-semibold text-ink-900">{t('empty.title')}</p>
+        <p className="mx-auto mt-1 max-w-sm text-[0.875rem] leading-snug text-ink-600">
           {t('empty.body')}
         </p>
       </div>
@@ -43,9 +36,7 @@ export async function ShopShelf({ products }: { products: ShopProduct[] }) {
   const training = products.filter((p) => p.purpose === 'training_program')
   const vendor = products.filter((p) => p.purpose === 'vendor_product')
 
-  /* Resolved ONCE, not per card. `getTranslations` is async and a card is not,
-     so awaiting inside the map is both invalid and — if it worked — a lookup
-     per product for strings that never differ. */
+  /* Resolved once, not per card: `getTranslations` is async and a card is not. */
   const labels = {
     owned: t('owned'),
     open: t('open'),
@@ -55,18 +46,18 @@ export async function ShopShelf({ products }: { products: ShopProduct[] }) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-9">
       {training.length > 0 && (
         <Shelf title={t('shelf.training')} description={t('shelf.trainingBody')}>
-          {training.map((product) => (
-            <ProductCard key={product.id} product={product} labels={labels} />
+          {training.map((p) => (
+            <ProductCard key={p.id} product={p} labels={labels} />
           ))}
         </Shelf>
       )}
       {vendor.length > 0 && (
         <Shelf title={t('shelf.products')}>
-          {vendor.map((product) => (
-            <ProductCard key={product.id} product={product} labels={labels} />
+          {vendor.map((p) => (
+            <ProductCard key={p.id} product={p} labels={labels} />
           ))}
         </Shelf>
       )}
@@ -93,77 +84,65 @@ function Shelf({
 }) {
   return (
     <section>
-      <h2 className="text-[0.9375rem] font-semibold tracking-[-0.01em] text-ink-900">{title}</h2>
+      <h2 className="text-[1.125rem] font-semibold tracking-[-0.02em] text-ink-900">{title}</h2>
       {description && (
-        <p className="mt-0.5 max-w-prose text-[0.8125rem] leading-snug text-ink-600">
-          {description}
-        </p>
+        <p className="mt-1 max-w-prose text-[0.875rem] leading-snug text-ink-600">{description}</p>
       )}
-      <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
     </section>
   )
 }
 
-function ProductCard({
-  product,
-  labels,
-}: {
-  product: ShopProduct
-  labels: CardLabels
-}) {
+function ProductCard({ product, labels }: { product: ShopProduct; labels: CardLabels }) {
   const Icon = product.purpose === 'training_program' ? GraduationCap : BookOpen
 
   return (
     <Link
       href={`/shop/${product.slug}`}
-      className="group flex flex-col overflow-hidden rounded-(--radius-card) border border-ink-200 bg-surface transition-colors hover:border-ink-300"
+      className="group flex flex-col overflow-hidden rounded-(--radius-card) border border-ink-200 bg-surface transition-[border-color,transform] duration-200 hover:-translate-y-0.5 hover:border-ink-300"
     >
-      {/* Cover. No image yet on any product, so the placeholder has to be a
-          deliberate design rather than a grey box — it is what every card looks
-          like until covers exist. */}
-      <div className="grid aspect-[16/9] place-items-center bg-gradient-to-br from-jade-50 to-brand-50">
-        <Icon aria-hidden className="size-8 text-jade-600/70" strokeWidth={1.5} />
+      <div className="relative grid aspect-[16/10] place-items-center bg-gradient-to-br from-jade-50 via-surface to-ink-50">
+        <Icon aria-hidden className="size-9 text-jade-600/50" strokeWidth={1.25} />
+        {product.owned && (
+          <span className="absolute left-3 top-3 rounded-full bg-jade-600 px-2.5 py-1 text-[0.6875rem] font-semibold text-white">
+            {labels.owned}
+          </span>
+        )}
+        {product.min_affiliate_tier === 'professional' && !product.owned && (
+          <span className="absolute left-3 top-3 rounded-full bg-surface/90 px-2.5 py-1 text-[0.6875rem] font-semibold text-ink-700 ring-hairline">
+            {labels.professionalOnly}
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col p-4">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="min-w-0 text-[0.9375rem] leading-snug font-semibold text-ink-900">
-            {product.title}
-          </h3>
-          {product.owned && (
-            <Badge tone="success" className="shrink-0">
-              {labels.owned}
-            </Badge>
-          )}
-        </div>
+        <h3 className="text-[1rem] leading-snug font-semibold tracking-[-0.01em] text-ink-900">
+          {product.title}
+        </h3>
 
         {product.description && (
-          <p className="mt-1 line-clamp-2 text-[0.8125rem] leading-snug text-ink-600">
+          <p className="mt-1.5 line-clamp-2 text-[0.875rem] leading-snug text-ink-600">
             {product.description}
           </p>
         )}
 
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-[0.75rem] text-ink-500">
-          {product.lessons > 0 && <span>{labels.lessons(product.lessons)}</span>}
-          {/* The question an affiliate is actually asking. */}
-          {product.min_affiliate_tier === 'professional' && (
-            <Badge tone="neutral">{labels.professionalOnly}</Badge>
-          )}
-        </div>
+        {product.lessons > 0 && (
+          <p className="mt-2 text-[0.75rem] text-ink-500">{labels.lessons(product.lessons)}</p>
+        )}
 
-        <div className="mt-auto flex items-baseline gap-2 pt-3">
+        <div className="mt-auto flex items-baseline gap-2 pt-4">
           {product.owned ? (
-            <span className="text-[0.875rem] font-semibold text-jade-700">{labels.open}</span>
+            <span className="text-[0.9375rem] font-semibold text-jade-700">{labels.open}</span>
           ) : (
             <>
+              <span className="text-[1.25rem] font-semibold tabular-nums tracking-[-0.02em] text-ink-900">
+                {product.price_minor === 0 ? labels.free : cedis(product.price_minor)}
+              </span>
               {product.on_sale && (
-                <span className="text-[0.8125rem] text-ink-400 line-through">
+                <span className="text-[0.875rem] text-ink-400 line-through">
                   {cedis(product.list_price_minor)}
                 </span>
               )}
-              <span className="text-base font-semibold tabular-nums text-ink-900">
-                {product.price_minor === 0 ? labels.free : cedis(product.price_minor)}
-              </span>
             </>
           )}
         </div>

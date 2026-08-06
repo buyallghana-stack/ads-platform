@@ -3022,7 +3022,8 @@
         "title": "Votre compte affilié est suspendu",
         "body": "Vos liens ne génèrent plus de gains. Votre accès à la formation n'est pas affecté.",
         "contact": "Écrivez au support depuis l'onglet Profil et nous examinerons la situation."
-      }
+      },
+      "tierLine": "Affilié {tier}"
     },
     "training": {
       "cta": "Voir la formation",

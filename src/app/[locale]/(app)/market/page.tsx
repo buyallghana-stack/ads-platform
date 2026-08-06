@@ -25,5 +25,12 @@ export default async function MarketPage({
   if (!user) redirect({ href: '/login', locale })
 
   const data = await getAffiliateDashboard(user!.id)
-  return <MarketDashboard data={data} />
+  /* The market skin (DESIGN.md): the affiliate business does not inherit
+     the ads design language. One class, and every primitive beneath it
+     re-reads its tokens. */
+  return (
+    <div className="market-skin min-h-full bg-canvas">
+      <MarketDashboard data={data} />
+    </div>
+  )
 }

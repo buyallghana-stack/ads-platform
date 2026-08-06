@@ -3022,7 +3022,8 @@
         "title": "Your affiliate account is suspended",
         "body": "Your links have stopped earning. Your course access is unaffected.",
         "contact": "Message support from the Profile tab and we will look at it."
-      }
+      },
+      "tierLine": "{tier} affiliate"
     },
     "training": {
       "cta": "See the course",

@@ -2,6 +2,7 @@ import { ArrowRight, Copy, Wallet } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
 import { Badge } from '@/components/ui/Badge'
+import { OfferPanel, PanelAction } from '@/components/market/OfferPanel'
 import { Link } from '@/i18n/navigation'
 import { MarketHeader } from '@/components/market/MarketHeader'
 import { ProgressToActivation } from '@/components/market/ProgressToActivation'
@@ -146,46 +147,29 @@ export async function MarketDashboard({ data }: { data: AffiliateDashboard }) {
             {/* MONEY FIRST. Commission only — there is no points figure
                 anywhere in Market mode, which is what makes D27 structural
                 rather than a rule somebody has to remember. */}
-            <div className="rounded-(--radius-card) border border-ink-200 bg-surface p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-[0.8125rem] font-medium text-ink-500">{t('balance')}</p>
-                  <p
-                    className={`mt-1 text-[2rem] leading-none font-semibold tabular-nums tracking-[-0.03em] ${
-                      negative ? 'text-danger-700' : 'text-ink-900'
-                    }`}
-                  >
-                    {cedis(balance)}
-                  </p>
-                </div>
-                {data.tier && (
-                  <Badge tone="neutral" className="shrink-0 capitalize">
-                    {data.tier}
-                  </Badge>
-                )}
-              </div>
-
-              {canWithdraw ? (
-                <Link
-                  href="/commission/withdraw"
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-(--radius-input) bg-jade-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-jade-700"
-                >
-                  <Wallet aria-hidden className="size-4" />
-                  {t('withdraw')}
-                </Link>
-              ) : (
-                /* Says WHY, rather than showing a dead button. The three
-                   reasons are different problems with different fixes, and
-                   "Withdraw (disabled)" tells you which one you have. */
-                <p className="mt-3 text-[0.8125rem] leading-snug text-ink-500">
-                  {!(data.payouts_enabled ?? false)
+            <OfferPanel
+              label={t('balance')}
+              headline={
+                <span className={negative ? 'text-danger-700' : undefined}>{cedis(balance)}</span>
+              }
+              sub={data.tier ? t('tierLine', { tier: data.tier }) : undefined}
+              footnote={
+                canWithdraw
+                  ? undefined
+                  : !(data.payouts_enabled ?? false)
                     ? t('payoutsOff')
                     : negative
                       ? t('payoutsBlocked')
-                      : t('belowMinimum', { min: cedis(minimum) })}
-                </p>
+                      : t('belowMinimum', { min: cedis(minimum) })
+              }
+            >
+              {canWithdraw && (
+                <PanelAction href="/commission/withdraw">
+                  <Wallet aria-hidden className="size-4" />
+                  {t('withdraw')}
+                </PanelAction>
               )}
-            </div>
+            </OfferPanel>
 
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
               <StatTile
