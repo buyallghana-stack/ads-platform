@@ -118,8 +118,17 @@ export async function ProductCard({ product }: { product: ShopProduct }) {
               </div>
             </>
           ) : (
-            <div className="flex items-end justify-between gap-3">
-              <div>
+            /*
+              Two across on a phone leaves roughly 165px inside a card, which
+              is not enough for two money blocks side by side — so they stack
+              below `sm` and sit shoulder to shoulder above it.
+
+              The CASH stays the larger of the two at every width. It is the
+              figure that ranks the grid: 20% of GHS 400 beats 35% of GHS 100,
+              so a reader comparing percentages is comparing the wrong number.
+            */
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-3">
+              <div className="flex items-baseline justify-between gap-2 sm:block">
                 <p className="text-[0.6875rem] uppercase tracking-[0.06em] text-ink-500">
                   {t('commission')}
                 </p>
@@ -127,7 +136,7 @@ export async function ProductCard({ product }: { product: ShopProduct }) {
                   {product.l1_rate === null ? '—' : `${Number(product.l1_rate)}%`}
                 </p>
               </div>
-              <div className="text-right">
+              <div className="sm:text-right">
                 <p className="text-[0.6875rem] uppercase tracking-[0.06em] text-ink-500">
                   {t('perSale')}
                 </p>
@@ -142,8 +151,14 @@ export async function ProductCard({ product }: { product: ShopProduct }) {
           )}
         </div>
 
-        {/* ── the action ─────────────────────────────────────────────── */}
-        <div className="mt-3 flex items-center gap-2">
+        {/* ── the action ───────────────────────────────────────────────
+            `mt-auto` pins it to the bottom of the card. Two across, one card
+            carrying a progress bar and its neighbour carrying a money block,
+            the two blocks are different heights — so without this the primary
+            buttons sit at different heights in the same row, which reads as a
+            rendering fault before it reads as content. The grid already
+            stretches the cards to match; this makes the contents agree. */}
+        <div className="mt-auto flex items-center gap-2 pt-3">
           {product.owned ? (
             <Link
               href={`/learn/${product.slug}`}
@@ -168,11 +183,16 @@ export async function ProductCard({ product }: { product: ShopProduct }) {
           {/* Share goes to the product page rather than copying here. A copied
               link has to carry the affiliate code, and a card that silently
               copies something is a card that can silently copy the wrong
-              thing — the promote panel shows the link before it is shared. */}
+              thing — the promote panel shows the link before it is shared.
+
+              Hidden below `sm`: two cards across leaves no room for it beside
+              the primary action, and it is a shortcut to the same place that
+              button already goes. A 40px square squeezed against a 100px button
+              is a mis-tap, not an affordance. */}
           <Link
             href={`/shop/${product.slug}#promote`}
             aria-label={t('shareLabel', { title: product.title })}
-            className="grid size-10 shrink-0 place-items-center rounded-(--radius-input) border border-ink-200 text-ink-600 transition-colors hover:border-brand-600/50 hover:text-brand-700"
+            className="hidden size-10 shrink-0 place-items-center rounded-(--radius-input) border border-ink-200 text-ink-600 transition-colors hover:border-brand-600/50 hover:text-brand-700 sm:grid"
           >
             {product.can_promote || product.owned ? (
               <Share2 aria-hidden className="size-4" />

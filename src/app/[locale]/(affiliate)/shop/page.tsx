@@ -167,7 +167,17 @@ export default async function MarketplacePage({
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        /* TWO ACROSS ON A PHONE (operator, 2026-08-06), which is what the
+           reference shows and what a browsing grid wants: one card per row
+           makes the screen a list you scroll rather than a shelf you scan, and
+           at 390px a full-width card is mostly empty to the right of its own
+           text.
+
+           `minmax(0,1fr)` via `grid-cols-2` rather than an implicit column —
+           an auto column is floored at its content's min-content width and a
+           long product title would push the grid wider than the phone. Same
+           trap as the course page. */
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3">
           {visible.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
