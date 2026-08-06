@@ -4487,6 +4487,8 @@ export type Database = {
       my_learning: { Args: { p_user_id: string }; Returns: Json }
       certificate_grade_for: { Args: { p_product_id: string; p_user_id: string }; Returns: number }
       affiliate_dashboard: { Args: { p_user_id: string }; Returns: Json }
+      affiliate_performance: { Args: { p_days?: number; p_user_id: string }; Returns: Json }
+      affiliate_statement: { Args: { p_limit?: number; p_user_id: string }; Returns: Json }
       lesson_for_learner: { Args: { p_lesson_id: string; p_user_id: string }; Returns: Json }
       affiliate_depth_now: { Args: { p_affiliate_id: string }; Returns: number }
       affiliate_earnings_by_year: {

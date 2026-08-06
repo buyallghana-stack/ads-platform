@@ -235,18 +235,28 @@ export function PerformanceChart({ daily }: { daily: DailyPoint[] }) {
         )}
       </div>
 
-      {/* Same data, readable without the plot. */}
-      <table className="sr-only">
-        <caption>{t(metric)}</caption>
-        <thead>
-          <tr><th>{t('dateColumn')}</th><th>{t(metric)}</th></tr>
-        </thead>
-        <tbody>
-          {view.map((d) => (
-            <tr key={d.day}><td>{d.day}</td><td>{d[metric]}</td></tr>
-          ))}
-        </tbody>
-      </table>
+      {/*
+        Same data, readable without the plot.
+
+        ⚠️ `sr-only` on the DIV, not on the <table>. On the table it does not
+        clip — the utility is `position:absolute; height:1px; overflow:hidden`,
+        and a table lays itself out past that box, so the rows kept their real
+        height and added invisible page below the card. At 30 points that is
+        several hundred pixels of dead scroll on the dashboard.
+      */}
+      <div className="sr-only">
+        <table>
+          <caption>{t(metric)}</caption>
+          <thead>
+            <tr><th>{t('dateColumn')}</th><th>{t(metric)}</th></tr>
+          </thead>
+          <tbody>
+            {view.map((d) => (
+              <tr key={d.day}><td>{d.day}</td><td>{d[metric]}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

@@ -33,13 +33,19 @@ export type AppMode = 'earn' | 'market'
  * like a styling mistake rather than a routing one.
  */
 const MARKET_PREFIXES = [
-  '/market',
-  '/shop',
-  '/learn',
-  '/links',
-  '/downline',
-  '/commission',
+  '/market',      // dashboard, join, account
+  '/shop',        // the marketplace and its product pages
+  '/learn',       // entitled courses and the player
+  '/commission',  // statement and payouts
 ] as const
+
+/*
+  `/p/<slug>` is deliberately NOT here. It is the public product page an
+  affiliate link lands on, it renders in the main brand's light skin, and it is
+  reachable signed out — so it belongs to neither mode's navigation. Adding it
+  would wrap a stranger's first impression of the product in a workspace UI
+  they have no account for.
+*/
 
 /** Strips the locale segment so prefixes can be matched against a bare path. */
 export function stripLocale(pathname: string): string {

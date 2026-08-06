@@ -2966,5 +2966,356 @@
     "viewing": "Vous consultez le compte de {name}",
     "readOnly": "Lecture seule — rien n'est enregistré ici.",
     "exit": "Quitter"
+  },
+  "affiliate": {
+    "there": "vous",
+    "greeting": "Bonjour, {name}",
+    "subtitle": "Vos promotions, vos ventes et ce que vous avez gagné.",
+    "nav": {
+      "label": "Navigation affiliation",
+      "modeName": "Affiliation",
+      "dashboard": "Tableau",
+      "products": "Produits",
+      "learn": "Formation",
+      "earnings": "Gains",
+      "account": "Compte"
+    },
+    "mode": {
+      "switchTo": "Aller vers",
+      "earnName": "Regarder et gagner",
+      "earnBody": "Vos points, publicités et retraits.",
+      "marketName": "Affiliation",
+      "marketBody": "Promouvoir des produits et gagner des commissions."
+    },
+    "period": {
+      "label": "Période",
+      "days": "{n} j"
+    },
+    "earnings": {
+      "panelLabel": "Commissions gagnées",
+      "totalEarned": "Gagné sur cette période",
+      "available": "Disponible au retrait",
+      "pending": "{amount} en cours de validation",
+      "withdraw": "Retirer",
+      "vsPrevious": "vs les {n} jours précédents",
+      "noBaseline": "Pas encore de {n} jours antérieurs à comparer",
+      "belowMinimum": "Vous pourrez retirer dès que votre solde atteindra {amount}.",
+      "payoutsClosed": "Les retraits de commissions ne sont pas encore ouverts. Votre solde est en sécurité."
+    },
+    "stats": {
+      "label": "Votre tunnel",
+      "clicks": "Clics",
+      "customers": "Personnes",
+      "conversions": "Ventes",
+      "rate": "Conversion"
+    },
+    "training": {
+      "label": "Votre formation",
+      "gateTitle": "Terminez la formation pour commencer à gagner",
+      "gateBody": "Vous en êtes à {percent} %. Vos liens enregistrent déjà les clics, mais ils ne rapportent qu’à partir de {threshold} %.",
+      "certificateTitle": "Continuez pour obtenir votre certificat",
+      "certificateBody": "Vous gagnez déjà. Terminez les {percent} % restants et votre certificat sera délivré automatiquement.",
+      "doneTitle": "Formation terminée",
+      "doneBody": "Vous avez terminé {title}. Votre certificat se trouve sur votre compte.",
+      "unlocksAt": "Rapporte dès {n} %",
+      "start": "Commencer la formation",
+      "continue": "Continuer la formation",
+      "review": "Revoir le cours"
+    },
+    "tools": {
+      "label": "Raccourcis affiliation",
+      "title": "Outils rapides",
+      "browse": "Parcourir",
+      "links": "Votre lien",
+      "statement": "Relevé",
+      "payouts": "Retraits"
+    },
+    "chart": {
+      "title": "Performance",
+      "description": "Gains et clics sur les {n} derniers jours.",
+      "earnings": "Gains",
+      "clicks": "Clics",
+      "clicksN": "{n} clics",
+      "date": "Date",
+      "empty": "Rien pour l’instant. Partagez un lien et cette courbe se remplira."
+    },
+    "join": {
+      "eyebrow": "Programme d’affiliation",
+      "title": "Soyez payé pour les ventes que vous apportez",
+      "body": "Suivez la formation, puis faites la promotion de n’importe quel produit du catalogue avec votre propre lien. Chaque vente qui vous est attribuée rapporte de vrais cédis, retenus brièvement puis retirables.",
+      "chipReal": "Payé en cédis, pas en points",
+      "chipYear": "Une année complète d’accès",
+      "chipCert": "Certificat à la fin",
+      "fullest": "Rapporte sur deux niveaux",
+      "perYear": "/ an",
+      "perPeriod": "/ {n} jours",
+      "renewsAt": "Renouvellement à {amount} par an",
+      "featureOwnSales": "Commission sur chacune de vos ventes",
+      "featureOverride": "Une part sur les ventes des affiliés que vous recrutez",
+      "featureLessons": "{n} leçons, avec points de contrôle",
+      "featureCertificate": "Certificat à la fin",
+      "featureValidity": "{n} jours d’accès",
+      "choose": "Choisir {title}",
+      "starter": "Débutant",
+      "pro": "Professionnel",
+      "thresholdNote": "Vos liens commencent à rapporter dès {n} % du cours terminé.",
+      "noneOnSale": "Rien n’est en vente pour le moment. Revenez bientôt.",
+      "howTitle": "Comment vous êtes payé",
+      "howOne": "Partagez votre lien. Toute personne qui l’ouvre vous est attribuée pendant 30 jours.",
+      "howTwo": "Quand elle achète, votre commission est enregistrée aussitôt et commence à se valider.",
+      "howThree": "Une fois validée et au-dessus du minimum, vous demandez un retrait."
+    },
+    "pending": {
+      "title": "Presque prêt",
+      "body": "Votre compte affilié existe mais ne rapporte pas encore. Terminez une part suffisante de la formation et il s’activera tout seul — personne n’a à l’approuver."
+    },
+    "suspended": {
+      "title": "Ce compte est suspendu",
+      "body": "Votre compte affilié a été suspendu : les liens n’enregistrent plus rien et aucune commission n’est créditée. Ce qui a déjà été gagné reste intact.",
+      "contact": "Contacter le support"
+    },
+    "lapsed": {
+      "title": "Votre accès a pris fin",
+      "body": "Les nouvelles ventes ne vous sont plus attribuées. Tout ce que vous avez déjà gagné vous appartient et reste retirable."
+    },
+    "market": {
+      "title": "Produits à promouvoir",
+      "subtitle": "Tous les produits publiés, avec ce qu’ils vous rapportent par vente. Les gains les plus élevés en premier.",
+      "filterLabel": "Filtrer les produits",
+      "searchPlaceholder": "Rechercher un produit",
+      "clearSearch": "Effacer la recherche",
+      "sortLabel": "Trier",
+      "tab": {
+        "all": "Tout",
+        "course": "Cours",
+        "ebook": "Livres",
+        "bundle": "Packs",
+        "saved": "Enregistrés"
+      },
+      "sort": {
+        "payout": "Gain le plus élevé",
+        "newest": "Plus récents",
+        "priceUp": "Prix croissant",
+        "priceDown": "Prix décroissant"
+      },
+      "commission": "Commission",
+      "perSale": "Vous gagnez / vente",
+      "sellsFor": "Vendu {amount}",
+      "yourProgress": "Votre progression",
+      "lessons": "{n} leçons",
+      "checkpoints": "{n} points de contrôle",
+      "onSale": "En promo",
+      "promote": "Promouvoir",
+      "view": "Voir le programme",
+      "viewProduct": "Voir le produit",
+      "continue": "Continuer",
+      "start": "Commencer",
+      "shareLabel": "Partager {title}",
+      "saveLabel": "Enregistrer {title}",
+      "unsaveLabel": "Retirer {title} des enregistrés",
+      "joinTitle": "Rejoignez le programme d’affiliation pour en tirer des gains",
+      "joinBody": "Suivez la formation et chaque lien que vous partagez commence à rapporter.",
+      "emptyAll": "Rien n’est encore publié",
+      "emptyAllHint": "Les produits apparaîtront ici dès leur mise en vente.",
+      "emptySaved": "Vous n’avez rien enregistré",
+      "emptySavedHint": "Touchez le cœur sur un produit et il vous attendra ici.",
+      "emptySearch": "Aucun résultat",
+      "emptySearchHint": "Essayez un mot plus court, ou effacez la recherche."
+    },
+    "product": {
+      "back": "Tous les produits",
+      "lessons": "{n} leçons",
+      "checkpoints": "{n} points de contrôle",
+      "certificate": "Certificat",
+      "twoLevels": "Rapporte sur deux niveaux",
+      "continue": "Continuer",
+      "start": "Commencer",
+      "ownedPercent": "{n} % terminé",
+      "buy": "Acheter à {amount}",
+      "onSale": "réduit",
+      "outcomes": "Ce que vous saurez faire",
+      "curriculum": "Contenu",
+      "sectionNumber": "Section {n}",
+      "preview": "Aperçu gratuit"
+    },
+    "promote": {
+      "title": "Promouvoir ce produit",
+      "youEarn": "Vous gagnez par vente",
+      "rateOfPrice": "{rate} % du prix de {price}",
+      "secondLevel": "Deuxième niveau",
+      "secondLevelHint": "{rate} % quand un affilié que vous avez recruté réalise cette vente",
+      "window": "Un clic compte pendant",
+      "hold": "Fonds validés après",
+      "days": "{n} jours",
+      "immediate": "immédiatement",
+      "yourLink": "Votre lien",
+      "copy": "Copier le lien",
+      "copied": "Copié",
+      "share": "Partager",
+      "cannot": {
+        "title": "Vous ne pouvez pas encore le promouvoir",
+        "no_account": "Vous n’avez pas rejoint le programme d’affiliation. Suivez une des formations et vos liens commenceront à rapporter.",
+        "pending": "Votre compte affilié n’est pas encore actif. Terminez une part suffisante de la formation et il s’activera tout seul.",
+        "lapsed": "Votre accès affilié a pris fin. Renouvelez-le et vos liens rapporteront à nouveau.",
+        "tier": "Ce produit requiert le programme Professionnel. Passez au niveau supérieur pour le promouvoir.",
+        "suspended": "Votre compte affilié est suspendu : les liens n’enregistrent rien. Contactez le support.",
+        "wouldEarn": "Vous gagneriez {amount} par vente — {rate} % du prix."
+      }
+    },
+    "learn": {
+      "title": "Vos formations",
+      "subtitle": "Ce que vous suivez, et ce que vous avez terminé.",
+      "inProgress": "En cours",
+      "certificates": "Certificats",
+      "lessonsLeft": "{n} leçons restantes",
+      "allDone": "Toutes les leçons terminées",
+      "continue": "Continuer",
+      "start": "Commencer",
+      "issued": "Délivré le {date}",
+      "grade": "Note {n} %",
+      "emptyTitle": "Rien à apprendre pour l’instant",
+      "emptyBody": "Rejoignez une formation et elle apparaîtra ici.",
+      "emptyCta": "Voir les formations"
+    },
+    "statement": {
+      "title": "Gains",
+      "subtitle": "Chaque cédi entré et sorti, et où il en est.",
+      "available": "Disponible",
+      "pending": "En validation",
+      "pendingHint": "Commission retenue jusqu’à la fin du délai de remboursement.",
+      "request": "Demander un retrait",
+      "belowMinimum": "Vous pourrez demander un retrait dès que votre solde disponible atteindra {amount}.",
+      "payoutsClosed": "Les retraits de commissions ne sont pas encore ouverts. Votre solde est en sécurité et n’expire pas.",
+      "earnedAll": "Gagné",
+      "reversedAll": "Annulé",
+      "paidAll": "Versé",
+      "payoutsTitle": "Vos demandes de retrait",
+      "payoutsDescription": "Ce que vous avez demandé, et où cela en est.",
+      "afterFee": "{gross} moins {fee} de frais",
+      "payoutStatus": {
+        "requested": "Demandé",
+        "approved": "Approuvé",
+        "paid": "Versé",
+        "rejected": "Refusé",
+        "cancelled": "Annulé"
+      },
+      "historyTitle": "Relevé",
+      "historyDescription": "Chaque écriture de commission sur ce compte.",
+      "empty": "Rien pour l’instant. Votre première commission apparaîtra ici dès qu’une vente vous sera attribuée.",
+      "levelTwo": "N2",
+      "clearsOn": "validé le {date}",
+      "type": {
+        "credit": "Commission gagnée",
+        "reversal": "Vente annulée",
+        "payout": "Versement",
+        "adjustment": "Ajustement"
+      }
+    },
+    "account": {
+      "title": "Compte affilié",
+      "subtitle": "Votre code, votre programme, et la fin de votre accès.",
+      "noName": "Votre compte",
+      "noProgramme": "Aucun programme",
+      "tier": {
+        "beginner": "Programme Débutant",
+        "professional": "Programme Professionnel"
+      },
+      "codeTitle": "Votre code d’affilié",
+      "copyCode": "Copier votre code",
+      "copied": "Copié",
+      "codeHint": "Les liens sont propres à chaque produit — ouvrez un produit et copiez son lien. Les vôtres ressemblent à {example}",
+      "accessTitle": "Accès se termine dans",
+      "daysLeft": "{n} jours",
+      "until": "Jusqu’au {date}",
+      "noAccess": "Aucun programme actif.",
+      "depthTitle": "Niveaux de commission",
+      "depthOne": "Vous gagnez sur vos propres ventes.",
+      "depthTwo": "Vous gagnez sur vos ventes, et une part des ventes des affiliés que vous avez recrutés.",
+      "elsewhereTitle": "Géré sur votre compte principal",
+      "payoutDetails": {
+        "title": "Coordonnées de paiement",
+        "body": "Où votre argent est envoyé."
+      },
+      "profile": {
+        "title": "Profil et sécurité",
+        "body": "Nom, mot de passe, double authentification et déconnexion."
+      }
+    },
+    "public": {
+      "signIn": "Se connecter",
+      "lessons": "{n} leçons",
+      "checkpoints": "{n} points de contrôle",
+      "certificate": "Certificat inclus",
+      "outcomes": "Ce que vous saurez faire",
+      "curriculum": "Contenu",
+      "sectionNumber": "Section {n}",
+      "preview": "Aperçu gratuit",
+      "oneLevel": "Gagnez une commission sur chacune de vos ventes",
+      "twoLevels": "Gagnez sur vos ventes et sur celles des affiliés que vous recrutez",
+      "validity": "{n} jours d’accès",
+      "certificateOnFinish": "Certificat à la fin",
+      "buy": "Acheter",
+      "owned": "Continuer",
+      "signUpToBuy": "Créer un compte pour acheter",
+      "starting": "Redirection vers le paiement…",
+      "paymentNote": "Paiement sécurisé via Paystack. Mobile money et cartes acceptés.",
+      "mustSignIn": "Veuillez vous connecter avant d’acheter.",
+      "freeNotSupported": "Ce produit n’a pas de prix défini. Contactez le support."
+    },
+    "callback": {
+      "ok": {
+        "title": "Paiement reçu",
+        "body": "Votre accès est actif. Vous pouvez commencer tout de suite."
+      },
+      "already": {
+        "title": "Déjà confirmé",
+        "body": "Ce paiement a déjà été enregistré. Votre accès est actif."
+      },
+      "pending": {
+        "title": "Pas encore payé",
+        "body": "Paystack n’a pas confirmé ce paiement. Si l’argent a quitté votre compte, il arrivera sous peu et votre accès s’ouvrira automatiquement."
+      },
+      "mismatch": {
+        "title": "Le montant ne correspond pas",
+        "body": "Le paiement ne correspond pas à la commande : rien n’a été accordé. Contactez le support avec la référence ci-dessous."
+      },
+      "missing": {
+        "title": "Commande introuvable",
+        "body": "La référence ne correspond à aucune commande de ce compte. Si vous avez été débité, contactez le support avec la référence ci-dessous."
+      },
+      "error": {
+        "title": "Confirmation impossible",
+        "body": "Une erreur est survenue lors de la vérification. Si l’argent a quitté votre compte, rien n’est perdu — contactez le support avec la référence ci-dessous."
+      },
+      "startLearning": "Commencer",
+      "goDashboard": "Aller au tableau affilié",
+      "goHome": "Retour au site",
+      "contactSupport": "Contacter le support",
+      "reference": "Référence {reference}"
+    },
+    "course": {
+      "back": "Vos formations",
+      "section": "Section {n}",
+      "checkpoints": "{n} points de contrôle",
+      "preview": "Aperçu",
+      "locked": "Verrouillé tant que vous ne possédez pas ce cours",
+      "kind": {
+        "video": "Vidéo",
+        "article": "Article",
+        "pdf": "PDF",
+        "quiz": "Point de contrôle"
+      },
+      "progress": "{done} sur {total} terminées",
+      "finished": "Cours terminé",
+      "emptyCourse": "Ce cours n’a pas encore de leçons.",
+      "resources": "Ressources",
+      "resourcesNote": "À lire dans l’application — les ressources ne sont pas téléchargeables.",
+      "articleDone": "Marqué comme lu",
+      "videoFailed": "Cette vidéo n’a pas pu être chargée. Réessayez dans un instant.",
+      "lockedTitle": "Vous ne possédez pas cette leçon",
+      "lockedBody": "Achetez le cours et toutes les leçons s’ouvrent aussitôt.",
+      "missingTitle": "Leçon introuvable",
+      "missingBody": "Elle a peut-être été déplacée ou supprimée. Choisissez-en une autre."
+    }
   }
 }

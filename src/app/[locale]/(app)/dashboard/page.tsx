@@ -19,6 +19,7 @@ import { pickDisplayName } from '@/lib/dashboard/display-name'
 import { getHomeData } from '@/lib/dashboard/home-data'
 import { getGamesEnabled } from '@/lib/games/data'
 import { getNotifications, getUnreadCount } from '@/lib/notifications/data'
+import { serverNow } from '@/lib/server-now'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { cn } from '@/lib/cn'
 
@@ -72,7 +73,7 @@ export default async function HomePage({
       // Cheap public-config read; drives whether the Games tile is live.
       getGamesEnabled(),
     ])
-  const now = Date.now()
+  const now = serverNow()
 
   const balance = status?.balance ?? 0
   const currency = Number(status?.currency_value ?? 0)

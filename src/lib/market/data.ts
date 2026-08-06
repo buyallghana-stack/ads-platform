@@ -19,9 +19,24 @@ export type TrainingOffer = {
   product_id: string
   slug: string
   title: string
+  description: string | null
+  cover_path: string | null
   level: 'beginner' | 'professional'
+  /** Commission levels this program grants: 1 pays on your own sales, 2 also
+   *  pays an override on sales by affiliates you bring in. This is the whole
+   *  difference between the two programs, so it is what the join screen leads
+   *  with — not the price. */
   depth: number
   price_minor: number
+  list_price_minor: number
+  validity_days: number
+  grace_days: number
+  renewal_price_minor: number | null
+  /** Percent of the course that must be finished before the account switches
+   *  on and links start paying. */
+  threshold: number
+  certificate: boolean
+  lessons: number
 }
 
 export type TrainingProgress = {
@@ -82,6 +97,130 @@ export const getAffiliateDashboard = cache(async (userId: string): Promise<Affil
 })
 
 /* ------------------------------------------------------------------ */
+/* Performance over time                                               */
+/* ------------------------------------------------------------------ */
+
+export type PerformancePoint = {
+  /** `YYYY-MM-DD`, UTC. */
+  day: string
+  earned_minor: number
+  clicks: number
+  conversions: number
+}
+
+export type AffiliatePerformance = {
+  days: number
+  /** Gap-filled: every day in the window is present, zeros included. A chart
+   *  that skips absent days draws a line across them and claims activity. */
+  series: PerformancePoint[]
+  earned_minor: number
+  clicks: number
+  /** Distinct people, not clicks. ⚠️ Window-level only, and absent from
+   *  `series` on purpose: somebody who clicks twice in a week is one person in
+   *  the weekly figure and would be two if daily counts were added. */
+  visitors: number
+  conversions: number
+  /** The window immediately before this one, for the "vs last N days" delta. */
+  prev_earned_minor: number
+  prev_clicks: number
+  prev_visitors: number
+  prev_conversions: number
+}
+
+const EMPTY_PERFORMANCE = (days: number): AffiliatePerformance => ({
+  days,
+  series: [],
+  earned_minor: 0,
+  clicks: 0,
+  visitors: 0,
+  conversions: 0,
+  prev_earned_minor: 0,
+  prev_clicks: 0,
+  prev_visitors: 0,
+  prev_conversions: 0,
+})
+
+export const getAffiliatePerformance = cache(
+  async (userId: string, days = 30): Promise<AffiliatePerformance> => {
+    const supabase = createAdminClient()
+    const { data, error } = await supabase.rpc('affiliate_performance', {
+      p_user_id: userId,
+      p_days: days,
+    })
+    if (error || !data) return EMPTY_PERFORMANCE(days)
+    return data as unknown as AffiliatePerformance
+  },
+)
+
+/**
+ * Period-over-period change, as a whole percent, or `null` when there is
+ * nothing to compare against.
+ *
+ * `null` rather than 0 or ∞ for a previous window of zero. Going from GHS 0 to
+ * GHS 400 is not "+100%" and it is not "+∞%" — it is a first sale, and the
+ * honest thing for a comparison to say when there is no baseline is nothing.
+ * Printing a percentage there is how a dashboard ends up announcing "+100%" to
+ * somebody every single week they earn anything at all.
+ */
+export function periodDelta(now: number, before: number): number | null {
+  if (before <= 0) return null
+  return Math.round(((now - before) / before) * 100)
+}
+
+/* ------------------------------------------------------------------ */
+/* The statement                                                       */
+/* ------------------------------------------------------------------ */
+
+/** Four different events. Never collapsed to the sign of the amount: a
+ *  reversal and a payout are both money leaving, and confusing them is the
+ *  difference between "I was paid" and "a sale was cancelled". */
+export type CommissionEntryType = 'credit' | 'reversal' | 'payout' | 'adjustment'
+
+export type StatementEntry = {
+  id: string
+  entry_type: CommissionEntryType
+  amount_minor: number
+  /** 1 = your own sale, 2 = an override on somebody you recruited. */
+  level: number | null
+  status: 'pending' | 'cleared' | 'requested' | 'paid' | 'reversed'
+  /** When a pending entry becomes withdrawable. */
+  clears_at: string | null
+  reason: string | null
+  created_at: string
+  product_title: string | null
+  product_slug: string | null
+}
+
+export type StatementPayout = {
+  id: string
+  amount_minor: number
+  fee_minor: number
+  /** What actually lands. The figure the affiliate will check against. */
+  net_minor: number
+  fee_percent: number | null
+  method: string
+  status: 'requested' | 'approved' | 'paid' | 'rejected' | 'cancelled'
+  created_at: string
+  paid_at: string | null
+  failure_reason: string | null
+}
+
+export const getAffiliateStatement = cache(
+  async (
+    userId: string,
+    limit = 100,
+  ): Promise<{ entries: StatementEntry[]; payouts: StatementPayout[] }> => {
+    const supabase = createAdminClient()
+    const { data, error } = await supabase.rpc('affiliate_statement', {
+      p_user_id: userId,
+      p_limit: limit,
+    })
+    if (error || !data) return { entries: [], payouts: [] }
+    return data as unknown as { entries: StatementEntry[]; payouts: StatementPayout[] }
+  },
+)
+
+/* ------------------------------------------------------------------ */
 /* The shop                                                            */
 /* ------------------------------------------------------------------ */
 
@@ -115,6 +254,17 @@ export type ShopProduct = {
   /** How far through, for the progress bar on an owned card. */
   percent: number
   saved: boolean
+  /** Level-one commission percentage this product publishes. Null when it has
+   *  no active affiliate program — which is not the same as 0%. */
+  l1_rate: number | null
+  /** What that rate is worth in pesewas at the current price. Computed in
+   *  Postgres with the ledger's own expression, never multiplied here: a
+   *  browser float and an exact numeric disagree on half a pesewa, and the card
+   *  would advertise a figure the payout does not match. */
+  l1_earn_minor: number | null
+  /** Per ROW, not per user: `min_affiliate_tier` lives on the product, so a
+   *  beginner can promote some of this grid and not the rest. */
+  can_promote: boolean
 }
 
 export type ShopDetail =

@@ -2966,5 +2966,356 @@
     "viewing": "Viewing as {name}",
     "readOnly": "Read only — nothing you do here is saved.",
     "exit": "Exit"
+  },
+  "affiliate": {
+    "there": "there",
+    "greeting": "Hello, {name}",
+    "subtitle": "Your promoting, your sales, and what you have earned.",
+    "nav": {
+      "label": "Affiliate navigation",
+      "modeName": "Affiliate",
+      "dashboard": "Dashboard",
+      "products": "Products",
+      "learn": "Learn",
+      "earnings": "Earnings",
+      "account": "Account"
+    },
+    "mode": {
+      "switchTo": "Switch to",
+      "earnName": "Watch & earn",
+      "earnBody": "Your points, ads and withdrawals.",
+      "marketName": "Affiliate",
+      "marketBody": "Promote products and earn commission."
+    },
+    "period": {
+      "label": "Period",
+      "days": "{n}d"
+    },
+    "earnings": {
+      "panelLabel": "Commission earnings",
+      "totalEarned": "Earned in this period",
+      "available": "Available to withdraw",
+      "pending": "{amount} still clearing",
+      "withdraw": "Withdraw",
+      "vsPrevious": "vs the previous {n} days",
+      "noBaseline": "No earlier {n} days to compare against yet",
+      "belowMinimum": "You can withdraw once your balance reaches {amount}.",
+      "payoutsClosed": "Commission withdrawals are not open yet. Your balance is safe."
+    },
+    "stats": {
+      "label": "Your funnel",
+      "clicks": "Clicks",
+      "customers": "People",
+      "conversions": "Sales",
+      "rate": "Conversion"
+    },
+    "training": {
+      "label": "Your training",
+      "gateTitle": "Finish your training to start earning",
+      "gateBody": "You are {percent}% through. Your links record clicks already, but they only start paying once you reach {threshold}%.",
+      "certificateTitle": "Keep going for your certificate",
+      "certificateBody": "You are earning. Finish the remaining {percent}% and your certificate is issued automatically.",
+      "doneTitle": "Training complete",
+      "doneBody": "You have finished {title}. Your certificate is on your Account.",
+      "unlocksAt": "Pays from {n}%",
+      "start": "Start training",
+      "continue": "Continue training",
+      "review": "Review the course"
+    },
+    "tools": {
+      "label": "Affiliate shortcuts",
+      "title": "Quick tools",
+      "browse": "Browse",
+      "links": "Your link",
+      "statement": "Statement",
+      "payouts": "Payouts"
+    },
+    "chart": {
+      "title": "Performance",
+      "description": "Earnings and clicks over the last {n} days.",
+      "earnings": "Earnings",
+      "clicks": "Clicks",
+      "clicksN": "{n} clicks",
+      "date": "Date",
+      "empty": "Nothing here yet. Share a link and this fills in."
+    },
+    "join": {
+      "eyebrow": "Affiliate programme",
+      "title": "Get paid for the sales you bring in",
+      "body": "Take the training, then promote anything in our catalogue with your own link. Every sale credited to you pays real cedis, held for a short clearing period and then withdrawable.",
+      "chipReal": "Paid in cedis, not points",
+      "chipYear": "A full year of access",
+      "chipCert": "Certificate on completion",
+      "fullest": "Pays on two levels",
+      "perYear": "/ year",
+      "perPeriod": "/ {n} days",
+      "renewsAt": "Renews at {amount} a year",
+      "featureOwnSales": "Commission on every sale you make",
+      "featureOverride": "An override on sales by affiliates you bring in",
+      "featureLessons": "{n} lessons, with checkpoints",
+      "featureCertificate": "Certificate when you finish",
+      "featureValidity": "{n} days of access",
+      "choose": "Choose {title}",
+      "starter": "Beginner",
+      "pro": "Professional",
+      "thresholdNote": "Your links start paying once you are {n}% through the course.",
+      "noneOnSale": "Nothing is on sale right now. Check back shortly.",
+      "howTitle": "How you get paid",
+      "howOne": "Share your link. Anyone who opens it is credited to you for 30 days.",
+      "howTwo": "When they buy, your commission is recorded straight away and starts clearing.",
+      "howThree": "Once it clears and you are above the minimum, you request a payout."
+    },
+    "pending": {
+      "title": "Almost there",
+      "body": "Your affiliate account exists but is not earning yet. Finish enough of the training and it switches on by itself — nobody has to approve it."
+    },
+    "suspended": {
+      "title": "This account is paused",
+      "body": "Your affiliate account has been paused, so links are not recording and commission is not being credited. Anything already earned is untouched.",
+      "contact": "Contact support"
+    },
+    "lapsed": {
+      "title": "Your access has ended",
+      "body": "New sales are no longer being credited to you. Everything you have already earned stays yours and can still be withdrawn."
+    },
+    "market": {
+      "title": "Products to promote",
+      "subtitle": "Every published product, with what it pays you per sale. Sorted by the biggest payout first.",
+      "filterLabel": "Filter products",
+      "searchPlaceholder": "Search products",
+      "clearSearch": "Clear search",
+      "sortLabel": "Sort",
+      "tab": {
+        "all": "All",
+        "course": "Courses",
+        "ebook": "E-books",
+        "bundle": "Bundles",
+        "saved": "Saved"
+      },
+      "sort": {
+        "payout": "Biggest payout",
+        "newest": "Newest",
+        "priceUp": "Price: low to high",
+        "priceDown": "Price: high to low"
+      },
+      "commission": "Commission",
+      "perSale": "You earn / sale",
+      "sellsFor": "Sells for {amount}",
+      "yourProgress": "Your progress",
+      "lessons": "{n} lessons",
+      "checkpoints": "{n} checkpoints",
+      "onSale": "On sale",
+      "promote": "Promote",
+      "view": "View programme",
+      "viewProduct": "View product",
+      "continue": "Continue",
+      "start": "Start",
+      "shareLabel": "Share {title}",
+      "saveLabel": "Save {title}",
+      "unsaveLabel": "Remove {title} from saved",
+      "joinTitle": "Join the affiliate programme to earn on these",
+      "joinBody": "Take the training and every link you share starts paying commission.",
+      "emptyAll": "Nothing is published yet",
+      "emptyAllHint": "Products appear here as soon as they go on sale.",
+      "emptySaved": "You have not saved anything",
+      "emptySavedHint": "Tap the heart on a product and it will be waiting here.",
+      "emptySearch": "Nothing matches that",
+      "emptySearchHint": "Try a shorter word, or clear the search to see everything."
+    },
+    "product": {
+      "back": "All products",
+      "lessons": "{n} lessons",
+      "checkpoints": "{n} checkpoints",
+      "certificate": "Certificate",
+      "twoLevels": "Pays on two levels",
+      "continue": "Continue learning",
+      "start": "Start learning",
+      "ownedPercent": "{n}% complete",
+      "buy": "Buy for {amount}",
+      "onSale": "reduced",
+      "outcomes": "What you will be able to do",
+      "curriculum": "What is inside",
+      "sectionNumber": "Section {n}",
+      "preview": "Free preview"
+    },
+    "promote": {
+      "title": "Promote this product",
+      "youEarn": "You earn per sale",
+      "rateOfPrice": "{rate}% of the {price} price",
+      "secondLevel": "Second level",
+      "secondLevelHint": "{rate}% when an affiliate you brought in makes this sale",
+      "window": "A click counts for",
+      "hold": "Money clears after",
+      "days": "{n} days",
+      "immediate": "straight away",
+      "yourLink": "Your link",
+      "copy": "Copy link",
+      "copied": "Copied",
+      "share": "Share",
+      "cannot": {
+        "title": "You cannot promote this yet",
+        "no_account": "You have not joined the affiliate programme. Take one of the training programmes and your links start paying.",
+        "pending": "Your affiliate account is not active yet. Finish enough of your training and it switches on by itself.",
+        "lapsed": "Your affiliate access has ended. Renew it and your links start paying again.",
+        "tier": "This product needs the Professional programme. Upgrade and you can promote it.",
+        "suspended": "Your affiliate account is paused, so links are not recording. Contact support.",
+        "wouldEarn": "You would earn {amount} per sale — {rate}% of the price."
+      }
+    },
+    "learn": {
+      "title": "Your learning",
+      "subtitle": "What you are working through, and what you have finished.",
+      "inProgress": "In progress",
+      "certificates": "Certificates",
+      "lessonsLeft": "{n} lessons left",
+      "allDone": "All lessons done",
+      "continue": "Continue",
+      "start": "Start",
+      "issued": "Issued {date}",
+      "grade": "Graded {n}%",
+      "emptyTitle": "Nothing to learn yet",
+      "emptyBody": "Join a training programme and it will appear here.",
+      "emptyCta": "See the programmes"
+    },
+    "statement": {
+      "title": "Earnings",
+      "subtitle": "Every cedi in and out, and where it is.",
+      "available": "Available",
+      "pending": "Clearing",
+      "pendingHint": "Commission held until the refund window closes.",
+      "request": "Request a payout",
+      "belowMinimum": "You can request a payout once your available balance reaches {amount}.",
+      "payoutsClosed": "Commission withdrawals are not open yet. Your balance is safe and nothing expires.",
+      "earnedAll": "Earned",
+      "reversedAll": "Reversed",
+      "paidAll": "Paid out",
+      "payoutsTitle": "Your payout requests",
+      "payoutsDescription": "What you asked for, and where it got to.",
+      "afterFee": "{gross} less {fee} fee",
+      "payoutStatus": {
+        "requested": "Requested",
+        "approved": "Approved",
+        "paid": "Paid",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled"
+      },
+      "historyTitle": "Statement",
+      "historyDescription": "Every commission entry on this account.",
+      "empty": "Nothing yet. Your first commission will appear here the moment a sale is credited to you.",
+      "levelTwo": "L2",
+      "clearsOn": "clears {date}",
+      "type": {
+        "credit": "Commission earned",
+        "reversal": "Sale reversed",
+        "payout": "Paid out",
+        "adjustment": "Adjustment"
+      }
+    },
+    "account": {
+      "title": "Affiliate account",
+      "subtitle": "Your code, your programme, and when your access ends.",
+      "noName": "Your account",
+      "noProgramme": "No programme yet",
+      "tier": {
+        "beginner": "Beginner programme",
+        "professional": "Professional programme"
+      },
+      "codeTitle": "Your affiliate code",
+      "copyCode": "Copy your code",
+      "copied": "Copied",
+      "codeHint": "Links are per product — open any product and copy its link there. Yours look like {example}",
+      "accessTitle": "Access ends in",
+      "daysLeft": "{n} days",
+      "until": "Until {date}",
+      "noAccess": "No active programme.",
+      "depthTitle": "Commission levels",
+      "depthOne": "You earn on the sales you make.",
+      "depthTwo": "You earn on your own sales, and a share of sales by affiliates you brought in.",
+      "elsewhereTitle": "Managed on your main account",
+      "payoutDetails": {
+        "title": "Payout details",
+        "body": "Where your money is sent."
+      },
+      "profile": {
+        "title": "Profile and security",
+        "body": "Name, password, two-factor and sign out."
+      }
+    },
+    "public": {
+      "signIn": "Sign in",
+      "lessons": "{n} lessons",
+      "checkpoints": "{n} checkpoints",
+      "certificate": "Certificate included",
+      "outcomes": "What you will be able to do",
+      "curriculum": "What is inside",
+      "sectionNumber": "Section {n}",
+      "preview": "Free preview",
+      "oneLevel": "Earn commission on every sale you make",
+      "twoLevels": "Earn on your own sales and on sales by affiliates you bring in",
+      "validity": "{n} days of access",
+      "certificateOnFinish": "Certificate when you finish",
+      "buy": "Buy now",
+      "owned": "Continue learning",
+      "signUpToBuy": "Create an account to buy",
+      "starting": "Taking you to payment…",
+      "paymentNote": "Paid securely through Paystack. Mobile money and cards accepted.",
+      "mustSignIn": "Please sign in before buying.",
+      "freeNotSupported": "This product has no price set. Please contact support."
+    },
+    "callback": {
+      "ok": {
+        "title": "Payment received",
+        "body": "Your access is live. You can start straight away."
+      },
+      "already": {
+        "title": "Already confirmed",
+        "body": "This payment was recorded earlier. Your access is live."
+      },
+      "pending": {
+        "title": "Not paid yet",
+        "body": "Paystack has not confirmed this payment. If money left your account, it will land shortly and your access opens automatically."
+      },
+      "mismatch": {
+        "title": "The amount did not match",
+        "body": "The payment does not match what was ordered, so nothing has been granted. Please contact support with the reference below — no action is needed from you first."
+      },
+      "missing": {
+        "title": "We could not find that order",
+        "body": "The reference does not match any order on this account. If you were charged, contact support with the reference below."
+      },
+      "error": {
+        "title": "We could not confirm it",
+        "body": "Something went wrong while checking this payment. If money left your account, nothing is lost — contact support with the reference below."
+      },
+      "startLearning": "Start learning",
+      "goDashboard": "Go to your affiliate dashboard",
+      "goHome": "Back to the site",
+      "contactSupport": "Contact support",
+      "reference": "Reference {reference}"
+    },
+    "course": {
+      "back": "Your learning",
+      "section": "Section {n}",
+      "checkpoints": "{n} checkpoints",
+      "preview": "Preview",
+      "locked": "Locked until you own this course",
+      "kind": {
+        "video": "Video",
+        "article": "Article",
+        "pdf": "PDF",
+        "quiz": "Checkpoint"
+      },
+      "progress": "{done} of {total} done",
+      "finished": "Course complete",
+      "emptyCourse": "This course has no lessons yet.",
+      "resources": "Resources",
+      "resourcesNote": "Read here in the app — resources are not downloadable.",
+      "articleDone": "Marked as read",
+      "videoFailed": "This video could not be loaded. Try again in a moment.",
+      "lockedTitle": "You do not own this lesson",
+      "lockedBody": "Buy the course and every lesson opens straight away.",
+      "missingTitle": "Lesson not found",
+      "missingBody": "It may have been moved or removed. Pick another from the list."
+    }
   }
 }

@@ -383,6 +383,15 @@
   background-image: var(--gradient-field);
 }
 
+/*
+  The earnings panel at the top of the affiliate dashboard. Deep violet with
+  two light pools, the same anatomy as the ads balance hero — deliberately, so
+  the two businesses feel like one company — in the other business's hue.
+*/
+@utility bg-affiliate-hero {
+  background: var(--gradient-affiliate-hero);
+}
+
 /* ===========================================================================
    Themeable gradients + dark overrides
    =========================================================================== */
@@ -500,5 +509,141 @@
        smear; 5% reads as depth. */
     --gradient-field:
       radial-gradient(120% 340px at 50% -60px, rgb(0 104 248 / 0.16) 0%, transparent 70%);
+  }
+
+  /* -------------------------------------------------------------------------
+     THE AFFILIATE MODE
+     -------------------------------------------------------------------------
+     Phase 2 is a second BUSINESS sharing this login, and the operator's ruling
+     (2026-08-06, on the new design assets) is that it wears a dark violet skin
+     while the ads business keeps its light blue one. Jade, chosen for the mode
+     before there were assets, is retired.
+
+     ── WHY THIS IS A TOKEN BLOCK AND NOT A SET OF COMPONENTS ──
+
+     Every primitive in this app — Button, Card, StatCard, Input, TableShell —
+     is already written against semantic tokens: `bg-surface`, `border-ink-200`,
+     `text-ink-900`, `bg-brand-600`. None of them names a colour.
+
+     So the entire second skin is a redefinition of those same tokens on ONE
+     wrapper element. Custom properties inherit, and a declaration on a
+     descendant beats the one on `html`, so `.affiliate` wins over both `:root`
+     and `.dark` for everything inside it — in either theme, with no `dark:`
+     utilities involved. A Card rendered in this tree is violet-dark without a
+     single line of Card being touched, and a primitive fixed once is fixed in
+     both businesses.
+
+     The alternative — a parallel set of Affiliate* components — is how the two
+     halves of an app drift apart: a focus ring corrected in one and not the
+     other, a radius that stops matching, two spinners. It was also what the
+     first attempt at this did, and what got stripped.
+
+     ⚠️ THE ONE RULE THAT MAKES IT HOLD: inside this tree, never use a `dark:`
+     utility and never hard-code a hex. `dark:` keys off the class on <html>,
+     which says what the USER'S THEME is, not what this subtree is — in light
+     mode a `dark:` utility here silently does nothing and the element renders
+     light-on-dark. Tokens are the only thing that knows where it is.
+
+     `color-scheme` is set on the wrapper, not just on html, so native controls
+     inside it (selects, scrollbars, date pickers) are drawn dark even when the
+     rest of the app is light.
+
+     The BRAND ramp is remapped to violet rather than left alone. That is the
+     move that makes every existing primary button, focus ring, active tab and
+     link the mode's colour for free — brand means "this product's colour", and
+     in here the product is the other one.
+     ------------------------------------------------------------------------- */
+  .affiliate {
+    color-scheme: dark;
+
+    /* Surfaces. Near-black with a violet cast rather than neutral black: a
+       true grey under violet accents reads as a bug in the accent. */
+    --color-canvas:  #0a0913;
+    --color-surface: #14122a;
+
+    /* Neutral ramp, remapped by role exactly as the dark theme does — low
+       numbers are fills, high numbers are text. Each step carries the same
+       violet cast so a border never looks like a stray blue hairline. */
+    --color-ink-50:  #171531; /* recessed fill */
+    --color-ink-100: #1f1c40; /* hover fill, progress track */
+    --color-ink-200: #2a2652; /* hairline border */
+    --color-ink-300: #3b3570; /* stronger / hover border */
+    --color-ink-400: #8b85b0; /* placeholders, dots */
+    --color-ink-500: #a09ac2; /* muted text */
+    --color-ink-600: #bab5d6; /* secondary text */
+    --color-ink-700: #d3cfe8; /* labels */
+    --color-ink-800: #e6e3f2;
+    --color-ink-900: #f3f1fb; /* primary text — never pure white */
+
+    /* Brand becomes violet. -600 is the fill every primary control uses; -700
+       and -800 are its hover and active, and on a dark skin those must get
+       LIGHTER, not darker, or a hover looks like a disable. */
+    --color-brand-50:  #221c47;
+    --color-brand-100: #2b2359;
+    --color-brand-200: #3f3480;
+    --color-brand-300: #5b4cae;
+    --color-brand-400: #7c5fe0;
+    --color-brand-500: #8b5cf6;
+    --color-brand-600: #7c3aed;
+    --color-brand-700: #a78bfa;
+    --color-brand-800: #c4b5fd;
+    --color-brand-900: #ddd6fe;
+    --color-brand-950: #1a1338;
+    --color-brand-accent: #a855f7;
+
+    /* Feedback, lifted for a dark field. Green stays green: the commission
+       percentage on every product card is green in the references, and money
+       arriving is the one meaning that must not be restyled per business. */
+    --color-success-50:  #102a1c;
+    --color-success-500: #22c55e;
+    --color-success-600: #34d399;
+    --color-success-700: #6ee7a7;
+
+    --color-danger-50:  #2d1420;
+    --color-danger-500: #ef4444;
+    --color-danger-600: #f87171;
+    --color-danger-700: #fca5a5;
+
+    --color-warning-50:  #2d2109;
+    --color-warning-500: #f59e0b;
+    --color-warning-600: #fbbf24;
+
+    /* Accents. Violet is the brand in here, so the accent violet is pushed to
+       fuchsia — otherwise the "premium" chip and every primary button would be
+       the same colour and neither would mean anything. */
+    --color-violet-50:  #2a1440;
+    --color-violet-100: #371a55;
+    --color-violet-500: #d946ef;
+    --color-violet-600: #e879f9;
+    --color-violet-700: #f0abfc;
+
+    --color-teal-50:  #0c2b2c;
+    --color-teal-100: #113b3d;
+    --color-teal-500: #14b8a6;
+    --color-teal-600: #2dd4bf;
+    --color-teal-700: #5eead4;
+
+    --color-orange-50:  #33200c;
+    --color-orange-100: #452c10;
+    --color-orange-500: #f97316;
+    --color-orange-600: #fb923c;
+    --color-orange-700: #fdba74;
+
+    /* Chart series: earnings violet, clicks blue — the two lines in the
+       Performance Overview reference, and the only place the ads business's
+       blue is allowed in here, because it is a data series and not chrome. */
+    --chart-series: #a78bfa;
+    --chart-series-alt: #38bdf8;
+
+    /* Ambient wash behind the top of an affiliate screen. */
+    --gradient-field:
+      radial-gradient(120% 360px at 50% -60px, rgb(124 58 237 / 0.28) 0%, transparent 70%);
+
+    /* The earnings panel. Two light pools over a violet base, so it reads as
+       lit rather than as a flat fill. */
+    --gradient-affiliate-hero:
+      radial-gradient(120% 100% at 88% 0%, #7c3aed 0%, transparent 58%),
+      radial-gradient(110% 110% at 5% 100%, #2a1466 0%, transparent 62%),
+      linear-gradient(155deg, #4c2199 0%, #33167a 100%);
   }
 }

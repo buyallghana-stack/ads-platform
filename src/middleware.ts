@@ -89,8 +89,13 @@ export default async function middleware(request: NextRequest) {
   /*
     THE VISITOR TOKEN HAS TO BE MINTED HERE, NOT IN THE PAGE.
 
-    An affiliate link is `/shop/<slug>?ref=<code>`, and the page that lands on
-    records the click. It first tried to set this cookie itself — and it did
+    An affiliate link is `/p/<slug>?ref=<code>` — the PUBLIC product page, not
+    the one inside the affiliate shell, which is behind the auth gate. This
+    check keys on the `ref` parameter rather than on that path, so it keeps
+    working wherever links are allowed to land.
+
+    The page that lands on records the click. It first tried to set this cookie
+    itself — and it did
     not work, silently: `cookies().set()` during a Server Component render is a
     no-op in Next.js, because the response headers are already committed by the
     time a component runs. Cookies can only be written from middleware, a route

@@ -24,12 +24,21 @@
  * Refuses to touch more than one account, and refuses anything that is not on
  * the `example.invalid` domain.
  *
- *   node --env-file=.env.local scripts/delete-seeded-qa-account.mjs --yes
+ *   node --env-file=.env.local scripts/delete-seeded-qa-account.mjs [email] --yes
+ *
+ * The address is an argument so the same guarded delete can clean up any
+ * throwaway a QA pass needed — but ONLY on `.invalid`, which RFC 2606 reserves
+ * and which can therefore never be a real person's address.
  */
 import { Client } from 'pg'
 
-const EMAIL = 'qa-dash@example.invalid'
+const EMAIL = process.argv.find((a) => a.includes('@')) ?? 'qa-dash@example.invalid'
 const CONFIRMED = process.argv.includes('--yes')
+
+if (!EMAIL.endsWith('.invalid')) {
+  console.error(`Refusing: ${EMAIL} is not a reserved throwaway address.`)
+  process.exit(1)
+}
 
 const db = new Client({
   connectionString: process.env.SUPABASE_DB_URL,
