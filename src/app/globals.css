@@ -57,7 +57,19 @@
      deep slate canvas with a slightly lifted surface, which is what gives
      dark its front-to-back layering. Use `bg-canvas` / `bg-surface` instead
      of a bare white so a sheet knows how to be dark.                         */
-  --color-canvas:  #f1f5f9; /* = ink-100, the established page tone */
+  /*
+     LIGHTENED 2026-08-06. It was #f1f5f9 — the same value as ink-100 — and the
+     operator's verdict was that the grey was not appealing. Two things were
+     wrong with it and only one was the hue:
+
+       1. it sat mid-tone, so a white card barely separated from the page and
+          every screen read as flat panels on flat grey
+       2. it was a COOL slate, which fights the brand blue rather than seating it
+
+     #f6f8fd is lighter, so white now genuinely lifts off it, and carries a
+     trace of the brand hue so the two belong to the same family. The ink ramp
+     is untouched: this is the page field, not the neutral scale.                */
+  --color-canvas:  #f6f8fd;
   --color-surface: #ffffff;
 
   /* Chart series hues (light). Overridden in .dark — every step validated
@@ -356,6 +368,21 @@
   background: var(--gradient-promo-panel);
 }
 
+/*
+  AMBIENT FIELD behind the top of a signed-in screen.
+
+  A flat page under a vivid blue hero makes the hero look pasted on — the exact
+  "flat panels on flat grey" reading the canvas change above is fixing. This is
+  the other half: a soft brand wash that the hero sits IN rather than on,
+  fading to nothing well before the content below it.
+
+  Pinned to the top of the scroll container and non-interactive, so it never
+  costs a tap or moves when the page scrolls.
+*/
+@utility bg-field {
+  background-image: var(--gradient-field);
+}
+
 /* ===========================================================================
    Themeable gradients + dark overrides
    =========================================================================== */
@@ -373,6 +400,10 @@
       radial-gradient(110% 90% at 85% 0%, #ffffff 0%, transparent 55%),
       radial-gradient(120% 100% at 15% 100%, #a7cbfb 0%, transparent 60%),
       linear-gradient(160deg, #eaf2fe 0%, #d3e4fd 100%);
+
+    /* Light: a wash of brand blue at the very top, gone by ~420px. */
+    --gradient-field:
+      radial-gradient(120% 340px at 50% -60px, rgb(0 104 248 / 0.10) 0%, transparent 70%);
   }
 
   /* -------------------------------------------------------------------------
@@ -464,5 +495,10 @@
       radial-gradient(120% 95% at 85% 0%, #21365f 0%, transparent 55%),
       radial-gradient(120% 100% at 12% 100%, #12224a 0%, transparent 60%),
       linear-gradient(160deg, #121b30 0%, #0f1728 100%);
+
+    /* Dark: the same shape, far weaker. On a near-black field a 10% wash is a
+       smear; 5% reads as depth. */
+    --gradient-field:
+      radial-gradient(120% 340px at 50% -60px, rgb(0 104 248 / 0.16) 0%, transparent 70%);
   }
 }

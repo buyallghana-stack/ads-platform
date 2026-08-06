@@ -136,6 +136,20 @@ const STAT_BAR: Record<StatTone, string> = {
  *  of the trend, not a chart. Uses the tone's fill colour. */
 function Sparkline({ data, className }: { data: number[]; className?: string }) {
   if (data.length < 2) return null
+
+  /*
+    A TREND NEEDS SOMETHING TO TREND.
+
+    With one non-zero day in fourteen this drew a flat line along the floor and
+    then a vertical spike — an "L" that reads as a rendering fault rather than
+    as data. It is not a fault; it is an accurate picture of a series that has
+    nothing to say yet.
+
+    That is every user's FIRST day, not an edge case, so the honest answer is to
+    draw nothing until there is a shape worth drawing. Three non-zero points is
+    the least that can describe a direction rather than an event.
+  */
+  if (data.filter((v) => v > 0).length < 3) return null
   const max = Math.max(...data, 1)
   const pts = data
     .map((v, i) => `${((i / (data.length - 1)) * 58 + 1).toFixed(1)},${(19 - (v / max) * 16).toFixed(1)}`)

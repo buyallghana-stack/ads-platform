@@ -90,7 +90,11 @@ export default async function HomePage({
   const bestDay = week.reduce((best, d) => (d.earned > best.earned ? d : best), week[0])
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-5 sm:px-6 md:px-8 md:py-7">
+    <div className="relative isolate mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-5 sm:px-6 md:px-8 md:py-7">
+      {/* The brand wash the hero sits IN rather than on. Fixed height and
+          pointer-events-none, so it never intercepts a tap and never grows
+          with the page. See `bg-field` in globals.css. */}
+      <div aria-hidden className="bg-field pointer-events-none absolute inset-x-0 top-0 -z-10 h-[26rem]" />
       {/* Home-only header: brand (mobile — the sidebar carries it on md+),
           then notifications, theme and support chat. Other tabs get none of
           this chrome (operator direction 2026-07-24).
@@ -175,8 +179,20 @@ export default async function HomePage({
           </span>
           {format.number(currency, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </p>
+        {/*
+          WAS the lifetime points total — which also appeared in the "Lifetime
+          earned" stat card and again in the week summary. The same figure three
+          times on one screen teaches nothing the first one did not.
+
+          What belongs here instead is the only genuinely time-sensitive thing
+          on the dashboard: how many ads are left today. It expires at midnight,
+          it is what the primary button does, and it was previously six grey
+          words beside the buttons.
+        */}
         <p className="mt-2 text-[0.875rem] font-medium tabular-nums text-white/85">
-          {t('pointsAccumulated', { points: format.number(balance) })}
+          {remaining > 0
+            ? t('adsWaiting', { n: remaining })
+            : t('capReachedToday')}
         </p>
 
         <div className="mt-5 flex flex-wrap items-center gap-3">
@@ -198,9 +214,6 @@ export default async function HomePage({
               {t('withdrawCta')}
             </Button>
           </Link>
-          <span className="text-[0.8125rem] text-white/75">
-            {t('remaining', { count: remaining })}
-          </span>
         </div>
       </section>
 
@@ -234,7 +247,22 @@ export default async function HomePage({
           tone="brand"
           progress={cap > 0 ? done / cap : 0}
         />
-        <Stat label={t('tier')} value={status?.tier_name ?? '—'} icon={<Trophy />} tone="violet" />
+        {/* The plan NAME alone is a label; the multiplier is what the plan
+            actually does, and it appeared nowhere on this screen. "Gold" tells
+            somebody which box they are in — "×2.50 on every ad" tells them why
+            they paid for it. */}
+        <Stat
+          label={t('tier')}
+          value={status?.tier_name ?? '—'}
+          /* The daily cap, which the plan grants and `get_user_earning_status`
+             already returns. The reward MULTIPLIER would be the better line —
+             it is the plan's real value — but the RPC does not return it, and a
+             migration to widen a widely-called function is not worth a subtitle.
+             The cap is true, concrete, and already in hand. */
+          sublabel={cap > 0 ? t('tierCap', { n: cap }) : undefined}
+          icon={<Trophy />}
+          tone="violet"
+        />
         <Stat
           label={t('lifetimeEarned')}
           value={format.number(balances?.lifetime_earned ?? 0)}

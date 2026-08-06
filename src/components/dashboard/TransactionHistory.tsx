@@ -3,6 +3,8 @@
 import { useMemo, useState } from 'react'
 
 import {
+  ChevronDown,
+  ChevronRight,
   Coins,
   CreditCard,
   Gift,
@@ -140,6 +142,10 @@ export function TransactionHistory({ rows }: { rows: TxRow[] }) {
 
   const visible = filtered.slice(0, limit)
 
+  /* Which runs the reader has opened. Collapsed by default — see the note on
+     `groups` below. */
+  const [opened, setOpened] = useState<Set<string>>(new Set())
+
   // Day grouping for the mobile feed. Keys are locale-formatted labels.
   const groups = useMemo(() => {
     const today = new Date().toDateString()
@@ -159,6 +165,39 @@ export function TransactionHistory({ rows }: { rows: TxRow[] }) {
     }
     return out
   }, [visible, format, t])
+
+  /*
+    RUNS: consecutive entries of the same kind, within one day, rolled into a
+    single line.
+
+    Somebody who watches eight ads produces eight ledger rows that differ only
+    in the number of points. Listed individually they were roughly sixty per
+    cent of the dashboard's height and said one thing eight times — the reader
+    scrolls past a wall to reach anything else, and learns nothing they did not
+    already know from the balance.
+
+    Rolled up, the same day reads "Ads · 8 watched · +812 pts", which is the
+    sentence they would actually say out loud. The detail is one tap away and
+    nothing is hidden or lost.
+
+    THREE is the threshold, not two. A pair is not a wall, and collapsing it
+    would hide two real rows to save one line — the ledger should only be
+    summarised where the summary is genuinely easier to read than the thing it
+    replaces.
+  */
+  const runsByDay = useMemo(
+    () =>
+      groups.map((g) => {
+        const runs: Array<{ key: string; kind: TxKind; items: TxRow[] }> = []
+        for (const row of g.items) {
+          const last = runs[runs.length - 1]
+          if (last && last.kind === row.kind) last.items.push(row)
+          else runs.push({ key: `${g.label}-${runs.length}`, kind: row.kind, items: [row] })
+        }
+        return { label: g.label, runs }
+      }),
+    [groups],
+  )
 
   const amountCell = (r: TxRow) => (
     <div className="text-right">
@@ -281,25 +320,114 @@ export function TransactionHistory({ rows }: { rows: TxRow[] }) {
       {/* Mobile: statement feed grouped by day                               */}
       {/* ------------------------------------------------------------------ */}
       <div className="md:hidden">
-        {groups.map((g) => (
+        {runsByDay.map((g) => (
           <div key={g.label}>
             <p className="bg-ink-50 px-4 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.06em] text-ink-400">
               {g.label}
             </p>
             <ul className="divide-y divide-ink-100">
-              {g.items.map((r) => (
-                <li key={r.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                  {identity(r)}
-                  <div className="shrink-0 text-right">
-                    {amountCell(r)}
-                    <p className="mt-0.5 text-[0.625rem] tabular-nums text-ink-400">
-                      {format.dateTime(new Date(r.at), { hour: 'numeric', minute: '2-digit' })}
-                      {r.balanceAfter !== null &&
-                        ` · ${t('balanceShort', { balance: format.number(r.balanceAfter) })}`}
-                    </p>
-                  </div>
-                </li>
-              ))}
+              {g.runs.map((run) => {
+                const single = run.items.length < 3
+                const isOpen = opened.has(run.key)
+
+                /* Fewer than three, or already opened: the real rows. */
+                if (single || isOpen) {
+                  return (
+                    <li key={run.key}>
+                      {!single && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setOpened((prev) => {
+                              const next = new Set(prev)
+                              next.delete(run.key)
+                              return next
+                            })
+                          }
+                          className="flex w-full items-center gap-1.5 px-4 pt-3 text-[0.6875rem] font-semibold text-brand-700"
+                        >
+                          <ChevronDown aria-hidden className="size-3.5" />
+                          {t('collapse')}
+                        </button>
+                      )}
+                      <ul className="divide-y divide-ink-100">
+                        {run.items.map((r) => (
+                          <li
+                            key={r.id}
+                            className="flex items-center justify-between gap-3 px-4 py-3"
+                          >
+                            {identity(r)}
+                            <div className="shrink-0 text-right">
+                              {amountCell(r)}
+                              <p className="mt-0.5 text-[0.625rem] tabular-nums text-ink-400">
+                                {format.dateTime(new Date(r.at), {
+                                  hour: 'numeric',
+                                  minute: '2-digit',
+                                })}
+                                {r.balanceAfter !== null &&
+                                  ` · ${t('balanceShort', { balance: format.number(r.balanceAfter) })}`}
+                              </p>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  )
+                }
+
+                /* Three or more: one line, and the total. */
+                const total = run.items.reduce((n, r) => n + (r.points ?? 0), 0)
+                return (
+                  <li key={run.key}>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setOpened((prev) => new Set(prev).add(run.key))
+                      }
+                      className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-ink-50"
+                    >
+                      <span className="flex min-w-0 items-center gap-3">
+                        {(() => {
+                          /* Same chip treatment `identity` gives a single row,
+                             so a rolled-up line sits in the list rather than
+                             looking like a different kind of thing. */
+                          const Icon = iconFor(run.items[0]!)
+                          return (
+                            <span
+                              className={cn(
+                                'grid size-9 shrink-0 place-items-center rounded-full',
+                                KIND_CHIP[run.kind],
+                              )}
+                            >
+                              <Icon aria-hidden className="size-4" />
+                            </span>
+                          )
+                        })()}
+                        <span className="min-w-0">
+                          <span className="block truncate text-[0.8125rem] font-medium text-ink-900">
+                            {t(`kind.${run.kind}`)}
+                          </span>
+                          <span className="flex items-center gap-1 text-[0.6875rem] text-ink-500">
+                            {t('runCount', { n: run.items.length })}
+                            <ChevronRight aria-hidden className="size-3" />
+                          </span>
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-right">
+                        <span
+                          className={cn(
+                            'block text-[0.8125rem] font-semibold tabular-nums',
+                            total >= 0 ? 'text-success-700' : 'text-danger-600',
+                          )}
+                        >
+                          {total >= 0 ? '+' : ''}
+                          {format.number(total)} {t('pts')}
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                )
+              })}
             </ul>
           </div>
         ))}
@@ -319,24 +447,124 @@ export function TransactionHistory({ rows }: { rows: TxRow[] }) {
                 <th className="px-4 py-2.5 text-right font-semibold">{t('columns.balance')}</th>
               </tr>
             </thead>
+            {/*
+              THE SAME ROLL-UP AS THE PHONE FEED.
+
+              A statement is allowed to list every line — but this one is on a
+              DASHBOARD, where fifteen rows of "Ads / Ad reward" pushed
+              everything else off the screen and said one thing fifteen times.
+              Rolled up it is still a complete statement: nothing is dropped,
+              and one click opens any run.
+
+              The running-balance column is deliberately blank on a collapsed
+              row. A single balance cannot describe eight entries, and printing
+              the last one would look like the balance for the whole run.
+            */}
             <tbody className="divide-y divide-ink-100">
-              {visible.map((r) => (
-                <tr key={r.id}>
-                  <td className="px-4 py-3">{identity(r)}</td>
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <p className="text-[0.8125rem] text-ink-700">
-                      {format.dateTime(new Date(r.at), { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </p>
-                    <p className="text-[0.6875rem] tabular-nums text-ink-400">
-                      {format.dateTime(new Date(r.at), { hour: 'numeric', minute: '2-digit' })}
-                    </p>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3">{amountCell(r)}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-right text-[0.8125rem] tabular-nums text-ink-700">
-                    {r.balanceAfter !== null ? `${format.number(r.balanceAfter)} pts` : '—'}
-                  </td>
-                </tr>
-              ))}
+              {runsByDay.flatMap((g) =>
+                g.runs.map((run) => {
+                  const single = run.items.length < 3
+                  const isOpen = opened.has(run.key)
+
+                  if (single || isOpen) {
+                    return run.items.map((r, i) => (
+                      <tr key={r.id}>
+                        <td className="px-4 py-3">
+                          {identity(r)}
+                          {!single && i === 0 && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setOpened((prev) => {
+                                  const next = new Set(prev)
+                                  next.delete(run.key)
+                                  return next
+                                })
+                              }
+                              className="mt-1 flex items-center gap-1 text-[0.6875rem] font-semibold text-brand-700"
+                            >
+                              <ChevronDown aria-hidden className="size-3" />
+                              {t('collapse')}
+                            </button>
+                          )}
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-3">
+                          <p className="text-[0.8125rem] text-ink-700">
+                            {format.dateTime(new Date(r.at), {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            })}
+                          </p>
+                          <p className="text-[0.6875rem] tabular-nums text-ink-400">
+                            {format.dateTime(new Date(r.at), { hour: 'numeric', minute: '2-digit' })}
+                          </p>
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-3">{amountCell(r)}</td>
+                        <td className="whitespace-nowrap px-4 py-3 text-right text-[0.8125rem] tabular-nums text-ink-700">
+                          {r.balanceAfter !== null ? `${format.number(r.balanceAfter)} pts` : '—'}
+                        </td>
+                      </tr>
+                    ))
+                  }
+
+                  const total = run.items.reduce((n, r) => n + (r.points ?? 0), 0)
+                  const first = run.items[run.items.length - 1]!
+                  const Icon = iconFor(run.items[0]!)
+                  return (
+                    <tr
+                      key={run.key}
+                      onClick={() => setOpened((prev) => new Set(prev).add(run.key))}
+                      className="cursor-pointer transition-colors hover:bg-ink-50"
+                    >
+                      <td className="px-4 py-3">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span
+                            className={cn(
+                              'grid size-9 shrink-0 place-items-center rounded-full',
+                              KIND_CHIP[run.kind],
+                            )}
+                          >
+                            <Icon aria-hidden className="size-4" />
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-[0.8125rem] font-medium text-ink-900">
+                              {t(`kind.${run.kind}`)}
+                            </p>
+                            <p className="flex items-center gap-1 text-[0.6875rem] text-brand-700">
+                              {t('runCount', { n: run.items.length })}
+                              <ChevronRight aria-hidden className="size-3" />
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <p className="text-[0.8125rem] text-ink-700">
+                          {format.dateTime(new Date(first.at), {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                        </p>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <p
+                          className={cn(
+                            'text-right text-[0.8125rem] font-semibold tabular-nums',
+                            total >= 0 ? 'text-success-700' : 'text-danger-600',
+                          )}
+                        >
+                          {total >= 0 ? '+' : ''}
+                          {format.number(total)} {t('pts')}
+                        </p>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-right text-[0.8125rem] text-ink-400">
+                        —
+                      </td>
+                    </tr>
+                  )
+                }),
+              )}
             </tbody>
           </table>
         </div>
