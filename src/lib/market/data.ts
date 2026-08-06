@@ -190,3 +190,47 @@ export const getPromoteInfo = cache(
     return data as unknown as import('@/components/market/PromotePanel').PromoteInfo
   },
 )
+
+/* ------------------------------------------------------------------ */
+/* The Learn tab                                                       */
+/* ------------------------------------------------------------------ */
+
+export type EarnedCertificate = {
+  id: string
+  productId: string
+  slug: string
+  title: string
+  coverPath: string | null
+  category: string | null
+  /** Null on certificates issued before grades existed — renders as no grade,
+   *  never as zero. */
+  grade: number | null
+  issuedAt: string
+  code: string
+  instructor: string | null
+}
+
+export type OngoingCourse = {
+  productId: string
+  slug: string
+  title: string
+  description: string | null
+  coverPath: string | null
+  category: string | null
+  instructor: string | null
+  percent: number
+  lessons: number
+  /** What the reference puts on the row: "08 lectures left". A better thing to
+   *  show than a percentage alone — a percentage says how far you have come, a
+   *  count says how much is in the way. */
+  lessonsLeft: number
+}
+
+export const getMyLearning = cache(
+  async (userId: string): Promise<{ certificates: EarnedCertificate[]; ongoing: OngoingCourse[] }> => {
+    const supabase = createAdminClient()
+    const { data, error } = await supabase.rpc('my_learning', { p_user_id: userId })
+    if (error || !data) return { certificates: [], ongoing: [] }
+    return data as unknown as { certificates: EarnedCertificate[]; ongoing: OngoingCourse[] }
+  },
+)

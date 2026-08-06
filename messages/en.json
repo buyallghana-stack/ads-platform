@@ -3078,12 +3078,16 @@
     },
     "learn": {
       "title": "My courses",
-      "complete": "Complete",
-      "percentDone": "{n}% complete",
+      "certifications": "Your certificates",
+      "viewAll": "View all",
+      "ongoing": "Pick up where you left off",
+      "continue": "Continue",
+      "lessonsLeft": "{n, plural, one {# lesson left} other {# lessons left}}",
+      "completed": "Completed {date}",
       "empty": {
-        "title": "No courses yet",
-        "body": "Courses you buy appear here, with your place in each one saved.",
-        "cta": "See the training"
+        "title": "Nothing to learn yet",
+        "body": "Courses you buy land here, with your place in each one saved.",
+        "cta": "Browse the shop"
       }
     },
     "shop": {

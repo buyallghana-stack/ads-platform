@@ -3078,12 +3078,16 @@
     },
     "learn": {
       "title": "Mes formations",
-      "complete": "Terminée",
-      "percentDone": "{n}% terminé",
+      "certifications": "Vos certificats",
+      "viewAll": "Voir tout",
+      "ongoing": "Reprenez où vous en étiez",
+      "continue": "Continuer",
+      "lessonsLeft": "{n, plural, one {# leçon restante} other {# leçons restantes}}",
+      "completed": "Terminée le {date}",
       "empty": {
-        "title": "Aucune formation",
-        "body": "Les formations que vous achetez apparaissent ici, avec votre progression enregistrée.",
-        "cta": "Voir la formation"
+        "title": "Rien à apprendre pour l'instant",
+        "body": "Les formations que vous achetez arrivent ici, avec votre progression enregistrée.",
+        "cta": "Parcourir la boutique"
       }
     },
     "shop": {

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import {
+  ArrowLeft,
   Award,
   BadgeCheck,
   Check,
@@ -23,6 +24,7 @@ import { OfferPanel, PanelAction } from '@/components/market/OfferPanel'
 import { PromotePanel, type PromoteInfo } from '@/components/market/PromotePanel'
 import { Link } from '@/i18n/navigation'
 import { courseLength, coverUrl } from '@/lib/market/covers'
+import { cn } from '@/lib/cn'
 import { cedis } from '@/lib/market/money'
 import type { ShopDetail } from '@/lib/market/data'
 import { buyProductAction } from '@/app/[locale]/shop/actions'
@@ -88,6 +90,11 @@ export function ProductDetail({
 }) {
   const [pending, start] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  /* Pill tabs, exactly as the reference does it: the outline and the curriculum
+     are two answers to "what is this", and stacking both makes the page a
+     scroll. Overview is first because somebody who has not decided yet needs
+     the argument before the index. */
+  const [tab, setTab] = useState<'overview' | 'outline'>('overview')
   const { product, training, sections } = detail
 
   const lessons = sections.reduce((n, s) => n + s.lessons.length, 0)
@@ -203,7 +210,7 @@ export function ProductDetail({
   )
 
   return (
-    <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-8">
+    <div className="pb-28 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-8 lg:pb-0">
       <div className="min-w-0">
         {/* The cover. A real image, from the public bucket — `cover_path` had
             existed since migration 107 and nothing ever wrote to it, which is
@@ -223,8 +230,15 @@ export function ProductDetail({
               <GraduationCap aria-hidden className="size-12 text-ink-400" strokeWidth={1.25} />
             </span>
           )}
+          <Link
+            href="/shop"
+            aria-label="Back to the shop"
+            className="absolute left-3 top-3 grid size-9 place-items-center rounded-full bg-surface/95 text-ink-800 backdrop-blur-sm transition-colors hover:bg-surface"
+          >
+            <ArrowLeft aria-hidden className="size-4.5" />
+          </Link>
           {product.category && (
-            <span className="absolute left-4 top-4 rounded-full bg-surface/95 px-3 py-1.5 text-[0.75rem] font-semibold text-ink-800 backdrop-blur-sm">
+            <span className="absolute left-14 top-3 rounded-full bg-surface/95 px-3 py-2 text-[0.75rem] font-semibold text-ink-800 backdrop-blur-sm">
               {product.category}
             </span>
           )}
@@ -267,8 +281,17 @@ export function ProductDetail({
             to the sticky right column instead (reference 0578). */}
         <div className="mt-5 space-y-3 lg:hidden">{panels}</div>
 
-        {product.outcomes.length > 0 && (
-          <section className="mt-7">
+        <div className="mt-7 flex gap-2">
+          <TabPill active={tab === 'overview'} onClick={() => setTab('overview')}>
+            Overview
+          </TabPill>
+          <TabPill active={tab === 'outline'} onClick={() => setTab('outline')}>
+            Course outline
+          </TabPill>
+        </div>
+
+        {tab === 'overview' && product.outcomes.length > 0 && (
+          <section className="mt-5">
             <h2 className="text-[1.0625rem] font-semibold tracking-[-0.01em] text-ink-900">
               What you will learn
             </h2>
@@ -285,8 +308,8 @@ export function ProductDetail({
           </section>
         )}
 
-        {training?.certificate && (
-          <section className="mt-7 flex items-center gap-4 rounded-(--radius-card) border border-ink-200 bg-surface p-4">
+        {tab === 'overview' && training?.certificate && (
+          <section className="mt-5 flex items-center gap-4 rounded-(--radius-card) border border-ink-200 bg-surface p-4">
             <span
               aria-hidden
               className="grid size-12 shrink-0 place-items-center rounded-full bg-jade-50 text-jade-700"
@@ -303,12 +326,9 @@ export function ProductDetail({
           </section>
         )}
 
-        {sections.length > 0 && (
-          <section className="mt-7">
-            <h2 className="text-[1.0625rem] font-semibold tracking-[-0.01em] text-ink-900">
-              What is inside
-            </h2>
-            <div className="mt-3 space-y-2.5">
+        {tab === 'outline' && sections.length > 0 && (
+          <section className="mt-5">
+            <div className="space-y-2.5">
               {sections.map((section, si) => (
                 <div
                   key={si}
@@ -369,7 +389,80 @@ export function ProductDetail({
 
       {/* DESKTOP: the commercial column, sticky beside a long curriculum. */}
       <aside className="hidden lg:sticky lg:top-6 lg:block lg:space-y-3">{panels}</aside>
+
+      {/*
+        THE STICKY ENROL BAR — reference 0572 screen 2, and 0579.
+
+        Both references pin the buy action to the bottom of the phone viewport
+        rather than leaving it in the page. On a course page the curriculum is
+        the longest part, so an in-page button spends most of the visit scrolled
+        away; a person who has just read the outline and decided has to scroll
+        BACK to act on it.
+
+        Hidden at lg, where the sticky right column already keeps the panel in
+        view, and hidden entirely once owned — a bar that says "buy" on
+        something you bought is worse than no bar.
+
+        `bottom-[4.25rem]` clears the app's own fixed tab bar. Sitting flush at
+        bottom-0 would put it underneath the navigation.
+      */}
+      {!product.owned && (
+        <div
+          className={cn(
+            'fixed inset-x-0 z-30 border-t border-ink-200 bg-surface/95 px-4 py-3 backdrop-blur-sm lg:hidden',
+            /* Clears the fixed tab bar for a signed-in user; sits on the floor
+               for a stranger, who has no tab bar to clear. Getting this wrong
+               leaves the bar hovering over a strip of empty canvas. */
+            signedIn ? 'bottom-[4.25rem]' : 'bottom-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]',
+          )}
+        >
+          <div className="mx-auto flex w-full max-w-6xl items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-[0.6875rem] text-ink-500">
+                {product.purpose === 'training_program' ? 'One payment' : 'Price'}
+              </p>
+              <p className="truncate text-[1.125rem] leading-none font-semibold tabular-nums text-ink-900">
+                {product.priceMinor === 0 ? 'Free' : cedis(product.priceMinor)}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={buy}
+              disabled={pending}
+              className="shrink-0 rounded-full bg-action px-6 py-3 text-[0.9375rem] font-semibold text-on-action transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              {pending ? 'One moment…' : signedIn ? 'Enrol now' : 'Sign up to enrol'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
+  )
+}
+
+function TabPill({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        'rounded-full border px-4 py-2 text-[0.875rem] font-semibold transition-colors',
+        active
+          ? 'border-ink-900 bg-ink-900 text-surface'
+          : 'border-ink-200 bg-surface text-ink-600 hover:border-ink-300',
+      )}
+    >
+      {children}
+    </button>
   )
 }
 

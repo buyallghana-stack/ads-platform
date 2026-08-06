@@ -1,9 +1,7 @@
 import { notFound } from 'next/navigation'
 import { setRequestLocale } from 'next-intl/server'
 
-import { MarketHeader } from '@/components/market/MarketHeader'
 import { ProductDetail } from '@/components/market/ProductDetail'
-import { Link } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
 import { recordClick } from '@/lib/market/attribution'
 import { getPromoteInfo, getShopProduct } from '@/lib/market/data'
@@ -63,16 +61,13 @@ export default async function ProductPage({
     getOrigin(),
   ])
 
+  /* NO MarketHeader. The reference puts nothing above the cover — the title
+     bar was printing the product name directly above the h1 that prints the
+     product name, which is the same duplication the operator called out on the
+     shop and the dashboard. The back control lives on the cover instead. */
   return (
     <>
-      <MarketHeader title={detail.product.title} bare={!user} />
-      <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 md:px-8 md:py-7">
-        <Link
-          href="/shop"
-          className="mb-4 inline-block text-[0.75rem] font-medium text-ink-500 hover:text-ink-800"
-        >
-          ← Shop
-        </Link>
+      <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 md:px-8">
         <ProductDetail
           detail={detail}
           signedIn={Boolean(user)}
