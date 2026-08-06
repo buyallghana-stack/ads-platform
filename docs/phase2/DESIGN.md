@@ -125,8 +125,14 @@ would send every prospect to a login wall wrapped in a tool they have no account
 links are built as `/{locale}/p/{slug}?ref={code}`, and the affiliate's own view of the same product
 is a separate screen with a promote panel on it.
 
-That page is also the only Phase 2 screen that is **indexable**. Every signed-in screen carries
-`robots: { index: false }`; hiding the shopfront from search would be hiding the shopfront.
+⚠️ **It is currently `noindex`, inherited from the root layout, and that is not a decision — it is
+the default nobody has overridden.** Checked against the live page after deploying: the served HTML
+carries `robots: noindex, nofollow`.
+
+Pre-launch that is the safe state and it should stay. But this is the one Phase 2 page a stranger
+is meant to reach, so hiding it from search permanently would be hiding the shopfront. The moment
+the operator wants organic traffic, `generateMetadata` here needs an explicit
+`robots: { index: true, follow: true }` — it will not happen by itself.
 
 ---
 
