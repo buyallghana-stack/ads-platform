@@ -3356,6 +3356,12 @@ export type Database = {
           },
         ]
       }
+      saved_products: {
+        Row: { user_id: string; product_id: string; created_at: string }
+        Insert: { user_id: string; product_id: string; created_at?: string }
+        Update: { user_id?: string; product_id?: string; created_at?: string }
+        Relationships: []
+      }
       vendors: {
         Row: {
           contact_email: string | null
@@ -4478,6 +4484,8 @@ export type Database = {
       shop_products: { Args: { p_user_id?: string }; Returns: Json[] }
       shop_product: { Args: { p_slug: string; p_user_id?: string }; Returns: Json }
       affiliate_promote_info: { Args: { p_product_id: string; p_user_id: string }; Returns: Json }
+      my_learning: { Args: { p_user_id: string }; Returns: Json }
+      certificate_grade_for: { Args: { p_product_id: string; p_user_id: string }; Returns: number }
       affiliate_dashboard: { Args: { p_user_id: string }; Returns: Json }
       lesson_for_learner: { Args: { p_lesson_id: string; p_user_id: string }; Returns: Json }
       affiliate_depth_now: { Args: { p_affiliate_id: string }; Returns: number }

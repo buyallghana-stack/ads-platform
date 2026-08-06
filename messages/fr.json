@@ -3026,23 +3026,15 @@
       "tierLine": "Affilié {tier}"
     },
     "training": {
-      "cta": "Voir la formation",
-      "beginner": {
-        "summary": "Apprenez à promouvoir et touchez une commission sur les personnes qui achètent via votre lien."
-      },
-      "professional": {
-        "summary": "La même formation, plus une commission sur les ventes des affiliés que vous recrutez."
-      },
-      "perks": {
-        "levels": "{n, plural, one {Commission sur # niveau} other {Commission sur # niveaux}}",
-        "year": "Promouvoir pendant un an à compter de l'achat",
-        "keep": "La formation vous reste acquise après cette année",
-        "certificate": "Certificat à la fin"
-      },
-      "soon": {
-        "title": "Les formations ne sont pas encore en vente",
-        "body": "La formation d'affiliation est en cours de finalisation. Elle apparaîtra ici."
-      }
+      "headline": "Soyez payé pour ce que vous recommandez déjà",
+      "sub": "Suivez la formation d'affiliation, puis touchez une part de chaque vente que vous nous envoyez.",
+      "cta": "Continuer avec {level}",
+      "best": "2 niveaux",
+      "oneLevel": "Un niveau de commission",
+      "twoLevels": "Deux niveaux de commission",
+      "footnote": "Payé une fois. Un an pour promouvoir, et la formation vous reste acquise.",
+      "soonTitle": "Les formations ne sont pas encore en vente",
+      "soonBody": "La formation d'affiliation est en cours de finalisation. Elle apparaîtra ici."
     },
     "course": {
       "section": "Section {n} — {title}",
@@ -3095,23 +3087,25 @@
       }
     },
     "shop": {
-      "title": "Boutique",
-      "subtitle": "Formations et ebooks. Achetés une fois, ils vous restent acquis.",
+      "welcome": "Bon retour,",
+      "welcomeAnon": "Bienvenue sur",
+      "browse": "Trouvez ce qui mérite d’être partagé",
+      "searchPlaceholder": "Rechercher des formations",
+      "all": "Tout",
+      "featured": "Commencez ici",
+      "everything": "Tout le reste",
+      "viewAll": "Voir tout",
+      "noMatch": "Aucun résultat. Essayez un autre mot.",
       "owned": "Acquis",
       "open": "Ouvrir",
       "free": "Gratuit",
+      "continue": "Continuer",
       "lessons": "{n, plural, one {# leçon} other {# leçons}}",
       "professionalOnly": "Professionnel uniquement",
-      "shelf": {
-        "training": "Formation d'affiliation",
-        "trainingBody": "Achetez-en une pour commencer à promouvoir. Elles diffèrent par la portée de votre commission.",
-        "products": "Formations et ebooks"
-      },
       "empty": {
         "title": "Rien en vente pour l'instant",
-        "body": "Les produits apparaissent ici dès leur publication."
-      },
-      "continue": "Continuer"
+        "body": "Les formations apparaissent ici dès leur publication."
+      }
     }
   }
 }

@@ -1,11 +1,16 @@
-import { setRequestLocale } from 'next-intl/server'
-import { getTranslations } from 'next-intl/server'
+import { setRequestLocale, getTranslations } from 'next-intl/server'
 
-import { MarketHeader } from '@/components/market/MarketHeader'
-import { ShopShelf } from '@/components/market/ShopShelf'
-import { getViewerUser } from '@/lib/auth/session'
+import { ShopScreen } from '@/components/market/ShopScreen'
+import { getProfile, getViewerUser } from '@/lib/auth/session'
 import { getShopProducts } from '@/lib/market/data'
 
+/**
+ * The shop.
+ *
+ * Public — outside the authenticated route group — because an affiliate link is
+ * sent to strangers by definition. A signed-out visitor gets the same catalogue
+ * and a welcome instead of their name.
+ */
 export default async function ShopPage({
   params,
 }: {
@@ -15,15 +20,36 @@ export default async function ShopPage({
   setRequestLocale(locale)
 
   const t = await getTranslations('market.shop')
+  const common = await getTranslations('common')
   const user = await getViewerUser()
-  const products = await getShopProducts(user?.id)
+
+  const [products, profile] = await Promise.all([
+    getShopProducts(user?.id),
+    user ? getProfile(user.id) : Promise.resolve(null),
+  ])
+
+  /* First name only. "Welcome, Emmanuel" is a greeting; "Welcome, Emmanuel
+     Kwabena Ofori" is a database record read aloud. */
+  const firstName = profile?.full_name?.trim().split(/\s+/)[0] ?? null
 
   return (
-    <>
-      <MarketHeader title={t('title')} description={t('subtitle')} bare={!user} />
-      <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 md:px-8 md:py-7">
-        <ShopShelf products={products} />
-      </div>
-    </>
+    <ShopScreen
+      products={products}
+      greetingName={firstName}
+      platformName={common('appName')}
+      labels={{
+        welcome: firstName ? t('welcome') : t('welcomeAnon'),
+        browse: t('browse'),
+        searchPlaceholder: t('searchPlaceholder'),
+        all: t('all'),
+        featured: t('featured'),
+        everything: t('everything'),
+        viewAll: t('viewAll'),
+        owned: t('owned'),
+        emptyTitle: t('empty.title'),
+        emptyBody: t('empty.body'),
+        noMatch: t('noMatch'),
+      }}
+    />
   )
 }

@@ -39,13 +39,28 @@ export async function MarketDashboard({ data }: { data: AffiliateDashboard }) {
   const t = await getTranslations('market.dashboard')
 
   if (data.state === 'none') {
+    const tt = await getTranslations('market.training')
+    /* No MarketHeader here. The Stacks layout IS the page — a title bar above
+       a headline would be the same sentence twice, and the operator's note on
+       the old header ("boring and unprofessional") was largely about exactly
+       that duplication. */
     return (
-      <>
-        <MarketHeader title={t('none.title')} description={t('none.body')} />
-        <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 md:px-8 md:py-7">
-          <TrainingOffers offers={data.training_offers ?? []} />
-        </div>
-      </>
+      <div className="px-4 py-8 sm:px-6 md:px-8 md:py-10">
+        <TrainingOffers
+          offers={data.training_offers ?? []}
+          labels={{
+            headline: tt('headline'),
+            sub: tt('sub'),
+            soonTitle: tt('soonTitle'),
+            soonBody: tt('soonBody'),
+            cta: tt('cta'),
+            footnote: tt('footnote'),
+            best: tt('best'),
+            oneLevel: tt('oneLevel'),
+            twoLevels: tt('twoLevels'),
+          }}
+        />
+      </div>
     )
   }
 

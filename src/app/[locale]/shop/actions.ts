@@ -1,5 +1,7 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
+
 import { getViewAsSession } from '@/lib/admin/view-as'
 import { getSessionUser } from '@/lib/auth/session'
 import { reportUnexpected } from '@/lib/observability/report'
@@ -7,6 +9,7 @@ import { initialiseTransaction } from '@/lib/payments/paystack'
 import { getOrigin } from '@/lib/request-context'
 import { startProductOrder } from '@/lib/market/orders'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient as createUserClient } from '@/lib/supabase/server'
 
 /**
  * Buying a product.
@@ -94,4 +97,42 @@ export async function buyProductAction(productId: string): Promise<BuyResult> {
   }
 
   return { ok: true, redirectTo: charge.authorizationUrl }
+}
+
+/**
+ * Save or unsave a product.
+ *
+ * Through the RLS user client rather than the service key, unusually for Phase
+ * 2 — `saved_products` is genuinely "own rows", the policy says so, and routing
+ * a bookmark through an admin client would mean the server deciding whose
+ * shortlist to write on the strength of an id in the payload. Here the database
+ * decides, from the caller's own token.
+ *
+ * A toggle rather than separate add/remove: the button has one state and one
+ * meaning, and two actions would let the UI and the row disagree about which.
+ */
+export async function toggleSaveAction(productId: string): Promise<{ ok: boolean }> {
+  const user = await getSessionUser()
+  if (!user) return { ok: false }
+  if (await getViewAsSession()) return { ok: false }
+
+  const supabase = await createUserClient()
+
+  const { data: existing } = await supabase
+    .from('saved_products')
+    .select('product_id')
+    .eq('product_id', productId)
+    .maybeSingle()
+
+  const { error } = existing
+    ? await supabase.from('saved_products').delete().eq('product_id', productId)
+    : await supabase.from('saved_products').insert({ user_id: user.id, product_id: productId })
+
+  if (error) {
+    reportUnexpected(error, 'shop.toggleSave', { productId })
+    return { ok: false }
+  }
+
+  revalidatePath('/shop')
+  return { ok: true }
 }

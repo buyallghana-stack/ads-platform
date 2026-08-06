@@ -3026,23 +3026,15 @@
       "tierLine": "{tier} affiliate"
     },
     "training": {
-      "cta": "See the course",
-      "beginner": {
-        "summary": "Learn to promote, and earn commission on the people who buy through your link."
-      },
-      "professional": {
-        "summary": "The same course, plus commission on sales made by the affiliates you bring in."
-      },
-      "perks": {
-        "levels": "{n, plural, one {Commission on # level} other {Commission on # levels}}",
-        "year": "Promote for one year from the day you buy",
-        "keep": "The course stays yours after the year ends",
-        "certificate": "Certificate when you finish it"
-      },
-      "soon": {
-        "title": "Courses are not on sale yet",
-        "body": "The affiliate training is being finished. This is where it will appear."
-      }
+      "headline": "Get paid for what you already recommend",
+      "sub": "Take the affiliate course, then earn a share of every sale you send our way.",
+      "cta": "Continue with {level}",
+      "best": "2 levels",
+      "oneLevel": "One commission level",
+      "twoLevels": "Two commission levels",
+      "footnote": "Paid once. One year of promoting, and the course is yours to keep.",
+      "soonTitle": "Courses are not on sale yet",
+      "soonBody": "The affiliate training is being finished. This is where it will appear."
     },
     "course": {
       "section": "Section {n} — {title}",
@@ -3095,23 +3087,25 @@
       }
     },
     "shop": {
-      "title": "Shop",
-      "subtitle": "Courses and ebooks. Buy once, and they stay yours.",
+      "welcome": "Welcome back,",
+      "welcomeAnon": "Welcome to",
+      "browse": "Find something worth sharing",
+      "searchPlaceholder": "Search courses",
+      "all": "All",
+      "featured": "Start here",
+      "everything": "Everything else",
+      "viewAll": "View all",
+      "noMatch": "Nothing matches that. Try a different word.",
       "owned": "Owned",
       "open": "Open it",
       "free": "Free",
+      "continue": "Continue",
       "lessons": "{n, plural, one {# lesson} other {# lessons}}",
       "professionalOnly": "Professional only",
-      "shelf": {
-        "training": "Affiliate training",
-        "trainingBody": "Buy one of these to start promoting. They differ in how far your commission reaches.",
-        "products": "Courses and ebooks"
-      },
       "empty": {
         "title": "Nothing on sale yet",
-        "body": "Products appear here as soon as they are published."
-      },
-      "continue": "Continue"
+        "body": "Courses appear here the moment they are published."
+      }
     }
   }
 }

@@ -94,7 +94,13 @@ export type ShopProduct = {
   purpose: 'vendor_product' | 'training_program'
   cover_path: string | null
   category: string | null
-  vendor_name: string | null
+  /** Falls back to the platform name in the UI: a TRAINING product structurally
+   *  cannot have a vendor (`products_training_has_no_vendor`) because it is the
+   *  Owner's own, so these are null on exactly the products the shop leads
+   *  with. */
+  instructor_name: string | null
+  instructor_headline: string | null
+  instructor_avatar: string | null
   content_language: string
   price_minor: number
   list_price_minor: number
@@ -108,6 +114,7 @@ export type ShopProduct = {
   owned: boolean
   /** How far through, for the progress bar on an owned card. */
   percent: number
+  saved: boolean
 }
 
 export type ShopDetail =
