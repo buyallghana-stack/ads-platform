@@ -119,7 +119,10 @@ export default async function PublicProductPage({
       </header>
 
       <main className="mx-auto grid max-w-5xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1fr_20rem] lg:items-start lg:py-10">
-        <div className="flex flex-col gap-5">
+        {/* `min-w-0`: a grid item's default `min-width: auto` will not shrink
+            below its content, and the cover below carries a full-size photo —
+            enough to push the whole page sideways on a phone. */}
+        <div className="flex min-w-0 flex-col gap-5">
           {cover && (
             <div className="aspect-[21/9] overflow-hidden rounded-(--radius-panel) bg-ink-100">
               {/* eslint-disable-next-line @next/next/no-img-element */}

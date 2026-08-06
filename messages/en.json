@@ -3315,7 +3315,18 @@
       "lockedTitle": "You do not own this lesson",
       "lockedBody": "Buy the course and every lesson opens straight away.",
       "missingTitle": "Lesson not found",
-      "missingBody": "It may have been moved or removed. Pick another from the list."
+      "missingBody": "It may have been moved or removed. Pick another from the list.",
+      "checkpointIntro": "Answer the questions below. You can retry as many times as you need."
+    },
+    "quiz": {
+      "passMark": "Pass mark {n}%",
+      "submit": "Submit answers",
+      "answerRemaining": "{n} left to answer",
+      "retry": "Try again",
+      "passedTitle": "Checkpoint passed",
+      "passedBody": "You scored {n}%. This lesson is marked complete.",
+      "failedTitle": "Not quite",
+      "failedBody": "You scored {n}%. Go back over the lesson and try again — there is no limit on attempts."
     }
   }
 }

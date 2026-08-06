@@ -129,7 +129,21 @@ export default async function CoursePage({
       ) : (
         /* Player above the list on a phone; side by side from xl, where there is
            room for the curriculum to stay visible while a lesson plays. */
-        <div className="grid gap-5 xl:grid-cols-[1fr_22rem] xl:items-start">
+        /* ⚠️ `grid-cols-1` and `minmax(0,1fr)`, not a bare `grid` and `1fr`.
+
+           An implicitly-sized grid column is `auto`, which means it is sized to
+           its content's MIN-CONTENT — and `1fr` is shorthand for
+           `minmax(auto, 1fr)`, which has the same floor. Either way the column
+           grows to whatever its widest child needs and the page scrolls
+           sideways; at 390px this one settled at 480px, which showed up not as
+           a scrollbar but as the dark canvas stopping three-quarters of the way
+           across, because a background paints its own box and not the
+           document's.
+
+           `minmax(0, …)` is what lets the column be narrower than its content
+           so the children's own truncation and wrapping can do their job.
+           Caught by `scripts/verify-affiliate-ui.mjs`. */
+        <div className="grid min-w-0 grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start">
           <div className="min-w-0">
             {payload && <LessonView payload={payload} slug={slug} />}
           </div>

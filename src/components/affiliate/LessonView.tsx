@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { CheckCircle2, FileText, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { LessonQuiz } from '@/components/affiliate/LessonQuiz'
 import type { LessonPayload } from '@/lib/market/course'
 import { markLessonProgress } from '@/app/[locale]/(affiliate)/learn/[slug]/actions'
 import { cn } from '@/lib/cn'
@@ -67,11 +68,19 @@ export function LessonView({ payload, slug }: { payload: LessonPayload; slug: st
   const heading = (
     <div className={video ? 'border-t border-ink-200 px-4 py-3.5' : 'border-b border-ink-200 px-4 py-3.5'}>
       <p className="text-[0.75rem] text-ink-500">{lesson.section_title}</p>
-      <h1 className="mt-0.5 flex items-center gap-2 text-[1.0625rem] font-semibold tracking-[-0.01em] text-ink-900">
+      {/* `items-start` and a wrapped, `min-w-0` title.
+
+          Raw text directly inside a flex container becomes an ANONYMOUS flex
+          item, and like every flex item it defaults to `min-width: auto` — so
+          a long lesson title did not wrap, it pushed the page 140px wider than
+          a 390px phone. Wrapping it in a span that is allowed to shrink is the
+          fix; `items-start` keeps the tick aligned to the first line once the
+          title runs to two. */}
+      <h1 className="mt-0.5 flex items-start gap-2 text-[1.0625rem] font-semibold tracking-[-0.01em] text-ink-900">
         {progress.completed && (
-          <CheckCircle2 aria-hidden className="size-4.5 shrink-0 text-success-600" />
+          <CheckCircle2 aria-hidden className="mt-0.5 size-4.5 shrink-0 text-success-600" />
         )}
-        {lesson.title}
+        <span className="min-w-0">{lesson.title}</span>
       </h1>
     </div>
   )
@@ -83,12 +92,24 @@ export function LessonView({ payload, slug }: { payload: LessonPayload; slug: st
 
         {video ? (
           <VideoLesson lessonId={lesson.id} slug={slug} seconds={progress.seconds_watched} />
+        ) : lesson.kind === 'quiz' ? (
+          /* A checkpoint lesson has no body of its own — the quizzes below ARE
+             the lesson. Rendering it through ArticleLesson (which is what a
+             kind-based else branch does) drew an empty page with an invisible
+             read-tracker on it. */
+          <p className="px-4 py-4 text-[0.8125rem] leading-relaxed text-ink-600">
+            {t('checkpointIntro')}
+          </p>
         ) : (
           <ArticleLesson lessonId={lesson.id} slug={slug} body={lesson.body} done={progress.completed} />
         )}
 
         {video && heading}
       </div>
+
+      {payload.quizzes.map((quiz) => (
+        <LessonQuiz key={quiz.id} quiz={quiz} slug={slug} />
+      ))}
 
       {payload.resources.length > 0 && (
         <div className="rounded-(--radius-panel) border border-ink-200 bg-surface p-4">

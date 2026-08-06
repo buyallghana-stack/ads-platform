@@ -60,3 +60,46 @@ export async function markLessonProgress(
      request and will be fresh when it is next visited. */
   revalidatePath(`/learn/${slug}`)
 }
+
+/**
+ * Submitting a checkpoint.
+ *
+ * ── THE GRADING IS IN POSTGRES AND THAT IS THE WHOLE SECURITY MODEL ──
+ *
+ * `submit_quiz_attempt` compares the answers against `quiz_options.is_correct`
+ * and returns only a score. The answer key never leaves the database: neither
+ * `quiz_for_learner` nor `lesson_for_learner` selects `is_correct`, so there is
+ * nothing in the page for a reader to inspect.
+ *
+ * That matters more here than on a normal course. Passing a checkpoint
+ * completes a lesson, completing lessons crosses `activation_threshold_percent`,
+ * and crossing it switches on the ability to earn real money. A quiz graded in
+ * the browser would be a money control graded in the browser.
+ *
+ * ⚠️ Same rule as progress: the SIGNED-IN user, and refused while a super admin
+ * has a look open. An admin clicking through somebody's checkpoint must not
+ * activate their account.
+ */
+export async function submitQuiz(
+  quizId: string,
+  slug: string,
+  answers: Record<string, string>,
+): Promise<{ score: number; passed: boolean }> {
+  const user = await getSessionUser()
+  if (!user) return { score: 0, passed: false }
+  if (await getViewAsSession()) return { score: 0, passed: false }
+
+  const admin = createAdminClient()
+  const { data, error } = await admin
+    .rpc('submit_quiz_attempt', {
+      p_user_id: user.id,
+      p_quiz_id: quizId,
+      p_answers: answers,
+    })
+    .maybeSingle()
+
+  if (error || !data) return { score: 0, passed: false }
+
+  revalidatePath(`/learn/${slug}`)
+  return { score: data.score_percent, passed: data.passed }
+}

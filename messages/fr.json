@@ -3315,7 +3315,18 @@
       "lockedTitle": "Vous ne possédez pas cette leçon",
       "lockedBody": "Achetez le cours et toutes les leçons s’ouvrent aussitôt.",
       "missingTitle": "Leçon introuvable",
-      "missingBody": "Elle a peut-être été déplacée ou supprimée. Choisissez-en une autre."
+      "missingBody": "Elle a peut-être été déplacée ou supprimée. Choisissez-en une autre.",
+      "checkpointIntro": "Répondez aux questions ci-dessous. Vous pouvez réessayer autant de fois que nécessaire."
+    },
+    "quiz": {
+      "passMark": "Seuil {n} %",
+      "submit": "Valider les réponses",
+      "answerRemaining": "{n} restante(s)",
+      "retry": "Réessayer",
+      "passedTitle": "Point de contrôle validé",
+      "passedBody": "Vous avez obtenu {n} %. Cette leçon est marquée comme terminée.",
+      "failedTitle": "Pas encore",
+      "failedBody": "Vous avez obtenu {n} %. Relisez la leçon et réessayez — le nombre de tentatives est illimité."
     }
   }
 }

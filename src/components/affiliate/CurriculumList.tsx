@@ -99,7 +99,16 @@ export async function CurriculumList({
                   </span>
 
                   <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-1.5">
+                    {/* ⚠️ `min-w-0` on THIS row too, not only on its parent.
+                        A flex item's default `min-width: auto` refuses to
+                        shrink below its content, so the truncate below it never
+                        fired and a long lesson title pushed the whole page
+                        wider than the viewport — which showed up as the dark
+                        canvas stopping halfway across, because the wrapper
+                        paints its own box and the document had grown past it.
+                        The overflow chain has to be unbroken from the row down
+                        to the element that truncates. */}
+                    <span className="flex min-w-0 items-center gap-1.5">
                       {lesson.completed && (
                         <CheckCircle2
                           aria-hidden
