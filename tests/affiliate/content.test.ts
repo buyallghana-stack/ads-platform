@@ -107,6 +107,43 @@ describe.skipIf(!HAS_DB)('what a shopper can see of a course', () => {
     })
   })
 
+  it('returns ONLY the course it was asked about', async () => {
+    await withRollback(async (tx) => {
+      const by = await admin(tx)
+
+      /*
+        `course_outline` took a product id and never used it — no
+        `where s.product_id = p_product_id` anywhere in the body — so it
+        returned the curriculum of every published product, interleaved.
+
+        The two tests either side of this one covered it and both passed for
+        months, VACUOUSLY: until real courses were published there was no
+        published product with lessons, the join found nothing, and "returns 0
+        rows" and "is in the right order" were both trivially true of an empty
+        result.
+
+        This test cannot pass that way. It builds a SECOND published course and
+        asserts the first one's outline does not mention it — so an empty
+        database makes it fail rather than succeed.
+      */
+      const mine = await makeCourse(tx, by)
+      const mySection = await makeSection(tx, mine, 'Mine', 0)
+      await makeLesson(tx, mySection, { title: 'My lesson', position: 0 })
+
+      const theirs = await makeCourse(tx, by)
+      const theirSection = await makeSection(tx, theirs, 'Theirs', 0)
+      await makeLesson(tx, theirSection, { title: 'Their lesson', position: 0 })
+
+      const { rows } = await tx.query<{ section_title: string; lesson_title: string }>(
+        `select section_title, lesson_title from public.course_outline($1)`,
+        [mine],
+      )
+
+      expect(rows.map((r) => r.lesson_title)).toEqual(['My lesson'])
+      expect(rows.map((r) => r.section_title)).not.toContain('Theirs')
+    })
+  })
+
   it('says nothing at all about an unpublished course', async () => {
     await withRollback(async (tx) => {
       const by = await admin(tx)
