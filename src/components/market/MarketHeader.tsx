@@ -18,7 +18,23 @@ import { ModeSwitch } from '@/components/app/ModeSwitch'
  * sidebar, where it is always visible, and two of them on one screen would be
  * two answers to "which business am I in".
  */
-export function MarketHeader({ title, description }: { title: string; description?: string }) {
+export function MarketHeader({
+  title,
+  description,
+  bare = false,
+}: {
+  title: string
+  description?: string
+  /**
+   * A signed-out visitor on the shop — the normal case for an affiliate link.
+   *
+   * The mode switch is hidden for them because both of its destinations
+   * require an account. Offering a control that only leads to a login page is
+   * worse than not offering it: it looks like navigation and behaves like a
+   * wall.
+   */
+  bare?: boolean
+}) {
   return (
     /* The bar spans the full width so its bottom border reads as a real edge
        to the page, but the TEXT is capped at the same max-w-6xl the ads
@@ -26,7 +42,7 @@ export function MarketHeader({ title, description }: { title: string; descriptio
        and stops looking like a heading. */
     <header className="border-b border-ink-200 bg-surface">
       <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 md:px-8 md:py-5">
-        <ModeSwitch className="mb-4 md:hidden" />
+        {!bare && <ModeSwitch className="mb-4 md:hidden" />}
         <h1 className="text-[1.375rem] leading-tight font-semibold tracking-[-0.02em] text-ink-900 md:text-2xl">
           {title}
         </h1>

@@ -9,7 +9,8 @@
     "show": "Afficher",
     "hide": "Masquer",
     "showPassword": "Afficher le mot de passe",
-    "hidePassword": "Masquer le mot de passe"
+    "hidePassword": "Masquer le mot de passe",
+    "logIn": "Connexion"
   },
   "landing": {
     "meta": {
@@ -3090,6 +3091,24 @@
         "title": "Aucune formation",
         "body": "Les formations que vous achetez apparaissent ici, avec votre progression enregistrée.",
         "cta": "Voir la formation"
+      }
+    },
+    "shop": {
+      "title": "Boutique",
+      "subtitle": "Formations et ebooks. Achetés une fois, ils vous restent acquis.",
+      "owned": "Acquis",
+      "open": "Ouvrir",
+      "free": "Gratuit",
+      "lessons": "{n, plural, one {# leçon} other {# leçons}}",
+      "professionalOnly": "Professionnel uniquement",
+      "shelf": {
+        "training": "Formation d'affiliation",
+        "trainingBody": "Achetez-en une pour commencer à promouvoir. Elles diffèrent par la portée de votre commission.",
+        "products": "Formations et ebooks"
+      },
+      "empty": {
+        "title": "Rien en vente pour l'instant",
+        "body": "Les produits apparaissent ici dès leur publication."
       }
     }
   }

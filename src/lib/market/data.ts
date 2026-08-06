@@ -80,3 +80,76 @@ export const getAffiliateDashboard = cache(async (userId: string): Promise<Affil
   if (error || !data) return { state: 'none', training_offers: [] }
   return data as unknown as AffiliateDashboard
 })
+
+/* ------------------------------------------------------------------ */
+/* The shop                                                            */
+/* ------------------------------------------------------------------ */
+
+export type ShopProduct = {
+  id: string
+  slug: string
+  title: string
+  description: string | null
+  kind: string
+  purpose: 'vendor_product' | 'training_program'
+  cover_path: string | null
+  content_language: string
+  price_minor: number
+  list_price_minor: number
+  on_sale: boolean
+  min_affiliate_tier: 'beginner' | 'professional'
+  lessons: number
+  owned: boolean
+}
+
+export type ShopDetail =
+  | { ok: false }
+  | {
+      ok: true
+      product: {
+        id: string
+        slug: string
+        title: string
+        description: string | null
+        kind: string
+        purpose: 'vendor_product' | 'training_program'
+        coverPath: string | null
+        priceMinor: number
+        listPriceMinor: number
+        onSale: boolean
+        minAffiliateTier: 'beginner' | 'professional'
+        owned: boolean
+      }
+      training: {
+        level: 'beginner' | 'professional'
+        commissionDepth: number
+        validityDays: number
+        renewalPriceMinor: number | null
+        activationThreshold: number
+        certificate: boolean
+      } | null
+      sections: {
+        title: string
+        position: number
+        lessons: { title: string; kind: string; seconds: number | null; preview: boolean }[]
+      }[]
+    }
+
+export const getShopProducts = cache(async (userId?: string): Promise<ShopProduct[]> => {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase.rpc('shop_products', { p_user_id: userId ?? undefined })
+  if (error || !data) return []
+  return data as unknown as ShopProduct[]
+})
+
+export const getShopProduct = cache(
+  async (slug: string, userId?: string): Promise<ShopDetail> => {
+    const supabase = createAdminClient()
+    const { data, error } = await supabase.rpc('shop_product', {
+      p_slug: slug,
+      p_user_id: userId ?? undefined,
+    })
+    if (error || !data) return { ok: false }
+    return data as unknown as ShopDetail
+  },
+)

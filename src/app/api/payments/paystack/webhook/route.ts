@@ -4,6 +4,7 @@ import { serverEnv } from '@/lib/env'
 import { reportUnexpected } from '@/lib/observability/report'
 import { confirmPaystackReference } from '@/lib/payments/confirm'
 import { verifyWebhookSignature } from '@/lib/payments/paystack'
+import { confirmProductOrder } from '@/lib/market/orders'
 
 /**
  * Paystack webhook.
@@ -55,7 +56,28 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true, ignored: event.event ?? 'unknown' })
   }
 
-  const outcome = await confirmPaystackReference(event.data.reference)
+  /*
+    ONE WEBHOOK, TWO KINDS OF PURCHASE.
+
+    Paystack posts to a single configured URL, so this route has to serve both
+    businesses: a plan (`subscription_payments`) and a shop order (`orders`).
+    The reference is the row id in one table or the other, and they cannot
+    collide — both are uuids from different tables.
+
+    Try the plan first because it is the older and busier path, and fall
+    through on `not_found` only. Any other failure is a real failure of THAT
+    path and must not be retried as the other one: a mismatched amount on a
+    subscription is not an order, it is a problem.
+  */
+  let outcome: { ok: true; alreadyDone: boolean } | { ok: false; reason: string } =
+    await confirmPaystackReference(event.data.reference)
+
+  if (!outcome.ok && outcome.reason === 'not_found') {
+    /* No cookie on a webhook, so no visitor token. Attribution still works
+       through the account-side binding: a click made while signed in is
+       recorded against the user as well as the browser. */
+    outcome = await confirmProductOrder(event.data.reference, null)
+  }
 
   /*
     MONEY ARRIVED AND WE DID NOT GRANT IT. Paystack has taken the customer's

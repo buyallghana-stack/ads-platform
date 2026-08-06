@@ -10,6 +10,12 @@ import { updateSession } from '@/lib/supabase/middleware'
    the middleware bundle. */
 const VIEW_AS_COOKIE = 'sp_view_as'
 
+/* The affiliate visitor token. A random id and nothing else — no user, no
+   affiliate code, nothing that identifies a person if it leaks. Thirty days,
+   matching the attribution window. */
+const VISITOR_COOKIE = 'sp_v'
+const VISITOR_MAX_AGE = 60 * 60 * 24 * 30
+
 /*
   Screens that stay shut even while viewing.
 
@@ -79,6 +85,39 @@ export default async function middleware(request: NextRequest) {
 
   const response = handleI18n(request)
   await updateSession(request, response)
+
+  /*
+    THE VISITOR TOKEN HAS TO BE MINTED HERE, NOT IN THE PAGE.
+
+    An affiliate link is `/shop/<slug>?ref=<code>`, and the page that lands on
+    records the click. It first tried to set this cookie itself — and it did
+    not work, silently: `cookies().set()` during a Server Component render is a
+    no-op in Next.js, because the response headers are already committed by the
+    time a component runs. Cookies can only be written from middleware, a route
+    handler, or a server action.
+
+    Nothing errored. The click was recorded against a token the browser never
+    kept, so the next request arrived with no cookie, `attribute_order` found
+    nothing, and the sale paid NOBODY. Caught by asserting on the cookie in a
+    browser rather than by reading the code, which had a comment explaining how
+    important the cookie was directly above the line that did not set it.
+
+    Set on BOTH the request and the response: the request copy is what makes it
+    visible to the page rendering in this same round trip, so somebody who
+    clicks a link and buys immediately is still attributed.
+  */
+  if (request.nextUrl.searchParams.has('ref') && !request.cookies.has(VISITOR_COOKIE)) {
+    const token = crypto.randomUUID()
+    request.cookies.set(VISITOR_COOKIE, token)
+    response.cookies.set(VISITOR_COOKIE, token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: VISITOR_MAX_AGE,
+    })
+  }
+
   return response
 }
 

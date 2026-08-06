@@ -9,7 +9,8 @@
     "show": "Show",
     "hide": "Hide",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "logIn": "Log in"
   },
   "landing": {
     "meta": {
@@ -3090,6 +3091,24 @@
         "title": "No courses yet",
         "body": "Courses you buy appear here, with your place in each one saved.",
         "cta": "See the training"
+      }
+    },
+    "shop": {
+      "title": "Shop",
+      "subtitle": "Courses and ebooks. Buy once, and they stay yours.",
+      "owned": "Owned",
+      "open": "Open it",
+      "free": "Free",
+      "lessons": "{n, plural, one {# lesson} other {# lessons}}",
+      "professionalOnly": "Professional only",
+      "shelf": {
+        "training": "Affiliate training",
+        "trainingBody": "Buy one of these to start promoting. They differ in how far your commission reaches.",
+        "products": "Courses and ebooks"
+      },
+      "empty": {
+        "title": "Nothing on sale yet",
+        "body": "Products appear here as soon as they are published."
       }
     }
   }
