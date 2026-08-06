@@ -132,6 +132,22 @@ a Phase 2 product has one price plus an optional sale price.
 - ⚠️ **Paid content lives in a PRIVATE bucket** served by short-lived signed URLs after an
   entitlement check. Phase 1's `ad-media` is public — correct for an advert, catastrophic for a paid
   course, because a public bucket URL is permanent and unauthenticated.
+- ⚠️ **`course-media` is gated on `is_super_admin`, NOT `is_admin`** (migration 134). The two are
+  not the same function and the difference is a leak:
+
+  | | Covers |
+  |---|---|
+  | `is_admin()` | super_admin, admin, **support**, **ads_manager** |
+  | `is_super_admin()` | super_admin |
+
+  `ad-media`'s policies use `is_admin()`, so copying that shape onto the course bucket is the
+  obvious move and the wrong one — it would let anyone handling a password-reset ticket download
+  every paid course the platform sells. Every catalogue RPC calls `assert_admin`, which is
+  super-admin only; **the storage has to match the RPCs that write to it, or the weaker of the two
+  is the real permission.**
+- **The answer key has its own read.** `admin_lesson_detail` returns `isCorrect`;
+  `lesson_for_learner` has no code path that can. Two functions rather than one with an
+  `include_answers` flag, because such a flag would live in the function learners *can* reach.
 - **Per-user watermark** on video and ebook pages (E31), carrying the viewer's identity. With
   streaming and DRM both declined, this is the only thing that makes a leak traceable.
 - **Ebooks are text, not files** (E32). There is no column anywhere that could hold a path to a

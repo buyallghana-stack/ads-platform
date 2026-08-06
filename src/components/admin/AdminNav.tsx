@@ -13,6 +13,7 @@ import {
   Gauge,
   Gamepad2,
   Gift,
+  BookOpen,
   Target,
   Trophy,
   LayoutGrid,
@@ -109,6 +110,10 @@ const GROUPS: NavGroup[] = [
     key: 'content',
     items: [
       { key: 'ads', href: '/admin/ads', Icon: LayoutGrid, area: 'ads' },
+      // Phase 2's content, sitting with Phase 1's. A course is authored the
+      // same way an ad is — the operator writes it, then publishes it — so it
+      // belongs beside Ads rather than in a group of its own.
+      { key: 'catalogue', href: '/admin/catalogue', Icon: BookOpen },
       // Sits with Ads rather than under SYSTEM: a gift code is content the
       // operator creates and hands out, not a setting they configure.
       { key: 'giftCodes', href: '/admin/gift-codes', Icon: Gift },

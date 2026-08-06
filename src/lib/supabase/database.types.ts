@@ -4473,6 +4473,8 @@ export type Database = {
         Args: { p_affiliate_id: string }
         Returns: number
       }
+      admin_lesson_detail: { Args: { p_admin_id: string; p_lesson_id: string }; Returns: Json }
+      admin_delete_quiz: { Args: { p_admin_id: string; p_quiz_id: string }; Returns: undefined }
       affiliate_dashboard: { Args: { p_user_id: string }; Returns: Json }
       lesson_for_learner: { Args: { p_lesson_id: string; p_user_id: string }; Returns: Json }
       affiliate_depth_now: { Args: { p_affiliate_id: string }; Returns: number }

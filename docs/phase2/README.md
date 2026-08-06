@@ -6,7 +6,7 @@
 | [CONFIGURATION.md](CONFIGURATION.md) | Every number you can change, with its live value |
 | [DESIGN.md](DESIGN.md) | The six design calls the UI follows from, and what they were derived from |
 
-Migrations 107–132.
+Migrations 107–136.
 
 ---
 
@@ -17,13 +17,18 @@ activation, attribution, the commission ledger, reports, curriculum and quizzes,
 upgrades, admin authoring, affiliate operations, nightly maintenance, commission payouts, and
 the two screen reads (migrations 130–131).
 
-**UI done.** The mode switch and mode-aware navigation, the affiliate dashboard in all five of
-its states, the course player with in-video checkpoints, the curriculum, quizzes, and the
-article/PDF reader.
+**Learner UI done.** The mode switch and mode-aware navigation, the affiliate dashboard in all
+five of its states, the course player with in-video checkpoints, the curriculum, quizzes, and
+the article/PDF reader.
+
+**Admin authoring done.** The catalogue list, the product editor with its publish gate, the
+curriculum builder, and the lesson editor with video upload and the quiz editor. A complete
+course can now be built end to end — product → sections → lessons → video, text or quiz →
+publish — without touching SQL.
 
 **Not built yet.** The shop and product pages, checkout, the links screen, commission
-withdrawal, admin authoring screens, manual commission adjustment, the E34 two-stream
-concurrency limit, vendor CSV export.
+withdrawal, the vendor editor, manual commission adjustment, the E34 two-stream concurrency
+limit, vendor CSV export.
 
 ---
 

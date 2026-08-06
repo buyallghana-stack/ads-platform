@@ -209,6 +209,59 @@ describe.skipIf(!HAS_DB)('what a curriculum item can be', () => {
     })
   })
 
+  it('refuses to publish a course with no lessons at all', async () => {
+    await withRollback(async (tx) => {
+      const by = await admin(tx)
+      const { productId } = await makeCourse(tx, by)
+
+      /*
+        The gap migration 133 closed. `product_publish_blockers` walks the
+        LESSON list, so a course with no lessons had nothing to walk, reported
+        zero blockers, and published.
+
+        For a training product that is not merely an empty page. It takes
+        money and returns a dead end: `training_completion_percent` divides by
+        the lesson count and returns 0 when there is none, activation needs 50,
+        and zero never reaches fifty. The buyer holds a right to promote that
+        no amount of effort on their part can ever unlock.
+      */
+      const { rows } = await tx.query<{ problem: string }>(
+        `select problem from public.product_publish_blockers($1)`,
+        [productId],
+      )
+      expect(rows.length).toBe(1)
+      expect(rows[0]!.problem).toMatch(/no lessons yet/i)
+
+      const message = await expectRejection(tx, () =>
+        tx.query(`select public.admin_set_product_status($1, $2, 'published')`, [by, productId]),
+      )
+      expect(message).toMatch(/no lessons yet/i)
+    })
+  })
+
+  it('refuses to publish while a section would render as an empty header', async () => {
+    await withRollback(async (tx) => {
+      const by = await admin(tx)
+      const { productId, sectionId } = await makeCourse(tx, by)
+      await addLesson(tx, sectionId, { kind: 'article', body: 'Real text.' })
+
+      // A second section with nothing in it. Cosmetic rather than financial,
+      // but a header with nothing beneath it reads as a loading failure.
+      await tx.query(
+        `insert into public.course_sections (product_id, title, position)
+         values ($1, 'Coming soon', 1)`,
+        [productId],
+      )
+
+      const { rows } = await tx.query<{ problem: string }>(
+        `select problem from public.product_publish_blockers($1)`,
+        [productId],
+      )
+      expect(rows.length).toBe(1)
+      expect(rows[0]!.problem).toMatch(/Coming soon.*no lessons/i)
+    })
+  })
+
   it('reports what is missing before a lesson is published', async () => {
     await withRollback(async (tx) => {
       const by = await admin(tx)

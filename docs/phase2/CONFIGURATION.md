@@ -1,6 +1,6 @@
 # Every number you can change
 
-**Generated from the live database, 2026-08-06.** Migrations 107–132. Values are what is set right now, not
+**Generated from the live database, 2026-08-06.** Migrations 107–136. Values are what is set right now, not
 what the code defaults to.
 
 Four places hold settings, and they are not interchangeable:
@@ -45,7 +45,7 @@ Defaults only apply at creation. Changing them does **not** move any existing pr
 | `sale_price_minor` + `sale_starts_at` / `sale_ends_at` | none | Optional sale. **Commission is charged on what was actually paid**, so a sale reduces commission with it |
 | `min_affiliate_tier` | `beginner` | Lowest training level allowed to promote it. `professional` restricts it |
 | `content_language` | `en` | |
-| `status` | `draft` | `draft` → `published` → `archived`. Publishing is refused while `product_publish_blockers()` returns rows |
+| `status` | `draft` | `draft` → `published` → `paused`. Publishing is refused while `product_publish_blockers()` returns rows — including, since migration 133, a course with **no lessons at all** |
 
 ### Per product's commission (`affiliate_programs`)
 
