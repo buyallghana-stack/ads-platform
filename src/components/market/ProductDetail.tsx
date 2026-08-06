@@ -2,19 +2,27 @@
 
 import { useState, useTransition } from 'react'
 import {
+  Award,
   BadgeCheck,
+  Check,
+  Clock,
   FileText,
   GraduationCap,
   HelpCircle,
+  Layers,
   Lock,
+  RefreshCw,
   PlayCircle,
   ScrollText,
   type LucideIcon,
 } from 'lucide-react'
 
+import Image from 'next/image'
+
 import { OfferPanel, PanelAction } from '@/components/market/OfferPanel'
 import { PromotePanel, type PromoteInfo } from '@/components/market/PromotePanel'
 import { Link } from '@/i18n/navigation'
+import { courseLength, coverUrl } from '@/lib/market/covers'
 import { cedis } from '@/lib/market/money'
 import type { ShopDetail } from '@/lib/market/data'
 import { buyProductAction } from '@/app/[locale]/shop/actions'
@@ -83,6 +91,8 @@ export function ProductDetail({
   const { product, training, sections } = detail
 
   const lessons = sections.reduce((n, s) => n + s.lessons.length, 0)
+  const cover = coverUrl(product.coverPath)
+  const length = courseLength(product.seconds)
 
   function buy() {
     /*
@@ -195,11 +205,29 @@ export function ProductDetail({
   return (
     <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-8">
       <div className="min-w-0">
-        {/* Cover. No product carries an image yet, so the placeholder is a
-            designed state rather than a grey box — it is what every product
-            looks like until covers exist. */}
-        <div className="grid aspect-[16/8] place-items-center rounded-(--radius-panel) bg-gradient-to-br from-jade-50 via-surface to-ink-50">
-          <GraduationCap aria-hidden className="size-12 text-jade-600/50" strokeWidth={1.25} />
+        {/* The cover. A real image, from the public bucket — `cover_path` had
+            existed since migration 107 and nothing ever wrote to it, which is
+            why this used to be a gradient with an excuse. */}
+        <div className="relative aspect-[16/8] overflow-hidden rounded-(--radius-panel) bg-ink-100">
+          {cover ? (
+            <Image
+              src={cover}
+              alt=""
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 640px"
+              className="object-cover"
+            />
+          ) : (
+            <span className="grid size-full place-items-center">
+              <GraduationCap aria-hidden className="size-12 text-ink-400" strokeWidth={1.25} />
+            </span>
+          )}
+          {product.category && (
+            <span className="absolute left-4 top-4 rounded-full bg-surface/95 px-3 py-1.5 text-[0.75rem] font-semibold text-ink-800 backdrop-blur-sm">
+              {product.category}
+            </span>
+          )}
         </div>
 
         <h1 className="mt-5 text-[1.75rem] leading-[1.15] font-semibold tracking-[-0.03em] text-ink-900">
@@ -212,19 +240,25 @@ export function ProductDetail({
           </p>
         )}
 
-        <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.8125rem] text-ink-600">
-          {lessons > 0 && <span>{lessons} lessons</span>}
-          {training && (
-            <>
-              <span aria-hidden>·</span>
-              <span className="capitalize">{training.level}</span>
-            </>
+        {product.vendorName && (
+          <p className="mt-2 text-[0.875rem] font-medium text-ink-700">{product.vendorName}</p>
+        )}
+
+        {/* The detail strip. Reference 0578 gives these their own labelled list
+            because they are the facts somebody scans before reading a word of
+            the description. All derived — nothing here is stored twice. */}
+        <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+          {length && <Detail Icon={Clock} label="Length" value={length} />}
+          {lessons > 0 && <Detail Icon={Layers} label="Lessons" value={String(lessons)} />}
+          {product.quizzes > 0 && (
+            <Detail Icon={HelpCircle} label="Quizzes" value={String(product.quizzes)} />
           )}
-          {product.minAffiliateTier === 'professional' && (
-            <>
-              <span aria-hidden>·</span>
-              <span>Professional affiliates only</span>
-            </>
+          {training && (
+            <Detail
+              Icon={RefreshCw}
+              label="Access"
+              value={`${Math.round(training.validityDays / 365)} year`}
+            />
           )}
         </div>
 
@@ -232,6 +266,42 @@ export function ProductDetail({
             curriculum — the decision comes before the detail. At lg they move
             to the sticky right column instead (reference 0578). */}
         <div className="mt-5 space-y-3 lg:hidden">{panels}</div>
+
+        {product.outcomes.length > 0 && (
+          <section className="mt-7">
+            <h2 className="text-[1.0625rem] font-semibold tracking-[-0.01em] text-ink-900">
+              What you will learn
+            </h2>
+            {/* Two columns from sm, exactly as the reference lays it out — a
+                single column of eight checkmarks reads as a wall. */}
+            <ul className="mt-3 grid gap-2.5 sm:grid-cols-2">
+              {product.outcomes.map((outcome, i) => (
+                <li key={i} className="flex gap-2.5 text-[0.9375rem] leading-snug text-ink-800">
+                  <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-jade-600" strokeWidth={2.5} />
+                  {outcome}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {training?.certificate && (
+          <section className="mt-7 flex items-center gap-4 rounded-(--radius-card) border border-ink-200 bg-surface p-4">
+            <span
+              aria-hidden
+              className="grid size-12 shrink-0 place-items-center rounded-full bg-jade-50 text-jade-700"
+            >
+              <Award className="size-6" strokeWidth={1.5} />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[0.9375rem] font-semibold text-ink-900">Earn your certificate</p>
+              <p className="mt-0.5 text-[0.875rem] leading-snug text-ink-600">
+                Finish every lesson and the certificate is issued to your account. Promoting
+                unlocks earlier, at {training.activationThreshold}%.
+              </p>
+            </div>
+          </section>
+        )}
 
         {sections.length > 0 && (
           <section className="mt-7">
@@ -299,6 +369,31 @@ export function ProductDetail({
 
       {/* DESKTOP: the commercial column, sticky beside a long curriculum. */}
       <aside className="hidden lg:sticky lg:top-6 lg:block lg:space-y-3">{panels}</aside>
+    </div>
+  )
+}
+
+/** One fact in the detail strip. Icon in a rounded square, per the references —
+ *  a bare number with a word under it reads as a stat block; this reads as a
+ *  specification. */
+function Detail({
+  Icon,
+  label,
+  value,
+}: {
+  Icon: LucideIcon
+  label: string
+  value: string
+}) {
+  return (
+    <div className="flex items-center gap-2.5 rounded-(--radius-input) border border-ink-200 bg-surface px-3 py-2.5">
+      <span aria-hidden className="grid size-8 shrink-0 place-items-center rounded-lg bg-ink-50 text-ink-500">
+        <Icon className="size-4" />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-[0.6875rem] text-ink-500">{label}</span>
+        <span className="block truncate text-[0.875rem] font-semibold text-ink-900">{value}</span>
+      </span>
     </div>
   )
 }

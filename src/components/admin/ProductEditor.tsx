@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { AlertTriangle, CheckCircle2, ExternalLink, ListTree } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
+import { CoverUpload } from '@/components/admin/CoverUpload'
 import { Field, FieldSet, FormSection, Segmented, inputClass } from '@/components/admin/FormBits'
 import { Badge } from '@/components/ui/Badge'
 import { Link } from '@/i18n/navigation'
@@ -55,7 +56,10 @@ export function ProductEditor({
     salePriceGhs: product?.sale_price_ghs !== null && product ? String(product.sale_price_ghs) : '',
     minAffiliateTier: (product?.min_affiliate_tier ?? 'beginner') as 'beginner' | 'professional',
     contentLanguage: product?.content_language ?? 'en',
-    description: '',
+    description: product?.description ?? '',
+    coverPath: product?.cover_path ?? null,
+    category: product?.category ?? '',
+    outcomes: (product?.learning_outcomes ?? []).join('\n'),
   })
 
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
@@ -79,6 +83,13 @@ export function ProductEditor({
         minAffiliateTier: form.minAffiliateTier,
         contentLanguage: form.contentLanguage,
         description: form.description || undefined,
+        coverPath: form.coverPath,
+        category: form.category || null,
+        /* One outcome per line. A repeater with add/remove buttons is the
+           obvious control and the slower one — the operator is writing four
+           short lines, and a textarea lets them paste, reorder and rewrite in
+           one motion. Blank lines are dropped in Postgres. */
+        outcomes: form.outcomes.split('\n').map((l) => l.trim()).filter(Boolean),
       })
       if (!result.ok) return setError(result.message)
       router.push(`/admin/catalogue/${result.data.id}`)
@@ -199,6 +210,57 @@ export function ProductEditor({
               <option value="en">English</option>
               <option value="fr">French</option>
             </select>
+          </Field>
+        </div>
+      </FormSection>
+
+      <FormSection
+        title="How it looks in the shop"
+        description="The cover is the first thing anyone sees. Everything here is what a buyer reads before deciding."
+      >
+        <div className="space-y-4">
+          <FieldSet label="Cover image">
+            <CoverUpload
+              productId={product?.id ?? null}
+              path={form.coverPath}
+              onChange={(coverPath) => set('coverPath', coverPath)}
+            />
+          </FieldSet>
+
+          <Field
+            label="Description"
+            hint="Two lines at most — it is shown on the card and above the fold."
+          >
+            <textarea
+              rows={3}
+              className={cn(inputClass(), 'resize-y')}
+              value={form.description}
+              onChange={(e) => set('description', e.target.value)}
+            />
+          </Field>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Topic" hint="Shown as a chip on the card, and groups the shop.">
+              <input
+                className={inputClass()}
+                value={form.category}
+                onChange={(e) => set('category', e.target.value)}
+                placeholder="Affiliate marketing"
+              />
+            </Field>
+          </div>
+
+          <Field
+            label="What they will learn"
+            hint="One per line. Each should be a thing the buyer can DO afterwards, not a topic the course covers."
+          >
+            <textarea
+              rows={5}
+              className={cn(inputClass(), 'resize-y')}
+              value={form.outcomes}
+              onChange={(e) => set('outcomes', e.target.value)}
+              placeholder={'Explain how commission is calculated\nShare a link that is credited to you'}
+            />
           </Field>
         </div>
       </FormSection>

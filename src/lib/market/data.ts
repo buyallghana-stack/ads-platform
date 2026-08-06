@@ -93,13 +93,21 @@ export type ShopProduct = {
   kind: string
   purpose: 'vendor_product' | 'training_program'
   cover_path: string | null
+  category: string | null
+  vendor_name: string | null
   content_language: string
   price_minor: number
   list_price_minor: number
   on_sale: boolean
   min_affiliate_tier: 'beginner' | 'professional'
   lessons: number
+  quizzes: number
+  /** Total course length. Summed from lessons rather than stored, so it cannot
+   *  disagree with the curriculum. */
+  seconds: number
   owned: boolean
+  /** How far through, for the progress bar on an owned card. */
+  percent: number
 }
 
 export type ShopDetail =
@@ -114,11 +122,19 @@ export type ShopDetail =
         kind: string
         purpose: 'vendor_product' | 'training_program'
         coverPath: string | null
+        category: string | null
+        vendorName: string | null
+        outcomes: string[]
+        updatedAt: string
         priceMinor: number
         listPriceMinor: number
         onSale: boolean
         minAffiliateTier: 'beginner' | 'professional'
         owned: boolean
+        percent: number
+        lessons: number
+        quizzes: number
+        seconds: number
       }
       training: {
         level: 'beginner' | 'professional'

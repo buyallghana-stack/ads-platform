@@ -3110,7 +3110,8 @@
       "empty": {
         "title": "Nothing on sale yet",
         "body": "Products appear here as soon as they are published."
-      }
+      },
+      "continue": "Continue"
     }
   }
 }

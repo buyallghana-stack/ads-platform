@@ -14,6 +14,29 @@ const nextConfig: NextConfig = {
     root: path.resolve(__dirname),
   },
 
+  /*
+    Product covers come from Supabase Storage's public bucket, and next/image
+    refuses a remote host it was not told about — a deliberate default, so that
+    an attacker cannot point the optimiser at arbitrary URLs and use it as a
+    proxy.
+
+    Pinned to the project's own storage path rather than the whole hostname:
+    `/storage/v1/object/public/**` is the only prefix that serves public
+    objects, so a private bucket URL cannot be optimised even if one leaked
+    into a src attribute.
+  */
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: new URL(
+          process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://placeholder.supabase.co',
+        ).hostname,
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
+  },
+
   // Fail the production build on type errors rather than shipping them. It is
   // the default already; stated explicitly so turning it off has to be
   // deliberate. (Next 16 removed the equivalent `eslint` key — linting runs

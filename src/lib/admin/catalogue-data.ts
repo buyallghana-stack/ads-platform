@@ -27,6 +27,10 @@ export type CatalogueRow = {
   sections: number
   /** How many things stand between this product and being publishable. */
   blockers: number
+  cover_path: string | null
+  category: string | null
+  description: string | null
+  learning_outcomes: string[]
   l1_rate: number | null
   l2_rate: number | null
   sales: number

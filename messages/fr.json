@@ -3110,7 +3110,8 @@
       "empty": {
         "title": "Rien en vente pour l'instant",
         "body": "Les produits apparaissent ici dès leur publication."
-      }
+      },
+      "continue": "Continuer"
     }
   }
 }

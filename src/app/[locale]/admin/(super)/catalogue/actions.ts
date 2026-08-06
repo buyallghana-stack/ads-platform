@@ -66,6 +66,12 @@ const productSchema = z.object({
   saleStartsAt: z.string().nullable().optional(),
   saleEndsAt: z.string().nullable().optional(),
   minAffiliateTier: z.enum(['beginner', 'professional']).optional(),
+  /* Added in migration 140. All three use key PRESENCE in the RPC so that a
+     cleared value is distinguishable from an untouched one — which is why they
+     are nullable rather than merely optional. */
+  coverPath: z.string().nullable().optional(),
+  category: z.string().trim().max(60).nullable().optional(),
+  outcomes: z.array(z.string().trim().max(300)).max(12).optional(),
 })
 
 export async function saveProductAction(

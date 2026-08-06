@@ -147,6 +147,38 @@ slate grid.
 
 ---
 
+## Call 7 — Density is a feature, and "we have no data for that" is usually wrong
+
+The first version of this skin got the palette right and still failed, because
+the screens were **empty**. Held against the references, a shop card had a
+gradient, a title and a price; the reference card had artwork, a topic, an
+author, a duration, a lesson count and a price.
+
+Every omission had a reason, and each was individually defensible:
+
+| Omitted | The reason given | What was actually true |
+|---|---|---|
+| Cover artwork | "no product has an image" | ⚠️ `products.cover_path` existed since migration 107 and `shop_products` already returned it. Nothing WROTE to it because the admin had no upload. A missing feature with an excuse attached |
+| Author | "vendors are offline" | `vendor_name` was already in the admin read and simply absent from the shop one |
+| Duration | — | never computed anywhere, though every lesson stores `duration_seconds` |
+| Quiz count | — | one aggregate away |
+| "What you'll learn" | "no column" | true, and the column was worth adding (migration 140) |
+| Ratings | "nothing stores them" | **still true, and still refused** |
+
+Five of those six were data we had, or were one small column away. Together they
+turned a design into a wireframe.
+
+**The rule that comes out of it:** when a reference shows something and the
+instinct is "we have no data for that", check whether the column exists before
+believing it. It usually does, and if it does not, adding one is often cheaper
+than shipping a screen with nothing on it.
+
+**The one exception is ratings**, and it is a genuine exception. The references
+carry stars because they have reviewers. Nothing here generates a review, and a
+five-star row on a product nobody has rated is fabricated social proof attached
+to something sold for real money. That gap does not get closed by rendering
+harder — it gets closed by having reviewers, or not at all.
+
 ## Breakpoints
 
 Mobile is the designed case; the other two are derived.
