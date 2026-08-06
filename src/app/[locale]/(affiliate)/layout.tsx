@@ -1,7 +1,7 @@
 import { setRequestLocale } from 'next-intl/server'
 
 import { AffiliateSidebar, AffiliateTabBar } from '@/components/affiliate/AffiliateNav'
-import { ModeSwitchCard } from '@/components/affiliate/ModeSwitch'
+import { ModeSwitchCard } from '@/components/app/ModeSwitch'
 import { ViewAsBanner } from '@/components/app/ViewAsBanner'
 import { redirect } from '@/i18n/navigation'
 import { getViewAsSession } from '@/lib/admin/view-as'

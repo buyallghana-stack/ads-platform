@@ -5,7 +5,7 @@ import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/serve
 
 import { AffiliateHeader } from '@/components/affiliate/AffiliateHeader'
 import { CopyCode } from '@/components/affiliate/CopyCode'
-import { ModeSwitchCard } from '@/components/affiliate/ModeSwitch'
+import { ModeSwitchCard } from '@/components/app/ModeSwitch'
 import { Link, redirect } from '@/i18n/navigation'
 import { getProfile, getViewerUser } from '@/lib/auth/session'
 import { getAffiliateDashboard } from '@/lib/market/data'

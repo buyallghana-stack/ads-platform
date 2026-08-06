@@ -139,10 +139,16 @@ export function BottomTabBar({ user }: { user?: NavUser }) {
  *  (operator direction 2026-07-24: that chrome is Home-only). */
 export function Sidebar({
   upgradeSlot,
+  modeSlot,
   user,
 }: {
   /** Upgrade teaser card, pinned to the bottom like the references. */
   upgradeSlot?: React.ReactNode
+  /** The door into the affiliate business. Pinned under the teaser, and
+   *  mirrored into the Home header for phones — the sidebar is `md:flex`, so
+   *  this slot alone would leave the second business unreachable on a phone,
+   *  which is exactly the bug the first version of the mode switch shipped. */
+  modeSlot?: React.ReactNode
   user?: NavUser
 }) {
   const t = useTranslations('nav')
@@ -188,7 +194,10 @@ export function Sidebar({
           })}
         </ul>
 
-        <div className="mt-auto flex flex-col gap-3">{upgradeSlot}</div>
+        <div className="mt-auto flex flex-col gap-3">
+          {upgradeSlot}
+          {modeSlot}
+        </div>
       </nav>
     </aside>
   )

@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { Logo } from '@/components/brand/Logo'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { SupportChatButton } from '@/components/support/SupportChatButton'
-import { ModeSwitchButton } from '@/components/affiliate/ModeSwitch'
+import { ModeSwitchButton } from '@/components/app/ModeSwitch'
 import type { getNotifications } from '@/lib/notifications/data'
 
 /**

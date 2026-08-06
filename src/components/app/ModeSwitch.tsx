@@ -29,10 +29,25 @@ import { MODE_HOME, type AppMode } from '@/lib/market/mode'
  * is that a user holding both will look for one balance while standing in the
  * other. This control is the whole of the answer, so it is never hidden behind
  * a menu: pinned in the sidebar on md+, and in the header on a phone.
+ *
+ * ⚠️ IT MUST BE RENDERED AT BOTH BREAKPOINTS, ON BOTH SIDES. The first version
+ * of this existed only in the sidebar, which is `md:flex` — so on a phone there
+ * was no route into the affiliate business at all, and the bug was invisible in
+ * the source because the component was plainly imported and used. The way to
+ * check it is to assert on VISIBLE links in a browser at 390px, not to read the
+ * markup; `.first()` happily matches the hidden desktop copy.
+ *
+ * ── THE COLOUR IS THE DESTINATION'S, NOT THE CURRENT MODE'S ──
+ *
+ * Pointing at the affiliate business it wears violet; pointing back at the ads
+ * business it wears brand. That is what makes it read as a door rather than as
+ * another button on the page you are already on — and inside the affiliate
+ * skin `brand` IS violet, so the same two rules give the right answer on both
+ * sides without either side special-casing the other.
  */
 
 /** Rendered in the affiliate sidebar's pinned footer. */
-export function ModeSwitchCard({ to }: { to: AppMode }) {
+export function ModeSwitchCard({ to, className }: { to: AppMode; className?: string }) {
   const t = useTranslations('affiliate.mode')
   const earn = to === 'earn'
 
@@ -40,11 +55,19 @@ export function ModeSwitchCard({ to }: { to: AppMode }) {
     <Link
       href={MODE_HOME[to]}
       className={cn(
-        'group block rounded-(--radius-card) border border-ink-200 bg-ink-50 p-3 transition-colors',
-        'hover:border-brand-600/45 hover:bg-brand-50',
+        'group block rounded-(--radius-card) border p-3 transition-colors',
+        earn
+          ? 'border-ink-200 bg-ink-50 hover:border-brand-600/45 hover:bg-brand-50'
+          : 'border-violet-600/25 bg-violet-50 hover:border-violet-600/55',
+        className,
       )}
     >
-      <span className="flex items-center gap-2 text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-400">
+      <span
+        className={cn(
+          'flex items-center gap-2 text-[0.6875rem] font-semibold uppercase tracking-[0.1em]',
+          earn ? 'text-ink-400' : 'text-violet-700',
+        )}
+      >
         <ArrowLeftRight aria-hidden className="size-3.5" />
         {t('switchTo')}
       </span>
@@ -52,7 +75,7 @@ export function ModeSwitchCard({ to }: { to: AppMode }) {
         {earn ? (
           <PlayCircle aria-hidden className="size-4 text-brand-700" />
         ) : (
-          <Store aria-hidden className="size-4 text-brand-700" />
+          <Store aria-hidden className="size-4 text-violet-600" />
         )}
         {t(earn ? 'earnName' : 'marketName')}
       </span>
@@ -76,10 +99,12 @@ export function ModeSwitchButton({ to, className }: { to: AppMode; className?: s
     <Link
       href={MODE_HOME[to]}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border border-ink-200 bg-surface px-3 py-1.5',
-        'text-[0.75rem] font-semibold text-ink-700 transition-colors',
-        'hover:border-brand-600/45 hover:text-brand-700',
+        'inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5',
+        'text-[0.75rem] font-semibold transition-colors',
         'pointer-coarse:py-2',
+        earn
+          ? 'border-ink-200 bg-surface text-ink-700 hover:border-brand-600/45 hover:text-brand-700'
+          : 'border-violet-600/30 bg-violet-50 text-violet-700 hover:border-violet-600/60',
         className,
       )}
     >

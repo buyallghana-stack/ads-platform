@@ -4,6 +4,7 @@ import { ArrowUpRight, PlayCircle, TrendingUp, Trophy } from 'lucide-react'
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { Logo } from '@/components/brand/Logo'
+import { ModeSwitchButton } from '@/components/app/ModeSwitch'
 import { PerformanceChart } from '@/components/dashboard/PerformanceChart'
 import { QuickLinks } from '@/components/dashboard/QuickLinks'
 import { ReferralCard } from '@/components/dashboard/ReferralCard'
@@ -107,8 +108,21 @@ export default async function HomePage({
           is where every app this audience uses keeps it — and a one-tap sign
           out sitting beside the theme switch is a mis-tap that costs somebody
           their session on a phone. */}
-      <header className="flex items-center gap-3">
+      <header className="flex items-center gap-2">
         <Logo variant="dark" className="md:hidden" />
+        {/*
+          THE PHONE'S ONLY ROUTE INTO THE SECOND BUSINESS.
+
+          The sidebar carries the same switch, and the sidebar is `md:flex` —
+          so without this there is no way into Phase 2 on a phone, which is the
+          bug the first mode switch shipped with and which is invisible in the
+          source because the component is plainly imported and used.
+
+          `md:hidden` here, because above md the sidebar's card is the better
+          affordance and two doors on one screen is one too many.
+        */}
+        <div className="ml-auto flex items-center gap-2">
+        <ModeSwitchButton to="market" className="md:hidden" />
         {/*
           The three icons used to float loose on the wash: no container, no
           edge, nothing saying they belong together or that they are controls
@@ -123,11 +137,12 @@ export default async function HomePage({
           three that carries state (the unread badge); the theme switch and
           support chat are stateless twins and sit together.
         */}
-        <div className="ml-auto flex items-center rounded-full border border-ink-200 bg-surface/80 p-0.5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] backdrop-blur-sm">
+        <div className="flex shrink-0 items-center rounded-full border border-ink-200 bg-surface/80 p-0.5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] backdrop-blur-sm">
           <NotificationBell notifications={notifications} unreadCount={unreadCount} now={now} />
           <span aria-hidden className="mx-0.5 h-5 w-px bg-ink-200" />
           <ThemeSwitchButton />
           <SupportChatButton />
+        </div>
         </div>
       </header>
 
