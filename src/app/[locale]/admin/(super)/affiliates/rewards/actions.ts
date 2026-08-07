@@ -36,6 +36,9 @@ const prizeSchema = z.object({
   extra_plays: z.number().int().min(0).max(10),
   weight: z.number().int().min(0).max(10_000),
   colour: z.string().trim().max(20).nullable().optional(),
+  /* 0 means no cap, exactly as the ads table means it. */
+  daily_cap: z.number().int().min(0).max(100_000),
+  weekly_cap: z.number().int().min(0).max(100_000),
   is_active: z.boolean(),
 })
 

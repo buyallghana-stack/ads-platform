@@ -140,6 +140,8 @@ function PrizeTable({ game, initial }: { game: AffiliateGame; initial: AdminAffi
           extra_plays: r.extraPlays,
           weight: r.weight,
           colour: r.colour,
+          daily_cap: r.dailyCap,
+          weekly_cap: r.weeklyCap,
           is_active: r.isActive,
         })),
       )
@@ -187,7 +189,19 @@ function PrizeTable({ game, initial }: { game: AffiliateGame; initial: AdminAffi
         <table className="w-full min-w-[40rem] text-left">
           <thead>
             <tr className="border-b border-ink-200">
-              {['slot', 'label', 'amount', 'extra', 'weight', 'odds', 'colour', 'won', 'active'].map((key) => (
+              {[
+                'slot',
+                'label',
+                'amount',
+                'extra',
+                'weight',
+                'odds',
+                'dailyCap',
+                'weeklyCap',
+                'colour',
+                'won',
+                'active',
+              ].map((key) => (
                 <th
                   key={key}
                   className="px-2 py-2 text-[0.6875rem] font-medium tracking-[0.04em] text-ink-400 uppercase"
@@ -250,6 +264,32 @@ function PrizeTable({ game, initial }: { game: AffiliateGame; initial: AdminAffi
                   </td>
                   <td className="px-2 py-2 text-[0.8125rem] tabular-nums text-ink-600">
                     {odds.toFixed(1)}%
+                  </td>
+                  {/* 0 means no cap. These are what ration the big prizes:
+                      platform-wide, not per player, so once the jackpot has
+                      gone three times this week it is out of the draw for
+                      everybody. */}
+                  <td className="px-2 py-2">
+                    <input
+                      inputMode="numeric"
+                      aria-label={t('col.dailyCap')}
+                      value={row.dailyCap}
+                      onChange={(e) =>
+                        update(row.slot, { dailyCap: Math.max(0, Number(e.target.value) || 0) })
+                      }
+                      className="w-14 rounded-(--radius-input) border border-ink-200 bg-surface px-2 py-1.5 text-[0.8125rem] tabular-nums text-ink-900 focus:border-brand-600 focus:outline-none pointer-coarse:text-base"
+                    />
+                  </td>
+                  <td className="px-2 py-2">
+                    <input
+                      inputMode="numeric"
+                      aria-label={t('col.weeklyCap')}
+                      value={row.weeklyCap}
+                      onChange={(e) =>
+                        update(row.slot, { weeklyCap: Math.max(0, Number(e.target.value) || 0) })
+                      }
+                      className="w-14 rounded-(--radius-input) border border-ink-200 bg-surface px-2 py-1.5 text-[0.8125rem] tabular-nums text-ink-900 focus:border-brand-600 focus:outline-none pointer-coarse:text-base"
+                    />
                   </td>
                   <td className="px-2 py-2">
                     {/* The wheel draws its wedges in these colours, so this is

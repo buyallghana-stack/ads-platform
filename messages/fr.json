@@ -3114,7 +3114,9 @@
         "odds": "Chances",
         "active": "Actif",
         "colour": "Couleur",
-        "won": "Gagnés · versés"
+        "won": "Gagnés · versés",
+        "dailyCap": "Par jour",
+        "weeklyCap": "Par semaine"
       },
       "unsaved": "Rien n’est encore enregistré.",
       "discard": "Annuler les modifications",

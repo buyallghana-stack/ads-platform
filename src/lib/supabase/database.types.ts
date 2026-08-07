@@ -4628,7 +4628,8 @@ export type Database = {
           extra_plays: number
           weight: number
           colour: string | null
-          weekly_cap: number | null
+          daily_cap: number
+          weekly_cap: number
           is_active: boolean
           times_won: number
           paid_minor: number

@@ -3114,7 +3114,9 @@
         "odds": "Odds",
         "active": "Active",
         "colour": "Colour",
-        "won": "Won · paid"
+        "won": "Won · paid",
+        "dailyCap": "A day",
+        "weeklyCap": "A week"
       },
       "unsaved": "Nothing is saved yet.",
       "discard": "Discard",

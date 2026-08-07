@@ -115,14 +115,14 @@ export function businessDetails(locale: 'en' | 'fr' = 'en'): string[] {
  *      and no payment. Affiliate tasks can now set a ranking as their goal, so
  *      the clause was rewritten to say a rank pays once through a task and
  *      never again. The operator asked for that change knowingly.
- *   4. That affiliate games and tasks pay REAL MONEY into a commission
- *      balance. The July opinion cleared games whose prizes were points and
- *      whose plays were never sold. Cash prizes are a different question and
- *      he has not been asked it.
+ *   4. RESOLVED 2026-08-07. That affiliate games and tasks pay REAL MONEY into
+ *      a commission balance was put to him and he reviewed and accepted it as
+ *      lawful, per the operator. The July opinion had covered points prizes
+ *      only, so this was the open question; it is now closed.
  *
- * The operator has decided to keep this true meanwhile. That is their call to
- * make; the list is here so the conversation with him is one paragraph rather
- * than an archaeology exercise.
+ * Items 1 to 3 are still unsent. The operator has decided to keep this true
+ * meanwhile. That is their call to make; the list is here so the conversation
+ * with him is one paragraph rather than an archaeology exercise.
  */
 export const LEGAL_REVIEWED = true
 

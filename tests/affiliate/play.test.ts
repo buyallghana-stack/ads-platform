@@ -326,3 +326,86 @@ describe.skipIf(!HAS_DB)('the earnings board', () => {
     })
   })
 })
+
+describe.skipIf(!HAS_DB)('the prize table matches the ads economy', () => {
+  it('has twelve prizes on each game, converted at 100 points to the cedi', async () => {
+    await withRollback(async (tx) => {
+      for (const game of ['spin_wheel', 'mystery_box']) {
+        const { rows } = await tx.query<{ n: string; total: string; cost: string }>(
+          `select count(*)::text as n,
+                  sum(weight)::text as total,
+                  (sum(weight * amount_minor)::numeric / nullif(sum(weight), 0))::text as cost
+             from public.affiliate_game_prizes
+            where game = $1::public.affiliate_game_kind and is_active`,
+          [game],
+        )
+        expect(Number(rows[0]!.n)).toBe(12)
+
+        /* The peg is 100 points to GHS 1 and a cedi is 100 pesewas, so a point
+           and a pesewa are the same size and the ads figures carry over
+           unchanged. If the peg is ever retuned these amounts do NOT follow
+           it, which is why the conversion is asserted here once. */
+        const { rows: peg } = await tx.query<{ value: string }>(
+          `select value from public.app_config where key = 'points_per_currency_unit'`,
+        )
+        expect(Number(peg[0]!.value)).toBe(100)
+
+        /* Roughly half a cedi a play, which is the ads economy in cedis. */
+        expect(Number(rows[0]!.cost)).toBeGreaterThan(40)
+        expect(Number(rows[0]!.cost)).toBeLessThan(55)
+      }
+    })
+  })
+
+  it('takes a prize out of the draw once its weekly cap is reached', async () => {
+    await withRollback(async (tx) => {
+      await setConfig(tx, 'affiliate_games_enabled', 'true')
+      const { user, affiliateId } = await affiliate(tx, 'Cap Tester')
+
+      /* One prize, capped at a single win a week. */
+      await tx.query(
+        `update public.affiliate_game_prizes set is_active = false where game = 'spin_wheel'`,
+      )
+      const { rows: prize } = await tx.query<{ id: string }>(
+        `update public.affiliate_game_prizes
+            set is_active = true, weight = 100, weekly_cap = 1, daily_cap = 0
+          where game = 'spin_wheel' and slot = 12
+          returning id`,
+      )
+
+      const week = await tx.query<{ w: string }>(`select public.affiliate_week_start()::text as w`)
+      const eligibleBefore = await tx.query<{ n: string }>(
+        `select count(*)::text as n
+           from public.affiliate_eligible_prizes('spin_wheel', $1::date)`,
+        [week.rows[0]!.w],
+      )
+      expect(Number(eligibleBefore.rows[0]!.n)).toBe(1)
+
+      await tx.query(`select public.play_affiliate_game($1, 'spin_wheel')`, [user.id])
+
+      /* Won once, capped at one: out of the draw for EVERYBODY, not just for
+         the player who won it. */
+      const eligibleAfter = await tx.query<{ n: string }>(
+        `select count(*)::text as n
+           from public.affiliate_eligible_prizes('spin_wheel', $1::date)`,
+        [week.rows[0]!.w],
+      )
+      expect(Number(eligibleAfter.rows[0]!.n)).toBe(0)
+
+      /* And with nothing left drawable the game refuses rather than paying
+         from an empty table. */
+      const message = await expectRejection(tx, () =>
+        tx.query(`select public.play_affiliate_game($1, 'spin_wheel')`, [user.id]),
+      )
+      expect(message).toMatch(/no prizes set up/i)
+
+      /* The play that did happen still paid. */
+      const { rows: balance } = await tx.query<{ b: string }>(
+        `select public.affiliate_balance_minor($1)::text as b`,
+        [affiliateId],
+      )
+      expect(Number(balance[0]!.b)).toBe(500)
+      expect(prize).toHaveLength(1)
+    })
+  })
+})

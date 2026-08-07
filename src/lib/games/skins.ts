@@ -36,8 +36,19 @@ export const GAME_SKINS: Record<SkinName, GameSkin> = {
     unit: 'money',
     formatValue: (value) => cedis(value),
     /* A wedge has room for about five glyphs, so the currency word is dropped
-       and only the figure is drawn. */
-    formatWedge: (value) => (value > 0 ? (value / 100).toLocaleString() : '+1'),
+       and only the figure is drawn. Under a cedi it keeps both decimals,
+       because "0.1" on a prize wedge reads as a tenth of something rather
+       than as ten pesewas. */
+    formatWedge: (value) =>
+      value <= 0
+        ? '+1'
+        : /* Two decimals throughout, so a wedge of prizes reads as one column
+             of money: 0.10, 1.00, 2.50, 5.00. `toLocaleString` gave "1.5"
+             beside "0.10", which looks like two different units. Above GHS 100
+             the decimals are dropped, because five glyphs is all a wedge has. */
+          value >= 10_000
+          ? Math.round(value / 100).toLocaleString()
+          : (value / 100).toFixed(2),
     hubHref: '/market/games',
     moreHref: '/shop',
   },

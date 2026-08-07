@@ -25,7 +25,8 @@ export type AdminAffiliatePrize = {
   extraPlays: number
   weight: number
   colour: string | null
-  weeklyCap: number | null
+  dailyCap: number
+  weeklyCap: number
   isActive: boolean
   timesWon: number
   paidMinor: number
@@ -75,7 +76,8 @@ export async function getAffiliatePrizes(game: AffiliateGame): Promise<AdminAffi
     extraPlays: n(r.extra_plays),
     weight: n(r.weight),
     colour: (r.colour as string | null) ?? null,
-    weeklyCap: r.weekly_cap === null ? null : n(r.weekly_cap),
+    dailyCap: n(r.daily_cap),
+    weeklyCap: n(r.weekly_cap),
     isActive: r.is_active === true,
     timesWon: n(r.times_won),
     paidMinor: n(r.paid_minor),
