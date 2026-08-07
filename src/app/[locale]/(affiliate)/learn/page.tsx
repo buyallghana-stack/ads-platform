@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Award, GraduationCap } from 'lucide-react'
+import { Award, Download, GraduationCap } from 'lucide-react'
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server'
 import { Link, redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
@@ -185,6 +185,18 @@ export default async function LearnPage({
                     </p>
                   )}
                   <p className="mt-1 font-mono text-[0.6875rem] text-ink-500">{certificate.code}</p>
+
+                  {/* ⚠️ WITHOUT THIS THE CERTIFICATE IS UNREACHABLE. The page
+                      that renders and downloads it lives at
+                      /market/certificate/[productId] and nothing linked to it,
+                      so the whole feature existed and no user could get to it. */}
+                  <Link
+                    href={`/market/certificate/${certificate.productId}`}
+                    className="mt-2.5 inline-flex items-center gap-1.5 rounded-(--radius-input) bg-success-600 px-3 py-2 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-success-700"
+                  >
+                    <Download aria-hidden className="size-4" />
+                    {t('view')}
+                  </Link>
                 </div>
               </li>
             ))}

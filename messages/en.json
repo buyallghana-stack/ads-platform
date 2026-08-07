@@ -2810,7 +2810,13 @@
       "previewHint": "The real notification card, exactly as it appears in their bell.",
       "historyTitle": "Sent before",
       "historyEmpty": "Nothing has been announced yet.",
-      "historyMeta": "{name} · reached {count, plural, one {# person} other {# people}}"
+      "historyMeta": "{name} · reached {count, plural, one {# person} other {# people}}",
+      "audienceLabel": "Who should get this",
+      "audience": {
+        "all": "Everyone",
+        "affiliates": "Affiliates only",
+        "ads": "Ads side only"
+      }
     },
     "giftCodes": {
       "title": "Gift codes",
@@ -3621,7 +3627,8 @@
       "grade": "Graded {n}%",
       "emptyTitle": "Nothing to learn yet",
       "emptyBody": "Join a training programme and it will appear here.",
-      "emptyCta": "See the programmes"
+      "emptyCta": "See the programmes",
+      "view": "View and download"
     },
     "statement": {
       "title": "Earnings",
@@ -3967,6 +3974,15 @@
       "share": "Copy the check link",
       "copied": "Link copied",
       "printHint": "Download opens your printer. Choose \"Save as PDF\" to keep a copy, or print it on A4 landscape."
+    },
+    "recruit": {
+      "title": "Bring in other affiliates",
+      "body": "Share the training with anybody who wants to earn. When they buy through your link you earn commission on the sale, at the rate your own programme pays.",
+      "youEarn": "You earn {amount}",
+      "copy": "Copy link",
+      "copied": "Copied",
+      "share": "Share",
+      "note": "Commission is credited when their purchase is confirmed. Your own training has to be finished to the activation threshold before your links start paying."
     }
   }
 }

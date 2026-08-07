@@ -2810,7 +2810,13 @@
       "previewHint": "La vraie carte de notification, telle qu'elle apparaît dans leur cloche.",
       "historyTitle": "Déjà envoyées",
       "historyEmpty": "Aucune annonce pour l'instant.",
-      "historyMeta": "{name} · a touché {count, plural, one {# personne} other {# personnes}}"
+      "historyMeta": "{name} · a touché {count, plural, one {# personne} other {# personnes}}",
+      "audienceLabel": "Qui doit le recevoir",
+      "audience": {
+        "all": "Tout le monde",
+        "affiliates": "Affiliés uniquement",
+        "ads": "Côté publicités uniquement"
+      }
     },
     "giftCodes": {
       "title": "Codes cadeaux",
@@ -3621,7 +3627,8 @@
       "grade": "Note {n} %",
       "emptyTitle": "Rien à apprendre pour l’instant",
       "emptyBody": "Rejoignez une formation et elle apparaîtra ici.",
-      "emptyCta": "Voir les formations"
+      "emptyCta": "Voir les formations",
+      "view": "Voir et télécharger"
     },
     "statement": {
       "title": "Gains",
@@ -3967,6 +3974,15 @@
       "share": "Copier le lien de vérification",
       "copied": "Lien copié",
       "printHint": "Télécharger ouvre votre imprimante. Choisissez « Enregistrer en PDF » pour en garder une copie, ou imprimez en A4 paysage."
+    },
+    "recruit": {
+      "title": "Faites venir d'autres affiliés",
+      "body": "Partagez la formation avec quiconque veut gagner. Lorsqu'ils achètent via votre lien, vous touchez une commission sur la vente, au taux que paie votre propre programme.",
+      "youEarn": "Vous gagnez {amount}",
+      "copy": "Copier le lien",
+      "copied": "Copié",
+      "share": "Partager",
+      "note": "La commission est créditée dès que leur achat est confirmé. Votre propre formation doit atteindre le seuil d'activation avant que vos liens ne rapportent."
     }
   }
 }

@@ -36,6 +36,8 @@ export type SendAnnouncementResult =
 export async function sendAnnouncement(input: {
   title: string
   body: string
+  /** Who it reaches AND which bell it lands in. 'all' shows in both. */
+  audience?: 'all' | 'affiliates' | 'ads'
 }): Promise<SendAnnouncementResult> {
   const user = await getSessionUser()
   if (!user || !(await isAdminUser(user.id))) return { ok: false, message: UNAUTHORISED }
@@ -50,6 +52,7 @@ export async function sendAnnouncement(input: {
     p_admin: user.id,
     p_title: parsed.data.title,
     p_body: parsed.data.body,
+    p_audience: input.audience ?? 'all',
   })
 
   // Postgres phrases the refusals for an operator; they are shown as written.

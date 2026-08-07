@@ -37,6 +37,12 @@ export function AnnouncementComposer({
   const t = useTranslations('admin.announcements')
   const format = useFormatter()
 
+  /* ⚠️ Who it reaches AND which bell it lands in are the same choice here.
+     An affiliate announcement reaches only people with an affiliate account
+     and appears only in their affiliate bell; "everyone" is account-wide news
+     and shows in both. Sending "your commission rates have changed" to
+     somebody who has never opened the marketplace is how an app gets muted. */
+  const [sendTo, setSendTo] = useState<'all' | 'affiliates' | 'ads'>('all')
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [confirming, setConfirming] = useState(false)
@@ -50,7 +56,7 @@ export function AnnouncementComposer({
   const send = () => {
     setError(null)
     startSending(async () => {
-      const result = await sendAnnouncement({ title, body })
+      const result = await sendAnnouncement({ title, body, audience: sendTo })
       setConfirming(false)
 
       if (!result.ok) {
@@ -99,6 +105,27 @@ export function AnnouncementComposer({
 
         <div className="rounded-(--radius-card) border border-ink-200 bg-surface p-4 sm:p-5">
           <label className="block">
+            <span className="mb-1.5 block text-[0.8125rem] font-medium text-ink-700">
+              {t('audienceLabel')}
+            </span>
+            <div className="mb-4 flex flex-wrap gap-2">
+              {(['all', 'affiliates', 'ads'] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setSendTo(option)}
+                  aria-pressed={sendTo === option}
+                  className={cn(
+                    'rounded-full border px-3.5 py-2 text-[0.8125rem] font-medium transition-colors',
+                    sendTo === option
+                      ? 'border-brand-600 bg-brand-600 text-white'
+                      : 'border-ink-200 text-ink-700 hover:border-ink-300',
+                  )}
+                >
+                  {t(`audience.${option}`)}
+                </button>
+              ))}
+            </div>
             <span className="text-[0.8125rem] font-medium text-ink-700">{t('titleLabel')}</span>
             <input
               value={title}

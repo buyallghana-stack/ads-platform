@@ -10,10 +10,11 @@ import {
 } from 'lucide-react'
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server'
 import { CopyCode } from '@/components/affiliate/CopyCode'
+import { RecruitPanel } from '@/components/affiliate/RecruitPanel'
 import { ModeSwitchCard } from '@/components/app/ModeSwitch'
 import { Link, redirect } from '@/i18n/navigation'
 import { getProfile, getViewerUser } from '@/lib/auth/session'
-import { getAffiliateDashboard } from '@/lib/market/data'
+import { getAffiliateDashboard, getShopProducts } from '@/lib/market/data'
 import { getOrigin } from '@/lib/request-context'
 import { cn } from '@/lib/cn'
 
@@ -60,6 +61,21 @@ export default async function AffiliateAccountPage({
     getOrigin(),
   ])
 
+  /* The training programmes, with this affiliate's own code on each link and
+     the rate the programme actually pays. Read from the shop rather than
+     assumed: a panel advertising a percentage the ledger does not pay is
+     worse than no panel. */
+  const recruitLinks = dashboard.code
+    ? (await getShopProducts(user!.id))
+        .filter((p) => p.purpose === 'training_program')
+        .map((p) => ({
+          title: p.title,
+          url: `${origin}/${locale}/p/${p.slug}?ref=${dashboard.code}`,
+          l1Rate: p.l1_rate,
+          priceGhs: p.price_minor / 100,
+        }))
+    : []
+
   const daysLeft = dashboard.days_left ?? null
   /* Three bands, not two. "Expired" is obvious the day it happens; the useful
      warning is the one that arrives while there is still time to renew. */
@@ -102,6 +118,11 @@ export default async function AffiliateAccountPage({
 
       {/* ── the code ─────────────────────────────────────────────────── */}
       {dashboard.code && <CopyCode code={dashboard.code} origin={origin} locale={locale} />}
+
+      {/* The training is a product, so a link to it carrying this affiliate's
+          code is a real attributable link — and what it sells is the thing that
+          turns the person clicking it into another affiliate. */}
+      {dashboard.code && <RecruitPanel programmes={recruitLinks} />}
 
       {/* ── access and depth ─────────────────────────────────────────── */}
       <div className="grid gap-3 sm:grid-cols-2">
