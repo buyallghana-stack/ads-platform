@@ -1033,6 +1033,117 @@ export type Database = {
           },
         ]
       }
+      commission_payouts: {
+        Row: {
+          affiliate_id: string
+          amount_minor: number
+          coin_amount: number | null
+          coin_usd: number | null
+          created_at: string
+          currency_code: string
+          external_reference: string | null
+          failure_reason: string | null
+          fee_minor: number
+          fee_percent: number
+          id: string
+          ledger_entry_id: string | null
+          method: Database["public"]["Enums"]["payout_method"]
+          net_minor: number
+          paid_at: string | null
+          quoted_at: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          snapshot_account_name: string | null
+          snapshot_coin_code: string | null
+          snapshot_msisdn: string | null
+          snapshot_network_code: string | null
+          snapshot_provider_code: string | null
+          snapshot_wallet: string | null
+          status: Database["public"]["Enums"]["commission_payout_status"]
+          updated_at: string
+          usd_ghs: number | null
+          user_id: string
+        }
+        Insert: {
+          affiliate_id: string
+          amount_minor: number
+          coin_amount?: number | null
+          coin_usd?: number | null
+          created_at?: string
+          currency_code?: string
+          external_reference?: string | null
+          failure_reason?: string | null
+          fee_minor: number
+          fee_percent: number
+          id?: string
+          ledger_entry_id?: string | null
+          method: Database["public"]["Enums"]["payout_method"]
+          net_minor: number
+          paid_at?: string | null
+          quoted_at?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          snapshot_account_name?: string | null
+          snapshot_coin_code?: string | null
+          snapshot_msisdn?: string | null
+          snapshot_network_code?: string | null
+          snapshot_provider_code?: string | null
+          snapshot_wallet?: string | null
+          status?: Database["public"]["Enums"]["commission_payout_status"]
+          updated_at?: string
+          usd_ghs?: number | null
+          user_id: string
+        }
+        Update: {
+          affiliate_id?: string
+          amount_minor?: number
+          coin_amount?: number | null
+          coin_usd?: number | null
+          created_at?: string
+          currency_code?: string
+          external_reference?: string | null
+          failure_reason?: string | null
+          fee_minor?: number
+          fee_percent?: number
+          id?: string
+          ledger_entry_id?: string | null
+          method?: Database["public"]["Enums"]["payout_method"]
+          net_minor?: number
+          paid_at?: string | null
+          quoted_at?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          snapshot_account_name?: string | null
+          snapshot_coin_code?: string | null
+          snapshot_msisdn?: string | null
+          snapshot_network_code?: string | null
+          snapshot_provider_code?: string | null
+          snapshot_wallet?: string | null
+          status?: Database["public"]["Enums"]["commission_payout_status"]
+          updated_at?: string
+          usd_ghs?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_payouts_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commission_payouts_ledger_entry_id_fkey"
+            columns: ["ledger_entry_id"]
+            isOneToOne: false
+            referencedRelation: "commission_ledger"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversions: {
         Row: {
           affiliate_id: string
@@ -4507,6 +4618,51 @@ export type Database = {
           created_at: string
         }
       }
+      admin_list_commission_payouts: {
+        Args: { p_status?: string | null }
+        Returns: {
+          payout_id: string
+          requested_at: string
+          affiliate_id: string
+          affiliate_code: string
+          name: string
+          method: string
+          amount_minor: number
+          fee_minor: number
+          net_minor: number
+          coin_amount: number | null
+          coin_code: string | null
+          destination: string
+          balance_after: number
+          status: string
+          review_notes: string | null
+          paid_at: string | null
+        }[]
+      }
+      decide_commission_payout: {
+        Args: {
+          p_admin_id: string
+          p_decision: string
+          p_note?: string | null
+          p_payout_id: string
+        }
+        Returns: {
+          id: string
+          status: string
+          net_minor: number
+          review_notes: string | null
+        }
+      }
+      mark_commission_payout_paid: {
+        Args: { p_admin_id: string; p_payout_id: string; p_reference: string }
+        Returns: {
+          id: string
+          status: string
+          net_minor: number
+          paid_at: string | null
+          external_reference: string | null
+        }
+      }
       lesson_for_learner: { Args: { p_lesson_id: string; p_user_id: string }; Returns: Json }
       affiliate_depth_now: { Args: { p_affiliate_id: string }; Returns: number }
       affiliate_earnings_by_year: {
@@ -6296,6 +6452,7 @@ export type Database = {
         | "redemption_request"
         | "payout_details_change"
       commission_entry_type: "credit" | "reversal" | "payout" | "adjustment"
+      commission_payout_status: "requested" | "approved" | "paid" | "rejected" | "cancelled"
       commission_status:
         | "pending"
         | "cleared"
@@ -6546,6 +6703,7 @@ export const Constants = {
         "payout_details_change",
       ],
       commission_entry_type: ["credit", "reversal", "payout", "adjustment"],
+      commission_payout_status: ["requested", "approved", "paid", "rejected", "cancelled"],
       commission_status: [
         "pending",
         "cleared",

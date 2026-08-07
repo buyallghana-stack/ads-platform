@@ -42,6 +42,15 @@ import { chromium } from '@playwright/test'
 import { createClient } from '@supabase/supabase-js'
 import { Client } from 'pg'
 
+/* ⚠️ NEVER let a closed stdout kill this run. Piping it through `head` sends
+   SIGPIPE/EPIPE, Node throws on the next write, and the process dies BEFORE
+   the `finally` that restores a live money switch — which is exactly how
+   `affiliate_payouts_enabled` was left ON on the shared project once. Swallow
+   EPIPE and keep going: the restore matters more than the output. */
+process.stdout.on('error', (e) => {
+  if (e.code !== 'EPIPE') throw e
+})
+
 const BASE = process.env.BASE ?? 'http://localhost:3100'
 const SHOTS = process.env.SHOTS ?? ''
 

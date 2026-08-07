@@ -1424,7 +1424,8 @@
         "giftCodes": "Gift codes",
         "leaderboard": "Leaderboard",
         "games": "Games",
-        "tasks": "Tasks"
+        "tasks": "Tasks",
+        "affiliates": "Affiliates"
       },
       "viewUserApp": "View user app"
     },
@@ -2375,7 +2376,8 @@
         "percent": "%",
         "places": "places",
         "perHour": "per hour",
-        "days": "days"
+        "days": "days",
+        "pesewas": "pesewas"
       },
       "groups": {
         "earning": {
@@ -2413,6 +2415,10 @@
         "leaderboard": {
           "title": "Leaderboard and gift codes",
           "description": "What the public board counts and shows, and how hard a gift code is to guess at."
+        },
+        "affiliate": {
+          "title": "Affiliate business",
+          "description": "The second business: people who sell your products for a cut. Cedis, not points."
         }
       },
       "fields": {
@@ -2565,6 +2571,23 @@
         "freeEarningDays": {
           "label": "Free earning window",
           "description": "How many days after signing up a free account can earn. Buying any plan lifts it immediately. 0 means no limit. This is the ceiling on what a farmed account can ever be worth."
+        },
+        "affiliatePayouts": {
+          "label": "Affiliates can withdraw commission",
+          "description": "Off means commission still builds up and simply cannot be taken out yet. Nothing expires while it is off. Separate from the points payout switch above — one business can open without the other.",
+          "warning": "Turning this on lets real money leave. Check the withdrawal queue on Affiliates the same day."
+        },
+        "commissionMinimum": {
+          "label": "Smallest commission withdrawal",
+          "description": "In pesewas — 5000 is GHS 50.00. One figure for every affiliate, whatever they have sold."
+        },
+        "affiliateL1": {
+          "label": "Default rate for the seller",
+          "description": "What a new product starts at for whoever made the sale. Each product carries its own rate, so changing this re-prices nothing already selling."
+        },
+        "affiliateL2": {
+          "label": "Default rate for their recruiter",
+          "description": "Paid out of what is left after the seller, to the affiliate who brought them in. Zero switches the second level off."
         }
       }
     },
@@ -2850,6 +2873,155 @@
         "has_avatar": "Profile picture set",
         "has_withdrawal_pin": "Withdrawal PIN set",
         "referrals_purchased": "Referrals who bought a plan"
+      }
+    },
+    "affiliates": {
+      "title": "Commission withdrawals",
+      "description": "What affiliates have asked to take out, and what it costs to send it.",
+      "closed": "Commission withdrawals are switched off, so nothing new can arrive here. Anything already in the queue can still be decided. Turn them on under Platform settings → Affiliate business.",
+      "tabsLabel": "Filter withdrawals",
+      "searchPlaceholder": "Name, code or destination",
+      "seeAffiliates": "Affiliates",
+      "review": "Review the withdrawal from {name}",
+      "actionsFor": "Actions for {name}",
+      "tabs": {
+        "queue": "Queue",
+        "approved": "Approved",
+        "paid": "Paid",
+        "rejected": "Rejected",
+        "all": "All"
+      },
+      "status": {
+        "requested": "Waiting",
+        "approved": "Approved",
+        "paid": "Paid",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled"
+      },
+      "col": {
+        "affiliate": "Affiliate",
+        "destination": "Sending to",
+        "net": "They receive",
+        "asked": "Asked",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "summary": {
+        "owed": "Owed now",
+        "owedDetail": "{n} affiliates",
+        "pending": "Not cleared yet",
+        "paid": "Paid, 30 days",
+        "reversed": "Reversed, 30 days"
+      },
+      "empty": {
+        "queue": "Nothing is waiting on you.",
+        "other": "Nothing here yet."
+      },
+      "menu": {
+        "review": "Open",
+        "approve": "Approve",
+        "reject": "Reject…",
+        "rejectHint": "Needs a reason the affiliate is shown",
+        "markPaid": "Mark as paid…",
+        "markPaidHint": "Needs the transfer reference"
+      },
+      "panel": {
+        "title": "Review withdrawal",
+        "close": "Close",
+        "who": "Affiliate",
+        "money": "Money",
+        "asked": "Asked for",
+        "fee": "Fee",
+        "net": "They receive",
+        "leftAfter": "Left after this",
+        "inCoin": "Send exactly",
+        "requested": "Requested",
+        "destination": "Sending to",
+        "destinationNote": "Masked. The whole number is on the affiliate’s own payout details, never on this screen.",
+        "note": "Note on file",
+        "approve": "Approve",
+        "reject": "Reject",
+        "rejectReason": "Why it is being rejected",
+        "rejectPlaceholder": "The affiliate reads this word for word.",
+        "rejectShown": "This is shown to the affiliate and cannot be edited afterwards.",
+        "confirmReject": "Reject and tell them",
+        "cancel": "Cancel",
+        "reference": "Transfer reference",
+        "referencePlaceholder": "MoMo transaction id, or the hash",
+        "referenceNote": "Marking paid cannot be undone. The reference is the only proof the money left.",
+        "markPaid": "Mark as paid",
+        "done": {
+          "paid": "Paid. This is the end of the line for this request.",
+          "rejected": "Rejected. The money went back to their balance.",
+          "cancelled": "Cancelled.",
+          "requested": "",
+          "approved": ""
+        }
+      },
+      "people": {
+        "title": "Affiliates",
+        "description": "Who is selling, what they have earned, and whether they may go on.",
+        "back": "Withdrawals",
+        "tabsLabel": "Filter affiliates",
+        "searchPlaceholder": "Name, email or code",
+        "empty": "Nobody here yet.",
+        "noUpline": "Nobody",
+        "review": "Open {name}",
+        "actionsFor": "Actions for {name}",
+        "tabs": {
+          "active": "Active",
+          "pending": "Not activated",
+          "suspended": "Suspended",
+          "all": "All"
+        },
+        "status": {
+          "active": "Active",
+          "pending": "Not activated",
+          "suspended": "Suspended"
+        },
+        "col": {
+          "person": "Affiliate",
+          "upline": "Brought in by",
+          "sales": "Sales",
+          "balance": "Balance",
+          "status": "Status"
+        },
+        "menu": {
+          "suspend": "Suspend…",
+          "suspendHint": "Needs a reason on the account",
+          "reinstate": "Reinstate"
+        },
+        "panel": {
+          "title": "Affiliate",
+          "programme": "Programme",
+          "code": "Code",
+          "levels": "Earns on",
+          "levelsValue": "{n} levels",
+          "tier": "Training",
+          "noTier": "None",
+          "expires": "Access until",
+          "recruits": "Recruited",
+          "upline": "Brought in by",
+          "money": "Money",
+          "gross": "Earned",
+          "reversed": "Reversed",
+          "paidOut": "Paid out",
+          "balance": "Balance",
+          "pending": "Not cleared",
+          "clicks": "Clicks",
+          "suspend": "Suspend",
+          "suspendReason": "Why they are being suspended",
+          "suspendPlaceholder": "Recorded against the account.",
+          "suspendKeepsMoney": "Suspending stops them selling and stops them withdrawing. It does not touch the {amount} they have already earned.",
+          "confirmSuspend": "Suspend this affiliate",
+          "reinstate": "Reinstate"
+        },
+        "card": {
+          "sales": "{n} sales"
+        }
+      },
+      "card": {
+        "of": "of {amount}"
       }
     }
   },

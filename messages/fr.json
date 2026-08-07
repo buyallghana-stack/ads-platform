@@ -1424,7 +1424,8 @@
         "giftCodes": "Codes cadeaux",
         "leaderboard": "Classement",
         "games": "Jeux",
-        "tasks": "Objectifs"
+        "tasks": "Objectifs",
+        "affiliates": "Affiliés"
       },
       "viewUserApp": "Voir l’app utilisateur"
     },
@@ -2375,7 +2376,8 @@
         "percent": "%",
         "places": "places",
         "perHour": "par heure",
-        "days": "jours"
+        "days": "jours",
+        "pesewas": "pesewas"
       },
       "groups": {
         "earning": {
@@ -2413,6 +2415,10 @@
         "leaderboard": {
           "title": "Classement et codes cadeaux",
           "description": "Ce que le classement public compte et affiche, et la difficulté à deviner un code cadeau."
+        },
+        "affiliate": {
+          "title": "Activité d’affiliation",
+          "description": "La seconde activité : des personnes qui vendent vos produits pour une part. En cedis, pas en points."
         }
       },
       "fields": {
@@ -2565,6 +2571,23 @@
         "freeEarningDays": {
           "label": "Durée de gain gratuite",
           "description": "Nombre de jours après l'inscription pendant lesquels un compte gratuit peut gagner. Prendre un forfait lève la limite immédiatement. 0 = aucune limite. C'est le plafond de ce que peut rapporter un compte créé pour de la fraude."
+        },
+        "affiliatePayouts": {
+          "label": "Les affiliés peuvent retirer leurs commissions",
+          "description": "Désactivé, la commission continue de s’accumuler sans pouvoir être retirée. Rien n’expire pendant ce temps. Indépendant du commutateur des retraits en points ci-dessus.",
+          "warning": "Activer ceci laisse sortir de l’argent réel. Vérifiez la file d’attente des retraits sur Affiliés le jour même."
+        },
+        "commissionMinimum": {
+          "label": "Retrait de commission minimum",
+          "description": "En pesewas — 5000 correspond à 50,00 GHS. Un seul montant pour tous les affiliés, quel que soit leur volume."
+        },
+        "affiliateL1": {
+          "label": "Taux par défaut pour le vendeur",
+          "description": "Le taux de départ d’un nouveau produit pour celui qui réalise la vente. Chaque produit porte son propre taux : modifier ceci ne change rien à ce qui est déjà en vente."
+        },
+        "affiliateL2": {
+          "label": "Taux par défaut pour son parrain",
+          "description": "Payé sur ce qui reste après le vendeur, à l’affilié qui l’a recruté. Zéro désactive le second niveau."
         }
       }
     },
@@ -2850,6 +2873,155 @@
         "has_avatar": "Photo de profil définie",
         "has_withdrawal_pin": "Code de retrait défini",
         "referrals_purchased": "Filleuls ayant acheté un forfait"
+      }
+    },
+    "affiliates": {
+      "title": "Retraits de commissions",
+      "description": "Ce que les affiliés ont demandé à retirer, et ce que cela coûte de l’envoyer.",
+      "closed": "Les retraits de commissions sont désactivés : rien de nouveau ne peut arriver ici. Ce qui est déjà en file peut toujours être traité. Activez-les dans Réglages de la plateforme → Activité d’affiliation.",
+      "tabsLabel": "Filtrer les retraits",
+      "searchPlaceholder": "Nom, code ou destination",
+      "seeAffiliates": "Affiliés",
+      "review": "Examiner le retrait de {name}",
+      "actionsFor": "Actions pour {name}",
+      "tabs": {
+        "queue": "File",
+        "approved": "Approuvés",
+        "paid": "Payés",
+        "rejected": "Refusés",
+        "all": "Tous"
+      },
+      "status": {
+        "requested": "En attente",
+        "approved": "Approuvé",
+        "paid": "Payé",
+        "rejected": "Refusé",
+        "cancelled": "Annulé"
+      },
+      "col": {
+        "affiliate": "Affilié",
+        "destination": "Envoi vers",
+        "net": "Il reçoit",
+        "asked": "Demandé",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "summary": {
+        "owed": "Dû maintenant",
+        "owedDetail": "{n} affiliés",
+        "pending": "Pas encore validé",
+        "paid": "Payé, 30 jours",
+        "reversed": "Annulé, 30 jours"
+      },
+      "empty": {
+        "queue": "Rien n’attend de vous.",
+        "other": "Rien ici pour l’instant."
+      },
+      "menu": {
+        "review": "Ouvrir",
+        "approve": "Approuver",
+        "reject": "Refuser…",
+        "rejectHint": "Nécessite un motif montré à l’affilié",
+        "markPaid": "Marquer comme payé…",
+        "markPaidHint": "Nécessite la référence du transfert"
+      },
+      "panel": {
+        "title": "Examiner le retrait",
+        "close": "Fermer",
+        "who": "Affilié",
+        "money": "Montants",
+        "asked": "Demandé",
+        "fee": "Frais",
+        "net": "Il reçoit",
+        "leftAfter": "Restant après",
+        "inCoin": "Envoyer exactement",
+        "requested": "Demandé",
+        "destination": "Envoi vers",
+        "destinationNote": "Masqué. Le numéro complet figure dans les coordonnées de l’affilié, jamais sur cet écran.",
+        "note": "Note au dossier",
+        "approve": "Approuver",
+        "reject": "Refuser",
+        "rejectReason": "Motif du refus",
+        "rejectPlaceholder": "L’affilié lit ce texte mot pour mot.",
+        "rejectShown": "Ce texte est montré à l’affilié et ne peut plus être modifié ensuite.",
+        "confirmReject": "Refuser et le lui dire",
+        "cancel": "Annuler",
+        "reference": "Référence du transfert",
+        "referencePlaceholder": "Identifiant MoMo, ou le hash",
+        "referenceNote": "Marquer comme payé est irréversible. La référence est la seule preuve que l’argent est parti.",
+        "markPaid": "Marquer comme payé",
+        "done": {
+          "paid": "Payé. C’est le terme de cette demande.",
+          "rejected": "Refusé. L’argent est retourné sur son solde.",
+          "cancelled": "Annulé.",
+          "requested": "",
+          "approved": ""
+        }
+      },
+      "people": {
+        "title": "Affiliés",
+        "description": "Qui vend, ce qu’ils ont gagné, et s’ils peuvent continuer.",
+        "back": "Retraits",
+        "tabsLabel": "Filtrer les affiliés",
+        "searchPlaceholder": "Nom, e-mail ou code",
+        "empty": "Personne ici pour l’instant.",
+        "noUpline": "Personne",
+        "review": "Ouvrir {name}",
+        "actionsFor": "Actions pour {name}",
+        "tabs": {
+          "active": "Actifs",
+          "pending": "Non activés",
+          "suspended": "Suspendus",
+          "all": "Tous"
+        },
+        "status": {
+          "active": "Actif",
+          "pending": "Non activé",
+          "suspended": "Suspendu"
+        },
+        "col": {
+          "person": "Affilié",
+          "upline": "Parrainé par",
+          "sales": "Ventes",
+          "balance": "Solde",
+          "status": "Statut"
+        },
+        "menu": {
+          "suspend": "Suspendre…",
+          "suspendHint": "Nécessite un motif au dossier",
+          "reinstate": "Réactiver"
+        },
+        "panel": {
+          "title": "Affilié",
+          "programme": "Programme",
+          "code": "Code",
+          "levels": "Gagne sur",
+          "levelsValue": "{n} niveaux",
+          "tier": "Formation",
+          "noTier": "Aucune",
+          "expires": "Accès jusqu’au",
+          "recruits": "Recrutés",
+          "upline": "Parrainé par",
+          "money": "Montants",
+          "gross": "Gagné",
+          "reversed": "Annulé",
+          "paidOut": "Payé",
+          "balance": "Solde",
+          "pending": "Non validé",
+          "clicks": "Clics",
+          "suspend": "Suspendre",
+          "suspendReason": "Motif de la suspension",
+          "suspendPlaceholder": "Enregistré au dossier du compte.",
+          "suspendKeepsMoney": "La suspension l’empêche de vendre et de retirer. Elle ne touche pas aux {amount} déjà gagnés.",
+          "confirmSuspend": "Suspendre cet affilié",
+          "reinstate": "Réactiver"
+        },
+        "card": {
+          "sales": "{n} ventes"
+        }
+      },
+      "card": {
+        "of": "sur {amount}"
       }
     }
   },

@@ -303,6 +303,66 @@ export default async function AdminConfigPage({
       ],
     },
     {
+      /*
+        THE AFFILIATE BUSINESS, WHICH IS NOT THE REFERRAL PROGRAMME.
+
+        Its own group, immediately after Referrals, precisely because the two
+        read alike and pay differently: referrals pay POINTS for introducing a
+        person, affiliates pay CEDIS for selling a product. Two keys named
+        `*_commission_percent` sitting in one list is how somebody sets the
+        wrong one. The group heading says which business they belong to, and
+        the four keys here are the only Phase 2 numbers an operator can move.
+      */
+      key: 'affiliate',
+      title: t('groups.affiliate.title'),
+      description: t('groups.affiliate.description'),
+      fields: [
+        {
+          /* The licence gate for the whole second business, independent of
+             `payouts_enabled` so one can be opened without committing the
+             other. Off means an affiliate keeps earning and simply cannot
+             take it out — nothing expires. */
+          key: 'affiliate_payouts_enabled',
+          label: t('fields.affiliatePayouts.label'),
+          description: t('fields.affiliatePayouts.description'),
+          warning: t('fields.affiliatePayouts.warning'),
+          kind: 'toggle',
+        },
+        {
+          key: 'commission_payout_minimum_minor',
+          label: t('fields.commissionMinimum.label'),
+          description: t('fields.commissionMinimum.description'),
+          kind: 'number',
+          min: 0,
+          step: 100,
+          suffix: t('units.pesewas'),
+        },
+        {
+          /* Defaults, not the rate: every product carries its own percentage,
+             and these are what a new one starts at. Changing them re-prices
+             nothing already selling. */
+          key: 'affiliate_default_l1_percent',
+          label: t('fields.affiliateL1.label'),
+          description: t('fields.affiliateL1.description'),
+          kind: 'number',
+          min: 0,
+          max: 90,
+          step: 0.5,
+          suffix: t('units.percent'),
+        },
+        {
+          key: 'affiliate_default_l2_percent',
+          label: t('fields.affiliateL2.label'),
+          description: t('fields.affiliateL2.description'),
+          kind: 'number',
+          min: 0,
+          max: 90,
+          step: 0.5,
+          suffix: t('units.percent'),
+        },
+      ],
+    },
+    {
       key: 'fraud',
       title: t('groups.fraud.title'),
       description: t('groups.fraud.description'),

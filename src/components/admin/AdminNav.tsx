@@ -13,6 +13,7 @@ import {
   Gauge,
   Gamepad2,
   Gift,
+  Handshake,
   BookOpen,
   Target,
   Trophy,
@@ -85,6 +86,11 @@ const GROUPS: NavGroup[] = [
     items: [
       { key: 'overview', href: '/admin', Icon: Gauge, exact: true },
       { key: 'payouts', href: '/admin/payouts', Icon: Wallet },
+      // The SECOND business's queue, deliberately its own destination beside
+      // Payouts rather than a tab inside it: different ledger, different
+      // switch, different minimum (D27). Prefix matching keeps it lit on
+      // /admin/affiliates/people.
+      { key: 'affiliates', href: '/admin/affiliates', Icon: Handshake },
       { key: 'finance', href: '/admin/finance', Icon: BadgeCheck },
       { key: 'advertisers', href: '/admin/advertisers', Icon: Building2, area: 'ads' },
       { key: 'subscriptions', href: '/admin/subscriptions', Icon: ClipboardList },
