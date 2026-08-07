@@ -16,10 +16,15 @@ import { describe, expect, it } from 'vitest'
  * This test exists because copy is added constantly and the habit is mine, not
  * the codebase's. A rule nobody can enforce is a rule that lasts one session.
  *
- * ⚠️ SCOPE IS DELIBERATELY THE MESSAGE FILES. Source comments are full of them
- * and stay that way: they are written for whoever maintains this, never
- * rendered, and stripping them would be thousands of lines of noise in a diff
- * for no reader's benefit.
+ * ⚠️ THE LEGAL DOCUMENTS ARE NOT IN `messages/`. They live in
+ * `src/content/legal/*.ts`, which is why the first pass at this reported the
+ * marketing page clean while Terms still carried 23 dashes and Privacy 45.
+ * Both places are checked here now.
+ *
+ * ⚠️ SOURCE COMMENTS ARE DELIBERATELY OUT OF SCOPE, in both. They are written
+ * for whoever maintains this, never rendered, and stripping them would be
+ * thousands of lines of noise in a diff for no reader's benefit. So the legal
+ * check looks inside string literals only.
  */
 
 const LOCALES = ['en', 'fr'] as const
@@ -42,6 +47,23 @@ describe('user-facing copy', () => {
       const offenders = strings
         .filter(([, text]) => /[—–]/.test(text))
         .map(([path, text]) => `${path}: ${text.slice(0, 80)}`)
+
+      expect(offenders, offenders.join('\n')).toHaveLength(0)
+    })
+  }
+
+  for (const doc of ['terms.en', 'terms.fr', 'privacy.en', 'privacy.fr']) {
+    it(`carries no em or en dash in ${doc}`, () => {
+      const source = readFileSync(join(process.cwd(), 'src', 'content', 'legal', `${doc}.ts`), 'utf8')
+
+      /* Comments stripped first, then only what is left inside quotes counts.
+         A dash in a note to the next maintainer is not a dash a user reads. */
+      const withoutComments = source
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/^\s*\/\/.*$/gm, '')
+
+      const literals = withoutComments.match(/'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"/g) ?? []
+      const offenders = literals.filter((text) => /[—–]/.test(text)).map((t) => t.slice(0, 90))
 
       expect(offenders, offenders.join('\n')).toHaveLength(0)
     })

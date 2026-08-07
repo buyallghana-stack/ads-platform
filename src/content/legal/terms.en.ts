@@ -120,7 +120,7 @@ export const termsEn: LegalDoc = {
         },
         {
           kind: 'p',
-          text: 'A free account can earn for a limited period after it is created — the app shows you when that period ends, and buying any plan lifts the limit for as long as the plan runs. Points you have already earned are unaffected: they stay in your balance and can still be withdrawn.',
+          text: 'A free account can earn for a limited period after it is created. The app shows you when that period ends, and buying any plan lifts the limit for as long as the plan runs. Points you have already earned are unaffected: they stay in your balance and can still be withdrawn.',
         },
         {
           kind: 'p',
@@ -142,7 +142,7 @@ export const termsEn: LegalDoc = {
       blocks: [
         {
           kind: 'p',
-          text: 'A task is an optional challenge with a target — for example, watching a number of ads, or keeping a daily streak. When your progress reaches the target, the reward becomes available for you to claim.',
+          text: 'A task is an optional challenge with a target: for example, watching a number of ads, or keeping a daily streak. When your progress reaches the target, the reward becomes available for you to claim.',
         },
         {
           kind: 'p',
@@ -160,7 +160,7 @@ export const termsEn: LegalDoc = {
       blocks: [
         {
           kind: 'p',
-          text: 'Some plans include a number of plays each week on our reward games — currently a spin wheel and a mystery box. Plays are a benefit of the plan you already hold.',
+          text: 'Some plans include a number of plays each week on our reward games, currently a spin wheel and a mystery box. Plays are a benefit of the plan you already hold.',
         },
         {
           kind: 'p',
@@ -186,7 +186,7 @@ export const termsEn: LegalDoc = {
       blocks: [
         {
           kind: 'p',
-          text: 'We sometimes issue gift codes — for a promotion, a campaign, or to put right a problem raised through support. Entering a valid code credits the points it carries.',
+          text: 'We sometimes issue gift codes, for a promotion, a campaign, or to put right a problem raised through support. Entering a valid code credits the points it carries.',
         },
         {
           kind: 'p',
@@ -212,7 +212,7 @@ export const termsEn: LegalDoc = {
         },
         {
           kind: 'p',
-          text: 'Withdrawals and refunds do not affect a standing, and accounts under review may be excluded. Placing on the leaderboard carries recognition only — no prize or payment is attached to it.',
+          text: 'Withdrawals and refunds do not affect a standing, and accounts under review may be excluded. Placing on the leaderboard carries recognition only. No prize or payment is attached to it.',
         },
       ],
     },
@@ -289,7 +289,7 @@ export const termsEn: LegalDoc = {
       blocks: [
         {
           kind: 'p',
-          text: 'You may invite other people using your referral link or code. Where a referral reward applies, it is paid to the people who introduced them — the person who invited them, and, at a lower rate, whoever invited that person. It is never charged to the person invited. Nobody pays anything to refer or to be referred.',
+          text: 'You may invite other people using your referral link or code. Where a referral reward applies, it is paid to the people who introduced them: the person who invited them, and, at a lower rate, whoever invited that person. It is never charged to the person invited. Nobody pays anything to refer or to be referred.',
         },
         { kind: 'p', text: 'A referral can pay a reward at up to three moments:' },
         {
@@ -297,7 +297,7 @@ export const termsEn: LegalDoc = {
           items: [
             'when the person you invited creates an account using your code;',
             'when they become active by completing the activity condition shown in the app at the time;',
-            'when they buy a plan — a commission calculated as a percentage of what they paid, subject to a limit per person you invited.',
+            'when they buy a plan: a commission calculated as a percentage of what they paid, subject to a limit per person you invited.',
           ],
         },
         {
@@ -306,7 +306,7 @@ export const termsEn: LegalDoc = {
         },
         {
           kind: 'p',
-          text: 'Referral rewards go at most two levels deep. You may be rewarded for the people you invited yourself, and, at a separate rate, for the people they in turn invite. That is where it stops: we do not pay you anything for a third level or beyond, and no setting anywhere in the service can extend it — the limit is built into how the reward is calculated, not into a preference.',
+          text: 'Referral rewards go at most two levels deep. You may be rewarded for the people you invited yourself, and, at a separate rate, for the people they in turn invite. That is where it stops: we do not pay you anything for a third level or beyond, and no setting anywhere in the service can extend it. The limit is built into how the reward is calculated, not into a preference.',
         },
         {
           kind: 'p',
@@ -318,7 +318,7 @@ export const termsEn: LegalDoc = {
         },
         {
           kind: 'p',
-          text: 'The Team screen shows you both levels openly. For each person it shows their name, their phone number, which plans they hold, how much has been paid out to them and how much their remaining balance is worth — in cedis, not points, so you can check it against what you know a cedi is worth. We show it because you are entitled to see what the introductions you are being rewarded for actually amount to, rather than taking our word for a total.',
+          text: 'The Team screen shows you both levels openly. For each person it shows their name, their phone number, which plans they hold, how much has been paid out to them and how much their remaining balance is worth, in cedis, not points, so you can check it against what you know a cedi is worth. We show it because you are entitled to see what the introductions you are being rewarded for actually amount to, rather than taking our word for a total.',
         },
         {
           kind: 'note',
@@ -366,7 +366,7 @@ export const termsEn: LegalDoc = {
         },
         {
           kind: 'p',
-          text: 'A fee may be deducted from a payout to cover transaction costs and taxes. Where one applies, the rate and the amount are shown to you before you confirm the request, and the amount is fixed at that moment — a later change to the rate does not affect a request you have already made.',
+          text: 'A fee may be deducted from a payout to cover transaction costs and taxes. Where one applies, the rate and the amount are shown to you before you confirm the request, and the amount is fixed at that moment. A later change to the rate does not affect a request you have already made.',
         },
         {
           kind: 'p',
@@ -460,7 +460,7 @@ export const termsEn: LegalDoc = {
         },
         {
           kind: 'p',
-          text: 'We are not affiliated with the advertisers whose ads, articles and links appear on SidePerks, and showing one is not a recommendation of them. When you follow a link to an advertiser you leave SidePerks, and what happens there is a matter between you and them: we are not responsible for their website or app, for anything you buy, pay or lose there, or for a product or service that disappoints you. Never send money to anyone who tells you it is required to earn or withdraw on SidePerks — nothing here ever asks you to pay an advertiser.',
+          text: 'We are not affiliated with the advertisers whose ads, articles and links appear on SidePerks, and showing one is not a recommendation of them. When you follow a link to an advertiser you leave SidePerks, and what happens there is a matter between you and them: we are not responsible for their website or app, for anything you buy, pay or lose there, or for a product or service that disappoints you. Never send money to anyone who tells you it is required to earn or withdraw on SidePerks. Nothing here ever asks you to pay an advertiser.',
         },
         {
           kind: 'p',

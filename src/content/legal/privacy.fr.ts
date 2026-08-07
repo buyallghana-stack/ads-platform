@@ -44,7 +44,7 @@ export const privacyFr: LegalDoc = {
           kind: 'list',
           items: [
             'vos nom, adresse e-mail et numéro de téléphone ;',
-            "votre mot de passe, que nous ne stockons jamais — seulement une empreinte à sens unique ;",
+            "votre mot de passe, que nous ne stockons jamais, seulement une empreinte à sens unique ;",
             "vos coordonnées de paiement : numéro et nom du compte mobile money, ou adresse et réseau de votre portefeuille de cryptomonnaie ;",
             "votre code PIN de retrait, conservé uniquement sous forme d'empreinte à sens unique ;",
             "si vous activez la double authentification, votre secret d'authentification, conservé chiffré, et les empreintes de vos codes de secours ;",
@@ -57,7 +57,7 @@ export const privacyFr: LegalDoc = {
           kind: 'list',
           items: [
             "les publicités et sondages que vous avez terminés, quand, jusqu'où, et vos réponses à la question d'attention ;",
-            "les annonceurs vers lesquels vous avez suivi un lien depuis une publicité article, et quand — nous enregistrons que le lien a été suivi et ce qu'il vous a rapporté, et rien de ce que vous avez fait sur le site de l'annonceur ;",
+            "les annonceurs vers lesquels vous avez suivi un lien depuis une publicité article, et quand. Nous enregistrons que le lien a été suivi et ce qu'il vous a rapporté, et rien de ce que vous avez fait sur le site de l'annonceur ;",
             'vos points, transactions, demandes de retrait et historique de formules ;',
             "votre progression dans les tâches et les récompenses de tâches que vous avez réclamées ;",
             "les parties de jeux-récompenses utilisées et les lots obtenus ;",
@@ -74,7 +74,7 @@ export const privacyFr: LegalDoc = {
         },
         {
           kind: 'p',
-          text: "Une signature d'appareil : lors de votre inscription ou de votre connexion, votre navigateur calcule un code court à partir de caractéristiques générales de votre appareil et de votre navigateur — taille d'écran, langue, fuseau horaire, polices disponibles. C'est un code à sens unique, pas un nom, et il est calculé sur votre appareil : les caractéristiques elles-mêmes ne nous sont jamais envoyées, seulement le code. Nous l'utilisons dans un seul but, décrit à la section 4.",
+          text: "Une signature d'appareil : lors de votre inscription ou de votre connexion, votre navigateur calcule un code court à partir de caractéristiques générales de votre appareil et de votre navigateur, taille d'écran, langue, fuseau horaire, polices disponibles. C'est un code à sens unique, pas un nom, et il est calculé sur votre appareil : les caractéristiques elles-mêmes ne nous sont jamais envoyées, seulement le code. Nous l'utilisons dans un seul but, décrit à la section 4.",
         },
         {
           kind: 'p',
@@ -93,12 +93,12 @@ export const privacyFr: LegalDoc = {
         {
           kind: 'list',
           items: [
-            "Pour gérer votre compte et vous payer — impossible de fournir le service sans cela. Base : exécution de notre contrat.",
-            "Pour faire fonctionner les fonctionnalités que vous utilisez — créditer les publicités, les articles et les sondages, mesurer la progression des tâches, attribuer et enregistrer les lots des jeux-récompenses, appliquer les codes cadeaux et établir le classement. Base : exécution de notre contrat.",
+            "Pour gérer votre compte et vous payer, impossible de fournir le service sans cela. Base : exécution de notre contrat.",
+            "Pour faire fonctionner les fonctionnalités que vous utilisez, créditer les publicités, les articles et les sondages, mesurer la progression des tâches, attribuer et enregistrer les lots des jeux-récompenses, appliquer les codes cadeaux et établir le classement. Base : exécution de notre contrat.",
             "Pour confirmer que les visionnages sont authentiques et prévenir la fraude, les comptes multiples et les abus. Base : notre intérêt légitime à protéger le service, les annonceurs et les utilisateurs honnêtes.",
             "Pour sécuriser le service, y compris les relevés de connexion et les protections que vous activez. Base : intérêt légitime et, pour certains enregistrements, obligation légale.",
             "Pour respecter nos obligations légales, fiscales et comptables, dont la conservation des mouvements d'argent. Base : obligation légale.",
-            "Pour vous envoyer les notifications du service — décision de retrait, message du support, annonce. Base : exécution du contrat et intérêt légitime.",
+            "Pour vous envoyer les notifications du service, décision de retrait, message du support, annonce. Base : exécution du contrat et intérêt légitime.",
             'Pour répondre à vos messages au support. Base : exécution du contrat et intérêt légitime.',
             "Pour améliorer le service et comprendre les fonctionnalités utilisées. Base : intérêt légitime.",
           ],
@@ -115,7 +115,7 @@ export const privacyFr: LegalDoc = {
       blocks: [
         {
           kind: 'p',
-          text: "Nous effectuons des contrôles automatisés sur l'activité — par exemple des signaux sur l'appareil et le réseau utilisés, et la manière dont les publicités sont regardées et validées. Ces contrôles peuvent entraîner l'annulation de points, le signalement d'un compte ou la suspension d'un retrait.",
+          text: "Nous effectuons des contrôles automatisés sur l'activité : par exemple des signaux sur l'appareil et le réseau utilisés, et la manière dont les publicités sont regardées et validées. Ces contrôles peuvent entraîner l'annulation de points, le signalement d'un compte ou la suspension d'un retrait.",
         },
         {
           kind: 'p',
@@ -184,10 +184,10 @@ export const privacyFr: LegalDoc = {
           kind: 'list',
           items: [
             "Les prestataires de paiement, pour que l'argent vous parvienne. Ils ne reçoivent que le nécessaire.",
-            "Les annonceurs et partenaires publicitaires, de façon agrégée — combien de personnes ont vu une publicité et sa performance. Ils ne reçoivent ni votre nom, ni votre e-mail, ni votre téléphone.",
+            "Les annonceurs et partenaires publicitaires, de façon agrégée, combien de personnes ont vu une publicité et sa performance. Ils ne reçoivent ni votre nom, ni votre e-mail, ni votre téléphone.",
             "Les prestataires techniques qui hébergent et font fonctionner le service (base de données, hébergement, e-mail), liés par contrat à agir sur nos seules instructions.",
             "Les fournisseurs de taux de change, qui nous indiquent le prix d'une cryptomonnaie afin de chiffrer un retrait. Nous leur demandons un prix et ils ne reçoivent rien vous concernant.",
-            "Un prestataire de surveillance des erreurs, qui reçoit un rapport lorsqu'un problème survient — la page concernée, l'erreur et le type de navigateur. Il est configuré pour NE PAS recevoir votre adresse, vos cookies ni votre session, et les jetons des liens de connexion sont retirés avant l'envoi du rapport.",
+            "Un prestataire de surveillance des erreurs, qui reçoit un rapport lorsqu'un problème survient : la page concernée, l'erreur et le type de navigateur. Il est configuré pour NE PAS recevoir votre adresse, vos cookies ni votre session, et les jetons des liens de connexion sont retirés avant l'envoi du rapport.",
             "Les autorités et régulateurs, lorsque la loi l'exige ou pour faire valoir ou défendre des droits.",
             "Un acquéreur ou successeur, si l'activité était cédée ou réorganisée. Nous vous préviendrions au préalable.",
           ],
@@ -221,7 +221,7 @@ export const privacyFr: LegalDoc = {
           items: [
             'Informations de compte : tant que votre compte est ouvert.',
             "Si vous demandez la suppression : 15 jours, pendant lesquels une connexion annule la demande. Passé ce délai, la suppression est effectuée.",
-            "Enregistrements de transactions — points gagnés, retraits et paiements de formules : conservés après la suppression aussi longtemps que l'exigent le droit fiscal, comptable et anti-fraude. Ces enregistrements sont anonymisés et ne peuvent plus vous être rattachés nominativement.",
+            "Enregistrements de transactions, points gagnés, retraits et paiements de formules : conservés après la suppression aussi longtemps que l'exigent le droit fiscal, comptable et anti-fraude. Ces enregistrements sont anonymisés et ne peuvent plus vous être rattachés nominativement.",
             "Une empreinte à sens unique de l'e-mail et du téléphone d'un compte supprimé : conservée indéfiniment, afin que les mêmes coordonnées ne puissent servir à créer un nouveau compte. Une empreinte ne peut pas être reconvertie en e-mail ou en numéro.",
             "Enregistrements de sécurité et de connexion : une durée limitée, afin de pouvoir enquêter sur une activité suspecte.",
             "Positions au classement des périodes passées : conservées comme partie de l'historique des points gagnés, et affichées sans vos informations une fois votre compte supprimé.",
@@ -240,7 +240,7 @@ export const privacyFr: LegalDoc = {
             'consulter et corriger vos informations dans Profil → Informations personnelles ;',
             'demander une copie des informations personnelles vous concernant ;',
             'supprimer votre compte depuis Profil → Supprimer le compte ;',
-            "vous opposer aux traitements fondés sur nos intérêts légitimes ou en demander la limitation — y compris demander à ne pas figurer au classement ;",
+            "vous opposer aux traitements fondés sur nos intérêts légitimes ou en demander la limitation, y compris demander à ne pas figurer au classement ;",
             "retirer votre consentement lorsque nous nous y sommes fiés, sans effet sur le passé ;",
             'demander le réexamen d’une décision automatisée vous concernant.',
           ],
@@ -266,7 +266,7 @@ export const privacyFr: LegalDoc = {
             "Les secrets de double authentification sont chiffrés : une copie de la base ne suffit pas à les révéler.",
             'Les échanges entre vous et nous sont chiffrés en transit.',
             "L'accès à vos enregistrements est restreint au niveau de la base de données : un compte ne peut pas lire ceux d'un autre.",
-            "Les actions sensibles — retraits, changement de mot de passe ou d'e-mail, suppression du compte — exigent de confirmer votre identité.",
+            "Les actions sensibles (retraits, changement de mot de passe ou d'e-mail, suppression du compte) exigent de confirmer votre identité.",
           ],
         },
         {

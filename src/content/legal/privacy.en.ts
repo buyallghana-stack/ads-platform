@@ -59,7 +59,7 @@ export const privacyEn: LegalDoc = {
           kind: 'list',
           items: [
             'your name, email address and phone number;',
-            'your password, which we never store — only a one-way hash of it;',
+            'your password, which we never store, only a one-way hash of it;',
             'your payout details: your mobile money number and account name, or your cryptocurrency wallet address and network;',
             'your withdrawal PIN, stored only as a one-way hash;',
             'if you turn on two-factor authentication, your authenticator secret, stored encrypted, and one-way hashes of your backup codes;',
@@ -72,7 +72,7 @@ export const privacyEn: LegalDoc = {
           kind: 'list',
           items: [
             'which advertisements and surveys you completed, when, how far through, and how you answered the attention question;',
-            'which advertisers you followed a link to from an article ad, and when — we record that the link was followed and what it earned you, and nothing about what you did on the advertiser\u2019s own site;',
+            'which advertisers you followed a link to from an article ad, and when. We record that the link was followed and what it earned you, and nothing about what you did on the advertiser\u2019s own site;',
             'your points, transactions, payout requests and plan history;',
             'your progress towards tasks, and which task rewards you have claimed;',
             'the reward-game plays you have used and the prizes they produced;',
@@ -80,13 +80,13 @@ export const privacyEn: LegalDoc = {
             'your standing on the leaderboard for each period, and the notifications we have sent you and whether you have read them;',
             'your device and browser type, and the network address you connect from, together with the approximate country it indicates;',
             'a record of your sign-ins and the devices where your account is signed in;',
-            'referral information, such as the code used when an account was created, and — if you invited someone who then bought a plan — the fact of that purchase and the commission it earned you.',
+            'referral information, such as the code used when an account was created, and (if you invited someone who then bought a plan) the fact of that purchase and the commission it earned you.',
           ],
         },
         { kind: 'p', text: 'Information from others: confirmation from payment and payout providers that a payment or disbursement succeeded or failed.' },
         {
           kind: 'p',
-          text: 'A device signature: when you register or sign in, your browser calculates a short code from general characteristics of your device and browser — things like screen size, language, time zone and the fonts available. It is a one-way code, not a name, and it is calculated on your device: the characteristics themselves are never sent to us, only the code. We use it for one purpose, described in section 4.',
+          text: 'A device signature: when you register or sign in, your browser calculates a short code from general characteristics of your device and browser, things like screen size, language, time zone and the fonts available. It is a one-way code, not a name, and it is calculated on your device: the characteristics themselves are never sent to us, only the code. We use it for one purpose, described in section 4.',
         },
         {
           kind: 'p',
@@ -105,12 +105,12 @@ export const privacyEn: LegalDoc = {
         {
           kind: 'list',
           items: [
-            'To run your account and pay you — we cannot provide the service or send a payout without it. Basis: performance of our contract with you.',
-            'To run the features you use — crediting ads, articles and surveys, measuring progress towards tasks, awarding and recording reward-game prizes, applying gift codes, and building the leaderboard. Basis: performance of our contract with you.',
+            'To run your account and pay you. We cannot provide the service or send a payout without it. Basis: performance of our contract with you.',
+            'To run the features you use, crediting ads, articles and surveys, measuring progress towards tasks, awarding and recording reward-game prizes, applying gift codes, and building the leaderboard. Basis: performance of our contract with you.',
             'To confirm that ad views are genuine and to prevent fraud, multiple accounts and abuse. Basis: our legitimate interest in protecting the service, advertisers and honest users.',
             'To keep the service secure, including sign-in records and the security features you switch on. Basis: legitimate interest and, for some records, legal obligation.',
             'To meet legal, tax and accounting duties, including keeping records of money moved. Basis: legal obligation.',
-            'To send you service notifications — a payout decision, a message from support, an announcement. Basis: performance of our contract and legitimate interest.',
+            'To send you service notifications. A payout decision, a message from support, an announcement. Basis: performance of our contract and legitimate interest.',
             'To answer your support messages. Basis: performance of our contract and legitimate interest.',
             'To improve the service and understand which features are used. Basis: legitimate interest.',
           ],
@@ -127,7 +127,7 @@ export const privacyEn: LegalDoc = {
       blocks: [
         {
           kind: 'p',
-          text: 'We run automated checks on activity — for example, signals about the device and network used, and patterns in how ads are watched and answered. These checks can result in points being reversed, an account being flagged for review, or a payout being held.',
+          text: 'We run automated checks on activity, for example, signals about the device and network used, and patterns in how ads are watched and answered. These checks can result in points being reversed, an account being flagged for review, or a payout being held.',
         },
         {
           kind: 'p',
@@ -176,7 +176,7 @@ export const privacyEn: LegalDoc = {
         },
         {
           kind: 'p',
-          text: 'Nobody in your referral chain can see your email address, your password, your withdrawal PIN, your payout account or wallet, the individual ads or surveys you completed, your support messages, or anything we hold for fraud checks. They cannot change anything on your account, and they cannot move money into or out of it. Nobody beyond those two levels sees any of it — the third person up the chain sees nothing about you at all.',
+          text: 'Nobody in your referral chain can see your email address, your password, your withdrawal PIN, your payout account or wallet, the individual ads or surveys you completed, your support messages, or anything we hold for fraud checks. They cannot change anything on your account, and they cannot move money into or out of it. Nobody beyond those two levels sees any of it. The third person up the chain sees nothing about you at all.',
         },
         {
           kind: 'note',
@@ -196,10 +196,10 @@ export const privacyEn: LegalDoc = {
           kind: 'list',
           items: [
             'Payment and payout providers, so that money can reach you. They receive only what is needed to make the payment.',
-            'Advertisers and advertising partners, in aggregate — how many people watched an ad and how it performed. They do not receive your name, email or phone number.',
+            'Advertisers and advertising partners, in aggregate, how many people watched an ad and how it performed. They do not receive your name, email or phone number.',
             'Technology providers that host and run the service for us, including our database, hosting and email providers, under contracts that limit them to acting on our instructions.',
             'Exchange-rate providers, which tell us the price of a cryptocurrency so a payout can be quoted. They are asked for a price and receive nothing about you.',
-            'An error-monitoring provider, which receives a report when something breaks — the page it happened on, the error, and the make of browser. It is configured NOT to receive your address, your cookies or your session, and sign-in links have their token removed before the report is sent.',
+            'An error-monitoring provider, which receives a report when something breaks. The page it happened on, the error, and the make of browser. It is configured NOT to receive your address, your cookies or your session, and sign-in links have their token removed before the report is sent.',
             'Authorities and regulators, where the law requires it or to establish or defend legal claims.',
             'A buyer or successor, if the business is ever sold or reorganised. We would tell you first.',
           ],
@@ -233,7 +233,7 @@ export const privacyEn: LegalDoc = {
           items: [
             'Account information: while your account is open.',
             'If you ask us to delete your account: 15 days, during which signing in cancels the request. After that the deletion is carried out.',
-            'Transaction records — points earned, payouts and plan payments: kept after deletion for as long as tax, accounting and anti-fraud law requires. These records are anonymised, so they can no longer be linked back to you by name.',
+            'Transaction records. Points earned, payouts and plan payments: kept after deletion for as long as tax, accounting and anti-fraud law requires. These records are anonymised, so they can no longer be linked back to you by name.',
             'A one-way hash of the email address and phone number of a deleted account: kept indefinitely, so the same details cannot be used to open a new account. A hash cannot be turned back into your email or phone number.',
             'Security and sign-in records: a limited period, so we can investigate suspicious activity.',
             'Leaderboard standings for past periods: kept as part of the record of points earned, and shown without your details once your account is deleted.',
@@ -252,7 +252,7 @@ export const privacyEn: LegalDoc = {
             'see and correct your details in Profile → Personal information;',
             'ask for a copy of the personal information we hold about you;',
             'delete your account from Profile → Delete account;',
-            'object to, or ask us to restrict, processing based on our legitimate interests — including asking to be left off the leaderboard;',
+            'object to, or ask us to restrict, processing based on our legitimate interests, including asking to be left off the leaderboard;',
             'withdraw consent where we relied on it, without affecting what happened before;',
             'ask us to review an automated decision that affected you.',
           ],
@@ -278,7 +278,7 @@ export const privacyEn: LegalDoc = {
             'Two-factor authentication secrets are encrypted, so a copy of the database alone does not reveal them.',
             'Traffic between you and us is encrypted in transit.',
             'Access to your records is restricted at the database level, so one account cannot read another’s.',
-            'Sensitive actions — payouts, changing your password or email, deleting your account — require you to confirm who you are.',
+            'Sensitive actions (payouts, changing your password or email, deleting your account) require you to confirm who you are.',
           ],
         },
         {

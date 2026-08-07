@@ -116,7 +116,7 @@ export const termsFr: LegalDoc = {
       blocks: [
         {
           kind: 'p',
-          text: "Une tâche est un défi facultatif assorti d'un objectif — par exemple regarder un certain nombre de publicités, ou maintenir une série quotidienne. Lorsque votre progression atteint l'objectif, la récompense devient disponible et vous pouvez la réclamer.",
+          text: "Une tâche est un défi facultatif assorti d'un objectif : par exemple regarder un certain nombre de publicités, ou maintenir une série quotidienne. Lorsque votre progression atteint l'objectif, la récompense devient disponible et vous pouvez la réclamer.",
         },
         {
           kind: 'p',
@@ -134,7 +134,7 @@ export const termsFr: LegalDoc = {
       blocks: [
         {
           kind: 'p',
-          text: "Certaines formules incluent un nombre de parties par semaine sur nos jeux-récompenses — actuellement une roue et une boîte mystère. Ces parties sont un avantage de la formule que vous détenez déjà.",
+          text: "Certaines formules incluent un nombre de parties par semaine sur nos jeux-récompenses, actuellement une roue et une boîte mystère. Ces parties sont un avantage de la formule que vous détenez déjà.",
         },
         {
           kind: 'p',
@@ -160,7 +160,7 @@ export const termsFr: LegalDoc = {
       blocks: [
         {
           kind: 'p',
-          text: "Nous émettons parfois des codes cadeaux — pour une promotion, une campagne, ou pour corriger un problème signalé au support. Saisir un code valide crédite les points qu'il porte.",
+          text: "Nous émettons parfois des codes cadeaux, pour une promotion, une campagne, ou pour corriger un problème signalé au support. Saisir un code valide crédite les points qu'il porte.",
         },
         {
           kind: 'p',
@@ -263,7 +263,7 @@ export const termsFr: LegalDoc = {
       blocks: [
         {
           kind: 'p',
-          text: "Vous pouvez inviter d'autres personnes avec votre lien ou votre code de parrainage. Lorsqu'une récompense s'applique, elle est versée aux personnes à l'origine de l'inscription — celle qui a invité, et, à un taux inférieur, celle qui avait invité cette dernière. Elle n'est jamais facturée à la personne invitée. Personne ne paie quoi que ce soit pour parrainer ou être parrainé.",
+          text: "Vous pouvez inviter d'autres personnes avec votre lien ou votre code de parrainage. Lorsqu'une récompense s'applique, elle est versée aux personnes à l'origine de l'inscription : celle qui a invité, et, à un taux inférieur, celle qui avait invité cette dernière. Elle n'est jamais facturée à la personne invitée. Personne ne paie quoi que ce soit pour parrainer ou être parrainé.",
         },
         { kind: 'p', text: 'Un parrainage peut donner lieu à une récompense à trois moments au plus :' },
         {
@@ -271,7 +271,7 @@ export const termsFr: LegalDoc = {
           items: [
             "lorsque la personne invitée crée un compte avec votre code ;",
             "lorsqu'elle devient active en remplissant la condition d'activité affichée dans l'application à ce moment-là ;",
-            "lorsqu'elle achète une formule — une commission calculée en pourcentage de ce qu'elle a payé, dans la limite d'un plafond par personne invitée.",
+            "lorsqu'elle achète une formule : une commission calculée en pourcentage de ce qu'elle a payé, dans la limite d'un plafond par personne invitée.",
           ],
         },
         {
@@ -280,7 +280,7 @@ export const termsFr: LegalDoc = {
         },
         {
           kind: 'p',
-          text: "Les récompenses de parrainage comportent deux niveaux au maximum. Vous pouvez être rémunéré pour les personnes que vous avez invitées vous-même et, à un taux distinct, pour celles qu'elles invitent à leur tour. Cela s'arrête là : nous ne versons rien pour un troisième niveau ou au-delà, et aucun réglage du service ne peut étendre cette limite — elle est inscrite dans le calcul de la récompense, et non dans une préférence.",
+          text: "Les récompenses de parrainage comportent deux niveaux au maximum. Vous pouvez être rémunéré pour les personnes que vous avez invitées vous-même et, à un taux distinct, pour celles qu'elles invitent à leur tour. Cela s'arrête là : nous ne versons rien pour un troisième niveau ou au-delà, et aucun réglage du service ne peut étendre cette limite. Elle est inscrite dans le calcul de la récompense, et non dans une préférence.",
         },
         {
           kind: 'p',
@@ -292,7 +292,7 @@ export const termsFr: LegalDoc = {
         },
         {
           kind: 'p',
-          text: "L'écran Équipe vous montre les deux niveaux ouvertement. Pour chaque personne, il indique son nom, son numéro de téléphone, les formules qu'elle détient, ce qui lui a été versé et la valeur de ce qu'il lui reste — en cedis et non en points, afin que vous puissiez vérifier ces chiffres. Nous les affichons parce que vous êtes en droit de voir ce que représentent réellement les inscriptions pour lesquelles vous êtes rémunéré, plutôt que de nous croire sur parole.",
+          text: "L'écran Équipe vous montre les deux niveaux ouvertement. Pour chaque personne, il indique son nom, son numéro de téléphone, les formules qu'elle détient, ce qui lui a été versé et la valeur de ce qu'il lui reste, en cedis et non en points, afin que vous puissiez vérifier ces chiffres. Nous les affichons parce que vous êtes en droit de voir ce que représentent réellement les inscriptions pour lesquelles vous êtes rémunéré, plutôt que de nous croire sur parole.",
         },
         {
           kind: 'note',
