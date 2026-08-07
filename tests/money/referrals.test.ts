@@ -689,9 +689,18 @@ describe.skipIf(!HAS_DB)('the second level — who gets paid', () => {
   it('is off by default, so nothing changes until the operator sets a rate', async () => {
     await withRollback(async (tx) => {
       await pinEconomy(tx, { pointsPerCedi: POINTS_PER_CEDI })
-      // enableCommission touches the first level only — the second-level keys
-      // keep their shipped value of zero.
       await enableCommission(tx)
+      /* ⚠️ PINNED TO ZERO, NOT ASSUMED TO BE ZERO. This used to say
+         "enableCommission touches the first level only, so the second-level
+         keys keep their shipped value of zero" — and then read the live value
+         of a key the operator can change from the admin. They did: it is 7 on
+         the project now, so a test about what happens at zero was testing
+         seven and failing.
+
+         The invariant is real and worth keeping: a second level with no rate
+         set pays nobody. It just has to be stated here rather than inherited.
+         Same rule as the ladder in `pinEconomy`. */
+      await setConfig(tx, 'referral_purchase_commission_percent_l2', '0')
       await setConfig(tx, 'referral_signup_bonus_points', '500')
 
       const { grandparent, referee } = await chain(tx)
