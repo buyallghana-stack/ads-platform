@@ -285,6 +285,23 @@ export default async function PublicProductPage({
             <p className="mt-3 text-center text-[0.75rem] leading-snug text-ink-500">
               {t('paymentNote')}
             </p>
+
+            {/* ONLY ON A TRAINING PROGRAMME, because buying one is what makes
+                somebody an affiliate. Their acceptance and its version are
+                recorded on the account the purchase creates (H47): the
+                mechanism had to exist from the start, since it cannot be
+                added retroactively for people who already joined. */}
+            {training && !product.owned && (
+              <p className="mt-2 text-center text-[0.75rem] leading-snug text-ink-500">
+                {t.rich('termsNote', {
+                  terms: (chunks) => (
+                    <Link href="/terms" className="font-medium text-brand-700 hover:underline">
+                      {chunks}
+                    </Link>
+                  ),
+                })}
+              </p>
+            )}
           </div>
         </aside>
       </main>

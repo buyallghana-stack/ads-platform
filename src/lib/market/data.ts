@@ -74,6 +74,12 @@ export type AffiliateDashboard = {
   training_offers?: TrainingOffer[]
   payouts_enabled?: boolean
   payout_minimum_minor?: number
+  /** Which version of the terms this affiliate accepted, and when. NULL for
+   *  anybody who joined before the mechanism existed (H47) — the screen says
+   *  "not recorded" rather than inventing a date. */
+  terms_version?: number | null
+  terms_accepted_at?: string | null
+  terms_current_version?: number
 }
 
 /**

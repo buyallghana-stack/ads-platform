@@ -1,6 +1,13 @@
 import type { Metadata } from 'next'
 
-import { CalendarClock, ChevronRight, Layers, ShieldCheck, UserRound } from 'lucide-react'
+import {
+  CalendarClock,
+  ChevronRight,
+  FileText,
+  Layers,
+  ShieldCheck,
+  UserRound,
+} from 'lucide-react'
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server'
 import { CopyCode } from '@/components/affiliate/CopyCode'
 import { ModeSwitchCard } from '@/components/app/ModeSwitch'
@@ -147,6 +154,36 @@ export default async function AffiliateAccountPage({
           </p>
         </section>
       </div>
+
+      {/* ── what they agreed to ──────────────────────────────────────
+          H47: no separate affiliate agreement is drafted, but WHICH VERSION
+          somebody accepted is recorded, because that cannot be reconstructed
+          later. Shown to them, not just stored, since a record nobody can see
+          is a record nobody can check. */}
+      <section className="rounded-(--radius-panel) border border-ink-200 bg-surface p-4">
+        <p className="flex items-center gap-1.5 text-[0.75rem] font-medium tracking-[0.06em] text-ink-500 uppercase">
+          <FileText aria-hidden className="size-3.5" />
+          {t('termsTitle')}
+        </p>
+        <p className="mt-1.5 text-[0.8125rem] leading-snug text-ink-700">
+          {dashboard.terms_accepted_at
+            ? t('termsAccepted', {
+                version: dashboard.terms_version ?? 1,
+                date: format.dateTime(new Date(dashboard.terms_accepted_at), {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                }),
+              })
+            : t('termsUnrecorded')}
+        </p>
+        <Link
+          href="/terms"
+          className="mt-2 inline-block text-[0.8125rem] font-semibold text-brand-700 hover:underline"
+        >
+          {t('termsLink')}
+        </Link>
+      </section>
 
       {/* ── things that live on the other side ───────────────────────── */}
       <section className="overflow-hidden rounded-(--radius-panel) border border-ink-200 bg-surface">

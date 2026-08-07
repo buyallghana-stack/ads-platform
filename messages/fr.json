@@ -3588,7 +3588,11 @@
       "profile": {
         "title": "Profil et sécurité",
         "body": "Nom, mot de passe, double authentification et déconnexion."
-      }
+      },
+      "termsTitle": "Conditions",
+      "termsAccepted": "Vous avez accepté la version {version} le {date}.",
+      "termsUnrecorded": "Votre acceptation n’a pas été enregistrée. Vous avez rejoint avant que nous ne conservions cette trace.",
+      "termsLink": "Lire les conditions"
     },
     "public": {
       "signIn": "Se connecter",
@@ -3609,7 +3613,8 @@
       "starting": "Redirection vers le paiement…",
       "paymentNote": "Paiement sécurisé via Paystack. Mobile money et cartes acceptés.",
       "mustSignIn": "Veuillez vous connecter avant d’acheter.",
-      "freeNotSupported": "Ce produit n’a pas de prix défini. Contactez le support."
+      "freeNotSupported": "Ce produit n’a pas de prix défini. Contactez le support.",
+      "termsNote": "En achetant ce programme, vous devenez affilié et acceptez nos <terms>conditions</terms>. Nous enregistrons la version que vous avez acceptée."
     },
     "callback": {
       "ok": {

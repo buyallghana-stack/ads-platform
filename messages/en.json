@@ -3588,7 +3588,11 @@
       "profile": {
         "title": "Profile and security",
         "body": "Name, password, two-factor and sign out."
-      }
+      },
+      "termsTitle": "Terms",
+      "termsAccepted": "You accepted version {version} on {date}.",
+      "termsUnrecorded": "Your acceptance was not recorded. You joined before we started keeping that record.",
+      "termsLink": "Read the terms"
     },
     "public": {
       "signIn": "Sign in",
@@ -3609,7 +3613,8 @@
       "starting": "Taking you to payment…",
       "paymentNote": "Paid securely through Paystack. Mobile money and cards accepted.",
       "mustSignIn": "Please sign in before buying.",
-      "freeNotSupported": "This product has no price set. Please contact support."
+      "freeNotSupported": "This product has no price set. Please contact support.",
+      "termsNote": "By buying this programme you become an affiliate and accept our <terms>terms</terms>. We record which version you accepted."
     },
     "callback": {
       "ok": {
