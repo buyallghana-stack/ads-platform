@@ -47,6 +47,20 @@ export default async function AdminGamesPage({
     <>
       <PageHeader title={t('title')} description={t('description')} />
 
+      {/* THE OTHER BUSINESS HAS ITS OWN GAMES AND ITS OWN PRIZE TABLE, paying
+          cedis rather than points. The operator went looking for it here and
+          did not find it (2026-08-07), because the only way in was a button on
+          the affiliate withdrawals queue. This is that way in. */}
+      <div className="mb-4 flex flex-wrap items-center gap-2 rounded-(--radius-card) border border-ink-200 bg-ink-50 px-4 py-3">
+        <p className="min-w-0 flex-1 text-[0.8125rem] text-ink-600">{t('affiliateNote')}</p>
+        <Link
+          href="/admin/affiliates/rewards"
+          className="inline-flex shrink-0 items-center gap-2 rounded-(--radius-input) border border-ink-300 bg-surface px-3 py-2 text-[0.8125rem] font-semibold text-ink-700 transition-colors hover:border-ink-400"
+        >
+          {t('affiliateLink')}
+        </Link>
+      </div>
+
       <nav aria-label={t('gameTabs')} className="mb-4 flex gap-1 rounded-(--radius-input) bg-ink-100 p-1">
         {GAME_KINDS.map((key) => (
           <Link

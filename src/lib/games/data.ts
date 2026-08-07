@@ -59,7 +59,7 @@ export async function getGameBoard(game: GameKind): Promise<GameFace[]> {
   return ((data ?? []) as RawFace[]).map((f) => ({
     slot: Number(f.slot),
     label: f.label,
-    points: Number(f.points),
+    value: Number(f.points),
     extraPlays: Number(f.extra_plays ?? 0),
     colour: f.colour,
   }))

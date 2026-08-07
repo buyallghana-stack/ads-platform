@@ -2847,7 +2847,9 @@
         "hint": "Un seul pool partagé entre les deux jeux. Un utilisateur détenant plusieurs forfaits obtient le plus élevé, pas le total, modifiable via game_plays_combine_mode dans les paramètres.",
         "free": "Gratuit",
         "playsFor": "Parties hebdomadaires pour {plan}"
-      }
+      },
+      "affiliateNote": "Ces lots versent des points, pour les personnes qui regardent des publicités. L’activité d’affiliation propose les deux mêmes jeux et verse des cedis, avec sa propre table.",
+      "affiliateLink": "Lots des affiliés"
     },
     "tasks": {
       "title": "Objectifs",
@@ -3110,7 +3112,9 @@
         "extra": "Parties offertes",
         "weight": "Poids",
         "odds": "Chances",
-        "active": "Actif"
+        "active": "Actif",
+        "colour": "Couleur",
+        "won": "Gagnés · versés"
       },
       "unsaved": "Rien n’est encore enregistré.",
       "discard": "Annuler les modifications",
@@ -3243,7 +3247,12 @@
       "down": "En baisse de {places} {places, plural, one {place} other {places}}",
       "same": "Aucun changement",
       "new": "Nouveau au classement"
-    }
+    },
+    "yourEarnings": "{amount} gagnés sur cette période",
+    "titleMoney": "Classement des gains",
+    "subtitleMoney": "Chaque cedi compte. Où vous situez-vous ?",
+    "emptyMoney": "Personne n’a encore gagné de commission sur cette période.",
+    "onlyPodiumMoney": "Seules les premières places ont des gains pour l’instant."
   },
   "games": {
     "title": "Jeux",
@@ -3755,18 +3764,7 @@
     },
     "board": {
       "back": "Tableau de bord",
-      "title": "Classement des gains",
-      "subtitle": "Qui a gagné le plus de commissions. De vrais cedis, pas des points.",
-      "periodLabel": "Choisir une période",
-      "period": {
-        "week": "Cette semaine",
-        "month": "Ce mois-ci",
-        "all": "Depuis le début"
-      },
-      "you": "Vous êtes",
-      "place": "n°{rank}",
-      "unranked": "Vous n’êtes pas encore au classement sur cette période. Toute commission validée vous y place.",
-      "empty": "Personne n’a gagné de commission sur cette période."
+      "yourEarnings": "{amount} gagnés sur cette période"
     },
     "tasks": {
       "back": "Tableau de bord",

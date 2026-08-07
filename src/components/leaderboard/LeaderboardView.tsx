@@ -6,6 +6,7 @@ import { Crown, Minus, TrendingDown, TrendingUp } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import { Avatar } from '@/components/profile/Avatar'
+import { cedis } from '@/lib/market/money'
 import { cn } from '@/lib/cn'
 import type {
   LeaderboardData,
@@ -74,9 +75,35 @@ function MovementMark({ movement, label }: { movement: Movement; label: string }
   )
 }
 
-export function LeaderboardView({ data }: { data: LeaderboardData }) {
+export function LeaderboardView({
+  data,
+  unit = 'points',
+}: {
+  data: LeaderboardData
+  /**
+   * Which board this is. Points for the ads side, cedis of cleared commission
+   * for the affiliate side.
+   *
+   * ⚠️ A STRING, not a formatter. Functions cannot be passed from a server
+   * component to a client one, which is how the first version of this returned
+   * a 500 on every render.
+   *
+   * Nothing else is skinnable, deliberately: the operator asked for the two
+   * boards to be the same board (2026-08-07), so the podium, the medals, the
+   * movement arrows and the jump-to-me button are shared exactly.
+   */
+  unit?: 'points' | 'money'
+}) {
   const t = useTranslations('leaderboard')
   const format = useFormatter()
+
+  const score = (value: number) => (unit === 'money' ? cedis(value) : format.number(value))
+  /* The four strings that name the unit. Everything else on this screen reads
+     the same in both businesses, which is the point of sharing it. */
+  const say = (key: 'title' | 'subtitle' | 'empty' | 'onlyPodium') =>
+    unit === 'money' ? t(`${key}Money`) : t(key)
+  const standing = (value: number) =>
+    unit === 'money' ? t('yourEarnings', { amount: score(value) }) : t('yourPoints', { points: score(value) })
 
   const [period, setPeriod] = useState<LeaderboardPeriod>('week')
   const board = data.boards[period]
@@ -117,9 +144,9 @@ export function LeaderboardView({ data }: { data: LeaderboardData }) {
     <div ref={boardRef} className="mx-auto w-full max-w-3xl px-1 pb-28 pt-2 md:pb-10">
       <header className="animate-rise text-center">
         <h1 className="text-[1.375rem] font-semibold tracking-[-0.01em] text-ink-900">
-          {t('title')}
+          {say('title')}
         </h1>
-        <p className="mt-1 text-[0.875rem] text-ink-500">{t('subtitle')}</p>
+        <p className="mt-1 text-[0.875rem] text-ink-500">{say('subtitle')}</p>
       </header>
 
       {/* Period tabs — same segmented idiom as Ads and Notifications. */}
@@ -153,7 +180,7 @@ export function LeaderboardView({ data }: { data: LeaderboardData }) {
 
       {board.rows.length === 0 ? (
         <p className="mt-10 rounded-(--radius-panel) border border-dashed border-ink-200 px-6 py-12 text-center text-[0.875rem] text-ink-500">
-          {t('empty')}
+          {say('empty')}
         </p>
       ) : (
         <>
@@ -211,7 +238,7 @@ export function LeaderboardView({ data }: { data: LeaderboardData }) {
                     {row.userId === data.meId ? t('you') : row.name}
                   </span>
                   <span className="mt-0.5 flex items-center gap-1 text-[0.75rem] font-medium tabular-nums text-ink-500">
-                    {format.number(row.points)}
+                    {score(row.points)}
                     <MovementMark
                       movement={row.movement}
                       label={movementLabel(row.movement, row.previousRank, row.rank)}
@@ -231,7 +258,7 @@ export function LeaderboardView({ data }: { data: LeaderboardData }) {
           >
             {rest.length === 0 ? (
               <p className="px-4 py-8 text-center text-[0.8125rem] text-ink-500">
-                {t('onlyPodium')}
+                {say('onlyPodium')}
               </p>
             ) : (
               <ol>
@@ -243,7 +270,7 @@ export function LeaderboardView({ data }: { data: LeaderboardData }) {
                     flash={flashMe && row.userId === data.meId}
                     youLabel={t('you')}
                     movementLabel={movementLabel(row.movement, row.previousRank, row.rank)}
-                    points={format.number(row.points)}
+                    points={score(row.points)}
                   />
                 ))}
               </ol>
@@ -278,7 +305,7 @@ export function LeaderboardView({ data }: { data: LeaderboardData }) {
                 })}
               </span>
               <span className="block text-[0.75rem] tabular-nums text-white/75">
-                {t('yourPoints', { points: format.number(board.standing.points) })}
+                {standing(board.standing.points)}
               </span>
             </span>
             <button

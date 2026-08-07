@@ -8,6 +8,7 @@ import { getViewAsSession } from '@/lib/admin/view-as'
 import { getSessionUser } from '@/lib/auth/session'
 import { reportUnexpected } from '@/lib/observability/report'
 import { createAdminClient } from '@/lib/supabase/admin'
+import type { PlayResult } from '@/lib/games/types'
 
 /**
  * One play of an affiliate game.
@@ -83,4 +84,43 @@ function humanise(message: string): string {
   const clean = message.trim()
   if (!clean || /violates|constraint|duplicate key|syntax error/i.test(clean)) return GENERIC
   return clean
+}
+
+/**
+ * The same play, in the shape the shared wheel and box expect.
+ *
+ * `PlayResult` is the ads engine's vocabulary and the components speak it. The
+ * adapter is here rather than in the component so that exactly one file knows
+ * that `value` carries pesewas on this side of the app.
+ */
+export async function playAffiliateGameForBoard(
+  game: 'mystery_box' | 'spin_wheel',
+): Promise<PlayResult> {
+  const outcome = await playAffiliateGame({ game })
+
+  if (!outcome.ok) {
+    /* The components render `errors.<reason>` out of the games namespace, so
+       the refusals map onto the ones that already have wording. */
+    const reason: Extract<PlayResult, { ok: false }>['reason'] = /not open yet/i.test(
+      outcome.message,
+    )
+      ? 'games_disabled'
+      : /no plays left/i.test(outcome.message)
+        ? 'no_plays_left'
+        : /not an affiliate/i.test(outcome.message)
+          ? 'account_disabled'
+          : /no prizes/i.test(outcome.message)
+            ? 'no_prizes_configured'
+            : 'error'
+    return { ok: false, reason }
+  }
+
+  return {
+    ok: true,
+    slot: outcome.slot,
+    label: outcome.label,
+    value: outcome.amountMinor,
+    extraPlays: outcome.extraPlays,
+    remaining: outcome.left,
+  }
 }

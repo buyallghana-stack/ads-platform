@@ -4,6 +4,7 @@ import { useFormatter, useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/Button'
 import { Link } from '@/i18n/navigation'
+import type { GameSkin } from '@/lib/games/types'
 import { cn } from '@/lib/cn'
 
 /**
@@ -17,17 +18,20 @@ import { cn } from '@/lib/cn'
  */
 export function PrizeReveal({
   label,
-  points,
+  value,
   extraPlays,
   remaining,
   colour,
+  skin,
   onAgain,
 }: {
   label: string
-  points: number
+  /** Points or pesewas; `skin.formatValue` is what knows which. */
+  value: number
   extraPlays: number
   remaining: number
   colour: string
+  skin: GameSkin
   onAgain: () => void
 }) {
   const t = useTranslations('games')
@@ -56,9 +60,11 @@ export function PrizeReveal({
           ("300 points"), so printing "+300 points" underneath just says the
           same thing twice; the credit line is worth showing when the label is
           a name rather than a number ("Jackpot", "Extra play"). */}
-      {points > 0 && !label.replace(/[,\s]/g, '').includes(String(points)) && (
+      {value > 0 && !label.replace(/[,\s]/g, '').includes(String(value)) && (
         <p className="mt-1 text-[0.9375rem] font-medium text-success-600">
-          +{format.number(points)} {t('reveal.points')}
+          {skin.unit === 'points'
+            ? `+${format.number(value)} ${t('reveal.points')}`
+            : `+${skin.formatValue(value)}`}
         </p>
       )}
       {extraPlays > 0 && (
@@ -77,14 +83,14 @@ export function PrizeReveal({
              allowance, and the honest next step is the plan that grants more. */
           <>
             <p className={cn('text-[0.8125rem] text-ink-500')}>{t('reveal.spent')}</p>
-            <Link href="/upgrade" className="block">
+            <Link href={skin.moreHref} className="block">
               <Button size="lg" fullWidth>
                 {t('reveal.upgrade')}
               </Button>
             </Link>
           </>
         )}
-        <Link href="/games" className="block">
+        <Link href={skin.hubHref} className="block">
           <button
             type="button"
             className="w-full text-[0.8125rem] font-medium text-brand-700 hover:text-brand-800"

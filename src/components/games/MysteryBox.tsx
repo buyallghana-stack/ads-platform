@@ -4,9 +4,9 @@ import { useState, useTransition } from 'react'
 
 import { useTranslations } from 'next-intl'
 
-import { playGame } from '@/app/[locale]/(app)/games/actions'
 import { PrizeReveal } from '@/components/games/PrizeReveal'
 import { cn } from '@/lib/cn'
+import { GAME_SKINS, type SkinName } from '@/lib/games/skins'
 import type { GameFace, GameStatus, PlayResult } from '@/lib/games/types'
 
 /**
@@ -40,10 +40,15 @@ const BOX_HUES = [
 export function MysteryBox({
   faces,
   status,
+  skin: skinName = 'ads',
 }: {
   faces: GameFace[]
   status: GameStatus
+  /** A NAME, not a skin: functions cannot cross the server boundary. Defaults
+   *  to the points games, so the ads side reads exactly as before. */
+  skin?: SkinName
 }) {
+  const skin = GAME_SKINS[skinName]
   const t = useTranslations('games')
 
   const [remaining, setRemaining] = useState(status.remaining)
@@ -60,7 +65,7 @@ export function MysteryBox({
     setError(null)
 
     startTransition(async () => {
-      const outcome = await playGame('mystery_box')
+      const outcome = await skin.play('mystery_box')
       if (!outcome.ok) {
         setPicked(null)
         setError(t(`errors.${outcome.reason}`))
@@ -90,10 +95,11 @@ export function MysteryBox({
     return (
       <PrizeReveal
         label={won.label}
-        points={won.points}
+        value={won.value}
         extraPlays={won.extraPlays}
         remaining={remaining}
         colour={wonColour}
+        skin={skin}
         onAgain={again}
       />
     )

@@ -1,5 +1,13 @@
 import 'server-only'
 
+import type { GameFace } from '@/lib/games/types'
+import {
+  LEADERBOARD_PERIODS,
+  type LeaderboardData,
+  type LeaderboardPeriod,
+  type PeriodBoard,
+} from '@/lib/leaderboard/types'
+import { avatarPublicUrl } from '@/lib/profile/avatar'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
@@ -20,6 +28,8 @@ const n = (v: unknown) => Number(v ?? 0)
 /* ------------------------------------------------------------------ */
 /* Games                                                               */
 /* ------------------------------------------------------------------ */
+
+export type AffiliateGame = 'mystery_box' | 'spin_wheel'
 
 export type AffiliateGameStatus = {
   /** `affiliate_games_enabled`. Off means the screen explains itself. */
@@ -54,11 +64,35 @@ export async function getAffiliateGameStatus(userId: string): Promise<AffiliateG
   }
 }
 
+/**
+ * The faces of a game: what the wheel draws and what the boxes hide.
+ *
+ * Returned in the ads engine's `GameFace` shape so the shared components can
+ * render it, with `value` carrying PESEWAS here. The weights are not in the
+ * result and never should be, for the same reason they are absent from
+ * `get_game_board`: a player who can read the odds knows which box to pick.
+ */
+export async function getAffiliateGameBoard(game: AffiliateGame): Promise<GameFace[]> {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase.rpc('affiliate_game_board', { p_game: game })
+  if (error || !data) return []
+
+  return (data as unknown as Record<string, unknown>[]).map((r) => ({
+    slot: n(r.slot),
+    label: String(r.label ?? ''),
+    value: n(r.amount_minor),
+    extraPlays: n(r.extra_plays),
+    colour: (r.colour as string | null) ?? '#7c3aed',
+  }))
+}
+
 /* ------------------------------------------------------------------ */
 /* Leaderboard                                                         */
 /* ------------------------------------------------------------------ */
 
-export type LeaderboardPeriod = 'week' | 'month' | 'all'
+/* Re-exported so callers keep importing periods from one place. The four
+   are the ads board's four, so the tab strip matches. */
+export type { LeaderboardPeriod }
 
 export type AffiliateBoardRow = {
   rank: number
@@ -116,6 +150,53 @@ export async function getAffiliateStanding(
     amountMinor: n(raw.amount_minor),
     movement: (raw.movement as AffiliateBoardRow['movement']) ?? 'same',
   }
+}
+
+/**
+ * The affiliate board in the SHAPE THE SHARED VIEW EXPECTS.
+ *
+ * `LeaderboardData` is the ads engine's vocabulary and `LeaderboardView`
+ * speaks it, so the affiliate board is mapped into it here: `points` carries
+ * PESEWAS, and the view is told how to write them. That keeps one podium, one
+ * set of movement arrows and one jump-to-me button across both businesses,
+ * which is what the operator asked for.
+ *
+ * `previousRank` is not returned by the affiliate function, and rather than
+ * invent one the movement string it does return is used directly, which is all
+ * the view needs to draw the arrow.
+ */
+export async function getAffiliateLeaderboardData(userId: string): Promise<LeaderboardData> {
+  const boards = {} as Record<LeaderboardPeriod, PeriodBoard>
+
+  await Promise.all(
+    LEADERBOARD_PERIODS.map(async (period) => {
+      const rows = await getAffiliateLeaderboard(period)
+      const mine = rows.find((r) => r.userId === userId)
+
+      boards[period] = {
+        rows: rows.map((r) => ({
+          rank: r.rank,
+          userId: r.userId,
+          name: r.name || 'Someone',
+          avatarUrl: avatarPublicUrl(r.avatarPath),
+          points: r.amountMinor,
+          previousRank: null,
+          movement: r.movement,
+        })),
+        standing: mine
+          ? {
+              rank: mine.rank,
+              points: mine.amountMinor,
+              previousRank: null,
+              movement: mine.movement,
+              totalRanked: rows.length,
+            }
+          : null,
+      }
+    }),
+  )
+
+  return { meId: userId, boards }
 }
 
 /* ------------------------------------------------------------------ */

@@ -187,7 +187,7 @@ function PrizeTable({ game, initial }: { game: AffiliateGame; initial: AdminAffi
         <table className="w-full min-w-[40rem] text-left">
           <thead>
             <tr className="border-b border-ink-200">
-              {['slot', 'label', 'amount', 'extra', 'weight', 'odds', 'active'].map((key) => (
+              {['slot', 'label', 'amount', 'extra', 'weight', 'odds', 'colour', 'won', 'active'].map((key) => (
                 <th
                   key={key}
                   className="px-2 py-2 text-[0.6875rem] font-medium tracking-[0.04em] text-ink-400 uppercase"
@@ -250,6 +250,21 @@ function PrizeTable({ game, initial }: { game: AffiliateGame; initial: AdminAffi
                   </td>
                   <td className="px-2 py-2 text-[0.8125rem] tabular-nums text-ink-600">
                     {odds.toFixed(1)}%
+                  </td>
+                  <td className="px-2 py-2">
+                    {/* The wheel draws its wedges in these colours, so this is
+                        not decoration: a prize with no colour renders as the
+                        fallback violet and every wedge looks the same. */}
+                    <input
+                      type="color"
+                      aria-label={t('col.colour')}
+                      value={row.colour ?? '#7c3aed'}
+                      onChange={(e) => update(row.slot, { colour: e.target.value })}
+                      className="h-8 w-12 cursor-pointer rounded border border-ink-200 bg-canvas"
+                    />
+                  </td>
+                  <td className="px-2 py-2 text-[0.75rem] tabular-nums whitespace-nowrap text-ink-500">
+                    {row.timesWon} · {cedis(row.paidMinor)}
                   </td>
                   <td className="px-2 py-2">
                     <input

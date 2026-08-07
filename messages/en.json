@@ -2847,7 +2847,9 @@
         "hint": "One shared pool across both games. A user holding several plans gets the highest of them, not the total. Change that with game_plays_combine_mode in Platform settings.",
         "free": "Free",
         "playsFor": "Weekly plays for {plan}"
-      }
+      },
+      "affiliateNote": "These prizes pay points, for people watching ads. The affiliate business runs the same two games and pays cedis, with its own table.",
+      "affiliateLink": "Affiliate prizes"
     },
     "tasks": {
       "title": "Tasks",
@@ -3110,7 +3112,9 @@
         "extra": "Extra plays",
         "weight": "Weight",
         "odds": "Odds",
-        "active": "Active"
+        "active": "Active",
+        "colour": "Colour",
+        "won": "Won · paid"
       },
       "unsaved": "Nothing is saved yet.",
       "discard": "Discard",
@@ -3243,7 +3247,12 @@
       "down": "Down {places} {places, plural, one {place} other {places}}",
       "same": "No change",
       "new": "New on the board"
-    }
+    },
+    "yourEarnings": "{amount} earned this period",
+    "titleMoney": "Earnings board",
+    "subtitleMoney": "Every cedi counts. Where do you stand?",
+    "emptyMoney": "Nobody has earned commission in this period yet.",
+    "onlyPodiumMoney": "Only the top places have earnings so far."
   },
   "games": {
     "title": "Games",
@@ -3755,18 +3764,7 @@
     },
     "board": {
       "back": "Dashboard",
-      "title": "Earnings board",
-      "subtitle": "Who has earned the most commission. Real cedis, not points.",
-      "periodLabel": "Choose a period",
-      "period": {
-        "week": "This week",
-        "month": "This month",
-        "all": "All time"
-      },
-      "you": "You are",
-      "place": "#{rank}",
-      "unranked": "You are not on the board for this period yet. Any commission that clears puts you on it.",
-      "empty": "Nobody has earned commission in this period yet."
+      "yourEarnings": "{amount} earned this period"
     },
     "tasks": {
       "back": "Dashboard",

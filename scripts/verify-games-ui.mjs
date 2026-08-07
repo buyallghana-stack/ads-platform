@@ -42,6 +42,7 @@ let browser = null
 let userId = null
 let switchedOn = false
 let originalGap = '3'
+let originalGamesEnabled = 'false'
 
 await db.connect()
 
@@ -77,6 +78,18 @@ try {
     [userId],
   )
 
+  /* ⚠️ CAPTURE FIRST, THEN FORCE. Both of the next two sections used to read
+     whatever the operator had left the switch on, so the day they turned the
+     games on this script reported two failures that were nothing to do with
+     the code. What is under test is the behaviour when the switch is off, so
+     the script closes it rather than hoping. */
+  const { rows: switchBefore } = await db.query(
+    `select value from public.app_config where key = 'games_enabled'`,
+  )
+  originalGamesEnabled = switchBefore[0]?.value ?? 'false'
+  switchedOn = true
+  await db.query(`update public.app_config set value = 'false' where key = 'games_enabled'`)
+
   // ---- With the switch OFF the games must not exist ------------------------
   browser = await chromium.launch()
   const offCtx = await browser.newContext({ viewport: { width: 390, height: 844 } })
@@ -110,6 +123,7 @@ try {
     `select value from public.app_config where key = 'game_min_seconds_between_plays'`,
   )
   originalGap = before[0]?.value ?? '3'
+
   await db.query(`update public.app_config set value = 'true' where key = 'games_enabled'`)
   await db.query(
     `update public.app_config set value = '0' where key = 'game_min_seconds_between_plays'`,
@@ -130,8 +144,19 @@ try {
   check('the Games tile opens the hub once enabled', true, page.url())
   await shoot(page, 'games-hub-mobile')
 
+  /* Read from the plan rather than written into the assertion: the operator
+     tunes `weekly_game_plays` in the admin, and a literal here goes red for
+     that alone. */
+  const { rows: planRows } = await db.query(
+    `select weekly_game_plays from public.tiers where slug = 'platinum'`,
+  )
+  const expectedPlays = Number(planRows[0]?.weekly_game_plays ?? 0)
   const hubText = await page.locator('body').innerText()
-  check('the hub states the shared allowance', /5 plays left/i.test(hubText), hubText.split('\n').find((l) => /plays left/i.test(l)) ?? 'not found')
+  check(
+    'the hub states the shared allowance the plan grants',
+    new RegExp(`${expectedPlays} plays? left`, 'i').test(hubText),
+    hubText.split('\n').find((l) => /plays left/i.test(l)) ?? 'not found',
+  )
 
   // ---- Mystery box --------------------------------------------------------
   await page.getByRole('link', { name: /mystery box/i }).click()
@@ -241,7 +266,9 @@ try {
   if (browser) await browser.close()
   try {
     if (switchedOn) {
-      await db.query(`update public.app_config set value = 'false' where key = 'games_enabled'`)
+      await db.query(`update public.app_config set value = $1 where key = 'games_enabled'`, [
+        originalGamesEnabled,
+      ])
       await db.query(`update public.app_config set value = $1 where key = 'game_min_seconds_between_plays'`, [
         originalGap,
       ])
@@ -272,8 +299,15 @@ try {
       `cleanup: games_enabled=${state.games}, ${state.users} user(s), ${state.plays} play(s), ` +
         `${state.disabled_triggers} disabled trigger(s)`,
     )
-    // The switch is the one that matters: leaving it on is a live lottery.
-    if (state.games !== 'false' || state.users !== 0 || state.disabled_triggers !== 0) {
+    /* The switch is the one that matters, and what matters about it is that
+       it reads exactly as it did before this run. Asserting `false` here was
+       the same mistake as restoring `false`: it called a correctly restored
+       live switch a failure. */
+    if (
+      state.games !== originalGamesEnabled ||
+      state.users !== 0 ||
+      state.disabled_triggers !== 0
+    ) {
       console.error('CLEANUP INCOMPLETE — check the switch and the fixtures')
       process.exitCode = 1
     }

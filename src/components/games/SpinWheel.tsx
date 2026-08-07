@@ -4,9 +4,9 @@ import { useRef, useState, useTransition } from 'react'
 
 import { useTranslations } from 'next-intl'
 
-import { playGame } from '@/app/[locale]/(app)/games/actions'
 import { PrizeReveal } from '@/components/games/PrizeReveal'
 import { Button } from '@/components/ui/Button'
+import { GAME_SKINS, type SkinName } from '@/lib/games/skins'
 import { cn } from '@/lib/cn'
 import type { GameFace, GameStatus, PlayResult } from '@/lib/games/types'
 
@@ -29,7 +29,18 @@ import type { GameFace, GameStatus, PlayResult } from '@/lib/games/types'
  * angle ALWAYS increases so the wheel never appears to spin backwards between
  * plays.
  */
-export function SpinWheel({ faces, status }: { faces: GameFace[]; status: GameStatus }) {
+export function SpinWheel({
+  faces,
+  status,
+  skin: skinName = 'ads',
+}: {
+  faces: GameFace[]
+  status: GameStatus
+  /** A NAME, not a skin: functions cannot cross the server boundary. Defaults
+   *  to the points games, so the ads side reads exactly as before. */
+  skin?: SkinName
+}) {
+  const skin = GAME_SKINS[skinName]
   const t = useTranslations('games')
 
   const [remaining, setRemaining] = useState(status.remaining)
@@ -51,7 +62,7 @@ export function SpinWheel({ faces, status }: { faces: GameFace[]; status: GameSt
     setError(null)
 
     startTransition(async () => {
-      const outcome = await playGame('spin_wheel')
+      const outcome = await skin.play('spin_wheel')
       if (!outcome.ok) {
         setError(t(`errors.${outcome.reason}`))
         return
@@ -90,10 +101,11 @@ export function SpinWheel({ faces, status }: { faces: GameFace[]; status: GameSt
     return (
       <PrizeReveal
         label={won.label}
-        points={won.points}
+        value={won.value}
         extraPlays={won.extraPlays}
         remaining={remaining}
         colour={faces.find((f) => f.slot === won.slot)?.colour ?? '#2563eb'}
+        skin={skin}
         onAgain={again}
       />
     )
@@ -165,7 +177,7 @@ export function SpinWheel({ faces, status }: { faces: GameFace[]; status: GameSt
                   transform={`rotate(${index * wedge + wedge / 2} ${100 + 62 * Math.cos(mid)} ${100 + 62 * Math.sin(mid)})`}
                   style={{ paintOrder: 'stroke', stroke: 'rgb(0 0 0 / 0.25)', strokeWidth: 2 }}
                 >
-                  {face.points > 0 ? face.points.toLocaleString() : '+1'}
+                  {skin.formatWedge(face.value)}
                 </text>
               </g>
             )

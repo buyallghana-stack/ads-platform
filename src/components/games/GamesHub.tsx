@@ -11,20 +11,32 @@ import type { GameStatus } from '@/lib/games/types'
  * shared pool across both games (operator's choice) — showing it per game
  * would imply two allowances.
  */
-export async function GamesHub({ status }: { status: GameStatus }) {
+export async function GamesHub({
+  status,
+  hubHref = '/games',
+}: {
+  status: GameStatus
+  /**
+   * Which business's hub this is. The affiliate side renders the same two
+   * cards, the same allowance strip and the same fairness note; only the
+   * destinations differ, because a hub that looked different would be the
+   * first place the two games started drifting apart.
+   */
+  hubHref?: string
+}) {
   const t = await getTranslations('games')
   const format = await getFormatter()
 
   const games = [
     {
-      href: '/games/mystery-box',
+      href: `${hubHref}/mystery-box`,
       key: 'box',
       Icon: Gift,
       from: '#7c3aed',
       to: '#c026d3',
     },
     {
-      href: '/games/wheel',
+      href: `${hubHref}/wheel`,
       key: 'wheel',
       Icon: Ticket,
       from: '#0ea5e9',

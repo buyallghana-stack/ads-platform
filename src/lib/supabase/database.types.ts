@@ -4665,6 +4665,16 @@ export type Database = {
         Args: { p_admin_id: string; p_task_id: string }
         Returns: string
       }
+      affiliate_game_board: {
+        Args: { p_game: string }
+        Returns: {
+          slot: number
+          label: string
+          amount_minor: number
+          extra_plays: number
+          colour: string | null
+        }[]
+      }
       affiliate_game_status: { Args: { p_user_id: string }; Returns: Json }
       affiliate_leaderboard: {
         Args: { p_limit?: number; p_period?: string }

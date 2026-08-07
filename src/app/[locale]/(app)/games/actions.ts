@@ -54,7 +54,7 @@ export async function playGame(game: GameKind): Promise<PlayResult> {
       ok: true,
       slot: Number(result.slot ?? 1),
       label: String(result.label ?? ''),
-      points: Number(result.points ?? 0),
+      value: Number(result.points ?? 0),
       extraPlays: Number(result.extra_plays ?? 0),
       remaining: Number(result.remaining ?? 0),
     }
