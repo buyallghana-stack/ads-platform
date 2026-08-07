@@ -4618,6 +4618,53 @@ export type Database = {
           created_at: string
         }
       }
+      admin_list_affiliate_prizes: {
+        Args: { p_admin_id: string; p_game: string }
+        Returns: {
+          id: string
+          slot: number
+          label: string
+          amount_minor: number
+          extra_plays: number
+          weight: number
+          colour: string | null
+          weekly_cap: number | null
+          is_active: boolean
+          times_won: number
+          paid_minor: number
+        }[]
+      }
+      admin_save_affiliate_prizes: {
+        Args: { p_admin_id: string; p_game: string; p_prizes: Json }
+        Returns: number
+      }
+      admin_list_affiliate_tasks: {
+        Args: { p_admin_id: string }
+        Returns: {
+          id: string
+          code: string
+          name: string
+          description: string | null
+          metric: string
+          target: number
+          reward_minor: number
+          icon: string | null
+          sort_order: number
+          is_active: boolean
+          claimed_count: number
+          paid_minor: number
+          eligible_now: number
+        }[]
+      }
+      admin_affiliate_task_exposure: {
+        Args: { p_admin_id: string; p_metric: string; p_target: number; p_task_id?: string }
+        Returns: Json
+      }
+      admin_save_affiliate_task: { Args: { p_admin_id: string; p_task: Json }; Returns: string }
+      admin_delete_affiliate_task: {
+        Args: { p_admin_id: string; p_task_id: string }
+        Returns: string
+      }
       affiliate_game_status: { Args: { p_user_id: string }; Returns: Json }
       affiliate_leaderboard: {
         Args: { p_limit?: number; p_period?: string }

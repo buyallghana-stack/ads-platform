@@ -3045,7 +3045,8 @@
       },
       "card": {
         "of": "of {amount}"
-      }
+      },
+      "seeRewards": "Rewards"
     },
     "vendorSales": {
       "title": "Vendor sales",
@@ -3080,6 +3081,73 @@
         "products": "{n} products"
       },
       "note": "These are sales figures, not an amount owed. What a vendor is paid is your licence agreement with them, which this system deliberately does not hold. So nothing here can tell you the figure to send. A sale counts in the period it was confirmed, and a later refund is deducted from that same period."
+    },
+    "affiliateRewards": {
+      "back": "Withdrawals",
+      "title": "Rewards",
+      "description": "What the affiliate games and tasks pay. Every figure here is real cedis.",
+      "gamesOn": "The games are OPEN. A change to this table changes what the next spin can win.",
+      "gamesOff": "The games are switched off, so nothing here can be won yet. Set the table first, then open them under Platform settings.",
+      "tabs": {
+        "prizes": "Game prizes",
+        "tasks": "Tasks"
+      },
+      "game": {
+        "mystery_box": "Mystery box",
+        "spin_wheel": "Spin the wheel"
+      },
+      "economics": {
+        "average": "Average cost of a play",
+        "weight": "Total weight",
+        "extra": "Extra plays per play",
+        "note": "The average is what one play costs the business over many plays, not what the next one costs. Weight is relative: a prize at 10 against a total of 100 comes up a tenth of the time."
+      },
+      "col": {
+        "slot": "Slot",
+        "label": "Label",
+        "amount": "Pays (GHS)",
+        "extra": "Extra plays",
+        "weight": "Weight",
+        "odds": "Odds",
+        "active": "Active"
+      },
+      "unsaved": "Nothing is saved yet.",
+      "discard": "Discard",
+      "save": "Save",
+      "cancel": "Cancel",
+      "savedNote": "Saved.",
+      "newTask": "New task",
+      "edit": "Edit",
+      "editing": "Editing {name}",
+      "remove": "Remove {name}",
+      "inactive": "not active",
+      "archived": "Somebody has already been paid for that one, so it was switched off rather than deleted.",
+      "deleted": "Deleted.",
+      "metric": {
+        "sales": "Sales",
+        "referrals": "Affiliates recruited",
+        "games_played": "Games played",
+        "leaderboard_rank": "Place on the board"
+      },
+      "targetIs": "target {n}",
+      "claimedSoFar": "Claimed {n} times, {amount} paid.",
+      "eligibleNow": "{n} could claim it right now, about {amount}.",
+      "form": {
+        "name": "Name",
+        "icon": "Icon",
+        "description": "Description",
+        "metric": "What it measures",
+        "metricLocked": "This has been claimed, so what it measures can no longer change.",
+        "target": "Target",
+        "rank": "Place to reach",
+        "reward": "Reward (GHS)",
+        "active": "Show it to affiliates"
+      },
+      "exposure": {
+        "ask": "Tasks are retroactive: anybody who already meets the target can claim the moment you save. Check before you do.",
+        "answer": "{n} affiliates could claim this immediately, about {amount} if they all do.",
+        "check": "Check who qualifies"
+      }
     }
   },
   "giftCode": {

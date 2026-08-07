@@ -3045,7 +3045,8 @@
       },
       "card": {
         "of": "sur {amount}"
-      }
+      },
+      "seeRewards": "Récompenses"
     },
     "vendorSales": {
       "title": "Ventes des fournisseurs",
@@ -3080,6 +3081,73 @@
         "products": "{n} produits"
       },
       "note": "Ce sont des chiffres de ventes, pas un montant dû. Ce qu’un fournisseur perçoit relève de votre contrat de licence avec lui, que ce système ne conserve délibérément pas. Rien ici ne peut donc indiquer la somme à envoyer. Une vente compte dans la période où elle a été confirmée, et un remboursement ultérieur est déduit de cette même période."
+    },
+    "affiliateRewards": {
+      "back": "Retraits",
+      "title": "Récompenses",
+      "description": "Ce que paient les jeux et les tâches des affiliés. Chaque montant ici est en cedis réels.",
+      "gamesOn": "Les jeux sont OUVERTS. Modifier cette table change ce que le prochain tour peut gagner.",
+      "gamesOff": "Les jeux sont désactivés : rien ici ne peut encore être gagné. Réglez la table, puis ouvrez-les dans Réglages de la plateforme.",
+      "tabs": {
+        "prizes": "Lots des jeux",
+        "tasks": "Tâches"
+      },
+      "game": {
+        "mystery_box": "Boîte mystère",
+        "spin_wheel": "Roue"
+      },
+      "economics": {
+        "average": "Coût moyen d’une partie",
+        "weight": "Poids total",
+        "extra": "Parties offertes par partie",
+        "note": "La moyenne est ce qu’une partie coûte à l’entreprise sur un grand nombre de parties, pas ce que coûte la prochaine. Le poids est relatif : un lot à 10 sur un total de 100 sort une fois sur dix."
+      },
+      "col": {
+        "slot": "Case",
+        "label": "Libellé",
+        "amount": "Paie (GHS)",
+        "extra": "Parties offertes",
+        "weight": "Poids",
+        "odds": "Chances",
+        "active": "Actif"
+      },
+      "unsaved": "Rien n’est encore enregistré.",
+      "discard": "Annuler les modifications",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "savedNote": "Enregistré.",
+      "newTask": "Nouvelle tâche",
+      "edit": "Modifier",
+      "editing": "Modification de {name}",
+      "remove": "Supprimer {name}",
+      "inactive": "inactive",
+      "archived": "Quelqu’un a déjà été payé pour celle-ci : elle a été désactivée plutôt que supprimée.",
+      "deleted": "Supprimée.",
+      "metric": {
+        "sales": "Ventes",
+        "referrals": "Affiliés recrutés",
+        "games_played": "Parties jouées",
+        "leaderboard_rank": "Place au classement"
+      },
+      "targetIs": "objectif {n}",
+      "claimedSoFar": "Réclamée {n} fois, {amount} versés.",
+      "eligibleNow": "{n} pourraient la réclamer immédiatement, environ {amount}.",
+      "form": {
+        "name": "Nom",
+        "icon": "Icône",
+        "description": "Description",
+        "metric": "Ce qu’elle mesure",
+        "metricLocked": "Elle a déjà été réclamée : ce qu’elle mesure ne peut plus changer.",
+        "target": "Objectif",
+        "rank": "Place à atteindre",
+        "reward": "Récompense (GHS)",
+        "active": "La montrer aux affiliés"
+      },
+      "exposure": {
+        "ask": "Les tâches sont rétroactives : toute personne remplissant déjà l’objectif pourra réclamer dès l’enregistrement. Vérifiez avant.",
+        "answer": "{n} affiliés pourraient la réclamer immédiatement, environ {amount} si tous le font.",
+        "check": "Vérifier qui remplit l’objectif"
+      }
     }
   },
   "giftCode": {

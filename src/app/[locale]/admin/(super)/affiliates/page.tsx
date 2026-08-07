@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/admin/AdminChrome'
 import { CommissionQueue } from '@/components/admin/CommissionQueue'
 import { getCommissionPayouts, getCommissionTotals } from '@/lib/admin/data/affiliates'
 import { getPlatformConfig } from '@/lib/admin/data/config'
+import { serverNow } from '@/lib/server-now'
 
 export const metadata: Metadata = {
   title: 'Admin · Affiliates',
@@ -47,10 +48,10 @@ export default async function AdminAffiliatesPage({
         initial={payouts}
         totals={totals}
         payoutsEnabled={config.values.affiliate_payouts_enabled === true}
-        /* One clock for both renders. `Date.now()` in a Server Component is
-           this repo's pattern for handing a stable now to a client one — the
-           alternative is a hydration error over "3 hours ago". */
-        serverNow={Date.now()}
+        /* One clock for both renders, via the repo's own helper: a raw
+           `Date.now()` here is what `react-hooks/purity` rejects, and
+           `serverNow()` is where that reasoning is written down. */
+        serverNow={serverNow()}
       />
     </>
   )

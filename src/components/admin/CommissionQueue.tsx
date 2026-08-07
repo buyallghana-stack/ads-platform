@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
 
-import { AlertTriangle, Check, Coins, PanelRight, Smartphone, Users, X } from 'lucide-react'
+import { AlertTriangle, Check, Coins, Gift, PanelRight, Smartphone, Users, X } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import {
@@ -224,13 +224,22 @@ export function CommissionQueue({
         onQuery={setQuery}
         searchPlaceholder={t('searchPlaceholder')}
         actions={
-          <Link
-            href="/admin/affiliates/people"
-            className="inline-flex shrink-0 items-center gap-2 rounded-(--radius-input) border border-ink-300 px-3 py-2 text-[0.8125rem] font-semibold text-ink-700 transition-colors hover:border-ink-400"
-          >
-            <Users aria-hidden className="size-4" />
-            {t('seeAffiliates')}
-          </Link>
+          <>
+            <Link
+              href="/admin/affiliates/rewards"
+              className="inline-flex shrink-0 items-center gap-2 rounded-(--radius-input) border border-ink-300 px-3 py-2 text-[0.8125rem] font-semibold text-ink-700 transition-colors hover:border-ink-400"
+            >
+              <Gift aria-hidden className="size-4" />
+              {t('seeRewards')}
+            </Link>
+            <Link
+              href="/admin/affiliates/people"
+              className="inline-flex shrink-0 items-center gap-2 rounded-(--radius-input) border border-ink-300 px-3 py-2 text-[0.8125rem] font-semibold text-ink-700 transition-colors hover:border-ink-400"
+            >
+              <Users aria-hidden className="size-4" />
+              {t('seeAffiliates')}
+            </Link>
+          </>
         }
       />
 
