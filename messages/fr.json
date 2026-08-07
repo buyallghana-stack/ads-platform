@@ -3327,6 +3327,63 @@
       "passedBody": "Vous avez obtenu {n} %. Cette leçon est marquée comme terminée.",
       "failedTitle": "Pas encore",
       "failedBody": "Vous avez obtenu {n} %. Relisez la leçon et réessayez — le nombre de tentatives est illimité."
+    },
+    "withdraw": {
+      "back": "Gains",
+      "title": "Retirer vos commissions",
+      "subtitle": "De vrais cédis, envoyés là où va votre argent.",
+      "amountLabel": "Combien voulez-vous retirer ?",
+      "all": "Tout",
+      "available": "Disponible {amount}",
+      "minimum": "Minimum {amount}",
+      "errTooSmall": "Le minimum de retrait est {amount}.",
+      "errTooBig": "Vous ne disposez que de {amount} pour le moment.",
+      "requested": "Demandé",
+      "fee": "Frais",
+      "feeAt": "Frais ({percent} %)",
+      "youGet": "Vous recevez",
+      "sendingTo": "Envoyé vers",
+      "change": "Modifier",
+      "cooloffNote": "Si vous changez la destination, les retraits sont suspendus 48 heures. Cela protège votre solde si quelqu’un accède à votre compte.",
+      "continue": "Continuer",
+      "confirmTitle": "Envoyer {amount} ?",
+      "pinLabel": "Saisissez votre code de retrait à 4 chiffres",
+      "confirm": "Confirmer le retrait",
+      "editAmount": "Modifier le montant",
+      "pinWrong": "Ce code est incorrect. {n} tentatives restantes.",
+      "pinLocked": "Trop de codes erronés. Réessayez dans un moment.",
+      "pinMissing": "Vous n’avez pas encore défini de code de retrait.",
+      "setPin": "Définir votre code",
+      "failed": "Cela n’a pas abouti. Rien n’a quitté votre solde.",
+      "alreadyOpen": "Vous avez déjà un retrait en attente. Vous pourrez en demander un autre une fois celui-ci payé ou refusé.",
+      "blocked": {
+        "closed": {
+          "title": "Les retraits ne sont pas ouverts",
+          "body": "Les retraits de commissions ne sont pas encore activés. Votre solde est en sécurité et n’expire pas."
+        },
+        "noDestination": {
+          "title": "Indiquez où l’envoyer",
+          "body": "Ajoutez un numéro mobile money ou un portefeuille avant de retirer.",
+          "cta": "Ajouter les coordonnées"
+        },
+        "nothing": {
+          "title": "Rien à retirer pour l’instant",
+          "body": "Dès qu’une commission est validée, elle apparaît ici prête à être retirée."
+        },
+        "openRequest": {
+          "title": "Vous en avez déjà un en cours",
+          "body": "Un retrait à la fois. Dès que celui-ci est payé ou refusé, vous pourrez en demander un autre.",
+          "cta": "Voir où il en est"
+        }
+      },
+      "done": {
+        "title": "Retrait demandé",
+        "body": "Il est en file d’attente. Vous recevrez une notification une fois envoyé.",
+        "reference": "Référence",
+        "youGet": "Vous recevez",
+        "inCoin": "En {coin}",
+        "back": "Retour aux gains"
+      }
     }
   }
 }

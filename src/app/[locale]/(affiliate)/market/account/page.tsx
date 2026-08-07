@@ -162,7 +162,9 @@ export default async function AffiliateAccountPage({
         </p>
         <ul className="divide-y divide-ink-200">
           {[
-            { href: '/profile/payout-details', key: 'payoutDetails', Icon: ShieldCheck },
+            /* `/profile/payout` — `/profile/payout-details` was shipped here and 404s;
+               the route it means is the Phase 1 one. */
+            { href: '/profile/payout', key: 'payoutDetails', Icon: ShieldCheck },
             { href: '/profile', key: 'profile', Icon: UserRound },
           ].map(({ href, key, Icon }) => (
             <li key={key}>

@@ -19,7 +19,7 @@ import { cn } from '@/lib/cn'
  *
  * Same five destinations either way, so muscle memory transfers between a
  * phone and a laptop. Active state is by route prefix, not equality, so
- * /profile/payout-details still lights up Profile.
+ * /profile/payout still lights up Profile.
  *
  * FIVE, since 2026-07-31: Team was added between Upgrade and Profile at the
  * operator's instruction. Five is the ceiling both platform guidelines give

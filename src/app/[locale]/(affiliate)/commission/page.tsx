@@ -120,8 +120,14 @@ export default async function CommissionPage({
 
         <div className="mt-5 border-t border-ink-200 pt-4">
           {canRequest ? (
+            /* ⚠️ `/commission/withdraw`, NOT `/withdraw`.
+               This pointed at the POINTS withdrawal for a day — different
+               money, different balance, different minimum, different ledger,
+               and exactly the mixing D27 exists to prevent. It was invisible
+               because `affiliate_payouts_enabled` is false so the button never
+               rendered; it would have fired the moment payouts opened. */
             <Link
-              href="/withdraw"
+              href="/commission/withdraw"
               className="inline-flex items-center gap-2 rounded-(--radius-input) bg-brand-600 px-5 py-3 text-[0.875rem] font-semibold text-white transition-colors hover:bg-brand-500"
             >
               <Banknote aria-hidden className="size-4" />

@@ -4489,6 +4489,24 @@ export type Database = {
       affiliate_dashboard: { Args: { p_user_id: string }; Returns: Json }
       affiliate_performance: { Args: { p_days?: number; p_user_id: string }; Returns: Json }
       affiliate_statement: { Args: { p_limit?: number; p_user_id: string }; Returns: Json }
+      request_commission_payout: {
+        Args: { p_amount_minor: number; p_user_id: string }
+        Returns: {
+          id: string
+          affiliate_id: string
+          user_id: string
+          method: string
+          amount_minor: number
+          fee_percent: number
+          fee_minor: number
+          net_minor: number
+          currency_code: string
+          snapshot_coin_code: string | null
+          coin_amount: number | null
+          status: string
+          created_at: string
+        }
+      }
       lesson_for_learner: { Args: { p_lesson_id: string; p_user_id: string }; Returns: Json }
       affiliate_depth_now: { Args: { p_affiliate_id: string }; Returns: number }
       affiliate_earnings_by_year: {

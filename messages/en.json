@@ -3327,6 +3327,63 @@
       "passedBody": "You scored {n}%. This lesson is marked complete.",
       "failedTitle": "Not quite",
       "failedBody": "You scored {n}%. Go back over the lesson and try again — there is no limit on attempts."
+    },
+    "withdraw": {
+      "back": "Earnings",
+      "title": "Withdraw commission",
+      "subtitle": "Real cedis, straight to where your money goes.",
+      "amountLabel": "How much do you want to withdraw?",
+      "all": "All",
+      "available": "Available {amount}",
+      "minimum": "Minimum {amount}",
+      "errTooSmall": "The least you can withdraw is {amount}.",
+      "errTooBig": "You only have {amount} available right now.",
+      "requested": "Requested",
+      "fee": "Fee",
+      "feeAt": "Fee ({percent}%)",
+      "youGet": "You receive",
+      "sendingTo": "Sending to",
+      "change": "Change",
+      "cooloffNote": "If you change where your money goes, withdrawals pause for 48 hours. It protects your balance if somebody else ever gets into your account.",
+      "continue": "Continue",
+      "confirmTitle": "Send {amount}?",
+      "pinLabel": "Enter your 4-digit withdrawal PIN",
+      "confirm": "Confirm withdrawal",
+      "editAmount": "Change amount",
+      "pinWrong": "That PIN is not right. {n} attempts left.",
+      "pinLocked": "Too many wrong PINs. Try again shortly.",
+      "pinMissing": "You have not set a withdrawal PIN yet.",
+      "setPin": "Set your PIN",
+      "failed": "That did not go through. Nothing has left your balance.",
+      "alreadyOpen": "You already have a withdrawal waiting. You can ask for another once this one is paid or turned down.",
+      "blocked": {
+        "closed": {
+          "title": "Withdrawals are not open yet",
+          "body": "Commission withdrawals have not been switched on. Your balance is safe and nothing expires."
+        },
+        "noDestination": {
+          "title": "Tell us where to send it",
+          "body": "Add a mobile money number or a wallet before you withdraw.",
+          "cta": "Add payout details"
+        },
+        "nothing": {
+          "title": "Nothing to withdraw yet",
+          "body": "Once commission clears the hold, it appears here ready to withdraw."
+        },
+        "openRequest": {
+          "title": "You already have one on the way",
+          "body": "One withdrawal at a time. As soon as this one is paid or turned down, you can ask again.",
+          "cta": "See where it is"
+        }
+      },
+      "done": {
+        "title": "Withdrawal requested",
+        "body": "It is in the queue for review. You will get a notification when it is sent.",
+        "reference": "Reference",
+        "youGet": "You receive",
+        "inCoin": "In {coin}",
+        "back": "Back to earnings"
+      }
     }
   }
 }
