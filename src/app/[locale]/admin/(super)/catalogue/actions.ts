@@ -394,3 +394,94 @@ export async function deleteQuizAction(
   revalidatePath(`/admin/catalogue/${productId}/curriculum`)
   return { ok: true }
 }
+
+/* ------------------------------------------------------------------ */
+/* Commission                                                          */
+/* ------------------------------------------------------------------ */
+
+const commissionSchema = z.object({
+  productId: z.string().uuid(),
+  /* Percent of the sale price, both levels. The table's own CHECK allows only
+     'percent', so there is no rate-type to choose. */
+  l1: z.number().min(0).max(100),
+  l2: z.number().min(0).max(100),
+  windowHours: z.number().int().min(1).max(8760),
+  holdDays: z.number().int().min(0).max(365),
+  active: z.boolean(),
+})
+
+/**
+ * What a product pays an affiliate.
+ *
+ * ⚠️ THIS IS THE FIRST WRITE PATH `affiliate_programs` HAS EVER HAD. Two rows
+ * were seeded by a migration and nothing could add a third, so every vendor
+ * product created through the catalogue arrived with no programme, no rate,
+ * and no way for an affiliate to earn on it.
+ *
+ * Changing a rate is safe with respect to money already earned:
+ * `conversions.l1_rate` is frozen onto the row at attribution time and the
+ * ledger credit is computed from that, so this only ever affects sales that
+ * have not happened yet.
+ */
+export async function saveCommissionAction(
+  input: z.input<typeof commissionSchema>,
+): Promise<ActionResult<void>> {
+  const adminId = await actor()
+  if (!adminId) return fail('You are not signed in.')
+
+  const parsed = commissionSchema.safeParse(input)
+  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? 'That does not look right.')
+
+  const { productId, l1, l2, windowHours, holdDays, active } = parsed.data
+  if (l1 + l2 > 100) return fail('The two levels together cannot be more than 100%.')
+
+  const supabase = createAdminClient()
+  const { data, error } = await supabase.rpc('admin_save_affiliate_program', {
+    p_admin_id: adminId,
+    p_product_id: productId,
+    p_l1: l1,
+    p_l2: l2,
+    p_window_hours: windowHours,
+    p_hold_days: holdDays,
+    p_active: active,
+  })
+
+  if (error) {
+    reportUnexpected(error, 'catalogue.saveCommission')
+    return fail(error.message)
+  }
+
+  const outcome = (data as { outcome?: string } | null)?.outcome
+  if (outcome === 'over_100') return fail('The two levels together cannot be more than 100%.')
+  if (outcome === 'not_found') return fail('That product no longer exists.')
+  if (outcome !== 'ok') return fail('Could not save the commission.')
+
+  revalidatePath('/admin/catalogue')
+  return { ok: true }
+}
+
+/** Take the product out of the affiliate marketplace entirely. */
+export async function removeCommissionAction(productId: string): Promise<ActionResult<void>> {
+  const adminId = await actor()
+  if (!adminId) return fail('You are not signed in.')
+
+  const supabase = createAdminClient()
+  const { data, error } = await supabase.rpc('admin_remove_affiliate_program', {
+    p_admin_id: adminId,
+    p_product_id: productId,
+  })
+
+  if (error) {
+    reportUnexpected(error, 'catalogue.removeCommission')
+    return fail(error.message)
+  }
+
+  const outcome = (data as { outcome?: string } | null)?.outcome
+  if (outcome === 'has_sales') {
+    return fail('Affiliates have already earned on this product. Pause it instead of removing it.')
+  }
+  if (outcome !== 'ok') return fail('Could not remove the commission.')
+
+  revalidatePath('/admin/catalogue')
+  return { ok: true }
+}

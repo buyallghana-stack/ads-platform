@@ -31,8 +31,14 @@ export type CatalogueRow = {
   category: string | null
   description: string | null
   learning_outcomes: string[]
+  /** Percent of the sale price. Null means the product has NO affiliate
+   *  programme at all, which is different from a programme paying 0%: the
+   *  first cannot be promoted, the second pays nothing for promoting it. */
   l1_rate: number | null
   l2_rate: number | null
+  attribution_window_hours: number | null
+  hold_days: number | null
+  commission_status: 'active' | 'paused' | null
   sales: number
   revenue_ghs: number
   created_at: string

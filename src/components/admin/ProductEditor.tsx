@@ -10,7 +10,12 @@ import { Badge } from '@/components/ui/Badge'
 import { Link } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
 import type { CatalogueRow, VendorRow } from '@/lib/admin/catalogue-data'
-import { saveProductAction, setProductStatusAction } from '@/app/[locale]/admin/(super)/catalogue/actions'
+import {
+  removeCommissionAction,
+  saveCommissionAction,
+  saveProductAction,
+  setProductStatusAction,
+} from '@/app/[locale]/admin/(super)/catalogue/actions'
 
 /**
  * Product details: what it is, what it costs, and whether it can go on sale.
@@ -311,6 +316,12 @@ export function ProductEditor({
         </div>
       </FormSection>
 
+      {/* Commission is only offered on a product that EXISTS. Creating writes
+          the product first; there is no id to hang a programme on until then,
+          and a rate typed into a form that has not been saved is a rate the
+          operator believes they set. */}
+      {product && <CommissionSection product={product} />}
+
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
@@ -429,5 +440,216 @@ function PublishPanel({
         )}
       </div>
     </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+
+/**
+ * What this product pays an affiliate.
+ *
+ * ⚠️ ITS OWN FORM, SAVED ON ITS OWN. Commission lives in a different table
+ * with different constraints, and folding it into the product save would mean
+ * a typo in the rate refusing a title change. It is also the one section here
+ * that touches money somebody will be paid, which is worth a deliberate act.
+ *
+ * ── NO PROGRAMME IS NOT 0% ──
+ *
+ * A product with no `affiliate_programs` row is not in the marketplace at all:
+ * no affiliate can promote it and the shop card has no rate to show. A
+ * programme paying 0% is a product that CAN be promoted and pays nothing for
+ * it. Both are things an operator wants, so the form distinguishes them and
+ * Remove is a separate action from setting zero.
+ *
+ * ── THE SENTENCE IS THE POINT ──
+ *
+ * Percentages are hard to feel. The live line underneath turns the two rates
+ * into three cash figures at this product's actual price, including what the
+ * platform keeps — which is the number an operator is really deciding, and the
+ * one a percentage field never shows them.
+ */
+function CommissionSection({ product }: { product: CatalogueRow }) {
+  const router = useRouter()
+  const [pending, start] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+  const [saved, setSaved] = useState(false)
+
+  const existing = product.l1_rate !== null
+  const [rates, setRates] = useState({
+    l1: existing ? String(product.l1_rate) : '',
+    l2: existing ? String(product.l2_rate ?? 0) : '',
+    windowHours: String(product.attribution_window_hours ?? 720),
+    holdDays: String(product.hold_days ?? 0),
+    active: product.commission_status !== 'paused',
+  })
+
+  const l1 = Number(rates.l1)
+  const l2 = Number(rates.l2)
+  const valid =
+    Number.isFinite(l1) && Number.isFinite(l2) && l1 >= 0 && l2 >= 0 && l1 + l2 <= 100
+
+  /* The effective price, not the list price: commission is charged on what the
+     buyer actually pays, so a product on sale pays less and the operator
+     should be looking at the figure their affiliates will see. */
+  const price = product.effective_price_ghs
+  const cash = (percent: number) => (price * percent) / 100
+  const money = (n: number) => `GHS ${n.toFixed(2)}`
+
+  function save() {
+    setError(null)
+    setSaved(false)
+    start(async () => {
+      const result = await saveCommissionAction({
+        productId: product.id,
+        l1,
+        l2,
+        windowHours: Number(rates.windowHours),
+        holdDays: Number(rates.holdDays),
+        active: rates.active,
+      })
+      if (!result.ok) return setError(result.message)
+      setSaved(true)
+      router.refresh()
+    })
+  }
+
+  function remove() {
+    setError(null)
+    setSaved(false)
+    start(async () => {
+      const result = await removeCommissionAction(product.id)
+      if (!result.ok) return setError(result.message)
+      setRates((r) => ({ ...r, l1: '', l2: '' }))
+      router.refresh()
+    })
+  }
+
+  return (
+    <FormSection
+      title="Commission"
+      description="What an affiliate earns for selling this. Rates apply to new sales only: what somebody has already been paid is frozen on the sale it came from."
+    >
+      {!existing && (
+        <p className="mb-4 rounded-(--radius-input) border border-warning-500/25 bg-warning-50 px-3.5 py-2.5 text-[0.8125rem] leading-relaxed text-warning-600">
+          No commission is set, so this product is not in the affiliate
+          marketplace. Nobody can promote it and nobody earns on it.
+        </p>
+      )}
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Level one" suffix="%" hint="The affiliate who made the sale.">
+          <input
+            type="number"
+            inputMode="decimal"
+            step="0.5"
+            min="0"
+            max="100"
+            className={cn(inputClass(), 'tabular-nums')}
+            value={rates.l1}
+            onChange={(e) => setRates((r) => ({ ...r, l1: e.target.value }))}
+          />
+        </Field>
+
+        <Field
+          label="Level two"
+          suffix="%"
+          hint="Whoever recruited that affiliate. Zero is fine."
+        >
+          <input
+            type="number"
+            inputMode="decimal"
+            step="0.5"
+            min="0"
+            max="100"
+            className={cn(inputClass(), 'tabular-nums')}
+            value={rates.l2}
+            onChange={(e) => setRates((r) => ({ ...r, l2: e.target.value }))}
+          />
+        </Field>
+      </div>
+
+      {valid && price > 0 && (rates.l1 !== '' || rates.l2 !== '') && (
+        <p className="mt-3 rounded-(--radius-input) bg-ink-50 px-3.5 py-3 text-[0.8125rem] leading-relaxed text-ink-700">
+          On one sale at <strong className="text-ink-900">{money(price)}</strong>, the
+          affiliate earns <strong className="text-ink-900">{money(cash(l1))}</strong>
+          {l2 > 0 && (
+            <>
+              , their recruiter earns <strong className="text-ink-900">{money(cash(l2))}</strong>
+            </>
+          )}
+          , and you keep{' '}
+          <strong className="text-ink-900">{money(price - cash(l1) - cash(l2))}</strong>.
+        </p>
+      )}
+
+      {!valid && (
+        <p className="mt-3 text-[0.8125rem] text-danger-700">
+          The two levels together cannot be more than 100%.
+        </p>
+      )}
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <Field
+          label="Attribution window"
+          suffix="hours"
+          hint="How long after a click a purchase still counts. 720 is 30 days."
+        >
+          <input
+            type="number"
+            inputMode="numeric"
+            min="1"
+            className={cn(inputClass(), 'tabular-nums')}
+            value={rates.windowHours}
+            onChange={(e) => setRates((r) => ({ ...r, windowHours: e.target.value }))}
+          />
+        </Field>
+
+        <Field
+          label="Hold before payable"
+          suffix="days"
+          hint="Commission is credited straight away and cannot be withdrawn until the hold passes. Zero means no hold."
+        >
+          <input
+            type="number"
+            inputMode="numeric"
+            min="0"
+            className={cn(inputClass(), 'tabular-nums')}
+            value={rates.holdDays}
+            onChange={(e) => setRates((r) => ({ ...r, holdDays: e.target.value }))}
+          />
+        </Field>
+      </div>
+
+      {error && (
+        <p className="mt-3 rounded-(--radius-input) border border-danger-500/25 bg-danger-50 px-3.5 py-2.5 text-[0.8125rem] text-danger-700">
+          {error}
+        </p>
+      )}
+      {saved && !error && (
+        <p className="mt-3 text-[0.8125rem] font-medium text-success-600">Commission saved.</p>
+      )}
+
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={save}
+          disabled={pending || !valid || rates.l1 === ''}
+          className="rounded-(--radius-input) bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
+        >
+          {pending ? 'Saving…' : existing ? 'Save commission' : 'Set commission'}
+        </button>
+
+        {existing && (
+          <button
+            type="button"
+            onClick={remove}
+            disabled={pending}
+            className="rounded-(--radius-input) border border-ink-200 px-4 py-2.5 text-sm font-semibold text-danger-700 transition-colors hover:border-danger-500/40 hover:bg-danger-50 disabled:opacity-50"
+          >
+            Remove from the marketplace
+          </button>
+        )}
+      </div>
+    </FormSection>
   )
 }

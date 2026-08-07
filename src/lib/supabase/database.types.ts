@@ -4040,6 +4040,22 @@ export type Database = {
           sort_order: number
         }[]
       }
+      admin_remove_affiliate_program: {
+        Args: { p_admin_id: string; p_product_id: string }
+        Returns: Json
+      }
+      admin_save_affiliate_program: {
+        Args: {
+          p_active?: boolean
+          p_admin_id: string
+          p_hold_days?: number
+          p_l1: number
+          p_l2: number
+          p_product_id: string
+          p_window_hours?: number
+        }
+        Returns: Json
+      }
       admin_list_products: {
         Args: { p_purpose?: string }
         Returns: {
@@ -4049,6 +4065,9 @@ export type Database = {
           effective_price_ghs: number
           id: string
           kind: string
+          attribution_window_hours: number
+          commission_status: string
+          hold_days: number
           l1_rate: number
           l2_rate: number
           lessons: number
