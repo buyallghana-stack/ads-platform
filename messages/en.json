@@ -3720,7 +3720,31 @@
       "lockedBody": "Buy the course and every lesson opens straight away.",
       "missingTitle": "Lesson not found",
       "missingBody": "It may have been moved or removed. Pick another from the list.",
-      "checkpointIntro": "Answer the questions below. You can retry as many times as you need."
+      "checkpointIntro": "Answer the questions below. You can retry as many times as you need.",
+      "mins": "{time} mins",
+      "remaining": "{time} mins remaining",
+      "resourceCount": "{n, plural, one {# resource} other {# resources}}",
+      "noResources": "This course has no attachments.",
+      "previous": "Previous",
+      "next": "Next",
+      "rewatch": "Rewatch",
+      "navLabel": "Move between lessons",
+      "tabs": {
+        "lectures": "Lectures",
+        "resources": "Resources",
+        "about": "About"
+      },
+      "about": {
+        "heading": "What this course covers",
+        "lessons": "Lessons",
+        "length": "Total length",
+        "quizzes": "Checkpoints",
+        "access": "Your access",
+        "accessValue": "{days} days",
+        "certificate": "Certificate",
+        "certificateValue": "When you finish",
+        "outcomes": "What you will be able to do"
+      }
     },
     "quiz": {
       "passMark": "Pass mark {n}%",

@@ -4,11 +4,21 @@ import { notFound } from 'next/navigation'
 
 import { Award, ArrowLeft } from 'lucide-react'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { CourseAbout } from '@/components/affiliate/CourseAbout'
+import { CourseResources } from '@/components/affiliate/CourseResources'
+import { CourseTabs } from '@/components/affiliate/CourseTabs'
 import { CurriculumList } from '@/components/affiliate/CurriculumList'
 import { LessonView } from '@/components/affiliate/LessonView'
 import { Link, redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
-import { courseProgress, getCurriculum, getLesson } from '@/lib/market/course'
+import {
+  courseProgress,
+  getCourseResources,
+  getCurriculum,
+  getLesson,
+  neighbours,
+} from '@/lib/market/course'
+import { coverUrl } from '@/lib/market/covers'
 import { getShopProduct } from '@/lib/market/data'
 
 export const metadata: Metadata = {
@@ -55,7 +65,7 @@ export default async function CoursePage({
     getShopProduct(slug, user!.id),
   ])
   if (!detail.ok) notFound()
-  const { product } = detail
+  const { product, training } = detail
 
   const sections = await getCurriculum(product.id, user!.id)
   const { done, total } = courseProgress(sections)
@@ -71,6 +81,9 @@ export default async function CoursePage({
     lessons[0]
 
   const payload = chosen ? await getLesson(user!.id, chosen.lesson_id) : null
+  const { previous, next } = neighbours(sections, chosen?.lesson_id ?? null)
+
+  const resources = await getCourseResources(product.id, user!.id)
 
   return (
     <div className="relative isolate mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-5 sm:px-6 md:px-8 md:py-7">
@@ -138,15 +151,41 @@ export default async function CoursePage({
            Caught by `scripts/verify-affiliate-ui.mjs`. */
         <div className="grid min-w-0 grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start">
           <div className="min-w-0">
-            {payload && <LessonView payload={payload} slug={slug} />}
+            {payload && (
+              <LessonView
+                payload={payload}
+                slug={slug}
+                previous={previous}
+                next={next}
+                poster={coverUrl(product.coverPath)}
+              />
+            )}
           </div>
 
+          {/* The strip sits beside the player from xl and under it on a phone,
+              which is the reference's own arrangement at phone width. */}
           <div className="xl:sticky xl:top-6">
-            <CurriculumList
-              sections={sections}
-              slug={slug}
-              currentLessonId={chosen?.lesson_id ?? null}
-              entitled={product.owned}
+            <CourseTabs
+              resourceCount={resources.length}
+              lectures={
+                <CurriculumList
+                  sections={sections}
+                  slug={slug}
+                  currentLessonId={chosen?.lesson_id ?? null}
+                  entitled={product.owned}
+                />
+              }
+              resources={<CourseResources resources={resources} />}
+              about={
+                <CourseAbout
+                  description={product.description}
+                  outcomes={product.outcomes}
+                  lessons={product.lessons}
+                  quizzes={product.quizzes}
+                  seconds={product.seconds}
+                  training={training}
+                />
+              }
             />
           </div>
         </div>

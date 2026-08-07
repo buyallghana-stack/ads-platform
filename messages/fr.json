@@ -3720,7 +3720,31 @@
       "lockedBody": "Achetez le cours et toutes les leçons s’ouvrent aussitôt.",
       "missingTitle": "Leçon introuvable",
       "missingBody": "Elle a peut-être été déplacée ou supprimée. Choisissez-en une autre.",
-      "checkpointIntro": "Répondez aux questions ci-dessous. Vous pouvez réessayer autant de fois que nécessaire."
+      "checkpointIntro": "Répondez aux questions ci-dessous. Vous pouvez réessayer autant de fois que nécessaire.",
+      "mins": "{time} min",
+      "remaining": "Il reste {time} min",
+      "resourceCount": "{n, plural, one {# ressource} other {# ressources}}",
+      "noResources": "Ce cours n'a aucune pièce jointe.",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "rewatch": "Revoir",
+      "navLabel": "Passer d'une leçon à l'autre",
+      "tabs": {
+        "lectures": "Leçons",
+        "resources": "Ressources",
+        "about": "À propos"
+      },
+      "about": {
+        "heading": "Ce que couvre ce cours",
+        "lessons": "Leçons",
+        "length": "Durée totale",
+        "quizzes": "Points de contrôle",
+        "access": "Votre accès",
+        "accessValue": "{days} jours",
+        "certificate": "Certificat",
+        "certificateValue": "À la fin du cours",
+        "outcomes": "Ce que vous saurez faire"
+      }
     },
     "quiz": {
       "passMark": "Seuil {n} %",

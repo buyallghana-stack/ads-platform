@@ -119,3 +119,89 @@ export function courseProgress(sections: Section[]): { done: number; total: numb
   const lessons = sections.flatMap((s) => s.lessons)
   return { done: lessons.filter((l) => l.completed).length, total: lessons.length }
 }
+
+export type CourseResource = {
+  resource_id: string
+  title: string
+  byte_size: number | null
+  lesson_id: string
+  lesson_title: string
+  section_title: string
+}
+
+/** Everything attached to the course, for the Resources tab. */
+export const getCourseResources = cache(
+  async (productId: string, userId: string): Promise<CourseResource[]> => {
+    const supabase = createAdminClient()
+    const { data, error } = await supabase.rpc('course_resources', {
+      p_product_id: productId,
+      p_user_id: userId,
+    })
+    if (error || !data) return []
+    return data as unknown as CourseResource[]
+  },
+)
+
+/**
+ * A lesson's length as the reference writes it: `05:25`, and `06:03` for what
+ * is left of one already started.
+ *
+ * Minutes and seconds, not the `5m` the shop cards use. On a card, "5m" is a
+ * shopping figure — is this course two hours or ten. Inside the player it is a
+ * scheduling one: somebody is deciding whether to start this lesson now, and
+ * the difference between 5:05 and 5:55 is the whole question. Padded so the
+ * column does not jitter as the numbers change.
+ */
+export function clock(seconds: number): string | null {
+  if (!seconds || seconds < 1) return null
+  const whole = Math.round(seconds)
+  const m = Math.floor(whole / 60)
+  const s = whole % 60
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
+/**
+ * What is left of a lesson, or null when that is not a useful thing to say.
+ *
+ * Null on a finished lesson (the tick already says it) and on an untouched one
+ * (its length already says it). "Remaining" is only information in the middle,
+ * which is exactly where the reference shows it.
+ */
+export function remaining(row: {
+  duration_seconds: number | null
+  seconds_watched: number
+  completed: boolean
+}): string | null {
+  if (row.completed || !row.duration_seconds) return null
+  const left = row.duration_seconds - row.seconds_watched
+  if (row.seconds_watched < 5 || left < 5) return null
+  return clock(left)
+}
+
+export type Neighbour = { id: string; title: string } | null
+
+/**
+ * The lesson before and after this one, in curriculum order.
+ *
+ * Flattened ACROSS sections, because "next" means the next thing to study, not
+ * the next thing in this section — stopping at a section boundary would strand
+ * somebody at the end of section one with a dead button and no clue that there
+ * are four more sections under it.
+ *
+ * Computed here rather than fetched: the page already holds the whole
+ * curriculum to draw the list, so asking the database again for two rows it is
+ * already holding would be a query to save an array lookup.
+ */
+export function neighbours(
+  sections: Section[],
+  lessonId: string | null,
+): { previous: Neighbour; next: Neighbour } {
+  const flat = sections.flatMap((s) => s.lessons)
+  const at = flat.findIndex((l) => l.lesson_id === lessonId)
+  if (at < 0) return { previous: null, next: null }
+
+  const name = (row: CurriculumRow | undefined): Neighbour =>
+    row ? { id: row.lesson_id, title: row.lesson_title } : null
+
+  return { previous: name(flat[at - 1]), next: name(flat[at + 1]) }
+}

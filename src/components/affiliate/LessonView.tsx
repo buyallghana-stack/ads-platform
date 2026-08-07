@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-import { CheckCircle2, FileText, Loader2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CheckCircle2, FileText, Loader2, RotateCcw } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { LessonQuiz } from '@/components/affiliate/LessonQuiz'
-import type { LessonPayload } from '@/lib/market/course'
+import { Link, useRouter } from '@/i18n/navigation'
+import type { LessonPayload, Neighbour } from '@/lib/market/course'
 import { markLessonProgress } from '@/app/[locale]/(affiliate)/learn/[slug]/actions'
 import { cn } from '@/lib/cn'
 
@@ -35,7 +36,20 @@ import { cn } from '@/lib/cn'
 
 const DWELL_SECONDS = 20
 
-export function LessonView({ payload, slug }: { payload: LessonPayload; slug: string }) {
+export function LessonView({
+  payload,
+  slug,
+  previous,
+  next,
+  poster,
+}: {
+  payload: LessonPayload
+  slug: string
+  previous: Neighbour
+  next: Neighbour
+  /** The course cover, so the player is not a black rectangle before play. */
+  poster: string | null
+}) {
   const t = useTranslations('affiliate.course')
 
   if (!payload.ok) {
@@ -91,7 +105,14 @@ export function LessonView({ payload, slug }: { payload: LessonPayload; slug: st
         {!video && heading}
 
         {video ? (
-          <VideoLesson lessonId={lesson.id} slug={slug} seconds={progress.seconds_watched} />
+          <VideoLesson
+            lessonId={lesson.id}
+            slug={slug}
+            seconds={progress.seconds_watched}
+            poster={poster}
+            previous={previous}
+            next={next}
+          />
         ) : lesson.kind === 'quiz' ? (
           /* A checkpoint lesson has no body of its own — the quizzes below ARE
              the lesson. Rendering it through ArticleLesson (which is what a
@@ -130,7 +151,87 @@ export function LessonView({ payload, slug }: { payload: LessonPayload; slug: st
           <p className="mt-2 text-[0.75rem] text-ink-500">{t('resourcesNote')}</p>
         </div>
       )}
+
+      <LessonNav slug={slug} previous={previous} next={next} />
     </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+
+/**
+ * Previous and Next, under every lesson whatever kind it is.
+ *
+ * ── IT IS NOT ONLY FOR VIDEOS ──
+ *
+ * A video announces its own ending and can offer the next lesson over the last
+ * frame. An article and a checkpoint end without saying so, and the operator's
+ * point (2026-08-07) is that finishing one of those and then having to hunt the
+ * list for what comes next is the moment a course gets abandoned. Same control,
+ * same place, all three kinds.
+ *
+ * ── BOTH ARROWS ARE ALWAYS LIVE ──
+ *
+ * Skipping ahead is allowed, because skipping earns nothing: completion is
+ * recorded by watching or reading, and the activation threshold is what gates
+ * the ability to earn. Locking Next until a lesson is finished would only
+ * trap somebody who cannot pass a checkpoint, and it would gate them on the
+ * one screen they cannot get past.
+ */
+function LessonNav({
+  slug,
+  previous,
+  next,
+}: {
+  slug: string
+  previous: Neighbour
+  next: Neighbour
+}) {
+  const t = useTranslations('affiliate.course')
+  if (!previous && !next) return null
+
+  const shell =
+    'flex min-w-0 flex-1 items-center gap-2 rounded-(--radius-card) border px-3.5 py-3 transition-colors'
+
+  return (
+    <nav aria-label={t('navLabel')} className="flex items-stretch gap-2">
+      {previous ? (
+        <Link
+          href={{ pathname: `/learn/${slug}`, query: { lesson: previous.id } }}
+          className={cn(shell, 'border-ink-200 bg-surface hover:bg-ink-50')}
+        >
+          <ChevronLeft aria-hidden className="size-4 shrink-0 text-ink-400" />
+          <span className="min-w-0">
+            <span className="block text-[0.6875rem] uppercase tracking-wide text-ink-500">
+              {t('previous')}
+            </span>
+            <span className="block truncate text-[0.8125rem] font-medium text-ink-800">
+              {previous.title}
+            </span>
+          </span>
+        </Link>
+      ) : (
+        /* Holds the column so a first lesson does not throw Next to the left. */
+        <span aria-hidden className="min-w-0 flex-1" />
+      )}
+
+      {next && (
+        <Link
+          href={{ pathname: `/learn/${slug}`, query: { lesson: next.id } }}
+          className={cn(shell, 'justify-end border-brand-600 bg-brand-600 hover:bg-brand-700')}
+        >
+          <span className="min-w-0 text-right">
+            <span className="block text-[0.6875rem] uppercase tracking-wide text-white/70">
+              {t('next')}
+            </span>
+            <span className="block truncate text-[0.8125rem] font-medium text-white">
+              {next.title}
+            </span>
+          </span>
+          <ChevronRight aria-hidden className="size-4 shrink-0 text-white/80" />
+        </Link>
+      )}
+    </nav>
   )
 }
 
@@ -140,14 +241,22 @@ function VideoLesson({
   lessonId,
   slug,
   seconds,
+  poster,
+  previous,
+  next,
 }: {
   lessonId: string
   slug: string
   seconds: number
+  poster: string | null
+  previous: Neighbour
+  next: Neighbour
 }) {
   const t = useTranslations('affiliate.course')
+  const router = useRouter()
   const [url, setUrl] = useState<string | null>(null)
   const [failed, setFailed] = useState(false)
+  const [ended, setEnded] = useState(false)
   const video = useRef<HTMLVideoElement | null>(null)
   const lastSent = useRef(0)
 
@@ -182,12 +291,21 @@ function VideoLesson({
     )
   }
 
+  const rewatch = () => {
+    const el = video.current
+    if (!el) return
+    el.currentTime = 0
+    setEnded(false)
+    void el.play()
+  }
+
   return (
-    <div className="aspect-video w-full bg-black">
+    <div className="relative aspect-video w-full bg-black">
       {url ? (
         <video
           ref={video}
           src={url}
+          poster={poster ?? undefined}
           controls
           playsInline
           className="size-full"
@@ -198,11 +316,75 @@ function VideoLesson({
             if (seconds > 5 && seconds < el.duration - 5) el.currentTime = seconds
           }}
           onTimeUpdate={onTime}
-          onEnded={() => void markLessonProgress(lessonId, slug, Math.floor(video.current?.duration ?? 0), 100)}
+          onPlay={() => setEnded(false)}
+          onEnded={() => {
+            setEnded(true)
+            void markLessonProgress(lessonId, slug, Math.floor(video.current?.duration ?? 0), 100)
+          }}
         />
       ) : (
         <div className="grid size-full place-items-center text-white/60">
           <Loader2 aria-hidden className="size-6 animate-spin" />
+        </div>
+      )}
+
+      {/*
+        THE END PANEL, over the last frame.
+
+        The operator asked for it there rather than under the player, and that
+        is right: the moment a video stops is the moment the decision gets
+        made, and the eye is already on the picture. Under the player it would
+        be below the fold on a phone held in one hand.
+
+        It covers the video but NOT the control bar, so the scrubber stays
+        reachable — somebody who wants to go back to 4:12 rather than restart
+        should not have to dismiss anything first.
+      */}
+      {ended && (
+        <div className="absolute inset-x-0 top-0 bottom-12 grid place-items-center bg-black/72 px-4 backdrop-blur-[2px]">
+          <div className="flex w-full max-w-xs flex-col items-center gap-3">
+            <button
+              type="button"
+              onClick={rewatch}
+              className="inline-flex items-center gap-2 rounded-full border border-white/30 px-4 py-2 text-[0.8125rem] font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            >
+              <RotateCcw aria-hidden className="size-4" />
+              {t('rewatch')}
+            </button>
+
+            <div className="flex w-full items-center justify-center gap-2">
+              {previous && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push({
+                      pathname: `/learn/${slug}`,
+                      query: { lesson: previous.id },
+                    })
+                  }
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-[0.8125rem] font-medium text-white/80 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                >
+                  <ChevronLeft aria-hidden className="size-4" />
+                  {t('previous')}
+                </button>
+              )}
+
+              {next && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push({ pathname: `/learn/${slug}`, query: { lesson: next.id } })
+                  }
+                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-brand-600 px-4 py-2.5 text-[0.875rem] font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                >
+                  {t('next')}
+                  <ChevronRight aria-hidden className="size-4" />
+                </button>
+              )}
+            </div>
+
+            {next && <p className="truncate text-[0.75rem] text-white/60">{next.title}</p>}
+          </div>
         </div>
       )}
     </div>

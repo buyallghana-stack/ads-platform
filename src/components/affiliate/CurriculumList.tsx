@@ -2,8 +2,7 @@ import { CheckCircle2, CirclePlay, FileText, HelpCircle, Lock } from 'lucide-rea
 import { getTranslations } from 'next-intl/server'
 
 import { Link } from '@/i18n/navigation'
-import { courseLength } from '@/lib/market/covers'
-import type { LessonKind, Section } from '@/lib/market/course'
+import { clock, remaining, type LessonKind, type Section } from '@/lib/market/course'
 import { cn } from '@/lib/cn'
 
 /**
@@ -85,7 +84,13 @@ export async function CurriculumList({
               const Icon = ICON[lesson.kind] ?? FileText
               const open = entitled || lesson.is_preview
               const current = lesson.lesson_id === currentLessonId
-              const length = courseLength(lesson.duration_seconds ?? 0)
+              /* What is LEFT of a part-watched lesson, falling back to how long
+                 the whole thing is. Straight from the reference, which prints
+                 "06:03 mins remaining" on the row you are on and the plain
+                 length on every other — the two facts answer different
+                 questions and only one of them is worth the space at a time. */
+              const left = remaining(lesson)
+              const length = left ?? clock(lesson.duration_seconds ?? 0)
 
               const body = (
                 <>
@@ -133,7 +138,14 @@ export async function CurriculumList({
                         somebody deciding whether they have time for it. */}
                     <span className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[0.75rem] text-ink-500">
                       <span>{t(`kind.${lesson.kind}`)}</span>
-                      {length && <span>· {length}</span>}
+                      {length && (
+                        <span className={cn(left && 'font-medium text-brand-700')}>
+                          · {left ? t('remaining', { time: length }) : t('mins', { time: length })}
+                        </span>
+                      )}
+                      {lesson.resource_count > 0 && (
+                        <span>· {t('resourceCount', { n: lesson.resource_count })}</span>
+                      )}
                       {lesson.quiz_count > 0 && <span>· {t('checkpoints', { n: lesson.quiz_count })}</span>}
                       {!entitled && lesson.is_preview && (
                         <span className="rounded-full bg-success-500/15 px-1.5 py-0.5 font-medium text-success-600">
@@ -166,6 +178,17 @@ export async function CurriculumList({
                     <Link
                       href={{ pathname: `/learn/${slug}`, query: { lesson: lesson.lesson_id } }}
                       aria-current={current ? 'true' : undefined}
+                      /* ⚠️ NOT PREFETCHED, and a long course is why. Next
+                         prefetches every link in the viewport, so a forty-row
+                         curriculum fires forty RSC requests for the one row
+                         that gets tapped — measured here as eleven requests
+                         twice over on a nine-lesson course, and a 2.5s wait
+                         behind them for the tap that was actually made. On a
+                         Ghanaian phone plan that is somebody's data spent on
+                         lessons they did not open. Next and Previous keep
+                         their prefetch: those two are the ones about to be
+                         used. */
+                      prefetch={false}
                       className={rowClass}
                     >
                       {body}

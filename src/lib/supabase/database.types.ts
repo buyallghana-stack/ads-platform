@@ -5105,6 +5105,17 @@ export type Database = {
           word_count: number
         }[]
       }
+      course_resources: {
+        Args: { p_product_id: string; p_user_id?: string }
+        Returns: {
+          byte_size: number
+          lesson_id: string
+          lesson_title: string
+          resource_id: string
+          section_title: string
+          title: string
+        }[]
+      }
       course_outline: {
         Args: { p_product_id: string }
         Returns: {
