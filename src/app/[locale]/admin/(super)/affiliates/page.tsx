@@ -2,7 +2,10 @@ import type { Metadata } from 'next'
 
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
+import { ArrowRight, Coins } from 'lucide-react'
+
 import { PageHeader } from '@/components/admin/AdminChrome'
+import { Link } from '@/i18n/navigation'
 import { CommissionQueue } from '@/components/admin/CommissionQueue'
 import { getCommissionPayouts, getCommissionTotals } from '@/lib/admin/data/affiliates'
 import { getPlatformConfig } from '@/lib/admin/data/config'
@@ -44,6 +47,25 @@ export default async function AdminAffiliatesPage({
   return (
     <>
       <PageHeader title={t('title')} description={t('description')} />
+
+      {/* The other half, named. See the note on the payouts screen: two
+          queues is the correct shape, but each one has to say so. */}
+      <Link
+        href="/admin/payouts"
+        className="mb-4 flex items-center gap-3 rounded-(--radius-card) border border-ink-200 bg-surface px-4 py-3 transition-colors hover:bg-ink-50"
+      >
+        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-600/12 text-brand-700">
+          <Coins aria-hidden className="size-4.5" />
+        </span>
+        <span className="min-w-0 flex-1 text-[0.875rem] font-medium text-ink-900">
+          {t('otherQueue')}
+        </span>
+        <span className="inline-flex shrink-0 items-center gap-1.5 text-[0.8125rem] font-medium text-brand-700">
+          {t('otherQueueCta')}
+          <ArrowRight aria-hidden className="size-4" />
+        </span>
+      </Link>
+
       <CommissionQueue
         initial={payouts}
         totals={totals}

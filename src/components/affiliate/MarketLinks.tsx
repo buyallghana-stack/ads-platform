@@ -20,17 +20,20 @@ import { cn } from '@/lib/cn'
  * Same four, same order, same idea: Games, Leaderboard, Gift code, Tasks. A
  * user who holds both businesses learns the row once.
  *
- * ⚠️ GIFT CODE IS THE ONE THAT CROSSES. A gift code credits POINTS, so its
- * screen lives in the ads business and this tile leaves affiliate mode. That
- * is deliberate and it is not a D27 breach: the two balances stay separate,
- * the user simply walks between them. The tile is marked so nobody is
- * surprised to arrive somewhere green.
+ * ⚠️ GIFT CODE USED TO CROSS, AND THAT WAS WRONG. It pointed at `/gift-code`,
+ * the ads screen, on the argument that a gift code credits POINTS and the user
+ * simply walks between businesses. The operator's answer (2026-08-07): "the
+ * gift code of the affiliate when clicked takes you to the ads ... the gift
+ * code that exists is just for the ads." Somebody on the cedis dashboard
+ * tapping a tile on the cedis dashboard is asking for cedis. There is now a
+ * commission gift code with its own table, its own redeem function and its own
+ * admin board, and all four tiles stay in the mode.
  */
 
 const TILES = [
   { key: 'games', href: '/market/games', Icon: Gamepad2, tone: 'text-violet-600 bg-violet-500/12' },
   { key: 'leaderboard', href: '/market/leaderboard', Icon: Trophy, tone: 'text-orange-600 bg-orange-500/12' },
-  { key: 'gift', href: '/gift-code', Icon: Gift, tone: 'text-brand-700 bg-brand-600/12' },
+  { key: 'gift', href: '/market/gift-code', Icon: Gift, tone: 'text-brand-700 bg-brand-600/12' },
   { key: 'tasks', href: '/market/tasks', Icon: ListChecks, tone: 'text-success-600 bg-success-500/12' },
 ] as const
 

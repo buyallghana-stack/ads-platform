@@ -165,9 +165,27 @@ export async function EarningsPanel({
           )}
         </div>
 
-        {canWithdraw ? (
+        {/*
+          ⚠️ THE BUTTON IS ALWAYS HERE NOW (operator, 2026-08-07): "there is
+          currently no button to ask for withdrawal ... even if the user has
+          not reached the minimum threshold, they should still be able to see
+          the withdraw flow."
+
+          It used to be replaced by a sentence below the minimum, which is what
+          an affiliate with GHS 13 of a GHS 50 threshold saw: a screen with no
+          way in and no way to find out what the flow even looks like. The ads
+          side has never done that — its button is always live and the wizard
+          itself explains how far off you are. Same shape here now, and the
+          shortfall moves onto the button so the answer is legible without
+          opening it.
+
+          The only case that still has no button is payouts switched off
+          platform-wide, because that is not something the affiliate can act
+          on and a button leading to "closed" is a button that wasted a tap.
+        */}
+        {payoutsEnabled ? (
           <Link
-            href="/commission"
+            href="/commission/withdraw"
             className={cn(
               'inline-flex items-center gap-2 rounded-(--radius-input) bg-white px-4 py-2.5',
               'text-[0.875rem] font-semibold text-brand-950 transition-colors hover:bg-white/90',
@@ -178,20 +196,31 @@ export async function EarningsPanel({
             <ArrowUpRight aria-hidden className="size-4" />
           </Link>
         ) : (
-          /*
-            NOT a disabled button. A greyed control says "you cannot do this"
-            and stops; these two cases each have a different reason and a
-            different next step, and the affiliate needs to know which one they
-            are in. Below the minimum is a matter of earning more; payouts
-            switched off platform-wide is not something they can act on at all.
-          */
           <p className="max-w-[15rem] text-[0.75rem] leading-snug text-white/70">
-            {payoutsEnabled
-              ? t('belowMinimum', { amount: cedis(minimumMinor) })
-              : t('payoutsClosed')}
+            {t('payoutsClosed')}
           </p>
         )}
       </div>
+
+      {/* How far off, under the button rather than in place of it. A bar reads
+          as progress towards something; the sentence it replaced read as a
+          refusal. */}
+      {payoutsEnabled && !canWithdraw && (
+        <div className="mt-2.5 px-1">
+          <div className="flex items-baseline justify-between gap-3 text-[0.75rem] text-white/70">
+            <span>{t('toGo', { amount: cedis(Math.max(minimumMinor - balanceMinor, 0)) })}</span>
+            <span className="tabular-nums text-white/50">{cedis(minimumMinor)}</span>
+          </div>
+          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-black/30">
+            <span
+              className="block h-full rounded-full bg-white/80"
+              style={{
+                width: `${Math.min((balanceMinor / Math.max(minimumMinor, 1)) * 100, 100)}%`,
+              }}
+            />
+          </div>
+        </div>
+      )}
     </section>
   )
 }

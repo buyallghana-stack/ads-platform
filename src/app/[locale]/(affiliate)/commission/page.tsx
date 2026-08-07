@@ -112,26 +112,37 @@ export default async function CommissionPage({
         </div>
 
         <div className="mt-5 border-t border-ink-200 pt-4">
-          {canRequest ? (
-            /* ⚠️ `/commission/withdraw`, NOT `/withdraw`.
-               This pointed at the POINTS withdrawal for a day — different
-               money, different balance, different minimum, different ledger,
-               and exactly the mixing D27 exists to prevent. It was invisible
-               because `affiliate_payouts_enabled` is false so the button never
-               rendered; it would have fired the moment payouts opened. */
-            <Link
-              href="/commission/withdraw"
-              className="inline-flex items-center gap-2 rounded-(--radius-input) bg-brand-600 px-5 py-3 text-[0.875rem] font-semibold text-white transition-colors hover:bg-brand-500"
-            >
-              <Banknote aria-hidden className="size-4" />
-              {t('request')}
-            </Link>
+          {/* ⚠️ `/commission/withdraw`, NOT `/withdraw`.
+              This pointed at the POINTS withdrawal for a day — different
+              money, different balance, different minimum, different ledger,
+              and exactly the mixing D27 exists to prevent.
+
+              ⚠️ AND IT NO LONGER WAITS FOR THE MINIMUM (operator, 2026-08-07).
+              Gating the button on `canRequest` meant the entire withdrawal
+              flow was invisible to everybody who had not yet earned GHS 50 —
+              which is everybody, on day one. The screen behind it now explains
+              the shortfall properly, so there is nothing left to protect them
+              from. */}
+          {payoutsEnabled ? (
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <Link
+                href="/commission/withdraw"
+                className="inline-flex items-center gap-2 rounded-(--radius-input) bg-brand-600 px-5 py-3 text-[0.875rem] font-semibold text-white transition-colors hover:bg-brand-500"
+              >
+                <Banknote aria-hidden className="size-4" />
+                {t('request')}
+              </Link>
+              {!canRequest && (
+                <p className="flex items-start gap-2 text-[0.8125rem] leading-snug text-ink-500">
+                  <Info aria-hidden className="mt-0.5 size-4 shrink-0" />
+                  {t('belowMinimum', { amount: cedis(minimum) })}
+                </p>
+              )}
+            </div>
           ) : (
             <p className="flex items-start gap-2 text-[0.8125rem] leading-snug text-ink-500">
               <Info aria-hidden className="mt-0.5 size-4 shrink-0" />
-              {payoutsEnabled
-                ? t('belowMinimum', { amount: cedis(minimum) })
-                : t('payoutsClosed')}
+              {t('payoutsClosed')}
             </p>
           )}
         </div>

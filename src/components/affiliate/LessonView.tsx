@@ -405,6 +405,10 @@ function ArticleLesson({
   const t = useTranslations('affiliate.course')
   const [reached, setReached] = useState(false)
   const end = useRef<HTMLDivElement | null>(null)
+  /* The pane the text scrolls inside. It is also the observer's ROOT: the
+     sentinel is no longer in the page's scroll, so watching the viewport would
+     mean watching a box that never moves. */
+  const pane = useRef<HTMLDivElement | null>(null)
   /* Stamped in the effect, not during render. `useRef(Date.now())` evaluates
      the clock on every render even though only the first value is kept — which
      is both impure and, on a re-render, a different number being thrown away. */
@@ -415,44 +419,92 @@ function ArticleLesson({
     reader has to have been here for `DWELL_SECONDS`. Either one alone is
     trivially defeated — a fast scroll satisfies the first, an idle tab
     satisfies the second — and this lesson type has no playhead to fall back on.
+
+    ⚠️ THE DWELL NEEDS A TIMER, NOT JUST AN EARLY RETURN, AND THIS WAS A REAL
+    BUG. IntersectionObserver only fires when the intersection CHANGES. Reach
+    the bottom of a short article at eight seconds and the callback ran, failed
+    the twenty-second check, returned — and then never fired again, because the
+    sentinel simply stayed in view. The lesson was never marked read no matter
+    how long they sat there, which is what the operator saw as "sometimes even
+    after clicking next it fails to mark articles as read".
+
+    So arriving at the bottom early SCHEDULES the mark instead of discarding
+    it, and scrolling away cancels it. The defence is unchanged: twenty seconds
+    with the end of the article in front of you.
   */
   useEffect(() => {
     if (done || !end.current) return
     opened.current = Date.now()
+    let timer: ReturnType<typeof setTimeout> | undefined
+
+    const mark = () => {
+      setReached(true)
+      void markLessonProgress(lessonId, slug, DWELL_SECONDS, 100)
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
+        clearTimeout(timer)
         if (!entry?.isIntersecting) return
-        if ((Date.now() - opened.current) / 1000 < DWELL_SECONDS) return
-        setReached(true)
-        void markLessonProgress(lessonId, slug, DWELL_SECONDS, 100)
-        observer.disconnect()
+        const waited = (Date.now() - opened.current) / 1000
+        if (waited >= DWELL_SECONDS) {
+          mark()
+          observer.disconnect()
+          return
+        }
+        timer = setTimeout(() => {
+          mark()
+          observer.disconnect()
+        }, (DWELL_SECONDS - waited) * 1000)
       },
-      { rootMargin: '0px 0px -10% 0px' },
+      { root: pane.current, rootMargin: '0px 0px -5% 0px' },
     )
     observer.observe(end.current)
-    return () => observer.disconnect()
+    return () => {
+      clearTimeout(timer)
+      observer.disconnect()
+    }
   }, [done, lessonId, slug])
 
   return (
-    <div className="px-4 py-5 sm:px-6">
+    <div>
+      {/*
+        THE ARTICLE SCROLLS INSIDE ITS OWN PANE (operator, 2026-08-07).
+
+        A four-hundred-word lesson printed straight into the page made the page
+        four screens tall, which pushed the curriculum, the checkpoint and the
+        Next button so far down that the rest of the screen "drifts down" out
+        of reach. Bounding the text keeps every control on the lesson a
+        predictable distance from the top, whatever the lesson is.
+
+        `overscroll-contain` so reaching the end of the article does not carry
+        on into the page behind it, which on a phone reads as the whole screen
+        lurching.
+      */}
       <div
-        className={cn(
-          'prose-sp max-w-none text-[0.9375rem] leading-relaxed text-ink-800',
-          '[&_h2]:mt-6 [&_h2]:text-[1.0625rem] [&_h2]:font-semibold [&_h2]:text-ink-900',
-          '[&_h3]:mt-5 [&_h3]:font-semibold [&_h3]:text-ink-900',
-          '[&_p]:mt-3 [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mt-1.5',
-          '[&_strong]:font-semibold [&_strong]:text-ink-900',
-        )}
+        ref={pane}
+        tabIndex={0}
+        className="max-h-[26rem] overflow-y-auto overscroll-contain px-4 py-5 focus-visible:outline-none sm:px-6 md:max-h-[32rem]"
       >
-        {(body ?? '').split('\n\n').map((para, i) => (
-          <p key={i}>{para}</p>
-        ))}
+        <div
+          className={cn(
+            'prose-sp max-w-none text-[0.9375rem] leading-relaxed text-ink-800',
+            '[&_h2]:mt-6 [&_h2]:text-[1.0625rem] [&_h2]:font-semibold [&_h2]:text-ink-900',
+            '[&_h3]:mt-5 [&_h3]:font-semibold [&_h3]:text-ink-900',
+            '[&_p]:mt-3 [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mt-1.5',
+            '[&_strong]:font-semibold [&_strong]:text-ink-900',
+          )}
+        >
+          {(body ?? '').split('\n\n').map((para, i) => (
+            <p key={i}>{para}</p>
+          ))}
+        </div>
+
+        <div ref={end} className="h-px" />
       </div>
 
-      <div ref={end} className="h-px" />
-
       {(done || reached) && (
-        <p className="mt-5 flex items-center gap-2 text-[0.8125rem] font-medium text-success-600">
+        <p className="flex items-center gap-2 border-t border-ink-200 px-4 py-3 text-[0.8125rem] font-medium text-success-600 sm:px-6">
           <CheckCircle2 aria-hidden className="size-4" />
           {t('articleDone')}
         </p>

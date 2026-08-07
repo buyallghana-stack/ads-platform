@@ -88,16 +88,28 @@ export function LessonQuiz({ quiz, slug }: { quiz: Quiz; slug: string }) {
             {t(result.passed ? 'passedBody' : 'failedBody', { n: result.score })}
           </p>
 
-          {!result.passed && (
-            <button
-              type="button"
-              onClick={retry}
-              className="mt-4 inline-flex items-center gap-2 rounded-(--radius-input) bg-brand-600 px-4 py-2.5 text-[0.875rem] font-semibold text-white transition-colors hover:bg-brand-500"
-            >
-              <RotateCcw aria-hidden className="size-4" />
-              {t('retry')}
-            </button>
-          )}
+          {/* ⚠️ OFFERED AFTER A PASS TOO. This was `!result.passed`, which meant
+              passing a checkpoint sealed it for the rest of the session: the
+              questions vanished behind a green card with no way back to them.
+              A checkpoint is a proof of attention, not an exam sat once, and
+              somebody who passed it in week one and wants to check themselves
+              again in week four is doing exactly what it is for. Passing again
+              cannot take anything away either — `record_lesson_progress` never
+              un-completes a lesson. */}
+          <button
+            type="button"
+            onClick={retry}
+            className={cn(
+              'mt-4 inline-flex items-center gap-2 rounded-(--radius-input) px-4 py-2.5',
+              'text-[0.875rem] font-semibold transition-colors',
+              result.passed
+                ? 'border border-ink-300 text-ink-700 hover:bg-ink-50'
+                : 'bg-brand-600 text-white hover:bg-brand-500',
+            )}
+          >
+            <RotateCcw aria-hidden className="size-4" />
+            {t(result.passed ? 'again' : 'retry')}
+          </button>
         </div>
       ) : (
         <>

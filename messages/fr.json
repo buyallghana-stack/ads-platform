@@ -1526,8 +1526,8 @@
       }
     },
     "payouts": {
-      "title": "Retraits",
-      "description": "Approuvez, mettez en attente ou refusez les demandes de retrait. Les numéros de compte et les portefeuilles sont masqués. Ouvrez une demande pour en révéler un.",
+      "title": "Retraits de points",
+      "description": "Retraits du côté publicités, payés sur les points. Les numéros et portefeuilles sont masqués. Ouvrez une demande pour en révéler un.",
       "filterLabel": "Filtrer par statut",
       "filters": {
         "queue": "Décision requise",
@@ -1621,7 +1621,10 @@
       },
       "errors": {
         "dismiss": "Fermer"
-      }
+      },
+      "otherQueue": "Les retraits de commissions du côté affiliation forment une file distincte.",
+      "otherQueueCta": "Ouvrir les retraits de commissions",
+      "otherQueueWaiting": "{n, plural, =0 {aucun en attente} one {# en attente} other {# en attente}}"
     },
     "people": {
       "tabsLabel": "Filtrer les personnes",
@@ -2841,7 +2844,9 @@
         "notePlaceholder": "À quoi sert ce code",
         "save": "Créer le code",
         "cancel": "Annuler"
-      }
+      },
+      "sectionPoints": "Codes cadeaux de points",
+      "sectionCommission": "Codes cadeaux de commission"
     },
     "leaderboard": {
       "title": "Classement",
@@ -2955,7 +2960,7 @@
     },
     "affiliates": {
       "title": "Retraits de commissions",
-      "description": "Ce que les affiliés ont demandé à retirer, et ce que cela coûte de l’envoyer.",
+      "description": "Retraits du côté affiliation, payés en cédis sur les commissions. Les numéros et portefeuilles sont masqués.",
       "closed": "Les retraits de commissions sont désactivés : rien de nouveau ne peut arriver ici. Ce qui est déjà en file peut toujours être traité. Activez-les dans Réglages de la plateforme → Activité d’affiliation.",
       "tabsLabel": "Filtrer les retraits",
       "searchPlaceholder": "Nom, code ou destination",
@@ -3102,7 +3107,9 @@
         "of": "sur {amount}"
       },
       "seeRewards": "Récompenses",
-      "seeReport": "Rapport"
+      "seeReport": "Rapport",
+      "otherQueue": "Les retraits du côté publicités, payés sur les points, forment une file distincte.",
+      "otherQueueCta": "Ouvrir les retraits de points"
     },
     "vendorSales": {
       "title": "Ventes des fournisseurs",
@@ -3252,6 +3259,43 @@
         "reversal": "Annulé",
         "payout": "Versé",
         "adjustment": "Ajustement"
+      }
+    },
+    "commissionGiftCodes": {
+      "title": "Codes cadeaux de commission",
+      "description": "Codes qui ajoutent des cédis au solde de commissions d'un affilié.",
+      "intro": "Chaque code est utilisable une seule fois, par un seul affilié.",
+      "create": "Nouveau code",
+      "empty": "Aucun code cadeau de commission pour le moment.",
+      "revoke": "Révoquer",
+      "dismiss": "Fermer",
+      "none": "Aucun",
+      "redeemedBy": "Utilisé par {name}",
+      "createdOn": "Créé le {when}",
+      "status": {
+        "active": "Actif",
+        "redeemed": "Utilisé",
+        "revoked": "Révoqué"
+      },
+      "col": {
+        "code": "Code",
+        "amount": "Valeur",
+        "status": "Statut",
+        "note": "Note",
+        "redeemed": "Utilisé par"
+      },
+      "form": {
+        "code": "Code",
+        "generating": "Génération",
+        "regenerate": "Générer un autre code",
+        "codeHint": "Généré pour être impossible à deviner. Touchez pour en changer.",
+        "amount": "Valeur (GHS)",
+        "amountHint": "Ce que l'affilié reçoit, en cédis.",
+        "worth": "Vaut {amount}",
+        "note": "Note",
+        "notePlaceholder": "À quoi sert ce code",
+        "save": "Créer le code",
+        "cancel": "Annuler"
       }
     }
   },
@@ -3407,7 +3451,8 @@
       "vsPrevious": "vs les {n} jours précédents",
       "noBaseline": "Pas encore de {n} jours antérieurs à comparer",
       "belowMinimum": "Vous pourrez retirer dès que votre solde atteindra {amount}.",
-      "payoutsClosed": "Les retraits de commissions ne sont pas encore ouverts. Votre solde est en sécurité."
+      "payoutsClosed": "Les retraits de commissions ne sont pas encore ouverts. Votre solde est en sécurité.",
+      "toGo": "Encore {amount}"
     },
     "stats": {
       "label": "Votre tunnel",
@@ -3754,7 +3799,8 @@
       "passedTitle": "Point de contrôle validé",
       "passedBody": "Vous avez obtenu {n} %. Cette leçon est marquée comme terminée.",
       "failedTitle": "Pas encore",
-      "failedBody": "Vous avez obtenu {n} %. Relisez la leçon et réessayez. Le nombre de tentatives est illimité."
+      "failedBody": "Vous avez obtenu {n} %. Relisez la leçon et réessayez. Le nombre de tentatives est illimité.",
+      "again": "Refaire le test"
     },
     "withdraw": {
       "back": "Gains",
@@ -3790,9 +3836,9 @@
           "body": "Les retraits de commissions ne sont pas encore activés. Votre solde est en sécurité et n’expire pas."
         },
         "noDestination": {
-          "title": "Indiquez où l’envoyer",
-          "body": "Ajoutez un numéro mobile money ou un portefeuille avant de retirer.",
-          "cta": "Ajouter les coordonnées"
+          "title": "Indiquez-nous où envoyer",
+          "body": "Un seul compte de paiement couvre les deux côtés de SidePerks : ce que vous ajoutez ici sert aussi au paiement de vos points. Mobile money ou USDT.",
+          "cta": "Ajouter mes coordonnées"
         },
         "nothing": {
           "title": "Rien à retirer pour l’instant",
@@ -3811,6 +3857,11 @@
         "youGet": "Vous recevez",
         "inCoin": "En {coin}",
         "back": "Retour aux gains"
+      },
+      "notYet": {
+        "title": "Encore {amount}",
+        "body": "Vous pourrez retirer dès que votre solde de commissions atteint {minimum}. Vous avez {balance} disponible pour le moment.",
+        "cta": "Trouver un produit à promouvoir"
       }
     },
     "links": {
@@ -3867,6 +3918,30 @@
       "claimed": "{amount} ajoutés à votre solde de commissions.",
       "claimedNoReward": "Réclamé. Aucune récompense n’est encore fixée pour celle-ci.",
       "alreadyClaimed": "Réclamé"
+    },
+    "giftCode": {
+      "back": "Tableau de bord",
+      "title": "Utiliser un code cadeau",
+      "subtitle": "Saisissez le code de 12 caractères. Le montant arrive directement sur votre solde de commissions, en cédis.",
+      "label": "Code cadeau",
+      "placeholder": "Saisissez votre code",
+      "hint": "{entered} sur {total} caractères",
+      "submit": "Valider",
+      "success": {
+        "title": "Ajouté à votre solde",
+        "body": "{amount} est maintenant sur votre solde de commissions.",
+        "balance": "Voir mon solde",
+        "another": "Utiliser un autre code"
+      },
+      "errors": {
+        "not_found": "Ce code n'a pas été reconnu. Vérifiez-le et réessayez.",
+        "already_used": "Ce code a déjà été utilisé.",
+        "revoked": "Ce code n'est plus valable.",
+        "expired": "Ce code a expiré.",
+        "no_account": "Les codes cadeaux de commission sont réservés aux affiliés. Achetez d'abord une formation et cela fonctionnera.",
+        "not_signed_in": "Connectez-vous et réessayez.",
+        "error": "Une erreur s'est produite. Réessayez dans un instant."
+      }
     }
   }
 }

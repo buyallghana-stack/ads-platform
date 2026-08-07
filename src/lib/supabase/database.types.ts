@@ -5105,6 +5105,42 @@ export type Database = {
           word_count: number
         }[]
       }
+      admin_create_commission_gift_code: {
+        Args: {
+          p_admin_id: string
+          p_amount_minor: number
+          p_code: string
+          p_expires_at?: string
+          p_note?: string
+        }
+        Returns: Json
+      }
+      admin_list_commission_gift_codes: {
+        Args: { p_admin_id: string; p_status?: Database["public"]["Enums"]["gift_code_status"] }
+        Returns: {
+          amount_minor: number
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          note: string
+          redeemed_at: string
+          redeemed_by: string
+          status: string
+        }[]
+      }
+      admin_revoke_commission_gift_code: {
+        Args: { p_admin_id: string; p_code_id: string }
+        Returns: Json
+      }
+      generate_commission_gift_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      redeem_commission_gift_code: {
+        Args: { p_code: string; p_user_id: string }
+        Returns: Json
+      }
       course_resources: {
         Args: { p_product_id: string; p_user_id?: string }
         Returns: {

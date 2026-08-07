@@ -1526,8 +1526,8 @@
       }
     },
     "payouts": {
-      "title": "Payouts",
-      "description": "Approve, hold or decline withdrawal requests. Account numbers and wallets are masked. Open a request to reveal one.",
+      "title": "Points payouts",
+      "description": "Withdrawals from the ads business, paid out of points. Account numbers and wallets are masked. Open a request to reveal one.",
       "filterLabel": "Filter by status",
       "filters": {
         "queue": "Needs a decision",
@@ -1621,7 +1621,10 @@
       },
       "errors": {
         "dismiss": "Dismiss"
-      }
+      },
+      "otherQueue": "Commission withdrawals from the affiliate business are a separate queue.",
+      "otherQueueCta": "Open commission withdrawals",
+      "otherQueueWaiting": "{n, plural, =0 {none waiting} one {# waiting} other {# waiting}}"
     },
     "people": {
       "tabsLabel": "Filter people",
@@ -2841,7 +2844,9 @@
         "notePlaceholder": "What this code is for",
         "save": "Create code",
         "cancel": "Cancel"
-      }
+      },
+      "sectionPoints": "Points gift codes",
+      "sectionCommission": "Commission gift codes"
     },
     "leaderboard": {
       "title": "Leaderboard",
@@ -2955,7 +2960,7 @@
     },
     "affiliates": {
       "title": "Commission withdrawals",
-      "description": "What affiliates have asked to take out, and what it costs to send it.",
+      "description": "Withdrawals from the affiliate business, paid out of commission in cedis. Account numbers and wallets are masked.",
       "closed": "Commission withdrawals are switched off, so nothing new can arrive here. Anything already in the queue can still be decided. Turn them on under Platform settings → Affiliate business.",
       "tabsLabel": "Filter withdrawals",
       "searchPlaceholder": "Name, code or destination",
@@ -3102,7 +3107,9 @@
         "of": "of {amount}"
       },
       "seeRewards": "Rewards",
-      "seeReport": "Report"
+      "seeReport": "Report",
+      "otherQueue": "Withdrawals from the ads business, paid out of points, are a separate queue.",
+      "otherQueueCta": "Open points payouts"
     },
     "vendorSales": {
       "title": "Vendor sales",
@@ -3252,6 +3259,43 @@
         "reversal": "Reversed",
         "payout": "Paid out",
         "adjustment": "Adjustment"
+      }
+    },
+    "commissionGiftCodes": {
+      "title": "Commission gift codes",
+      "description": "Codes that add cedis to an affiliate's commission balance.",
+      "intro": "Each code can be redeemed once, by one affiliate.",
+      "create": "New code",
+      "empty": "No commission gift codes yet.",
+      "revoke": "Revoke",
+      "dismiss": "Dismiss",
+      "none": "None",
+      "redeemedBy": "Redeemed by {name}",
+      "createdOn": "Created {when}",
+      "status": {
+        "active": "Active",
+        "redeemed": "Redeemed",
+        "revoked": "Revoked"
+      },
+      "col": {
+        "code": "Code",
+        "amount": "Worth",
+        "status": "Status",
+        "note": "Note",
+        "redeemed": "Redeemed by"
+      },
+      "form": {
+        "code": "Code",
+        "generating": "Generating",
+        "regenerate": "Generate a different code",
+        "codeHint": "Generated so it cannot be guessed. Tap to change it.",
+        "amount": "Worth (GHS)",
+        "amountHint": "What the affiliate receives, in cedis.",
+        "worth": "Worth {amount}",
+        "note": "Note",
+        "notePlaceholder": "What this code is for",
+        "save": "Create code",
+        "cancel": "Cancel"
       }
     }
   },
@@ -3407,7 +3451,8 @@
       "vsPrevious": "vs the previous {n} days",
       "noBaseline": "No earlier {n} days to compare against yet",
       "belowMinimum": "You can withdraw once your balance reaches {amount}.",
-      "payoutsClosed": "Commission withdrawals are not open yet. Your balance is safe."
+      "payoutsClosed": "Commission withdrawals are not open yet. Your balance is safe.",
+      "toGo": "{amount} to go"
     },
     "stats": {
       "label": "Your funnel",
@@ -3754,7 +3799,8 @@
       "passedTitle": "Checkpoint passed",
       "passedBody": "You scored {n}%. This lesson is marked complete.",
       "failedTitle": "Not quite",
-      "failedBody": "You scored {n}%. Go back over the lesson and try again. There is no limit on attempts."
+      "failedBody": "You scored {n}%. Go back over the lesson and try again. There is no limit on attempts.",
+      "again": "Take it again"
     },
     "withdraw": {
       "back": "Earnings",
@@ -3791,7 +3837,7 @@
         },
         "noDestination": {
           "title": "Tell us where to send it",
-          "body": "Add a mobile money number or a wallet before you withdraw.",
+          "body": "One payout account covers both sides of SidePerks, so whatever you add here is also where your points are paid. Mobile money or USDT.",
           "cta": "Add payout details"
         },
         "nothing": {
@@ -3811,6 +3857,11 @@
         "youGet": "You receive",
         "inCoin": "In {coin}",
         "back": "Back to earnings"
+      },
+      "notYet": {
+        "title": "{amount} to go",
+        "body": "You can withdraw once your commission balance reaches {minimum}. You have {balance} cleared so far.",
+        "cta": "Find something to promote"
       }
     },
     "links": {
@@ -3867,6 +3918,30 @@
       "claimed": "{amount} added to your commission balance.",
       "claimedNoReward": "Claimed. No reward is set on this one yet.",
       "alreadyClaimed": "Claimed"
+    },
+    "giftCode": {
+      "back": "Dashboard",
+      "title": "Redeem a gift code",
+      "subtitle": "Enter the 12-character code. The amount goes straight into your commission balance in cedis.",
+      "label": "Gift code",
+      "placeholder": "Enter your code",
+      "hint": "{entered} of {total} characters",
+      "submit": "Redeem",
+      "success": {
+        "title": "Added to your balance",
+        "body": "{amount} is now in your commission balance.",
+        "balance": "See my balance",
+        "another": "Redeem another code"
+      },
+      "errors": {
+        "not_found": "That code was not recognised. Check it and try again.",
+        "already_used": "That code has already been redeemed.",
+        "revoked": "That code is no longer valid.",
+        "expired": "That code has expired.",
+        "no_account": "Commission gift codes are for affiliates. Buy a training programme first and this will work.",
+        "not_signed_in": "Sign in and try again.",
+        "error": "Something went wrong. Try again in a moment."
+      }
     }
   }
 }

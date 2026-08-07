@@ -136,6 +136,55 @@ export function CommissionWithdraw({
     )
   }
 
+  /* ----------------  not enough yet  ----------------
+     Its own screen, above the other blocked states, because it is the only one
+     that is a matter of TIME rather than of something being wrong. The bar and
+     the shortfall are the same answer the ads wizard gives on points, and the
+     way in is the shop rather than a dead end: what closes this gap is another
+     sale, so the button goes where the products are.
+
+     ⚠️ Reachable at all only because the panel's Withdraw button is no longer
+     hidden below the minimum. It used to fall through to the FORM, which
+     accepted an amount and then refused it at Continue — the same answer three
+     taps later, and the reason the operator could not find the flow. */
+  if (payoutsEnabled && destination && !openRequest && balanceMinor < minimumMinor) {
+    const shortMinor = minimumMinor - balanceMinor
+    return (
+      <section className="rounded-(--radius-panel) border border-ink-200 bg-surface p-6 text-center">
+        <span
+          aria-hidden
+          className="mx-auto grid size-12 place-items-center rounded-full bg-brand-50 text-brand-700"
+        >
+          <Wallet className="size-6" />
+        </span>
+        <h2 className="mt-3 text-[1rem] font-semibold text-ink-900">
+          {t('notYet.title', { amount: cedis(shortMinor) })}
+        </h2>
+        <p className="mx-auto mt-1.5 max-w-sm text-[0.8125rem] leading-snug text-ink-500">
+          {t('notYet.body', { minimum: cedis(minimumMinor), balance: cedis(balanceMinor) })}
+        </p>
+
+        <div className="mx-auto mt-4 w-full max-w-[16rem]">
+          <div className="h-1.5 overflow-hidden rounded-full bg-ink-100">
+            <span
+              className="block h-full rounded-full bg-brand-600"
+              style={{
+                width: `${Math.min((balanceMinor / Math.max(minimumMinor, 1)) * 100, 100)}%`,
+              }}
+            />
+          </div>
+        </div>
+
+        <Link
+          href="/shop"
+          className="mt-5 inline-flex rounded-(--radius-input) bg-brand-600 px-4 py-2.5 text-[0.875rem] font-semibold text-white transition-colors hover:bg-brand-500"
+        >
+          {t('notYet.cta')}
+        </Link>
+      </section>
+    )
+  }
+
   /* ---------------- blocked before it starts ---------------- */
   if (!payoutsEnabled || !destination || openRequest || balanceMinor <= 0) {
     const key = !payoutsEnabled
