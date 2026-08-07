@@ -212,7 +212,7 @@ export const termsEn: LegalDoc = {
         },
         {
           kind: 'p',
-          text: 'Withdrawals and refunds do not affect a standing, and accounts under review may be excluded. Placing on the leaderboard carries recognition only. No prize or payment is attached to it.',
+          text: 'Withdrawals and refunds do not affect a standing, and accounts under review may be excluded. Placing on a leaderboard pays nothing by itself. Where a task sets a ranking as its goal, reaching that ranking can complete the task and pay its reward once, and once only: if you are later overtaken, nothing is taken back, and climbing to the same place again does not pay a second time.',
         },
       ],
     },

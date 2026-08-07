@@ -4,16 +4,12 @@ import { notFound } from 'next/navigation'
 
 import { ArrowLeft, Award, BookOpen, CheckCircle2, Clock, FileText, Layers, PlayCircle } from 'lucide-react'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
-
-import { AffiliateHeader } from '@/components/affiliate/AffiliateHeader'
 import { PromotePanel } from '@/components/affiliate/PromotePanel'
 import { Link, redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
 import { courseLength, coverUrl } from '@/lib/market/covers'
 import { getPromoteInfo, getShopProduct } from '@/lib/market/data'
 import { cedis } from '@/lib/market/money'
-import { getNotifications, getUnreadCount } from '@/lib/notifications/data'
-import { serverNow } from '@/lib/server-now'
 import { getOrigin } from '@/lib/request-context'
 
 export const metadata: Metadata = {
@@ -66,10 +62,8 @@ export default async function AffiliateProductPage({
 
   const t = await getTranslations('affiliate.product')
 
-  const [detail, notifications, unreadCount, origin] = await Promise.all([
+  const [detail, origin] = await Promise.all([
     getShopProduct(slug, user!.id),
-    getNotifications(30),
-    getUnreadCount(),
     getOrigin(),
   ])
 
@@ -94,7 +88,6 @@ export default async function AffiliateProductPage({
         aria-hidden
         className="bg-field pointer-events-none absolute inset-x-0 top-0 -z-10 h-[26rem]"
       />
-      <AffiliateHeader notifications={notifications} unreadCount={unreadCount} now={serverNow()} />
 
       <Link
         href="/shop"

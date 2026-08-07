@@ -104,6 +104,25 @@ export function businessDetails(locale: 'en' | 'fr' = 'en'): string[] {
  * a new earning route, a new disclosure, another referral level — makes that
  * claim stale. The honest move then is to set this back to false until it has
  * been looked at again, not to leave it true because it once was.
+ *
+ * ⚠️ WHAT HE HAS NOT SEEN, as of 2026-08-07. Kept as a list rather than a
+ * memory, because the operator has to send it and I cannot:
+ *
+ *   1. §4 and §19, link ads as an earning route and the advertiser
+ *      disclaimer (2026-07-31).
+ *   2. The withdrawal fee and the free-earning window (2026-08-01).
+ *   3. §8, the leaderboard. It used to say a ranking carried recognition only
+ *      and no payment. Affiliate tasks can now set a ranking as their goal, so
+ *      the clause was rewritten to say a rank pays once through a task and
+ *      never again. The operator asked for that change knowingly.
+ *   4. That affiliate games and tasks pay REAL MONEY into a commission
+ *      balance. The July opinion cleared games whose prizes were points and
+ *      whose plays were never sold. Cash prizes are a different question and
+ *      he has not been asked it.
+ *
+ * The operator has decided to keep this true meanwhile. That is their call to
+ * make; the list is here so the conversation with him is one paragraph rather
+ * than an archaeology exercise.
  */
 export const LEGAL_REVIEWED = true
 

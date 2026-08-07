@@ -2,16 +2,12 @@ import type { Metadata } from 'next'
 
 import { Banknote, Clock, Info, Wallet } from 'lucide-react'
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server'
-
-import { AffiliateHeader } from '@/components/affiliate/AffiliateHeader'
 import { StatementList } from '@/components/affiliate/StatementList'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { Link, redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
 import { getAffiliateDashboard, getAffiliateStatement } from '@/lib/market/data'
 import { cedis } from '@/lib/market/money'
-import { getNotifications, getUnreadCount } from '@/lib/notifications/data'
-import { serverNow } from '@/lib/server-now'
 import { cn } from '@/lib/cn'
 
 export const metadata: Metadata = {
@@ -60,11 +56,9 @@ export default async function CommissionPage({
   const t = await getTranslations('affiliate.statement')
   const format = await getFormatter()
 
-  const [dashboard, statement, notifications, unreadCount] = await Promise.all([
+  const [dashboard, statement] = await Promise.all([
     getAffiliateDashboard(user!.id),
     getAffiliateStatement(user!.id),
-    getNotifications(30),
-    getUnreadCount(),
   ])
 
   const balance = dashboard.balance_minor ?? 0
@@ -82,7 +76,6 @@ export default async function CommissionPage({
         aria-hidden
         className="bg-field pointer-events-none absolute inset-x-0 top-0 -z-10 h-[26rem]"
       />
-      <AffiliateHeader notifications={notifications} unreadCount={unreadCount} now={serverNow()} />
 
       <div>
         <h1 className="text-[1.375rem] font-semibold tracking-[-0.02em] text-ink-900 sm:text-[1.625rem]">

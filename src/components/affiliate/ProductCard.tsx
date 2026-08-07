@@ -63,8 +63,13 @@ export async function ProductCard({ product }: { product: ShopProduct }) {
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-(--radius-panel) border border-ink-200 bg-surface transition-colors hover:border-ink-300">
-      {/* Cover. Fixed aspect so a grid of mixed uploads does not stagger. */}
-      <div className="relative aspect-[16/9] shrink-0 overflow-hidden bg-ink-100">
+      {/* Cover. Fixed aspect so a grid of mixed uploads does not stagger, and
+          4:3 rather than 16:9 (operator, 2026-08-07): the card is a fixed
+          column, so the only way to give the image more room is to make it
+          taller. `object-cover` keeps it proportional at any shape, so a wide
+          upload is cropped rather than squashed. The card lost the description
+          in the same pass, so this costs nothing in height overall. */}
+      <div className="relative aspect-[4/3] shrink-0 overflow-hidden bg-ink-100">
         {cover ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
@@ -110,11 +115,11 @@ export async function ProductCard({ product }: { product: ShopProduct }) {
           </Link>
         </h3>
 
-        {product.description && (
-          <p className="mt-1 line-clamp-2 text-[0.75rem] leading-snug text-ink-500 sm:text-[0.8125rem]">
-            {product.description}
-          </p>
-        )}
+        {/* NO DESCRIPTION (operator, 2026-08-07). Two clamped lines of prose
+            was the largest block on the card and the least useful: it is the
+            same sentence for every product in a range, it never fits, and the
+            product page carries it in full for anybody who taps through. The
+            cover took the height it gave back. */}
 
         {/* One line, smallest type on the card. Two rows of counts were reading
             as loudly as the money underneath them.
@@ -129,107 +134,66 @@ export async function ProductCard({ product }: { product: ShopProduct }) {
           )}
         </p>
 
-        {/* ── the money, or the progress ─────────────────────────────── */}
-        <div className="mt-3 border-t border-ink-200 pt-3">
-          {product.owned ? (
-            <>
-              <div className="flex items-center justify-between text-[0.75rem]">
-                <span className="text-ink-500">{t('yourProgress')}</span>
-                <span className="font-semibold tabular-nums text-ink-900">{product.percent}%</span>
-              </div>
-              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-ink-100">
-                <div
-                  className="h-full rounded-full bg-success-500"
-                  style={{ width: `${Math.min(Math.max(product.percent, 0), 100)}%` }}
-                />
-              </div>
-            </>
-          ) : (
-            /*
-              Side by side at every width, including two-across on a phone.
-              Stacking them was what made the card a column: the labels are two
-              short words and the values are five characters, so 165px carries
-              both comfortably once the uppercase tracking is gone.
+        {/* ── the money ──────────────────────────────────────────────
+            Side by side at every width, including two cards across a phone.
+            Stacking them was what made this a column.
 
-              The CASH stays the larger of the two. It is the figure that ranks
-              the grid: 20% of GHS 400 beats 35% of GHS 100, so a reader
-              comparing percentages is comparing the wrong number.
-            */
-            /* Nothing here wraps and nothing here truncates. A label that
-               breaks over two lines re-stacks the row it was meant to fit in,
-               and "GHS 30…" is a payout figure with its last digit missing,
-               which is worse than any layout problem it solves. So the labels
-               are `nowrap` and short, and the earnings block never shrinks:
-               if anything has to give, it is the rate on the left. */
-            /* Both labels and both values are `nowrap`, and the type steps up
-               only once there is room for it. Two cards across a 390px phone
-               leaves 141px inside a card: "Commission" and "GHS 30.00" at the
-               sizes this used above `sm` come to 148px, so the label was
-               clipping to "Commis…". A clipped label on a money block is worse
-               than a small one. */
-            /* `overflow-hidden` on the row is the backstop: both blocks refuse
-               to shrink, so an extreme pairing (a 100% rate against a
-               four-figure payout) would otherwise push the card wider than its
-               grid column and take the page with it. Clipped inside the card is
-               contained; a sideways-scrolling page is not. */
-            <div className="flex items-end justify-between gap-1.5 overflow-hidden">
-              <div className="shrink-0">
-                {/* "Rate" on a phone, "Commission" once there is room. Both
-                    values are `nowrap` so neither can give, which means the
-                    pair sets the card's minimum width: at 360px the long label
-                    pushed the whole grid 3px past the viewport. A shorter word
-                    is the fix; truncating it to "Commis…" over a money figure
-                    is not. */}
-                <p className="text-[0.625rem] leading-none whitespace-nowrap text-ink-500 sm:text-[0.6875rem]">
-                  <span className="sm:hidden">{t('rateShort')}</span>
-                  <span className="hidden sm:inline">{t('commission')}</span>
-                </p>
-                <p className="mt-1 text-[0.875rem] font-semibold leading-none tabular-nums text-success-600 sm:text-[0.9375rem]">
-                  {product.l1_rate === null ? '0%' : `${Number(product.l1_rate)}%`}
-                </p>
-              </div>
-              <div className="shrink-0 text-right">
-                <p className="text-[0.625rem] leading-none whitespace-nowrap text-ink-500 sm:text-[0.6875rem]">
-                  {t('perSale')}
-                </p>
-                <p className="mt-1 text-[0.9375rem] font-bold leading-none whitespace-nowrap tabular-nums text-ink-900 sm:text-[1rem]">
-                  {product.l1_earn_minor === null ? cedis(0) : cedis(product.l1_earn_minor)}
-                </p>
-              </div>
+            The CASH is the larger of the two: it ranks the grid, because 20%
+            of GHS 400 beats 35% of GHS 100, and a reader comparing percentages
+            is comparing the wrong number.
+
+            Nothing wraps and nothing truncates. Both labels are `nowrap` and
+            the left one shortens to "Rate" on a phone, because "Commission"
+            beside "GHS 30.00" set a minimum width that pushed the whole grid
+            3px past a 360px screen. `overflow-hidden` on the row is the
+            backstop for an extreme pairing (a 100% rate against a four-figure
+            payout): clipped inside the card is contained, a sideways-scrolling
+            page is not. */}
+        <div className="mt-3 border-t border-ink-200 pt-3">
+          <div className="flex items-end justify-between gap-1.5 overflow-hidden">
+            <div className="shrink-0">
+              <p className="text-[0.625rem] leading-none whitespace-nowrap text-ink-500 sm:text-[0.6875rem]">
+                <span className="sm:hidden">{t('rateShort')}</span>
+                <span className="hidden sm:inline">{t('commission')}</span>
+              </p>
+              <p className="mt-1 text-[0.875rem] font-semibold leading-none tabular-nums text-success-600 sm:text-[0.9375rem]">
+                {product.l1_rate === null ? '0%' : `${Number(product.l1_rate)}%`}
+              </p>
             </div>
-          )}
+            <div className="shrink-0 text-right">
+              <p className="text-[0.625rem] leading-none whitespace-nowrap text-ink-500 sm:text-[0.6875rem]">
+                {t('perSale')}
+              </p>
+              <p className="mt-1 text-[0.9375rem] font-bold leading-none whitespace-nowrap tabular-nums text-ink-900 sm:text-[1rem]">
+                {product.l1_earn_minor === null ? cedis(0) : cedis(product.l1_earn_minor)}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* ── the action ───────────────────────────────────────────────
-            `mt-auto` pins it to the bottom of the card. Two across, one card
-            carrying a progress bar and its neighbour carrying a money block,
-            the two blocks are different heights — so without this the primary
-            buttons sit at different heights in the same row, which reads as a
-            rendering fault before it reads as content. The grid already
-            stretches the cards to match; this makes the contents agree. */}
-        <div className="mt-auto flex items-center gap-1.5 pt-2.5">
-          {product.owned ? (
-            <Link
-              href={`/learn/${product.slug}`}
-              className="min-w-0 flex-1 truncate rounded-(--radius-input) bg-brand-600 px-3 py-2.5 text-center text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-500"
-            >
-              {product.percent > 0 ? t('continue') : t('start')}
-            </Link>
-          ) : (
-            <Link
-              href={`/shop/${product.slug}`}
-              className={cn(
-                'min-w-0 flex-1 truncate rounded-(--radius-input) px-3 py-2.5 text-center text-[0.8125rem] font-semibold transition-colors',
-                product.can_promote
-                  ? 'bg-brand-600 text-white hover:bg-brand-500'
-                  : 'border border-ink-300 text-ink-700 hover:border-brand-600/50 hover:text-brand-700',
-              )}
-            >
-              {product.can_promote ? t('promote') : training ? t('view') : t('viewProduct')}
-            </Link>
-          )}
+            `mt-auto` pins it to the bottom, so the primary buttons line up
+            across a row whose cards have titles of different lengths. The grid
+            already stretches the cards to match; this makes their contents
+            agree.
 
-          {/* Share goes to the product page rather than copying here. A copied
+            There is no "Continue" here any more: an owned course never reaches
+            this component, because /shop filters it out (operator, 2026-08-07).
+            Owned courses belong on Learn. */}
+        <div className="mt-auto flex items-center gap-1.5 pt-2.5">
+          <Link
+            href={`/shop/${product.slug}`}
+            className={cn(
+              'min-w-0 flex-1 truncate rounded-(--radius-input) px-3 py-2.5 text-center text-[0.8125rem] font-semibold transition-colors',
+              product.can_promote
+                ? 'bg-brand-600 text-white hover:bg-brand-500'
+                : 'border border-ink-300 text-ink-700 hover:border-brand-600/50 hover:text-brand-700',
+            )}
+          >
+            {product.can_promote ? t('promote') : training ? t('view') : t('viewProduct')}
+          </Link>
+
+        {/* Share goes to the product page rather than copying here. A copied
               link has to carry the affiliate code, and a card that silently
               copies something is a card that can silently copy the wrong thing.
               The promote panel shows the link before it is shared.
@@ -244,7 +208,7 @@ export async function ProductCard({ product }: { product: ShopProduct }) {
             aria-label={t('shareLabel', { title: product.title })}
             className="hidden size-9 shrink-0 place-items-center rounded-(--radius-input) border border-ink-200 text-ink-600 transition-colors hover:border-brand-600/50 hover:text-brand-700 min-[380px]:grid"
           >
-            {product.can_promote || product.owned ? (
+            {product.can_promote ? (
               <Share2 aria-hidden className="size-4" />
             ) : (
               <Lock aria-hidden className="size-4" />

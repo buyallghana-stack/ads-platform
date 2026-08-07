@@ -8,7 +8,7 @@ import { EarningsPanel } from '@/components/affiliate/EarningsPanel'
 import { JoinPanel } from '@/components/affiliate/JoinPanel'
 import { PeriodPicker } from '@/components/affiliate/PeriodPicker'
 import { PerformanceOverview } from '@/components/affiliate/PerformanceOverview'
-import { QuickTools } from '@/components/affiliate/QuickTools'
+import { MarketLinks } from '@/components/affiliate/MarketLinks'
 import { StatStrip } from '@/components/affiliate/StatStrip'
 import { TrainingCard } from '@/components/affiliate/TrainingCard'
 import { Card, CardHeader } from '@/components/ui/Card'
@@ -214,7 +214,7 @@ export default async function AffiliateHomePage({
 
       {focus && <TrainingCard course={focus} />}
 
-      <QuickTools />
+      <MarketLinks />
 
       <Card>
         <CardHeader title={t('chart.title')} description={t('chart.description', { n: days })} />

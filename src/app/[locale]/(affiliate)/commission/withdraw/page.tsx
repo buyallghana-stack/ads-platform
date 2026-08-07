@@ -2,14 +2,10 @@ import type { Metadata } from 'next'
 
 import { ArrowLeft } from 'lucide-react'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
-
-import { AffiliateHeader } from '@/components/affiliate/AffiliateHeader'
 import { CommissionWithdraw } from '@/components/affiliate/CommissionWithdraw'
 import { Link, redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
 import { getAffiliateDashboard, getAffiliateStatement } from '@/lib/market/data'
-import { getNotifications, getUnreadCount } from '@/lib/notifications/data'
-import { serverNow } from '@/lib/server-now'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export const metadata: Metadata = {
@@ -64,15 +60,11 @@ export default async function CommissionWithdrawPage({
 
   const [
     dashboard,
-    notifications,
-    unreadCount,
     { data: configRows },
     { data: details },
     statement,
   ] = await Promise.all([
     getAffiliateDashboard(user!.id),
-    getNotifications(30),
-    getUnreadCount(),
     admin.from('app_config').select('key, value').in('key', ['redemption_fee_percent']),
     admin
       .from('user_payout_details')
@@ -119,7 +111,6 @@ export default async function CommissionWithdrawPage({
         aria-hidden
         className="bg-field pointer-events-none absolute inset-x-0 top-0 -z-10 h-[26rem]"
       />
-      <AffiliateHeader notifications={notifications} unreadCount={unreadCount} now={serverNow()} />
 
       <Link
         href="/commission"

@@ -2378,7 +2378,8 @@
         "places": "places",
         "perHour": "par heure",
         "days": "jours",
-        "pesewas": "pesewas"
+        "pesewas": "pesewas",
+        "perWeek": "par semaine"
       },
       "groups": {
         "earning": {
@@ -2589,6 +2590,27 @@
         "affiliateL2": {
           "label": "Taux par défaut pour son parrain",
           "description": "Payé sur ce qui reste après le vendeur, à l’affilié qui l’a recruté. Zéro désactive le second niveau."
+        },
+        "affiliateGames": {
+          "label": "Les affiliés peuvent jouer aux jeux",
+          "description": "Désactivé, l’écran l’explique et aucune partie n’est possible. Les parties viennent du programme de formation, pas d’une formule publicitaire.",
+          "warning": "Un lot ici verse de vrais cedis sur un solde de commissions, qui est retirable. Réglez la table des lots avant d’activer."
+        },
+        "affiliatePlaysBeginner": {
+          "label": "Parties par semaine, Débutant",
+          "description": "Combien de parties reçoit chaque semaine un affilié du programme Débutant."
+        },
+        "affiliatePlaysPro": {
+          "label": "Parties par semaine, Professionnel",
+          "description": "Combien de parties reçoit chaque semaine un affilié du programme Professionnel. Détenir les deux programmes retient le chiffre le plus élevé."
+        },
+        "affiliateBoardRanks": {
+          "label": "Places au classement des gains",
+          "description": "Jusqu’où descend le classement des affiliés. Une personne au-delà de la limite connaît quand même sa propre position."
+        },
+        "affiliateBoardZeros": {
+          "label": "Afficher les affiliés sans gain",
+          "description": "Désactivé, le classement se limite aux personnes ayant réellement gagné sur la période."
         }
       }
     },
@@ -3229,14 +3251,6 @@
       "continue": "Continuer la formation",
       "review": "Revoir le cours"
     },
-    "tools": {
-      "label": "Raccourcis affiliation",
-      "title": "Outils rapides",
-      "browse": "Parcourir",
-      "links": "Votre lien",
-      "statement": "Relevé",
-      "payouts": "Retraits"
-    },
     "chart": {
       "title": "Performance",
       "description": "Gains et clics sur les {n} derniers jours.",
@@ -3591,6 +3605,72 @@
         "inCoin": "En {coin}",
         "back": "Retour aux gains"
       }
+    },
+    "links": {
+      "label": "Autres actions",
+      "games": "Jeux",
+      "leaderboard": "Classement",
+      "gift": "Code cadeau",
+      "tasks": "Tâches"
+    },
+    "games": {
+      "back": "Tableau de bord",
+      "title": "Jeux",
+      "subtitle": "Une partie ou trois par semaine, et tout gain va directement sur votre solde de commissions.",
+      "closed": {
+        "title": "Les jeux ne sont pas encore ouverts",
+        "body": "Ils sont prêts et attendent le réglage des lots. Rien ne change sur votre compte d’ici là."
+      },
+      "playsLeft": "{n, plural, =0 {Aucune partie restante cette semaine} one {# partie restante cette semaine} other {# parties restantes cette semaine}}",
+      "allowance": "{n, plural, one {# par semaine avec votre programme} other {# par semaine avec votre programme}}",
+      "noProgramme": "Les parties viennent avec un programme de formation. Le vôtre a pris fin ou n’a pas commencé.",
+      "play": "Jouer",
+      "youWon": "Vous avez gagné",
+      "inBalance": "C’est déjà sur votre solde de commissions.",
+      "wonExtra": "{n, plural, one {Une partie de plus, offerte.} other {# parties de plus, offertes.}}",
+      "betterLuck": "Rien cette fois. La partie est utilisée.",
+      "comeBack": "Vos parties reviennent au début de la semaine prochaine.",
+      "box": {
+        "title": "Boîte mystère",
+        "body": "Ouvrez-la et voyez ce qu’il y a dedans."
+      },
+      "wheel": {
+        "title": "Tourner la roue",
+        "body": "Un tour, un lot, celui sur lequel elle s’arrête."
+      }
+    },
+    "board": {
+      "back": "Tableau de bord",
+      "title": "Classement des gains",
+      "subtitle": "Qui a gagné le plus de commissions. De vrais cedis, pas des points.",
+      "periodLabel": "Choisir une période",
+      "period": {
+        "week": "Cette semaine",
+        "month": "Ce mois-ci",
+        "all": "Depuis le début"
+      },
+      "you": "Vous êtes",
+      "place": "n°{rank}",
+      "unranked": "Vous n’êtes pas encore au classement sur cette période. Toute commission validée vous y place.",
+      "empty": "Personne n’a gagné de commission sur cette période."
+    },
+    "tasks": {
+      "back": "Tableau de bord",
+      "title": "Tâches",
+      "subtitle": "Des objectifs qui rapportent de l’argent réel. Chacun paie une seule fois.",
+      "sections": {
+        "ready": "{n, plural, one {# à réclamer} other {# à réclamer}}",
+        "working": "En cours",
+        "done": "Terminées"
+      },
+      "nothingWaiting": "Rien en cours pour le moment.",
+      "progress": "{progress} sur {target}",
+      "rankNow": "Vous êtes n°{rank}. Atteignez le top {target}.",
+      "rankNone": "Pas encore au classement. Atteignez le top {target}.",
+      "claim": "Réclamer",
+      "claimed": "{amount} ajoutés à votre solde de commissions.",
+      "claimedNoReward": "Réclamé. Aucune récompense n’est encore fixée pour celle-ci.",
+      "alreadyClaimed": "Réclamé"
     }
   }
 }

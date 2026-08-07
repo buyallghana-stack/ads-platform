@@ -4618,6 +4618,26 @@ export type Database = {
           created_at: string
         }
       }
+      affiliate_game_status: { Args: { p_user_id: string }; Returns: Json }
+      affiliate_leaderboard: {
+        Args: { p_limit?: number; p_period?: string }
+        Returns: {
+          rank: number
+          user_id: string
+          display_name: string
+          avatar_path: string | null
+          amount_minor: number
+          previous_rank: number | null
+          movement: string
+        }[]
+      }
+      affiliate_leaderboard_standing: {
+        Args: { p_period?: string; p_user_id: string }
+        Returns: Json
+      }
+      get_affiliate_tasks: { Args: { p_user_id: string }; Returns: Json }
+      play_affiliate_game: { Args: { p_game: string; p_user_id: string }; Returns: Json }
+      claim_affiliate_task: { Args: { p_task_id: string; p_user_id: string }; Returns: Json }
       admin_vendor_sales_report: {
         Args: { p_from?: string; p_to?: string }
         Returns: Json

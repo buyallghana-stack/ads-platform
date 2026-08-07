@@ -360,6 +360,49 @@ export default async function AdminConfigPage({
           step: 0.5,
           suffix: t('units.percent'),
         },
+        {
+          /* Off until the prize table is tuned, exactly as the points games
+             shipped. A game here pays CEDIS, so this switch is the one that
+             lets real money leave through a prize. */
+          key: 'affiliate_games_enabled',
+          label: t('fields.affiliateGames.label'),
+          description: t('fields.affiliateGames.description'),
+          warning: t('fields.affiliateGames.warning'),
+          kind: 'toggle',
+        },
+        {
+          key: 'affiliate_weekly_plays_beginner',
+          label: t('fields.affiliatePlaysBeginner.label'),
+          description: t('fields.affiliatePlaysBeginner.description'),
+          kind: 'number',
+          min: 0,
+          max: 50,
+          suffix: t('units.perWeek'),
+        },
+        {
+          key: 'affiliate_weekly_plays_professional',
+          label: t('fields.affiliatePlaysPro.label'),
+          description: t('fields.affiliatePlaysPro.description'),
+          kind: 'number',
+          min: 0,
+          max: 50,
+          suffix: t('units.perWeek'),
+        },
+        {
+          key: 'affiliate_leaderboard_visible_ranks',
+          label: t('fields.affiliateBoardRanks.label'),
+          description: t('fields.affiliateBoardRanks.description'),
+          kind: 'number',
+          min: 3,
+          max: 500,
+          suffix: t('units.places'),
+        },
+        {
+          key: 'affiliate_leaderboard_shows_zero_earners',
+          label: t('fields.affiliateBoardZeros.label'),
+          description: t('fields.affiliateBoardZeros.description'),
+          kind: 'toggle',
+        },
       ],
     },
     {

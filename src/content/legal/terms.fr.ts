@@ -186,7 +186,7 @@ export const termsFr: LegalDoc = {
         },
         {
           kind: 'p',
-          text: "Les retraits et les remboursements n'affectent pas un classement, et les comptes en cours d'examen peuvent en être exclus. Figurer au classement n'apporte qu'une reconnaissance : aucun lot ni paiement n'y est attaché.",
+          text: "Les retraits et les remboursements n'affectent pas un classement, et les comptes en cours d'examen peuvent en être exclus. Figurer à un classement ne rapporte rien en soi. Lorsqu'une tâche fixe un rang comme objectif, atteindre ce rang peut valider la tâche et verser sa récompense une seule fois : si vous êtes ensuite dépassé, rien ne vous est repris, et revenir au même rang ne paie pas une seconde fois.",
         },
       ],
     },

@@ -2,14 +2,10 @@ import type { Metadata } from 'next'
 
 import { Award, GraduationCap } from 'lucide-react'
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server'
-
-import { AffiliateHeader } from '@/components/affiliate/AffiliateHeader'
 import { Link, redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
 import { coverUrl } from '@/lib/market/covers'
 import { getMyLearning } from '@/lib/market/data'
-import { getNotifications, getUnreadCount } from '@/lib/notifications/data'
-import { serverNow } from '@/lib/server-now'
 
 export const metadata: Metadata = {
   title: 'Learn',
@@ -47,10 +43,8 @@ export default async function LearnPage({
   const t = await getTranslations('affiliate.learn')
   const format = await getFormatter()
 
-  const [{ certificates, ongoing }, notifications, unreadCount] = await Promise.all([
+  const [{ certificates, ongoing }] = await Promise.all([
     getMyLearning(user!.id),
-    getNotifications(30),
-    getUnreadCount(),
   ])
 
   const empty = ongoing.length === 0 && certificates.length === 0
@@ -61,7 +55,6 @@ export default async function LearnPage({
         aria-hidden
         className="bg-field pointer-events-none absolute inset-x-0 top-0 -z-10 h-[26rem]"
       />
-      <AffiliateHeader notifications={notifications} unreadCount={unreadCount} now={serverNow()} />
 
       <div>
         <h1 className="text-[1.375rem] font-semibold tracking-[-0.02em] text-ink-900 sm:text-[1.625rem]">

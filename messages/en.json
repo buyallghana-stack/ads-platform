@@ -2378,7 +2378,8 @@
         "places": "places",
         "perHour": "per hour",
         "days": "days",
-        "pesewas": "pesewas"
+        "pesewas": "pesewas",
+        "perWeek": "per week"
       },
       "groups": {
         "earning": {
@@ -2589,6 +2590,27 @@
         "affiliateL2": {
           "label": "Default rate for their recruiter",
           "description": "Paid out of what is left after the seller, to the affiliate who brought them in. Zero switches the second level off."
+        },
+        "affiliateGames": {
+          "label": "Affiliates can play the games",
+          "description": "Off means the screen explains itself and no play is possible. Plays come from the training programme, not from an ads plan.",
+          "warning": "A prize here pays real cedis into a commission balance, which is withdrawable. Set the prize table before turning this on."
+        },
+        "affiliatePlaysBeginner": {
+          "label": "Plays a week, Beginner",
+          "description": "How many games an affiliate on the Beginner programme gets each week."
+        },
+        "affiliatePlaysPro": {
+          "label": "Plays a week, Professional",
+          "description": "How many games an affiliate on the Professional programme gets each week. Holding both programmes takes the higher figure."
+        },
+        "affiliateBoardRanks": {
+          "label": "Places on the earnings board",
+          "description": "How far down the affiliate leaderboard goes. Somebody below the cut is still told their own position."
+        },
+        "affiliateBoardZeros": {
+          "label": "Show affiliates who earned nothing",
+          "description": "Off keeps the board to people who actually earned in the period."
         }
       }
     },
@@ -3229,14 +3251,6 @@
       "continue": "Continue training",
       "review": "Review the course"
     },
-    "tools": {
-      "label": "Affiliate shortcuts",
-      "title": "Quick tools",
-      "browse": "Browse",
-      "links": "Your link",
-      "statement": "Statement",
-      "payouts": "Payouts"
-    },
     "chart": {
       "title": "Performance",
       "description": "Earnings and clicks over the last {n} days.",
@@ -3591,6 +3605,72 @@
         "inCoin": "In {coin}",
         "back": "Back to earnings"
       }
+    },
+    "links": {
+      "label": "More things to do",
+      "games": "Games",
+      "leaderboard": "Leaderboard",
+      "gift": "Gift code",
+      "tasks": "Tasks"
+    },
+    "games": {
+      "back": "Dashboard",
+      "title": "Games",
+      "subtitle": "A weekly play or three, and anything you win goes straight to your commission balance.",
+      "closed": {
+        "title": "The games are not open yet",
+        "body": "They are built and waiting on the prize table being set. Nothing about your account changes until then."
+      },
+      "playsLeft": "{n, plural, =0 {No plays left this week} one {# play left this week} other {# plays left this week}}",
+      "allowance": "{n, plural, one {# a week with your programme} other {# a week with your programme}}",
+      "noProgramme": "Plays come with a training programme. Yours has ended or has not started.",
+      "play": "Play",
+      "youWon": "You won",
+      "inBalance": "It is in your commission balance already.",
+      "wonExtra": "{n, plural, one {Another play, on the house.} other {# more plays, on the house.}}",
+      "betterLuck": "Nothing this time. The play is used.",
+      "comeBack": "Your plays come back at the start of next week.",
+      "box": {
+        "title": "Mystery box",
+        "body": "Pick it up and see what is inside."
+      },
+      "wheel": {
+        "title": "Spin the wheel",
+        "body": "One spin, one prize, whatever it lands on."
+      }
+    },
+    "board": {
+      "back": "Dashboard",
+      "title": "Earnings board",
+      "subtitle": "Who has earned the most commission. Real cedis, not points.",
+      "periodLabel": "Choose a period",
+      "period": {
+        "week": "This week",
+        "month": "This month",
+        "all": "All time"
+      },
+      "you": "You are",
+      "place": "#{rank}",
+      "unranked": "You are not on the board for this period yet. Any commission that clears puts you on it.",
+      "empty": "Nobody has earned commission in this period yet."
+    },
+    "tasks": {
+      "back": "Dashboard",
+      "title": "Tasks",
+      "subtitle": "Goals worth real money. Each one pays once.",
+      "sections": {
+        "ready": "{n, plural, one {# ready to claim} other {# ready to claim}}",
+        "working": "In progress",
+        "done": "Done"
+      },
+      "nothingWaiting": "Nothing in progress right now.",
+      "progress": "{progress} of {target}",
+      "rankNow": "You are #{rank}. Reach the top {target}.",
+      "rankNone": "Not on the board yet. Reach the top {target}.",
+      "claim": "Claim",
+      "claimed": "{amount} added to your commission balance.",
+      "claimedNoReward": "Claimed. No reward is set on this one yet.",
+      "alreadyClaimed": "Claimed"
     }
   }
 }

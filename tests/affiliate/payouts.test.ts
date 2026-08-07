@@ -86,11 +86,19 @@ const request = async (tx: Tx, userId: string, minor: number) => {
 describe.skipIf(!HAS_DB)('the licence gate', () => {
   it('refuses everything while withdrawals are closed', async () => {
     await withRollback(async (tx) => {
+      /* ⚠️ PINNED, not inherited. This asserted the LIVE value of the switch
+         and passed only while the operator had it off. They turned commission
+         withdrawals on at 06:06 on 2026-08-07 and this test went red with no
+         code behind it, which is the same failure the ladder tests were
+         rewritten for. What is under test is the gate's behaviour when it is
+         closed, so the test closes it. */
+      await setConfig(tx, 'affiliate_payouts_enabled', 'false')
+
       const by = await superAdmin(tx)
       const { user } = await earner(tx, by, 'Too Early')
 
-      /* H45: off by default and independent of the points switch, so one
-         business can be opened without committing the other. */
+      /* H45: independent of the points switch, so one business can be opened
+         without committing the other. */
       const message = await expectRejection(tx, () => request(tx, user.id, 10_000))
       expect(message).toMatch(/not open yet/i)
     })

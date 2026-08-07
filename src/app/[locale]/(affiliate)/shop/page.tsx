@@ -2,15 +2,11 @@ import type { Metadata } from 'next'
 
 import { ArrowRight, PackageOpen, Sparkles } from 'lucide-react'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
-
-import { AffiliateHeader } from '@/components/affiliate/AffiliateHeader'
 import { MarketFilters } from '@/components/affiliate/MarketFilters'
 import { ProductCard } from '@/components/affiliate/ProductCard'
 import { Link, redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
 import { getAffiliateDashboard, getShopProducts, type ShopProduct } from '@/lib/market/data'
-import { getNotifications, getUnreadCount } from '@/lib/notifications/data'
-import { serverNow } from '@/lib/server-now'
 
 export const metadata: Metadata = {
   title: 'Products',
@@ -63,12 +59,23 @@ export default async function MarketplacePage({
   const sort = SORTS.includes(sp.sort as (typeof SORTS)[number]) ? sp.sort! : 'payout'
   const query = (sp.q ?? '').trim()
 
-  const [products, dashboard, notifications, unreadCount] = await Promise.all([
+  const [everything, dashboard] = await Promise.all([
     getShopProducts(user!.id),
     getAffiliateDashboard(user!.id),
-    getNotifications(30),
-    getUnreadCount(),
   ])
+
+  /*
+    ANYTHING ALREADY BOUGHT IS OFF THIS SCREEN (operator, 2026-08-07).
+
+    A course somebody owns has no business in a shop: the card had to grow a
+    progress bar and a "Continue" button to say so, which made two cards in the
+    same row two different things. Owned courses live on Learn, which is built
+    for exactly that, and this screen goes back to being what it says it is.
+
+    Filtered before the counts are taken, so a tab cannot promise four and then
+    list three.
+  */
+  const products = everything.filter((p) => !p.owned)
 
   const counts = Object.fromEntries(
     TABS.map((key) => [key, products.filter((p) => inTab(p, key)).length]),
@@ -107,11 +114,6 @@ export default async function MarketplacePage({
       <div
         aria-hidden
         className="bg-field pointer-events-none absolute inset-x-0 top-0 -z-10 h-[26rem]"
-      />
-      <AffiliateHeader
-        notifications={notifications}
-        unreadCount={unreadCount}
-        now={serverNow()}
       />
 
       <div>

@@ -4,16 +4,12 @@ import { notFound } from 'next/navigation'
 
 import { Award, ArrowLeft } from 'lucide-react'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
-
-import { AffiliateHeader } from '@/components/affiliate/AffiliateHeader'
 import { CurriculumList } from '@/components/affiliate/CurriculumList'
 import { LessonView } from '@/components/affiliate/LessonView'
 import { Link, redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
 import { courseProgress, getCurriculum, getLesson } from '@/lib/market/course'
 import { getShopProduct } from '@/lib/market/data'
-import { getNotifications, getUnreadCount } from '@/lib/notifications/data'
-import { serverNow } from '@/lib/server-now'
 
 export const metadata: Metadata = {
   title: 'Course',
@@ -55,10 +51,8 @@ export default async function CoursePage({
 
   const t = await getTranslations('affiliate.course')
 
-  const [detail, notifications, unreadCount] = await Promise.all([
+  const [detail] = await Promise.all([
     getShopProduct(slug, user!.id),
-    getNotifications(30),
-    getUnreadCount(),
   ])
   if (!detail.ok) notFound()
   const { product } = detail
@@ -84,7 +78,6 @@ export default async function CoursePage({
         aria-hidden
         className="bg-field pointer-events-none absolute inset-x-0 top-0 -z-10 h-[26rem]"
       />
-      <AffiliateHeader notifications={notifications} unreadCount={unreadCount} now={serverNow()} />
 
       <Link
         href="/learn"

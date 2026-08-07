@@ -2,15 +2,11 @@ import type { Metadata } from 'next'
 
 import { CalendarClock, ChevronRight, Layers, ShieldCheck, UserRound } from 'lucide-react'
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server'
-
-import { AffiliateHeader } from '@/components/affiliate/AffiliateHeader'
 import { CopyCode } from '@/components/affiliate/CopyCode'
 import { ModeSwitchCard } from '@/components/app/ModeSwitch'
 import { Link, redirect } from '@/i18n/navigation'
 import { getProfile, getViewerUser } from '@/lib/auth/session'
 import { getAffiliateDashboard } from '@/lib/market/data'
-import { getNotifications, getUnreadCount } from '@/lib/notifications/data'
-import { serverNow } from '@/lib/server-now'
 import { getOrigin } from '@/lib/request-context'
 import { cn } from '@/lib/cn'
 
@@ -51,11 +47,9 @@ export default async function AffiliateAccountPage({
   const t = await getTranslations('affiliate.account')
   const format = await getFormatter()
 
-  const [dashboard, profile, notifications, unreadCount, origin] = await Promise.all([
+  const [dashboard, profile, origin] = await Promise.all([
     getAffiliateDashboard(user!.id),
     getProfile(user!.id),
-    getNotifications(30),
-    getUnreadCount(),
     getOrigin(),
   ])
 
@@ -71,7 +65,6 @@ export default async function AffiliateAccountPage({
         aria-hidden
         className="bg-field pointer-events-none absolute inset-x-0 top-0 -z-10 h-[26rem]"
       />
-      <AffiliateHeader notifications={notifications} unreadCount={unreadCount} now={serverNow()} />
 
       <div>
         <h1 className="text-[1.375rem] font-semibold tracking-[-0.02em] text-ink-900 sm:text-[1.625rem]">
