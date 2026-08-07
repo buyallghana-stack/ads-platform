@@ -140,7 +140,7 @@
       "titleAccent": "plus vite.",
       "lead": "La formule gratuite n'expire jamais. Une formule payante augmente votre limite quotidienne, rapporte davantage de points par publicité et abaisse le solde nécessaire pour retirer.",
       "bestChip": "Meilleur taux",
-      "period": "pour {months} mois",
+      "period": "{months, plural, one {pour # mois} other {pour # mois}}",
       "rowAds": "Publicités par jour",
       "rowRate": "Points par publicité",
       "rowThreshold": "Retrait dès",
@@ -149,7 +149,10 @@
         "body": "{ads} publicités par jour pendant vos {days} premiers jours, et un retrait possible à partir de {threshold} points. Aucune carte requise pour commencer.",
         "cta": "Commencer gratuitement"
       },
-      "stacking": "Les formules se cumulent. Si vous en détenez plusieurs, les limites quotidiennes s'additionnent, les bonus de gain s'additionnent, et c'est le seuil de retrait le plus bas qui s'applique. Chaque formule court sur une durée fixe et rien ne se renouvelle tout seul : vous n'êtes jamais débité de nouveau sans le demander."
+      "stacking": "Les formules se cumulent. Si vous en détenez plusieurs, les limites quotidiennes s'additionnent, les bonus de gain s'additionnent, et c'est le seuil de retrait le plus bas qui s'applique. Chaque formule court sur une durée fixe et rien ne se renouvelle tout seul : vous n'êtes jamais débité de nouveau sans le demander.",
+      "range": "{from} à {to}",
+      "rangeHint": "Payez le montant de votre choix dans cette fourchette. Plus vous payez, plus chaque publicité vous rapporte.",
+      "rateRange": "+{from}% à +{to}%"
     },
     "invite": {
       "eyebrow": "Parrainage",

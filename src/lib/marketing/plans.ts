@@ -39,8 +39,18 @@ export type MarketingPlan = {
   currency: string
   months: number
   adsPerDay: number
-  /** 1.5 means +50% points on every ad. */
+  /** 1.5 means +50% points on every ad. What the FLOOR of the band pays. */
   rewardMultiplier: number
+  /**
+   * The top of the band, in whole cedis, and what paying it earns.
+   *
+   * A plan has been a price RANGE since 2026-08-04: what somebody pays inside
+   * it sets what one ad is worth to them. Equal to `price` when the plan is a
+   * single price, which is what `flexible` then reports.
+   */
+  bandMaxGhs: number
+  bandMaxMultiplier: number
+  flexible: boolean
   withdrawFrom: number
   isDefault: boolean
 }
@@ -80,7 +90,7 @@ export async function getMarketingFigures(): Promise<MarketingFigures> {
     supabase
       .from('tiers')
       .select(
-        'slug, name, description, price_minor, currency_code, billing_period_days, daily_ad_cap, reward_multiplier, redemption_minimum_points, is_default, sort_order',
+        'slug, name, description, price_minor, currency_code, billing_period_days, daily_ad_cap, reward_multiplier, redemption_minimum_points, is_default, sort_order, band_max_minor, band_max_multiplier',
       )
       .eq('is_active', true)
       .order('sort_order', { ascending: true }),
@@ -98,7 +108,33 @@ export async function getMarketingFigures(): Promise<MarketingFigures> {
 
   if (tiersRes.error || !tiersRes.data?.length) return FALLBACK
 
-  const plans: MarketingPlan[] = tiersRes.data.map((t) => ({
+  /*
+    THE BAND, DERIVED THE SAME WAY EVERYWHERE.
+
+    `plan_band_max_minor` is the source of truth in SQL: a rung's ceiling is
+    one pesewa below the next rung's price, and the TOP rung uses its own
+    stored `band_max_minor`. The boundary is deliberately not symmetric, so it
+    is written out here rather than guessed, and `marketing-bands.test.ts`
+    asserts this agrees with the function.
+
+    The displayed ceiling is floored to whole cedis, matching `PlanCard`: the
+    upgrade screen offers Bronze up to GHS 139, so the front page must not
+    advertise GHS 139.99.
+  */
+  const rows = tiersRes.data
+  const bandOf = (index: number) => {
+    const row = rows[index]
+    const next = rows[index + 1]
+    const maxMinor = next
+      ? Number(next.price_minor) - 1
+      : Number(row.band_max_minor ?? row.price_minor)
+    const maxMultiplier = next
+      ? Number(next.reward_multiplier)
+      : Number(row.band_max_multiplier ?? row.reward_multiplier)
+    return { maxGhs: Math.floor(maxMinor / 100), maxMultiplier }
+  }
+
+  const plans: MarketingPlan[] = tiersRes.data.map((t, index) => ({
     slug: t.slug,
     name: t.name,
     description: t.description,
@@ -108,6 +144,9 @@ export async function getMarketingFigures(): Promise<MarketingFigures> {
     months: Math.max(1, Math.round(t.billing_period_days / 30)),
     adsPerDay: t.daily_ad_cap,
     rewardMultiplier: Number(t.reward_multiplier),
+    bandMaxGhs: bandOf(index).maxGhs,
+    bandMaxMultiplier: bandOf(index).maxMultiplier,
+    flexible: bandOf(index).maxGhs > t.price_minor / 100,
     // Overwritten below with the platform-wide minimum; the column is history.
     withdrawFrom: t.redemption_minimum_points,
     isDefault: t.is_default,

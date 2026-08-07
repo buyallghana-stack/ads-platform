@@ -140,7 +140,7 @@
       "titleAccent": "faster.",
       "lead": "The free plan never expires. A paid plan raises your daily limit, pays more points per ad, and lowers the balance you need before you can withdraw.",
       "bestChip": "Best rate",
-      "period": "for {months} months",
+      "period": "{months, plural, one {for # month} other {for # months}}",
       "rowAds": "Ads a day",
       "rowRate": "Points per ad",
       "rowThreshold": "Withdraw from",
@@ -149,7 +149,10 @@
         "body": "{ads} ads a day for your first {days} days, and you can withdraw from {threshold} points. No card needed to start.",
         "cta": "Start free"
       },
-      "stacking": "Plans stack. Hold more than one and the daily limits add up, the earning bonuses add together, and the lowest withdrawal threshold is the one that applies. Every plan runs for a fixed period and nothing renews on its own. You are never charged again without asking."
+      "stacking": "Plans stack. Hold more than one and the daily limits add up, the earning bonuses add together, and the lowest withdrawal threshold is the one that applies. Every plan runs for a fixed period and nothing renews on its own. You are never charged again without asking.",
+      "range": "{from} to {to}",
+      "rangeHint": "Pay anything in that range. The more you pay, the more each ad is worth to you.",
+      "rateRange": "+{from}% to +{to}%"
     },
     "invite": {
       "eyebrow": "Invite & earn",

@@ -483,15 +483,32 @@ export default async function LandingPage({
                         {isBest && <Chip tone="violet">{t('plans.bestChip')}</Chip>}
                       </div>
 
-                      <p className="mt-4 flex items-baseline gap-1.5">
+                      {/* A PLAN IS A PRICE RANGE (since 2026-08-04), and this
+                          page went on selling it as one figure for three days.
+                          What somebody pays inside the range sets what an ad
+                          is worth to them, so quoting only the floor
+                          understates the plan and quoting only the ceiling
+                          overstates the cost. Both, and the sentence
+                          underneath says what moving inside it does. */}
+                      <p className="mt-4 flex flex-wrap items-baseline gap-1.5">
                         <span className="text-sm font-medium text-ink-500">{plan.currency}</span>
                         <span className="text-[2rem] leading-none font-semibold tracking-[-0.03em] text-ink-900">
-                          {num(plan.price)}
+                          {plan.flexible
+                            ? t('plans.range', {
+                                from: num(plan.price),
+                                to: num(plan.bandMaxGhs),
+                              })
+                            : num(plan.price)}
                         </span>
                       </p>
                       <p className="mt-1.5 text-sm text-ink-500">
                         {t('plans.period', { months: plan.months })}
                       </p>
+                      {plan.flexible && (
+                        <p className="mt-1.5 text-[0.8125rem] leading-snug text-ink-500">
+                          {t('plans.rangeHint')}
+                        </p>
+                      )}
 
                       <dl className="mt-6 flex flex-col gap-3 border-t border-ink-200 pt-5 text-sm">
                         <div className="flex items-baseline justify-between gap-3">
@@ -501,7 +518,12 @@ export default async function LandingPage({
                         <div className="flex items-baseline justify-between gap-3">
                           <dt className="text-ink-500">{t('plans.rowRate')}</dt>
                           <dd className="font-semibold text-success-700">
-                            +{Math.round((plan.rewardMultiplier - 1) * 100)}%
+                            {plan.flexible
+                              ? t('plans.rateRange', {
+                                  from: Math.round((plan.rewardMultiplier - 1) * 100),
+                                  to: Math.round((plan.bandMaxMultiplier - 1) * 100),
+                                })
+                              : `+${Math.round((plan.rewardMultiplier - 1) * 100)}%`}
                           </dd>
                         </div>
                       </dl>
