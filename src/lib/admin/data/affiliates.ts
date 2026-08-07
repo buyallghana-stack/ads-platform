@@ -2,6 +2,8 @@ import 'server-only'
 
 import { createAdminClient } from '@/lib/supabase/admin'
 
+export { programmeShare, type ShareInput } from '@/lib/admin/promotion-share'
+
 /**
  * The affiliate business, as an operator sees it.
  *
@@ -205,4 +207,99 @@ export async function countCommissionPayoutsAwaitingDecision(): Promise<number> 
     .in('status', ['requested', 'approved'])
 
   return error ? 0 : (count ?? 0)
+}
+
+/* ------------------------------------------------------------------ */
+/* Where the commission actually comes from                            */
+/* ------------------------------------------------------------------ */
+
+export type PromotionRow = {
+  affiliateId: string
+  userId: string
+  name: string
+  code: string
+  status: string
+  /** Commission earned selling somebody else's product. */
+  productMinor: number
+  /** Commission earned selling the TRAINING programme, which is the
+   *  recruitment half and the number this report exists for. */
+  trainingMinor: number
+  totalMinor: number
+  recruitmentSharePct: number
+  recruits: number
+  productSales: number
+  trainingSales: number
+  clicks: number
+  conversionRatePct: number
+}
+
+/**
+ * How much of each affiliate's commission came from recruiting rather than
+ * selling.
+ *
+ * ⚠️ THIS IS THE MEASURE THE PHASE 2 DECISION RESTS ON. Training sales pay
+ * commission at both levels (C16), which is the shape a regulator looks at
+ * twice: paid entry, plus a commission for bringing in people who also pay
+ * entry. The decision was kept reversible on the condition that the split is
+ * measurable, and this is where it is measured. It is worth more now than when
+ * it was written, because games and tasks pay cash too.
+ */
+export async function getPromotionReport(days = 30): Promise<PromotionRow[]> {
+  const supabase = createAdminClient()
+
+  const from = new Date(Date.now() - days * 86_400_000).toISOString()
+  const { data, error } = await supabase.rpc('admin_affiliate_promotion_report', { p_from: from })
+  if (error) throw new Error(`Could not load the promotion report: ${error.message}`)
+
+  return ((data ?? []) as unknown as Record<string, unknown>[]).map((r) => ({
+    affiliateId: String(r.affiliate_id),
+    userId: String(r.user_id),
+    name: String(r.name ?? ''),
+    code: String(r.affiliate_code ?? ''),
+    status: String(r.status ?? ''),
+    productMinor: n(r.product_commission_minor),
+    trainingMinor: n(r.training_commission_minor),
+    totalMinor: n(r.total_commission_minor),
+    recruitmentSharePct: n(r.recruitment_share_pct),
+    recruits: n(r.recruits),
+    productSales: n(r.product_sales),
+    trainingSales: n(r.training_sales),
+    clicks: n(r.clicks),
+    conversionRatePct: n(r.conversion_rate_pct),
+  }))
+}
+
+export type CommissionLedgerRow = {
+  id: string
+  createdAt: string
+  affiliateName: string
+  code: string
+  level: number | null
+  entryType: string
+  amountMinor: number
+  status: string
+  productTitle: string | null
+  reason: string | null
+}
+
+/** Every commission line, newest first: the audit view behind the totals. */
+export async function getCommissionLedger(days = 90): Promise<CommissionLedgerRow[]> {
+  const supabase = createAdminClient()
+
+  const from = new Date(Date.now() - days * 86_400_000).toISOString()
+  const { data, error } = await supabase.rpc('admin_list_commissions', { p_from: from })
+  if (error) throw new Error(`Could not load the commission ledger: ${error.message}`)
+
+  return ((data ?? []) as unknown as Record<string, unknown>[]).map((r) => ({
+    id: String(r.ledger_id),
+    createdAt: String(r.created_at),
+    affiliateName: String(r.affiliate_name ?? ''),
+    code: String(r.affiliate_code ?? ''),
+    level: r.level === null ? null : n(r.level),
+    entryType: String(r.entry_type ?? ''),
+    amountMinor: n(r.amount_minor),
+    status: String(r.status ?? ''),
+    productTitle: (r.product_title as string | null) ?? null,
+    reason: (r.reason as string | null) ?? null,
+  }))
 }

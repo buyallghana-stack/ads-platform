@@ -3046,7 +3046,8 @@
       "card": {
         "of": "of {amount}"
       },
-      "seeRewards": "Rewards"
+      "seeRewards": "Rewards",
+      "seeReport": "Report"
     },
     "vendorSales": {
       "title": "Vendor sales",
@@ -3147,6 +3148,51 @@
         "ask": "Tasks are retroactive: anybody who already meets the target can claim the moment you save. Check before you do.",
         "answer": "{n} affiliates could claim this immediately, about {amount} if they all do.",
         "check": "Check who qualifies"
+      }
+    },
+    "promotion": {
+      "back": "Withdrawals",
+      "title": "Where commission comes from",
+      "description": "How much of it is people selling products, and how much is people recruiting people.",
+      "windowLabel": "Choose a window",
+      "window": "Last {n} days",
+      "view": {
+        "summary": "By affiliate",
+        "ledger": "Every line"
+      },
+      "summary": {
+        "share": "From recruiting",
+        "shareDetail": "of all commission",
+        "training": "Training sales",
+        "product": "Product sales",
+        "total": "Total commission",
+        "recruits": "{n} recruited"
+      },
+      "note": "Training sales pay commission at both levels, which is why this split is worth watching rather than assuming. A high share means most of the money is coming from people signing other people up rather than from products being sold. Nothing here changes any rate; it is a measurement, and the rates are on Platform settings.",
+      "empty": "No commission was earned in this window.",
+      "emptyLedger": "No commission lines in this window.",
+      "col": {
+        "affiliate": "Affiliate",
+        "training": "From training",
+        "product": "From products",
+        "share": "Recruiting",
+        "recruits": "Recruited",
+        "conversion": "Conversion"
+      },
+      "ledger": {
+        "when": "When",
+        "affiliate": "Affiliate",
+        "what": "What",
+        "kind": "Kind",
+        "amount": "Amount",
+        "status": "Status",
+        "level": "L{n}"
+      },
+      "kind": {
+        "credit": "Sale",
+        "reversal": "Reversed",
+        "payout": "Paid out",
+        "adjustment": "Adjustment"
       }
     }
   },

@@ -3046,7 +3046,8 @@
       "card": {
         "of": "sur {amount}"
       },
-      "seeRewards": "Récompenses"
+      "seeRewards": "Récompenses",
+      "seeReport": "Rapport"
     },
     "vendorSales": {
       "title": "Ventes des fournisseurs",
@@ -3147,6 +3148,51 @@
         "ask": "Les tâches sont rétroactives : toute personne remplissant déjà l’objectif pourra réclamer dès l’enregistrement. Vérifiez avant.",
         "answer": "{n} affiliés pourraient la réclamer immédiatement, environ {amount} si tous le font.",
         "check": "Vérifier qui remplit l’objectif"
+      }
+    },
+    "promotion": {
+      "back": "Retraits",
+      "title": "D’où viennent les commissions",
+      "description": "Quelle part vient de la vente de produits, et quelle part du recrutement de personnes.",
+      "windowLabel": "Choisir une période",
+      "window": "{n} derniers jours",
+      "view": {
+        "summary": "Par affilié",
+        "ledger": "Chaque ligne"
+      },
+      "summary": {
+        "share": "Issu du recrutement",
+        "shareDetail": "de toutes les commissions",
+        "training": "Ventes de formation",
+        "product": "Ventes de produits",
+        "total": "Commissions totales",
+        "recruits": "{n} recrutés"
+      },
+      "note": "Les ventes de formation versent une commission sur deux niveaux : cette répartition mérite donc d’être suivie plutôt que supposée. Une part élevée signifie que l’essentiel de l’argent provient de personnes qui en inscrivent d’autres, et non de produits vendus. Rien ici ne modifie un taux : c’est une mesure, et les taux sont dans Réglages de la plateforme.",
+      "empty": "Aucune commission gagnée sur cette période.",
+      "emptyLedger": "Aucune ligne de commission sur cette période.",
+      "col": {
+        "affiliate": "Affilié",
+        "training": "Formation",
+        "product": "Produits",
+        "share": "Recrutement",
+        "recruits": "Recrutés",
+        "conversion": "Conversion"
+      },
+      "ledger": {
+        "when": "Quand",
+        "affiliate": "Affilié",
+        "what": "Quoi",
+        "kind": "Type",
+        "amount": "Montant",
+        "status": "Statut",
+        "level": "N{n}"
+      },
+      "kind": {
+        "credit": "Vente",
+        "reversal": "Annulé",
+        "payout": "Versé",
+        "adjustment": "Ajustement"
       }
     }
   },
