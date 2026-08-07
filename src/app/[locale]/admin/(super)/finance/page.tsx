@@ -2,8 +2,11 @@ import type { Metadata } from 'next'
 
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
+import { Store } from 'lucide-react'
+
 import { PageHeader } from '@/components/admin/AdminChrome'
 import { SummaryCell, SummaryStrip } from '@/components/admin/AdminTable'
+import { Link } from '@/i18n/navigation'
 import { getFinanceRows, getOverviewMetrics } from '@/lib/admin/data/finance'
 
 export const metadata: Metadata = {
@@ -65,6 +68,21 @@ export default async function AdminFinancePage({
   return (
     <>
       <PageHeader title={t('title')} description={t('description')} />
+
+      {/* The only door into vendor settlement. It is a Phase 2 report and this
+          is the Phase 1 statement, but "who do I pay this month" is a money
+          question and Finance is where the operator asks it — a sixteenth
+          sidebar row would be a worse answer than a link on the screen they
+          are already on. */}
+      <div className="mb-5 flex justify-end">
+        <Link
+          href="/admin/finance/vendors"
+          className="inline-flex items-center gap-2 rounded-(--radius-input) border border-ink-300 px-3 py-2 text-[0.8125rem] font-semibold text-ink-700 transition-colors hover:border-ink-400"
+        >
+          <Store aria-hidden className="size-4" />
+          {t('vendorSales')}
+        </Link>
+      </div>
 
       <SummaryStrip className="mb-5">
         <SummaryCell label={t('summary.in')} value={ghs(totalIn)} detail={t('summary.period')} />

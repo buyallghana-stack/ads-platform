@@ -4618,6 +4618,10 @@ export type Database = {
           created_at: string
         }
       }
+      admin_vendor_sales_report: {
+        Args: { p_from?: string; p_to?: string }
+        Returns: Json
+      }
       admin_list_commission_payouts: {
         Args: { p_status?: string | null }
         Returns: {

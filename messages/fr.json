@@ -2360,7 +2360,8 @@
         "profit": "Bénéfice",
         "total": "Total"
       },
-      "exportNote": "L'export d'un relevé en CSV pour votre comptable reste à brancher côté serveur."
+      "exportNote": "L'export d'un relevé en CSV pour votre comptable reste à brancher côté serveur.",
+      "vendorSales": "Ventes fournisseurs"
     },
     "config": {
       "title": "Paramètres de la plateforme",
@@ -3023,6 +3024,40 @@
       "card": {
         "of": "sur {amount}"
       }
+    },
+    "vendorSales": {
+      "title": "Ventes des fournisseurs",
+      "description": "Ce que les produits de chaque fournisseur ont vendu, pour pouvoir les régler.",
+      "back": "Finances",
+      "periodLabel": "Choisir une période",
+      "period": {
+        "this_month": "Ce mois-ci",
+        "last_month": "Le mois dernier",
+        "last_90": "90 derniers jours",
+        "all": "Depuis le début"
+      },
+      "export": "Exporter en CSV",
+      "empty": "Aucun produit de fournisseur n’a été vendu sur cette période.",
+      "summary": {
+        "gross": "Payé par les acheteurs",
+        "units": "{n} ventes",
+        "refunded": "Remboursé",
+        "commission": "Commission d’affiliation",
+        "net": "Restant après les deux"
+      },
+      "col": {
+        "vendor": "Fournisseur",
+        "units": "Ventes",
+        "gross": "Payé",
+        "refunded": "Remboursé",
+        "commission": "Commission",
+        "net": "Restant"
+      },
+      "card": {
+        "units": "{n} ventes sur {products} produits",
+        "products": "{n} produits"
+      },
+      "note": "Ce sont des chiffres de ventes, pas un montant dû. Ce qu’un fournisseur perçoit relève de votre contrat de licence avec lui, que ce système ne conserve délibérément pas — rien ici ne peut donc indiquer la somme à envoyer. Une vente compte dans la période où elle a été confirmée, et un remboursement ultérieur est déduit de cette même période."
     }
   },
   "giftCode": {

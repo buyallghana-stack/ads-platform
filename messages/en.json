@@ -2360,7 +2360,8 @@
         "profit": "Profit",
         "total": "Total"
       },
-      "exportNote": "Exporting a statement as CSV for your accountant is backend work and is not wired up yet."
+      "exportNote": "Exporting a statement as CSV for your accountant is backend work and is not wired up yet.",
+      "vendorSales": "Vendor sales"
     },
     "config": {
       "title": "Platform settings",
@@ -3023,6 +3024,40 @@
       "card": {
         "of": "of {amount}"
       }
+    },
+    "vendorSales": {
+      "title": "Vendor sales",
+      "description": "What each vendor’s products sold, so you can settle with them.",
+      "back": "Finance",
+      "periodLabel": "Choose a period",
+      "period": {
+        "this_month": "This month",
+        "last_month": "Last month",
+        "last_90": "Last 90 days",
+        "all": "All time"
+      },
+      "export": "Export CSV",
+      "empty": "No vendor product has sold in this period.",
+      "summary": {
+        "gross": "Buyers paid",
+        "units": "{n} sales",
+        "refunded": "Refunded",
+        "commission": "Affiliate commission",
+        "net": "Left after both"
+      },
+      "col": {
+        "vendor": "Vendor",
+        "units": "Sales",
+        "gross": "Buyers paid",
+        "refunded": "Refunded",
+        "commission": "Commission",
+        "net": "Left"
+      },
+      "card": {
+        "units": "{n} sales across {products} products",
+        "products": "{n} products"
+      },
+      "note": "These are sales figures, not an amount owed. What a vendor is paid is your licence agreement with them, which this system deliberately does not hold — so nothing here can tell you the figure to send. A sale counts in the period it was confirmed, and a later refund is deducted from that same period."
     }
   },
   "giftCode": {
