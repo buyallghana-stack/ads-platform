@@ -27,10 +27,15 @@ export function NotificationBell({
   notifications,
   unreadCount,
   now,
+  fullHref = '/notifications',
 }: {
   notifications: NotificationRow[]
   unreadCount: number
   now: number
+  /** Where "see all" goes. The affiliate bell has its own page, because a
+   *  notification now belongs to one business and the list has to stay inside
+   *  the mode it was read from. */
+  fullHref?: string
 }) {
   const t = useTranslations('notifications')
   const [open, setOpen] = useState(false)
@@ -84,7 +89,7 @@ export function NotificationBell({
   return (
     <div ref={wrapRef} className="relative">
       {/* Phone: navigate to the full page. */}
-      <Link href="/notifications" aria-label={label} className={cn(bellClasses, 'md:hidden')}>
+      <Link href={fullHref} aria-label={label} className={cn(bellClasses, 'md:hidden')}>
         <Bell aria-hidden className="size-[1.15rem]" />
         {badge}
       </Link>
@@ -105,6 +110,7 @@ export function NotificationBell({
       {open && (
         <div className="absolute right-0 top-full z-50 mt-2 hidden md:block">
           <NotificationPanel
+            fullHref={fullHref}
             notifications={notifications}
             unreadCount={unreadCount}
             now={now}

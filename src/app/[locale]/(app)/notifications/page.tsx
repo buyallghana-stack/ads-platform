@@ -31,7 +31,7 @@ export default async function NotificationsPage({
   if (!user) redirect({ href: '/login', locale })
 
   const t = await getTranslations('notifications')
-  const notifications = await getNotifications()
+  const notifications = await getNotifications('ads')
   const now = Date.now()
 
   return (

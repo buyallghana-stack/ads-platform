@@ -216,7 +216,7 @@ export function CommissionWithdraw({
         )}
         {key === 'noDestination' && (
           <Link
-            href="/profile/payout"
+            href={{ pathname: '/profile/payout', query: { from: 'commission' } }}
             className="mt-4 inline-flex rounded-(--radius-input) bg-brand-600 px-4 py-2.5 text-[0.875rem] font-semibold text-white transition-colors hover:bg-brand-500"
           >
             {t('blocked.noDestination.cta')}
@@ -306,7 +306,7 @@ export function CommissionWithdraw({
               the name reads right and 404s, and it is the ONE link somebody
               follows when they cannot withdraw at all. */}
           <Link
-            href="/profile/payout"
+            href={{ pathname: '/profile/payout', query: { from: 'commission' } }}
             className="ml-auto shrink-0 text-[0.75rem] font-semibold text-brand-700 hover:underline"
           >
             {t('change')}

@@ -1025,7 +1025,8 @@
       "walletRequired": "Enter your wallet address.",
       "notSignedIn": "Please sign in again.",
       "generic": "Could not save. Please try again."
-    }
+    },
+    "backToWithdrawal": "Back to your withdrawal"
   },
   "pin": {
     "title": "Withdrawal PIN",
@@ -1082,7 +1083,8 @@
       "readAll": "Read all",
       "clearAll": "Clear all"
     },
-    "openSupport": "Open the conversation"
+    "openSupport": "Open the conversation",
+    "backToDashboard": "Dashboard"
   },
   "personal": {
     "title": "Personal information",
@@ -3789,7 +3791,8 @@
         "certificate": "Certificate",
         "certificateValue": "When you finish",
         "outcomes": "What you will be able to do"
-      }
+      },
+      "articleReading": "Read to the end to mark this lesson done."
     },
     "quiz": {
       "passMark": "Pass mark {n}%",

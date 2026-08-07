@@ -189,6 +189,55 @@ try {
     pane ? `${pane.client}px window over ${pane.scroll}px of text` : 'no bounded pane found',
   )
 
+  // ================= notifications are two feeds =================
+  console.log('\n--- notifications ---')
+  const { rows: me } = await db.query(`select id from auth.users where email = $1`, [email])
+  const uid = me[0].id
+  /* One of each, so the separation is measured rather than assumed. */
+  await db.query(
+    `select public.create_notification($1,'payout','VERIFY ads side','points message',null,'ads'),
+            public.create_notification($1,'payout','VERIFY affiliate side','cedis message',null,'affiliate'),
+            public.create_notification($1,'support','VERIFY account wide','support reply',null,'both')`,
+    [uid],
+  )
+
+  /* ⚠️ The LIST pages, not the dashboards. Below md the bell is a link
+     straight to the full page rather than a dropdown, so reading the
+     dashboard body finds no notifications at all — and the "does not show the
+     other business" half then passes for the wrong reason. */
+  await page.goto(`${base}/market/notifications`, { waitUntil: 'networkidle' })
+  const affBell = await page.locator('body').innerText()
+  ok('the affiliate bell shows affiliate news', /VERIFY affiliate side/.test(affBell))
+  ok('and NOT the ads news', !/VERIFY ads side/.test(affBell))
+  ok('and still shows account-wide news', /VERIFY account wide/.test(affBell))
+
+  await page.goto(`${base}/notifications`, { waitUntil: 'networkidle' })
+  const adsBell = await page.locator('body').innerText()
+  ok('the ads bell shows ads news', /VERIFY ads side/.test(adsBell))
+  ok('and NOT the affiliate news', !/VERIFY affiliate side/.test(adsBell))
+  ok('and still shows account-wide news', /VERIFY account wide/.test(adsBell))
+
+  await db.query(`delete from public.notifications where title like 'VERIFY %'`)
+
+  // ================= the header =================
+  console.log('\n--- header ---')
+  for (const [where, url] of [['affiliate', '/market'], ['ads', '/dashboard']]) {
+    await page.goto(`${base}${url}`, { waitUntil: 'networkidle' })
+    await page.waitForTimeout(500)
+    const h = await page.evaluate(() => {
+      const word = [...document.querySelectorAll('header span')].find(
+        (e) => e.textContent?.trim() === 'SidePerks',
+      )
+      const r = word?.getBoundingClientRect()
+      return {
+        wordmark: r ? (r.right <= window.innerWidth && r.width > 60 ? 'whole' : 'CLIPPED') : 'MISSING',
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      }
+    })
+    ok(`${where}: the wordmark is whole`, h.wordmark === 'whole', h.wordmark)
+    ok(`${where}: nothing runs off the screen`, h.overflow === 0, `${h.overflow}px`)
+  }
+
   // ================= the admin =================
   console.log('\n--- admin ---')
   const desk = await browser.newContext({ storageState: state, viewport: { width: 1280, height: 900 } })

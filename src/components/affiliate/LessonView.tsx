@@ -2,7 +2,15 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-import { ChevronLeft, ChevronRight, CheckCircle2, FileText, Loader2, RotateCcw } from 'lucide-react'
+import {
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle2,
+  FileText,
+  Loader2,
+  RotateCcw,
+} from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { LessonQuiz } from '@/components/affiliate/LessonQuiz'
@@ -51,6 +59,31 @@ export function LessonView({
   poster: string | null
 }) {
   const t = useTranslations('affiliate.course')
+
+  /*
+    ⚠️ WHY "NEXT" DID NOT MARK AN ARTICLE READ (operator, 2026-08-07).
+
+    An article completes on two conditions: the end of the text in view AND
+    `DWELL_SECONDS` spent on it. Neither is a click, so tapping Next did
+    nothing at all — no mark, and no explanation either, which is what made it
+    look broken rather than strict.
+
+    The reading time is the real defence and it stays. What changes is that the
+    SCROLL half is no longer the only way to satisfy the first condition:
+    somebody who has genuinely sat with a long article for twenty seconds and
+    then moves on has done the thing the rule is protecting. So Next now marks
+    it, if and only if the dwell has elapsed.
+
+    Clicking Next in the first few seconds still marks nothing — and now says
+    so, because the article carries a visible line about what it is waiting
+    for. A silent refusal is what turned a rule into a bug report.
+  */
+  const articleReady = useRef(false)
+  const markArticle = () => {
+    if (!payload.ok || payload.lesson.kind === 'video') return
+    if (!articleReady.current || payload.progress.completed) return
+    void markLessonProgress(payload.lesson.id, slug, DWELL_SECONDS, 100)
+  }
 
   if (!payload.ok) {
     return (
@@ -122,7 +155,15 @@ export function LessonView({
             {t('checkpointIntro')}
           </p>
         ) : (
-          <ArticleLesson lessonId={lesson.id} slug={slug} body={lesson.body} done={progress.completed} />
+          <ArticleLesson
+            lessonId={lesson.id}
+            slug={slug}
+            body={lesson.body}
+            done={progress.completed}
+            onDwellMet={() => {
+              articleReady.current = true
+            }}
+          />
         )}
 
         {video && heading}
@@ -152,7 +193,7 @@ export function LessonView({
         </div>
       )}
 
-      <LessonNav slug={slug} previous={previous} next={next} />
+      <LessonNav slug={slug} previous={previous} next={next} onLeave={markArticle} />
     </div>
   )
 }
@@ -182,10 +223,14 @@ function LessonNav({
   slug,
   previous,
   next,
+  onLeave,
 }: {
   slug: string
   previous: Neighbour
   next: Neighbour
+  /** Fires before the navigation, so an article that has met its reading time
+   *  is recorded on the way out rather than lost. */
+  onLeave: () => void
 }) {
   const t = useTranslations('affiliate.course')
   if (!previous && !next) return null
@@ -198,6 +243,7 @@ function LessonNav({
       {previous ? (
         <Link
           href={{ pathname: `/learn/${slug}`, query: { lesson: previous.id } }}
+          onClick={onLeave}
           className={cn(shell, 'border-ink-200 bg-surface hover:bg-ink-50')}
         >
           <ChevronLeft aria-hidden className="size-4 shrink-0 text-ink-400" />
@@ -218,6 +264,7 @@ function LessonNav({
       {next && (
         <Link
           href={{ pathname: `/learn/${slug}`, query: { lesson: next.id } }}
+          onClick={onLeave}
           className={cn(shell, 'justify-end border-brand-600 bg-brand-600 hover:bg-brand-700')}
         >
           <span className="min-w-0 text-right">
@@ -396,11 +443,14 @@ function ArticleLesson({
   slug,
   body,
   done,
+  onDwellMet,
 }: {
   lessonId: string
   slug: string
   body: string | null
   done: boolean
+  /** Told the moment the reading time is satisfied, so Next can record it. */
+  onDwellMet: () => void
 }) {
   const t = useTranslations('affiliate.course')
   const [reached, setReached] = useState(false)
@@ -437,6 +487,12 @@ function ArticleLesson({
     opened.current = Date.now()
     let timer: ReturnType<typeof setTimeout> | undefined
 
+    /* The dwell alone, reported upward the moment it is met and regardless of
+       where they have scrolled to. It does not complete the lesson by itself —
+       that still needs the end of the text — but it is what tells Next it may
+       record on the way out. */
+    const dwellTimer = setTimeout(() => onDwellMet(), DWELL_SECONDS * 1000)
+
     const mark = () => {
       setReached(true)
       void markLessonProgress(lessonId, slug, DWELL_SECONDS, 100)
@@ -462,9 +518,10 @@ function ArticleLesson({
     observer.observe(end.current)
     return () => {
       clearTimeout(timer)
+      clearTimeout(dwellTimer)
       observer.disconnect()
     }
-  }, [done, lessonId, slug])
+  }, [done, lessonId, slug, onDwellMet])
 
   return (
     <div>
@@ -472,19 +529,29 @@ function ArticleLesson({
         THE ARTICLE SCROLLS INSIDE ITS OWN PANE (operator, 2026-08-07).
 
         A four-hundred-word lesson printed straight into the page made the page
-        four screens tall, which pushed the curriculum, the checkpoint and the
-        Next button so far down that the rest of the screen "drifts down" out
-        of reach. Bounding the text keeps every control on the lesson a
-        predictable distance from the top, whatever the lesson is.
+        four screens tall, which pushed the curriculum, the checkpoint and Next
+        so far down that the rest of the screen drifted out of reach. Bounding
+        the text keeps every control a predictable distance from the top.
 
-        `overscroll-contain` so reaching the end of the article does not carry
-        on into the page behind it, which on a phone reads as the whole screen
-        lurching.
+        ⚠️ TWO CORRECTIONS AFTER THE FIRST ATTEMPT, both from the operator
+        using it: "it fills the screen too much making scrolling down hard, it
+        scrolls the text down and there is a little space for you to scroll
+        down."
+
+        1. 26rem was 416px of a 844px phone, so almost every downward drag
+           landed inside the pane and moved the TEXT. There was no room left to
+           drag the page. 19rem leaves the page reachable above and below it.
+
+        2. `overscroll-contain` was wrong here. It was meant to stop the page
+           lurching when the article ends, but what it actually does is trap
+           the gesture: reach the bottom of the text and scrolling simply
+           stops, instead of carrying on down the page the way every reader
+           expects. Chaining is the default and the default was right.
       */}
       <div
         ref={pane}
         tabIndex={0}
-        className="max-h-[26rem] overflow-y-auto overscroll-contain px-4 py-5 focus-visible:outline-none sm:px-6 md:max-h-[32rem]"
+        className="max-h-[19rem] overflow-y-auto px-4 py-5 focus-visible:outline-none sm:px-6 md:max-h-[26rem]"
       >
         <div
           className={cn(
@@ -503,12 +570,28 @@ function ArticleLesson({
         <div ref={end} className="h-px" />
       </div>
 
-      {(done || reached) && (
-        <p className="flex items-center gap-2 border-t border-ink-200 px-4 py-3 text-[0.8125rem] font-medium text-success-600 sm:px-6">
-          <CheckCircle2 aria-hidden className="size-4" />
-          {t('articleDone')}
-        </p>
-      )}
+      {/* ⚠️ ALWAYS SAYS SOMETHING. Before this line existed, an article that
+          had not met its reading time simply did nothing when Next was tapped,
+          and a rule with no visible state is indistinguishable from a bug —
+          which is exactly how it was reported. */}
+      <p
+        className={cn(
+          'flex items-center gap-2 border-t border-ink-200 px-4 py-3 text-[0.8125rem] sm:px-6',
+          done || reached ? 'font-medium text-success-600' : 'text-ink-500',
+        )}
+      >
+        {done || reached ? (
+          <>
+            <CheckCircle2 aria-hidden className="size-4 shrink-0" />
+            {t('articleDone')}
+          </>
+        ) : (
+          <>
+            <BookOpen aria-hidden className="size-4 shrink-0 text-ink-400" />
+            {t('articleReading')}
+          </>
+        )}
+      </p>
     </div>
   )
 }

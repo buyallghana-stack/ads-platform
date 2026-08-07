@@ -1025,7 +1025,8 @@
       "walletRequired": "Saisissez votre adresse de portefeuille.",
       "notSignedIn": "Veuillez vous reconnecter.",
       "generic": "Enregistrement impossible. Veuillez réessayer."
-    }
+    },
+    "backToWithdrawal": "Retour à votre retrait"
   },
   "pin": {
     "title": "Code PIN de retrait",
@@ -1082,7 +1083,8 @@
       "readAll": "Tout lire",
       "clearAll": "Tout effacer"
     },
-    "openSupport": "Ouvrir la conversation"
+    "openSupport": "Ouvrir la conversation",
+    "backToDashboard": "Tableau de bord"
   },
   "personal": {
     "title": "Informations personnelles",
@@ -3789,7 +3791,8 @@
         "certificate": "Certificat",
         "certificateValue": "À la fin du cours",
         "outcomes": "Ce que vous saurez faire"
-      }
+      },
+      "articleReading": "Lisez jusqu'au bout pour valider cette leçon."
     },
     "quiz": {
       "passMark": "Seuil {n} %",

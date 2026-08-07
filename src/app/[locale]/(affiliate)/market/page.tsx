@@ -75,8 +75,8 @@ export default async function AffiliateHomePage({
   const [dashboard, profile, notifications, unreadCount] = await Promise.all([
     getAffiliateDashboard(user!.id),
     getProfile(user!.id),
-    getNotifications(30),
-    getUnreadCount(),
+    getNotifications('affiliate', 30),
+    getUnreadCount('affiliate'),
   ])
 
   const { name: pickedName } = pickDisplayName(profile?.full_name)

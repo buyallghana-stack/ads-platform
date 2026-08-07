@@ -47,27 +47,46 @@ export async function AffiliateHeader({
   const t = await getTranslations('affiliate.nav')
 
   return (
-    /* ⚠️ NOTHING IN THIS ROW COULD SHRINK, so at 360px it ran 3px off the
-       screen and at 320px it ran 43px off, on every affiliate screen. The
-       wordmark is what gives: the mark alone still says whose app this is,
-       and the mode switch beside it is the one control that must stay legible
-       because it is the only door back to the earning side.
-       ⚠️ THE BREAKPOINT MOVED WITH THE THEME SWITCH. A third 36px icon in the
-       pill is 36px the wordmark no longer has, and at 390px it was clipped
-       mid-word to "SidePer". Adding a control to this row means re-measuring
-       this number, not just adding the control. */
-    <header className="flex min-w-0 items-center gap-2 sm:gap-3">
-      <Logo variant="dark" className="min-w-0 md:hidden" wordmarkClassName="hidden min-[430px]:inline" />
-      <span className="sr-only">{t('modeName')}</span>
+    /*
+      ⚠️ THE MODE SWITCH GETS ITS OWN ROW ON A PHONE, and measuring is the only
+      way to see why. Three things wanted this row — the wordmark, a door
+      labelled "Watch & earn", and a three-icon pill — and at 390px they need
+      about 33px more than there is. Every previous attempt paid for it out of
+      the wordmark: first `min-[380px]`, then `min-[430px]`, and the operator's
+      report was the result ("the SidePerks logo text is missing").
 
-      <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
-        <ModeSwitchButton to="earn" />
-        <div className="flex items-center rounded-full border border-ink-200 bg-surface p-0.5">
-          <NotificationBell notifications={notifications} unreadCount={unreadCount} now={now} />
-          <ThemeSwitchButton />
-          <SupportChatButton />
+      Measured with `document.documentElement.scrollWidth` at 320/360/390/430,
+      not by eye: the affiliate wordmark was being clipped at every width below
+      430, and the ADS header was running 61px off the screen at 320px.
+
+      So below `sm` the door drops to a line of its own, which is also the most
+      prominent place it has ever been — the operator asked for it to pop. From
+      `sm` there is room and it returns to the row.
+    */
+    <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-3">
+      <header className="flex min-w-0 items-center gap-2 sm:gap-3">
+        <Logo variant="dark" className="min-w-0 md:hidden" wordmarkClassName="inline" />
+        <span className="sr-only">{t('modeName')}</span>
+
+        <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+          {/* Inline from sm, where the row can hold it. */}
+          <ModeSwitchButton to="earn" className="hidden sm:inline-flex" />
+          <div className="flex items-center rounded-full border border-ink-200 bg-surface p-0.5">
+            <NotificationBell
+              notifications={notifications}
+              unreadCount={unreadCount}
+              now={now}
+              fullHref="/market/notifications"
+            />
+            <ThemeSwitchButton />
+            <SupportChatButton />
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* The phone copy. Only one of the two is ever displayed, so the
+          accessibility tree only ever has one door in it. */}
+      <ModeSwitchButton to="earn" className="w-fit sm:hidden" />
+    </div>
   )
 }

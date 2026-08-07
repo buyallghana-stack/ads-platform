@@ -27,6 +27,24 @@ import { createClient } from '@/lib/supabase/server'
 
 export type NotificationType = 'announcement' | 'payout' | 'flag' | 'support'
 
+/**
+ * Which business a notification belongs to.
+ *
+ * ⚠️ EVERY READ MUST PASS ONE. Operator, 2026-08-07: the two bells were the
+ * same bell, so an affiliate reading the marketplace saw "5,000 points have
+ * been added to your balance" — the other business's news, in units that do
+ * not exist on that screen.
+ *
+ * `both` is for events about the ACCOUNT rather than about a business: a
+ * support reply, an account flag, a platform announcement. Those show in
+ * whichever bell is being looked at, because hiding a support reply until you
+ * switch modes is a worse bug than the one being fixed.
+ */
+export type NotificationBusiness = 'ads' | 'affiliate'
+
+/** What a bell in `business` mode is allowed to show. */
+const visibleTo = (business: NotificationBusiness) => [business, 'both']
+
 export type NotificationRow = {
   id: string
   type: NotificationType
@@ -39,24 +57,33 @@ export type NotificationRow = {
 const COLUMNS = 'id, type, title, body, read_at, created_at'
 
 /** Newest first. `limit` caps the panel; the full page passes none. */
-export const getNotifications = cache(async (limit?: number): Promise<NotificationRow[]> => {
-  const user = await getSessionUser()
-  if (!user) return []
+export const getNotifications = cache(
+  async (business: NotificationBusiness, limit?: number): Promise<NotificationRow[]> => {
+    const user = await getSessionUser()
+    if (!user) return []
 
-  const supabase = await createClient()
-  let query = supabase
-    .from('notifications')
-    .select(COLUMNS)
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-  if (limit) query = query.limit(limit)
+    const supabase = await createClient()
+    let query = supabase
+      .from('notifications')
+      .select(COLUMNS)
+      .eq('user_id', user.id)
+      .in('business', visibleTo(business))
+      .order('created_at', { ascending: false })
+    if (limit) query = query.limit(limit)
 
-  const { data } = await query
-  return (data ?? []) as NotificationRow[]
-})
+    const { data } = await query
+    return (data ?? []) as NotificationRow[]
+  },
+)
 
-/** Unread count for the bell badge. head+count, so no rows travel. */
-export const getUnreadCount = cache(async (): Promise<number> => {
+/**
+ * Unread count for the bell badge. head+count, so no rows travel.
+ *
+ * ⚠️ Scoped the same way as the list. A badge counting the other business's
+ * unread items is a red dot that never clears, because nothing on this side
+ * can open the thing it is counting.
+ */
+export const getUnreadCount = cache(async (business: NotificationBusiness): Promise<number> => {
   const user = await getSessionUser()
   if (!user) return 0
 
@@ -65,6 +92,7 @@ export const getUnreadCount = cache(async (): Promise<number> => {
     .from('notifications')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', user.id)
+    .in('business', visibleTo(business))
     .is('read_at', null)
   return count ?? 0
 })

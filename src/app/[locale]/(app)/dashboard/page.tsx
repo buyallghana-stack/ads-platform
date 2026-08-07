@@ -69,8 +69,8 @@ export default async function HomePage({
       admin.from('user_balances').select('lifetime_earned').eq('user_id', user!.id).maybeSingle(),
       getHomeData(user!.id),
       // Own rows via RLS (user client); recent slice feeds the dropdown panel.
-      getNotifications(30),
-      getUnreadCount(),
+      getNotifications('ads', 30),
+      getUnreadCount('ads'),
       // Cheap public-config read; drives whether the Games tile is live.
       getGamesEnabled(),
     ])
@@ -108,8 +108,14 @@ export default async function HomePage({
           is where every app this audience uses keeps it — and a one-tap sign
           out sitting beside the theme switch is a mis-tap that costs somebody
           their session on a phone. */}
-      <header className="flex items-center gap-2">
-        <Logo variant="dark" className="md:hidden" />
+      {/* ⚠️ SAME SPLIT AS THE AFFILIATE HEADER, and for the same measured
+          reason: with the wordmark, the door and the three-icon pill all on
+          one line this header ran 61px off a 320px screen and 21px off a
+          360px one. Below sm the door takes its own row. See the note in
+          AffiliateHeader.tsx. */}
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-3">
+      <header className="flex min-w-0 flex-1 items-center gap-2">
+        <Logo variant="dark" className="min-w-0 md:hidden" />
         {/*
           THE PHONE'S ONLY ROUTE INTO THE SECOND BUSINESS.
 
@@ -121,8 +127,8 @@ export default async function HomePage({
           `md:hidden` here, because above md the sidebar's card is the better
           affordance and two doors on one screen is one too many.
         */}
-        <div className="ml-auto flex items-center gap-2">
-        <ModeSwitchButton to="market" className="md:hidden" />
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+        <ModeSwitchButton to="market" className="hidden sm:inline-flex md:hidden" />
         {/*
           The three icons used to float loose on the wash: no container, no
           edge, nothing saying they belong together or that they are controls
@@ -145,6 +151,10 @@ export default async function HomePage({
         </div>
         </div>
       </header>
+
+      {/* The phone copy. Only one of the two is displayed at a time. */}
+      <ModeSwitchButton to="market" className="w-fit sm:hidden" />
+      </div>
 
       <div className="animate-rise">
         <h1

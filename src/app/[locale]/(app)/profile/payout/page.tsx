@@ -23,11 +23,29 @@ export const metadata: Metadata = {
  */
 export default async function PayoutPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>
+  searchParams: Promise<{ from?: string }>
 }) {
   const { locale } = await params
   setRequestLocale(locale)
+
+  /*
+    WHERE TO GO BACK TO (operator, 2026-08-07).
+
+    One payout account serves both businesses, so an affiliate with no
+    destination is sent here — across the mode boundary, into a screen wearing
+    the other business's colours. Before this they were simply left here, four
+    taps from the withdrawal they were in the middle of.
+
+    ⚠️ THE VALUE IS NOT TRUSTED. An open redirect parameter is an open redirect
+    parameter even when it only ever holds one of two words, so this is an
+    allow-list of two known routes and anything else falls back. Never
+    `redirect(searchParams.from)`.
+  */
+  const from = (await searchParams).from
+  const returnTo = from === 'commission' ? '/commission/withdraw' : from === 'withdraw' ? '/withdraw' : null
 
   const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
@@ -83,6 +101,7 @@ export default async function PayoutPage({
       providers={providersRes.data ?? []}
       coins={coinsRes.data ?? []}
       networks={networksRes.data ?? []}
+      returnTo={returnTo}
     />
   )
 }

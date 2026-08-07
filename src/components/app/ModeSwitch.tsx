@@ -98,13 +98,28 @@ export function ModeSwitchButton({ to, className }: { to: AppMode; className?: s
   return (
     <Link
       href={MODE_HOME[to]}
+      /*
+        ⚠️ FILLED, NOT OUTLINED, AND IN A TOKEN THE SKIN OWNS (operator,
+        2026-08-07: "the watch and earn should pop to make it visible
+        especially in the dark mode, do same for the ads affiliate too").
+
+        It used to be a tinted outline in `brand` on one side and `violet` on
+        the other. Inside the affiliate skin `brand` IS violet and `surface` is
+        near-black, so on the screen the operator was looking at, the one door
+        out of the business was a dark pill on a dark header with a hairline
+        round it. `--color-mode-other` is defined by each skin as the colour of
+        the OTHER business, so this fill is always the destination's colour and
+        always the one hue on the screen that belongs to nothing else.
+      */
       className={cn(
-        'inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5',
-        'text-[0.75rem] font-semibold transition-colors',
-        'pointer-coarse:py-2',
-        earn
-          ? 'border-ink-200 bg-surface text-ink-700 hover:border-brand-600/45 hover:text-brand-700'
-          : 'border-violet-600/30 bg-violet-50 text-violet-700 hover:border-violet-600/60',
+        'inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2',
+        'text-[0.75rem] font-semibold text-white transition-colors',
+        'bg-[var(--color-mode-other)] hover:bg-[var(--color-mode-other-hover)]',
+        /* A ring in the same hue, so it reads as raised on a busy header
+           rather than as a flat sticker. */
+        'shadow-[0_1px_2px_rgb(15_23_42/0.18)] ring-1 ring-white/15',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
+        'pointer-coarse:py-2.5',
         className,
       )}
     >

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 
-import { ArrowLeft, Check, Coins, Pencil, Plus, ShieldCheck, Smartphone } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Coins, Pencil, Plus, ShieldCheck, Smartphone } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { savePayoutDetails } from '@/app/[locale]/(app)/profile/payout/actions'
@@ -52,12 +52,16 @@ export function PayoutAccountsForm({
   providers,
   coins,
   networks,
+  returnTo,
 }: {
   momoSaved: MomoSaved | null
   cryptoSaved: CryptoSaved | null
   providers: Provider[]
   coins: Coin[]
   networks: Network[]
+  /** The withdrawal that sent them here, already validated against an
+   *  allow-list on the server. Null when they arrived from Profile. */
+  returnTo: string | null
 }) {
   const t = useTranslations('payout')
   const router = useRouter()
@@ -133,7 +137,7 @@ export function PayoutAccountsForm({
       <header className="flex items-center gap-3">
         <button
           type="button"
-          onClick={() => router.push('/profile')}
+          onClick={() => router.push(returnTo ?? '/profile')}
           aria-label={t('back')}
           className="grid size-9 place-items-center rounded-full text-ink-600 transition-colors hover:bg-ink-100 hover:text-ink-900 pointer-coarse:size-10"
         >
@@ -149,6 +153,26 @@ export function PayoutAccountsForm({
         <ShieldCheck aria-hidden className="mt-0.5 size-3.5 shrink-0" />
         {t('coolOffNote')}
       </p>
+
+      {/*
+        THE WAY BACK, when a withdrawal sent them here.
+
+        One payout account serves both businesses, so an affiliate with no
+        destination crosses the mode boundary to reach this screen. Landing in
+        the other business's colours with only a Profile link out of it is how
+        somebody abandons a withdrawal they had already started. The header's
+        back arrow goes here too.
+      */}
+      {returnTo && (momoSaved || cryptoSaved) && (
+        <button
+          type="button"
+          onClick={() => router.push(returnTo)}
+          className="mt-3 flex w-full items-center justify-between gap-3 rounded-(--radius-card) border border-brand-600 bg-brand-600 px-4 py-3 text-left transition-colors hover:bg-brand-700"
+        >
+          <span className="text-[0.875rem] font-semibold text-white">{t('backToWithdrawal')}</span>
+          <ArrowRight aria-hidden className="size-4 shrink-0 text-white/80" />
+        </button>
+      )}
 
       <div className="mt-5 flex flex-col gap-4">
         {/* ---- Mobile Money ------------------------------------------------ */}

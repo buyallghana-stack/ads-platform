@@ -45,6 +45,19 @@
   /* Lighter end of the panel gradient, also measured. */
   --color-brand-accent: #0090f8;
 
+  /* ── THE DOOR TO THE OTHER BUSINESS ──
+     The mode switch is filled with the colour of where it GOES, never of where
+     it is. Each skin therefore names the OTHER one here, and the button just
+     paints itself with the token. That is what makes it pop: inside the violet
+     affiliate skin this resolves to the ads blue, which is the one colour on
+     that screen that belongs to nothing else. An outline in `brand` looked
+     correct in the source and vanished in dark mode, because inside
+     `.affiliate` brand IS violet.
+     ⚠️ Every skin must define it: :root, .dark, .affiliate, and the light
+     affiliate block. */
+  --color-mode-other: #7c3aed;
+  --color-mode-other-hover: #6d28d9;
+
   /* --- Semantic surfaces ------------------------------------------------
      Two tokens the neutral ramp cannot express, because both are pure white
      in light mode and the `ink` scale bottoms out at #f8fafc:
@@ -460,6 +473,11 @@
     --color-brand-700:  #5fa3fb; /* on-tint text + button hover (lifts nicely) */
     --color-brand-800:  #7cb3fb; /* button active */
 
+    /* The door still points at the affiliate business, lifted for a dark
+       field so a filled violet pill stays legible on a dark slate header. */
+    --color-mode-other: #8b5cf6;
+    --color-mode-other-hover: #a78bfa;
+
     --color-success-50:  #0f2418;
     --color-success-700: #5ee29a;
 
@@ -635,6 +653,10 @@
     --chart-series: #a78bfa;
     --chart-series-alt: #38bdf8;
 
+    /* Back to the ads business. Lifted for a dark field. */
+    --color-mode-other: #2b83f9;
+    --color-mode-other-hover: #4f9bfb;
+
     /* Ambient wash behind the top of an affiliate screen. */
     --gradient-field:
       radial-gradient(120% 360px at 50% -60px, rgb(124 58 237 / 0.28) 0%, transparent 70%);
@@ -752,6 +774,9 @@
     /* Darker than the dark skin's pair: these draw on white now. */
     --chart-series: #7c3aed;
     --chart-series-alt: #0284c7;
+
+    --color-mode-other: #0068f8;
+    --color-mode-other-hover: #0053c6;
 
     --gradient-field:
       radial-gradient(120% 360px at 50% -60px, rgb(124 58 237 / 0.14) 0%, transparent 70%);

@@ -348,7 +348,7 @@ export function WithdrawWizard({
               <p className="max-w-[30ch] text-[0.8125rem] leading-relaxed text-ink-500">
                 {t('account.empty')}
               </p>
-              <Link href="/profile/payout">
+              <Link href={{ pathname: '/profile/payout', query: { from: 'withdraw' } }}>
                 <Button size="md">{t('account.addAccount')}</Button>
               </Link>
             </div>

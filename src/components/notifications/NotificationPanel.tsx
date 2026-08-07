@@ -16,6 +16,7 @@ import { NotificationsView } from './NotificationsView'
  * the card.
  */
 export function NotificationPanel({
+  fullHref = '/notifications',
   notifications,
   unreadCount,
   now,
@@ -25,6 +26,8 @@ export function NotificationPanel({
   unreadCount: number
   now: number
   onClose: () => void
+  /** Where "see all" goes; the affiliate bell passes its own page. */
+  fullHref?: string
 }) {
   const t = useTranslations('notifications')
 
@@ -51,7 +54,7 @@ export function NotificationPanel({
         </h2>
         <div className="flex items-center gap-1">
           <Link
-            href="/notifications"
+            href={fullHref}
             onClick={onClose}
             className="rounded-full px-3 py-1.5 text-[0.8125rem] font-medium text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-800"
           >
