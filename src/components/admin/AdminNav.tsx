@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 
 import type { LucideIcon } from 'lucide-react'
 import {
+  GraduationCap,
   Megaphone,
   BadgeCheck,
   Building2,
@@ -120,6 +121,14 @@ const GROUPS: NavGroup[] = [
       // same way an ad is — the operator writes it, then publishes it — so it
       // belongs beside Ads rather than in a group of its own.
       { key: 'catalogue', href: '/admin/catalogue', Icon: BookOpen },
+      /* ⚠️ ITS OWN ROW, not a filter inside the catalogue. The catalogue has
+         had a Training tab all along and the operator still could not find it,
+         for two reasons: the tab strip collapses to a `<select>` below xl
+         because four tabs do not fit, and a training programme is not simply a
+         product with a different `purpose` — it gates the whole affiliate
+         business and carries a rate, a validity period and a certificate that
+         no vendor product has. */
+      { key: 'training', href: '/admin/training', Icon: GraduationCap },
       // Sits with Ads rather than under SYSTEM: a gift code is content the
       // operator creates and hands out, not a setting they configure.
       { key: 'giftCodes', href: '/admin/gift-codes', Icon: Gift },

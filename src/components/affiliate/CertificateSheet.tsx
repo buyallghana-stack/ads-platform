@@ -52,11 +52,28 @@ export function CertificateSheet({
   const accentInk = professional ? '#5b21b6' : '#b45309'
 
   return (
+    /*
+      ⚠️ LIGHT, WHATEVER THE THEME IS (operator, 2026-08-07: "a certificate
+      should only be light themed no matter your theme settings").
+
+      Every colour on this sheet was already a literal hex rather than a token,
+      so the sheet itself never went dark — but it sits inside the affiliate
+      wrapper, which is a dark violet skin, and that showed around it and
+      behind it when the page was screenshotted, shared or printed. A
+      certificate is a document, not a screen: it has one appearance.
+
+      `colorScheme: 'light'` is the part that is easy to miss. Without it the
+      browser still renders form controls, scrollbars and the print background
+      in the dark scheme it inherited, which is how a "light" sheet still
+      prints with a grey wash behind it.
+    */
     <div
       className="certificate-sheet"
       style={{
         containerType: 'inline-size',
         width: '100%',
+        colorScheme: 'light',
+        background: '#fff',
       }}
     >
       <div
@@ -102,28 +119,44 @@ export function CertificateSheet({
           </span>
         </div>
 
-        {/* The seal. */}
+        {/* The mark, not a stand-in for it.
+            This was a violet disc with the words SIDE / PERKS set in it, which
+            is what you draw when the real asset is not to hand — and on a
+            document somebody presents to an employer it reads as a placeholder.
+            `sideperks-mark.png` is the actual logo and it is already in
+            /public for the app header. */}
         <div
           style={{
             position: 'absolute',
             right: '7cqw',
-            top: '7cqw',
-            width: '13cqw',
-            height: '13cqw',
-            borderRadius: '50%',
-            background: accent,
-            display: 'grid',
-            placeItems: 'center',
+            top: '6.5cqw',
+            width: '15cqw',
             textAlign: 'center',
-            color: '#fff',
-            boxShadow: `0 0 0 0.8cqw ${accent}33`,
           }}
         >
-          <span style={{ fontSize: '1.5cqw', fontWeight: 700, lineHeight: 1.25 }}>
-            SIDE
-            <br />
-            PERKS
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/sideperks-mark.png"
+            alt=""
+            style={{
+              width: '11cqw',
+              height: '11cqw',
+              display: 'block',
+              margin: '0 auto',
+              borderRadius: '2.4cqw',
+            }}
+          />
+          <p
+            style={{
+              marginTop: '0.9cqw',
+              fontSize: '1.25cqw',
+              fontWeight: 700,
+              letterSpacing: '0.1em',
+              color: accentInk,
+            }}
+          >
+            SIDEPERKS
+          </p>
         </div>
 
         {/* The body. */}

@@ -848,6 +848,11 @@
     width: 100%;
     margin: 0;
     break-inside: avoid;
+    /* ⚠️ The sheet carries its own light scheme into the print. Inheriting the
+       affiliate skin's `color-scheme: dark` makes the printer lay a grey wash
+       behind the page even though every colour on the sheet is a literal. */
+    color-scheme: light;
+    background: #fff;
   }
 
   .certificate-sheet > div {

@@ -1482,7 +1482,8 @@
         "tasks": "Objectifs",
         "affiliates": "Affiliés"
       },
-      "viewUserApp": "Voir l’app utilisateur"
+      "viewUserApp": "Voir l’app utilisateur",
+      "training": "Formation"
     },
     "overview": {
       "title": "Aperçu",
@@ -3305,6 +3306,32 @@
         "save": "Créer le code",
         "cancel": "Annuler"
       }
+    },
+    "training": {
+      "title": "Formation affiliés",
+      "description": "Les deux programmes qui conditionnent l'activité d'affiliation, et ce que rapporte leur vente.",
+      "empty": "Aucun programme de formation pour le moment.",
+      "priceLine": "{price} · {lessons} leçons",
+      "status": {
+        "published": "Publié",
+        "draft": "Brouillon",
+        "paused": "En pause"
+      },
+      "edit": "Modifier le cours",
+      "commission": "Commission sur ce programme",
+      "setRates": "Définir les taux",
+      "changeRates": "Modifier les taux",
+      "noRates": "Aucune commission n'est définie : personne ne gagne rien en amenant un affilié via ce programme.",
+      "levelOne": "Niveau un",
+      "levelOneHint": "L'affilié qui a réalisé la vente.",
+      "levelTwo": "Niveau deux",
+      "levelTwoHint": "Celui qui a recruté cet affilié.",
+      "preview": "Sur une vente à {price} : le vendeur gagne {seller}, son recruteur {recruiter}, et vous gardez {kept}.",
+      "over100": "Les deux niveaux réunis ne peuvent pas dépasser 100 %.",
+      "save": "Enregistrer les taux",
+      "saving": "Enregistrement…",
+      "cancel": "Annuler",
+      "frozenNote": "Les taux ne valent que pour les nouvelles ventes. Une commission déjà versée reste figée sur la vente dont elle provient."
     }
   },
   "giftCode": {

@@ -1482,7 +1482,8 @@
         "tasks": "Tasks",
         "affiliates": "Affiliates"
       },
-      "viewUserApp": "View user app"
+      "viewUserApp": "View user app",
+      "training": "Training"
     },
     "overview": {
       "title": "Overview",
@@ -3305,6 +3306,32 @@
         "save": "Create code",
         "cancel": "Cancel"
       }
+    },
+    "training": {
+      "title": "Affiliate training",
+      "description": "The two programmes that gate the affiliate business, and what selling one pays.",
+      "empty": "No training programmes yet.",
+      "priceLine": "{price} · {lessons} lessons",
+      "status": {
+        "published": "Published",
+        "draft": "Draft",
+        "paused": "Paused"
+      },
+      "edit": "Edit the course",
+      "commission": "Commission on this programme",
+      "setRates": "Set the rates",
+      "changeRates": "Change the rates",
+      "noRates": "No commission is set, so nobody earns for bringing an affiliate in through this programme.",
+      "levelOne": "Level one",
+      "levelOneHint": "The affiliate who made the sale.",
+      "levelTwo": "Level two",
+      "levelTwoHint": "Whoever recruited that affiliate.",
+      "preview": "On one sale at {price}: the seller earns {seller}, their recruiter earns {recruiter}, and you keep {kept}.",
+      "over100": "The two levels together cannot be more than 100%.",
+      "save": "Save the rates",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "frozenNote": "Rates apply to new sales only. Commission somebody has already been paid is frozen on the sale it came from."
     }
   },
   "giftCode": {
