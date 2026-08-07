@@ -28,6 +28,8 @@ export type CurriculumRow = {
   completed: boolean
   seconds_watched: number
   watched_percent: number
+  /** False when a checkpoint on this lesson is still unpassed. */
+  checkpoints_passed: boolean
 }
 
 export type Section = {
@@ -45,6 +47,9 @@ export type Quiz = {
   at_seconds: number | null
   pass_percent: number
   questions: QuizQuestion[]
+  /** Merged in by `getLesson`. A checkpoint already passed is closed, and it
+   *  is what decides whether the lesson can be moved past. */
+  passed: boolean
 }
 
 export type LessonPayload =
@@ -69,6 +74,10 @@ export type LessonPayload =
       }
       resources: { id: string; title: string; byte_size: number | null }[]
       quizzes: Quiz[]
+      /** False while any checkpoint on this lesson is unpassed. Next is
+       *  blocked on it: a checkpoint that can be walked past is decoration,
+       *  and the certificate now depends on the score. */
+      checkpointsPassed: boolean
     }
 
 /**
@@ -105,12 +114,30 @@ export const getCurriculum = cache(
 export const getLesson = cache(
   async (userId: string, lessonId: string): Promise<LessonPayload> => {
     const supabase = createAdminClient()
-    const { data, error } = await supabase.rpc('lesson_for_learner', {
-      p_user_id: userId,
-      p_lesson_id: lessonId,
-    })
-    if (error || !data) return { ok: false, reason: 'not-found' }
-    return data as unknown as LessonPayload
+
+    /* Two calls rather than one, deliberately. `lesson_for_learner` is the
+       content read and it is careful about what it does NOT send — the answer
+       key never leaves the database. The pass state is a different question
+       about the same person, and bolting it into that function would mean
+       editing forty lines of jsonb to add one boolean per quiz. */
+    const [lesson, states] = await Promise.all([
+      supabase.rpc('lesson_for_learner', { p_user_id: userId, p_lesson_id: lessonId }),
+      supabase.rpc('lesson_quiz_states', { p_user_id: userId, p_lesson_id: lessonId }),
+    ])
+
+    if (lesson.error || !lesson.data) return { ok: false, reason: 'not-found' }
+
+    const payload = lesson.data as unknown as LessonPayload
+    if (!payload.ok) return payload
+
+    const passedById = (states.data ?? {}) as Record<string, boolean>
+    payload.quizzes = payload.quizzes.map((quiz) => ({
+      ...quiz,
+      passed: passedById[quiz.id] === true,
+    }))
+    payload.checkpointsPassed = payload.quizzes.every((quiz) => quiz.passed)
+
+    return payload
   },
 )
 

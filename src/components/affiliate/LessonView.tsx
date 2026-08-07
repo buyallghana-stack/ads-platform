@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import {
   BookOpen,
+  Lock,
   ChevronLeft,
   ChevronRight,
   CheckCircle2,
@@ -42,7 +43,11 @@ import { cn } from '@/lib/cn'
  * account is gated on. A browser is not a witness.
  */
 
-const DWELL_SECONDS = 20
+/* ⚠️ 15, HARD CODED, AND THE NUMBER IS SHOWN TO THE READER (operator,
+   2026-08-07: "indicate with a pop up the amount of seconds they need to read
+   for which is 15 seconds hard coded"). It was 20 and it was invisible, which
+   is the combination that made a rule look like a broken button. */
+const DWELL_SECONDS = 15
 
 export function LessonView({
   payload,
@@ -79,6 +84,9 @@ export function LessonView({
     for. A silent refusal is what turned a rule into a bug report.
   */
   const articleReady = useRef(false)
+  /* Seconds still owed on an article, or null when it is not an article or the
+     time is served. Held in STATE, not a ref, because the popup prints it. */
+  const [secondsLeft, setSecondsLeft] = useState<number | null>(null)
   const markArticle = () => {
     if (!payload.ok || payload.lesson.kind === 'video') return
     if (!articleReady.current || payload.progress.completed) return
@@ -162,7 +170,9 @@ export function LessonView({
             done={progress.completed}
             onDwellMet={() => {
               articleReady.current = true
+              setSecondsLeft(null)
             }}
+            onCountdown={setSecondsLeft}
           />
         )}
 
@@ -193,7 +203,24 @@ export function LessonView({
         </div>
       )}
 
-      <LessonNav slug={slug} previous={previous} next={next} onLeave={markArticle} />
+      <LessonNav
+        slug={slug}
+        previous={previous}
+        next={next}
+        onLeave={markArticle}
+        /* ⚠️ A CHECKPOINT IS NOW A GATE. It used to be a card under the video
+           that Next walked straight past — `at_seconds` was stored and never
+           read, so "checkpoint" meant "optional quiz". Since the certificate
+           depends on the average score, a course anybody can click through is
+           a certificate anybody can collect. */
+        blocked={
+          !payload.checkpointsPassed
+            ? 'checkpoint'
+            : secondsLeft !== null && secondsLeft > 0
+              ? { secondsLeft }
+              : null
+        }
+      />
     </div>
   )
 }
@@ -224,6 +251,7 @@ function LessonNav({
   previous,
   next,
   onLeave,
+  blocked,
 }: {
   slug: string
   previous: Neighbour
@@ -231,8 +259,12 @@ function LessonNav({
   /** Fires before the navigation, so an article that has met its reading time
    *  is recorded on the way out rather than lost. */
   onLeave: () => void
+  /** Why Next cannot be used yet, or null. PREVIOUS is never blocked: going
+   *  back to re-read is the thing somebody stuck on a checkpoint should do. */
+  blocked: 'checkpoint' | { secondsLeft: number } | null
 }) {
   const t = useTranslations('affiliate.course')
+  const [nudge, setNudge] = useState(false)
   if (!previous && !next) return null
 
   const shell =
@@ -261,22 +293,46 @@ function LessonNav({
         <span aria-hidden className="min-w-0 flex-1" />
       )}
 
-      {next && (
-        <Link
-          href={{ pathname: `/learn/${slug}`, query: { lesson: next.id } }}
-          onClick={onLeave}
-          className={cn(shell, 'justify-end border-brand-600 bg-brand-600 hover:bg-brand-700')}
-        >
-          <span className="min-w-0 text-right">
-            <span className="block text-[0.6875rem] uppercase tracking-wide text-white/70">
-              {t('next')}
+      {next &&
+        (blocked ? (
+          /* A BUTTON, not a disabled link. A greyed control says "no" and
+             stops; this one says why, which is the whole difference between
+             a rule and a bug report. */
+          <button
+            type="button"
+            onClick={() => setNudge(true)}
+            className={cn(shell, 'justify-end border-ink-200 bg-ink-50 text-left')}
+          >
+            <span className="min-w-0 text-right">
+              <span className="block text-[0.6875rem] uppercase tracking-wide text-ink-400">
+                {t('next')}
+              </span>
+              <span className="block truncate text-[0.8125rem] font-medium text-ink-500">
+                {next.title}
+              </span>
             </span>
-            <span className="block truncate text-[0.8125rem] font-medium text-white">
-              {next.title}
+            <Lock aria-hidden className="size-4 shrink-0 text-ink-400" />
+          </button>
+        ) : (
+          <Link
+            href={{ pathname: `/learn/${slug}`, query: { lesson: next.id } }}
+            onClick={onLeave}
+            className={cn(shell, 'justify-end border-brand-600 bg-brand-600 hover:bg-brand-700')}
+          >
+            <span className="min-w-0 text-right">
+              <span className="block text-[0.6875rem] uppercase tracking-wide text-white/70">
+                {t('next')}
+              </span>
+              <span className="block truncate text-[0.8125rem] font-medium text-white">
+                {next.title}
+              </span>
             </span>
-          </span>
-          <ChevronRight aria-hidden className="size-4 shrink-0 text-white/80" />
-        </Link>
+            <ChevronRight aria-hidden className="size-4 shrink-0 text-white/80" />
+          </Link>
+        ))}
+
+      {nudge && blocked && (
+        <NextBlocked reason={blocked} onClose={() => setNudge(false)} />
       )}
     </nav>
   )
@@ -444,6 +500,7 @@ function ArticleLesson({
   body,
   done,
   onDwellMet,
+  onCountdown,
 }: {
   lessonId: string
   slug: string
@@ -451,6 +508,9 @@ function ArticleLesson({
   done: boolean
   /** Told the moment the reading time is satisfied, so Next can record it. */
   onDwellMet: () => void
+  /** Seconds still owed, ticked down so the popup can name a real number
+   *  rather than repeating the full fifteen every time. */
+  onCountdown: (seconds: number) => void
 }) {
   const t = useTranslations('affiliate.course')
   const [reached, setReached] = useState(false)
@@ -493,6 +553,14 @@ function ArticleLesson({
        record on the way out. */
     const dwellTimer = setTimeout(() => onDwellMet(), DWELL_SECONDS * 1000)
 
+    /* Ticked once a second so the popup can say "8 seconds", not "15". */
+    onCountdown(DWELL_SECONDS)
+    const tick = setInterval(() => {
+      const left = Math.ceil(DWELL_SECONDS - (Date.now() - opened.current) / 1000)
+      onCountdown(Math.max(left, 0))
+      if (left <= 0) clearInterval(tick)
+    }, 1000)
+
     const mark = () => {
       setReached(true)
       void markLessonProgress(lessonId, slug, DWELL_SECONDS, 100)
@@ -519,9 +587,10 @@ function ArticleLesson({
     return () => {
       clearTimeout(timer)
       clearTimeout(dwellTimer)
+      clearInterval(tick)
       observer.disconnect()
     }
-  }, [done, lessonId, slug, onDwellMet])
+  }, [done, lessonId, slug, onDwellMet, onCountdown])
 
   return (
     <div>
@@ -592,6 +661,79 @@ function ArticleLesson({
           </>
         )}
       </p>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+
+/**
+ * Why Next did nothing.
+ *
+ * ── A DIALOG RATHER THAN A DISABLED BUTTON ──
+ *
+ * The operator asked for a pop-up, and the reason it is the right answer is
+ * that the two blocked states have different answers. A checkpoint is a thing
+ * to go and do; a reading timer is a thing to wait out, and the only useful
+ * response is the number of seconds left. A greyed button says neither.
+ *
+ * It closes on the backdrop, on Escape and on its own button, because a modal
+ * with one way out is a modal somebody gets stuck in on a phone.
+ */
+function NextBlocked({
+  reason,
+  onClose,
+}: {
+  reason: 'checkpoint' | { secondsLeft: number }
+  onClose: () => void
+}) {
+  const t = useTranslations('affiliate.course.blocked')
+  const checkpoint = reason === 'checkpoint'
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  return (
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-black/50 px-4 backdrop-blur-[2px]"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+        className="animate-rise w-full max-w-sm rounded-(--radius-panel) border border-ink-200 bg-surface p-6 text-center"
+      >
+        <span
+          aria-hidden
+          className={cn(
+            'mx-auto grid size-12 place-items-center rounded-full',
+            checkpoint ? 'bg-warning-500/15 text-warning-600' : 'bg-brand-600/12 text-brand-700',
+          )}
+        >
+          {checkpoint ? <Lock className="size-5" /> : <BookOpen className="size-5" />}
+        </span>
+
+        <h2 className="mt-3 text-[1rem] font-semibold text-ink-900">
+          {checkpoint ? t('checkpointTitle') : t('readingTitle', { n: reason.secondsLeft })}
+        </h2>
+        <p className="mx-auto mt-1.5 max-w-[30ch] text-[0.8125rem] leading-snug text-ink-500">
+          {checkpoint ? t('checkpointBody') : t('readingBody')}
+        </p>
+
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-5 w-full rounded-(--radius-input) bg-brand-600 px-4 py-2.5 text-[0.875rem] font-semibold text-white transition-colors hover:bg-brand-500"
+        >
+          {t('gotIt')}
+        </button>
+      </div>
     </div>
   )
 }

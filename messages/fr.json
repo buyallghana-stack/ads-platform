@@ -3792,7 +3792,14 @@
         "certificateValue": "À la fin du cours",
         "outcomes": "Ce que vous saurez faire"
       },
-      "articleReading": "Lisez jusqu'au bout pour valider cette leçon."
+      "articleReading": "Lisez jusqu'au bout pour valider cette leçon.",
+      "blocked": {
+        "checkpointTitle": "Répondez d'abord au point de contrôle",
+        "checkpointBody": "Cette leçon comporte un point de contrôle. Réussissez-le et la leçon suivante s'ouvre. Vous pouvez réessayer autant de fois que nécessaire.",
+        "readingTitle": "Encore {n} secondes",
+        "readingBody": "Lisez la leçon jusqu'au bout. Elle est validée après 15 secondes passées dessus.",
+        "gotIt": "J'ai compris"
+      }
     },
     "quiz": {
       "passMark": "Seuil {n} %",
@@ -3803,7 +3810,7 @@
       "passedBody": "Vous avez obtenu {n} %. Cette leçon est marquée comme terminée.",
       "failedTitle": "Pas encore",
       "failedBody": "Vous avez obtenu {n} %. Relisez la leçon et réessayez. Le nombre de tentatives est illimité.",
-      "again": "Refaire le test"
+      "passedAlready": "Vous avez déjà réussi ce point de contrôle."
     },
     "withdraw": {
       "back": "Gains",
@@ -3945,6 +3952,21 @@
         "not_signed_in": "Connectez-vous et réessayez.",
         "error": "Une erreur s'est produite. Réessayez dans un instant."
       }
+    },
+    "certificate": {
+      "back": "Vos formations",
+      "title": "Votre certificat",
+      "subtitle": "Téléchargez-le, imprimez-le, ou partagez le lien pour que chacun puisse le vérifier.",
+      "nameTitle": "Quel nom doit-il porter ?",
+      "nameBody": "Un certificat porte un nom légal, pas un surnom. C'est ce qui sera imprimé, et il est fixé une fois le certificat émis.",
+      "nameLabel": "Votre nom légal complet",
+      "namePlaceholder": "Kwame Mensah",
+      "nameHint": "Prénom et nom, tels qu'ils figurent sur votre pièce d'identité.",
+      "nameSubmit": "Utiliser ce nom",
+      "download": "Télécharger",
+      "share": "Copier le lien de vérification",
+      "copied": "Lien copié",
+      "printHint": "Télécharger ouvre votre imprimante. Choisissez « Enregistrer en PDF » pour en garder une copie, ou imprimez en A4 paysage."
     }
   }
 }

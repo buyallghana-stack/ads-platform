@@ -5104,9 +5104,34 @@ export type Database = {
         Args: { p_code: string; p_user_id: string }
         Returns: Json
       }
+      certificate_by_code: {
+        Args: { p_code: string }
+        Returns: Json
+      }
+      my_certificate: {
+        Args: { p_product_id: string; p_user_id: string }
+        Returns: Json
+      }
+      lesson_quiz_states: {
+        Args: { p_lesson_id: string; p_user_id: string }
+        Returns: Json
+      }
+      quiz_is_passed: {
+        Args: { p_quiz_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      lesson_checkpoints_passed: {
+        Args: { p_lesson_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      set_certificate_name: {
+        Args: { p_legal_name: string; p_product_id: string; p_user_id: string }
+        Returns: Json
+      }
       course_curriculum: {
         Args: { p_product_id: string; p_user_id?: string }
         Returns: {
+          checkpoints_passed: boolean
           completed: boolean
           duration_seconds: number
           is_preview: boolean

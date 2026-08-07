@@ -790,3 +790,68 @@
       linear-gradient(155deg, #6d28d9 0%, #4c1d95 100%);
   }
 }
+
+/* ===========================================================================
+   PRINTING A CERTIFICATE
+   ---------------------------------------------------------------------------
+   The download button is `window.print()`, so these rules ARE the PDF. They
+   turn the certificate page into one landscape sheet and take everything else
+   off it: the app shell, the bottom bar, the buttons, the page background.
+
+   `print-color-adjust: exact` is the load-bearing one. Browsers strip
+   background colours when printing to save ink, which on this page would
+   remove the entire coloured spine and the seal and leave a mostly blank
+   document. A certificate is not a memo; its colour is the content.
+
+   Scoped to the sheet and its ancestors rather than applied globally, so
+   printing any other screen still behaves like printing a web page.
+   =========================================================================== */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 8mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  /*
+    ⚠️ `visibility`, NOT `display`. The first version of this hid everything
+    with `body :not(:has(.certificate-sheet))… { display: none }` and restored
+    the sheet with `.certificate-sheet * { display: revert }`. That prints a
+    BLANK PAGE: the hiding selector scores (0,2,1) against the restore's
+    (0,1,0), so it wins on every element inside the sheet and `!important` on
+    both does not break the tie.
+
+    `visibility` has the property this needs and `display` does not — it
+    inherits, and a child can override an inherited `hidden` with `visible`.
+    So one rule hides the app and one rule brings the certificate back, with no
+    specificity race. The hidden elements still occupy space, which is why the
+    sheet is then positioned over the top of them.
+  */
+  body * {
+    visibility: hidden;
+  }
+
+  .certificate-sheet,
+  .certificate-sheet * {
+    visibility: visible;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .certificate-sheet {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    margin: 0;
+    break-inside: avoid;
+  }
+
+  .certificate-sheet > div {
+    border: none !important;
+    border-radius: 0 !important;
+  }
+}

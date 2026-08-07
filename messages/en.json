@@ -3792,7 +3792,14 @@
         "certificateValue": "When you finish",
         "outcomes": "What you will be able to do"
       },
-      "articleReading": "Read to the end to mark this lesson done."
+      "articleReading": "Read to the end to mark this lesson done.",
+      "blocked": {
+        "checkpointTitle": "Answer the checkpoint first",
+        "checkpointBody": "This lesson has a checkpoint. Get it right and the next lesson opens. You can try as many times as you need.",
+        "readingTitle": "{n} more seconds",
+        "readingBody": "Read to the end of the lesson. It is marked done once you have spent 15 seconds with it.",
+        "gotIt": "Got it"
+      }
     },
     "quiz": {
       "passMark": "Pass mark {n}%",
@@ -3803,7 +3810,7 @@
       "passedBody": "You scored {n}%. This lesson is marked complete.",
       "failedTitle": "Not quite",
       "failedBody": "You scored {n}%. Go back over the lesson and try again. There is no limit on attempts.",
-      "again": "Take it again"
+      "passedAlready": "You have already passed this checkpoint."
     },
     "withdraw": {
       "back": "Earnings",
@@ -3945,6 +3952,21 @@
         "not_signed_in": "Sign in and try again.",
         "error": "Something went wrong. Try again in a moment."
       }
+    },
+    "certificate": {
+      "back": "Your learning",
+      "title": "Your certificate",
+      "subtitle": "Download it, print it, or share the link so anybody can check it is real.",
+      "nameTitle": "What name should it carry?",
+      "nameBody": "A certificate carries a legal name, not a nickname. This is what will be printed, and it is fixed once the certificate is issued.",
+      "nameLabel": "Your full legal name",
+      "namePlaceholder": "Kwame Mensah",
+      "nameHint": "First and last name, as it appears on your ID.",
+      "nameSubmit": "Use this name",
+      "download": "Download",
+      "share": "Copy the check link",
+      "copied": "Link copied",
+      "printHint": "Download opens your printer. Choose \"Save as PDF\" to keep a copy, or print it on A4 landscape."
     }
   }
 }

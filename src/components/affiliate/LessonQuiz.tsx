@@ -34,7 +34,13 @@ import { cn } from '@/lib/cn'
 export function LessonQuiz({ quiz, slug }: { quiz: Quiz; slug: string }) {
   const t = useTranslations('affiliate.quiz')
   const [answers, setAnswers] = useState<Record<string, string>>({})
-  const [result, setResult] = useState<{ score: number; passed: boolean } | null>(null)
+  /* ⚠️ SEEDED FROM THE SERVER. Before this, a checkpoint passed last week
+     rendered as a fresh set of questions on every visit — so "already passed"
+     existed only for the length of one page view, and there was no way for the
+     screen to show a lesson as settled. */
+  const [result, setResult] = useState<{ score: number; passed: boolean } | null>(
+    quiz.passed ? { score: quiz.pass_percent, passed: true } : null,
+  )
   const [pending, startTransition] = useTransition()
 
   const answered = quiz.questions.filter((q) => answers[q.id]).length
@@ -85,31 +91,30 @@ export function LessonQuiz({ quiz, slug }: { quiz: Quiz; slug: string }) {
             {t(result.passed ? 'passedTitle' : 'failedTitle')}
           </p>
           <p className="mx-auto mt-1 max-w-sm text-[0.8125rem] leading-snug text-ink-600">
-            {t(result.passed ? 'passedBody' : 'failedBody', { n: result.score })}
+            {result.passed && quiz.passed && answers && Object.keys(answers).length === 0
+              ? t('passedAlready')
+              : t(result.passed ? 'passedBody' : 'failedBody', { n: result.score })}
           </p>
 
-          {/* ⚠️ OFFERED AFTER A PASS TOO. This was `!result.passed`, which meant
-              passing a checkpoint sealed it for the rest of the session: the
-              questions vanished behind a green card with no way back to them.
-              A checkpoint is a proof of attention, not an exam sat once, and
-              somebody who passed it in week one and wants to check themselves
-              again in week four is doing exactly what it is for. Passing again
-              cannot take anything away either — `record_lesson_progress` never
-              un-completes a lesson. */}
-          <button
-            type="button"
-            onClick={retry}
-            className={cn(
-              'mt-4 inline-flex items-center gap-2 rounded-(--radius-input) px-4 py-2.5',
-              'text-[0.875rem] font-semibold transition-colors',
-              result.passed
-                ? 'border border-ink-300 text-ink-700 hover:bg-ink-50'
-                : 'bg-brand-600 text-white hover:bg-brand-500',
-            )}
-          >
-            <RotateCcw aria-hidden className="size-4" />
-            {t(result.passed ? 'again' : 'retry')}
-          </button>
+          {/* ⚠️ NO RETRY ONCE PASSED (operator, 2026-08-07, reversing the
+              earlier reading of this). A checkpoint that can be reopened after
+              a pass is a checkpoint somebody can lower their own grade on by
+              accident — and the grade now decides whether a certificate is
+              issued at all. Passing closes it.
+
+              Failing still retries, without limit. Nobody is trapped: the way
+              past a checkpoint is to get it right, and there is no cap on
+              attempts. */}
+          {!result.passed && (
+            <button
+              type="button"
+              onClick={retry}
+              className="mt-4 inline-flex items-center gap-2 rounded-(--radius-input) bg-brand-600 px-4 py-2.5 text-[0.875rem] font-semibold text-white transition-colors hover:bg-brand-500"
+            >
+              <RotateCcw aria-hidden className="size-4" />
+              {t('retry')}
+            </button>
+          )}
         </div>
       ) : (
         <>
