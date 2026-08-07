@@ -36,11 +36,16 @@ export async function AffiliateHeader({
   const t = await getTranslations('affiliate.nav')
 
   return (
-    <header className="flex items-center gap-3">
-      <Logo variant="dark" className="md:hidden" />
+    /* ⚠️ NOTHING IN THIS ROW COULD SHRINK, so at 360px it ran 3px off the
+       screen and at 320px it ran 43px off, on every affiliate screen. The
+       wordmark is what gives: the mark alone still says whose app this is,
+       and the mode switch beside it is the one control that must stay legible
+       because it is the only door back to the earning side. */
+    <header className="flex min-w-0 items-center gap-2 sm:gap-3">
+      <Logo variant="dark" className="min-w-0 md:hidden" wordmarkClassName="hidden min-[380px]:inline" />
       <span className="sr-only">{t('modeName')}</span>
 
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
         <ModeSwitchButton to="earn" />
         <div className="flex items-center rounded-full border border-ink-200 bg-surface p-0.5">
           <NotificationBell notifications={notifications} unreadCount={unreadCount} now={now} />

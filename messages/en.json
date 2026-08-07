@@ -14,7 +14,7 @@
   },
   "landing": {
     "meta": {
-      "title": "SidePerks — get paid for watching ads and taking surveys",
+      "title": "SidePerks: get paid for watching ads and taking surveys",
       "description": "Watch short video ads and answer quick surveys on your phone. Points are pegged to the cedi and you withdraw to Mobile Money or crypto. Free to join, no card needed."
     },
     "nav": {
@@ -77,7 +77,7 @@
       "affiliate": {
         "chip": "Coming next",
         "title": "Affiliate offers",
-        "body": "Promoting partner products for a commission. This one is not built yet — it is on the roadmap, not in the app, and there is nothing here to sign up for."
+        "body": "Promoting partner products for a commission. This one is not built yet. It is on the roadmap, not in the app, and there is nothing here to sign up for."
       }
     },
     "how": {
@@ -117,7 +117,7 @@
           "points": "Points printed on every card",
           "length": "Video length shown before you commit",
           "tabs": "Videos and surveys kept in separate tabs",
-          "cap": "A clear count of what is left today — {freeAds} free"
+          "cap": "A clear count of what is left today: {freeAds} free"
         },
         "shotAlt": "The SidePerks ads feed, with video ad cards each showing the points it pays"
       },
@@ -145,11 +145,11 @@
       "rowRate": "Points per ad",
       "rowThreshold": "Withdraw from",
       "free": {
-        "title": "{name} plan — GHS 0",
+        "title": "{name} plan: GHS 0",
         "body": "{ads} ads a day for your first {days} days, and you can withdraw from {threshold} points. No card needed to start.",
         "cta": "Start free"
       },
-      "stacking": "Plans stack. Hold more than one and the daily limits add up, the earning bonuses add together, and the lowest withdrawal threshold is the one that applies. Every plan runs for a fixed period and nothing renews on its own — you are never charged again without asking."
+      "stacking": "Plans stack. Hold more than one and the daily limits add up, the earning bonuses add together, and the lowest withdrawal threshold is the one that applies. Every plan runs for a fixed period and nothing renews on its own. You are never charged again without asking."
     },
     "invite": {
       "eyebrow": "Invite & earn",
@@ -168,11 +168,11 @@
         },
         "watch": {
           "title": "They start watching",
-          "body": "Your bonus is tied to real activity rather than to a signup — which is what keeps the programme worth anything."
+          "body": "Your bonus is tied to real activity rather than to a signup, which is what keeps the programme worth anything."
         },
         "bonus": {
           "title": "You get your bonus",
-          "body": "Credited to your balance like any other earning and listed in your statement. It is the same amount for everybody — what an invite is worth depends on what they do, not on which plan you hold."
+          "body": "Credited to your balance like any other earning and listed in your statement. It is the same amount for everybody. What an invite is worth depends on what they do, not on which plan you hold."
         }
       }
     },
@@ -216,7 +216,7 @@
       "items": {
         "free": {
           "q": "Is SidePerks free?",
-          "a": "Yes. The free plan gives you {freeAds} ads a day for your first {days} days. After that a paid plan is needed to keep earning — the points you already have stay yours. Nothing else is locked behind them: plans raise your daily limit and the points you get per ad."
+          "a": "Yes. The free plan gives you {freeAds} ads a day for your first {days} days. After that a paid plan is needed to keep earning. The points you already have stay yours. Nothing else is locked behind them: plans raise your daily limit and the points you get per ad."
         },
         "worth": {
           "q": "What is a point actually worth?",
@@ -224,7 +224,7 @@
         },
         "withdraw": {
           "q": "When can I withdraw?",
-          "a": "Once your balance passes {threshold} points — the same threshold for everybody, whatever plan you hold. Payouts switch on when our payout licensing is complete; until then you can set up your payout account and keep earning, and the app tells you plainly where a request stands rather than pretending."
+          "a": "Once your balance passes {threshold} points. It is the same threshold for everybody, whatever plan you hold. Payouts switch on when our payout licensing is complete; until then you can set up your payout account and keep earning, and the app tells you plainly where a request stands rather than pretending."
         },
         "questions": {
           "q": "Do I have to answer questions?",
@@ -232,18 +232,18 @@
         },
         "methods": {
           "q": "How do I get paid?",
-          "a": "To a Mobile Money account — MTN, Telecel or AirtelTigo — or to a crypto wallet in USDT. You choose which and set it up yourself in your profile, and withdrawals can only ever go to an account saved on your own profile."
+          "a": "To a Mobile Money account (MTN, Telecel or AirtelTigo) or to a crypto wallet in USDT. You choose which and set it up yourself in your profile, and withdrawals can only ever go to an account saved on your own profile."
         },
         "devices": {
           "q": "Will it work on my phone?",
-          "a": "It is built for inexpensive Android phones and slow connections, and it is tested down to iOS 12 and Android 6. There is nothing to install — it runs in your browser."
+          "a": "It is built for inexpensive Android phones and slow connections, and it is tested down to iOS 12 and Android 6. There is nothing to install. It runs in your browser."
         }
       }
     },
     "cta": {
       "title": "Your spare minutes are already",
       "titleAccent": "worth something.",
-      "lead": "Create a free account and watch your first ad today — {freeAds} of them a day, every day, at no cost.",
+      "lead": "Create a free account and watch your first ad today, {freeAds} of them a day, every day, at no cost.",
       "primary": "Create free account",
       "secondary": "I already have an account",
       "note": "Under a minute to join. An email address and a password, nothing else."
@@ -375,10 +375,10 @@
       "invalidCredentials": "That email or password is not correct",
       "emailNotVerified": "Please verify your email address first",
       "identityBlocked": "This email address or phone number cannot be used to open an account.",
-      "botCheckFailed": "We could not confirm you are a person. Refresh the page and try again — if you use an ad blocker or a VPN, turn it off for this page.",
+      "botCheckFailed": "We could not confirm you are a person. Refresh the page and try again. If you use an ad blocker or a VPN, turn it off for this page.",
       "emailSendLimit": "We could not send your confirmation email just now. Please try again in a few minutes.",
-      "botCheckRetry": "The security check needs doing again — it has been reset just below. Please press Create account once more.",
-      "emailSendFailed": "We could not send a confirmation email to that address just now. This is on our side — please try again in a few minutes.",
+      "botCheckRetry": "The security check needs doing again. It has been reset just below. Please press Create account once more.",
+      "emailSendFailed": "We could not send a confirmation email to that address just now. This is on our side. Please try again in a few minutes.",
       "resetLinkExpired": "This reset link has expired or has already been used. Request a new one and open it in the same browser.",
       "passwordSameAsOld": "That is already your password. Choose a different one."
     }
@@ -428,7 +428,7 @@
       "earned": "Earnings",
       "adsWatched": "Ads watched",
       "days": "{count} days",
-      "empty": "Nothing here yet — watch your first ad to start the chart.",
+      "empty": "Nothing here yet. Watch your first ad to start the chart.",
       "tooltipEarned": "{points} pts",
       "tooltipAds": "{count, plural, =1 {1 ad} other {# ads}}",
       "dateColumn": "Date"
@@ -503,12 +503,12 @@
     },
     "referral": {
       "title": "Invite & earn",
-      "hint": "Share your link — you earn a bonus when a friend joins and starts watching.",
+      "hint": "Share your link. You earn a bonus when a friend joins and starts watching.",
       "copy": "Copy link",
       "share": "Share",
       "copiedDone": "Copied",
       "sharedDone": "Shared",
-      "inviteMessage": "Join me on SidePerks — watch short ads and earn real money in Ghana. Sign up with my link: {url}"
+      "inviteMessage": "Join me on SidePerks. Watch short ads and earn real money in Ghana. Sign up with my link: {url}"
     },
     "withdrawCta": "Withdraw",
     "quick": {
@@ -520,7 +520,7 @@
       "label": "Shortcuts"
     },
     "adsWaiting": "{n} ads waiting for you today",
-    "capReachedToday": "That is every ad for today — back at midnight",
+    "capReachedToday": "That is every ad for today: back at midnight",
     "tierCap": "{n} ads a day",
     "tierMultiplier": "×{x} on every ad"
   },
@@ -533,7 +533,7 @@
     "upgradeTeaserTitle": "Go further",
     "upgradeTeaserBody": "Upgrade your plan to raise your daily earning cap.",
     "addTeaserTitle": "Add another plan",
-    "addTeaserBody": "Plans stack — every one you hold adds to your daily limit.",
+    "addTeaserBody": "Plans stack. Every one you hold adds to your daily limit.",
     "team": "Team",
     "viewAsFallbackName": "this account"
   },
@@ -579,7 +579,7 @@
       "title": "Your team starts with one invite",
       "body": "Share your code. When somebody joins with it they are your level 1, and the people they go on to invite are your level 2."
     },
-    "note": "You can see these figures because these people joined through you. The same is visible about you to whoever invited you — your name, your phone number, what you have withdrawn and what is left in your balance. Nobody can move money in or out of your account from here.",
+    "note": "You can see these figures because these people joined through you. The same is visible about you to whoever invited you. Your name, your phone number, what you have withdrawn and what is left in your balance. Nobody can move money in or out of your account from here.",
     "noteEmpty": "Whoever invited you can see the same about you: your name, your phone number, what you have withdrawn and what is left in your balance. So can the person who invited them. Nobody can move money in or out of your account from there."
   },
   "ads": {
@@ -595,7 +595,7 @@
       "points": "pts",
       "remaining": "{count, plural, one {# ad left on your {tier} plan today} other {# ads left on your {tier} plan today}}",
       "spent": "You've used every ad on your {tier} plan today.",
-      "remainingShared": "{count, plural, one {# ad left today — shared across every kind of ad} other {# ads left today — shared across every kind of ad}}"
+      "remainingShared": "{count, plural, one {# ad left today, shared across every kind of ad} other {# ads left today, shared across every kind of ad}}"
     },
     "card": {
       "reward": "+{points} pts",
@@ -634,13 +634,13 @@
       "loading": "Getting your ad ready",
       "tapToPlay": "Tap to play",
       "questionsAhead": "{count, plural, one {# question during this ad} other {# questions during this ad}}",
-      "watchOnlyHint": "No questions — just watch it through",
+      "watchOnlyHint": "No questions: just watch it through",
       "answeredCount": "{done} of {total} answered",
       "unavailableTitle": "This ad is no longer available",
-      "unavailableBody": "It was paused or fully booked just now. Nothing was counted against you — pick another one.",
+      "unavailableBody": "It was paused or fully booked just now. Nothing was counted against you. Pick another one.",
       "watchLeft": "{seconds}s of watching still required",
       "watchDone": "Watch time complete",
-      "watchFree": "Paid — watch as long as you like",
+      "watchFree": "Paid: watch as long as you like",
       "creditedChip": "+{points} pts earned"
     },
     "question": {
@@ -650,7 +650,7 @@
       "next": "Next",
       "resume": "Continue watching",
       "finish": "Submit",
-      "noWrongAnswer": "There are no right or wrong answers — just tell us what you think.",
+      "noWrongAnswer": "There are no right or wrong answers, just tell us what you think.",
       "stepOpen": "Question {n}"
     },
     "result": {
@@ -702,14 +702,14 @@
       },
       "tryAgain": "Try again",
       "incorrectSurvey": {
-        "body": "{count, plural, one {One of the check questions did not match. Take the survey again — # try left.} other {One of the check questions did not match. Take the survey again — # tries left.}}"
+        "body": "{count, plural, one {One of the check questions did not match. Take the survey again, # try left.} other {One of the check questions did not match. Take the survey again, # tries left.}}"
       },
       "notWatchedSurvey": {
         "body": "Answer every question before submitting."
       },
       "cooldown": {
         "title": "Just a moment",
-        "body": "There is a short wait between ads. Try this one again in a few seconds — nothing was counted against you."
+        "body": "There is a short wait between ads. Try this one again in a few seconds. Nothing was counted against you."
       },
       "pointsCap": {
         "title": "That's the most for today",
@@ -762,14 +762,14 @@
       "watched": "{seconds}s watched",
       "answered": "{done, plural, =0 {No questions answered yet} one {# question answered} other {# questions answered}}",
       "answeredOf": "{done} of {total} answered",
-      "noAttempt": "Leaving does not use up one of your tries — only answering does.",
+      "noAttempt": "Leaving does not use up one of your tries, only answering does.",
       "stay": "Stay and finish",
       "leave": "Leave the ad",
       "read": "{seconds}s read of {total}s",
-      "noCostLink": "Leaving costs you nothing — the article stays in your list."
+      "noCostLink": "Leaving costs you nothing. The article stays in your list."
     },
-    "disclosure": "SidePerks is not affiliated with these advertisers and does not endorse them. Anything you do on an advertiser's website or app is between you and them — we are not responsible for money you spend or lose there, or for a product or service that disappoints you.",
-    "repeating": "You've finished every new ad. These are ones you've already watched — they pay again.",
+    "disclosure": "SidePerks is not affiliated with these advertisers and does not endorse them. Anything you do on an advertiser's website or app is between you and them. We are not responsible for money you spend or lose there, or for a product or service that disappoints you.",
+    "repeating": "You've finished every new ad. These are ones you've already watched. They pay again.",
     "link": {
       "visit": "Go to the advertiser",
       "waiting": "{seconds}s of reading to go",
@@ -815,10 +815,10 @@
         "max": "Max"
       },
       "coinEstimate": "≈ {coinAmount} {coin} (about ${usd}) at today's indicative rate, GHS {rate} to the dollar.",
-      "estimateUnavailable": "We cannot show a crypto estimate right now — today's exchange rate has not come through. Your withdrawal is recorded in cedis and the coin amount is worked out when it is sent.",
+      "estimateUnavailable": "We cannot show a crypto estimate right now, today's exchange rate has not come through. Your withdrawal is recorded in cedis and the coin amount is worked out when it is sent.",
       "afterFee": "You'll receive GHS {net} after the {percent}% fee."
     },
-    "usdtNotice": "USDT amounts are estimates. Your points convert to cedis at the fixed rate; the cedi–dollar rate updates daily, and the final USDT amount is calculated when your payout is sent — it may differ slightly from this estimate.",
+    "usdtNotice": "USDT amounts are estimates. Your points convert to cedis at the fixed rate; the cedi to dollar rate updates daily, and the final USDT amount is calculated when your payout is sent. It may differ slightly from this estimate.",
     "errors": {
       "belowMin": "The minimum withdrawal is {min} pts (GHS {ghs}).",
       "aboveBalance": "That is more than your balance."
@@ -841,7 +841,7 @@
       "delete": "Delete last digit",
       "submitting": "Submitting your request…",
       "hint": "Enter your withdrawal PIN",
-      "wrong": "{count, plural, =0 {Incorrect PIN.} =1 {Incorrect PIN — 1 try left.} other {Incorrect PIN — # tries left.}}",
+      "wrong": "{count, plural, =0 {Incorrect PIN.} =1 {Incorrect PIN, 1 try left.} other {Incorrect PIN, # tries left.}}",
       "locked": "Too many attempts. Try again in {minutes} min.",
       "error": "Could not verify your PIN. Please try again.",
       "noPinTitle": "Set a withdrawal PIN first",
@@ -857,7 +857,7 @@
     },
     "notYet": {
       "title": "{short} points to go",
-      "body": "You can withdraw once you reach {min} points (GHS {ghs}). You have {balance} — that threshold comes with your {tier} plan.",
+      "body": "You can withdraw once you reach {min} points (GHS {ghs}). You have {balance}. That threshold comes with your {tier} plan.",
       "cta": "Earn more"
     },
     "refused": {
@@ -1054,7 +1054,7 @@
       "badType": "Please choose a JPG, PNG or WebP image.",
       "tooBig": "That image is over 15 MB. Please choose a smaller one.",
       "failed": "Could not update your photo. Please try again.",
-      "couldNotShrink": "That picture could not be resized on this device. Please choose a smaller one — about 400 KB."
+      "couldNotShrink": "That picture could not be resized on this device. Please choose a smaller one, about 400 KB."
     },
     "errors": {
       "nameTooShort": "Please enter your name.",
@@ -1100,11 +1100,11 @@
       "title": "Save your backup codes",
       "body": "These get you back in if you lose your phone. Each one works once.",
       "replaced": "Your old codes no longer work. Save these instead.",
-      "warning": "This is the only time these are shown. Store them somewhere safe — not in the same place as your phone.",
+      "warning": "This is the only time these are shown. Store them somewhere safe, not in the same place as your phone.",
       "copy": "Copy",
       "copied": "Copied",
       "download": "Download",
-      "fileHeading": "SidePerks backup codes — each code works once.",
+      "fileHeading": "SidePerks backup codes: each code works once.",
       "acknowledge": "I have saved these codes somewhere safe.",
       "done": "Done"
     },
@@ -1189,7 +1189,7 @@
       "cta": "Send confirmation",
       "sentTitle": "Check your new inbox",
       "sentBody": "We sent a confirmation link to {email}. Open it to finish the change.",
-      "sentNote": "Until you open that link you keep signing in with your current address. This link only proves the new inbox is yours — codes are never emailed."
+      "sentNote": "Until you open that link you keep signing in with your current address. This link only proves the new inbox is yours. Codes are never emailed."
     },
     "errors": {
       "currentRequired": "Enter your current password.",
@@ -1239,7 +1239,7 @@
     },
     "pending": {
       "title": "Your account is scheduled for deletion in {days, plural, =0 {less than a day} one {# day} other {# days}}",
-      "body": "It will be deleted on {date}. Signing in again cancels this automatically — or cancel it now.",
+      "body": "It will be deleted on {date}. Signing in again cancels this automatically, or cancel it now.",
       "cta": "Cancel deletion"
     },
     "errors": {
@@ -1293,13 +1293,13 @@
   "upgrade": {
     "title": "Upgrade",
     "subtitle": "Raise your daily limit and earn at a better rate.",
-    "stacking": "Plans stack by what you paid. Hold more than one and we add the amounts together — two payments of GHS 100 land exactly where one payment of GHS 200 lands. You can hold each plan once.",
-    "footnote": "Each plan runs for the period shown on its card. Prices are one-off for that period — nothing renews automatically.",
+    "stacking": "Plans stack by what you paid. Hold more than one and we add the amounts together: two payments of GHS 100 land exactly where one payment of GHS 200 lands. You can hold each plan once.",
+    "footnote": "Each plan runs for the period shown on its card. Prices are one-off for that period. Nothing renews automatically.",
     "current": {
       "free": "You're on the Free plan",
       "freeHint": "Buy a plan to watch more ads a day and earn at a better rate.",
       "holding": "{count, plural, one {You hold # plan} other {You hold # plans}}",
-      "holdingHint": "Your plans are combined below — every one you hold is counted.",
+      "holdingHint": "Your plans are combined below. Every one you hold is counted.",
       "dailyAds": "Ads a day",
       "rate": "Earning bonus",
       "payoutFrom": "Withdraw from"
@@ -1364,8 +1364,8 @@
     },
     "flexible": {
       "title": "You choose what to pay",
-      "body": "{plan} runs from {from} to {to}. The more you pay, the more each ad is worth to you — and you stay on the same plan.",
-      "same": "The number of ads a day does not change — it is {ads} either way. Only what they are worth to you does.",
+      "body": "{plan} runs from {from} to {to}. The more you pay, the more each ad is worth to you, and you stay on the same plan.",
+      "same": "The number of ads a day does not change. It is {ads} either way. Only what they are worth to you does.",
       "adjust": "Set my amount",
       "continue": "Continue at {amount}",
       "dontShow": "Don't show this again"
@@ -1381,7 +1381,7 @@
     "yesterday": "Yesterday",
     "empty": {
       "title": "How can we help?",
-      "body": "Tell us what is going on and a person will read it. Your balance, your plan and any withdrawal you have requested are already in front of us — you do not need to explain them."
+      "body": "Tell us what is going on and a person will read it. Your balance, your plan and any withdrawal you have requested are already in front of us. You do not need to explain them."
     },
     "ask": {
       "hold": "Why is my withdrawal on hold?",
@@ -1393,7 +1393,7 @@
   "admin": {
     "previewBadge": "Preview data",
     "search": {
-      "placeholder": "Search — coming with the backend"
+      "placeholder": "Search: coming with the backend"
     },
     "nav": {
       "label": "Admin sections",
@@ -1474,7 +1474,7 @@
     },
     "payouts": {
       "title": "Payouts",
-      "description": "Approve, hold or decline withdrawal requests. Account numbers and wallets are masked — open a request to reveal one.",
+      "description": "Approve, hold or decline withdrawal requests. Account numbers and wallets are masked. Open a request to reveal one.",
       "filterLabel": "Filter by status",
       "filters": {
         "queue": "Needs a decision",
@@ -1542,7 +1542,7 @@
         "reuse": "{count, plural, one {This account has also been used by # other user.} other {This account has also been used by # other users.}}",
         "note": "Note sent to the user",
         "cryptoSub": "{ghs} · {points} pts",
-        "quoteLive": "Quoted at today's rate — no rate was available when this request was made.",
+        "quoteLive": "Quoted at today's rate. No rate was available when this request was made.",
         "quoteMissing": "No exchange rate available, so this shows the cedi value. Convert before sending.",
         "feeBreakdown": "{gross} less {fee} fee ({percent}%)"
       },
@@ -1551,7 +1551,7 @@
         "hold": "Hold {amount} for {name}. They are told why, so write something they can act on.",
         "decline": "Decline {amount} for {name}? The request ends here and the points go back to their balance.",
         "markPaid": "Confirm you have sent {amount} to {destination}. This cannot be undone.",
-        "reasonLabel": "Reason — the user sees this",
+        "reasonLabel": "Reason: the user sees this",
         "reasonPlaceholder": {
           "hold": "e.g. Confirm the MoMo number matches your ID",
           "decline": "e.g. Payout account belongs to someone else",
@@ -1560,7 +1560,7 @@
         "reasonHint": "Written plainly. It goes straight into their notifications.",
         "cancel": "Cancel",
         "working": "Working…",
-        "referenceLabel": "Transfer reference — optional",
+        "referenceLabel": "Transfer reference: optional",
         "referencePlaceholder": "e.g. MoMo transaction ID",
         "referenceHint": "Stored with the payout. It is what you check against if they later say the money never arrived.",
         "approveEarly": "Approve {amount} for {name} before its holding period ends on {until}? This is recorded as an early approval and raises an alert.",
@@ -1628,7 +1628,7 @@
       "confirm": {
         "flag": "Flag {name}. They keep earning, but every payout of theirs stops for review first.",
         "disable": "Disable {name}? They stop earning and cannot withdraw. Their {points} points stay on the account.",
-        "reasonLabel": "Reason — the next operator sees this",
+        "reasonLabel": "Reason: the next operator sees this",
         "reasonPlaceholder": {
           "flag": "e.g. Six accounts share this device fingerprint",
           "disable": "e.g. Confirmed answer-farming across three accounts"
@@ -1741,7 +1741,7 @@
         "remaining": "Slots left",
         "liability": "Still to pay out",
         "perCompletion": "Per completion",
-        "liabilityNote": "Slots left × reward, at the current rate of {rate} pts = GHS 1.00. This is what the platform owes if every remaining slot is filled — before any plan multiplier.",
+        "liabilityNote": "Slots left × reward, at the current rate of {rate} pts = GHS 1.00. This is what the platform owes if every remaining slot is filled, before any plan multiplier.",
         "setup": "Setup",
         "length": "Video",
         "noVideo": "No video",
@@ -1775,7 +1775,7 @@
         "confirmDelete": "Delete this ad permanently?",
         "confirmDeleteBody": "Nobody has watched it, so it will be removed outright along with its questions. This cannot be undone.",
         "confirmArchive": "Archive this ad?",
-        "confirmArchiveBody": "People have already watched it, so it is kept on the record rather than deleted — the attempts behind their earnings have to survive. It will never be served again.",
+        "confirmArchiveBody": "People have already watched it, so it is kept on the record rather than deleted. The attempts behind their earnings have to survive. It will never be served again.",
         "keep": "Keep it",
         "dwell": "Reading time",
         "article": "Article",
@@ -1806,7 +1806,7 @@
         "basics": "Basics",
         "basicsHint": "What the ad is called in the feed and who it is for.",
         "title": "Title",
-        "titlePlaceholder": "MTN Ghana — 5G is here",
+        "titlePlaceholder": "MTN Ghana: 5G is here",
         "advertiser": "Advertiser",
         "advertiserHint": "A label for reporting. There is no advertiser account behind it.",
         "advertiserPlaceholder": "MTN Ghana",
@@ -1824,20 +1824,20 @@
         "sourceYoutube": "YouTube",
         "sourceUpload": "In-house file",
         "youtubeLink": "YouTube link or ID",
-        "youtubeHint": "Paste the watch, share, embed or Shorts URL — the ID is taken from it.",
+        "youtubeHint": "Paste the watch, share, embed or Shorts URL. The ID is taken from it.",
         "youtubeResolved": "Video ID {id}",
         "videoFile": "Video file",
         "videoFileHint": "MP4, WebM or MOV, up to 100 MB. Uploads as soon as it is chosen.",
         "thumbnail": "Thumbnail",
         "thumbnailHint": "The image on the card. Without one the card draws its own cover.",
-        "thumbnailHintYoutube": "Optional — without one, YouTube's own still is used.",
+        "thumbnailHintYoutube": "Optional: without one, YouTube's own still is used.",
         "chooseFile": "Choose file",
         "replaceFile": "Replace",
         "removeFile": "Remove file",
         "uploading": "Uploading…",
         "questions": "Questions",
         "questionsHintVideo": "A video may interrupt with a question at any second, or ask at the end, or ask nothing at all and pay on watch time.",
-        "questionsHintSurvey": "A survey is not a quiz. Tick a right answer only where there genuinely is one — otherwise any answer is accepted and recorded.",
+        "questionsHintSurvey": "A survey is not a quiz. Tick a right answer only where there genuinely is one, otherwise any answer is accepted and recorded.",
         "questionsLocked": "{count, plural, one {# person has} other {# people have}} already completed this ad, so its questions are fixed. Rewriting them would rewrite what the advertiser’s research says. Everything else here is still editable; to change the questions, duplicate this ad and publish the copy.",
         "noQuestionsVideo": "No questions. This ad will pay on watch time alone.",
         "noQuestionsSurvey": "A survey needs at least one question.",
@@ -1886,7 +1886,7 @@
         "chosenOption": "Chosen option",
         "addCondition": "Add condition",
         "removeCondition": "Remove condition",
-        "cascadeNote": "Skipping cascades: if the question above is never shown, this one is not shown either — and nor is anything depending on it.",
+        "cascadeNote": "Skipping cascades: if the question above is never shown, this one is not shown either, and nor is anything depending on it.",
         "audience": "Audience",
         "audienceHint": "Which plans this ad is aimed at.",
         "everyone": "Everyone",
@@ -1904,7 +1904,7 @@
         "reward": "Reward",
         "rewardHint": "What a free-plan user earns. Paid plans multiply it.",
         "unlimited": "No budget cap",
-        "unlimitedHint": "Runs until you pause it. Use deliberately — nothing stops the spend.",
+        "unlimitedHint": "Runs until you pause it. Use deliberately. Nothing stops the spend.",
         "budget": "Budget",
         "budgetHint": "Completions paid for. The ad stops serving when they run out.",
         "weight": "Serving weight",
@@ -1914,16 +1914,16 @@
         "costNote": "Budget × reward at the current rate, before any plan multiplier.",
         "unlimitedShort": "No cap",
         "summary": "What this is",
-        "summaryQuestions": "{count, plural, =0 {No questions — pays on watch time} one {# question} other {# questions}}",
-        "summaryGraded": "{count, plural, =0 {Nothing graded — no wrong answers} one {# graded question} other {# graded questions}}",
+        "summaryQuestions": "{count, plural, =0 {No questions, pays on watch time} one {# question} other {# questions}}",
+        "summaryGraded": "{count, plural, =0 {Nothing graded. No wrong answers} one {# graded question} other {# graded questions}}",
         "summaryCues": "{count, plural, =0 {Asked at the end} one {# cue point during the video} other {# cue points during the video}}",
-        "summaryBranching": "Branches — respondents see different questions",
-        "summaryStraight": "Straight through — everyone sees the same questions",
+        "summaryBranching": "Branches: respondents see different questions",
+        "summaryStraight": "Straight through: everyone sees the same questions",
         "removal": "Remove this ad",
         "delete": "Delete permanently",
         "deleteHint": "Nobody has watched it yet, so it can be removed outright.",
         "archive": "Archive",
-        "archiveHint": "People have watched it, so it is archived rather than deleted — the attempts behind their earnings have to survive.",
+        "archiveHint": "People have watched it, so it is archived rather than deleted. The attempts behind their earnings have to survive.",
         "confirmDelete": "Delete this ad permanently?",
         "confirmDeleteBody": "It goes with its questions and cannot be recovered.",
         "confirmArchive": "Archive this ad?",
@@ -1940,7 +1940,7 @@
           "titleShort": "Give the ad a title of at least 2 characters.",
           "titleLong": "Titles are limited to 200 characters.",
           "pointsMin": "The reward must be at least 1 point.",
-          "pointsMax": "That reward looks wrong — the maximum is 100,000 points.",
+          "pointsMax": "That reward looks wrong. The maximum is 100,000 points.",
           "weightMin": "The weight must be at least 1.",
           "budgetMin": "The budget must be at least 1 completion.",
           "budgetBelowDelivered": "That is below what has already been delivered, which would stop the ad immediately.",
@@ -1994,7 +1994,7 @@
         },
         "statusLabel": "Status",
         "cta": "Call to action",
-        "ctaHint": "Where the viewer can reach this advertiser — a website, a WhatsApp number, social handles. Shown under the video and again when the points land. Surveys never carry one.",
+        "ctaHint": "Where the viewer can reach this advertiser. A website, a WhatsApp number, social handles. Shown under the video and again when the points land. Surveys never carry one.",
         "ctaEmpty": "No links yet. Add whatever the advertiser gave you.",
         "ctaAddFirst": "Add a link",
         "ctaAdd": "Add another",
@@ -2034,7 +2034,7 @@
         },
         "askAlways": "Always ask",
         "askOnlyIf": "Only if…",
-        "firstAlwaysAsked": "The first question is always asked. Later questions can be made to depend on this answer — use the branch button beside an option, or “Only if…” on the question itself.",
+        "firstAlwaysAsked": "The first question is always asked. Later questions can be made to depend on this answer, use the branch button beside an option, or “Only if…” on the question itself.",
         "addFollowUp": "Add a follow-up question for “{option}”",
         "followUpHint": "Use the branch arrow beside an answer to add a question only those people see.",
         "ruleIs": "Q{n} is “{answer}”",
@@ -2048,7 +2048,7 @@
           "link": "New link ad"
         },
         "article": "The article",
-        "articleHint": "What the reader sees before the link. Write it the way the advertiser wants to be introduced — this is the whole ad.",
+        "articleHint": "What the reader sees before the link. Write it the way the advertiser wants to be introduced. This is the whole ad.",
         "articleBody": "Text",
         "articlePlaceholder": "Who the advertiser is, what they are offering, and why the link is worth a tap…",
         "articleShortOf": "{count, plural, one {# more character needed} other {# more characters needed}}",
@@ -2058,33 +2058,33 @@
         "destination": "Destination",
         "destinationHint": "The one link out to the advertiser. The click is what gets paid for, so there can only be one.",
         "ctaDestination": "Destination",
-        "ctaNoteLink": "The link opens in a new tab, and the points are credited at the moment of the tap — provided the reading time has run.",
+        "ctaNoteLink": "The link opens in a new tab, and the points are credited at the moment of the tap, provided the reading time has run.",
         "summaryWords": "{count, plural, =0 {No article yet} one {Article of # word} other {Article of # words}}",
         "summaryDwell": "{seconds}s of reading before the link pays",
         "summaryDestination": "One destination set",
-        "summaryNoDestination": "No destination — this ad cannot be saved",
+        "summaryNoDestination": "No destination: this ad cannot be saved",
         "summaryLinkCaveat": "Nobody can check that the article was read, or what happens after the tap."
       },
       "newAd": "New ad",
       "chooser": {
         "back": "Back to the pool",
         "title": "What kind of ad?",
-        "subtitle": "The three buy different attention and defend themselves differently against farming. The choice is final — an ad cannot change format once it exists.",
+        "subtitle": "The three buy different attention and defend themselves differently against farming. The choice is final. An ad cannot change format once it exists.",
         "choose": "Choose",
         "video": {
           "name": "Video",
-          "body": "A film to watch, with questions at seconds you choose — or none at all.",
+          "body": "A film to watch, with questions at seconds you choose, or none at all.",
           "proof": "Proved by: watch time measured on the server, plus the answers."
         },
         "survey": {
           "name": "Survey",
-          "body": "Questions to answer. Not a quiz — with no right answer ticked, any answer is accepted.",
+          "body": "Questions to answer. Not a quiz: with no right answer ticked, any answer is accepted.",
           "proof": "Proved by: the answers themselves, which are the advertiser's research."
         },
         "link": {
           "name": "Link",
           "body": "An article to read, then one link out to the advertiser. The click is what pays.",
-          "proof": "Proved by: the reading time before the click, and nothing else — nobody can see what happens on the advertiser’s side."
+          "proof": "Proved by: the reading time before the click, and nothing else. Nobody can see what happens on the advertiser’s side."
         }
       }
     },
@@ -2136,7 +2136,7 @@
         "delete": "Delete",
         "end": "End contract"
       },
-      "endedInstead": "{name} has payments recorded, so the contract was ended rather than deleted — the statement is built from those receipts.",
+      "endedInstead": "{name} has payments recorded, so the contract was ended rather than deleted. The statement is built from those receipts.",
       "unpaidButServing": "Serving, nothing paid yet",
       "nothingYet": "Nothing paid or served yet",
       "panel": {
@@ -2168,7 +2168,7 @@
         "amount": "Amount",
         "received": "Received on",
         "method": "How it came",
-        "methodHint": "Bank, MoMo, cash — your own wording.",
+        "methodHint": "Bank, MoMo, cash: your own wording.",
         "methodPlaceholder": "Bank transfer",
         "reference": "Reference",
         "referenceHint": "What you would check this against on a statement.",
@@ -2191,7 +2191,7 @@
     },
     "subscriptions": {
       "title": "Subscriptions",
-      "description": "The plans, what they cost, and whether they are selling. Free is listed too — it is the denominator.",
+      "description": "The plans, what they cost, and whether they are selling. Free is listed too. It is the denominator.",
       "filterLabel": "Filter by availability",
       "filters": {
         "all": "All",
@@ -2269,7 +2269,7 @@
         "name": "Name",
         "namePlaceholder": "Gold",
         "slug": "Slug",
-        "slugHint": "Lowercase, no spaces. Cannot be changed later — payments and subscriptions refer to a plan by this.",
+        "slugHint": "Lowercase, no spaces. Cannot be changed later: payments and subscriptions refer to a plan by this.",
         "slugLocked": "Fixed once a plan exists. Subscriptions and payments refer to it.",
         "description": "Description",
         "descriptionHint": "One line, shown to users on the upgrade screen.",
@@ -2288,7 +2288,7 @@
         "cooldownHint": "Wait between ads. 0 is no wait.",
         "onSale": "On sale",
         "onSaleHint": "Off sale, nobody new can buy it.",
-        "onSaleKeeps": "Taken off sale — the {count} who already hold it keep it until it expires.",
+        "onSaleKeeps": "Taken off sale. The {count} who already hold it keep it until it expires.",
         "onSaleDefault": "The default plan is always on sale. Every new account starts here and expiring plans fall back to it.",
         "sortOrder": "Order",
         "sortOrderHint": "Position in the list users see. Low numbers first.",
@@ -2308,23 +2308,23 @@
         "defaultMustBeFree": "The default plan has to be free."
       },
       "dismissError": "Dismiss",
-      "hiddenInstead": "{name} has been bought, so it was taken off sale rather than deleted — the payments behind it are part of the statement.",
+      "hiddenInstead": "{name} has been bought, so it was taken off sale rather than deleted. The payments behind it are part of the statement.",
       "chosenAbove": "{count} of {of} above floor",
       "band": {
         "title": "Sells from {from} to GHS {to}",
-        "body": "A buyer choosing inside that range earns between {from}× and {to}× — the rate slides towards {next} as they pay more. All of them get {ads} ads a day; only the value of an ad changes.",
+        "body": "A buyer choosing inside that range earns between {from}× and {to}×. The rate slides towards {next} as they pay more. All of them get {ads} ads a day; only the value of an ad changes.",
         "topTitle": "One exact price",
         "topBody": "This is the top of the ladder, so there is nothing above it to slide towards. Buyers pay exactly {price}.",
         "line": "Buyers choose any amount from {from} to GHS {to}.",
-        "topLine": "The top plan sells at exactly {price} — there is no plan above it to set a ceiling.",
+        "topLine": "The top plan sells at exactly {price}. There is no plan above it to set a ceiling.",
         "perCedi": "At this floor, GHS 1 buys +{pct}% on the earning rate. Plans higher up the ladder deliberately buy less per cedi.",
-        "neighbour": "This also moves {name}: its range was {from} – {was} and becomes {from} – {to}. Everyone who buys {name} after this earns at the new rate.",
+        "neighbour": "This also moves {name}: its range was {from} to {was} and becomes {from} to {to}. Everyone who buys {name} after this earns at the new rate.",
         "topRangeBody": "Paying the floor earns {from}×, paying {price} earns {to}×, and anything between lands on the line. Ads a day stay at {ads} whatever they pay."
       },
       "bandWarn": {
         "unbuyable": {
           "short": "Nobody can buy this plan",
-          "body": "Its price is at or above {next}, which sits directly above it — so the range has nothing in it and the server refuses every amount. Price it below {next}, or move it above {next} in the sort order."
+          "body": "Its price is at or above {next}, which sits directly above it. So the range has nothing in it and the server refuses every amount. Price it below {next}, or move it above {next} in the sort order."
         },
         "earningInversion": {
           "short": "Paying more would earn less",
@@ -2332,9 +2332,9 @@
         },
         "adsInversion": {
           "short": "The plan above shows fewer ads",
-          "body": "{next} costs more than this plan but allows fewer ads a day, so paying to move up the ladder buys less. Ad counts do not slide inside a band — they step at the boundary — which makes this the moment it is felt."
+          "body": "{next} costs more than this plan but allows fewer ads a day, so paying to move up the ladder buys less. Ad counts do not slide inside a band (they step at the boundary), which makes this the moment it is felt."
         },
-        "undercut": "{plans} together cost GHS {price} and would give {ads} ads a day at {multiplier}× — more, for less money.",
+        "undercut": "{plans} together cost GHS {price} and would give {ads} ads a day at {multiplier}×. That is more, for less money.",
         "fix": "Put the benefits on the line"
       }
     },
@@ -2349,7 +2349,7 @@
       },
       "liability": {
         "label": "Owed to users",
-        "body": "{points} points are held but not yet cashed out. This is not a cost yet, so it is not in the profit column — but profit read without it looks better than it is."
+        "body": "{points} points are held but not yet cashed out. This is not a cost yet, so it is not in the profit column, but profit read without it looks better than it is."
       },
       "columns": {
         "month": "Month",
@@ -2365,7 +2365,7 @@
     },
     "config": {
       "title": "Platform settings",
-      "description": "The numbers that decide how much money leaves. Every field maps to a live column — the name is printed under each one.",
+      "description": "The numbers that decide how much money leaves. Every field maps to a live column. The name is printed under each one.",
       "units": {
         "points": "points",
         "seconds": "seconds",
@@ -2459,7 +2459,7 @@
         "pointsRate": {
           "label": "Points per cedi",
           "description": "How many points make GHS 1.00.",
-          "warning": "Forward-only. Changing this does not revalue points already earned — history keeps the rate it was written at. Raising it makes every future point worth less."
+          "warning": "Forward-only. Changing this does not revalue points already earned. History keeps the rate it was written at. Raising it makes every future point worth less."
         },
         "combineMode": {
           "label": "How plan benefits combine",
@@ -2483,7 +2483,7 @@
         },
         "referralActivation": {
           "label": "Bonus on activation",
-          "description": "Paid once the referred person has actually watched some ads — the anti-farming half."
+          "description": "Paid once the referred person has actually watched some ads. The anti-farming half."
         },
         "referralActivationL2": {
           "label": "Activation bonus, second level",
@@ -2512,7 +2512,7 @@
         },
         "referralCommission": {
           "label": "Commission when a referred person buys a plan",
-          "description": "A percentage of what they pay, credited to whoever invited them as points. Flat — the inviter’s own plan does not change it. Zero switches this off completely."
+          "description": "A percentage of what they pay, credited to whoever invited them as points. Flat. The inviter’s own plan does not change it. Zero switches this off completely."
         },
         "referralCommissionL2": {
           "label": "Commission, second level",
@@ -2542,7 +2542,7 @@
         },
         "gameGap": {
           "label": "Minimum gap between plays",
-          "description": "Stops a double tap or a stuck button spending two plays on one intention. Not a fraud control — the weekly allowance is that."
+          "description": "Stops a double tap or a stuck button spending two plays on one intention. Not a fraud control. The weekly allowance is that."
         },
         "leaderboardRanks": {
           "label": "Places shown on the leaderboard",
@@ -2562,12 +2562,12 @@
         },
         "redemptionMinimum": {
           "label": "Smallest withdrawal",
-          "description": "The fewest points anyone can withdraw — the same for everybody, whatever plans they hold. No plan has its own threshold."
+          "description": "The fewest points anyone can withdraw. The same for everybody, whatever plans they hold. No plan has its own threshold."
         },
         "redemptionFee": {
           "label": "Withdrawal fee",
           "description": "Percentage taken off each withdrawal to cover transaction costs and taxes. Frozen onto each request the moment it is filed.",
-          "warning": "Applies only to requests filed afterwards — anything already waiting keeps the rate it was quoted."
+          "warning": "Applies only to requests filed afterwards. Anything already waiting keeps the rate it was quoted."
         },
         "freeEarningDays": {
           "label": "Free earning window",
@@ -2575,12 +2575,12 @@
         },
         "affiliatePayouts": {
           "label": "Affiliates can withdraw commission",
-          "description": "Off means commission still builds up and simply cannot be taken out yet. Nothing expires while it is off. Separate from the points payout switch above — one business can open without the other.",
+          "description": "Off means commission still builds up and simply cannot be taken out yet. Nothing expires while it is off. Separate from the points payout switch above. One business can open without the other.",
           "warning": "Turning this on lets real money leave. Check the withdrawal queue on Affiliates the same day."
         },
         "commissionMinimum": {
           "label": "Smallest commission withdrawal",
-          "description": "In pesewas — 5000 is GHS 50.00. One figure for every affiliate, whatever they have sold."
+          "description": "In pesewas, 5000 is GHS 50.00. One figure for every affiliate, whatever they have sold."
         },
         "affiliateL1": {
           "label": "Default rate for the seller",
@@ -2629,7 +2629,7 @@
       "discard": "Discard",
       "saving": "Saving…",
       "savedCount": "{count, plural, one {# setting updated.} other {# settings updated.}}",
-      "savedNothing": "Nothing to update — those values were already set."
+      "savedNothing": "Nothing to update: those values were already set."
     },
     "adminSettings": {
       "title": "Admin settings",
@@ -2642,7 +2642,7 @@
         "description": "Everyone who can get into this area, and what each of them may do.",
         "twoFactorOn": "Two-factor on",
         "twoFactorOff": "No two-factor",
-        "note": "Roles take effect immediately, in both directions: revoking somebody ends their access on their very next click, not when their session expires. Everything a role can do is written down in the migration that created it — support reaches the message queue, an ads manager reaches ads and advertisers, and everything else, including every payout, stays with a super admin.",
+        "note": "Roles take effect immediately, in both directions: revoking somebody ends their access on their very next click, not when their session expires. Everything a role can do is written down in the migration that created it, support reaches the message queue, an ads manager reaches ads and advertisers, and everything else, including every payout, stays with a super admin.",
         "lastSeen": "Last seen {when}",
         "neverSeen": "Never signed in",
         "you": "You",
@@ -2652,7 +2652,7 @@
         "inviteRole": "Role",
         "inviteAction": "Send invite",
         "sent": "Invitation sent to {email}. They set their own password from the link, and can turn on two-factor afterwards.",
-        "granted": "That address already has an account, so no invitation was needed — the role applies the next time they sign in.",
+        "granted": "That address already has an account, so no invitation was needed. The role applies the next time they sign in.",
         "invited": "Invited",
         "makeRole": "Make {role}",
         "revoke": "Revoke access",
@@ -2720,7 +2720,7 @@
       "bodyLabel": "Message",
       "bodyPlaceholder": "Tell people what changed, in a sentence or two. This lands in their notifications.",
       "review": "Review and send",
-      "confirmBody": "This goes to {count, plural, one {# person} other {# people}} — everyone with an active account.",
+      "confirmBody": "This goes to {count, plural, one {# person} other {# people}}, everyone with an active account.",
       "confirmIrreversible": "It cannot be recalled, edited or deleted once sent. Read it once more.",
       "sendNow": "Send to {count, plural, one {# person} other {# people}}",
       "cancel": "Cancel",
@@ -2735,7 +2735,7 @@
     "giftCodes": {
       "title": "Gift codes",
       "description": "Generate a code, attach points to it, and hand it out. Each code can be redeemed exactly once.",
-      "intro": "Codes are generated, never chosen — that is what keeps them unguessable.",
+      "intro": "Codes are generated, never chosen. That is what keeps them unguessable.",
       "create": "New gift code",
       "empty": "No gift codes yet.",
       "revoke": "Revoke",
@@ -2815,14 +2815,14 @@
         "totalWeight": "Total weight",
         "perPlay": "Average points the table pays",
         "last30": "Measured over {plays} plays in 30 days",
-        "weightHint": "Weights are relative — they need not total 100"
+        "weightHint": "Weights are relative: they need not total 100"
       },
       "errors": {
         "mustPay": "Outcome {slot} pays nothing. Every box and every segment must award points or an extra play."
       },
       "plans": {
         "title": "Plays per week, by plan",
-        "hint": "One shared pool across both games. A user holding several plans gets the highest of them, not the total — change that with game_plays_combine_mode in Platform settings.",
+        "hint": "One shared pool across both games. A user holding several plans gets the highest of them, not the total. Change that with game_plays_combine_mode in Platform settings.",
         "free": "Free",
         "playsFor": "Weekly plays for {plan}"
       }
@@ -2842,7 +2842,7 @@
       "editing": "Editing task",
       "claimedBy": "{count, plural, =0 {not claimed yet} one {claimed by # person} other {claimed by # people}}",
       "waiting": "{count} can claim now",
-      "cost": "{people} people could claim this immediately — about {points} points if they all do.",
+      "cost": "{people} people could claim this immediately, about {points} points if they all do.",
       "field": {
         "name": "Name",
         "code": "Code",
@@ -2853,7 +2853,7 @@
         "target": "Target",
         "reward": "Reward (points)",
         "icon": "Icon",
-        "iconHint": "Any emoji — tap one below or use your keyboard",
+        "iconHint": "Any emoji: tap one below or use your keyboard",
         "useEmoji": "Use {emoji}"
       },
       "errors": {
@@ -3057,7 +3057,7 @@
         "units": "{n} sales across {products} products",
         "products": "{n} products"
       },
-      "note": "These are sales figures, not an amount owed. What a vendor is paid is your licence agreement with them, which this system deliberately does not hold — so nothing here can tell you the figure to send. A sale counts in the period it was confirmed, and a later refund is deducted from that same period."
+      "note": "These are sales figures, not an amount owed. What a vendor is paid is your licence agreement with them, which this system deliberately does not hold. So nothing here can tell you the figure to send. A sale counts in the period it was confirmed, and a later refund is deducted from that same period."
     }
   },
   "giftCode": {
@@ -3080,7 +3080,7 @@
       "expired": "That code has expired.",
       "rate_limited": "Too many tries. Wait an hour and try again.",
       "account_disabled": "Your account is under review and cannot redeem codes right now.",
-      "earning_paused": "Earning is paused across SidePerks at the moment. Your code has not been used — keep it and try again later.",
+      "earning_paused": "Earning is paused across SidePerks at the moment. Your code has not been used. Keep it and try again later.",
       "not_signed_in": "Please log in and try again.",
       "error": "Something went wrong. Please try again."
     }
@@ -3101,7 +3101,7 @@
     "myRank": "My rank",
     "yourRank": "You are {rank} of {total}",
     "yourPoints": "{points} points this period",
-    "unranked": "You have not earned points in this period yet — watch an ad and you are on the board.",
+    "unranked": "You have not earned points in this period yet. Watch an ad and you are on the board.",
     "movement": {
       "up": "Up {places} {places, plural, one {place} other {places}}",
       "down": "Down {places} {places, plural, one {place} other {places}}",
@@ -3143,7 +3143,7 @@
     "errors": {
       "games_disabled": "Games are not available right now.",
       "no_plays_left": "You have no plays left this week. New plays arrive on Monday.",
-      "too_soon": "One moment — try that again in a second.",
+      "too_soon": "One moment: try that again in a second.",
       "account_disabled": "Your account is under review and cannot play right now.",
       "no_prizes_configured": "This game is not ready yet. Please try later.",
       "not_signed_in": "Please log in and try again.",
@@ -3153,7 +3153,7 @@
   "tasks": {
     "title": "Tasks",
     "subtitle": "Milestones that pay. Finish one, then claim it.",
-    "readyToClaim": "{count, plural, one {# task ready to claim} other {# tasks ready to claim}} — {points} points waiting",
+    "readyToClaim": "{count, plural, one {# task ready to claim} other {# tasks ready to claim}} to {points} points waiting",
     "claimed": "Claimed! {name} paid {points} points.",
     "claim": "Claim",
     "done": "Claimed",
@@ -3171,7 +3171,7 @@
   },
   "viewAs": {
     "viewing": "Viewing as {name}",
-    "readOnly": "Read only — nothing you do here is saved.",
+    "readOnly": "Read only: nothing you do here is saved.",
     "exit": "Exit"
   },
   "affiliate": {
@@ -3274,7 +3274,7 @@
     },
     "pending": {
       "title": "Almost there",
-      "body": "Your affiliate account exists but is not earning yet. Finish enough of the training and it switches on by itself — nobody has to approve it."
+      "body": "Your affiliate account exists but is not earning yet. Finish enough of the training and it switches on by itself. Nobody has to approve it."
     },
     "suspended": {
       "title": "This account is paused",
@@ -3306,8 +3306,7 @@
         "priceDown": "Price: high to low"
       },
       "commission": "Commission",
-      "perSale": "You earn / sale",
-      "sellsFor": "Sells for {amount}",
+      "perSale": "Per sale",
       "yourProgress": "Your progress",
       "lessons": "{n} lessons",
       "checkpoints": "{n} checkpoints",
@@ -3327,7 +3326,8 @@
       "emptySaved": "You have not saved anything",
       "emptySavedHint": "Tap the heart on a product and it will be waiting here.",
       "emptySearch": "Nothing matches that",
-      "emptySearchHint": "Try a shorter word, or clear the search to see everything."
+      "emptySearchHint": "Try a shorter word, or clear the search to see everything.",
+      "rateShort": "Rate"
     },
     "product": {
       "back": "All products",
@@ -3366,7 +3366,7 @@
         "lapsed": "Your affiliate access has ended. Renew it and your links start paying again.",
         "tier": "This product needs the Professional programme. Upgrade and you can promote it.",
         "suspended": "Your affiliate account is paused, so links are not recording. Contact support.",
-        "wouldEarn": "You would earn {amount} per sale — {rate}% of the price."
+        "wouldEarn": "You would earn {amount} per sale, {rate}% of the price."
       }
     },
     "learn": {
@@ -3430,7 +3430,7 @@
       "codeTitle": "Your affiliate code",
       "copyCode": "Copy your code",
       "copied": "Copied",
-      "codeHint": "Links are per product — open any product and copy its link there. Yours look like {example}",
+      "codeHint": "Links are per product. Open any product and copy its link there. Yours look like {example}",
       "accessTitle": "Access ends in",
       "daysLeft": "{n} days",
       "until": "Until {date}",
@@ -3484,7 +3484,7 @@
       },
       "mismatch": {
         "title": "The amount did not match",
-        "body": "The payment does not match what was ordered, so nothing has been granted. Please contact support with the reference below — no action is needed from you first."
+        "body": "The payment does not match what was ordered, so nothing has been granted. Please contact support with the reference below. No action is needed from you first."
       },
       "missing": {
         "title": "We could not find that order",
@@ -3492,7 +3492,7 @@
       },
       "error": {
         "title": "We could not confirm it",
-        "body": "Something went wrong while checking this payment. If money left your account, nothing is lost — contact support with the reference below."
+        "body": "Something went wrong while checking this payment. If money left your account, nothing is lost. Contact support with the reference below."
       },
       "startLearning": "Start learning",
       "goDashboard": "Go to your affiliate dashboard",
@@ -3516,7 +3516,7 @@
       "finished": "Course complete",
       "emptyCourse": "This course has no lessons yet.",
       "resources": "Resources",
-      "resourcesNote": "Read here in the app — resources are not downloadable.",
+      "resourcesNote": "Read here in the app. Resources are not downloadable.",
       "articleDone": "Marked as read",
       "videoFailed": "This video could not be loaded. Try again in a moment.",
       "lockedTitle": "You do not own this lesson",
@@ -3533,7 +3533,7 @@
       "passedTitle": "Checkpoint passed",
       "passedBody": "You scored {n}%. This lesson is marked complete.",
       "failedTitle": "Not quite",
-      "failedBody": "You scored {n}%. Go back over the lesson and try again — there is no limit on attempts."
+      "failedBody": "You scored {n}%. Go back over the lesson and try again. There is no limit on attempts."
     },
     "withdraw": {
       "back": "Earnings",

@@ -14,7 +14,7 @@
   },
   "landing": {
     "meta": {
-      "title": "SidePerks — soyez payé pour regarder des pubs et répondre à des sondages",
+      "title": "SidePerks : soyez payé pour regarder des pubs et répondre à des sondages",
       "description": "Regardez de courtes vidéos publicitaires et répondez à des sondages depuis votre téléphone. Les points sont indexés sur le cedi et vous retirez vers Mobile Money ou en crypto. Inscription gratuite, sans carte."
     },
     "nav": {
@@ -117,7 +117,7 @@
           "points": "Les points affichés sur chaque carte",
           "length": "La durée de la vidéo avant de vous engager",
           "tabs": "Vidéos et sondages dans des onglets séparés",
-          "cap": "Un décompte clair de ce qu'il reste aujourd'hui — {freeAds} gratuites"
+          "cap": "Un décompte clair de ce qu'il reste aujourd'hui, {freeAds} gratuites"
         },
         "shotAlt": "Le fil de publicités SidePerks, chaque carte indiquant les points qu'elle rapporte"
       },
@@ -145,7 +145,7 @@
       "rowRate": "Points par publicité",
       "rowThreshold": "Retrait dès",
       "free": {
-        "title": "Formule {name} — 0 GHS",
+        "title": "Formule {name} : 0 GHS",
         "body": "{ads} publicités par jour pendant vos {days} premiers jours, et un retrait possible à partir de {threshold} points. Aucune carte requise pour commencer.",
         "cta": "Commencer gratuitement"
       },
@@ -168,7 +168,7 @@
         },
         "watch": {
           "title": "Ils commencent à regarder",
-          "body": "Votre bonus dépend d'une activité réelle et non d'une simple inscription — c'est ce qui donne sa valeur au programme."
+          "body": "Votre bonus dépend d'une activité réelle et non d'une simple inscription. C'est ce qui donne sa valeur au programme."
         },
         "bonus": {
           "title": "Vous recevez votre bonus",
@@ -216,7 +216,7 @@
       "items": {
         "free": {
           "q": "SidePerks est-il gratuit ?",
-          "a": "Oui. La formule gratuite donne {freeAds} publicités par jour pendant vos {days} premiers jours. Ensuite, une formule payante est nécessaire pour continuer à gagner — les points déjà gagnés restent les vôtres. Rien d'autre n'est verrouillé : les formules augmentent votre limite quotidienne et vos points par publicité."
+          "a": "Oui. La formule gratuite donne {freeAds} publicités par jour pendant vos {days} premiers jours. Ensuite, une formule payante est nécessaire pour continuer à gagner. Les points déjà gagnés restent les vôtres. Rien d'autre n'est verrouillé : les formules augmentent votre limite quotidienne et vos points par publicité."
         },
         "worth": {
           "q": "Que vaut réellement un point ?",
@@ -224,7 +224,7 @@
         },
         "withdraw": {
           "q": "Quand puis-je retirer ?",
-          "a": "Dès que votre solde dépasse {threshold} points — le même seuil pour tout le monde, quelle que soit la formule. Les retraits s'activent une fois notre agrément finalisé ; d'ici là vous pouvez enregistrer votre compte de retrait et continuer à gagner, et l'application dit clairement où en est une demande."
+          "a": "Dès que votre solde dépasse {threshold} points. Le même seuil pour tout le monde, quelle que soit la formule. Les retraits s'activent une fois notre agrément finalisé ; d'ici là vous pouvez enregistrer votre compte de retrait et continuer à gagner, et l'application dit clairement où en est une demande."
         },
         "questions": {
           "q": "Suis-je obligé de répondre aux questions ?",
@@ -232,7 +232,7 @@
         },
         "methods": {
           "q": "Comment suis-je payé ?",
-          "a": "Vers un compte Mobile Money — MTN, Telecel ou AirtelTigo — ou vers un portefeuille crypto en USDT. Vous choisissez et l'enregistrez vous-même dans votre profil, et un retrait ne peut aller que vers un compte enregistré sur votre propre profil."
+          "a": "Vers un compte Mobile Money (MTN, Telecel ou AirtelTigo) ou vers un portefeuille crypto en USDT. Vous choisissez et l'enregistrez vous-même dans votre profil, et un retrait ne peut aller que vers un compte enregistré sur votre propre profil."
         },
         "devices": {
           "q": "Est-ce que ça marchera sur mon téléphone ?",
@@ -243,7 +243,7 @@
     "cta": {
       "title": "Vos minutes perdues valent déjà",
       "titleAccent": "quelque chose.",
-      "lead": "Créez un compte gratuit et regardez votre première publicité aujourd'hui — {freeAds} par jour, tous les jours, sans rien payer.",
+      "lead": "Créez un compte gratuit et regardez votre première publicité aujourd'hui, {freeAds} par jour, tous les jours, sans rien payer.",
       "primary": "Créer un compte gratuit",
       "secondary": "J'ai déjà un compte",
       "note": "Moins d'une minute. Une adresse e-mail et un mot de passe, rien d'autre."
@@ -375,10 +375,10 @@
       "invalidCredentials": "Cet e-mail ou ce mot de passe n'est pas correct",
       "emailNotVerified": "Veuillez d'abord vérifier votre adresse e-mail",
       "identityBlocked": "Cette adresse e-mail ou ce numéro de téléphone ne peut pas servir à créer un compte.",
-      "botCheckFailed": "Nous n'avons pas pu confirmer que vous êtes une personne. Actualisez la page et réessayez — si vous utilisez un bloqueur de publicités ou un VPN, désactivez-le pour cette page.",
+      "botCheckFailed": "Nous n'avons pas pu confirmer que vous êtes une personne. Actualisez la page et réessayez, si vous utilisez un bloqueur de publicités ou un VPN, désactivez-le pour cette page.",
       "emailSendLimit": "Nous n'avons pas pu envoyer votre e-mail de confirmation pour le moment. Veuillez réessayer dans quelques minutes.",
-      "botCheckRetry": "La vérification de sécurité doit être refaite — elle vient d'être réinitialisée ci-dessous. Appuyez de nouveau sur Créer un compte.",
-      "emailSendFailed": "Nous n'avons pas pu envoyer d'e-mail de confirmation à cette adresse pour le moment. Le problème vient de nous — veuillez réessayer dans quelques minutes.",
+      "botCheckRetry": "La vérification de sécurité doit être refaite. Elle vient d'être réinitialisée ci-dessous. Appuyez de nouveau sur Créer un compte.",
+      "emailSendFailed": "Nous n'avons pas pu envoyer d'e-mail de confirmation à cette adresse pour le moment. Le problème vient de nous. Veuillez réessayer dans quelques minutes.",
       "resetLinkExpired": "Ce lien de réinitialisation a expiré ou a déjà été utilisé. Demandez-en un nouveau et ouvrez-le dans le même navigateur.",
       "passwordSameAsOld": "C'est déjà votre mot de passe. Choisissez-en un autre."
     }
@@ -428,7 +428,7 @@
       "earned": "Gains",
       "adsWatched": "Pubs vues",
       "days": "{count} jours",
-      "empty": "Rien pour l'instant — regardez votre première pub pour lancer le graphique.",
+      "empty": "Rien pour l'instant. Regardez votre première pub pour lancer le graphique.",
       "tooltipEarned": "{points} pts",
       "tooltipAds": "{count, plural, =1 {1 pub} other {# pubs}}",
       "dateColumn": "Date"
@@ -503,12 +503,12 @@
     },
     "referral": {
       "title": "Invitez et gagnez",
-      "hint": "Partagez votre lien — vous gagnez un bonus quand un ami s'inscrit et commence à regarder.",
+      "hint": "Partagez votre lien. Vous gagnez un bonus quand un ami s'inscrit et commence à regarder.",
       "copy": "Copier le lien",
       "share": "Partager",
       "copiedDone": "Copié",
       "sharedDone": "Partagé",
-      "inviteMessage": "Rejoins-moi sur SidePerks — regarde de courtes pubs et gagne de l'argent réel au Ghana. Inscris-toi avec mon lien : {url}"
+      "inviteMessage": "Rejoins-moi sur SidePerks, regarde de courtes pubs et gagne de l'argent réel au Ghana. Inscris-toi avec mon lien : {url}"
     },
     "withdrawCta": "Retirer",
     "quick": {
@@ -520,7 +520,7 @@
       "label": "Raccourcis"
     },
     "adsWaiting": "{n} publicités vous attendent aujourd’hui",
-    "capReachedToday": "C’est tout pour aujourd’hui — retour à minuit",
+    "capReachedToday": "C’est tout pour aujourd’hui : retour à minuit",
     "tierCap": "{n} publicités par jour",
     "tierMultiplier": "×{x} sur chaque publicité"
   },
@@ -533,7 +533,7 @@
     "upgradeTeaserTitle": "Allez plus loin",
     "upgradeTeaserBody": "Passez à un forfait supérieur pour augmenter votre plafond de gains quotidien.",
     "addTeaserTitle": "Ajouter une offre",
-    "addTeaserBody": "Les offres se cumulent — chacune augmente votre limite quotidienne.",
+    "addTeaserBody": "Les offres se cumulent, chacune augmente votre limite quotidienne.",
     "team": "Équipe",
     "viewAsFallbackName": "ce compte"
   },
@@ -595,7 +595,7 @@
       "points": "pts",
       "remaining": "{count, plural, one {# annonce restante aujourd'hui sur votre offre {tier}} other {# annonces restantes aujourd'hui sur votre offre {tier}}}",
       "spent": "Vous avez utilisé toutes les annonces de votre offre {tier} aujourd'hui.",
-      "remainingShared": "{count, plural, one {# publicité restante aujourd’hui — toutes catégories confondues} other {# publicités restantes aujourd’hui — toutes catégories confondues}}"
+      "remainingShared": "{count, plural, one {# publicité restante aujourd’hui, toutes catégories confondues} other {# publicités restantes aujourd’hui, toutes catégories confondues}}"
     },
     "card": {
       "reward": "+{points} pts",
@@ -634,13 +634,13 @@
       "loading": "Préparation de votre annonce",
       "tapToPlay": "Appuyez pour lancer",
       "questionsAhead": "{count, plural, one {# question pendant cette annonce} other {# questions pendant cette annonce}}",
-      "watchOnlyHint": "Aucune question — regardez simplement jusqu’au bout",
+      "watchOnlyHint": "Aucune question : regardez simplement jusqu’au bout",
       "answeredCount": "{done} sur {total} répondues",
       "unavailableTitle": "Cette annonce n'est plus disponible",
-      "unavailableBody": "Elle vient d'être mise en pause ou complète. Rien ne vous a été décompté — choisissez-en une autre.",
+      "unavailableBody": "Elle vient d'être mise en pause ou complète. Rien ne vous a été décompté, choisissez-en une autre.",
       "watchLeft": "Encore {seconds} s de visionnage requises",
       "watchDone": "Visionnage requis atteint",
-      "watchFree": "Payé — regardez autant que vous voulez",
+      "watchFree": "Payé : regardez autant que vous voulez",
       "creditedChip": "+{points} pts gagnés"
     },
     "question": {
@@ -650,7 +650,7 @@
       "next": "Suivant",
       "resume": "Continuer la lecture",
       "finish": "Valider",
-      "noWrongAnswer": "Il n'y a ni bonne ni mauvaise réponse — dites-nous simplement ce que vous pensez.",
+      "noWrongAnswer": "Il n'y a ni bonne ni mauvaise réponse, dites-nous simplement ce que vous pensez.",
       "stepOpen": "Question {n}"
     },
     "result": {
@@ -702,14 +702,14 @@
       },
       "tryAgain": "Réessayer",
       "incorrectSurvey": {
-        "body": "{count, plural, one {Une des questions de contrôle ne correspond pas. Refaites le sondage — # essai restant.} other {Une des questions de contrôle ne correspond pas. Refaites le sondage — # essais restants.}}"
+        "body": "{count, plural, one {Une des questions de contrôle ne correspond pas. Refaites le sondage, # essai restant.} other {Une des questions de contrôle ne correspond pas. Refaites le sondage, # essais restants.}}"
       },
       "notWatchedSurvey": {
         "body": "Répondez à toutes les questions avant de valider."
       },
       "cooldown": {
         "title": "Un instant",
-        "body": "Il y a un court délai entre deux annonces. Réessayez celle-ci dans quelques secondes — rien ne vous a été décompté."
+        "body": "Il y a un court délai entre deux annonces. Réessayez celle-ci dans quelques secondes. Rien ne vous a été décompté."
       },
       "pointsCap": {
         "title": "C'est le maximum pour aujourd'hui",
@@ -734,7 +734,7 @@
       "disabledTitle": "Votre compte est suspendu",
       "disabledBody": "Les gains sont désactivés sur ce compte. Consultez vos notifications ou contactez le support si vous pensez qu’il s’agit d’une erreur.",
       "freeOverTitle": "Vos jours gratuits sont terminés",
-      "freeOverBody": "La formule gratuite permet de gagner pendant les premiers jours suivant l'inscription. Prenez une formule pour continuer à gagner — elle s'active immédiatement.",
+      "freeOverBody": "La formule gratuite permet de gagner pendant les premiers jours suivant l'inscription. Prenez une formule pour continuer à gagner. Elle s'active immédiatement.",
       "freeOverCta": "Voir les formules",
       "freeOverKeep": "Les points déjà gagnés restent les vôtres et peuvent être retirés."
     },
@@ -762,14 +762,14 @@
       "watched": "{seconds} s regardées",
       "answered": "{done, plural, =0 {Aucune question répondue} one {# question répondue} other {# questions répondues}}",
       "answeredOf": "{done} sur {total} répondues",
-      "noAttempt": "Quitter ne consomme aucun de vos essais — seule une réponse en consomme un.",
+      "noAttempt": "Quitter ne consomme aucun de vos essais, seule une réponse en consomme un.",
       "stay": "Rester et terminer",
       "leave": "Quitter la publicité",
       "read": "{seconds}s lues sur {total}s",
       "noCostLink": "Quitter ne coûte rien : l'article reste dans votre liste."
     },
     "disclosure": "SidePerks n'est pas affilié à ces annonceurs et ne les recommande pas. Tout ce que vous faites sur le site ou l'application d'un annonceur relève de votre relation avec lui : nous ne sommes pas responsables de l'argent que vous y dépensez ou perdez, ni d'un produit ou service décevant.",
-    "repeating": "Vous avez terminé toutes les nouvelles publicités. Celles-ci, vous les avez déjà vues — elles rapportent à nouveau.",
+    "repeating": "Vous avez terminé toutes les nouvelles publicités. Celles-ci, vous les avez déjà vues. Elles rapportent à nouveau.",
     "link": {
       "visit": "Aller chez l’annonceur",
       "waiting": "Encore {seconds}s de lecture",
@@ -815,10 +815,10 @@
         "max": "Max"
       },
       "coinEstimate": "≈ {coinAmount} {coin} (environ {usd} $) au taux indicatif du jour, GHS {rate} pour un dollar.",
-      "estimateUnavailable": "Nous ne pouvons pas afficher d'estimation en crypto pour le moment — le taux du jour n'est pas disponible. Votre retrait est enregistré en cedis et le montant en crypto est calculé au moment de l'envoi.",
+      "estimateUnavailable": "Nous ne pouvons pas afficher d'estimation en crypto pour le moment. Le taux du jour n'est pas disponible. Votre retrait est enregistré en cedis et le montant en crypto est calculé au moment de l'envoi.",
       "afterFee": "Vous recevrez GHS {net} après les frais de {percent} %."
     },
-    "usdtNotice": "Les montants en USDT sont des estimations. Vos points se convertissent en cédis au taux fixe ; le taux cédi–dollar est mis à jour quotidiennement, et le montant final en USDT est calculé à l'envoi du paiement — il peut différer légèrement de cette estimation.",
+    "usdtNotice": "Les montants en USDT sont des estimations. Vos points se convertissent en cédis au taux fixe ; le taux cédi (dollar est mis à jour quotidiennement, et le montant final en USDT est calculé à l'envoi du paiement) il peut différer légèrement de cette estimation.",
     "errors": {
       "belowMin": "Le retrait minimum est de {min} pts (GHS {ghs}).",
       "aboveBalance": "C'est plus que votre solde."
@@ -841,7 +841,7 @@
       "delete": "Effacer le dernier chiffre",
       "submitting": "Envoi de votre demande…",
       "hint": "Saisissez votre PIN de retrait",
-      "wrong": "{count, plural, =0 {PIN incorrect.} =1 {PIN incorrect — 1 essai restant.} other {PIN incorrect — # essais restants.}}",
+      "wrong": "{count, plural, =0 {PIN incorrect.} =1 {PIN incorrect, 1 essai restant.} other {PIN incorrect, # essais restants.}}",
       "locked": "Trop de tentatives. Réessayez dans {minutes} min.",
       "error": "Impossible de vérifier votre PIN. Veuillez réessayer.",
       "noPinTitle": "Définissez d'abord un PIN de retrait",
@@ -857,7 +857,7 @@
     },
     "notYet": {
       "title": "Encore {short} points",
-      "body": "Vous pourrez retirer à partir de {min} points (GHS {ghs}). Vous en avez {balance} — ce seuil est celui de votre offre {tier}.",
+      "body": "Vous pourrez retirer à partir de {min} points (GHS {ghs}). Vous en avez {balance}. Ce seuil est celui de votre offre {tier}.",
       "cta": "Gagner plus"
     },
     "refused": {
@@ -1100,11 +1100,11 @@
       "title": "Enregistrez vos codes de secours",
       "body": "Ils vous permettent de revenir si vous perdez votre téléphone. Chaque code ne fonctionne qu'une fois.",
       "replaced": "Vos anciens codes ne fonctionnent plus. Enregistrez ceux-ci.",
-      "warning": "C'est la seule fois où ces codes s'affichent. Conservez-les en lieu sûr — pas au même endroit que votre téléphone.",
+      "warning": "C'est la seule fois où ces codes s'affichent. Conservez-les en lieu sûr, pas au même endroit que votre téléphone.",
       "copy": "Copier",
       "copied": "Copié",
       "download": "Télécharger",
-      "fileHeading": "Codes de secours SidePerks — chaque code ne fonctionne qu'une fois.",
+      "fileHeading": "Codes de secours SidePerks. Chaque code ne fonctionne qu'une fois.",
       "acknowledge": "J'ai enregistré ces codes en lieu sûr.",
       "done": "Terminé"
     },
@@ -1189,7 +1189,7 @@
       "cta": "Envoyer la confirmation",
       "sentTitle": "Vérifiez votre nouvelle boîte mail",
       "sentBody": "Nous avons envoyé un lien de confirmation à {email}. Ouvrez-le pour terminer le changement.",
-      "sentNote": "Tant que vous n'avez pas ouvert ce lien, vous continuez à vous connecter avec votre adresse actuelle. Ce lien prouve seulement que la nouvelle boîte mail vous appartient — aucun code n'est envoyé par e-mail."
+      "sentNote": "Tant que vous n'avez pas ouvert ce lien, vous continuez à vous connecter avec votre adresse actuelle. Ce lien prouve seulement que la nouvelle boîte mail vous appartient. Aucun code n'est envoyé par e-mail."
     },
     "errors": {
       "currentRequired": "Saisissez votre mot de passe actuel.",
@@ -1239,7 +1239,7 @@
     },
     "pending": {
       "title": "Votre compte sera supprimé dans {days, plural, =0 {moins d'un jour} one {# jour} other {# jours}}",
-      "body": "Suppression prévue le {date}. Une nouvelle connexion annule automatiquement la demande — ou annulez-la maintenant.",
+      "body": "Suppression prévue le {date}. Une nouvelle connexion annule automatiquement la demande, ou annulez-la maintenant.",
       "cta": "Annuler la suppression"
     },
     "errors": {
@@ -1299,7 +1299,7 @@
       "free": "Vous êtes sur le forfait Gratuit",
       "freeHint": "Prenez un forfait pour regarder plus de publicités par jour et gagner à un meilleur taux.",
       "holding": "{count, plural, one {Vous détenez # forfait} other {Vous détenez # forfaits}}",
-      "holdingHint": "Vos forfaits sont cumulés ci-dessous — chacun d'eux est pris en compte.",
+      "holdingHint": "Vos forfaits sont cumulés ci-dessous, chacun d'eux est pris en compte.",
       "dailyAds": "Pubs par jour",
       "rate": "Bonus de gain",
       "payoutFrom": "Retrait dès"
@@ -1364,7 +1364,7 @@
     },
     "flexible": {
       "title": "Vous choisissez le prix",
-      "body": "{plan} va de {from} à {to}. Plus vous payez, plus chaque publicité vaut de points — et vous restez sur la même formule.",
+      "body": "{plan} va de {from} à {to}. Plus vous payez, plus chaque publicité vaut de points, et vous restez sur la même formule.",
       "same": "Le nombre de publicités par jour ne change pas : {ads} dans tous les cas. Seule leur valeur change.",
       "adjust": "Choisir mon montant",
       "continue": "Continuer à {amount}",
@@ -1381,7 +1381,7 @@
     "yesterday": "Hier",
     "empty": {
       "title": "Comment pouvons-nous vous aider ?",
-      "body": "Dites-nous ce qui se passe et une personne le lira. Votre solde, votre formule et vos demandes de retrait sont déjà sous nos yeux — inutile de les expliquer."
+      "body": "Dites-nous ce qui se passe et une personne le lira. Votre solde, votre formule et vos demandes de retrait sont déjà sous nos yeux, inutile de les expliquer."
     },
     "ask": {
       "hold": "Pourquoi mon retrait est-il en attente ?",
@@ -1393,7 +1393,7 @@
   "admin": {
     "previewBadge": "Données de démonstration",
     "search": {
-      "placeholder": "Recherche — arrive avec le backend"
+      "placeholder": "Recherche : arrive avec le backend"
     },
     "nav": {
       "label": "Sections admin",
@@ -1474,7 +1474,7 @@
     },
     "payouts": {
       "title": "Retraits",
-      "description": "Approuvez, mettez en attente ou refusez les demandes de retrait. Les numéros de compte et les portefeuilles sont masqués — ouvrez une demande pour en révéler un.",
+      "description": "Approuvez, mettez en attente ou refusez les demandes de retrait. Les numéros de compte et les portefeuilles sont masqués. Ouvrez une demande pour en révéler un.",
       "filterLabel": "Filtrer par statut",
       "filters": {
         "queue": "Décision requise",
@@ -1542,7 +1542,7 @@
         "reuse": "{count, plural, one {Ce compte a aussi été utilisé par # autre utilisateur.} other {Ce compte a aussi été utilisé par # autres utilisateurs.}}",
         "note": "Note envoyée à l'utilisateur",
         "cryptoSub": "{ghs} · {points} pts",
-        "quoteLive": "Estimé au taux du jour — aucun taux n'était disponible lors de la demande.",
+        "quoteLive": "Estimé au taux du jour. Aucun taux n'était disponible lors de la demande.",
         "quoteMissing": "Aucun taux de change disponible : la valeur est affichée en cedis. À convertir avant l'envoi.",
         "feeBreakdown": "{gross} moins {fee} de frais ({percent} %)"
       },
@@ -1551,7 +1551,7 @@
         "hold": "Mettre {amount} en attente pour {name}. La personne est informée du motif, écrivez quelque chose d'actionnable.",
         "decline": "Refuser {amount} pour {name} ? La demande s'arrête ici et les points retournent au solde.",
         "markPaid": "Confirmez que vous avez envoyé {amount} vers {destination}. Cette action est irréversible.",
-        "reasonLabel": "Motif — visible par l'utilisateur",
+        "reasonLabel": "Motif : visible par l'utilisateur",
         "reasonPlaceholder": {
           "hold": "ex. Vérifiez que le numéro MoMo correspond à votre pièce d'identité",
           "decline": "ex. Le compte de retrait appartient à quelqu'un d'autre",
@@ -1560,7 +1560,7 @@
         "reasonHint": "Écrit simplement. Cela part directement dans ses notifications.",
         "cancel": "Annuler",
         "working": "En cours…",
-        "referenceLabel": "Référence du transfert — facultatif",
+        "referenceLabel": "Référence du transfert : facultatif",
         "referencePlaceholder": "ex. identifiant de transaction MoMo",
         "referenceHint": "Enregistrée avec le paiement. C'est ce que vous vérifiez si la personne signale plus tard n'avoir rien reçu.",
         "approveEarly": "Approuver {amount} pour {name} avant la fin de sa période de retenue le {until} ? Ceci est enregistré comme une approbation anticipée et déclenche une alerte.",
@@ -1628,7 +1628,7 @@
       "confirm": {
         "flag": "Signaler {name}. La personne continue de gagner, mais chacun de ses retraits passe d'abord en révision.",
         "disable": "Désactiver {name} ? La personne ne gagne plus et ne peut plus retirer. Ses {points} points restent sur le compte.",
-        "reasonLabel": "Motif — visible par le prochain opérateur",
+        "reasonLabel": "Motif : visible par le prochain opérateur",
         "reasonPlaceholder": {
           "flag": "ex. Six comptes partagent cette empreinte d'appareil",
           "disable": "ex. Fraude aux réponses confirmée sur trois comptes"
@@ -1741,7 +1741,7 @@
         "remaining": "Places restantes",
         "liability": "Reste à payer",
         "perCompletion": "Par complétion",
-        "liabilityNote": "Places restantes × récompense, au taux actuel de {rate} pts = 1,00 GHS. C’est ce que la plateforme devra si toutes les places restantes sont prises — avant tout multiplicateur de formule.",
+        "liabilityNote": "Places restantes × récompense, au taux actuel de {rate} pts = 1,00 GHS. C’est ce que la plateforme devra si toutes les places restantes sont prises, avant tout multiplicateur de formule.",
         "setup": "Configuration",
         "length": "Vidéo",
         "noVideo": "Pas de vidéo",
@@ -1806,7 +1806,7 @@
         "basics": "Informations",
         "basicsHint": "Le nom affiché dans le fil et l’annonceur concerné.",
         "title": "Titre",
-        "titlePlaceholder": "MTN Ghana — la 5G est là",
+        "titlePlaceholder": "MTN Ghana : la 5G est là",
         "advertiser": "Annonceur",
         "advertiserHint": "Une étiquette pour les rapports. Aucun compte annonceur derrière.",
         "advertiserPlaceholder": "MTN Ghana",
@@ -1824,20 +1824,20 @@
         "sourceYoutube": "YouTube",
         "sourceUpload": "Fichier interne",
         "youtubeLink": "Lien ou identifiant YouTube",
-        "youtubeHint": "Collez l’URL de lecture, de partage, d’intégration ou Shorts — l’ID en est extrait.",
+        "youtubeHint": "Collez l’URL de lecture, de partage, d’intégration ou Shorts, l’ID en est extrait.",
         "youtubeResolved": "Identifiant {id}",
         "videoFile": "Fichier vidéo",
         "videoFileHint": "MP4, WebM ou MOV, jusqu’à 100 Mo. Envoyé dès la sélection.",
         "thumbnail": "Vignette",
         "thumbnailHint": "L’image de la carte. Sans elle, la carte dessine sa propre couverture.",
-        "thumbnailHintYoutube": "Facultative — sinon l’image de YouTube est utilisée.",
+        "thumbnailHintYoutube": "Facultative : sinon l’image de YouTube est utilisée.",
         "chooseFile": "Choisir un fichier",
         "replaceFile": "Remplacer",
         "removeFile": "Retirer le fichier",
         "uploading": "Envoi en cours…",
         "questions": "Questions",
         "questionsHintVideo": "Une vidéo peut interrompre avec une question à n’importe quelle seconde, demander à la fin, ou ne rien demander et payer au temps de visionnage.",
-        "questionsHintSurvey": "Un sondage n’est pas un quiz. Ne cochez une bonne réponse que lorsqu’il en existe vraiment une — sinon toute réponse est acceptée et enregistrée.",
+        "questionsHintSurvey": "Un sondage n’est pas un quiz. Ne cochez une bonne réponse que lorsqu’il en existe vraiment une, sinon toute réponse est acceptée et enregistrée.",
         "questionsLocked": "{count, plural, one {# personne a} other {# personnes ont}} déjà terminé cette publicité : ses questions sont figées. Les réécrire réécrirait ce que dit l’étude de l’annonceur. Le reste reste modifiable ; pour changer les questions, dupliquez cette publicité et publiez la copie.",
         "noQuestionsVideo": "Aucune question. Cette publicité paiera au temps de visionnage.",
         "noQuestionsSurvey": "Un sondage a besoin d’au moins une question.",
@@ -1886,7 +1886,7 @@
         "chosenOption": "Option choisie",
         "addCondition": "Ajouter une condition",
         "removeCondition": "Supprimer la condition",
-        "cascadeNote": "L’omission se propage : si la question ci-dessus n’est jamais posée, celle-ci ne l’est pas non plus — ni celles qui en dépendent.",
+        "cascadeNote": "L’omission se propage : si la question ci-dessus n’est jamais posée, celle-ci ne l’est pas non plus, ni celles qui en dépendent.",
         "audience": "Audience",
         "audienceHint": "Les formules visées par cette publicité.",
         "everyone": "Tout le monde",
@@ -1914,11 +1914,11 @@
         "costNote": "Budget × récompense au taux actuel, avant multiplicateur de formule.",
         "unlimitedShort": "Sans plafond",
         "summary": "Ce que c’est",
-        "summaryQuestions": "{count, plural, =0 {Aucune question — paie au visionnage} one {# question} other {# questions}}",
-        "summaryGraded": "{count, plural, =0 {Rien de noté — aucune mauvaise réponse} one {# question notée} other {# questions notées}}",
+        "summaryQuestions": "{count, plural, =0 {Aucune question, paie au visionnage} one {# question} other {# questions}}",
+        "summaryGraded": "{count, plural, =0 {Rien de noté. Aucune mauvaise réponse} one {# question notée} other {# questions notées}}",
         "summaryCues": "{count, plural, =0 {Posées à la fin} one {# interruption pendant la vidéo} other {# interruptions pendant la vidéo}}",
-        "summaryBranching": "Conditionnel — les questions varient selon les réponses",
-        "summaryStraight": "Linéaire — tout le monde voit les mêmes questions",
+        "summaryBranching": "Conditionnel. Les questions varient selon les réponses",
+        "summaryStraight": "Linéaire : tout le monde voit les mêmes questions",
         "removal": "Retirer cette publicité",
         "delete": "Supprimer définitivement",
         "deleteHint": "Personne ne l’a encore regardée : elle peut être supprimée.",
@@ -1940,7 +1940,7 @@
           "titleShort": "Donnez un titre d’au moins 2 caractères.",
           "titleLong": "Les titres sont limités à 200 caractères.",
           "pointsMin": "La récompense doit valoir au moins 1 point.",
-          "pointsMax": "Cette récompense semble erronée — le maximum est de 100 000 points.",
+          "pointsMax": "Cette récompense semble erronée. Le maximum est de 100 000 points.",
           "weightMin": "Le poids doit valoir au moins 1.",
           "budgetMin": "Le budget doit valoir au moins 1 complétion.",
           "budgetBelowDelivered": "C’est en dessous de ce qui a déjà été livré, ce qui arrêterait la publicité immédiatement.",
@@ -1994,7 +1994,7 @@
         },
         "statusLabel": "Statut",
         "cta": "Appel à l’action",
-        "ctaHint": "Où joindre cet annonceur — site web, numéro WhatsApp, réseaux sociaux. Affiché sous la vidéo puis au moment du gain. Jamais sur un sondage.",
+        "ctaHint": "Où joindre cet annonceur, site web, numéro WhatsApp, réseaux sociaux. Affiché sous la vidéo puis au moment du gain. Jamais sur un sondage.",
         "ctaEmpty": "Aucun lien pour l’instant. Ajoutez ce que l’annonceur vous a donné.",
         "ctaAddFirst": "Ajouter un lien",
         "ctaAdd": "Ajouter un autre",
@@ -2034,7 +2034,7 @@
         },
         "askAlways": "Toujours poser",
         "askOnlyIf": "Seulement si…",
-        "firstAlwaysAsked": "La première question est toujours posée. Les suivantes peuvent dépendre de cette réponse — utilisez la flèche à côté d’une option, ou « Seulement si… » sur la question elle-même.",
+        "firstAlwaysAsked": "La première question est toujours posée. Les suivantes peuvent dépendre de cette réponse, utilisez la flèche à côté d’une option, ou « Seulement si… » sur la question elle-même.",
         "addFollowUp": "Ajouter une question de suivi pour « {option} »",
         "followUpHint": "Utilisez la flèche à côté d’une réponse pour ajouter une question que seules ces personnes verront.",
         "ruleIs": "Q{n} est « {answer} »",
@@ -2048,7 +2048,7 @@
           "link": "Nouvelle publicité lien"
         },
         "article": "Article",
-        "articleHint": "Ce que la personne lit avant le lien. Écrivez-le comme l'annonceur veut être présenté — c'est la totalité de la publicité.",
+        "articleHint": "Ce que la personne lit avant le lien. Écrivez-le comme l'annonceur veut être présenté. C'est la totalité de la publicité.",
         "articleBody": "Texte",
         "articlePlaceholder": "Qui est l'annonceur, ce qu'il propose, et pourquoi cliquer…",
         "articleShortOf": "{count, plural, one {encore # caractère} other {encore # caractères}}",
@@ -2058,11 +2058,11 @@
         "destination": "Destination",
         "destinationHint": "Le seul lien vers l'annonceur. Le clic est ce qui est payé, donc il ne peut y en avoir qu'un.",
         "ctaDestination": "Destination",
-        "ctaNoteLink": "Le lien s'ouvre dans un nouvel onglet, et les points sont crédités au moment du clic — si le temps de lecture est écoulé.",
+        "ctaNoteLink": "Le lien s'ouvre dans un nouvel onglet, et les points sont crédités au moment du clic, si le temps de lecture est écoulé.",
         "summaryWords": "{count, plural, =0 {Aucun article encore} one {Article de # mot} other {Article de # mots}}",
         "summaryDwell": "{seconds}s de lecture avant que le lien ne paie",
         "summaryDestination": "Une destination définie",
-        "summaryNoDestination": "Aucune destination — la publicité ne peut pas être enregistrée",
+        "summaryNoDestination": "Aucune destination. La publicité ne peut pas être enregistrée",
         "summaryLinkCaveat": "Personne ne peut vérifier si l'article a été lu, ni ce qui se passe après le clic."
       },
       "newAd": "Nouvelle publicité",
@@ -2084,7 +2084,7 @@
         "link": {
           "name": "Lien",
           "body": "Un article à lire, puis un seul lien vers l'annonceur. Le clic paie.",
-          "proof": "Prouvé par : le temps de lecture avant le clic, et rien d'autre — personne ne peut voir ce qui se passe chez l'annonceur."
+          "proof": "Prouvé par : le temps de lecture avant le clic, et rien d'autre. Personne ne peut voir ce qui se passe chez l'annonceur."
         }
       }
     },
@@ -2136,7 +2136,7 @@
         "delete": "Supprimer",
         "end": "Terminer le contrat"
       },
-      "endedInstead": "{name} a des paiements enregistrés : le contrat a été terminé plutôt que supprimé — le relevé est construit à partir de ces reçus.",
+      "endedInstead": "{name} a des paiements enregistrés : le contrat a été terminé plutôt que supprimé. Le relevé est construit à partir de ces reçus.",
       "unpaidButServing": "Diffuse, rien de payé",
       "nothingYet": "Rien payé ni diffusé",
       "panel": {
@@ -2168,7 +2168,7 @@
         "amount": "Montant",
         "received": "Reçu le",
         "method": "Moyen",
-        "methodHint": "Banque, MoMo, espèces — vos propres termes.",
+        "methodHint": "Banque, MoMo, espèces : vos propres termes.",
         "methodPlaceholder": "Virement bancaire",
         "reference": "Référence",
         "referenceHint": "Ce que vous vérifieriez sur un relevé.",
@@ -2191,7 +2191,7 @@
     },
     "subscriptions": {
       "title": "Abonnements",
-      "description": "Les formules, leur prix, et si elles se vendent. La formule gratuite est incluse — c'est le dénominateur.",
+      "description": "Les formules, leur prix, et si elles se vendent. La formule gratuite est incluse. C'est le dénominateur.",
       "filterLabel": "Filtrer par disponibilité",
       "filters": {
         "all": "Toutes",
@@ -2269,7 +2269,7 @@
         "name": "Nom",
         "namePlaceholder": "Gold",
         "slug": "Identifiant",
-        "slugHint": "Minuscules, sans espaces. Non modifiable ensuite — paiements et abonnements y font référence.",
+        "slugHint": "Minuscules, sans espaces. Non modifiable ensuite, paiements et abonnements y font référence.",
         "slugLocked": "Fixé dès la création. Les abonnements et paiements y font référence.",
         "description": "Description",
         "descriptionHint": "Une ligne, affichée aux utilisateurs sur l'écran d'abonnement.",
@@ -2288,7 +2288,7 @@
         "cooldownHint": "Attente entre deux publicités. 0 = aucune.",
         "onSale": "En vente",
         "onSaleHint": "Retirée de la vente, plus personne ne peut l'acheter.",
-        "onSaleKeeps": "Retirée de la vente — les {count} qui la détiennent la gardent jusqu'à expiration.",
+        "onSaleKeeps": "Retirée de la vente. Les {count} qui la détiennent la gardent jusqu'à expiration.",
         "onSaleDefault": "La formule par défaut est toujours en vente. Chaque nouveau compte y démarre et les formules expirées y retombent.",
         "sortOrder": "Ordre",
         "sortOrderHint": "Position dans la liste vue par les utilisateurs. Les petits nombres d'abord.",
@@ -2308,17 +2308,17 @@
         "defaultMustBeFree": "La formule par défaut doit être gratuite."
       },
       "dismissError": "Fermer",
-      "hiddenInstead": "{name} a été acheté : il a été retiré de la vente plutôt que supprimé — les paiements associés font partie du relevé.",
+      "hiddenInstead": "{name} a été acheté : il a été retiré de la vente plutôt que supprimé. Les paiements associés font partie du relevé.",
       "chosenAbove": "{count} sur {of} au-dessus du plancher",
       "band": {
         "title": "Se vend de {from} à GHS {to}",
-        "body": "Un acheteur qui choisit dans cette plage gagne entre {from}× et {to}× — le taux glisse vers {next} à mesure qu'il paie plus. Tous ont {ads} publicités par jour ; seule la valeur d'une publicité change.",
+        "body": "Un acheteur qui choisit dans cette plage gagne entre {from}× et {to}×. Le taux glisse vers {next} à mesure qu'il paie plus. Tous ont {ads} publicités par jour ; seule la valeur d'une publicité change.",
         "topTitle": "Un prix unique",
         "topBody": "C'est le sommet de l'échelle : il n'y a rien au-dessus vers quoi glisser. Les acheteurs paient exactement {price}.",
         "line": "Les acheteurs choisissent un montant entre {from} et GHS {to}.",
-        "topLine": "Le forfait le plus élevé se vend exactement à {price} — aucun forfait au-dessus ne lui fixe de plafond.",
+        "topLine": "Le forfait le plus élevé se vend exactement à {price}. Aucun forfait au-dessus ne lui fixe de plafond.",
         "perCedi": "À ce plancher, GHS 1 achète +{pct}% de taux de gain. Les forfaits plus élevés achètent délibérément moins par cédi.",
-        "neighbour": "Cela déplace aussi {name} : sa plage allait de {from} à {was} et devient {from} – {to}. Tous ceux qui achèteront {name} désormais gagneront au nouveau taux.",
+        "neighbour": "Cela déplace aussi {name} : sa plage allait de {from} à {was} et devient {from} à {to}. Tous ceux qui achèteront {name} désormais gagneront au nouveau taux.",
         "topRangeBody": "Payer le plancher rapporte {from}×, payer {price} rapporte {to}×, et tout montant intermédiaire se place sur la ligne. Le nombre d'annonces par jour reste à {ads} quel que soit le montant."
       },
       "bandWarn": {
@@ -2332,9 +2332,9 @@
         },
         "adsInversion": {
           "short": "Le forfait au-dessus montre moins de publicités",
-          "body": "{next} coûte plus cher que ce forfait mais autorise moins de publicités par jour : payer pour monter achète moins. Le nombre de publicités ne glisse pas dans une plage — il change au passage d'un forfait à l'autre — et c'est là que cela se ressent."
+          "body": "{next} coûte plus cher que ce forfait mais autorise moins de publicités par jour : payer pour monter achète moins. Le nombre de publicités ne glisse pas dans une plage (il change au passage d'un forfait à l'autre) et c'est là que cela se ressent."
         },
-        "undercut": "{plans} ensemble coûtent GHS {price} et donneraient {ads} publicités par jour à {multiplier}× — plus, pour moins cher.",
+        "undercut": "{plans} ensemble coûtent GHS {price} et donneraient {ads} publicités par jour à {multiplier}×, plus, pour moins cher.",
         "fix": "Aligner les avantages"
       }
     },
@@ -2349,7 +2349,7 @@
       },
       "liability": {
         "label": "Dû aux utilisateurs",
-        "body": "{points} points sont détenus mais pas encore encaissés. Ce n'est pas encore un coût, donc absent de la colonne bénéfice — mais un bénéfice lu sans cela paraît meilleur qu'il ne l'est."
+        "body": "{points} points sont détenus mais pas encore encaissés. Ce n'est pas encore un coût, donc absent de la colonne bénéfice, mais un bénéfice lu sans cela paraît meilleur qu'il ne l'est."
       },
       "columns": {
         "month": "Mois",
@@ -2365,7 +2365,7 @@
     },
     "config": {
       "title": "Paramètres de la plateforme",
-      "description": "Les chiffres qui décident de combien d'argent sort. Chaque champ correspond à une colonne réelle — son nom est indiqué en dessous.",
+      "description": "Les chiffres qui décident de combien d'argent sort. Chaque champ correspond à une colonne réelle, son nom est indiqué en dessous.",
       "units": {
         "points": "points",
         "seconds": "secondes",
@@ -2483,7 +2483,7 @@
         },
         "referralActivation": {
           "label": "Bonus à l'activation",
-          "description": "Versé une fois que la personne parrainée a réellement regardé des publicités — le volet anti-fraude."
+          "description": "Versé une fois que la personne parrainée a réellement regardé des publicités. Le volet anti-fraude."
         },
         "referralActivationL2": {
           "label": "Bonus à l'activation, deuxième niveau",
@@ -2542,7 +2542,7 @@
         },
         "gameGap": {
           "label": "Intervalle minimum entre parties",
-          "description": "Empêche un double appui de consommer deux parties pour une seule intention. Ce n'est pas un contrôle antifraude — l'allocation hebdomadaire l'est."
+          "description": "Empêche un double appui de consommer deux parties pour une seule intention. Ce n'est pas un contrôle antifraude, l'allocation hebdomadaire l'est."
         },
         "leaderboardRanks": {
           "label": "Places affichées au classement",
@@ -2580,7 +2580,7 @@
         },
         "commissionMinimum": {
           "label": "Retrait de commission minimum",
-          "description": "En pesewas — 5000 correspond à 50,00 GHS. Un seul montant pour tous les affiliés, quel que soit leur volume."
+          "description": "En pesewas, 5000 correspond à 50,00 GHS. Un seul montant pour tous les affiliés, quel que soit leur volume."
         },
         "affiliateL1": {
           "label": "Taux par défaut pour le vendeur",
@@ -2629,7 +2629,7 @@
       "discard": "Annuler",
       "saving": "Enregistrement…",
       "savedCount": "{count, plural, one {# paramètre mis à jour.} other {# paramètres mis à jour.}}",
-      "savedNothing": "Rien à mettre à jour — ces valeurs étaient déjà en place."
+      "savedNothing": "Rien à mettre à jour, ces valeurs étaient déjà en place."
     },
     "adminSettings": {
       "title": "Paramètres d'administration",
@@ -2720,7 +2720,7 @@
       "bodyLabel": "Message",
       "bodyPlaceholder": "Dites en une ou deux phrases ce qui a changé. Le message arrive dans leurs notifications.",
       "review": "Relire et envoyer",
-      "confirmBody": "Ceci part vers {count, plural, one {# personne} other {# personnes}} — tous les comptes actifs.",
+      "confirmBody": "Ceci part vers {count, plural, one {# personne} other {# personnes}}, tous les comptes actifs.",
       "confirmIrreversible": "Impossible de le rappeler, de le modifier ou de le supprimer une fois envoyé. Relisez-le.",
       "sendNow": "Envoyer à {count, plural, one {# personne} other {# personnes}}",
       "cancel": "Annuler",
@@ -2735,7 +2735,7 @@
     "giftCodes": {
       "title": "Codes cadeaux",
       "description": "Générez un code, attribuez-lui des points et distribuez-le. Chaque code ne peut être utilisé qu'une seule fois.",
-      "intro": "Les codes sont générés, jamais choisis — c'est ce qui les rend impossibles à deviner.",
+      "intro": "Les codes sont générés, jamais choisis. C'est ce qui les rend impossibles à deviner.",
       "create": "Nouveau code cadeau",
       "empty": "Aucun code cadeau pour le moment.",
       "revoke": "Révoquer",
@@ -2815,14 +2815,14 @@
         "totalWeight": "Poids total",
         "perPlay": "Points moyens versés par la table",
         "last30": "Mesuré sur {plays} parties en 30 jours",
-        "weightHint": "Les poids sont relatifs — ils ne doivent pas totaliser 100"
+        "weightHint": "Les poids sont relatifs. Ils ne doivent pas totaliser 100"
       },
       "errors": {
         "mustPay": "Le résultat {slot} ne rapporte rien. Chaque boîte et chaque segment doit accorder des points ou une partie bonus."
       },
       "plans": {
         "title": "Parties par semaine, par forfait",
-        "hint": "Un seul pool partagé entre les deux jeux. Un utilisateur détenant plusieurs forfaits obtient le plus élevé, pas le total — modifiable via game_plays_combine_mode dans les paramètres.",
+        "hint": "Un seul pool partagé entre les deux jeux. Un utilisateur détenant plusieurs forfaits obtient le plus élevé, pas le total, modifiable via game_plays_combine_mode dans les paramètres.",
         "free": "Gratuit",
         "playsFor": "Parties hebdomadaires pour {plan}"
       }
@@ -2842,7 +2842,7 @@
       "editing": "Modification",
       "claimedBy": "{count, plural, =0 {pas encore réclamé} one {réclamé par # personne} other {réclamé par # personnes}}",
       "waiting": "{count} peuvent réclamer",
-      "cost": "{people} personnes pourraient le réclamer immédiatement — environ {points} points si toutes le font.",
+      "cost": "{people} personnes pourraient le réclamer immédiatement, environ {points} points si toutes le font.",
       "field": {
         "name": "Nom",
         "code": "Code",
@@ -2853,7 +2853,7 @@
         "target": "Cible",
         "reward": "Récompense (points)",
         "icon": "Icône",
-        "iconHint": "N importe quel émoji — touchez-en un ci-dessous ou utilisez votre clavier",
+        "iconHint": "N importe quel émoji, touchez-en un ci-dessous ou utilisez votre clavier",
         "useEmoji": "Utiliser {emoji}"
       },
       "errors": {
@@ -3057,7 +3057,7 @@
         "units": "{n} ventes sur {products} produits",
         "products": "{n} produits"
       },
-      "note": "Ce sont des chiffres de ventes, pas un montant dû. Ce qu’un fournisseur perçoit relève de votre contrat de licence avec lui, que ce système ne conserve délibérément pas — rien ici ne peut donc indiquer la somme à envoyer. Une vente compte dans la période où elle a été confirmée, et un remboursement ultérieur est déduit de cette même période."
+      "note": "Ce sont des chiffres de ventes, pas un montant dû. Ce qu’un fournisseur perçoit relève de votre contrat de licence avec lui, que ce système ne conserve délibérément pas. Rien ici ne peut donc indiquer la somme à envoyer. Une vente compte dans la période où elle a été confirmée, et un remboursement ultérieur est déduit de cette même période."
     }
   },
   "giftCode": {
@@ -3080,7 +3080,7 @@
       "expired": "Ce code a expiré.",
       "rate_limited": "Trop de tentatives. Réessayez dans une heure.",
       "account_disabled": "Votre compte est en cours d'examen et ne peut pas utiliser de codes pour le moment.",
-      "earning_paused": "Les gains sont suspendus sur SidePerks en ce moment. Votre code n'a pas été utilisé — conservez-le et réessayez plus tard.",
+      "earning_paused": "Les gains sont suspendus sur SidePerks en ce moment. Votre code n'a pas été utilisé, conservez-le et réessayez plus tard.",
       "not_signed_in": "Veuillez vous connecter et réessayer.",
       "error": "Une erreur s'est produite. Veuillez réessayer."
     }
@@ -3101,7 +3101,7 @@
     "myRank": "Mon rang",
     "yourRank": "Vous êtes {rank} sur {total}",
     "yourPoints": "{points} points sur cette période",
-    "unranked": "Vous n avez pas encore gagné de points sur cette période — regardez une annonce et vous entrez au classement.",
+    "unranked": "Vous n avez pas encore gagné de points sur cette période. Regardez une annonce et vous entrez au classement.",
     "movement": {
       "up": "En hausse de {places} {places, plural, one {place} other {places}}",
       "down": "En baisse de {places} {places, plural, one {place} other {places}}",
@@ -3143,7 +3143,7 @@
     "errors": {
       "games_disabled": "Les jeux ne sont pas disponibles pour le moment.",
       "no_plays_left": "Plus de parties cette semaine. De nouvelles parties arrivent lundi.",
-      "too_soon": "Un instant — réessayez dans une seconde.",
+      "too_soon": "Un instant : réessayez dans une seconde.",
       "account_disabled": "Votre compte est en cours d'examen et ne peut pas jouer pour le moment.",
       "no_prizes_configured": "Ce jeu n'est pas encore prêt. Réessayez plus tard.",
       "not_signed_in": "Veuillez vous connecter et réessayer.",
@@ -3153,7 +3153,7 @@
   "tasks": {
     "title": "Objectifs",
     "subtitle": "Des étapes qui rapportent. Terminez-en une, puis réclamez-la.",
-    "readyToClaim": "{count, plural, one {# objectif à réclamer} other {# objectifs à réclamer}} — {points} points en attente",
+    "readyToClaim": "{count, plural, one {# objectif à réclamer} other {# objectifs à réclamer}} à {points} points en attente",
     "claimed": "Réclamé ! {name} a rapporté {points} points.",
     "claim": "Réclamer",
     "done": "Réclamé",
@@ -3171,7 +3171,7 @@
   },
   "viewAs": {
     "viewing": "Vous consultez le compte de {name}",
-    "readOnly": "Lecture seule — rien n'est enregistré ici.",
+    "readOnly": "Lecture seule : rien n'est enregistré ici.",
     "exit": "Quitter"
   },
   "affiliate": {
@@ -3274,7 +3274,7 @@
     },
     "pending": {
       "title": "Presque prêt",
-      "body": "Votre compte affilié existe mais ne rapporte pas encore. Terminez une part suffisante de la formation et il s’activera tout seul — personne n’a à l’approuver."
+      "body": "Votre compte affilié existe mais ne rapporte pas encore. Terminez une part suffisante de la formation et il s’activera tout seul. Personne n’a à l’approuver."
     },
     "suspended": {
       "title": "Ce compte est suspendu",
@@ -3306,8 +3306,7 @@
         "priceDown": "Prix décroissant"
       },
       "commission": "Commission",
-      "perSale": "Vous gagnez / vente",
-      "sellsFor": "Vendu {amount}",
+      "perSale": "Par vente",
       "yourProgress": "Votre progression",
       "lessons": "{n} leçons",
       "checkpoints": "{n} points de contrôle",
@@ -3327,7 +3326,8 @@
       "emptySaved": "Vous n’avez rien enregistré",
       "emptySavedHint": "Touchez le cœur sur un produit et il vous attendra ici.",
       "emptySearch": "Aucun résultat",
-      "emptySearchHint": "Essayez un mot plus court, ou effacez la recherche."
+      "emptySearchHint": "Essayez un mot plus court, ou effacez la recherche.",
+      "rateShort": "Taux"
     },
     "product": {
       "back": "Tous les produits",
@@ -3366,7 +3366,7 @@
         "lapsed": "Votre accès affilié a pris fin. Renouvelez-le et vos liens rapporteront à nouveau.",
         "tier": "Ce produit requiert le programme Professionnel. Passez au niveau supérieur pour le promouvoir.",
         "suspended": "Votre compte affilié est suspendu : les liens n’enregistrent rien. Contactez le support.",
-        "wouldEarn": "Vous gagneriez {amount} par vente — {rate} % du prix."
+        "wouldEarn": "Vous gagneriez {amount} par vente, {rate} % du prix."
       }
     },
     "learn": {
@@ -3430,7 +3430,7 @@
       "codeTitle": "Votre code d’affilié",
       "copyCode": "Copier votre code",
       "copied": "Copié",
-      "codeHint": "Les liens sont propres à chaque produit — ouvrez un produit et copiez son lien. Les vôtres ressemblent à {example}",
+      "codeHint": "Les liens sont propres à chaque produit. Ouvrez un produit et copiez son lien. Les vôtres ressemblent à {example}",
       "accessTitle": "Accès se termine dans",
       "daysLeft": "{n} jours",
       "until": "Jusqu’au {date}",
@@ -3492,7 +3492,7 @@
       },
       "error": {
         "title": "Confirmation impossible",
-        "body": "Une erreur est survenue lors de la vérification. Si l’argent a quitté votre compte, rien n’est perdu — contactez le support avec la référence ci-dessous."
+        "body": "Une erreur est survenue lors de la vérification. Si l’argent a quitté votre compte, rien n’est perdu. Contactez le support avec la référence ci-dessous."
       },
       "startLearning": "Commencer",
       "goDashboard": "Aller au tableau affilié",
@@ -3516,7 +3516,7 @@
       "finished": "Cours terminé",
       "emptyCourse": "Ce cours n’a pas encore de leçons.",
       "resources": "Ressources",
-      "resourcesNote": "À lire dans l’application — les ressources ne sont pas téléchargeables.",
+      "resourcesNote": "À lire dans l’application. Les ressources ne sont pas téléchargeables.",
       "articleDone": "Marqué comme lu",
       "videoFailed": "Cette vidéo n’a pas pu être chargée. Réessayez dans un instant.",
       "lockedTitle": "Vous ne possédez pas cette leçon",
@@ -3533,7 +3533,7 @@
       "passedTitle": "Point de contrôle validé",
       "passedBody": "Vous avez obtenu {n} %. Cette leçon est marquée comme terminée.",
       "failedTitle": "Pas encore",
-      "failedBody": "Vous avez obtenu {n} %. Relisez la leçon et réessayez — le nombre de tentatives est illimité."
+      "failedBody": "Vous avez obtenu {n} %. Relisez la leçon et réessayez. Le nombre de tentatives est illimité."
     },
     "withdraw": {
       "back": "Gains",

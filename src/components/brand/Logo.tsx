@@ -13,11 +13,19 @@ export function Logo({
   className,
   variant = 'light',
   showWordmark = true,
+  wordmarkClassName,
 }: {
   className?: string
   /** 'light' for use on the blue panel, 'dark' for use on a light surface. */
   variant?: 'light' | 'dark'
   showWordmark?: boolean
+  /**
+   * Classes on the wordmark itself, so a caller can drop it at one breakpoint
+   * and keep it at another. `showWordmark` is a boolean and cannot do that, and
+   * rendering the whole logo twice would put two `role="img"` copies of the
+   * same brand in the accessibility tree.
+   */
+  wordmarkClassName?: string
 }) {
   const isLight = variant === 'light'
 
@@ -42,11 +50,18 @@ export function Logo({
 
       {showWordmark &&
         (isLight ? (
-          <span className="text-[1.0625rem] font-semibold tracking-[-0.02em] text-white">
+          <span
+            className={cn(
+              'text-[1.0625rem] font-semibold tracking-[-0.02em] text-white',
+              wordmarkClassName,
+            )}
+          >
             SidePerks
           </span>
         ) : (
-          <span className="text-[1.0625rem] font-semibold tracking-[-0.02em]">
+          <span
+            className={cn('text-[1.0625rem] font-semibold tracking-[-0.02em]', wordmarkClassName)}
+          >
             <span className="text-ink-900">Side</span>
             <span className="text-brand-600">Perks</span>
           </span>

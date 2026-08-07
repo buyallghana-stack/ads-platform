@@ -121,7 +121,12 @@ export function MarketFilters({
         })}
       </div>
 
-      <div className="flex flex-col gap-2 sm:flex-row">
+      {/* ONE ROW, INCLUDING ON A PHONE (operator, 2026-08-07). Search on its
+          own line and sort on the next cost 56px above the first product, for
+          two controls that are each used once a visit. The reference puts them
+          shoulder to shoulder and so does this now: search takes the room that
+          is left, sort shrinks to its value. */}
+      <div className="flex flex-row gap-2">
         <div className="relative flex-1">
           <Search
             aria-hidden
@@ -155,10 +160,17 @@ export function MarketFilters({
         {/* A real <select>: four options, one tap, and the platform's own
             picker on a phone. `color-scheme: dark` on the skin wrapper is what
             makes the native menu render dark to match. */}
-        <label className="flex items-center gap-2 rounded-(--radius-input) border border-ink-200 bg-surface px-3 py-2 sm:w-52">
-          <span className="shrink-0 text-[0.75rem] text-ink-500">{t('sortLabel')}</span>
+        <label className="flex shrink-0 items-center gap-2 rounded-(--radius-input) border border-ink-200 bg-surface px-3 py-2 sm:w-52">
+          {/* The word "Sort" is hidden on a phone, not the control: the chevron
+              and the value say what it is, and the label was costing a third of
+              the width it shares with the search box. It stays for screen
+              readers via the select's own accessible name. */}
+          <span className="hidden shrink-0 text-[0.75rem] text-ink-500 sm:inline">
+            {t('sortLabel')}
+          </span>
           <select
             value={sort}
+            aria-label={t('sortLabel')}
             onChange={(e) => router.replace(
               (() => {
                 const h = hrefFor({ sort: e.target.value })
