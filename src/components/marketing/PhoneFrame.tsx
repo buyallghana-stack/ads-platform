@@ -14,6 +14,11 @@ import { cn } from '@/lib/cn'
  * on — the one detail that gives away a mocked-up landing page. Both files are
  * WebP and under 50 KB, so carrying the pair costs less than one careless PNG.
  *
+ * ⚠️ OMIT `srcDark` FOR AFFILIATE SCREENS. That side of the app is one fixed
+ * violet skin in both themes, so its two captures come out byte for byte
+ * identical — and a `dark:hidden` twin is still downloaded, so the pair would
+ * cost the visitor the same file twice for no visible difference.
+ *
  * `srcLight`/`srcDark` are paths under /public. Width and height are the real
  * pixel dimensions of the capture, passed so the browser reserves the box and
  * the hero does not reflow as it loads.
@@ -28,7 +33,7 @@ export function PhoneFrame({
   className,
 }: {
   srcLight: string
-  srcDark: string
+  srcDark?: string
   alt: string
   width: number
   height: number
@@ -62,11 +67,18 @@ export function PhoneFrame({
           visibly disagree. */}
       <div className="relative overflow-hidden rounded-[1.375rem] bg-canvas">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img {...common} src={srcLight} alt={alt} className={cn(imgClass, 'dark:hidden')} />
+        <img
+          {...common}
+          src={srcLight}
+          alt={alt}
+          className={cn(imgClass, srcDark && 'dark:hidden')}
+        />
         {/* The dark twin is decorative — the light one already carries the
             accessible name, and announcing the same screen twice is noise. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img {...common} src={srcDark} alt="" className={cn(imgClass, 'hidden dark:block')} />
+        {srcDark ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img {...common} src={srcDark} alt="" className={cn(imgClass, 'hidden dark:block')} />
+        ) : null}
 
         {/* Fades the screenshot out at the bottom instead of cutting it off
             mid-card, so the frame reads as a phone showing more below rather

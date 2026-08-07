@@ -12,8 +12,17 @@
  *   PORT=3100 pnpm start
  *   node scripts/shoot-marketing.mjs
  *
- * Sign in as admin@email.com — user@email.com carries the operator's real
- * authenticator and must never be driven by a script.
+ * ⚠️ SIGN IN AS THE MARKETING DEMO ACCOUNT, not as a real one. The balances
+ * in these frames are the ones the operator asked the page to show, and they
+ * belong to the account `scripts/seed-marketing-demo.mjs` creates and removes:
+ *
+ *   node --env-file=.env.local scripts/seed-marketing-demo.mjs
+ *   SHOOT_EMAIL=george@demo.invalid SHOOT_PASSWORD='Marketing!2026' \
+ *     node scripts/shoot-marketing.mjs
+ *   node --env-file=.env.local scripts/seed-marketing-demo.mjs --drop
+ *
+ * user@email.com carries the operator's real authenticator and must never be
+ * driven by a script.
  */
 import { mkdir, rm, readdir } from 'node:fs/promises'
 import path from 'node:path'
@@ -36,6 +45,10 @@ const ALL_SHOTS = [
   { slug: 'ads-feed', route: '/ads', clipHeight: 720 },
   { slug: 'home', route: '/dashboard', clipHeight: 720 },
   { slug: 'withdraw', route: '/withdraw', clipHeight: 720 },
+  /* The second business. The landing page gives it the same treatment as the
+     ads side, so it needs the same kind of frame: a real dashboard with a real
+     commission balance on it. */
+  { slug: 'affiliate', route: '/market', clipHeight: 720, singleSkin: true },
 ]
 
 /**
@@ -71,6 +84,10 @@ console.log(`signed in as ${email}`)
 
 for (const theme of ['light', 'dark']) {
   for (const shot of SHOTS) {
+    /* The affiliate side of the app is one fixed violet skin, so its two
+       captures come out identical. Shoot it once and give it a name with no
+       theme in it, rather than shipping the visitor the same file twice. */
+    if (shot.singleSkin && theme === 'dark') continue
     const context = await browser.newContext({
       storageState: state,
       viewport: { width: WIDTH, height: 844 },
@@ -96,7 +113,8 @@ for (const theme of ['light', 'dark']) {
     // images and the chart a beat to settle before the shutter.
     await page.waitForTimeout(900)
 
-    const raw = path.join(rawDir, `${shot.slug}-${theme}.png`)
+    const name = shot.singleSkin ? shot.slug : `${shot.slug}-${theme}`
+    const raw = path.join(rawDir, `${name}.png`)
     await page.screenshot({
       path: raw,
       clip: { x: 0, y: 0, width: WIDTH, height: shot.clipHeight },
@@ -104,7 +122,7 @@ for (const theme of ['light', 'dark']) {
 
     await sharp(raw)
       .webp({ quality: 82 })
-      .toFile(path.join(outDir, `${shot.slug}-${theme}.webp`))
+      .toFile(path.join(outDir, `${name}.webp`))
 
     console.log(
       `${theme.padEnd(5)} ${shot.route.padEnd(12)} HTTP ${res?.status()}  ${

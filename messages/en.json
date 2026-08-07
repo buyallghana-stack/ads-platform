@@ -31,53 +31,54 @@
     },
     "hero": {
       "badgeChip": "New",
-      "badge": "Surveys now pay too",
+      "badge": "Two businesses, one account",
       "title": "Get paid for your",
       "titleAccent": "attention.",
-      "lead": "SidePerks pays you points for watching short video ads and answering quick surveys on your phone. {points} points is GHS 1, and the free plan gives you {freeAds} ads every single day.",
+      "lead": "Watch short ads and take surveys on your phone, or promote products for commission. Both pay in cedis, straight to your Mobile Money.",
       "primaryCta": "Create free account",
       "secondaryCta": "See how it works",
-      "note": "Free to join. No card, no deposit, no minimum.",
+      "note": "Start on the free plan. Move up when you want to earn faster.",
       "shotAlt": "The SidePerks ads feed on a phone, showing video ads with the points each one pays",
       "chipEarnedLabel": "This ad pays",
       "chipEarnedValue": "+50 pts",
-      "chipDailyLabel": "Free every day",
+      "chipDailyLabel": "Every day, free",
       "chipDailyValue": "{count} ads"
     },
     "stats": {
       "freeAds": "Free ads every day",
-      "rate": "for every {points} points",
-      "bestRate": "Points on the top plan",
+      "rate": "What one ad pays on a paid plan",
+      "bestRate": "Top earning rate",
       "monthsValue": "{months}",
       "months": "Months on every paid plan"
     },
     "ways": {
       "eyebrow": "Ways to earn",
-      "title": "Two ways to earn, and one",
-      "titleAccent": "on the way.",
-      "lead": "Watching is live today. Inviting friends is live today. Affiliate offers are the next thing being built, and we would rather say so than dress it up.",
+      "title": "Three ways to",
+      "titleAccent": "get paid.",
+      "lead": "Watch ads in your spare minutes. Promote products people already want. Bring your friends along. All three are live, and all three pay in cedis.",
       "watch": {
         "chip": "Live now",
-        "title": "Watch video ads and take surveys",
-        "body": "The main way to earn on SidePerks. Short video ads with a question or two, and surveys where your honest opinion is the whole point. {freeAds} a day on the free plan, and more on every paid one.",
+        "title": "Watch ads and take surveys",
+        "body": "Short videos, quick surveys and articles worth reading. Every one tells you what it pays before you open it, and the money lands the moment you finish.",
         "points": {
-          "videos": "Short videos, most under two minutes",
-          "surveys": "Surveys with no right or wrong answers",
-          "upfront": "You see what an ad pays before you open it",
-          "instant": "Points land in your balance the moment you finish"
+          "videos": "Videos, surveys and articles",
+          "surveys": "Most take under two minutes",
+          "upfront": "You see the payment before you start",
+          "instant": "Credited the second you finish"
         },
-        "cta": "Start watching"
+        "cta": "Start earning"
       },
       "invite": {
         "chip": "Live now",
-        "title": "Invite your friends",
-        "body": "Every account comes with a personal invite link. Share it, and you earn a bonus once the people who joined through it start watching.",
+        "title": "Bring your friends",
+        "body": "Every account comes with an invite link. Share it, and you earn when the people who join through it start watching.",
         "cta": "How inviting works"
       },
       "affiliate": {
-        "chip": "Coming next",
-        "title": "Affiliate offers",
-        "body": "Promoting partner products for a commission. This one is not built yet. It is on the roadmap, not in the app, and there is nothing here to sign up for."
+        "chip": "Live now",
+        "title": "Promote products, keep a share",
+        "body": "Take a short training programme, get your own link for everything in the shop, and keep a percentage of every sale you bring in.",
+        "cta": "See the programmes"
       }
     },
     "how": {
@@ -138,21 +139,22 @@
       "eyebrow": "Plans",
       "title": "Watch more, earn",
       "titleAccent": "faster.",
-      "lead": "The free plan never expires. A paid plan raises your daily limit, pays more points per ad, and lowers the balance you need before you can withdraw.",
+      "lead": "Every plan raises your daily limit and what each ad is worth to you. Pay anywhere inside a range and the rate rises with it.",
       "bestChip": "Best rate",
       "period": "{months, plural, one {for # month} other {for # months}}",
       "rowAds": "Ads a day",
-      "rowRate": "Points per ad",
+      "rowRate": "Per ad",
       "rowThreshold": "Withdraw from",
       "free": {
         "title": "{name} plan: GHS 0",
-        "body": "{ads} ads a day for your first {days} days, and you can withdraw from {threshold} points. No card needed to start.",
+        "body": "{ads} a day for your first {days} days, and you can withdraw from {threshold} points.",
         "cta": "Start free"
       },
       "stacking": "Plans stack. Hold more than one and the daily limits add up, the earning bonuses add together, and the lowest withdrawal threshold is the one that applies. Every plan runs for a fixed period and nothing renews on its own. You are never charged again without asking.",
       "range": "{from} to {to}",
       "rangeHint": "Pay anything in that range. The more you pay, the more each ad is worth to you.",
-      "rateRange": "+{from}% to +{to}%"
+      "rateRange": "+{from}% to +{to}%",
+      "perAd": "{from} to {to}"
     },
     "invite": {
       "eyebrow": "Invite & earn",
@@ -218,8 +220,8 @@
       "lead": "Better to have this clear before you sign up than after.",
       "items": {
         "free": {
-          "q": "Is SidePerks free?",
-          "a": "Yes. The free plan gives you {freeAds} ads a day for your first {days} days. After that a paid plan is needed to keep earning. The points you already have stay yours. Nothing else is locked behind them: plans raise your daily limit and the points you get per ad."
+          "q": "What does it cost to start?",
+          "a": "Nothing to create an account, and the free plan gives you {freeAds} ads a day for your first {days} days. After that a paid plan keeps you earning, and the points you have already earned stay yours either way. The affiliate side is different: it starts with a paid training programme."
         },
         "worth": {
           "q": "What is a point actually worth?",
@@ -260,6 +262,54 @@
       "blurb": "SidePerks pays you for watching short video ads and taking surveys on your phone. Built in Ghana, for Ghana.",
       "copyright": "© {year} SidePerks. All rights reserved.",
       "madeIn": "Made in Ghana · English & Français"
+    },
+    "affiliateSection": {
+      "eyebrow": "Affiliate marketing",
+      "title": "Sell what people",
+      "titleAccent": "already want.",
+      "lead": "Learn the trade in an afternoon, then earn commission on every sale you bring in. Your earnings sit in their own balance and withdraw the same way.",
+      "depthOne": "Earn on every sale you make",
+      "depthTwo": "Earn on your own sales and on sales by affiliates you bring in",
+      "rate": "You keep {l1}%",
+      "rateTwo": "You keep {l1}%, plus {l2}% on your recruits",
+      "lessons": "{n, plural, one {# lesson} other {# lessons}}",
+      "validity": "Access for {n, plural, one {# day} other {# days}}",
+      "certificate": "Certificate when you finish",
+      "cta": "See the programme",
+      "dashboardEyebrow": "Your affiliate side",
+      "dashboardTitle": "A second balance, and a dashboard to match",
+      "dashboardBody": "Clicks, sales and commission in one place, with your own link for every product and a payout button that goes to the same account your points do.",
+      "dashboardPoints": {
+        "links": "A tracked link for every product",
+        "clicks": "See clicks and sales as they happen",
+        "cleared": "Commission clears and becomes withdrawable",
+        "board": "An earnings board and tasks with cash rewards"
+      },
+      "shotAlt": "The SidePerks affiliate dashboard on a phone, showing a commission balance in Ghana cedis"
+    },
+    "extras": {
+      "eyebrow": "More than watching",
+      "title": "Small wins,",
+      "titleAccent": "all week.",
+      "lead": "The parts people come back for.",
+      "items": {
+        "games": {
+          "title": "Spin the wheel, open the box",
+          "body": "Free plays every week with your plan. Whatever you land on is yours, credited straight away."
+        },
+        "leaderboard": {
+          "title": "The leaderboard",
+          "body": "See where you stand this week, this month and all time, against everybody else earning."
+        },
+        "tasks": {
+          "title": "Tasks worth claiming",
+          "body": "Goals you are already working towards. Hit one and the reward is waiting to be claimed."
+        },
+        "gift": {
+          "title": "Gift codes",
+          "body": "Codes we hand out for promotions and to put things right. Enter one and the points are yours."
+        }
+      }
     }
   },
   "auth": {

@@ -31,53 +31,54 @@
     },
     "hero": {
       "badgeChip": "Nouveau",
-      "badge": "Les sondages rapportent aussi",
+      "badge": "Deux activités, un seul compte",
       "title": "Soyez payé pour votre",
       "titleAccent": "attention.",
-      "lead": "SidePerks vous verse des points quand vous regardez de courtes vidéos publicitaires et répondez à des sondages depuis votre téléphone. {points} points valent 1 GHS, et la formule gratuite vous donne {freeAds} publicités chaque jour.",
+      "lead": "Regardez de courtes publicités et répondez à des sondages, ou faites la promotion de produits contre une commission. Les deux paient en cedis, directement sur votre Mobile Money.",
       "primaryCta": "Créer un compte gratuit",
       "secondaryCta": "Voir comment ça marche",
-      "note": "Inscription gratuite. Sans carte, sans dépôt, sans minimum.",
+      "note": "Commencez avec la formule gratuite. Passez à la vitesse supérieure quand vous voulez gagner plus vite.",
       "shotAlt": "Le fil de publicités SidePerks sur un téléphone, montrant les points que rapporte chaque vidéo",
-      "chipEarnedLabel": "Cette pub rapporte",
+      "chipEarnedLabel": "Cette publicité paie",
       "chipEarnedValue": "+50 pts",
-      "chipDailyLabel": "Gratuit chaque jour",
+      "chipDailyLabel": "Chaque jour, gratuit",
       "chipDailyValue": "{count} pubs"
     },
     "stats": {
       "freeAds": "Publicités gratuites par jour",
-      "rate": "pour {points} points",
-      "bestRate": "Points sur la meilleure formule",
+      "rate": "Ce que rapporte une publicité sur une formule payante",
+      "bestRate": "Meilleur taux",
       "monthsValue": "{months}",
-      "months": "Mois pour chaque formule payante"
+      "months": "Mois sur chaque formule payante"
     },
     "ways": {
       "eyebrow": "Façons de gagner",
-      "title": "Deux façons de gagner, et une",
-      "titleAccent": "à venir.",
-      "lead": "Regarder est disponible aujourd'hui. Parrainer est disponible aujourd'hui. Les offres d'affiliation sont la prochaine étape, et nous préférons le dire clairement.",
+      "title": "Trois façons",
+      "titleAccent": "d'être payé.",
+      "lead": "Regardez des publicités dans vos moments libres. Faites la promotion de produits que les gens veulent déjà. Amenez vos amis. Les trois sont actives et paient en cedis.",
       "watch": {
-        "chip": "Disponible",
-        "title": "Regardez des vidéos et répondez à des sondages",
-        "body": "La principale façon de gagner sur SidePerks. De courtes vidéos publicitaires avec une question ou deux, et des sondages où votre avis sincère est tout l'intérêt. {freeAds} par jour avec la formule gratuite, davantage avec chaque formule payante.",
+        "chip": "En ligne",
+        "title": "Regardez des publicités et répondez à des sondages",
+        "body": "Des vidéos courtes, des sondages rapides et des articles qui valent la lecture. Chacun annonce ce qu’il paie avant que vous ne l’ouvriez, et l’argent arrive dès la fin.",
         "points": {
-          "videos": "Des vidéos courtes, souvent moins de deux minutes",
-          "surveys": "Des sondages sans bonne ni mauvaise réponse",
-          "upfront": "Vous voyez ce que rapporte une pub avant de l'ouvrir",
-          "instant": "Les points arrivent dès que vous avez terminé"
+          "videos": "Vidéos, sondages et articles",
+          "surveys": "La plupart prennent moins de deux minutes",
+          "upfront": "Vous voyez le montant avant de commencer",
+          "instant": "Crédité dès que vous terminez"
         },
-        "cta": "Commencer à regarder"
+        "cta": "Commencer à gagner"
       },
       "invite": {
-        "chip": "Disponible",
-        "title": "Invitez vos proches",
-        "body": "Chaque compte dispose d'un lien de parrainage personnel. Partagez-le et vous recevez un bonus lorsque les personnes inscrites grâce à lui commencent à regarder.",
-        "cta": "Comment ça fonctionne"
+        "chip": "En ligne",
+        "title": "Amenez vos amis",
+        "body": "Chaque compte a son lien de parrainage. Partagez-le : vous gagnez quand les personnes inscrites commencent à regarder.",
+        "cta": "Comment ça marche"
       },
       "affiliate": {
-        "chip": "Bientôt",
-        "title": "Offres d'affiliation",
-        "body": "Promouvoir les produits de partenaires contre une commission. Cette partie n'existe pas encore : elle est prévue, elle n'est pas dans l'application, et il n'y a rien à souscrire ici."
+        "chip": "En ligne",
+        "title": "Faites la promotion, gardez votre part",
+        "body": "Suivez une courte formation, obtenez votre propre lien pour tout ce qui est en boutique, et gardez un pourcentage de chaque vente que vous apportez.",
+        "cta": "Voir les formations"
       }
     },
     "how": {
@@ -138,21 +139,22 @@
       "eyebrow": "Formules",
       "title": "Regardez plus, gagnez",
       "titleAccent": "plus vite.",
-      "lead": "La formule gratuite n'expire jamais. Une formule payante augmente votre limite quotidienne, rapporte davantage de points par publicité et abaisse le solde nécessaire pour retirer.",
+      "lead": "Chaque formule augmente votre limite quotidienne et ce que vaut une publicité pour vous. Payez le montant de votre choix dans la fourchette : le taux monte avec lui.",
       "bestChip": "Meilleur taux",
       "period": "{months, plural, one {pour # mois} other {pour # mois}}",
       "rowAds": "Publicités par jour",
-      "rowRate": "Points par publicité",
+      "rowRate": "Par publicité",
       "rowThreshold": "Retrait dès",
       "free": {
         "title": "Formule {name} : 0 GHS",
-        "body": "{ads} publicités par jour pendant vos {days} premiers jours, et un retrait possible à partir de {threshold} points. Aucune carte requise pour commencer.",
+        "body": "{ads} par jour pendant vos {days} premiers jours, et vous pouvez retirer à partir de {threshold} points.",
         "cta": "Commencer gratuitement"
       },
       "stacking": "Les formules se cumulent. Si vous en détenez plusieurs, les limites quotidiennes s'additionnent, les bonus de gain s'additionnent, et c'est le seuil de retrait le plus bas qui s'applique. Chaque formule court sur une durée fixe et rien ne se renouvelle tout seul : vous n'êtes jamais débité de nouveau sans le demander.",
       "range": "{from} à {to}",
       "rangeHint": "Payez le montant de votre choix dans cette fourchette. Plus vous payez, plus chaque publicité vous rapporte.",
-      "rateRange": "+{from}% à +{to}%"
+      "rateRange": "+{from}% à +{to}%",
+      "perAd": "{from} à {to}"
     },
     "invite": {
       "eyebrow": "Parrainage",
@@ -218,8 +220,8 @@
       "lead": "Mieux vaut que ce soit clair avant votre inscription qu'après.",
       "items": {
         "free": {
-          "q": "SidePerks est-il gratuit ?",
-          "a": "Oui. La formule gratuite donne {freeAds} publicités par jour pendant vos {days} premiers jours. Ensuite, une formule payante est nécessaire pour continuer à gagner. Les points déjà gagnés restent les vôtres. Rien d'autre n'est verrouillé : les formules augmentent votre limite quotidienne et vos points par publicité."
+          "q": "Combien ça coûte pour commencer ?",
+          "a": "Rien pour créer un compte, et la formule gratuite donne {freeAds} publicités par jour pendant vos {days} premiers jours. Ensuite, une formule payante permet de continuer à gagner, et les points déjà gagnés restent les vôtres dans tous les cas. Le côté affiliation est différent : il commence par une formation payante."
         },
         "worth": {
           "q": "Que vaut réellement un point ?",
@@ -260,6 +262,54 @@
       "blurb": "SidePerks vous paie pour regarder de courtes vidéos publicitaires et répondre à des sondages depuis votre téléphone. Conçu au Ghana, pour le Ghana.",
       "copyright": "© {year} SidePerks. Tous droits réservés.",
       "madeIn": "Conçu au Ghana · English & Français"
+    },
+    "affiliateSection": {
+      "eyebrow": "Marketing d’affiliation",
+      "title": "Vendez ce que les gens",
+      "titleAccent": "veulent déjà.",
+      "lead": "Apprenez le métier en un après-midi, puis gagnez une commission sur chaque vente que vous apportez. Vos gains ont leur propre solde et se retirent de la même façon.",
+      "depthOne": "Vous gagnez sur chaque vente que vous réalisez",
+      "depthTwo": "Vous gagnez sur vos ventes et sur celles des affiliés que vous recrutez",
+      "rate": "Vous gardez {l1} %",
+      "rateTwo": "Vous gardez {l1} %, plus {l2} % sur vos recrues",
+      "lessons": "{n, plural, one {# leçon} other {# leçons}}",
+      "validity": "Accès pendant {n, plural, one {# jour} other {# jours}}",
+      "certificate": "Certificat à la fin",
+      "cta": "Voir la formation",
+      "dashboardEyebrow": "Votre côté affilié",
+      "dashboardTitle": "Un second solde, et un tableau de bord assorti",
+      "dashboardBody": "Clics, ventes et commissions au même endroit, avec votre lien pour chaque produit et un retrait vers le compte qui reçoit déjà vos points.",
+      "dashboardPoints": {
+        "links": "Un lien suivi pour chaque produit",
+        "clicks": "Voyez les clics et les ventes en direct",
+        "cleared": "La commission se valide et devient retirable",
+        "board": "Un classement des gains et des tâches récompensées"
+      },
+      "shotAlt": "Le tableau de bord affilié de SidePerks sur un téléphone, avec un solde de commissions en cedis"
+    },
+    "extras": {
+      "eyebrow": "Plus que regarder",
+      "title": "De petites victoires,",
+      "titleAccent": "toute la semaine.",
+      "lead": "Ce pour quoi les gens reviennent.",
+      "items": {
+        "games": {
+          "title": "Tournez la roue, ouvrez la boîte",
+          "body": "Des parties gratuites chaque semaine avec votre formule. Ce sur quoi vous tombez est à vous, crédité aussitôt."
+        },
+        "leaderboard": {
+          "title": "Le classement",
+          "body": "Voyez où vous en êtes cette semaine, ce mois-ci et depuis le début, face à tous les autres."
+        },
+        "tasks": {
+          "title": "Des tâches à réclamer",
+          "body": "Des objectifs que vous poursuivez déjà. Atteignez-en un et la récompense vous attend."
+        },
+        "gift": {
+          "title": "Codes cadeaux",
+          "body": "Des codes que nous distribuons lors de promotions ou pour réparer un souci. Saisissez-en un et les points sont à vous."
+        }
+      }
     }
   },
   "auth": {

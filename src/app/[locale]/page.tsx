@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Clock3,
   Coins,
+  Gamepad2,
   Gift,
   Globe2,
   KeyRound,
@@ -16,7 +17,9 @@ import {
   ShieldCheck,
   Sparkles,
   Store,
+  Ticket,
   TrendingUp,
+  Trophy,
   UserPlus,
   Wallet,
 } from 'lucide-react'
@@ -90,14 +93,22 @@ export default async function LandingPage({
   const months = figures.plans.find((p) => !p.isDefault)?.months ?? 3
   const paidPlans = figures.plans.filter((p) => !p.isDefault)
 
+  /*
+    MONEY, THE WAY A VISITOR THINKS ABOUT IT (operator, 2026-08-07). Somebody
+    who has never used the app has no idea what a point is worth, so every
+    headline figure on this page is a cedi figure. The conversion is the live
+    peg, and the per-ad numbers come from what the ads in the feed actually
+    pay, so a retuned rate moves the page with it.
+  */
+  const cedis = (amount: number) =>
+    `${figures.plans[0]?.currency ?? 'GHS'} ${amount.toFixed(2)}`
+  const cheapestPaid = paidPlans[0]
+  const perAdHeadline = cheapestPaid ? cedis(cheapestPaid.perAdFrom) : cedis(1)
+
   /* --- Stat band. Four figures, every one of them read from config. ----- */
   const stats = [
     { icon: <PlayCircle />, value: num(freeAds), label: t('stats.freeAds') },
-    {
-      icon: <Coins />,
-      value: 'GHS 1',
-      label: t('stats.rate', { points: num(figures.pointsPerCedi) }),
-    },
+    { icon: <Coins />, value: perAdHeadline, label: t('stats.rate') },
     { icon: <TrendingUp />, value: `${bestRate}×`, label: t('stats.bestRate') },
     { icon: <Clock3 />, value: t('stats.monthsValue', { months }), label: t('stats.months') },
   ]
@@ -217,7 +228,7 @@ export default async function LandingPage({
                     {t('hero.chipEarnedLabel')}
                   </p>
                   <p className="text-lg font-semibold text-success-700">
-                    {t('hero.chipEarnedValue')}
+                    {cedis(figures.baseAdPoints / figures.pointsPerCedi)}
                   </p>
                 </div>
 
@@ -317,15 +328,15 @@ export default async function LandingPage({
                 </a>
               </article>
 
-              {/* Not built. Says so in the badge AND in the copy — an unmarked
-                  "coming soon" card is just a promise in a nicer font. It is
-                  deliberately the quietest card on the page. */}
-              <article className="flex flex-col rounded-(--radius-panel) border border-dashed border-ink-300 bg-canvas p-6">
+              {/* Live since 2026-08-06. It carried a dashed "coming next"
+                  border for as long as it was a promise, and stopped the day
+                  the shop, the training and the commission payouts shipped. */}
+              <article className="flex flex-col rounded-(--radius-panel) border border-violet-600/20 bg-violet-50 p-6">
                 <div className="flex flex-wrap items-center gap-3">
                   <IconTile tone="violet">
                     <Store />
                   </IconTile>
-                  <Chip tone="neutral">{t('ways.affiliate.chip')}</Chip>
+                  <Chip tone="success">{t('ways.affiliate.chip')}</Chip>
                 </div>
                 <h3 className="mt-4 text-lg font-semibold tracking-[-0.02em] text-ink-900">
                   {t('ways.affiliate.title')}
@@ -333,6 +344,13 @@ export default async function LandingPage({
                 <p className="mt-2 text-sm leading-relaxed text-pretty text-ink-600">
                   {t('ways.affiliate.body')}
                 </p>
+                <a
+                  href="#affiliate"
+                  className="mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold text-violet-700 hover:underline"
+                >
+                  {t('ways.affiliate.cta')}
+                  <ChevronRight aria-hidden className="size-4" />
+                </a>
               </article>
             </div>
           </div>
@@ -515,15 +533,19 @@ export default async function LandingPage({
                           <dt className="text-ink-500">{t('plans.rowAds')}</dt>
                           <dd className="font-semibold text-ink-900">{num(plan.adsPerDay)}</dd>
                         </div>
+                        {/* CEDIS, not points (operator, 2026-08-07). A new
+                            visitor cannot value a point, and "+150%" is a
+                            percentage of a number they do not know. What one
+                            ad pays them is the figure they came for. */}
                         <div className="flex items-baseline justify-between gap-3">
                           <dt className="text-ink-500">{t('plans.rowRate')}</dt>
                           <dd className="font-semibold text-success-700">
                             {plan.flexible
-                              ? t('plans.rateRange', {
-                                  from: Math.round((plan.rewardMultiplier - 1) * 100),
-                                  to: Math.round((plan.bandMaxMultiplier - 1) * 100),
+                              ? t('plans.perAd', {
+                                  from: cedis(plan.perAdFrom),
+                                  to: cedis(plan.perAdTo),
                                 })
-                              : `+${Math.round((plan.rewardMultiplier - 1) * 100)}%`}
+                              : cedis(plan.perAdFrom)}
                           </dd>
                         </div>
                       </dl>
@@ -564,6 +586,187 @@ export default async function LandingPage({
               </p>
             </>
           )}
+        </Section>
+
+        {/* ================= AFFILIATE ================= */}
+        {/* The second business, given a section of its own rather than a card.
+            The page used to be entirely about watching ads, which stopped
+            being an honest picture of the product the day the shop opened.
+
+            EVERY NUMBER HERE IS READ, NOT WRITTEN: the programmes, their
+            prices, how many lessons they carry, how long access lasts and the
+            commission each one pays all come from the admin. Publishing a new
+            programme puts it on this page; re-pricing one re-prices it here. */}
+        {figures.training.length > 0 && (
+          <Section id="affiliate">
+            <SectionHead
+              eyebrow={t('affiliateSection.eyebrow')}
+              eyebrowIcon={<Store />}
+              tone="violet"
+              title={t('affiliateSection.title')}
+              accent={t('affiliateSection.titleAccent')}
+              lead={t('affiliateSection.lead')}
+            />
+
+            <div className="mt-12 grid gap-4 sm:grid-cols-2">
+              {figures.training.map((programme) => {
+                const twoLevels = programme.commissionDepth >= 2
+                return (
+                  <article
+                    key={programme.slug}
+                    className={
+                      twoLevels
+                        ? 'flex flex-col rounded-(--radius-panel) border border-violet-600/30 bg-violet-50 p-6 sm:p-8'
+                        : 'flex flex-col rounded-(--radius-panel) border border-ink-200 bg-surface p-6 sm:p-8'
+                    }
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-lg font-semibold tracking-[-0.02em] text-ink-900">
+                        {programme.title}
+                      </h3>
+                      {twoLevels && <Chip tone="violet">{t('plans.bestChip')}</Chip>}
+                    </div>
+
+                    <p className="mt-4 flex items-baseline gap-1.5">
+                      <span className="text-sm font-medium text-ink-500">
+                        {figures.plans[0]?.currency ?? 'GHS'}
+                      </span>
+                      <span className="text-[2rem] leading-none font-semibold tracking-[-0.03em] text-ink-900">
+                        {num(programme.price)}
+                      </span>
+                    </p>
+
+                    <p className="mt-3 text-sm leading-relaxed text-pretty text-ink-600">
+                      {twoLevels
+                        ? t('affiliateSection.depthTwo')
+                        : t('affiliateSection.depthOne')}
+                    </p>
+
+                    <ul className="mt-6 flex flex-col gap-3 border-t border-ink-200 pt-5">
+                      <li className="flex items-start gap-2.5">
+                        <BadgeCheck aria-hidden className="mt-0.5 size-4 shrink-0 text-violet-600" />
+                        <span className="text-sm font-semibold text-ink-900">
+                          {twoLevels
+                            ? t('affiliateSection.rateTwo', {
+                                l1: num(programme.l1Percent),
+                                l2: num(programme.l2Percent),
+                              })
+                            : t('affiliateSection.rate', { l1: num(programme.l1Percent) })}
+                        </span>
+                      </li>
+                      {programme.lessons > 0 && (
+                        <li className="flex items-start gap-2.5">
+                          <BadgeCheck aria-hidden className="mt-0.5 size-4 shrink-0 text-violet-600" />
+                          <span className="text-sm text-ink-700">
+                            {t('affiliateSection.lessons', { n: programme.lessons })}
+                          </span>
+                        </li>
+                      )}
+                      <li className="flex items-start gap-2.5">
+                        <BadgeCheck aria-hidden className="mt-0.5 size-4 shrink-0 text-violet-600" />
+                        <span className="text-sm text-ink-700">
+                          {t('affiliateSection.validity', { n: programme.validityDays })}
+                        </span>
+                      </li>
+                      {programme.certificate && (
+                        <li className="flex items-start gap-2.5">
+                          <BadgeCheck aria-hidden className="mt-0.5 size-4 shrink-0 text-violet-600" />
+                          <span className="text-sm text-ink-700">
+                            {t('affiliateSection.certificate')}
+                          </span>
+                        </li>
+                      )}
+                    </ul>
+
+                    <div className="mt-7">
+                      <Link href={`/p/${programme.slug}`}>
+                        <Button
+                          variant={twoLevels ? 'primary' : 'secondary'}
+                          trailingIcon={<ArrowRight />}
+                        >
+                          {t('affiliateSection.cta')}
+                        </Button>
+                      </Link>
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+
+            {/* The affiliate dashboard, as a real screen. Same treatment the
+                ads side gets, so neither business looks like the afterthought. */}
+            <div className="mt-16 grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+              <div>
+                <Eyebrow tone="violet">{t('affiliateSection.dashboardEyebrow')}</Eyebrow>
+                <h3 className="mt-3 text-[1.5rem] leading-tight font-semibold tracking-[-0.025em] text-balance text-ink-900 sm:text-[1.875rem]">
+                  {t('affiliateSection.dashboardTitle')}
+                </h3>
+                <p className="mt-4 leading-relaxed text-pretty text-ink-600">
+                  {t('affiliateSection.dashboardBody')}
+                </p>
+                <ul className="mt-6 flex flex-col gap-3">
+                  {['links', 'clicks', 'cleared', 'board'].map((k) => (
+                    <li key={k} className="flex items-start gap-3">
+                      <BadgeCheck
+                        aria-hidden
+                        className="mt-0.5 size-[1.125rem] shrink-0 text-violet-600"
+                      />
+                      <span className="text-[0.9375rem] text-ink-700">
+                        {t(`affiliateSection.dashboardPoints.${k}`)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {/* No dark twin: the affiliate side of the app wears one violet
+                  skin in both themes, so the two captures are the same file. */}
+              <PhoneFrame
+                srcLight="/marketing/affiliate.webp"
+                alt={t('affiliateSection.shotAlt')}
+                width={780}
+                height={1440}
+                className="mx-auto w-full max-w-[18rem] lg:order-first"
+              />
+            </div>
+          </Section>
+        )}
+
+        {/* ================= EXTRAS ================= */}
+        {/* Only what is switched on. The games card disappears entirely when
+            the licence switch is off, rather than advertising a door that does
+            not open. */}
+        <Section className="bg-surface">
+          <SectionHead
+            eyebrow={t('extras.eyebrow')}
+            eyebrowIcon={<Sparkles />}
+            title={t('extras.title')}
+            accent={t('extras.titleAccent')}
+            lead={t('extras.lead')}
+          />
+
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { key: 'games', icon: <Gamepad2 />, tone: 'violet' as const, shown: figures.features.games || figures.features.affiliateGames },
+              { key: 'leaderboard', icon: <Trophy />, tone: 'orange' as const, shown: true },
+              { key: 'tasks', icon: <ListChecks />, tone: 'success' as const, shown: true },
+              { key: 'gift', icon: <Ticket />, tone: 'brand' as const, shown: true },
+            ]
+              .filter((item) => item.shown)
+              .map((item) => (
+                <article
+                  key={item.key}
+                  className="flex flex-col rounded-(--radius-card) border border-ink-200 bg-canvas p-6"
+                >
+                  <IconTile tone={item.tone}>{item.icon}</IconTile>
+                  <h3 className="mt-5 font-semibold text-ink-900">
+                    {t(`extras.items.${item.key}.title`)}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-pretty text-ink-600">
+                    {t(`extras.items.${item.key}.body`)}
+                  </p>
+                </article>
+              ))}
+          </div>
         </Section>
 
         {/* ================= INVITE ================= */}
