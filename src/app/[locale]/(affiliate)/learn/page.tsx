@@ -43,11 +43,24 @@ export default async function LearnPage({
   const t = await getTranslations('affiliate.learn')
   const format = await getFormatter()
 
-  const [{ certificates, ongoing }] = await Promise.all([
-    getMyLearning(user!.id),
-  ])
+  const { courses } = await getMyLearning(user!.id)
 
-  const empty = ongoing.length === 0 && certificates.length === 0
+  /*
+    ⚠️ THREE STATES OF ONE THING, AND NO CERTIFICATES (operator, 2026-08-08).
+
+    Learn used to show "in progress" and then a certificates list, which meant
+    a finished course DISAPPEARED from the course list the moment it was
+    finished and reappeared as a trophy. Somebody wanting to re-read lesson
+    four of a course they completed had nowhere obvious to go.
+
+    A course now lives here from the day it is bought until forever, in
+    whichever of three states it is in. The certificate is a document, not a
+    course, and it lives on the profile with the other documents.
+  */
+  const notStarted = courses.filter((c) => c.percent === 0)
+  const inProgress = courses.filter((c) => c.percent > 0 && c.percent < 100)
+  const finished = courses.filter((c) => c.percent >= 100)
+  const empty = courses.length === 0
 
   return (
     <div className="relative isolate mx-auto flex w-full max-w-5xl flex-col gap-5 px-4 py-5 sm:px-6 md:px-8 md:py-7">
@@ -84,11 +97,16 @@ export default async function LearnPage({
         </div>
       )}
 
-      {ongoing.length > 0 && (
-        <section>
-          <h2 className="text-[0.9375rem] font-semibold text-ink-900">{t('inProgress')}</h2>
+      {([
+        ['inProgress', inProgress],
+        ['notStarted', notStarted],
+        ['finished', finished],
+      ] as const).map(([key, list]) =>
+        list.length === 0 ? null : (
+        <section key={key}>
+          <h2 className="text-[0.9375rem] font-semibold text-ink-900">{t(key)}</h2>
           <ul className="mt-3 flex flex-col gap-3">
-            {ongoing.map((course) => {
+            {list.map((course) => {
               const cover = coverUrl(course.coverPath)
               const started = course.percent > 0
               return (
@@ -148,61 +166,9 @@ export default async function LearnPage({
             })}
           </ul>
         </section>
+        ),
       )}
 
-      {certificates.length > 0 && (
-        <section>
-          <h2 className="text-[0.9375rem] font-semibold text-ink-900">{t('certificates')}</h2>
-          <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-            {certificates.map((certificate) => (
-              <li
-                key={certificate.id}
-                className="flex gap-3 rounded-(--radius-panel) border border-success-500/25 bg-success-50 p-4"
-              >
-                <span
-                  aria-hidden
-                  className="grid size-11 shrink-0 place-items-center rounded-full bg-success-500/15 text-success-600"
-                >
-                  <Award className="size-5" />
-                </span>
-                <div className="min-w-0">
-                  <p className="truncate text-[0.875rem] font-semibold text-ink-900">
-                    {certificate.title}
-                  </p>
-                  <p className="mt-0.5 text-[0.75rem] text-ink-600">
-                    {t('issued', {
-                      date: format.dateTime(new Date(certificate.issuedAt), {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                      }),
-                    })}
-                  </p>
-                  {/* Null means no grade was recorded, not a grade of zero. */}
-                  {certificate.grade !== null && (
-                    <p className="mt-1 text-[0.75rem] font-semibold tabular-nums text-success-700">
-                      {t('grade', { n: certificate.grade })}
-                    </p>
-                  )}
-                  <p className="mt-1 font-mono text-[0.6875rem] text-ink-500">{certificate.code}</p>
-
-                  {/* ⚠️ WITHOUT THIS THE CERTIFICATE IS UNREACHABLE. The page
-                      that renders and downloads it lives at
-                      /market/certificate/[productId] and nothing linked to it,
-                      so the whole feature existed and no user could get to it. */}
-                  <Link
-                    href={`/market/certificate/${certificate.productId}`}
-                    className="mt-2.5 inline-flex items-center gap-1.5 rounded-(--radius-input) bg-success-600 px-3 py-2 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-success-700"
-                  >
-                    <Download aria-hidden className="size-4" />
-                    {t('view')}
-                  </Link>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
     </div>
   )
 }

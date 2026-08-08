@@ -5104,6 +5104,18 @@ export type Database = {
         Args: { p_code: string; p_user_id: string }
         Returns: Json
       }
+      training_upgrade_offer: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
+      owned_training_rank: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
+      training_level_rank: {
+        Args: { p_level: string }
+        Returns: number
+      }
       certificate_by_code: {
         Args: { p_code: string }
         Returns: Json

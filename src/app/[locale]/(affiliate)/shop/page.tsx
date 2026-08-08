@@ -75,7 +75,19 @@ export default async function MarketplacePage({
     Filtered before the counts are taken, so a tab cannot promise four and then
     list three.
   */
-  const products = everything.filter((p) => !p.owned)
+  /*
+    ⚠️ TRAINING IS NOT A PRODUCT ON THIS SCREEN (operator, 2026-08-08): "the
+    affiliate program is more of a subscription not a product so it should not
+    be shown at the product page."
+
+    And it behaves like one: it expires, it renews, it decides what somebody is
+    allowed to do rather than being a thing they consume. Listed beside vendor
+    products it invited the comparison "GHS 350 for a course, GHS 40 for an
+    ebook" — which is the wrong comparison entirely. It is offered where a
+    subscription belongs: on the dashboard when you have none, and on the
+    profile when there is a level above yours.
+  */
+  const products = everything.filter((p) => !p.owned && p.purpose !== 'training_program')
 
   const counts = Object.fromEntries(
     TABS.map((key) => [key, products.filter((p) => inTab(p, key)).length]),

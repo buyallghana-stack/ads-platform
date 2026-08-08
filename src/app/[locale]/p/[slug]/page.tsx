@@ -197,16 +197,51 @@ export default async function PublicProductPage({
                     <ul className="mt-2 divide-y divide-ink-200 border-y border-ink-200">
                       {section.lessons.map((lesson, i) => {
                         const Icon = LESSON_ICON[lesson.kind] ?? FileText
-                        return (
-                          <li key={i} className="flex items-center gap-3 py-2.5">
+
+                        /*
+                          ⚠️ A FREE PREVIEW IS A LINK NOW. It was a `<span>`
+                          saying "Free preview" beside a lesson nobody could
+                          open — the badge advertised something the page had no
+                          way to deliver, because `shop_product` returned a
+                          lesson's title and not its id.
+
+                          Only the preview row links. Everything else stays
+                          exactly as inert as it was, and the server agrees
+                          independently: `lesson_for_learner` allows
+                          `is_preview or has_entitlement(...)` and refuses the
+                          rest, so a hand-typed id for a paid lesson gets
+                          nothing. The link is a convenience over a rule that
+                          already existed, not the rule itself.
+                        */
+                        const row = (
+                          <>
                             <Icon aria-hidden className="size-4 shrink-0 text-ink-400" />
                             <span className="min-w-0 flex-1 truncate text-[0.8125rem] text-ink-800">
                               {lesson.title}
                             </span>
                             {lesson.preview && (
-                              <span className="shrink-0 rounded-full bg-success-50 px-2 py-0.5 text-[0.6875rem] font-medium text-success-700">
-                                {t('preview')}
+                              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-[0.6875rem] font-medium text-success-700">
+                                <PlayCircle aria-hidden className="size-3" />
+                                {t('watchPreview')}
                               </span>
+                            )}
+                          </>
+                        )
+
+                        return (
+                          <li key={lesson.id ?? i}>
+                            {lesson.preview ? (
+                              <Link
+                                href={{
+                                  pathname: `/learn/${product.slug}`,
+                                  query: { lesson: lesson.id },
+                                }}
+                                className="-mx-2 flex items-center gap-3 rounded-(--radius-input) px-2 py-2.5 transition-colors hover:bg-success-50"
+                              >
+                                {row}
+                              </Link>
+                            ) : (
+                              <span className="flex items-center gap-3 py-2.5">{row}</span>
                             )}
                           </li>
                         )

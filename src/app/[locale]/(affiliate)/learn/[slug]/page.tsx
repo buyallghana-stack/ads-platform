@@ -75,10 +75,18 @@ export default async function CoursePage({
   /* Validated against the curriculum rather than trusted. A hand-typed id from
      another course would otherwise reach `lesson_for_learner`, which refuses it
      correctly — but the page around it would still claim to be this course. */
+  /*
+    ⚠️ A NON-OWNER OPENS THE PREVIEW, NOT LESSON ONE. The fallback used to be
+    "first unfinished, else the first" — which for somebody who has not bought
+    the course is a LOCKED lesson, so arriving from the product page's Free
+    preview badge would have shown "You do not own this lesson". The one thing
+    they were promised is the one thing they must land on.
+  */
   const chosen =
     lessons.find((l) => l.lesson_id === asked) ??
-    lessons.find((l) => !l.completed) ??
-    lessons[0]
+    (product.owned
+      ? (lessons.find((l) => !l.completed) ?? lessons[0])
+      : (lessons.find((l) => l.is_preview) ?? lessons[0]))
 
   const payload = chosen ? await getLesson(user!.id, chosen.lesson_id) : null
   const { previous, next } = neighbours(sections, chosen?.lesson_id ?? null)

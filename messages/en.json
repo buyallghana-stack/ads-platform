@@ -3615,7 +3615,8 @@
       "outcomes": "What you will be able to do",
       "curriculum": "What is inside",
       "sectionNumber": "Section {n}",
-      "preview": "Free preview"
+      "preview": "Free preview",
+      "watchPreview": "Watch preview"
     },
     "promote": {
       "title": "Promote this product",
@@ -3655,7 +3656,9 @@
       "emptyTitle": "Nothing to learn yet",
       "emptyBody": "Join a training programme and it will appear here.",
       "emptyCta": "See the programmes",
-      "view": "View and download"
+      "view": "View and download",
+      "notStarted": "Not started yet",
+      "finished": "Finished"
     },
     "statement": {
       "title": "Earnings",
@@ -3789,7 +3792,8 @@
       "paymentNote": "Paid securely through Paystack. Mobile money and cards accepted.",
       "mustSignIn": "Please sign in before buying.",
       "freeNotSupported": "This product has no price set. Please contact support.",
-      "termsNote": "By buying this programme you become an affiliate and accept our <terms>terms</terms>. We record which version you accepted."
+      "termsNote": "By buying this programme you become an affiliate and accept our <terms>terms</terms>. We record which version you accepted.",
+      "watchPreview": "Watch preview"
     },
     "callback": {
       "ok": {
@@ -4054,6 +4058,23 @@
       "copied": "Copied",
       "share": "Share",
       "note": "Commission is credited when their purchase is confirmed. Your own training has to be finished to the activation threshold before your links start paying."
+    },
+    "certificatesPanel": {
+      "title": "Your certificates",
+      "body": "Download one to keep, or share the link so anybody can check it is real.",
+      "issued": "Issued {date}",
+      "grade": "Grade {n}%",
+      "view": "View and download"
+    },
+    "upgrade": {
+      "title": "Move up a level",
+      "body": "{title} picks up where your current training stops.",
+      "benefitLessons": "{n} lessons, including everything you have already covered",
+      "benefitDepth": "Earn on sales made by affiliates you bring in, not only your own",
+      "benefitValidity": "{days} days of access from the day you buy",
+      "benefitCertificate": "A certificate when you finish",
+      "keepsNote": "You keep everything you have already bought. The upgrade is its own course with its own certificate; nothing you have finished has to be done again.",
+      "cta": "Upgrade for {price}"
     }
   }
 }

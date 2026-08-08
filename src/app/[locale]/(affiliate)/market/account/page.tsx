@@ -9,12 +9,15 @@ import {
   UserRound,
 } from 'lucide-react'
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server'
+import { CertificatesPanel } from '@/components/affiliate/CertificatesPanel'
 import { CopyCode } from '@/components/affiliate/CopyCode'
 import { RecruitPanel } from '@/components/affiliate/RecruitPanel'
+import { UpgradePanel, type UpgradeOffer } from '@/components/affiliate/UpgradePanel'
 import { ModeSwitchCard } from '@/components/app/ModeSwitch'
 import { Link, redirect } from '@/i18n/navigation'
 import { getProfile, getViewerUser } from '@/lib/auth/session'
-import { getAffiliateDashboard, getShopProducts } from '@/lib/market/data'
+import { getAffiliateDashboard, getMyLearning, getShopProducts } from '@/lib/market/data'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getOrigin } from '@/lib/request-context'
 import { cn } from '@/lib/cn'
 
@@ -55,10 +58,17 @@ export default async function AffiliateAccountPage({
   const t = await getTranslations('affiliate.account')
   const format = await getFormatter()
 
-  const [dashboard, profile, origin] = await Promise.all([
+  const [dashboard, profile, origin, learning, upgrade] = await Promise.all([
     getAffiliateDashboard(user!.id),
     getProfile(user!.id),
     getOrigin(),
+    getMyLearning(user!.id),
+    /* The level above whatever they hold, or null. The read decides, so no
+       screen has to remember that Beginner stops being an offer once
+       Professional is bought. */
+    createAdminClient()
+      .rpc('training_upgrade_offer', { p_user_id: user!.id })
+      .then((r) => (r.data ?? null) as UpgradeOffer | null),
   ])
 
   /* The training programmes, with this affiliate's own code on each link and
@@ -123,6 +133,14 @@ export default async function AffiliateAccountPage({
           code is a real attributable link — and what it sells is the thing that
           turns the person clicking it into another affiliate. */}
       {dashboard.code && <RecruitPanel programmes={recruitLinks} />}
+
+      {/* Training is a subscription, so the level above yours is offered here
+          beside the one you hold rather than on the products screen. */}
+      <UpgradePanel offer={upgrade} />
+
+      {/* A certificate is a document you hold, not a course. It lives with the
+          rest of what you hold, and no longer on Learn. */}
+      <CertificatesPanel certificates={learning.certificates} />
 
       {/* ── access and depth ─────────────────────────────────────────── */}
       <div className="grid gap-3 sm:grid-cols-2">

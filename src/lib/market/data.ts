@@ -332,7 +332,15 @@ export type ShopDetail =
       sections: {
         title: string
         position: number
-        lessons: { title: string; kind: string; seconds: number | null; preview: boolean }[]
+        lessons: {
+          /** Needed to LINK a free preview. Without it the badge could only
+           *  ever be a label, which is exactly what it was. */
+          id: string
+          title: string
+          kind: string
+          seconds: number | null
+          preview: boolean
+        }[]
       }[]
     }
 
@@ -431,10 +439,10 @@ export type OngoingCourse = {
 }
 
 export const getMyLearning = cache(
-  async (userId: string): Promise<{ certificates: EarnedCertificate[]; ongoing: OngoingCourse[] }> => {
+  async (userId: string): Promise<{ certificates: EarnedCertificate[]; courses: OngoingCourse[] }> => {
     const supabase = createAdminClient()
     const { data, error } = await supabase.rpc('my_learning', { p_user_id: userId })
-    if (error || !data) return { certificates: [], ongoing: [] }
-    return data as unknown as { certificates: EarnedCertificate[]; ongoing: OngoingCourse[] }
+    if (error || !data) return { certificates: [], courses: [] }
+    return data as unknown as { certificates: EarnedCertificate[]; courses: OngoingCourse[] }
   },
 )

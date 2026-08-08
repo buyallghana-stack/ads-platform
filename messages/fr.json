@@ -3615,7 +3615,8 @@
       "outcomes": "Ce que vous saurez faire",
       "curriculum": "Contenu",
       "sectionNumber": "Section {n}",
-      "preview": "Aperçu gratuit"
+      "preview": "Aperçu gratuit",
+      "watchPreview": "Voir l’aperçu"
     },
     "promote": {
       "title": "Promouvoir ce produit",
@@ -3655,7 +3656,9 @@
       "emptyTitle": "Rien à apprendre pour l’instant",
       "emptyBody": "Rejoignez une formation et elle apparaîtra ici.",
       "emptyCta": "Voir les formations",
-      "view": "Voir et télécharger"
+      "view": "Voir et télécharger",
+      "notStarted": "Pas encore commencé",
+      "finished": "Terminé"
     },
     "statement": {
       "title": "Gains",
@@ -3789,7 +3792,8 @@
       "paymentNote": "Paiement sécurisé via Paystack. Mobile money et cartes acceptés.",
       "mustSignIn": "Veuillez vous connecter avant d’acheter.",
       "freeNotSupported": "Ce produit n’a pas de prix défini. Contactez le support.",
-      "termsNote": "En achetant ce programme, vous devenez affilié et acceptez nos <terms>conditions</terms>. Nous enregistrons la version que vous avez acceptée."
+      "termsNote": "En achetant ce programme, vous devenez affilié et acceptez nos <terms>conditions</terms>. Nous enregistrons la version que vous avez acceptée.",
+      "watchPreview": "Voir l’aperçu"
     },
     "callback": {
       "ok": {
@@ -4054,6 +4058,23 @@
       "copied": "Copié",
       "share": "Partager",
       "note": "La commission est créditée dès que leur achat est confirmé. Votre propre formation doit atteindre le seuil d'activation avant que vos liens ne rapportent."
+    },
+    "certificatesPanel": {
+      "title": "Vos certificats",
+      "body": "Téléchargez-en un, ou partagez le lien pour que chacun puisse le vérifier.",
+      "issued": "Émis le {date}",
+      "grade": "Note {n} %",
+      "view": "Voir et télécharger"
+    },
+    "upgrade": {
+      "title": "Passez au niveau supérieur",
+      "body": "{title} reprend là où votre formation actuelle s’arrête.",
+      "benefitLessons": "{n} leçons, y compris tout ce que vous avez déjà vu",
+      "benefitDepth": "Gagnez aussi sur les ventes des affiliés que vous amenez, pas seulement les vôtres",
+      "benefitValidity": "{days} jours d'accès à partir de l'achat",
+      "benefitCertificate": "Un certificat à la fin",
+      "keepsNote": "Vous gardez tout ce que vous avez déjà acheté. La mise à niveau est un cours à part, avec son propre certificat ; rien de ce que vous avez terminé n'est à refaire.",
+      "cta": "Passer au niveau supérieur pour {price}"
     }
   }
 }
