@@ -223,18 +223,31 @@ export default async function AffiliateProductPage({
                 <ul className="mt-2 flex flex-col divide-y divide-ink-200 border-y border-ink-200">
                   {section.lessons.map((lesson, i) => {
                     const Icon = LESSON_ICON[lesson.kind] ?? FileText
-                    return (
-                      <li
-                        key={`${section.position}-${i}`}
-                        className="flex items-center gap-3 py-2.5"
-                      >
+
+                    /*
+                      ⚠️ THERE ARE TWO PRODUCT PAGES AND THE FIRST FIX ONLY
+                      REACHED ONE. `/p/[slug]` is the public one an affiliate
+                      link points at; THIS is the one inside the app, reached
+                      from Products, and it is the one somebody browsing
+                      actually taps. Both drew the same inert "Free preview"
+                      `<span>`, so fixing the public page left the in-app badge
+                      doing nothing — which is exactly what the operator hit on
+                      the demo product.
+
+                      Same rule as the other page: only the preview row links,
+                      and `lesson_for_learner` refuses everything else on its
+                      own regardless of what is rendered here.
+                    */
+                    const row = (
+                      <>
                         <Icon aria-hidden className="size-4 shrink-0 text-ink-400" />
                         <span className="min-w-0 flex-1 truncate text-[0.8125rem] text-ink-800">
                           {lesson.title}
                         </span>
                         {lesson.preview && (
-                          <span className="shrink-0 rounded-full bg-success-500/15 px-2 py-0.5 text-[0.6875rem] font-medium text-success-600">
-                            {t('preview')}
+                          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-success-500/15 px-2 py-0.5 text-[0.6875rem] font-medium text-success-600">
+                            <PlayCircle aria-hidden className="size-3" />
+                            {t('watchPreview')}
                           </span>
                         )}
                         {lesson.seconds ? (
@@ -242,6 +255,24 @@ export default async function AffiliateProductPage({
                             {courseLength(lesson.seconds) ?? ''}
                           </span>
                         ) : null}
+                      </>
+                    )
+
+                    return (
+                      <li key={lesson.id ?? `${section.position}-${i}`}>
+                        {lesson.preview ? (
+                          <Link
+                            href={{
+                              pathname: `/learn/${product.slug}`,
+                              query: { lesson: lesson.id },
+                            }}
+                            className="-mx-2 flex items-center gap-3 rounded-(--radius-input) px-2 py-2.5 transition-colors hover:bg-success-500/10"
+                          >
+                            {row}
+                          </Link>
+                        ) : (
+                          <span className="flex items-center gap-3 py-2.5">{row}</span>
+                        )}
                       </li>
                     )
                   })}
