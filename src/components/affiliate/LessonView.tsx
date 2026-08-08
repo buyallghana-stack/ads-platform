@@ -14,9 +14,11 @@ import {
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { BuyButton } from '@/components/affiliate/BuyButton'
 import { LessonQuiz } from '@/components/affiliate/LessonQuiz'
 import { Link, useRouter } from '@/i18n/navigation'
 import type { LessonPayload, Neighbour } from '@/lib/market/course'
+import { cedis } from '@/lib/market/money'
 import { markLessonProgress } from '@/app/[locale]/(affiliate)/learn/[slug]/actions'
 import { cn } from '@/lib/cn'
 
@@ -55,6 +57,7 @@ export function LessonView({
   previous,
   next,
   poster,
+  offer,
 }: {
   payload: LessonPayload
   slug: string
@@ -62,6 +65,9 @@ export function LessonView({
   next: Neighbour
   /** The course cover, so the player is not a black rectangle before play. */
   poster: string | null
+  /** What buying this course costs and gets you. Null when it is already
+   *  owned, which is when the locked state can never be reached. */
+  offer: LessonOffer | null
 }) {
   const t = useTranslations('affiliate.course')
 
@@ -94,6 +100,22 @@ export function LessonView({
   }
 
   if (!payload.ok) {
+    /*
+      ⚠️ A LOCKED LESSON IS THE BEST SELLING MOMENT THE COURSE HAS, and it used
+      to spend it on the sentence "You do not own this lesson." Somebody who
+      has just watched the free preview and tapped the next lesson has already
+      decided they are interested; telling them what they cannot do and
+      stopping is the one response that wastes that.
+
+      So it is an offer, with the price and the Paystack button on it. The
+      button is the same `BuyButton` the product page uses — one checkout
+      path, and the price is read server-side by `startCheckout` so nothing
+      here can name its own.
+    */
+    if (payload.reason === 'locked' && offer) {
+      return <LockedOffer offer={offer} />
+    }
+
     return (
       <div className="rounded-(--radius-panel) border border-ink-200 bg-surface px-5 py-10 text-center">
         <p className="text-[0.875rem] font-medium text-ink-900">
@@ -735,5 +757,94 @@ function NextBlocked({
         </button>
       </div>
     </div>
+  )
+}
+
+
+/* ------------------------------------------------------------------ */
+
+export type LessonOffer = {
+  productId: string
+  title: string
+  priceMinor: number
+  listPriceMinor: number
+  onSale: boolean
+  lessons: number
+  certificate: boolean
+}
+
+/**
+ * The rest of the course, offered on the lesson they could not open.
+ *
+ * ── WHAT IT SAYS, AND WHY IN THAT ORDER ──
+ *
+ * The preview is what they just watched, so the offer leads with how much
+ * MORE there is rather than repeating what the course is. Then the price,
+ * then one tap to Paystack. Anything else on this card is between somebody
+ * who has decided and the thing they decided to do.
+ *
+ * The sale price is shown struck through against the full one only when
+ * `onSale` is true — a fake original price beside a real one is the oldest
+ * trick in retail and it is not one this platform plays.
+ */
+function LockedOffer({ offer }: { offer: LessonOffer }) {
+  const t = useTranslations('affiliate.course.offer')
+
+  return (
+    <section className="overflow-hidden rounded-(--radius-panel) border border-brand-600/30 bg-brand-600/8">
+      <div className="px-5 py-6 text-center sm:px-6">
+        <span
+          aria-hidden
+          className="mx-auto grid size-12 place-items-center rounded-full bg-brand-600/12 text-brand-700"
+        >
+          <Lock className="size-5" />
+        </span>
+
+        <h2 className="mt-3 text-[1.0625rem] font-semibold tracking-[-0.01em] text-ink-900">
+          {t('title')}
+        </h2>
+        <p className="mx-auto mt-1.5 max-w-sm text-[0.8125rem] leading-relaxed text-ink-600">
+          {t('body', { title: offer.title, lessons: offer.lessons })}
+        </p>
+
+        <ul className="mx-auto mt-4 flex max-w-xs flex-col gap-1.5 text-left">
+          {[
+            t('perkLessons', { n: offer.lessons }),
+            offer.certificate ? t('perkCertificate') : null,
+            t('perkEarn'),
+          ]
+            .filter((x) => x !== null)
+            .map((x) => (
+              <li key={x} className="flex items-start gap-2 text-[0.8125rem] text-ink-700">
+                <CheckCircle2
+                  aria-hidden
+                  className="mt-0.5 size-4 shrink-0 text-brand-700"
+                  strokeWidth={2.5}
+                />
+                {x}
+              </li>
+            ))}
+        </ul>
+
+        <p className="mt-4 flex items-baseline justify-center gap-2">
+          <span className="text-[1.5rem] font-bold tracking-[-0.02em] text-ink-900">
+            {cedis(offer.priceMinor)}
+          </span>
+          {offer.onSale && offer.listPriceMinor > offer.priceMinor && (
+            <span className="text-[0.9375rem] text-ink-400 line-through">
+              {cedis(offer.listPriceMinor)}
+            </span>
+          )}
+        </p>
+
+        {/* Straight to Paystack. Same component and same server action as the
+            product page, so there is one checkout to keep working. */}
+        <BuyButton
+          productId={offer.productId}
+          label={t('cta')}
+          className="mx-auto mt-4 max-w-xs"
+        />
+      </div>
+    </section>
   )
 }

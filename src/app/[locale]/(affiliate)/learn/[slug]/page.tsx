@@ -166,6 +166,22 @@ export default async function CoursePage({
                 previous={previous}
                 next={next}
                 poster={coverUrl(product.coverPath)}
+                /* Null once they own it: the locked state is then
+                   unreachable, and an offer to buy what you already have is
+                   the worst thing a course page can say. */
+                offer={
+                  product.owned
+                    ? null
+                    : {
+                        productId: product.id,
+                        title: product.title,
+                        priceMinor: product.priceMinor,
+                        listPriceMinor: product.listPriceMinor,
+                        onSale: product.onSale,
+                        lessons: product.lessons,
+                        certificate: training?.certificate ?? false,
+                      }
+                }
               />
             )}
           </div>

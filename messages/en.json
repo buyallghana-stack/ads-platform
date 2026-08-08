@@ -3873,6 +3873,14 @@
         "readingTitle": "{n} more seconds",
         "readingBody": "Read to the end of the lesson. It is marked done once you have spent 15 seconds with it.",
         "gotIt": "Got it"
+      },
+      "offer": {
+        "title": "Unlock the rest of the course",
+        "body": "You have watched the free preview. {title} has {lessons} lessons in total.",
+        "perkLessons": "All {n} lessons, yours for a year",
+        "perkCertificate": "A certificate when you finish",
+        "perkEarn": "Earn commission on every sale you bring in",
+        "cta": "Get the full course"
       }
     },
     "quiz": {

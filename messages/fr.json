@@ -3873,6 +3873,14 @@
         "readingTitle": "Encore {n} secondes",
         "readingBody": "Lisez la leçon jusqu'au bout. Elle est validée après 15 secondes passées dessus.",
         "gotIt": "J'ai compris"
+      },
+      "offer": {
+        "title": "Débloquez la suite du cours",
+        "body": "Vous avez vu l'aperçu gratuit. {title} compte {lessons} leçons au total.",
+        "perkLessons": "Les {n} leçons, à vous pendant un an",
+        "perkCertificate": "Un certificat à la fin",
+        "perkEarn": "Gagnez une commission sur chaque vente que vous apportez",
+        "cta": "Obtenir le cours complet"
       }
     },
     "quiz": {
