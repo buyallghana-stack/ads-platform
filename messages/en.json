@@ -3689,6 +3689,50 @@
         "reversal": "Sale reversed",
         "payout": "Paid out",
         "adjustment": "Adjustment"
+      },
+      "kind": {
+        "sale": "Sale",
+        "referral": "Referral sale",
+        "game": "Game prize",
+        "gift": "Gift code",
+        "task": "Task reward",
+        "payout": "Withdrawal",
+        "reversal": "Reversed",
+        "adjustment": "Adjustment"
+      },
+      "kindHint": {
+        "sale": "Somebody bought through your link",
+        "referral": "A sale by an affiliate you brought in",
+        "game": "Won on the wheel or the box",
+        "gift": "A code you redeemed",
+        "task": "A task you claimed",
+        "payout": "Money sent to your payout account",
+        "reversal": "A sale was refunded, so the commission went back",
+        "adjustment": "Set by the SidePerks team"
+      },
+      "searchPlaceholder": "Search your statement",
+      "sortLabel": "Sort",
+      "sort": {
+        "newest": "Newest first",
+        "oldest": "Oldest first",
+        "largest": "Largest first",
+        "smallest": "Smallest first"
+      },
+      "filterLabel": "Filter by type",
+      "allTypes": "All",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "runCount": "{n} entries",
+      "collapse": "Show fewer",
+      "balanceShort": "Balance {balance}",
+      "collapsedBalance": "Open to see",
+      "showMore": "Show {count} more",
+      "emptyFiltered": "Nothing matches that.",
+      "columns": {
+        "entry": "Entry",
+        "date": "Date",
+        "amount": "Amount",
+        "balance": "Balance"
       }
     },
     "account": {

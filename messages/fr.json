@@ -3689,6 +3689,50 @@
         "reversal": "Vente annulée",
         "payout": "Versement",
         "adjustment": "Ajustement"
+      },
+      "kind": {
+        "sale": "Vente",
+        "referral": "Vente parrainée",
+        "game": "Gain de jeu",
+        "gift": "Code cadeau",
+        "task": "Récompense de mission",
+        "payout": "Retrait",
+        "reversal": "Annulée",
+        "adjustment": "Ajustement"
+      },
+      "kindHint": {
+        "sale": "Quelqu'un a acheté via votre lien",
+        "referral": "Une vente d'un affilié que vous avez amené",
+        "game": "Gagné à la roue ou à la boîte",
+        "gift": "Un code que vous avez utilisé",
+        "task": "Une mission que vous avez réclamée",
+        "payout": "Argent envoyé sur votre compte de paiement",
+        "reversal": "Une vente a été remboursée, la commission est reprise",
+        "adjustment": "Défini par l'équipe SidePerks"
+      },
+      "searchPlaceholder": "Rechercher dans votre relevé",
+      "sortLabel": "Trier",
+      "sort": {
+        "newest": "Plus récent",
+        "oldest": "Plus ancien",
+        "largest": "Plus élevé",
+        "smallest": "Plus faible"
+      },
+      "filterLabel": "Filtrer par type",
+      "allTypes": "Tout",
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "runCount": "{n} entrées",
+      "collapse": "Afficher moins",
+      "balanceShort": "Solde {balance}",
+      "collapsedBalance": "Ouvrir pour voir",
+      "showMore": "Afficher {count} de plus",
+      "emptyFiltered": "Aucun résultat.",
+      "columns": {
+        "entry": "Entrée",
+        "date": "Date",
+        "amount": "Montant",
+        "balance": "Solde"
       }
     },
     "account": {

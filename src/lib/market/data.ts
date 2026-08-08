@@ -182,10 +182,32 @@ export function periodDelta(now: number, before: number): number | null {
  *  difference between "I was paid" and "a sale was cancelled". */
 export type CommissionEntryType = 'credit' | 'reversal' | 'payout' | 'adjustment'
 
+/**
+ * What an entry IS, for the statement's filter and icon.
+ *
+ * `entry_type` has four values and one of them, `adjustment`, currently covers
+ * a game win, a task reward, a gift code and a hand correction at once — which
+ * is why the statement could not filter or group the way the points one does.
+ * Derived in the database as a stored generated column, so it cannot drift.
+ */
+export type StatementKind =
+  | 'sale'
+  | 'referral'
+  | 'game'
+  | 'gift'
+  | 'task'
+  | 'payout'
+  | 'reversal'
+  | 'adjustment'
+
 export type StatementEntry = {
   id: string
   entry_type: CommissionEntryType
+  kind: StatementKind
   amount_minor: number
+  /** Balance after this entry, in minor units. Null on nothing — the RPC
+   *  computes it over the whole ledger before limiting. */
+  balance_after: number
   /** 1 = your own sale, 2 = an override on somebody you recruited. */
   level: number | null
   status: 'pending' | 'cleared' | 'requested' | 'paid' | 'reversed'
