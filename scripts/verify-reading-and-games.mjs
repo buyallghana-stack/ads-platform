@@ -10,6 +10,11 @@
  * Both need the real screens: the first is an effect in the browser, the second
  * depends on the signed-in account's tier.
  *
+ * PRECONDITION for the article half: the account must have at least one
+ * UNFINISHED article in the course. Each run finishes one, so a course that has
+ * reached 100% will fail the "exactly ONE lesson completed" check with nothing
+ * left to complete. Clear a lesson_progress row to run it again.
+ *
  *   node scripts/verify-reading-and-games.mjs
  */
 import { chromium } from '@playwright/test'

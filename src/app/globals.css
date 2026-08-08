@@ -860,3 +860,42 @@
     border-radius: 0 !important;
   }
 }
+
+/* ===========================================================================
+   Finishing a course
+   ===========================================================================
+
+   The only celebration in the app, and it earns it: finishing a training
+   programme is what turns somebody into an affiliate who can earn real money.
+
+   Both animations are transform + opacity only, so they composite on the GPU
+   and stay smooth on a cheap handset, and the global prefers-reduced-motion
+   rule in @layer base flattens both to nothing for anybody who asks for that.
+   Nothing here carries meaning that the motion alone conveys: the confetti is
+   decorative and the medal is legible before it has moved.
+*/
+@keyframes confetti-fall {
+  from {
+    opacity: 1;
+    transform: translate3d(0, -10svh, 0) rotate(0deg);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(var(--drift, 0px), 105svh, 0) rotate(var(--spin, 540deg));
+  }
+}
+
+@keyframes medal-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

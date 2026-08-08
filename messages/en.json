@@ -3845,7 +3845,6 @@
         "quiz": "Checkpoint"
       },
       "progress": "{done} of {total} done",
-      "finished": "Course complete",
       "emptyCourse": "This course has no lessons yet.",
       "resources": "Resources",
       "resourcesNote": "Read here in the app. Resources are not downloadable.",
@@ -4105,6 +4104,21 @@
       "needed": "{threshold}% needed",
       "ctaJoin": "See the training",
       "ctaLearn": "Continue your training"
+    },
+    "complete": {
+      "eyebrow": "Course complete",
+      "title": "Congratulations!",
+      "subtitle": "You have finished {course}.",
+      "statLessons": "Lessons",
+      "statGrade": "Your grade",
+      "bodyCertificate": "Your certificate is ready. You will be asked for your legal name once, so the document carries the name you would present it under.",
+      "bodyNoCertificate": "This course does not carry a certificate, but the work counts: your progress is recorded and everything it unlocks is yours.",
+      "download": "Download your certificate",
+      "back": "Back to the course",
+      "close": "Close",
+      "panelTitle": "Course complete",
+      "panelBody": "You have finished every lesson in this course.",
+      "panelBodyGraded": "You have finished every lesson, with a grade of {grade}%."
     }
   }
 }

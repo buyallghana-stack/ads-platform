@@ -3845,7 +3845,6 @@
         "quiz": "Point de contrôle"
       },
       "progress": "{done} sur {total} terminées",
-      "finished": "Cours terminé",
       "emptyCourse": "Ce cours n’a pas encore de leçons.",
       "resources": "Ressources",
       "resourcesNote": "À lire dans l’application. Les ressources ne sont pas téléchargeables.",
@@ -4105,6 +4104,21 @@
       "needed": "{threshold} % requis",
       "ctaJoin": "Voir les formations",
       "ctaLearn": "Continuer ma formation"
+    },
+    "complete": {
+      "eyebrow": "Cours terminé",
+      "title": "Félicitations !",
+      "subtitle": "Vous avez terminé {course}.",
+      "statLessons": "Leçons",
+      "statGrade": "Votre note",
+      "bodyCertificate": "Votre certificat est prêt. Votre nom légal vous sera demandé une seule fois, afin que le document porte le nom sous lequel vous le présenterez.",
+      "bodyNoCertificate": "Ce cours ne donne pas de certificat, mais le travail compte : votre progression est enregistrée et tout ce qu’elle débloque vous appartient.",
+      "download": "Télécharger votre certificat",
+      "back": "Retour au cours",
+      "close": "Fermer",
+      "panelTitle": "Cours terminé",
+      "panelBody": "Vous avez terminé toutes les leçons de ce cours.",
+      "panelBodyGraded": "Vous avez terminé toutes les leçons, avec une note de {grade} %."
     }
   }
 }

@@ -2,10 +2,11 @@ import type { Metadata } from 'next'
 
 import { notFound } from 'next/navigation'
 
-import { Award, ArrowLeft } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { CourseAbout } from '@/components/affiliate/CourseAbout'
 import { CourseResources } from '@/components/affiliate/CourseResources'
+import { CourseComplete } from '@/components/affiliate/CourseComplete'
 import { CourseTabs } from '@/components/affiliate/CourseTabs'
 import { CurriculumList } from '@/components/affiliate/CurriculumList'
 import { LessonView } from '@/components/affiliate/LessonView'
@@ -20,6 +21,7 @@ import {
 } from '@/lib/market/course'
 import { coverUrl } from '@/lib/market/covers'
 import { getShopProduct } from '@/lib/market/data'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export const metadata: Metadata = {
   title: 'Course',
@@ -116,6 +118,23 @@ export default async function CoursePage({
 
   const resources = await getCourseResources(product.id, user!.id)
 
+  /*
+    Only asked for once the course is finished, because that is the only time
+    the answer can be anything but null — and it is the answer that decides
+    whether the congratulation carries a download button. A certificate is not
+    guaranteed by finishing: a programme can have them switched off, and a
+    course scored below the pass mark issues none.
+  */
+  const certificate =
+    done === total && total > 0
+      ? ((
+          await createAdminClient().rpc('my_certificate', {
+            p_user_id: user!.id,
+            p_product_id: product.id,
+          })
+        ).data as { grade: number | null } | null)
+      : null
+
   return (
     <div className="relative isolate mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-5 sm:px-6 md:px-8 md:py-7">
       <div
@@ -151,11 +170,16 @@ export default async function CoursePage({
           </span>
         </div>
 
+        {/* Finishing is the point of the whole screen, so it gets a moment and
+            a way to the certificate rather than one green line. */}
         {done === total && total > 0 && (
-          <p className="mt-2 flex items-center gap-1.5 text-[0.8125rem] font-medium text-success-600">
-            <Award aria-hidden className="size-4" />
-            {t('finished')}
-          </p>
+          <CourseComplete
+            productId={product.id}
+            title={product.title}
+            lessons={total}
+            grade={certificate?.grade ?? null}
+            hasCertificate={certificate !== null}
+          />
         )}
       </div>
 
