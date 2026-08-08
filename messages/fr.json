@@ -15,7 +15,7 @@
   "landing": {
     "meta": {
       "title": "SidePerks : soyez payé pour regarder des pubs et répondre à des sondages",
-      "description": "Regardez de courtes vidéos publicitaires et répondez à des sondages depuis votre téléphone. Les points sont indexés sur le cedi et vous retirez vers Mobile Money ou en crypto. Inscription gratuite, sans carte."
+      "description": "Regardez de courtes publicités et répondez à des sondages depuis votre téléphone. Les points sont indexés sur le cédi et vous retirez vers Mobile Money ou crypto. Commencez avec le forfait gratuit."
     },
     "nav": {
       "primary": "Principal",
@@ -229,7 +229,7 @@
         },
         "withdraw": {
           "q": "Quand puis-je retirer ?",
-          "a": "Dès que votre solde dépasse {threshold} points. Le même seuil pour tout le monde, quelle que soit la formule. Les retraits s'activent une fois notre agrément finalisé ; d'ici là vous pouvez enregistrer votre compte de retrait et continuer à gagner, et l'application dit clairement où en est une demande."
+          "a": "Dès que votre solde dépasse {threshold} points. Le seuil est le même pour tout le monde, quel que soit votre forfait. Les retraits partent vers votre propre compte Mobile Money ou crypto, et vous suivez chaque demande dans l’application jusqu’au paiement."
         },
         "questions": {
           "q": "Suis-je obligé de répondre aux questions ?",
@@ -444,7 +444,6 @@
       "title": "Politique de confidentialité"
     },
     "pendingTitle": "Pas encore publié",
-    "pendingBody": "Ce document est en cours de préparation avec l'agrément de la plateforme et n'a pas encore été publié. Il sera disponible ici avant l'ouverture du service au public.",
     "pendingContact": "Pour en obtenir une copie avant cette date, écrivez-nous à <em>{email}</em>.",
     "back": "Retour à l'inscription",
     "updated": "Dernière mise à jour : {date}",
@@ -469,7 +468,6 @@
     "watchDescription": "Vos publicités du jour apparaîtront ici.",
     "watchBody": "Le lecteur et les questions d’attention sont construits et testés côté serveur. Cet écran s’y connectera une fois son design validé.",
     "watchFooter": "Les points sont crédités dès que vous répondez correctement.",
-    "comingSoon": "Bientôt",
     "pointsAccumulated": "{points} points accumulés",
     "watchCta": "Regarder des pubs",
     "lifetimeEarned": "Gains cumulés",
@@ -569,7 +567,7 @@
       "leaderboard": "Classement",
       "gift": "Code cadeau",
       "tasks": "Objectifs",
-      "soon": "Bientôt disponible",
+      "soon": "En pause",
       "label": "Raccourcis"
     },
     "adsWaiting": "{n} publicités vous attendent aujourd’hui",
@@ -835,13 +833,11 @@
   "upgradeTab": {
     "title": "Améliorer votre forfait",
     "description": "Les forfaits supérieurs augmentent votre plafond de gains quotidien.",
-    "comingSoon": "Bientôt disponible",
     "body": "Les forfaits et paiements sont prêts en coulisses. Cet écran arrivera avec son propre design."
   },
   "profileTab": {
     "title": "Votre profil",
     "description": "Compte, coordonnées de paiement et réglages.",
-    "comingSoon": "Bientôt disponible",
     "body": "Les coordonnées de paiement, la langue et l'apparence se règleront ici."
   },
   "withdraw": {
@@ -933,7 +929,6 @@
     "title": "Profil",
     "subtitle": "Votre compte, sécurité et préférences.",
     "noName": "Votre compte",
-    "soon": "Bientôt",
     "version": "SidePerks v{version}",
     "upgrade": {
       "title": "Améliorer votre forfait",
@@ -1447,9 +1442,6 @@
   },
   "admin": {
     "previewBadge": "Données de démonstration",
-    "search": {
-      "placeholder": "Recherche : arrive avec le backend"
-    },
     "nav": {
       "label": "Sections admin",
       "open": "Ouvrir le menu",

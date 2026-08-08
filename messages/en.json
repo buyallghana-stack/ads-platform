@@ -15,7 +15,7 @@
   "landing": {
     "meta": {
       "title": "SidePerks: get paid for watching ads and taking surveys",
-      "description": "Watch short video ads and answer quick surveys on your phone. Points are pegged to the cedi and you withdraw to Mobile Money or crypto. Free to join, no card needed."
+      "description": "Watch short video ads and answer quick surveys on your phone. Points are pegged to the cedi and you withdraw to Mobile Money or crypto. Start on the free plan."
     },
     "nav": {
       "primary": "Main",
@@ -229,7 +229,7 @@
         },
         "withdraw": {
           "q": "When can I withdraw?",
-          "a": "Once your balance passes {threshold} points. It is the same threshold for everybody, whatever plan you hold. Payouts switch on when our payout licensing is complete; until then you can set up your payout account and keep earning, and the app tells you plainly where a request stands rather than pretending."
+          "a": "Once your balance passes {threshold} points. It is the same threshold for everybody, whatever plan you hold. Withdrawals go to your own Mobile Money or crypto account, and you can follow every request through the app until it is paid."
         },
         "questions": {
           "q": "Do I have to answer questions?",
@@ -444,7 +444,6 @@
       "title": "Privacy Policy"
     },
     "pendingTitle": "Not published yet",
-    "pendingBody": "This document is being prepared alongside the platform’s licensing and has not been published. It will be available here before the service opens to the public.",
     "pendingContact": "If you need a copy before then, contact us at <em>{email}</em>.",
     "back": "Back to sign up",
     "updated": "Last updated {date}",
@@ -469,7 +468,6 @@
     "watchDescription": "Your daily ads will appear here.",
     "watchBody": "The ad player and attention questions are built and tested on the server. This screen connects to them once its design is agreed.",
     "watchFooter": "Points are credited the moment you answer correctly.",
-    "comingSoon": "Coming soon",
     "pointsAccumulated": "{points} points accumulated",
     "watchCta": "Watch ads",
     "lifetimeEarned": "Lifetime earned",
@@ -569,7 +567,7 @@
       "leaderboard": "Leaderboard",
       "gift": "Gift code",
       "tasks": "Tasks",
-      "soon": "Coming soon",
+      "soon": "Paused",
       "label": "Shortcuts"
     },
     "adsWaiting": "{n} ads waiting for you today",
@@ -835,13 +833,11 @@
   "upgradeTab": {
     "title": "Upgrade your plan",
     "description": "Higher tiers raise your daily earning cap.",
-    "comingSoon": "Coming soon",
     "body": "Plans and payments are ready behind the scenes. This screen arrives with its own design."
   },
   "profileTab": {
     "title": "Your profile",
     "description": "Account, payout details and settings.",
-    "comingSoon": "Coming soon",
     "body": "Payout details, language and appearance settings will live here."
   },
   "withdraw": {
@@ -933,7 +929,6 @@
     "title": "Profile",
     "subtitle": "Your account, security and preferences.",
     "noName": "Your account",
-    "soon": "Soon",
     "version": "SidePerks v{version}",
     "upgrade": {
       "title": "Upgrade your plan",
@@ -1447,9 +1442,6 @@
   },
   "admin": {
     "previewBadge": "Preview data",
-    "search": {
-      "placeholder": "Search: coming with the backend"
-    },
     "nav": {
       "label": "Admin sections",
       "open": "Open menu",

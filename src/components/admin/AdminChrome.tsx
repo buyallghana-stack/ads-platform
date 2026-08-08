@@ -72,25 +72,14 @@ export function AdminTopBar({
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-ink-200 bg-surface/95 px-3 backdrop-blur sm:px-5">
       <AdminDrawer counts={counts} admin={admin} role={role} />
 
-      {/* Search is the reference's anchor for the bar. It is inert until the
-          screens behind it exist — labelled, not faked with a fake result. */}
-      <div className="relative min-w-0 flex-1 sm:max-w-md">
-        <Search
-          aria-hidden
-          className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink-400"
-        />
-        <input
-          type="search"
-          disabled
-          placeholder={t('search.placeholder')}
-          aria-label={t('search.placeholder')}
-          className={cn(
-            'h-9 w-full rounded-(--radius-input) border border-ink-200 bg-canvas pl-9 pr-3',
-            'text-[0.8125rem] text-ink-900 placeholder:text-ink-400 pointer-coarse:text-base',
-            'disabled:cursor-not-allowed disabled:opacity-70',
-          )}
-        />
-      </div>
+      {/* ⚠️ THE SEARCH BOX IS GONE, not relabelled. It was a permanently
+          `disabled` input reading "Search: coming with the backend" — the
+          reference's anchor for this bar, kept as a promise. A control that
+          can never be used is worse than no control: it takes the width, it
+          draws the eye, and on a platform the operator now considers live it
+          is the one thing on the admin telling them it is not. The spacer
+          keeps the bar's proportions. */}
+      <div className="min-w-0 flex-1" />
 
       <div className="ml-auto flex items-center gap-2">
         {live ? (
