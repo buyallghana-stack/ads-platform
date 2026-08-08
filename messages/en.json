@@ -1480,10 +1480,10 @@
         "leaderboard": "Leaderboard",
         "games": "Games",
         "tasks": "Tasks",
-        "affiliates": "Affiliates"
+        "affiliates": "Affiliates",
+        "training": "Training"
       },
-      "viewUserApp": "View user app",
-      "training": "Training"
+      "viewUserApp": "View user app"
     },
     "overview": {
       "title": "Overview",
@@ -3954,7 +3954,13 @@
         "title": "{amount} to go",
         "body": "You can withdraw once your commission balance reaches {minimum}. You have {balance} cleared so far.",
         "cta": "Find something to promote"
-      }
+      },
+      "quick": {
+        "min": "Minimum",
+        "half": "Half",
+        "max": "All of it"
+      },
+      "afterFee": "{net} after the {percent}% fee"
     },
     "links": {
       "label": "More things to do",
@@ -4075,6 +4081,19 @@
       "benefitCertificate": "A certificate when you finish",
       "keepsNote": "You keep everything you have already bought. The upgrade is its own course with its own certificate; nothing you have finished has to be done again.",
       "cta": "Upgrade for {price}"
+    },
+    "linksLocked": {
+      "title": "Your links are not live yet",
+      "body": {
+        "none": "Take a training programme and your affiliate links switch on once you are {threshold}% through it.",
+        "pending": "Your links start recording and paying at {threshold}% of your training. Until then a link would collect clicks and pay nothing.",
+        "lapsed": "Your affiliate access has ended, so your links have stopped paying. Renew your training to switch them back on.",
+        "suspended": "Your affiliate account is paused, so links are not recording. Contact support."
+      },
+      "progress": "{percent}% of your training done",
+      "needed": "{threshold}% needed",
+      "ctaJoin": "See the training",
+      "ctaLearn": "Continue your training"
     }
   }
 }

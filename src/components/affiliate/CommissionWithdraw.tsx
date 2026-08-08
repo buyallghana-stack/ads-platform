@@ -236,34 +236,84 @@ export function CommissionWithdraw({
           {t('amountLabel')}
         </label>
 
-        <div className="mt-2 flex items-center gap-2 rounded-(--radius-input) border border-ink-200 px-3 focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-600/25">
-          <span className="text-[0.9375rem] font-semibold text-ink-500">GHS</span>
+        {/*
+          ⚠️ THE SAME AMOUNT FIELD AS THE POINTS WITHDRAWAL, not a smaller
+          cousin of it (operator, 2026-08-08). The points wizard uses a 56px
+          field with the currency set into the left edge, the figure
+          right-aligned and bold, quick amounts underneath and the net stated
+          before Continue. This had a 44px field, one "All" button and no net
+          until the confirm step — the same job done less clearly, on the
+          screen where somebody is deciding how much of their money to move.
+
+          `inputMode="decimal"` is what raises the number pad on a phone, and
+          it stays on `type="text"` on purpose: `type="number"` silently drops
+          a value the browser considers malformed mid-typing, which on an
+          amount field means a figure that vanishes as it is being entered.
+        */}
+        <div className="relative mt-2">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[0.875rem] font-semibold text-ink-400"
+          >
+            GHS
+          </span>
           <input
             id="cw-amount"
+            type="text"
             inputMode="decimal"
+            autoFocus
             value={amount}
             onChange={(e) => {
-              setAmount(e.target.value)
+              /* Digits and one decimal point; nothing else reaches state. */
+              setAmount(e.target.value.replace(/[^\d.]/g, ''))
               setStage('amount')
             }}
             placeholder="0.00"
-            /* 16px on touch, always. Mobile Safari zooms the page for anything
-               smaller and never zooms back out. */
-            className="w-full bg-transparent py-3 text-[1.25rem] font-semibold tabular-nums text-ink-900 placeholder:text-ink-300 focus:outline-none pointer-coarse:text-base"
+            aria-label={t('amountLabel')}
+            className={cn(
+              'h-14 w-full rounded-(--radius-input) border bg-surface pl-14 pr-4',
+              'text-right text-[1.5rem] font-bold tabular-nums text-ink-900',
+              'placeholder:text-ink-400 focus:outline-none',
+              'transition-[border-color,box-shadow] duration-150',
+              tooSmall || tooBig
+                ? 'border-danger-500 focus:border-danger-600 focus:shadow-[0_0_0_3px] focus:shadow-danger-500/12'
+                : 'border-ink-200 hover:border-ink-300 focus:border-brand-600 focus:shadow-[0_0_0_3px] focus:shadow-brand-600/12',
+            )}
           />
-          <button
-            type="button"
-            onClick={() => setAmount((balanceMinor / 100).toFixed(2))}
-            className="shrink-0 rounded-full bg-ink-100 px-2.5 py-1 text-[0.75rem] font-semibold text-ink-700 transition-colors hover:bg-ink-200"
-          >
-            {t('all')}
-          </button>
         </div>
 
-        <p className="mt-1.5 flex flex-wrap justify-between gap-2 text-[0.75rem] text-ink-500">
-          <span>{t('available', { amount: cedis(balanceMinor) })}</span>
-          <span>{t('minimum', { amount: cedis(minimumMinor) })}</span>
-        </p>
+        <div className="mt-2 flex items-baseline justify-between gap-2 text-[0.75rem] text-ink-500">
+          <span>
+            {amountMinor > 0
+              ? t('afterFee', { net: cedis(netMinor), percent: String(feePercent) })
+              : t('minimum', { amount: cedis(minimumMinor) })}
+          </span>
+          <span className="tabular-nums">{t('available', { amount: cedis(balanceMinor) })}</span>
+        </div>
+
+        {/* Min / half / max, exactly as the points wizard offers them. Typing
+            an amount is the slowest part of this screen and these are the
+            three anybody actually wants. */}
+        <div className="mt-3 flex gap-2">
+          {([
+            ['min', minimumMinor],
+            ['half', Math.floor(balanceMinor / 2)],
+            ['max', balanceMinor],
+          ] as const).map(([key, minor]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => {
+                setAmount((minor / 100).toFixed(2))
+                setStage('amount')
+              }}
+              disabled={minor <= 0 || minor > balanceMinor}
+              className="flex-1 rounded-full border border-ink-200 px-2 py-1.5 text-[0.75rem] font-medium text-ink-600 transition-colors hover:border-brand-600 hover:text-brand-700 disabled:opacity-40"
+            >
+              {t(`quick.${key}`)}
+            </button>
+          ))}
+        </div>
 
         {tooSmall && (
           <p role="alert" className="mt-2 text-[0.8125rem] text-danger-600">

@@ -1480,10 +1480,10 @@
         "leaderboard": "Classement",
         "games": "Jeux",
         "tasks": "Objectifs",
-        "affiliates": "Affiliés"
+        "affiliates": "Affiliés",
+        "training": "Formation"
       },
-      "viewUserApp": "Voir l’app utilisateur",
-      "training": "Formation"
+      "viewUserApp": "Voir l’app utilisateur"
     },
     "overview": {
       "title": "Aperçu",
@@ -3954,7 +3954,13 @@
         "title": "Encore {amount}",
         "body": "Vous pourrez retirer dès que votre solde de commissions atteint {minimum}. Vous avez {balance} disponible pour le moment.",
         "cta": "Trouver un produit à promouvoir"
-      }
+      },
+      "quick": {
+        "min": "Minimum",
+        "half": "Moitié",
+        "max": "Tout"
+      },
+      "afterFee": "{net} après les {percent} % de frais"
     },
     "links": {
       "label": "Autres actions",
@@ -4075,6 +4081,19 @@
       "benefitCertificate": "Un certificat à la fin",
       "keepsNote": "Vous gardez tout ce que vous avez déjà acheté. La mise à niveau est un cours à part, avec son propre certificat ; rien de ce que vous avez terminé n'est à refaire.",
       "cta": "Passer au niveau supérieur pour {price}"
+    },
+    "linksLocked": {
+      "title": "Vos liens ne sont pas encore actifs",
+      "body": {
+        "none": "Suivez une formation : vos liens d'affiliation s'activent dès que vous en avez fait {threshold} %.",
+        "pending": "Vos liens commencent à enregistrer et à payer à {threshold} % de votre formation. Avant cela, un lien collecterait des clics sans rien rapporter.",
+        "lapsed": "Votre accès affilié a pris fin, vos liens ne rapportent plus. Renouvelez votre formation pour les réactiver.",
+        "suspended": "Votre compte affilié est suspendu, les liens n'enregistrent rien. Contactez le support."
+      },
+      "progress": "{percent} % de votre formation faite",
+      "needed": "{threshold} % requis",
+      "ctaJoin": "Voir les formations",
+      "ctaLearn": "Continuer ma formation"
     }
   }
 }

@@ -11,6 +11,7 @@ import {
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server'
 import { CertificatesPanel } from '@/components/affiliate/CertificatesPanel'
 import { CopyCode } from '@/components/affiliate/CopyCode'
+import { LinksLocked } from '@/components/affiliate/LinksLocked'
 import { RecruitPanel } from '@/components/affiliate/RecruitPanel'
 import { UpgradePanel, type UpgradeOffer } from '@/components/affiliate/UpgradePanel'
 import { ModeSwitchCard } from '@/components/app/ModeSwitch'
@@ -86,6 +87,14 @@ export default async function AffiliateAccountPage({
         }))
     : []
 
+  /* Earning is the ONE condition that decides whether a link is real: the
+     account being ACTIVE, not merely existing. */
+  const earning = dashboard.state === 'active' && Boolean(dashboard.code)
+  /* The programme furthest along — the threshold they are working towards. */
+  const trainingProgress = (dashboard.training ?? [])
+    .slice()
+    .sort((a, b) => b.percent - a.percent)[0]
+
   const daysLeft = dashboard.days_left ?? null
   /* Three bands, not two. "Expired" is obvious the day it happens; the useful
      warning is the one that arrives while there is still time to renew. */
@@ -126,13 +135,33 @@ export default async function AffiliateAccountPage({
         </div>
       </section>
 
-      {/* ── the code ─────────────────────────────────────────────────── */}
-      {dashboard.code && <CopyCode code={dashboard.code} origin={origin} locale={locale} />}
+      {/* ── the code ─────────────────────────────────────────────────────
+        ⚠️ A CODE EXISTS BEFORE IT CAN EARN. The `affiliate_accounts` row is
+        written when somebody BUYS a training programme, not when they finish
+        enough of it — so `dashboard.code` was true for the whole gap in
+        between, and this screen handed out a link that
+        `affiliate_promote_info` was refusing at the same moment with
+        `reason: pending`. Clicks recorded, nothing paid, and the affiliate
+        only found out after sending it to ten people.
 
-      {/* The training is a product, so a link to it carrying this affiliate's
-          code is a real attributable link — and what it sells is the thing that
-          turns the person clicking it into another affiliate. */}
-      {dashboard.code && <RecruitPanel programmes={recruitLinks} />}
+        The gate here is now the same one the product page uses: the account
+        has to be ACTIVE, not merely present. */}
+      {earning ? (
+        <>
+          <CopyCode code={dashboard.code!} origin={origin} locale={locale} />
+          {/* The training is a product, so a link to it carrying this
+              affiliate's code is a real attributable link — and what it sells
+              is the thing that turns the person clicking it into another
+              affiliate. */}
+          <RecruitPanel programmes={recruitLinks} />
+        </>
+      ) : (
+        <LinksLocked
+          state={(dashboard.state ?? 'none') as 'none' | 'pending' | 'lapsed' | 'suspended'}
+          percent={trainingProgress?.percent ?? null}
+          threshold={trainingProgress?.threshold ?? null}
+        />
+      )}
 
       {/* Training is a subscription, so the level above yours is offered here
           beside the one you hold rather than on the products screen. */}
