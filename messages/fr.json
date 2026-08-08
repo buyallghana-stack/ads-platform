@@ -295,7 +295,7 @@
       "items": {
         "games": {
           "title": "Tournez la roue, ouvrez la boîte",
-          "body": "Des parties gratuites chaque semaine avec votre formule. Ce sur quoi vous tombez est à vous, crédité aussitôt."
+          "body": "Chaque forfait payant donne des parties chaque semaine. Ce que vous obtenez est à vous, crédité immédiatement."
         },
         "leaderboard": {
           "title": "Le classement",
@@ -3419,6 +3419,20 @@
       "no_prizes_configured": "Ce jeu n'est pas encore prêt. Réessayez plus tard.",
       "not_signed_in": "Veuillez vous connecter et réessayer.",
       "error": "Une erreur s'est produite. Veuillez réessayer."
+    },
+    "locked": {
+      "plan": {
+        "subtitle": "Les jeux sont inclus dans les forfaits payants.",
+        "title": "Votre forfait vous donne 0 partie",
+        "body": "Vous êtes sur le forfait Gratuit, qui n’inclut aucune partie. Aucune nouvelle partie n’arrivera donc lundi. Chaque forfait payant donne des parties chaque semaine, et plus le forfait est élevé, plus vous en recevez.",
+        "cta": "Passer à un forfait supérieur"
+      },
+      "programme": {
+        "subtitle": "Les jeux sont inclus dans les programmes de formation.",
+        "title": "Votre programme vous donne 0 partie",
+        "body": "Les parties sont incluses dans les programmes de formation, et le vôtre n’en comprend aucune. Aucune nouvelle partie n’arrivera donc lundi. Choisissez un programme pour jouer et gagner des prix en argent.",
+        "cta": "Voir les programmes"
+      }
     }
   },
   "tasks": {
@@ -3866,12 +3880,9 @@
         "certificateValue": "À la fin du cours",
         "outcomes": "Ce que vous saurez faire"
       },
-      "articleReading": "Lisez jusqu'au bout pour valider cette leçon.",
       "blocked": {
         "checkpointTitle": "Répondez d'abord au point de contrôle",
         "checkpointBody": "Cette leçon comporte un point de contrôle. Réussissez-le et la leçon suivante s'ouvre. Vous pouvez réessayer autant de fois que nécessaire.",
-        "readingTitle": "Encore {n} secondes",
-        "readingBody": "Lisez la leçon jusqu'au bout. Elle est validée après 15 secondes passées dessus.",
         "gotIt": "J'ai compris"
       },
       "offer": {

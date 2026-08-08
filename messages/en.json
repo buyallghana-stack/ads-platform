@@ -295,7 +295,7 @@
       "items": {
         "games": {
           "title": "Spin the wheel, open the box",
-          "body": "Free plays every week with your plan. Whatever you land on is yours, credited straight away."
+          "body": "Every paid plan comes with game plays every week. Whatever you land on is yours, credited straight away."
         },
         "leaderboard": {
           "title": "The leaderboard",
@@ -3419,6 +3419,20 @@
       "no_prizes_configured": "This game is not ready yet. Please try later.",
       "not_signed_in": "Please log in and try again.",
       "error": "Something went wrong. Please try again."
+    },
+    "locked": {
+      "plan": {
+        "subtitle": "Games come with a paid plan.",
+        "title": "Your plan gives you 0 game plays",
+        "body": "You are on the Free plan, which does not include any game plays, so no new plays arrive on Monday. Every paid plan comes with plays every week, and the higher the plan the more you get.",
+        "cta": "Upgrade to play"
+      },
+      "programme": {
+        "subtitle": "Games come with a training programme.",
+        "title": "Your programme gives you 0 game plays",
+        "body": "Game plays come with a training programme, and yours does not include any, so no new plays arrive on Monday. Take a programme to start playing for cash prizes.",
+        "cta": "See programmes"
+      }
     }
   },
   "tasks": {
@@ -3866,12 +3880,9 @@
         "certificateValue": "When you finish",
         "outcomes": "What you will be able to do"
       },
-      "articleReading": "Read to the end to mark this lesson done.",
       "blocked": {
         "checkpointTitle": "Answer the checkpoint first",
         "checkpointBody": "This lesson has a checkpoint. Get it right and the next lesson opens. You can try as many times as you need.",
-        "readingTitle": "{n} more seconds",
-        "readingBody": "Read to the end of the lesson. It is marked done once you have spent 15 seconds with it.",
         "gotIt": "Got it"
       },
       "offer": {

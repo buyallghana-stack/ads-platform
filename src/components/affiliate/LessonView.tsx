@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react'
 
 import {
-  BookOpen,
   Lock,
   ChevronLeft,
   ChevronRight,
@@ -30,12 +29,14 @@ import { cn } from '@/lib/cn'
  * For a video the player reports position and the server decides whether that
  * counts. A "mark complete" button would make the activation threshold — the
  * thing that switches on the ability to earn real money — a formality anybody
- * can click through in ten seconds. The reading time IS the defence, exactly as
+ * can click through in ten seconds. The watched time IS the defence, exactly as
  * it is for link ads.
  *
- * Articles are the exception and they need one, because there is no playhead to
- * read: they complete on reaching the bottom AND on a dwell floor, so scrolling
- * to the end instantly does not count.
+ * ARTICLES ARE DELIBERATELY NOT GATED. Opening one marks it read. Two stricter
+ * rules were tried and both were dropped (see `ArticleLesson`): a browser
+ * cannot tell reading from scrolling, so every version of the test let the
+ * wrong people through while blocking the right ones. The checkpoint quiz is
+ * the real gate on written material, and it cannot be skipped.
  *
  * ── THE SERVER DECIDES, ALWAYS ──
  *
@@ -45,11 +46,6 @@ import { cn } from '@/lib/cn'
  * account is gated on. A browser is not a witness.
  */
 
-/* ⚠️ 15, HARD CODED, AND THE NUMBER IS SHOWN TO THE READER (operator,
-   2026-08-07: "indicate with a pop up the amount of seconds they need to read
-   for which is 15 seconds hard coded"). It was 20 and it was invisible, which
-   is the combination that made a rule look like a broken button. */
-const DWELL_SECONDS = 15
 
 export function LessonView({
   payload,
@@ -71,33 +67,9 @@ export function LessonView({
 }) {
   const t = useTranslations('affiliate.course')
 
-  /*
-    ⚠️ WHY "NEXT" DID NOT MARK AN ARTICLE READ (operator, 2026-08-07).
-
-    An article completes on two conditions: the end of the text in view AND
-    `DWELL_SECONDS` spent on it. Neither is a click, so tapping Next did
-    nothing at all — no mark, and no explanation either, which is what made it
-    look broken rather than strict.
-
-    The reading time is the real defence and it stays. What changes is that the
-    SCROLL half is no longer the only way to satisfy the first condition:
-    somebody who has genuinely sat with a long article for twenty seconds and
-    then moves on has done the thing the rule is protecting. So Next now marks
-    it, if and only if the dwell has elapsed.
-
-    Clicking Next in the first few seconds still marks nothing — and now says
-    so, because the article carries a visible line about what it is waiting
-    for. A silent refusal is what turned a rule into a bug report.
-  */
-  const articleReady = useRef(false)
-  /* Seconds still owed on an article, or null when it is not an article or the
-     time is served. Held in STATE, not a ref, because the popup prints it. */
-  const [secondsLeft, setSecondsLeft] = useState<number | null>(null)
-  const markArticle = () => {
-    if (!payload.ok || payload.lesson.kind === 'video') return
-    if (!articleReady.current || payload.progress.completed) return
-    void markLessonProgress(payload.lesson.id, slug, DWELL_SECONDS, 100)
-  }
+  /* Reading is settled entirely inside `ArticleLesson`: opening one records it,
+     so nothing here has to catch anything on the way out and Next is never
+     waiting on an article. */
 
   if (!payload.ok) {
     /*
@@ -190,11 +162,6 @@ export function LessonView({
             slug={slug}
             body={lesson.body}
             done={progress.completed}
-            onDwellMet={() => {
-              articleReady.current = true
-              setSecondsLeft(null)
-            }}
-            onCountdown={setSecondsLeft}
           />
         )}
 
@@ -229,19 +196,12 @@ export function LessonView({
         slug={slug}
         previous={previous}
         next={next}
-        onLeave={markArticle}
         /* ⚠️ A CHECKPOINT IS NOW A GATE. It used to be a card under the video
            that Next walked straight past — `at_seconds` was stored and never
            read, so "checkpoint" meant "optional quiz". Since the certificate
            depends on the average score, a course anybody can click through is
            a certificate anybody can collect. */
-        blocked={
-          !payload.checkpointsPassed
-            ? 'checkpoint'
-            : secondsLeft !== null && secondsLeft > 0
-              ? { secondsLeft }
-              : null
-        }
+        blocked={payload.checkpointsPassed ? null : 'checkpoint'}
       />
     </div>
   )
@@ -272,18 +232,14 @@ function LessonNav({
   slug,
   previous,
   next,
-  onLeave,
   blocked,
 }: {
   slug: string
   previous: Neighbour
   next: Neighbour
-  /** Fires before the navigation, so an article that has met its reading time
-   *  is recorded on the way out rather than lost. */
-  onLeave: () => void
   /** Why Next cannot be used yet, or null. PREVIOUS is never blocked: going
    *  back to re-read is the thing somebody stuck on a checkpoint should do. */
-  blocked: 'checkpoint' | { secondsLeft: number } | null
+  blocked: 'checkpoint' | null
 }) {
   const t = useTranslations('affiliate.course')
   const [nudge, setNudge] = useState(false)
@@ -297,7 +253,6 @@ function LessonNav({
       {previous ? (
         <Link
           href={{ pathname: `/learn/${slug}`, query: { lesson: previous.id } }}
-          onClick={onLeave}
           className={cn(shell, 'border-ink-200 bg-surface hover:bg-ink-50')}
         >
           <ChevronLeft aria-hidden className="size-4 shrink-0 text-ink-400" />
@@ -338,8 +293,7 @@ function LessonNav({
         ) : (
           <Link
             href={{ pathname: `/learn/${slug}`, query: { lesson: next.id } }}
-            onClick={onLeave}
-            className={cn(shell, 'justify-end border-brand-600 bg-brand-600 hover:bg-brand-700')}
+              className={cn(shell, 'justify-end border-brand-600 bg-brand-600 hover:bg-brand-700')}
           >
             <span className="min-w-0 text-right">
               <span className="block text-[0.6875rem] uppercase tracking-wide text-white/70">
@@ -354,7 +308,7 @@ function LessonNav({
         ))}
 
       {nudge && blocked && (
-        <NextBlocked reason={blocked} onClose={() => setNudge(false)} />
+        <NextBlocked onClose={() => setNudge(false)} />
       )}
     </nav>
   )
@@ -521,98 +475,47 @@ function ArticleLesson({
   slug,
   body,
   done,
-  onDwellMet,
-  onCountdown,
 }: {
   lessonId: string
   slug: string
   body: string | null
   done: boolean
-  /** Told the moment the reading time is satisfied, so Next can record it. */
-  onDwellMet: () => void
-  /** Seconds still owed, ticked down so the popup can name a real number
-   *  rather than repeating the full fifteen every time. */
-  onCountdown: (seconds: number) => void
 }) {
   const t = useTranslations('affiliate.course')
-  const [reached, setReached] = useState(false)
-  const end = useRef<HTMLDivElement | null>(null)
-  /* The pane the text scrolls inside. It is also the observer's ROOT: the
-     sentinel is no longer in the page's scroll, so watching the viewport would
-     mean watching a box that never moves. */
-  const pane = useRef<HTMLDivElement | null>(null)
-  /* Stamped in the effect, not during render. `useRef(Date.now())` evaluates
-     the clock on every render even though only the first value is kept — which
-     is both impure and, on a re-render, a different number being thrown away. */
-  const opened = useRef(0)
 
   /*
-    Two conditions, both required: the bottom has to come into view AND the
-    reader has to have been here for `DWELL_SECONDS`. Either one alone is
-    trivially defeated — a fast scroll satisfies the first, an idle tab
-    satisfies the second — and this lesson type has no playhead to fall back on.
+    OPENING AN ARTICLE MARKS IT READ (operator, 2026-08-08).
 
-    ⚠️ THE DWELL NEEDS A TIMER, NOT JUST AN EARLY RETURN, AND THIS WAS A REAL
-    BUG. IntersectionObserver only fires when the intersection CHANGES. Reach
-    the bottom of a short article at eight seconds and the callback ran, failed
-    the twenty-second check, returned — and then never fired again, because the
-    sentinel simply stayed in view. The lesson was never marked read no matter
-    how long they sat there, which is what the operator saw as "sometimes even
-    after clicking next it fails to mark articles as read".
+    That is the whole rule. No timer, no scroll target, no condition on Next.
 
-    So arriving at the bottom early SCHEDULES the mark instead of discarding
-    it, and scrolling away cancels it. The defence is unchanged: twenty seconds
-    with the end of the article in front of you.
+    ── WHY THE TWO CLEVERER RULES BOTH WENT ──
+
+    First there was a fifteen-second dwell, and Next did nothing until it
+    elapsed. Then it became "scroll to the end of the text", watched with an
+    IntersectionObserver on a sentinel at the bottom of the pane. The second
+    was genuinely broken as shipped: `rootMargin: '0px 0px -5% 0px'` shrinks
+    the observed box by 5% at the bottom, so the sentinel sat inside the strip
+    that margin excluded and never intersected at all. An article could not be
+    completed however long anybody read it.
+
+    But fixing the margin was still the wrong shape of answer, which is the
+    operator's point: "make things simple rather complicated". Every version of
+    a reading test measures the browser, not the reader. Scrolling proves a
+    finger moved; a timer proves a tab was open. Somebody who genuinely reads a
+    long article on a phone and somebody who flicks to the bottom produce the
+    same evidence, so the gate excluded nobody it meant to and blocked people
+    it did not mean to.
+
+    The thing that actually tests whether a lesson landed is the CHECKPOINT,
+    which is a real quiz with a real pass mark and cannot be skipped. That is
+    where the rigour belongs. Reading is recorded, not enforced.
   */
   useEffect(() => {
-    if (done || !end.current) return
-    opened.current = Date.now()
-    let timer: ReturnType<typeof setTimeout> | undefined
-
-    /* The dwell alone, reported upward the moment it is met and regardless of
-       where they have scrolled to. It does not complete the lesson by itself —
-       that still needs the end of the text — but it is what tells Next it may
-       record on the way out. */
-    const dwellTimer = setTimeout(() => onDwellMet(), DWELL_SECONDS * 1000)
-
-    /* Ticked once a second so the popup can say "8 seconds", not "15". */
-    onCountdown(DWELL_SECONDS)
-    const tick = setInterval(() => {
-      const left = Math.ceil(DWELL_SECONDS - (Date.now() - opened.current) / 1000)
-      onCountdown(Math.max(left, 0))
-      if (left <= 0) clearInterval(tick)
-    }, 1000)
-
-    const mark = () => {
-      setReached(true)
-      void markLessonProgress(lessonId, slug, DWELL_SECONDS, 100)
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        clearTimeout(timer)
-        if (!entry?.isIntersecting) return
-        const waited = (Date.now() - opened.current) / 1000
-        if (waited >= DWELL_SECONDS) {
-          mark()
-          observer.disconnect()
-          return
-        }
-        timer = setTimeout(() => {
-          mark()
-          observer.disconnect()
-        }, (DWELL_SECONDS - waited) * 1000)
-      },
-      { root: pane.current, rootMargin: '0px 0px -5% 0px' },
-    )
-    observer.observe(end.current)
-    return () => {
-      clearTimeout(timer)
-      clearTimeout(dwellTimer)
-      clearInterval(tick)
-      observer.disconnect()
-    }
-  }, [done, lessonId, slug, onDwellMet, onCountdown])
+    if (done) return
+    /* `false` = do not revalidate. See the parameter's note: revalidating from
+       here walked the whole course. */
+    void markLessonProgress(lessonId, slug, 0, 100, false)
+  }, [done, lessonId, slug])
 
   return (
     <div>
@@ -640,7 +543,6 @@ function ArticleLesson({
            expects. Chaining is the default and the default was right.
       */}
       <div
-        ref={pane}
         tabIndex={0}
         className="max-h-[19rem] overflow-y-auto px-4 py-5 focus-visible:outline-none sm:px-6 md:max-h-[26rem]"
       >
@@ -657,31 +559,15 @@ function ArticleLesson({
             <p key={i}>{para}</p>
           ))}
         </div>
-
-        <div ref={end} className="h-px" />
       </div>
 
-      {/* ⚠️ ALWAYS SAYS SOMETHING. Before this line existed, an article that
-          had not met its reading time simply did nothing when Next was tapped,
-          and a rule with no visible state is indistinguishable from a bug —
-          which is exactly how it was reported. */}
-      <p
-        className={cn(
-          'flex items-center gap-2 border-t border-ink-200 px-4 py-3 text-[0.8125rem] sm:px-6',
-          done || reached ? 'font-medium text-success-600' : 'text-ink-500',
-        )}
-      >
-        {done || reached ? (
-          <>
-            <CheckCircle2 aria-hidden className="size-4 shrink-0" />
-            {t('articleDone')}
-          </>
-        ) : (
-          <>
-            <BookOpen aria-hidden className="size-4 shrink-0 text-ink-400" />
-            {t('articleReading')}
-          </>
-        )}
+      {/* One state, because there is only one. There used to be a second line
+          here telling somebody what they still had to do before Next would
+          work; nothing is pending any more, so a "not yet" that can never be
+          true would be the only thing left to get wrong. */}
+      <p className="flex items-center gap-2 border-t border-ink-200 px-4 py-3 text-[0.8125rem] font-medium text-success-600 sm:px-6">
+        <CheckCircle2 aria-hidden className="size-4 shrink-0" />
+        {t('articleDone')}
       </p>
     </div>
   )
@@ -694,23 +580,16 @@ function ArticleLesson({
  *
  * ── A DIALOG RATHER THAN A DISABLED BUTTON ──
  *
- * The operator asked for a pop-up, and the reason it is the right answer is
- * that the two blocked states have different answers. A checkpoint is a thing
- * to go and do; a reading timer is a thing to wait out, and the only useful
- * response is the number of seconds left. A greyed button says neither.
+ * The operator asked for a pop-up, and it is the right answer because a
+ * checkpoint is a thing to go and DO. A greyed-out button says only "no"; this
+ * says what is in the way. (It used to carry a second reason, a reading timer,
+ * which no longer exists: reaching the end of an article is the whole rule.)
  *
  * It closes on the backdrop, on Escape and on its own button, because a modal
  * with one way out is a modal somebody gets stuck in on a phone.
  */
-function NextBlocked({
-  reason,
-  onClose,
-}: {
-  reason: 'checkpoint' | { secondsLeft: number }
-  onClose: () => void
-}) {
+function NextBlocked({ onClose }: { onClose: () => void }) {
   const t = useTranslations('affiliate.course.blocked')
-  const checkpoint = reason === 'checkpoint'
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -735,17 +614,17 @@ function NextBlocked({
           aria-hidden
           className={cn(
             'mx-auto grid size-12 place-items-center rounded-full',
-            checkpoint ? 'bg-warning-500/15 text-warning-600' : 'bg-brand-600/12 text-brand-700',
+            'bg-warning-500/15 text-warning-600',
           )}
         >
-          {checkpoint ? <Lock className="size-5" /> : <BookOpen className="size-5" />}
+          <Lock className="size-5" />
         </span>
 
         <h2 className="mt-3 text-[1rem] font-semibold text-ink-900">
-          {checkpoint ? t('checkpointTitle') : t('readingTitle', { n: reason.secondsLeft })}
+          {t('checkpointTitle')}
         </h2>
         <p className="mx-auto mt-1.5 max-w-[30ch] text-[0.8125rem] leading-snug text-ink-500">
-          {checkpoint ? t('checkpointBody') : t('readingBody')}
+          {t('checkpointBody')}
         </p>
 
         <button

@@ -88,6 +88,29 @@ export default async function CoursePage({
       ? (lessons.find((l) => !l.completed) ?? lessons[0])
       : (lessons.find((l) => l.is_preview) ?? lessons[0]))
 
+  /*
+    ⚠️ THE OPEN LESSON IS PINNED IN THE URL, AND THAT IS A CORRECTNESS FIX.
+
+    The fallback above is a QUERY — "the first unfinished lesson" — so its
+    answer changes the moment anything completes. While that answer was only
+    computed on a fresh visit, that was fine. It stopped being fine when
+    articles began marking themselves on arrival: any refresh of this page
+    re-ran the query, landed on the next unfinished article, mounted it, marked
+    it, and refreshed again. One visit walked the entire course and issued a
+    certificate for it.
+
+    Redirecting once, on arrival, turns the query into a fact. After this the
+    URL always names the lesson, so no later render can choose a different one
+    — and the docblock above, which already claimed the URL names exactly which
+    lesson is open, becomes true.
+
+    It cannot loop: the redirect only happens when `asked` did not match, and
+    what it redirects to matches by construction.
+  */
+  if (chosen && asked !== chosen.lesson_id) {
+    redirect({ href: `/learn/${slug}?lesson=${chosen.lesson_id}`, locale })
+  }
+
   const payload = chosen ? await getLesson(user!.id, chosen.lesson_id) : null
   const { previous, next } = neighbours(sections, chosen?.lesson_id ?? null)
 

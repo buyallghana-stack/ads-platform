@@ -6,7 +6,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { MysteryBox } from '@/components/games/MysteryBox'
 import { SpinWheel } from '@/components/games/SpinWheel'
-import { Link } from '@/i18n/navigation'
+import { Link, redirect } from '@/i18n/navigation'
 import { getGameBoard, getGameStatus } from '@/lib/games/data'
 import { GAME_SLUGS } from '@/lib/games/types'
 
@@ -44,6 +44,11 @@ export default async function Page({
 
   const status = await getGameStatus()
   if (!status.enabled) notFound()
+  /* A plan that grants no plays cannot open a board by URL either. The game
+     screen's only word for it is "You have used all your plays this week",
+     which is the same false renewal promise the hub used to make. The hub is
+     where the honest answer now lives, so send them there. */
+  if (status.allowance === 0) redirect({ href: '/games', locale })
 
   const [board, t] = await Promise.all([getGameBoard(kind), getTranslations('games')])
   if (board.length === 0) notFound()

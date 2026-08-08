@@ -34,6 +34,23 @@ export async function markLessonProgress(
   slug: string,
   seconds: number,
   percent: number,
+  /**
+   * Whether to refresh the course page afterwards.
+   *
+   * ⚠️ FALSE FOR AN ARTICLE, AND THE REASON IS A CHAIN REACTION I SHIPPED.
+   * The course page opens "the first unfinished lesson" when the URL names
+   * none. Once opening an article marked it read, revalidating re-ran that
+   * choice — the first unfinished lesson was now the NEXT article, which
+   * mounted, marked itself, revalidated again, and walked the rest of the
+   * course in about two seconds a lesson. One page visit completed every
+   * remaining article and issued a certificate.
+   *
+   * The lesson is pinned in the URL now, so the loop is closed at its source
+   * too. This stays false regardless: an article that marks itself on arrival
+   * has nothing on screen left to refresh, and the tick beside it in the
+   * curriculum is drawn fresh by the very next navigation.
+   */
+  revalidate = true,
 ): Promise<void> {
   const user = await getSessionUser()
   if (!user) return
@@ -58,7 +75,7 @@ export async function markLessonProgress(
   /* The curriculum's tick marks and the dashboard's progress bar both read
      this. Revalidating the course page is enough — the dashboard is a separate
      request and will be fresh when it is next visited. */
-  revalidatePath(`/learn/${slug}`)
+  if (revalidate) revalidatePath(`/learn/${slug}`)
 }
 
 /**

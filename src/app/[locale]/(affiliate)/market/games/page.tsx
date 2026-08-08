@@ -58,6 +58,10 @@ export default async function AffiliateGamesPage({
       <Back label={t('back')} />
       <GamesHub
         hubHref="/market/games"
+        /* Plays come with a programme here, not a plan, so the zero-allowance
+           screen names the right thing and sends them to the right place. */
+        upgradeHref="/shop"
+        via="programme"
         status={{
           enabled: status.enabled,
           allowance: status.allowance,

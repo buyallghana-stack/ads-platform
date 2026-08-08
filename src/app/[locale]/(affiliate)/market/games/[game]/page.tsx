@@ -49,6 +49,9 @@ export default async function AffiliateGamePage({
 
   const status = await getAffiliateGameStatus(user!.id)
   if (!status.enabled) notFound()
+  /* Same rule as the ads board: a programme granting no plays cannot open one
+     by URL. The hub carries the honest answer and the way to fix it. */
+  if (status.allowance === 0) redirect({ href: '/market/games', locale })
 
   const [board, t] = await Promise.all([
     getAffiliateGameBoard(kind),
