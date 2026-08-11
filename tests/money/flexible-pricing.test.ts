@@ -10,6 +10,7 @@ import {
   createUser,
   expectRejection,
   pinLadder,
+  setConfig,
   withRollback,
 } from '../support/db'
 
@@ -455,6 +456,105 @@ describe.skipIf(!HAS_DB)('the slider and the database agree', () => {
 
       // A sweep that silently checked nothing would pass just as loudly.
       expect(checked).toBeGreaterThan(100)
+    })
+  })
+})
+
+/**
+ * Migration 177. The operator, 2026-08-11: manager holds all four plans and
+ * can still only watch 13 ads a day, "which is contrary to what was promised".
+ *
+ * Migration 036 built the adding-up rule; migration 098 replaced the whole
+ * function with the band and took the rule with it, leaving three pieces of
+ * live copy promising something the database had stopped doing. The rate was
+ * never the problem and is not what these test.
+ */
+describe.skipIf(!HAS_DB)('the daily limit when plans stack', () => {
+  /* The four purchasable rungs at their floor prices, which is the cheapest
+     way to hold everything and therefore the case that shows the rule most
+     plainly. Derived from the pinned ladder, never typed out beside it. */
+  const paid = PINNED_LADDER.filter((r) => r.priceGhs > 0 && r.slug !== 'diamond')
+  const free = PINNED_LADDER.find((r) => r.priceGhs === 0)!
+  const buyEverything = async (tx: Tx, userId: string) => {
+    for (const rung of paid) await buy(tx, userId, rung.slug, rung.priceGhs)
+  }
+
+  it('counts the free allowance once and adds what each plan gives above it', async () => {
+    await withRollback(async (tx) => {
+      await pinLadder(tx)
+      const user = await createUser(tx, { name: 'All Four' })
+      await buyEverything(tx, user.id)
+
+      const expected =
+        free.dailyAdCap + paid.reduce((sum, r) => sum + Math.max(r.dailyAdCap - free.dailyAdCap, 0), 0)
+
+      /* 1 + 2 + 3 + 6 + 12 = 24 on the pinned ladder. The free allowance is
+         added once rather than four times, or holding four plans would hand
+         out the free tier three extra times. */
+      expect((await resolved(tx, user.id)).dailyAdCap).toBe(expected)
+    })
+  })
+
+  it('leaves somebody holding one plan exactly where they were', async () => {
+    await withRollback(async (tx) => {
+      await pinLadder(tx)
+      const user = await createUser(tx, { name: 'Just Platinum' })
+      const platinum = PINNED_LADDER.find((r) => r.slug === 'platinum')!
+      await buy(tx, user.id, 'platinum', platinum.priceGhs)
+
+      expect((await resolved(tx, user.id)).dailyAdCap).toBe(platinum.dailyAdCap)
+    })
+  })
+
+  it('never hands out less than the total spend already bought', async () => {
+    await withRollback(async (tx) => {
+      await pinLadder(tx)
+      const user = await createUser(tx, { name: 'Deep In Two Bands' })
+
+      /* Bronze and Silver bought at the TOP of their bands: GHS 139 + 249 =
+         388, which lands in Gold. Gold's cap is 7, the two plans add up to 6,
+         and the answer has to be 7 — a rule that could cut somebody's ads for
+         paying more would be worse than the bug it replaced. */
+      await buy(tx, user.id, 'bronze', 139)
+      await buy(tx, user.id, 'silver', 249)
+
+      const standing = await resolved(tx, user.id)
+      expect(standing.name).toBe('Gold')
+      expect(standing.dailyAdCap).toBe(PINNED_LADDER.find((r) => r.slug === 'gold')!.dailyAdCap)
+    })
+  })
+
+  it('goes back to the band alone when the operator asks for it', async () => {
+    await withRollback(async (tx) => {
+      await pinLadder(tx)
+      await setConfig(tx, 'ad_cap_combine_mode', 'band')
+      const user = await createUser(tx, { name: 'Band Only' })
+      await buyEverything(tx, user.id)
+
+      /* Exactly what shipped between 2026-08-04 and 2026-08-11, kept as a
+         setting rather than deleted, because the operator chose neither. */
+      expect((await resolved(tx, user.id)).dailyAdCap).toBe(
+        PINNED_LADDER.find((r) => r.slug === 'platinum')!.dailyAdCap,
+      )
+    })
+  })
+
+  it('drops to the single best plan when stacking is switched off', async () => {
+    await withRollback(async (tx) => {
+      await pinLadder(tx)
+      await setConfig(tx, 'subscription_stacking_enabled', 'false')
+      const user = await createUser(tx, { name: 'No Stacking' })
+      await buyEverything(tx, user.id)
+
+      const platinum = PINNED_LADDER.find((r) => r.slug === 'platinum')!
+      const standing = await resolved(tx, user.id)
+
+      /* The switch was read by nothing at all between 2026-08-04 and this
+         migration: the admin could turn stacking off and every stacked user
+         kept every benefit. Off now means the best plan they hold, at the
+         amount paid for that one, so the rate is Platinum's own. */
+      expect(standing.dailyAdCap).toBe(platinum.dailyAdCap)
+      expect(standing.multiplier).toBe(platinum.multiplier)
     })
   })
 })

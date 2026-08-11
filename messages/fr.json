@@ -1343,7 +1343,7 @@
   "upgrade": {
     "title": "Passer à un forfait",
     "subtitle": "Augmentez votre limite quotidienne et gagnez à un meilleur taux.",
-    "stacking": "Les forfaits s'additionnent par le montant payé : si vous en détenez plusieurs, nous additionnons ce que vous avez payé et votre position sur l'échelle en découle. Deux paiements de GHS 100 valent exactement un paiement de GHS 200. Chaque forfait ne peut être détenu qu'une fois.",
+    "stacking": "Les forfaits se cumulent. Ce que vous avez payé est additionné pour fixer votre taux de gain, donc deux paiements de GHS 100 rapportent le même taux qu'un paiement de GHS 200, et chaque forfait détenu ajoute sa limite quotidienne d'annonces à celle des autres. Chaque forfait ne peut être détenu qu'une fois.",
     "footnote": "Chaque forfait a sa propre durée, indiquée sur la carte. Les prix sont uniques pour cette période : rien ne se renouvelle automatiquement.",
     "current": {
       "free": "Vous êtes sur le forfait Gratuit",
@@ -2520,6 +2520,18 @@
           "highest": "Utiliser uniquement le multiplicateur le plus élevé",
           "sum": "Additionner les multiplicateurs",
           "product": "Multiplier les multiplicateurs"
+        },
+        "stacking": {
+          "label": "Autoriser le cumul des formules",
+          "description": "Activé, tout ce que la personne a payé compte ensemble. Désactivé, seule la meilleure formule détenue compte, au montant payé pour celle-ci, et le reste cesse de compter.",
+          "warning": "Cela change ce que gagne dès la prochaine annonce toute personne détenant plusieurs formules."
+        },
+        "adCapMode": {
+          "label": "Combinaison des limites quotidiennes",
+          "description": "Quand une personne détient plusieurs formules. La page d'accueil promet que les limites s'additionnent, et une formule ne peut jamais laisser moins d'annonces que ce que le total payé permet déjà.",
+          "sumBonus": "Ajouter la limite de chaque formule au-dessus de l'offre gratuite",
+          "band": "Uniquement ce que le total payé permet",
+          "highest": "Formule la plus élevée uniquement"
         },
         "multiplierCeiling": {
           "label": "Plafond absolu du taux combiné",

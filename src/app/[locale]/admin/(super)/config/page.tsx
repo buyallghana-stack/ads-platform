@@ -198,6 +198,35 @@ export default async function AdminConfigPage({
           ],
         },
         {
+          /* Also added 2026-08-11. This key has existed since stacking shipped
+             and was rendered nowhere, while `resolve_user_tier` had stopped
+             reading it entirely on 2026-08-04. Migration 177 honours it again,
+             so it needs a way in: a branch nobody can select is the same as no
+             branch at all. */
+          key: 'subscription_stacking_enabled',
+          label: t('fields.stacking.label'),
+          description: t('fields.stacking.description'),
+          warning: t('fields.stacking.warning'),
+          danger: true,
+          kind: 'toggle',
+        },
+        {
+          /* Added 2026-08-11, with migration 177. Between 2026-08-04 and that
+             day the daily cap came off the band alone, so somebody holding all
+             four plans got the same 13 ads as somebody holding one, which the
+             landing page had never stopped promising would add up. The three
+             options are exactly the branches `resolve_user_tier` implements. */
+          key: 'ad_cap_combine_mode',
+          label: t('fields.adCapMode.label'),
+          description: t('fields.adCapMode.description'),
+          kind: 'select',
+          options: [
+            { value: 'sum_bonus', label: t('fields.adCapMode.sumBonus') },
+            { value: 'band', label: t('fields.adCapMode.band') },
+            { value: 'highest', label: t('fields.adCapMode.highest') },
+          ],
+        },
+        {
           key: 'subscription_max_combined_multiplier',
           label: t('fields.multiplierCeiling.label'),
           description: t('fields.multiplierCeiling.description'),

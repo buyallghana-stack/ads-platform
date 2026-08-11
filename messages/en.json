@@ -1343,7 +1343,7 @@
   "upgrade": {
     "title": "Upgrade",
     "subtitle": "Raise your daily limit and earn at a better rate.",
-    "stacking": "Plans stack by what you paid. Hold more than one and we add the amounts together: two payments of GHS 100 land exactly where one payment of GHS 200 lands. You can hold each plan once.",
+    "stacking": "Plans stack. What you paid is added together to set your earning rate, so two payments of GHS 100 pay the same rate as one payment of GHS 200, and every plan you hold adds its daily ad limit on top of the others. You can hold each plan once.",
     "footnote": "Each plan runs for the period shown on its card. Prices are one-off for that period. Nothing renews automatically.",
     "current": {
       "free": "You're on the Free plan",
@@ -2520,6 +2520,18 @@
           "highest": "Use the highest multiplier only",
           "sum": "Add the multipliers together",
           "product": "Multiply the multipliers"
+        },
+        "stacking": {
+          "label": "Let plans stack",
+          "description": "On, everything somebody has paid for counts together. Off, only the best plan they hold counts, at the amount they paid for that one, and the rest stops counting.",
+          "warning": "This changes what every person holding more than one plan earns from their very next ad."
+        },
+        "adCapMode": {
+          "label": "How daily ad limits combine",
+          "description": "When somebody holds more than one plan. The landing page promises the limits add up, and a plan can never leave somebody with fewer ads than their total spend already buys.",
+          "sumBonus": "Add each plan's limit above the free one",
+          "band": "Only what the total paid buys",
+          "highest": "Highest plan only"
         },
         "multiplierCeiling": {
           "label": "Hard ceiling on the combined rate",
