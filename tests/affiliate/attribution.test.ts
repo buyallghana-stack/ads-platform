@@ -452,3 +452,135 @@ describe.skipIf(!HAS_DB)('the two rates together', () => {
     })
   })
 })
+
+/**
+ * Migration 176. The bug these cover was reported by the operator on
+ * 2026-08-11: an admin invited somebody with a referral code, that person
+ * recruited a buyer, the buyer bought training, and only the middle affiliate
+ * was paid.
+ *
+ * The platform had two referral trees. Phase 1 wrote the invitation into
+ * `referrals`; Phase 2 only ever wrote an upline from a click-attributed
+ * training sale, so an invitation recorded nothing the commission code could
+ * see and the second level had nobody to pay.
+ */
+describe.skipIf(!HAS_DB)('an invitation is an upline too', () => {
+  const invite = async (tx: Tx, referrerId: string, refereeId: string) => {
+    const { rows } = await tx.query<{ referral_code: string }>(
+      `select referral_code from public.profiles where id = $1`,
+      [referrerId],
+    )
+    await tx.query(`select public.apply_referral_code($1, $2)`, [refereeId, rows[0]!.referral_code])
+  }
+
+  const creditsFor = async (tx: Tx, conversionId: string) => {
+    const { rows } = await tx.query<{ level: number; affiliate_id: string; amount_minor: string }>(
+      `select level, affiliate_id, amount_minor::text
+         from public.commission_ledger
+        where conversion_id = $1 and entry_type = 'credit'
+        order by level`,
+      [conversionId],
+    )
+    return rows
+  }
+
+  const conversionIdFor = async (tx: Tx, orderId: string) => {
+    const { rows } = await tx.query<{ id: string }>(
+      `select id from public.conversions where order_id = $1`,
+      [orderId],
+    )
+    return rows[0]!.id
+  }
+
+  it('records the referrer as the upline when no link sold the training', async () => {
+    await withRollback(async (tx) => {
+      const by = await admin(tx)
+      const inviter = await makeAffiliate(tx, by, 'Inviter')
+      const recruit = await createUser(tx, { name: 'Invited' })
+
+      /* The whole shape of the bug: an invitation, and no click anywhere. */
+      await invite(tx, inviter.user.id, recruit.id)
+      await buy(tx, recruit.id, await makeTraining(tx, by, 'beginner'))
+
+      expect((await accountOf(tx, recruit.id))!.parent_affiliate_id).toBe(inviter.account.id)
+    })
+  })
+
+  it('pays that upline level two when the recruit makes a sale', async () => {
+    await withRollback(async (tx) => {
+      const by = await admin(tx)
+      const inviter = await makeAffiliate(tx, by, 'Paid Inviter')
+      const recruitUser = await createUser(tx, { name: 'Paid Recruit' })
+
+      await invite(tx, inviter.user.id, recruitUser.id)
+      await buy(tx, recruitUser.id, await makeTraining(tx, by, 'beginner'))
+      const recruit = (await accountOf(tx, recruitUser.id))!
+
+      const customer = await createUser(tx, { name: 'Their Customer' })
+      const product = await makeProduct(tx, by, { price: 15_000, l1: 20, l2: 5 })
+      await click(tx, recruit.affiliate_code, product, { userId: customer.id })
+      const order = await buy(tx, customer.id, product)
+
+      /* The money, not just the relationship. Asserting the conversion row
+         alone would have passed on the live data too, one field earlier than
+         the fault. */
+      const credits = await creditsFor(tx, await conversionIdFor(tx, order))
+      expect(credits.map((c) => [c.level, c.affiliate_id, c.amount_minor])).toEqual([
+        [1, recruit.id, '3000'],
+        [2, inviter.account.id, '750'],
+      ])
+    })
+  })
+
+  it('lets the click outrank the invitation, because a sale is more specific', async () => {
+    await withRollback(async (tx) => {
+      const by = await admin(tx)
+      const inviter = await makeAffiliate(tx, by, 'Merely Invited By')
+      const seller = await makeAffiliate(tx, by, 'Actually Sold It')
+      const recruit = await createUser(tx, { name: 'Bought Elsewhere' })
+
+      await invite(tx, inviter.user.id, recruit.id)
+      const training = await makeTraining(tx, by, 'beginner')
+      await click(tx, seller.account.affiliate_code, training, { userId: recruit.id })
+      await buy(tx, recruit.id, training)
+
+      expect((await accountOf(tx, recruit.id))!.parent_affiliate_id).toBe(seller.account.id)
+    })
+  })
+
+  it('leaves an organic buyer with no upline at all', async () => {
+    await withRollback(async (tx) => {
+      const by = await admin(tx)
+      const alone = await createUser(tx, { name: 'Nobody Sent Me' })
+      await buy(tx, alone.id, await makeTraining(tx, by, 'beginner'))
+
+      /* Null is the right answer, not a gap to be filled later. Nobody
+         recruited them. */
+      expect((await accountOf(tx, alone.id))!.parent_affiliate_id).toBeNull()
+    })
+  })
+
+  it('refuses to move an upline once one is recorded', async () => {
+    await withRollback(async (tx) => {
+      const by = await admin(tx)
+      const first = await makeAffiliate(tx, by, 'First Upline')
+      const other = await makeAffiliate(tx, by, 'Somebody Else')
+      const recruit = await createUser(tx, { name: 'Contested' })
+
+      await invite(tx, first.user.id, recruit.id)
+      await buy(tx, recruit.id, await makeTraining(tx, by, 'beginner'))
+      const account = (await accountOf(tx, recruit.id))!
+
+      /* Moving an upline silently redirects every future override and this
+         table keeps no audit trail. Filling a null is still allowed, which is
+         how migration 176 repaired the accounts that predate it. */
+      const message = await expectRejection(tx, () =>
+        tx.query(`update public.affiliate_accounts set parent_affiliate_id = $1 where id = $2`, [
+          other.account.id,
+          account.id,
+        ]),
+      )
+      expect(message).toMatch(/recorded once/i)
+    })
+  })
+})

@@ -324,7 +324,10 @@ function AffiliatePanel({
             }
           />
           <Fact label={t('people.panel.recruits')} value={String(affiliate.recruits)} />
-          <Fact label={t('people.panel.upline')} value={affiliate.uplineName ?? '—'} />
+          {/* "Nobody", the same word the table uses. A dash here read as a
+              missing value rather than an answer, and this is the field the
+              operator opens when a second level has not paid. */}
+          <Fact label={t('people.panel.upline')} value={affiliate.uplineName ?? t('people.noUpline')} />
         </PanelFacts>
       </PanelSection>
 
