@@ -112,6 +112,25 @@ const clickRows = async (tx: Tx, adId: string) => {
   return rows
 }
 
+/**
+ * What one ad pays this person right now.
+ *
+ * ⚠️ ASKED, NOT ASSUMED (migration 192). These tests used to make an ad worth
+ * 25 points and expect 25, because an ad carried its own price. Operator,
+ * 2026-08-12: it does not any more — every ad pays the platform base and the
+ * plan does the rest — so `points` on the fixture is now decoration and a
+ * hardcoded 25 here would assert the rule that was removed. The `dwell` on
+ * these fixtures still matters: the reading time is the whole defence of this
+ * format.
+ */
+const worth = async (tx: Tx, userId: string) => {
+  const { rows } = await tx.query<{ p: string }>(
+    `select public.ad_reward_points($1, public.base_ad_points(), 0)::text as p`,
+    [userId],
+  )
+  return Number(rows[0]!.p)
+}
+
 describe.skipIf(!HAS_DB)('link ads', () => {
   it('pays once the reading time has run, and records the visit', async () => {
     await withRollback(async (tx) => {
@@ -122,8 +141,9 @@ describe.skipIf(!HAS_DB)('link ads', () => {
       const result = await click(tx, user.id, ad)
 
       expect(result.outcome).toBe('correct')
-      expect(Number(result.points_awarded)).toBe(25)
-      expect(await balanceOf(tx, user.id)).toBe(25)
+      const paid = await worth(tx, user.id)
+      expect(Number(result.points_awarded)).toBe(paid)
+      expect(await balanceOf(tx, user.id)).toBe(paid)
 
       // The visit is its own record, and it carries what the click was worth
       // — the number an advertiser is invoiced against, frozen against a
@@ -131,14 +151,14 @@ describe.skipIf(!HAS_DB)('link ads', () => {
       const clicks = await clickRows(tx, ad)
       expect(clicks).toHaveLength(1)
       expect(clicks[0]!.user_id).toBe(user.id)
-      expect(Number(clicks[0]!.points_awarded)).toBe(25)
+      expect(Number(clicks[0]!.points_awarded)).toBe(paid)
 
       const { rows: ledger } = await tx.query(
         `select entry_type, amount from public.points_ledger where user_id = $1`,
         [user.id],
       )
       expect(ledger).toHaveLength(1)
-      expect(Number(ledger[0]!.amount)).toBe(25)
+      expect(Number(ledger[0]!.amount)).toBe(paid)
     })
   })
 
@@ -177,10 +197,11 @@ describe.skipIf(!HAS_DB)('link ads', () => {
       // Still one balance, one ledger row, and ONE click row — the unique
       // constraint means a second visit is unrepresentable rather than merely
       // refused, and the row keeps what the paying click was worth.
-      expect(await balanceOf(tx, user.id)).toBe(30)
+      const paid = await worth(tx, user.id)
+      expect(await balanceOf(tx, user.id)).toBe(paid)
       const clicks = await clickRows(tx, ad)
       expect(clicks).toHaveLength(1)
-      expect(Number(clicks[0]!.points_awarded)).toBe(30)
+      expect(Number(clicks[0]!.points_awarded)).toBe(paid)
     })
   })
 
@@ -197,12 +218,13 @@ describe.skipIf(!HAS_DB)('link ads', () => {
       const second = await click(tx, user.id, ad)
 
       expect(second.outcome).toBe('correct')
-      expect(await balanceOf(tx, user.id)).toBe(20)
+      const paid = await worth(tx, user.id)
+      expect(await balanceOf(tx, user.id)).toBe(paid)
       // The same row, updated to what it ended up being worth — not a second
       // visit, because it is the same person on the same ad.
       const clicks = await clickRows(tx, ad)
       expect(clicks).toHaveLength(1)
-      expect(Number(clicks[0]!.points_awarded)).toBe(20)
+      expect(Number(clicks[0]!.points_awarded)).toBe(paid)
     })
   })
 
@@ -223,7 +245,7 @@ describe.skipIf(!HAS_DB)('link ads', () => {
       await setConfig(tx, 'earning_paused_globally', 'false')
       await openedArticle(tx, user.id, ad, 60)
       expect((await click(tx, user.id, ad)).outcome).toBe('correct')
-      expect(await balanceOf(tx, user.id)).toBe(25)
+      expect(await balanceOf(tx, user.id)).toBe(await worth(tx, user.id))
     })
   })
 

@@ -222,20 +222,19 @@ export const getPlanReferences = cache(
   }> => {
     const supabase = await createClient()
 
-    const [{ data: free }, { data: rate }, { data: ads }] = await Promise.all([
+    const [{ data: free }, { data: rate }, { data: base }] = await Promise.all([
       supabase.from('tiers').select('daily_ad_cap, name').eq('is_default', true).maybeSingle(),
       supabase.from('app_config').select('value').eq('key', 'points_per_currency_unit').maybeSingle(),
-      /* What a typical ad is worth before any multiplier. Read from the POOL
-         rather than assumed, so the preview on the upgrade screen matches the
-         ads that are actually out there — if the operator prices ads at 200,
-         the slider says what 200 becomes. */
-      supabase.from('ads').select('points_reward').eq('status', 'active').limit(200),
+      /* ⚠️ THE CONFIGURED BASE (migration 192). This used to take the MEDIAN
+         `points_reward` of up to 200 live ads, while the landing page took the
+         COMMONEST value of the same column — two screens quoting different
+         numbers for the same promise, and neither with an answer when the pool
+         was empty. An ad no longer carries its own worth: every ad pays the
+         platform base and the plan does the rest. */
+      supabase.from('app_config').select('value').eq('key', 'base_ad_points').maybeSingle(),
     ])
 
-    const rewards = (ads ?? []).map((a) => Number(a.points_reward)).filter((n) => n > 0).sort((a, b) => a - b)
-    // The median, not the mean: one 5,000-point launch ad should not drag the
-    // number everybody sees.
-    const baseAdPoints = rewards.length ? rewards[Math.floor(rewards.length / 2)]! : 100
+    const baseAdPoints = Number(base?.value ?? 0) || 100
 
     return {
       baseAdPoints,

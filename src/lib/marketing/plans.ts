@@ -163,7 +163,7 @@ export async function getMarketingFigures(): Promise<MarketingFigures> {
     page stays as static as it was.
   */
   const admin = createAdminClient()
-  const [trainingRes, programmeRes, adRes, privateConfigRes] = await Promise.all([
+  const [trainingRes, programmeRes, privateConfigRes] = await Promise.all([
     admin
       .from('products')
       .select(
@@ -172,12 +172,23 @@ export async function getMarketingFigures(): Promise<MarketingFigures> {
       .eq('purpose', 'training_program')
       .eq('status', 'published'),
     admin.from('affiliate_programs').select('product_id, l1_rate_value, l2_rate_value, status'),
-    admin.from('ads').select('points_reward').eq('status', 'active'),
     admin
       .from('app_config')
       .select('key, value')
-      .in('key', ['affiliate_games_enabled', 'affiliate_payouts_enabled', 'games_enabled', 'payouts_enabled']),
+      .in('key', [
+        'affiliate_games_enabled',
+        'affiliate_payouts_enabled',
+        'games_enabled',
+        'payouts_enabled',
+        'base_ad_points',
+      ]),
   ])
+
+  /* Read straight after the fetch, because more than one thing below needs it
+     now: the feature switches AND the base an ad pays. */
+  const privateConfig = new Map(
+    (privateConfigRes.data ?? []).map((row) => [row.key, row.value]),
+  )
 
   if (tiersRes.error || !tiersRes.data?.length) return FALLBACK
 
@@ -262,11 +273,15 @@ export async function getMarketingFigures(): Promise<MarketingFigures> {
     feed stopped paying. Where they differ, the commonest value is the honest
     headline; where there are none, the peg's own unit keeps the page sane.
   */
-  const rewards = (adRes.data ?? []).map((a) => Number(a.points_reward)).filter((n) => n > 0)
-  const counts = new Map<number, number>()
-  for (const value of rewards) counts.set(value, (counts.get(value) ?? 0) + 1)
+  /* ⚠️ THE CONFIGURED BASE, NOT A POLL OF THE POOL (migration 192). This used
+     to take the commonest `points_reward` among live ads, which had two
+     failure modes: it had no answer at all when the pool was empty, and it
+     disagreed with the upgrade screen, which took the MEDIAN of the same
+     column. Operator, 2026-08-12: an ad no longer carries its own worth —
+     every ad pays the platform base and the plan does the rest — so both
+     screens read the one number. */
   const baseAdPoints =
-    [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? FALLBACK.baseAdPoints
+    Number(privateConfig.get('base_ad_points') ?? 0) || FALLBACK.baseAdPoints
 
   for (const plan of plans) {
     plan.perAdFrom = (baseAdPoints * plan.rewardMultiplier) / pointsPerCedi
@@ -307,9 +322,6 @@ export async function getMarketingFigures(): Promise<MarketingFigures> {
     })
     .sort((a, b) => a.price - b.price)
 
-  const privateConfig = new Map(
-    (privateConfigRes.data ?? []).map((row) => [row.key, row.value]),
-  )
   const on = (key: string) => privateConfig.get(key) === 'true'
 
   return {

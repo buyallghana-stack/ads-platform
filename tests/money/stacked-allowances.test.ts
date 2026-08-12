@@ -252,3 +252,75 @@ describe.skipIf(!HAS_DB)('what a stacked day is worth', () => {
     })
   })
 })
+
+describe.skipIf(!HAS_DB)('what one ad is worth', () => {
+  /**
+   * Operator, 2026-08-12: *"dont let me decide what a point is worth by an ad.
+   * use what is already promised on the plan."*
+   *
+   * What an ad paid used to be the product of two numbers set in different
+   * places: the ad's own `points_reward` and the plan's multiplier. The pool
+   * held ads at 30, 40, 80 and 100, so a Platinum member on a 30-point ad was
+   * paid less than a Bronze member on a 100-point one — the ladder promised
+   * one thing and the feed did another.
+   */
+  const anAd = async (tx: Tx, points: number) => {
+    const { rows } = await tx.query<{ id: string; points_reward: string }>(
+      `insert into public.ads (title, format, status, points_reward, video_source,
+                               youtube_video_id, duration_seconds, min_watch_seconds, weight)
+       values ('Base fixture', 'video', 'active', $1::bigint, 'youtube',
+               'dQw4w9WgXcQ', 30, 0, 100)
+       returning id, points_reward::text`,
+      [points],
+    )
+    return rows[0]!
+  }
+
+  it('ignores what the ad says and pays the platform base', async () => {
+    await withRollback(async (tx) => {
+      await pinLadder(tx)
+      const user = await createUser(tx, { name: 'Base Only' })
+      await buy(tx, user.id, 'platinum', PINNED_LADDER.find((r) => r.slug === 'platinum')!.priceGhs)
+
+      /* Asked for 30. The trigger overwrites it, and even if it had not, the
+         feed and the credit no longer read the column. */
+      const ad = await anAd(tx, 30)
+      const { rows } = await tx.query<{ points_award: string }>(
+        `select points_award::text from public.get_ad_feed($1, null, 50) where id = $2`,
+        [user.id, ad.id],
+      )
+
+      const base = Number(
+        (await tx.query<{ b: string }>(`select public.base_ad_points()::text as b`)).rows[0]!.b,
+      )
+      const platinum = PINNED_LADDER.find((r) => r.slug === 'platinum')!
+      expect(Number(rows[0]!.points_award)).toBe(Math.floor(base * platinum.multiplier))
+    })
+  })
+
+  it('keeps the column in step, so a row cannot claim a price nobody pays', async () => {
+    await withRollback(async (tx) => {
+      const ad = await anAd(tx, 4321)
+      const base = (await tx.query<{ b: string }>(`select public.base_ad_points()::text as b`)).rows[0]!.b
+      expect(ad.points_reward).toBe(base)
+    })
+  })
+
+  it('moves every plan at once when the base moves', async () => {
+    await withRollback(async (tx) => {
+      await pinLadder(tx)
+      const user = await createUser(tx, { name: 'After The Change' })
+      await buy(tx, user.id, 'bronze', PINNED_LADDER.find((r) => r.slug === 'bronze')!.priceGhs)
+      const bronze = PINNED_LADDER.find((r) => r.slug === 'bronze')!
+
+      await setConfig(tx, 'base_ad_points', '250')
+      const ad = await anAd(tx, 100)
+
+      const { rows } = await tx.query<{ points_award: string }>(
+        `select points_award::text from public.get_ad_feed($1, null, 50) where id = $2`,
+        [user.id, ad.id],
+      )
+      expect(Number(rows[0]!.points_award)).toBe(Math.floor(250 * bronze.multiplier))
+    })
+  })
+})

@@ -394,8 +394,22 @@ export function AdEditor({
             </FormSection>
           )}
 
-          {/* ---- Audience ------------------------------------------------ */}
-          <FormSection title={t('audience')} description={t('audienceHint')}>
+          {/* ---- Bucket ---------------------------------------------------
+              Operator, 2026-08-12: *"remove the audience since every ad has a
+              bucket now, so automatically it shows to the audience with the
+              plan that ad is being sent on."*
+
+              Right, and the multi-select had stopped making sense: since
+              targeting became exclusive an ad belongs to ONE bucket, and a
+              chip row inviting three at once described a rule the feed no
+              longer follows. So this is one choice, not several, and it says
+              BUCKET because that is the word on the board the ad was added
+              from.
+
+              It is not removed outright, because an ad that arrives here any
+              other way — duplicated, or made with the toolbar's New ad — needs
+              somewhere to land, and an ad in the wrong bucket needs moving. */}
+          <FormSection title={t('bucket')} description={t('bucketHint')}>
             <div className="flex flex-wrap gap-2">
               <ChoiceChip selected={draft.tierIds.length === 0} onClick={() => set({ tierIds: [] })}>
                 {t('everyone')}
@@ -403,21 +417,20 @@ export function AdEditor({
               {tiers.map((tier) => (
                 <ChoiceChip
                   key={tier.id}
-                  selected={draft.tierIds.includes(tier.id)}
-                  onClick={() =>
-                    set({
-                      tierIds: draft.tierIds.includes(tier.id)
-                        ? draft.tierIds.filter((id) => id !== tier.id)
-                        : [...draft.tierIds, tier.id],
-                    })
-                  }
+                  selected={draft.tierIds[0] === tier.id}
+                  /* One bucket, so choosing replaces rather than adds. */
+                  onClick={() => set({ tierIds: [tier.id] })}
                 >
                   {tier.name}
                 </ChoiceChip>
               ))}
             </div>
             <p className="mt-2.5 text-[0.6875rem] leading-relaxed text-ink-400">
-              {draft.tierIds.length === 0 ? t('audienceEveryone') : t('audienceInclusive')}
+              {draft.tierIds.length === 0
+                ? t('bucketEveryone')
+                : t('bucketOne', {
+                    plan: tiers.find((x) => x.id === draft.tierIds[0])?.name ?? '',
+                  })}
             </p>
           </FormSection>
         </div>
@@ -500,21 +513,29 @@ export function AdEditor({
 
           <FormSection title={t('rewardAndBudget')}>
             <div className="flex flex-col gap-3">
-              <Field
-                label={t('reward')}
-                suffix={t('units.points')}
-                hint={t('rewardHint')}
-                error={err('points')}
-              >
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  value={draft.points}
-                  onChange={(e) => set({ points: Number(e.target.value) })}
-                  className={inputClass(Boolean(err('points')), 'tabular-nums')}
-                />
-              </Field>
+              {/* ⚠️ NOT A FIELD ANY MORE (operator, 2026-08-12: "dont let me
+                  decide what a point is worth by an ad. use what is already
+                  promised on the plan").
+
+                  What an ad paid used to be the product of two numbers set in
+                  different places on different days: this box and the plan's
+                  multiplier. The pool held ads at 30, 40, 80 and 100, so a
+                  Platinum member watching a 30-point ad was paid less than a
+                  Bronze member watching a 100-point one, and the ladder was
+                  not the promise it looked like.
+
+                  Every ad now pays the platform base — the free plan's per-ad
+                  value — and each member receives that times the rate their
+                  plan and the amount they paid inside its range bought. The
+                  number is set once, in Platform settings. */}
+              <div className="rounded-(--radius-card) border border-ink-200 bg-ink-50/60 px-3.5 py-3">
+                <p className="text-[0.8125rem] font-medium text-ink-900">
+                  {t('rewardFixed', { points: draft.points })}
+                </p>
+                <p className="mt-1 text-[0.75rem] leading-relaxed text-ink-500">
+                  {t('rewardFixedHint')}
+                </p>
+              </div>
 
               <SwitchRow
                 title={t('unlimited')}

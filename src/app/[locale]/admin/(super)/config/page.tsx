@@ -178,6 +178,20 @@ export default async function AdminConfigPage({
           suffix: t('units.perCedi'),
         },
         {
+          /* Added 2026-08-12 with migration 192. It used to be a box on every
+             ad, which meant the ladder promised one thing and the feed paid
+             another; there is one number now and this is where it lives. It
+             sits beside the peg deliberately — together they are what a member
+             is paid, and changing either moves every future credit. */
+          key: 'base_ad_points',
+          label: t('fields.baseAdPoints.label'),
+          description: t('fields.baseAdPoints.description'),
+          warning: t('fields.baseAdPoints.warning'),
+          kind: 'number',
+          min: 1,
+          suffix: t('units.points'),
+        },
+        {
           key: 'subscription_multiplier_combine_mode',
           label: t('fields.combineMode.label'),
           description: t('fields.combineMode.description'),

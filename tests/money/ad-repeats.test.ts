@@ -63,6 +63,22 @@ const watch = async (tx: Tx, userId: string, adId: string) => {
   return rows[0]!
 }
 
+/**
+ * What one ad pays this person right now.
+ *
+ * ⚠️ ASKED, NOT ASSUMED (migration 192). These tests used to create an ad at
+ * 50 points and expect 50, because an ad carried its own price. It does not
+ * any more: every ad pays the platform base and the plan does the rest, so a
+ * hardcoded number here would be asserting the rule that was just removed.
+ */
+const worth = async (tx: Tx, userId: string) => {
+  const { rows } = await tx.query<{ p: string }>(
+    `select public.ad_reward_points($1, public.base_ad_points(), 0)::text as p`,
+    [userId],
+  )
+  return Number(rows[0]!.p)
+}
+
 const feedSize = async (tx: Tx, userId: string) => {
   const { rows } = await tx.query(`select count(*)::int n from public.get_ad_feed($1, null, 40)`, [
     userId,
@@ -101,6 +117,12 @@ const onlyTheseAds = async (tx: Tx, userId: string, keep: string[]) => {
      reachable without the fallback opening. The day rule itself is tested in
      ad-buckets.test.ts, which is where it belongs. */
   await setConfig(tx, 'ad_repeat_same_day', 'true')
+  await tx.query(
+    `delete from public.ad_tiers x
+      using public.ads a
+      where a.id = x.ad_id and a.status = 'active' and a.id <> all($1::uuid[])`,
+    [keep],
+  )
   await tx.query(
     `insert into public.ad_tiers (ad_id, tier_id)
      select a.id, (select id from public.tiers where slug = 'platinum')
@@ -154,7 +176,8 @@ describe.skipIf(!HAS_DB)('repeating an ad once the pool is exhausted', () => {
       expect((await watch(tx, user.id, only)).outcome).toBe('correct')
       expect((await watch(tx, user.id, only)).outcome).toBe('correct')
 
-      expect(await balanceOf(tx, user.id)).toBe(100)
+      // Two completions of the same ad, each paid at the platform base.
+      expect(await balanceOf(tx, user.id)).toBe((await worth(tx, user.id)) * 2)
 
       /* The first completion keeps the bare ad id every historical row has;
          the second carries the occasion. That is what lets the unique index
@@ -201,7 +224,7 @@ describe.skipIf(!HAS_DB)('repeating an ad once the pool is exhausted', () => {
       ])
 
       expect(rows[0]!.outcome).toBe('already_completed')
-      expect(await balanceOf(tx, user.id)).toBe(50)
+      expect(await balanceOf(tx, user.id)).toBe(await worth(tx, user.id))
       expect(await ledgerRows(tx, user.id)).toHaveLength(1)
 
       // And the counter is put back in step, so the NEXT repeat is not stuck
@@ -256,7 +279,7 @@ describe.skipIf(!HAS_DB)('repeating an ad once the pool is exhausted', () => {
         tx.query(`select public.register_ad_view($1, $2)`, [user.id, first]),
       )
       expect(message).toMatch(/closed for this user/i)
-      expect(await balanceOf(tx, user.id)).toBe(50)
+      expect(await balanceOf(tx, user.id)).toBe(await worth(tx, user.id))
     })
   })
 
