@@ -92,6 +92,15 @@ const onlyTheseAds = async (tx: Tx, userId: string, keep: string[]) => {
      more than one a day — and the free plan is on one since the pricing
      restructure. */
   await pinEconomy(tx)
+
+  /* ⚠️ SAME-DAY REPEATS, ON PURPOSE. Since migration 188 an ad finished today
+     is not offered again today: one article was watched 17 times in a day
+     because the only limit was the daily cap. These tests are about the repeat
+     MECHANISM — the occasion in the ledger reference, a failed ad coming back
+     with its tries reset, the switch, the minimum gap — and none of that is
+     reachable without the fallback opening. The day rule itself is tested in
+     ad-buckets.test.ts, which is where it belongs. */
+  await setConfig(tx, 'ad_repeat_same_day', 'true')
   await tx.query(
     `insert into public.ad_tiers (ad_id, tier_id)
      select a.id, (select id from public.tiers where slug = 'platinum')

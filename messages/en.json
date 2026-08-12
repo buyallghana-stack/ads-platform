@@ -150,7 +150,7 @@
         "body": "{ads} a day for your first {days} days, and you can withdraw from {threshold} points.",
         "cta": "Start free"
       },
-      "stacking": "Plans stack. Hold more than one and the daily limits add up, the earning bonuses add together, and the lowest withdrawal threshold is the one that applies. Every plan runs for a fixed period and nothing renews on its own. You are never charged again without asking.",
+      "stacking": "Plans stack. Every plan you hold adds its own daily ad limit, and its ads are paid at its own rate, best first. So holding Bronze and Gold gives you Gold's 7 ads at Gold's rate and then Bronze's 3 at Bronze's rate. You can hold each plan once.",
       "range": "{from} to {to}",
       "rangeHint": "Pay anything in that range. The more you pay, the more each ad is worth to you.",
       "rateRange": "+{from}% to +{to}%",
@@ -1352,7 +1352,7 @@
   "upgrade": {
     "title": "Upgrade",
     "subtitle": "Raise your daily limit and earn at a better rate.",
-    "stacking": "Plans stack. What you paid is added together to set your earning rate, so two payments of GHS 100 pay the same rate as one payment of GHS 200, and every plan you hold adds its daily ad limit on top of the others. You can hold each plan once.",
+    "stacking": "Plans stack. Every plan you hold adds its own daily ad limit, and its ads are paid at its own rate, best first. So holding Bronze and Gold gives you Gold's 7 ads at Gold's rate and then Bronze's 3 at Bronze's rate. You can hold each plan once.",
     "footnote": "Each plan runs for the period shown on its card. Prices are one-off for that period. Nothing renews automatically.",
     "current": {
       "free": "You're on the Free plan",
@@ -1950,10 +1950,10 @@
         "removeCondition": "Remove condition",
         "cascadeNote": "Skipping cascades: if the question above is never shown, this one is not shown either, and nor is anything depending on it.",
         "audience": "Audience",
-        "audienceHint": "Which plans this ad is aimed at.",
+        "audienceHint": "Which bucket this ad goes in. A plan sees only its own bucket.",
         "everyone": "Everyone",
         "audienceEveryone": "Everyone sees this ad, whatever plan they hold.",
-        "audienceInclusive": "Holders of a higher plan also see it, so upgrading never shrinks somebody’s pool. Turn that off under Platform settings for exact targeting.",
+        "audienceInclusive": "Only holders of the plans ticked above see this ad. Somebody holding several plans sees every bucket they bought. Platform settings can widen this to \"and every plan above\".",
         "publishing": "Publishing",
         "statusHint": "Only a live ad is served, and only inside its schedule.",
         "exhaustedNote": "This ad has delivered its whole budget and stopped serving. Raise the number of completions to run it again.",
@@ -2148,6 +2148,17 @@
           "body": "An article to read, then one link out to the advertiser. The click is what pays.",
           "proof": "Proved by: the reading time before the click, and nothing else. Nobody can see what happens on the advertiser’s side."
         }
+      },
+      "buckets": {
+        "title": "Buckets",
+        "subtitle": "What each plan can watch today",
+        "short": "{n, plural, =1 {# plan does not have enough ads for today: {plans}.} other {# plans do not have enough ads for today: {plans}.}}",
+        "ofLimit": "{available} of {needed}",
+        "breakdown": "{own} in this bucket, {everyone} shown to everyone",
+        "scheduled": "{n} scheduled",
+        "noneScheduled": "nothing scheduled",
+        "add": "Add",
+        "everyoneNote": "An ad with no plan on it is shown to everybody and counts towards every bucket above. There are {n} live and {scheduled} scheduled."
       }
     },
     "advertisers": {

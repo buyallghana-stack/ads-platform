@@ -43,7 +43,7 @@ export async function getAdsScreenData(): Promise<AdsScreenData> {
     supabase.rpc('admin_list_ads'),
     supabase
       .from('tiers')
-      .select('id, name, slug, is_default, sort_order')
+      .select('id, name, slug, is_default, sort_order, daily_ad_cap')
       .order('sort_order'),
     // app_config through the SERVICE client. The select policy is
     // `is_public OR is_admin()` and this key is private — reading it through
@@ -58,6 +58,8 @@ export async function getAdsScreenData(): Promise<AdsScreenData> {
     name: t.name,
     slug: t.slug,
     isDefault: t.is_default,
+    dailyAdCap: t.daily_ad_cap ?? 0,
+    sortOrder: t.sort_order ?? 0,
   }))
 
   const nameBySlug = new Map(tiers.map((t) => [t.slug, t.name]))
@@ -114,7 +116,7 @@ export async function getAdEditorContext(): Promise<{
   const admin = createAdminClient()
 
   const [tiersRes, configRes] = await Promise.all([
-    supabase.from('tiers').select('id, name, slug, is_default, sort_order').order('sort_order'),
+    supabase.from('tiers').select('id, name, slug, is_default, sort_order, daily_ad_cap').order('sort_order'),
     admin
       .from('app_config')
       .select('key, value')
@@ -129,6 +131,8 @@ export async function getAdEditorContext(): Promise<{
       name: t.name,
       slug: t.slug,
       isDefault: t.is_default,
+      dailyAdCap: t.daily_ad_cap ?? 0,
+      sortOrder: t.sort_order ?? 0,
     })),
     pointsPerGhs: Number(config.get('points_per_currency_unit') ?? 1000),
     linkDwellSeconds: Number(config.get('link_dwell_seconds_default') ?? 15),

@@ -150,7 +150,7 @@
         "body": "{ads} par jour pendant vos {days} premiers jours, et vous pouvez retirer à partir de {threshold} points.",
         "cta": "Commencer gratuitement"
       },
-      "stacking": "Les formules se cumulent. Si vous en détenez plusieurs, les limites quotidiennes s'additionnent, les bonus de gain s'additionnent, et c'est le seuil de retrait le plus bas qui s'applique. Chaque formule court sur une durée fixe et rien ne se renouvelle tout seul : vous n'êtes jamais débité de nouveau sans le demander.",
+      "stacking": "Les forfaits se cumulent. Chaque forfait ajoute sa propre limite quotidienne, et ses pubs sont payées à son propre taux, le meilleur d'abord. Détenir Bronze et Or donne donc les 7 pubs d'Or au taux d'Or, puis les 3 de Bronze au taux de Bronze. Chaque forfait ne peut être détenu qu'une fois.",
       "range": "{from} à {to}",
       "rangeHint": "Payez le montant de votre choix dans cette fourchette. Plus vous payez, plus chaque publicité vous rapporte.",
       "rateRange": "+{from}% à +{to}%",
@@ -1352,7 +1352,7 @@
   "upgrade": {
     "title": "Passer à un forfait",
     "subtitle": "Augmentez votre limite quotidienne et gagnez à un meilleur taux.",
-    "stacking": "Les forfaits se cumulent. Ce que vous avez payé est additionné pour fixer votre taux de gain, donc deux paiements de GHS 100 rapportent le même taux qu'un paiement de GHS 200, et chaque forfait détenu ajoute sa limite quotidienne d'annonces à celle des autres. Chaque forfait ne peut être détenu qu'une fois.",
+    "stacking": "Les forfaits se cumulent. Chaque forfait ajoute sa propre limite quotidienne, et ses pubs sont payées à son propre taux, le meilleur d'abord. Détenir Bronze et Or donne donc les 7 pubs d'Or au taux d'Or, puis les 3 de Bronze au taux de Bronze. Chaque forfait ne peut être détenu qu'une fois.",
     "footnote": "Chaque forfait a sa propre durée, indiquée sur la carte. Les prix sont uniques pour cette période : rien ne se renouvelle automatiquement.",
     "current": {
       "free": "Vous êtes sur le forfait Gratuit",
@@ -1950,10 +1950,10 @@
         "removeCondition": "Supprimer la condition",
         "cascadeNote": "L’omission se propage : si la question ci-dessus n’est jamais posée, celle-ci ne l’est pas non plus, ni celles qui en dépendent.",
         "audience": "Audience",
-        "audienceHint": "Les formules visées par cette publicité.",
+        "audienceHint": "Dans quel lot cette pub va. Un forfait ne voit que son propre lot.",
         "everyone": "Tout le monde",
         "audienceEveryone": "Tout le monde voit cette publicité, quelle que soit sa formule.",
-        "audienceInclusive": "Les formules supérieures la voient aussi : monter en gamme ne réduit jamais le catalogue. Désactivez cette règle dans les réglages pour un ciblage strict.",
+        "audienceInclusive": "Seuls les détenteurs des forfaits cochés ci-dessus voient cette pub. Une personne qui détient plusieurs forfaits voit tous les lots achetés. Les réglages de la plateforme peuvent l'élargir à « et tous les forfaits supérieurs ».",
         "publishing": "Publication",
         "statusHint": "Seule une publicité en ligne est diffusée, et seulement dans sa période.",
         "exhaustedNote": "Cette publicité a livré tout son budget et ne se diffuse plus. Augmentez le nombre de complétions pour la relancer.",
@@ -2148,6 +2148,17 @@
           "body": "Un article à lire, puis un seul lien vers l'annonceur. Le clic paie.",
           "proof": "Prouvé par : le temps de lecture avant le clic, et rien d'autre. Personne ne peut voir ce qui se passe chez l'annonceur."
         }
+      },
+      "buckets": {
+        "title": "Lots",
+        "subtitle": "Ce que chaque forfait peut regarder aujourd'hui",
+        "short": "{n, plural, =1 {# forfait n'a pas assez de pubs pour aujourd'hui : {plans}.} other {# forfaits n'ont pas assez de pubs pour aujourd'hui : {plans}.}}",
+        "ofLimit": "{available} sur {needed}",
+        "breakdown": "{own} dans ce lot, {everyone} visibles par tous",
+        "scheduled": "{n} programmées",
+        "noneScheduled": "rien de programmé",
+        "add": "Ajouter",
+        "everyoneNote": "Une pub sans forfait est visible par tous et compte dans chaque lot ci-dessus. Il y en a {n} en ligne et {scheduled} programmées."
       }
     },
     "advertisers": {

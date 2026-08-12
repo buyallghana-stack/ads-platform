@@ -36,25 +36,35 @@ export default async function NewAdPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>
-  searchParams: Promise<{ format?: string; from?: string }>
+  searchParams: Promise<{ format?: string; from?: string; tier?: string }>
 }) {
   const { locale } = await params
   setRequestLocale(locale)
-  const { format, from } = await searchParams
+  const { format, from, tier } = await searchParams
   const t = await getTranslations('admin.ads.editor')
 
   const chosen = FORMATS.find((f) => f === format) ?? null
 
   // The chooser needs none of the editor's context, so it answers before any
-  // of it is fetched.
-  if (!chosen && !from) return <AdFormatChooser />
+  // of it is fetched. `tier` rides through it: the operator pressed Add on a
+  // bucket, and losing which bucket that was between here and the format
+  // question would be the whole point of the board thrown away.
+  if (!chosen && !from) return <AdFormatChooser tier={tier ?? null} />
 
   const context = await getAdEditorContext()
 
   const source = from ? await getAdDraft(from) : null
-  const initial = source
+  const bucket = tier ? context.tiers.find((option) => option.slug === tier) : undefined
+
+  const base = source
     ? duplicateDraft(source, t('copySuffix'))
     : blankDraft(chosen ?? 'video', context.linkDwellSeconds)
+
+  /* Arrived from a bucket: that plan is already ticked. Targeting is exclusive
+     since migration 188, so this IS which bucket the ad lands in, and making
+     the operator pick it again after pressing Add on that very bucket is how a
+     new ad ends up untargeted and served to everybody. */
+  const initial = bucket ? { ...base, tierIds: [bucket.id] } : base
 
   return <AdEditor initial={initial} tiers={context.tiers} pointsPerGhs={context.pointsPerGhs} />
 }

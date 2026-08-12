@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
+import { AdBuckets } from '@/components/admin/AdBuckets'
 import { PageHeader } from '@/components/admin/AdminChrome'
 import { AdsTable } from '@/components/admin/AdsTable'
 import { getAdsScreenData } from '@/lib/admin/ads-data'
@@ -22,6 +23,9 @@ export default async function AdminAdsPage({ params }: { params: Promise<{ local
   return (
     <>
       <PageHeader title={t('title')} description={t('description')} />
+      {/* Above the pool, not inside it: whether today is covered is the first
+          question this screen has to answer, and the table cannot answer it. */}
+      <AdBuckets ads={data.ads} tiers={data.tiers} serverNow={data.now} />
       <AdsTable ads={data.ads} pointsPerGhs={data.pointsPerGhs} serverNow={data.now} />
     </>
   )

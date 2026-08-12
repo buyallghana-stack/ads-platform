@@ -297,7 +297,16 @@ export type AdListItem = {
 }
 
 /** A plan, as the audience picker needs it. */
-export type TierOption = { id: string; name: string; slug: string; isDefault: boolean }
+export type TierOption = {
+  id: string
+  name: string
+  slug: string
+  isDefault: boolean
+  /** The plan's daily ad limit, which is also how many ads its bucket needs.
+   *  Operator, 2026-08-12: a bucket per plan, sized to that plan's limit. */
+  dailyAdCap: number
+  sortOrder: number
+}
 
 /* ---- The editor's working copy -------------------------------------------
  *

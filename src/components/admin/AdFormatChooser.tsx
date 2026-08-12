@@ -28,7 +28,7 @@ const CARDS: { format: AdFormat; Icon: typeof Film; tone: string }[] = [
   { format: 'link', Icon: Link2, tone: 'bg-teal-50 text-teal-700 ring-teal-600/15' },
 ]
 
-export function AdFormatChooser() {
+export function AdFormatChooser({ tier = null }: { tier?: string | null }) {
   const t = useTranslations('admin.ads.chooser')
 
   return (
@@ -52,7 +52,10 @@ export function AdFormatChooser() {
         {CARDS.map(({ format, Icon, tone }) => (
           <Link
             key={format}
-            href={`/admin/ads/new?format=${format}`}
+            /* The bucket rides through the format question. Pressing Add on
+               the Bronze bucket and arriving at an untargeted ad two clicks
+               later would undo the board entirely. */
+            href={`/admin/ads/new?format=${format}${tier ? `&tier=${tier}` : ''}`}
             className={cn(
               'group flex flex-col rounded-(--radius-card) border border-ink-200 bg-surface p-4',
               'transition-[border-color,box-shadow] duration-150',
