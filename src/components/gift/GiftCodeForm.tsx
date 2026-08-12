@@ -103,15 +103,27 @@ export function GiftCodeForm() {
   }
 
   return (
-    <div className="animate-rise">
+    /*
+      CONTAINED, NOT SPREAD (operator, 2026-08-12: this page "fills the screen
+      too much"). It was a 56px icon, a 1.25rem heading, a two-line subtitle,
+      a 56px-tall input and a full-width button, each stretched edge to edge
+      with a screen and a half of nothing underneath. One short form floating
+      in an empty page reads as unfinished rather than as focused.
+
+      Everything is inside a card now, at the sizes the rest of the app uses
+      for a single-purpose form. Nothing was removed: the icon, the heading,
+      the explanation, the field, the counter and the button are all still
+      here.
+    */
+    <div className="animate-rise rounded-(--radius-panel) border border-ink-200 bg-surface p-5 sm:p-6">
       <div className="flex flex-col items-center text-center">
-        <span className="grid size-14 place-items-center rounded-full bg-orange-50 text-orange-600">
-          <Gift aria-hidden className="size-7" />
+        <span className="grid size-11 place-items-center rounded-full bg-orange-50 text-orange-600">
+          <Gift aria-hidden className="size-5" />
         </span>
-        <h1 className="mt-3.5 text-[1.25rem] font-semibold tracking-[-0.01em] text-ink-900">
+        <h1 className="mt-3 text-[1.0625rem] font-semibold tracking-[-0.01em] text-ink-900">
           {t('title')}
         </h1>
-        <p className="mt-1.5 max-w-[34ch] text-[0.875rem] leading-relaxed text-ink-500">
+        <p className="mt-1 max-w-[32ch] text-[0.8125rem] leading-relaxed text-ink-500">
           {t('subtitle')}
         </p>
       </div>
@@ -148,8 +160,8 @@ export function GiftCodeForm() {
           placeholder={t('placeholder')}
           aria-describedby="gift-code-hint"
           className={cn(
-            'mt-1.5 h-14 w-full rounded-(--radius-input) border bg-surface text-center',
-            'font-mono text-[1.125rem] tracking-[0.2em] text-ink-900 uppercase',
+            'mt-1.5 h-12 w-full rounded-(--radius-input) border bg-canvas text-center',
+            'font-mono text-[1rem] tracking-[0.18em] text-ink-900 uppercase',
             'placeholder:tracking-[0.1em] placeholder:text-ink-300 placeholder:normal-case',
             'focus:outline-none focus:shadow-[0_0_0_3px]',
             complete

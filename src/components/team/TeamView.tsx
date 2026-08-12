@@ -2,12 +2,11 @@
 
 import { useState } from 'react'
 
-import { ArrowUpRight, Coins, Gem, Info, Users, Wallet } from 'lucide-react'
+import { Info, Users } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import { ReferralCard } from '@/components/dashboard/ReferralCard'
 import { Avatar } from '@/components/profile/Avatar'
-import { StatCard } from '@/components/ui/Card'
 import { cn } from '@/lib/cn'
 import {
   TEAM_SCOPES,
@@ -37,11 +36,8 @@ import {
  *     here carrying All / Level 1 / Level 2 — which is also how the screen
  *     answers "on level 1 and level 2" without cramming two figures into
  *     every tile;
- *   - the StatCard tiles from Home, in their fixed tone meanings (violet for
- *     plans, success for money in, teal for money out, orange for referrals);
- *   - the balance hero's currency treatment — a small muted GHS in front of a
- *     large tabular number, which is what stops "GHS 1,234.56" outgrowing a
- *     tile on a 390px phone;
+ *   - a compact figure grid for the four totals, sized to be read as context
+ *     rather than as the headline (see the note on it below);
  *   - the Transaction History split: a card feed below md, a table from md up.
  *
  * THE ONE THING THAT IS NOT BORROWED is the closing note. This screen shows
@@ -50,68 +46,15 @@ import {
  * disclosure the user has to find in a policy is not much of a disclosure.
  */
 
-/**
- * The balance hero's currency treatment, sized for a tile: a small muted GHS
- * in front of a large tabular number. Defined here rather than inside the view
- * because a component created during render is a new component type on every
- * render.
- *
- * THE SIZE FOLLOWS THE NUMBER, and it has to. A tile at 390px gives the value
- * about 105px once the padding and the icon chip are taken out, which is nine
- * or ten characters at 1.5rem — so a team that has paid GHS 3,703,753.67
- * rendered as `3,703,753.6` with the last digits cut off at the card's edge.
- * The page did not scroll sideways, which is why it was invisible to every
- * overflow check we had: the card simply clipped it.
- *
- * Steps rather than a clamp, because the breakpoint that matters is the COUNT
- * of digits, not the viewport. Anything past thirteen characters — a team
- * paying more than ten million cedis — keeps the exact figure in `title` and
- * accepts that a tile is the wrong place to read it in full; the per-person
- * list underneath still carries every digit.
- */
-function Cedis({ amount }: { amount: string }) {
-  return (
-    <span className="flex items-baseline gap-1 whitespace-nowrap" title={`GHS ${amount}`}>
-      <span className="shrink-0 text-[0.8125rem] font-semibold text-ink-400">GHS</span>
-      <span className={cedisSize(amount)}>{amount}</span>
-    </span>
-  )
-}
+/*
+  THE TILE-SIZING MACHINERY WENT WITH THE TILES (2026-08-12).
 
-/**
- * How big the figure can be without leaving its card, and whether the card can
- * still afford its icon.
- *
- * MEASURED IN THE BROWSER, not reasoned about. At 390px a tile gives the value
- * column 103px with its icon chip and 139px without, and the "GHS" prefix plus
- * its gap costs about 35 of that. So the budget for the digits themselves is
- * 68px with the icon and 104px without — and "GHS 370.00", which is what the
- * demo team shows today, needs 111px. It was clipping at the card's edge in
- * the ordinary case, not only in an invented one.
- *
- * Two consequences, in this order:
- *
- *   1. A currency tile gives up its ICON rather than its digits. The chip is
- *      decoration and the label above already says which figure this is; the
- *      digits are the entire point of a screen built to be checked. Only the
- *      shortest amounts keep it.
- *   2. Past that, the type steps down. Steps rather than a clamp because what
- *      overflows is a COUNT of digits, not a viewport width — and the widths
- *      above are for the narrowest phone we support, so every larger screen
- *      has room to spare.
- *
- * Nothing here truncates. An ellipsis on a money screen is worse than a small
- * number: `GHS 3,703…` cannot be checked against anything.
- */
-export function cedisSize(amount: string): string {
-  if (amount.length > 12) return 'text-[0.875rem]'
-  if (amount.length > 8) return 'text-[1rem]'
-  return 'text-[1.5rem]'
-}
-
-/** Short amounts keep the icon; longer ones spend its 36px on digits. */
-const iconIfItFits = (amount: string, icon: React.ReactNode) =>
-  amount.length > 5 ? undefined : icon
+  `Cedis`, `cedisSize` and `iconIfItFits` existed to keep a large currency
+  figure inside a `StatCard` at 390px: the value stepped down through three
+  type sizes and gave up its icon before it gave up a digit. The summary is
+  four small figures in one card now, so there is no tile left to overflow and
+  nothing to measure. The reasoning is in the history if tiles ever return.
+*/
 
 const LEVEL_TONE: Record<number, string> = {
   1: 'bg-brand-50 text-brand-700 border-brand-500/25',
@@ -175,39 +118,42 @@ export function TeamView({ data }: { data: TeamData }) {
             })}
           </div>
 
-          {/* The four figures the brief names, for whichever scope is selected. */}
+          {/*
+            THE SAME FOUR FIGURES, IN A QUARTER OF THE HEIGHT.
+
+            Operator, 2026-08-12: this tab "fills the screen too much". It did:
+            four `StatCard` tiles, each with an icon chip, a 2rem number and a
+            sublabel, took about three hundred pixels of a 390px phone before
+            the first team member appeared. The figures are a summary, and a
+            summary that pushes the thing it summarises off the screen has the
+            balance backwards.
+
+            Nothing is lost. All four labels, all four values and all four
+            hints are still here, in one card at a size that reads as context
+            rather than as the headline.
+          */}
           <div
             style={{ '--rise-delay': '0.1s' } as React.CSSProperties}
-            className="animate-rise mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4"
+            className="animate-rise mt-4 grid grid-cols-2 gap-x-4 gap-y-3 rounded-(--radius-panel) border border-ink-200 bg-surface px-4 py-3.5 lg:grid-cols-4"
           >
-            <StatCard
-              label={t('stats.plans')}
-              value={format.number(totals.plansBought)}
-              sublabel={t('stats.peopleCount', { count: totals.people })}
-              tone="violet"
-              icon={<Gem />}
-            />
-            <StatCard
-              label={t('stats.worth')}
-              value={<Cedis amount={money(totals.plansValue)} />}
-              sublabel={t('stats.worthHint')}
-              tone="success"
-              icon={iconIfItFits(money(totals.plansValue), <Coins />)}
-            />
-            <StatCard
-              label={t('stats.withdrawn')}
-              value={<Cedis amount={money(totals.redeemed)} />}
-              sublabel={t('stats.withdrawnHint')}
-              tone="teal"
-              icon={iconIfItFits(money(totals.redeemed), <ArrowUpRight />)}
-            />
-            <StatCard
-              label={t('stats.left')}
-              value={<Cedis amount={money(totals.remaining)} />}
-              sublabel={t('stats.leftHint')}
-              tone="orange"
-              icon={iconIfItFits(money(totals.remaining), <Wallet />)}
-            />
+            {[
+              { label: t('stats.plans'), value: format.number(totals.plansBought), hint: t('stats.peopleCount', { count: totals.people }) },
+              { label: t('stats.worth'), value: `GHS ${money(totals.plansValue)}`, hint: t('stats.worthHint') },
+              { label: t('stats.withdrawn'), value: `GHS ${money(totals.redeemed)}`, hint: t('stats.withdrawnHint') },
+              { label: t('stats.left'), value: `GHS ${money(totals.remaining)}`, hint: t('stats.leftHint') },
+            ].map((figure) => (
+              <div key={figure.label} className="min-w-0">
+                <p className="truncate text-[0.6875rem] font-medium tracking-[0.04em] text-ink-500 uppercase">
+                  {figure.label}
+                </p>
+                <p className="mt-0.5 truncate text-[1.0625rem] font-semibold tracking-[-0.01em] tabular-nums text-ink-900">
+                  {figure.value}
+                </p>
+                <p className="mt-0.5 truncate text-[0.6875rem] leading-snug text-ink-400">
+                  {figure.hint}
+                </p>
+              </div>
+            ))}
           </div>
 
           {/* ---- The people ------------------------------------------------ */}
@@ -231,51 +177,68 @@ export function TeamView({ data }: { data: TeamData }) {
                 {/* Mobile: a card per person. */}
                 <ol className="divide-y divide-ink-200 md:hidden">
                   {members.map((member, index) => (
-                    <li key={member.id} className="px-4 py-3.5">
-                      <div className="flex items-start gap-3">
-                        <span className="mt-1 w-5 shrink-0 text-[0.75rem] font-semibold tabular-nums text-ink-400">
-                          {index + 1}
-                        </span>
-                        <Avatar name={member.name} src={member.avatarUrl} className="size-9 text-[0.75rem]" />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-start justify-between gap-2">
-                            <p className="truncate text-[0.9375rem] font-semibold text-ink-900">
-                              {member.name ?? t('list.noName')}
-                            </p>
-                            {scope === 'all' && (
-                              <span
-                                className={cn(
-                                  'shrink-0 rounded-full border px-2 py-0.5 text-[0.6875rem] font-semibold',
-                                  LEVEL_TONE[member.level],
-                                )}
-                              >
-                                {t(`level.${member.level}`)}
-                              </span>
-                            )}
-                          </div>
-                          <p className="mt-0.5 text-[0.8125rem] tabular-nums text-ink-500">
-                            {member.phone ?? t('list.noPhone')}
-                          </p>
-                          <p className="mt-1.5 inline-flex rounded-full border border-ink-200 bg-ink-100 px-2 py-0.5 text-[0.75rem] font-medium text-ink-700">
-                            {planLabel(member)}
-                          </p>
-                        </div>
-                      </div>
+                    /*
+                      ONE BLOCK PER PERSON, NOT TWO.
 
-                      <dl className="mt-3 grid grid-cols-2 gap-2 border-t border-ink-100 pt-3">
-                        <div>
-                          <dt className="text-[0.75rem] text-ink-400">{t('list.withdrawn')}</dt>
-                          <dd className="mt-0.5 text-[0.9375rem] font-semibold tabular-nums text-ink-900">
-                            GHS {money(member.redeemed)}
-                          </dd>
+                      Operator, 2026-08-12: "the referred person details looks
+                      too big". It was ~170px each: a header block, then a
+                      hairline, then a two-column money block with its own
+                      labels and 0.9375rem values. Three people filled a phone
+                      screen on their own.
+
+                      Every field survives — name, phone, plan, level, what
+                      they withdrew and what is left. The money moved onto one
+                      line beneath the plan, labelled inline, which is how it
+                      reads in a statement anyway. About 90px now.
+                    */
+                    <li key={member.id} className="flex items-start gap-3 px-4 py-3">
+                      <span className="mt-0.5 w-4 shrink-0 text-[0.75rem] font-semibold tabular-nums text-ink-400">
+                        {index + 1}
+                      </span>
+                      <Avatar
+                        name={member.name}
+                        src={member.avatarUrl}
+                        className="size-8 text-[0.6875rem]"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="truncate text-[0.875rem] font-semibold text-ink-900">
+                            {member.name ?? t('list.noName')}
+                          </p>
+                          {scope === 'all' && (
+                            <span
+                              className={cn(
+                                'shrink-0 rounded-full border px-1.5 py-px text-[0.625rem] font-semibold',
+                                LEVEL_TONE[member.level],
+                              )}
+                            >
+                              {t(`level.${member.level}`)}
+                            </span>
+                          )}
                         </div>
-                        <div>
-                          <dt className="text-[0.75rem] text-ink-400">{t('list.left')}</dt>
-                          <dd className="mt-0.5 text-[0.9375rem] font-semibold tabular-nums text-ink-900">
+
+                        <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[0.75rem] text-ink-500">
+                          <span className="tabular-nums">{member.phone ?? t('list.noPhone')}</span>
+                          <span aria-hidden className="text-ink-300">
+                            ·
+                          </span>
+                          <span className="text-ink-700">{planLabel(member)}</span>
+                        </p>
+
+                        <p className="mt-1 flex flex-wrap items-baseline gap-x-1.5 text-[0.75rem] text-ink-500">
+                          <span>{t('list.left')}</span>
+                          <span className="font-semibold tabular-nums text-ink-900">
                             GHS {money(member.remaining)}
-                          </dd>
-                        </div>
-                      </dl>
+                          </span>
+                          <span aria-hidden className="text-ink-300">
+                            ·
+                          </span>
+                          <span>{t('list.withdrawn')}</span>
+                          <span className="font-semibold tabular-nums text-ink-900">
+                            GHS {money(member.redeemed)}
+                          </span>
+                        </p>
+                      </div>
                     </li>
                   ))}
                 </ol>

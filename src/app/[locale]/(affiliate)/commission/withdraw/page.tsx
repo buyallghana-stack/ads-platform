@@ -1,9 +1,8 @@
 import type { Metadata } from 'next'
 
-import { ArrowLeft } from 'lucide-react'
-import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { setRequestLocale } from 'next-intl/server'
 import { CommissionWithdraw } from '@/components/affiliate/CommissionWithdraw'
-import { Link, redirect } from '@/i18n/navigation'
+import { redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
 import { getAffiliateDashboard, getAffiliateStatement } from '@/lib/market/data'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -55,7 +54,6 @@ export default async function CommissionWithdrawPage({
   const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
 
-  const t = await getTranslations('affiliate.withdraw')
   const admin = createAdminClient()
 
   const [
@@ -106,27 +104,29 @@ export default async function CommissionWithdrawPage({
         : null
 
   return (
-    <div className="relative isolate mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 py-5 sm:px-6 md:px-8 md:py-7">
-      <div
-        aria-hidden
-        className="bg-field pointer-events-none absolute inset-x-0 top-0 -z-10 h-[26rem]"
-      />
+    /*
+      ⚠️ THE SAME FRAME AS THE ADS WITHDRAWAL, deliberately (operator,
+      2026-08-12: "the affiliate withdrawal ui doesnt meet the same design
+      pattern as the ads").
 
-      <Link
-        href="/commission"
-        className="inline-flex w-fit items-center gap-1.5 text-[0.8125rem] font-medium text-ink-500 transition-colors hover:text-ink-900"
-      >
-        <ArrowLeft aria-hidden className="size-4" />
-        {t('back')}
-      </Link>
+      What changed: this was a 2xl page with a text back link, a 1.625rem
+      display heading and a subtitle, sitting on the brand wash. Withdrawing
+      money on the ads side is a narrow 26rem column with a circular back
+      button, one small title and a progress bar, and nothing else competing
+      for the screen. Two screens that take money out of the same platform
+      should not feel like two products.
 
-      <div>
-        <h1 className="text-[1.375rem] font-semibold tracking-[-0.02em] text-ink-900 sm:text-[1.625rem]">
-          {t('title')}
-        </h1>
-        <p className="mt-0.5 text-[0.8125rem] text-ink-500">{t('subtitle')}</p>
-      </div>
+      The header and the progress bar moved INTO the client component, because
+      only it knows which stage the person is on. This page is now the column
+      and nothing more.
 
+      What did NOT change is the number of steps. The ads flow has four because
+      points are not money and it has to explain a peg, convert, and take a
+      PIN. Commission is already cedis, so this stays two. Matching the chrome
+      is the ask; inventing steps to match a count would be worse than the
+      inconsistency.
+    */
+    <div className="mx-auto w-full max-w-[26rem] px-5 pt-4 pb-10 sm:px-0 md:pt-8">
       <CommissionWithdraw
         balanceMinor={dashboard.balance_minor ?? 0}
         minimumMinor={dashboard.payout_minimum_minor ?? 0}

@@ -2,7 +2,15 @@
 
 import { useMemo, useState, useTransition } from 'react'
 
-import { AlertTriangle, ArrowRight, CheckCircle2, Loader2, ShieldCheck, Wallet } from 'lucide-react'
+import {
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  Loader2,
+  ShieldCheck,
+  Wallet,
+} from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import {
@@ -86,6 +94,57 @@ export function CommissionWithdraw({
   const tooBig = amountMinor > balanceMinor
   const valid = amountMinor > 0 && !tooSmall && !tooBig
 
+  /*
+    THE FRAME THE ADS WITHDRAWAL USES (operator, 2026-08-12: this screen did
+    not match it). A circular back button, one small title, and a progress bar
+    across the stages. Every state below renders inside it, so a person filling
+    this in and a person filling in the points withdrawal are looking at the
+    same screen furniture.
+
+    TWO SEGMENTS, NOT FOUR. The bar shows progress through THIS flow, which has
+    an amount and a confirmation. Padding it to four to match the other side
+    would be drawing three steps that do not exist.
+
+    Brand tokens, not violet ones: `.affiliate` on the layout wrapper already
+    remaps brand to violet inside this tree, so `bg-brand-600` here IS the
+    violet the operator sees, and it follows the skin if the skin ever moves.
+  */
+  const stages: Array<'amount' | 'confirm'> = ['amount', 'confirm']
+  const stageIndex = stages.indexOf(stage)
+
+  const frame = (children: React.ReactNode, showSteps = true) => (
+    <>
+      <div className="flex items-center gap-3">
+        <Link
+          href="/commission"
+          aria-label={t('back')}
+          className="grid size-9 place-items-center rounded-full text-ink-600 transition-colors hover:bg-ink-100 hover:text-ink-900 pointer-coarse:size-10"
+        >
+          <ArrowLeft aria-hidden className="size-4.5" />
+        </Link>
+        <h1 className="flex-1 text-[1.0625rem] font-semibold tracking-[-0.01em] text-ink-900">
+          {t('title')}
+        </h1>
+      </div>
+
+      {showSteps && (
+        <div className="mt-4 flex gap-1.5" aria-hidden>
+          {stages.map((s, i) => (
+            <span
+              key={s}
+              className={cn(
+                'h-1 flex-1 rounded-full transition-colors duration-300',
+                i <= stageIndex ? 'bg-brand-600' : 'bg-ink-200',
+              )}
+            />
+          ))}
+        </div>
+      )}
+
+      <div className="mt-6">{children}</div>
+    </>
+  )
+
   const submit = () => {
     startTransition(async () => {
       const outcome = await requestCommissionWithdrawal({ amountMinor, pin })
@@ -96,7 +155,7 @@ export function CommissionWithdraw({
 
   /* ---------------- done ---------------- */
   if (result?.ok) {
-    return (
+    return frame(
       <section className="rounded-(--radius-panel) border border-success-500/30 bg-success-50 p-6 text-center">
         <span
           aria-hidden
@@ -133,7 +192,7 @@ export function CommissionWithdraw({
           {t('done.back')}
         </Link>
       </section>
-    )
+    , false)
   }
 
   /* ----------------  not enough yet  ----------------
@@ -149,7 +208,7 @@ export function CommissionWithdraw({
      taps later, and the reason the operator could not find the flow. */
   if (payoutsEnabled && destination && !openRequest && balanceMinor < minimumMinor) {
     const shortMinor = minimumMinor - balanceMinor
-    return (
+    return frame(
       <section className="rounded-(--radius-panel) border border-ink-200 bg-surface p-6 text-center">
         <span
           aria-hidden
@@ -182,7 +241,7 @@ export function CommissionWithdraw({
           {t('notYet.cta')}
         </Link>
       </section>
-    )
+    , false)
   }
 
   /* ---------------- blocked before it starts ---------------- */
@@ -194,7 +253,7 @@ export function CommissionWithdraw({
         : openRequest
           ? 'openRequest'
           : 'nothing'
-    return (
+    return frame(
       <section className="rounded-(--radius-panel) border border-ink-200 bg-surface p-6 text-center">
         <span
           aria-hidden
@@ -223,11 +282,11 @@ export function CommissionWithdraw({
           </Link>
         )}
       </section>
-    )
+    , false)
   }
 
   /* ---------------- the form ---------------- */
-  return (
+  return frame(
     <div className="flex flex-col gap-4">
       {result && !result.ok && <Refusal result={result} />}
 
