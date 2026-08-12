@@ -1473,6 +1473,7 @@
         "flagged": "Signalés",
         "announcements": "Annonces",
         "ads": "Annonces et sondages",
+        "adResponses": "Réponses aux sondages",
         "catalogue": "Catalogue",
         "config": "Paramètres plateforme",
         "audit": "Journal",
@@ -1486,8 +1487,7 @@
         "training": "Formation",
         "communities": "Communautés"
       },
-      "viewUserApp": "Voir l’app utilisateur",
-      "adResponses": "Réponses aux sondages"
+      "viewUserApp": "Voir l’app utilisateur"
     },
     "overview": {
       "title": "Aperçu",
@@ -2544,7 +2544,7 @@
         },
         "baseAdPoints": {
           "label": "Ce que paie une pub",
-          "description": "La base que paie chaque pub avant tout multiplicateur — la valeur par pub du forfait gratuit. Définie ici plutôt que sur chaque pub, pour que l'échelle et le fil ne se contredisent pas.",
+          "description": "La base que paie chaque pub avant tout multiplicateur, c'est-à-dire la valeur par pub du forfait gratuit. Définie ici plutôt que sur chaque pub, pour que l'échelle et le fil ne se contredisent pas.",
           "warning": "C'est le nombre sur lequel repose toute l'échelle : chaque forfait paie cette base multipliée par son propre taux. Le changer modifie d'un coup ce que paiera chaque future pub, sur tous les forfaits."
         },
         "combineMode": {
@@ -3524,6 +3524,20 @@
         "answer": "Réponse",
         "who": "Qui a répondu",
         "watched": "Regardé"
+      },
+      "summary": {
+        "title": "Résumé",
+        "download": "Télécharger le graphique",
+        "preparing": "Préparation…",
+        "caption": "{answers} réponses de {people} personnes · {span}",
+        "tiles": {
+          "answers": "réponses",
+          "people": "personnes",
+          "questions": "questions"
+        },
+        "gradedNote": "{n} réponses · a une bonne réponse",
+        "opinionNote": "{n} réponses · avis, non noté",
+        "written": "{n} réponses écrites dans le CSV"
       }
     }
   },

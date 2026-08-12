@@ -6,6 +6,7 @@ import { Download } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import { EmptyState, TableShell, Toolbar } from '@/components/admin/AdminTable'
+import { SurveySummary } from '@/components/admin/SurveySummary'
 import { useRouter } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
 import type { AdResponseRow, ResponsesScreenData } from '@/lib/admin/responses-data'
@@ -157,6 +158,19 @@ export function ResponsesReport({ data }: { data: ResponsesScreenData }) {
         <EmptyState>{data.rows.length === 0 ? t('empty') : t('noMatch')}</EmptyState>
       ) : (
         <>
+          {/* The summary reads the SAME filtered rows as the table and the CSV,
+              so a search or an ad filter narrows all three together. A picture
+              that disagreed with the file underneath it would be worse than no
+              picture. */}
+          <SurveySummary
+            rows={visible}
+            scope={
+              data.adId
+                ? (data.ads.find((x) => x.id === data.adId)?.title ?? t('allAds'))
+                : t('allAds')
+            }
+          />
+
           <TableShell>
             <thead>
               <tr>

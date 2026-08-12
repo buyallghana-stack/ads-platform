@@ -1473,6 +1473,7 @@
         "flagged": "Flagged",
         "announcements": "Announcements",
         "ads": "Ads & surveys",
+        "adResponses": "Survey responses",
         "catalogue": "Catalogue",
         "config": "Platform settings",
         "audit": "Audit log",
@@ -1486,8 +1487,7 @@
         "training": "Training",
         "communities": "Communities"
       },
-      "viewUserApp": "View user app",
-      "adResponses": "Survey responses"
+      "viewUserApp": "View user app"
     },
     "overview": {
       "title": "Overview",
@@ -2544,7 +2544,7 @@
         },
         "baseAdPoints": {
           "label": "What one ad pays",
-          "description": "The base every ad pays before any plan multiplier — the free plan’s per-ad value. Set here rather than on each ad, so the ladder and the feed cannot disagree.",
+          "description": "The base every ad pays before any plan multiplier, which is the free plan’s per-ad value. Set here rather than on each ad, so the ladder and the feed cannot disagree.",
           "warning": "This is the number the whole ladder is built on: every plan pays this base times its own rate. Changing it moves what every future ad pays on every plan at once."
         },
         "combineMode": {
@@ -3524,6 +3524,20 @@
         "answer": "Answer",
         "who": "Who answered",
         "watched": "Watched"
+      },
+      "summary": {
+        "title": "Summary",
+        "download": "Download chart",
+        "preparing": "Preparing…",
+        "caption": "{answers} answers from {people} people · {span}",
+        "tiles": {
+          "answers": "answers",
+          "people": "people answered",
+          "questions": "questions"
+        },
+        "gradedNote": "{n} answers · has a right answer",
+        "opinionNote": "{n} answers · opinion, not graded",
+        "written": "{n} written answers in the CSV"
       }
     }
   },
