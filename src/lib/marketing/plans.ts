@@ -198,12 +198,23 @@ export async function getMarketingFigures(): Promise<MarketingFigures> {
   const bandOf = (index: number) => {
     const row = rows[index]
     const next = rows[index + 1]
-    const maxMinor = next
-      ? Number(next.price_minor) - 1
-      : Number(row.band_max_minor ?? row.price_minor)
-    const maxMultiplier = next
-      ? Number(next.reward_multiplier)
-      : Number(row.band_max_multiplier ?? row.reward_multiplier)
+    /* ⚠️ THE RUNG'S OWN CEILING FIRST (migration 189). The ladder has GAPS
+       between the plans now — Bronze sells GHS 85 to 105 and Silver starts at
+       145 — so a band no longer ends where the next one begins, and deriving
+       it from the next rung advertised Bronze as running to GHS 144 on the
+       front page. The next rung is the fallback for a continuous ladder. */
+    const maxMinor =
+      row.band_max_minor !== null
+        ? Number(row.band_max_minor)
+        : next
+          ? Number(next.price_minor) - 1
+          : Number(row.price_minor)
+    const maxMultiplier =
+      row.band_max_multiplier !== null
+        ? Number(row.band_max_multiplier)
+        : next
+          ? Number(next.reward_multiplier)
+          : Number(row.reward_multiplier)
     return { maxGhs: Math.floor(maxMinor / 100), maxMultiplier }
   }
 

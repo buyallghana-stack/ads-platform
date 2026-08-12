@@ -155,6 +155,17 @@ export default async function AffiliateHomePage({
             </Link>
           )}
         </section>
+
+        {/* ⚠️ AN ACCOUNT WITHOUT A COURSE (operator, 2026-08-12). Until the
+            reset, holding an affiliate row meant having bought training, so
+            this screen only ever said "finish your training". A pending
+            account with nothing bought was told to finish something it had
+            never started, with no way to buy it. The programmes belong here
+            for exactly that person, and `training_offers` is empty once they
+            hold one, so a member is never sold what they already own. */}
+        {!suspended && (dashboard.training_offers ?? []).length > 0 && (
+          <JoinPanel offers={dashboard.training_offers ?? []} />
+        )}
       </div>
     )
   }

@@ -260,6 +260,7 @@ describe.skipIf(!HAS_DB)('and the database agrees', () => {
       const { rows } = await tx.query<{
         slug: string
         band_max_ghs: string | null
+        own_band_max_ghs: string | null
         price_ghs: string
         daily_ad_cap: number
         reward_multiplier: string
@@ -272,14 +273,22 @@ describe.skipIf(!HAS_DB)('and the database agrees', () => {
         `select t.id, t.slug, t.name, (t.price_minor / 100.0)::text as price_ghs,
                 case when t.is_default or not t.is_active then null
                      else (public.plan_band_max_minor(t.id) / 100.0)::text end as band_max_ghs,
+                case when t.band_max_minor is null then null
+                     else (t.band_max_minor / 100.0)::text end as own_band_max_ghs,
                 t.daily_ad_cap, t.reward_multiplier::text, t.sort_order, t.is_active, t.is_default
            from public.tiers t order by t.sort_order`,
       )
 
+      /* ⚠️ `ownBandMaxGhs` HAS TO BE HANDED OVER (migration 189). Every rung
+         carries its own ceiling now, and a Rung built without one sends the
+         client-side rule back to "one pesewa below the next plan" — which is
+         exactly the disagreement this test exists to catch. The admin screens
+         pass it; this fixture did not, and said so by failing. */
       const plans: Rung[] = rows.map((r) => ({
         id: r.id,
         name: r.name,
         priceGhs: Number(r.price_ghs),
+        ownBandMaxGhs: r.own_band_max_ghs === null ? null : Number(r.own_band_max_ghs),
         dailyAdCap: r.daily_ad_cap,
         rewardMultiplier: Number(r.reward_multiplier),
         sortOrder: r.sort_order,
@@ -287,11 +296,25 @@ describe.skipIf(!HAS_DB)('and the database agrees', () => {
         isDefault: r.is_default,
       }))
 
+      /* Every rung, not just Bronze: hiding a plan changes what the ones
+         around it are cut against, and the two implementations have to agree
+         about all of them. */
+      for (const row of rows) {
+        if (row.band_max_ghs === null) continue
+        const mine = bandFor(plans.find((p) => p.id === row.id)!, plans)
+        expect([row.slug, mine!.toGhs]).toEqual([row.slug, Number(row.band_max_ghs)])
+      }
+
+      /* And the behaviour that changed with the gaps: a rung with a ceiling of
+         its own does NOT stretch when the plan above it is hidden. Bronze
+         sells GHS 85 to 105 whether or not Silver is on sale, because 105 is
+         Bronze's own number rather than a fact about Silver. */
       const bronze = rows.find((r) => r.slug === 'bronze')!
-      const mine = bandFor(plans.find((p) => p.id === bronze.id)!, plans)
-      expect(mine!.toGhs).toBe(Number(bronze.band_max_ghs))
-      // And it really did stretch past Silver rather than staying put.
-      expect(mine!.toGhs).toBeGreaterThan(140)
+      if (bronze.own_band_max_ghs !== null) {
+        expect(Number(bronze.band_max_ghs)).toBe(Number(bronze.own_band_max_ghs))
+      } else {
+        expect(Number(bronze.band_max_ghs)).toBeGreaterThan(140)
+      }
     })
   })
 })

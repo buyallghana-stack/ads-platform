@@ -70,11 +70,18 @@ export async function LinksLocked({
         </div>
       )}
 
+      {/* ⚠️ THREE STATES, NOT TWO (operator, 2026-08-12: "continue training
+          when clicked shows no course at the learn tab"). `percent` is null
+          when the person owns no training at all, and a number when they own
+          it and are partway through. Sending the first case to /learn is a
+          dead end: the tab is empty by definition, because there is nothing
+          to continue. It was unreachable until the reset left accounts
+          holding no course. */}
       <Link
-        href={state === 'none' ? '/market' : '/learn'}
+        href={state === 'none' || percent === null ? '/market' : '/learn'}
         className="mt-4 inline-flex rounded-(--radius-input) bg-brand-600 px-4 py-2.5 text-[0.875rem] font-semibold text-white transition-colors hover:bg-brand-500"
       >
-        {t(state === 'none' ? 'ctaJoin' : 'ctaLearn')}
+        {t(state === 'none' ? 'ctaJoin' : percent === null ? 'ctaStart' : 'ctaLearn')}
       </Link>
     </section>
   )

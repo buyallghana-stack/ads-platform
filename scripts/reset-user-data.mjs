@@ -97,7 +97,13 @@ const ADS = [
   'daily_earning_counters',
   'daily_issuance',
   'fraud_signals', // points at fraud_checks
-  'fraud_checks',
+  /* ⚠️ NOT `fraud_checks`. It reads like user data and is not: it is the RULE
+     TABLE — code, weight, severity, action, enabled — nine rows that define
+     what fraud detection even looks for. Deleting it on 2026-08-12 switched
+     detection off entirely and the suite caught it minutes later
+     (`device_multi_account` stopped firing, a shared-device signup scored 0).
+     Restored from the backup this script had just written, which is the whole
+     argument for taking one. */
   'user_risk_scores',
   'notifications',
   'system_alerts',

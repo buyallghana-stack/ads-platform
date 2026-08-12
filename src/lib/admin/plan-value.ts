@@ -102,13 +102,25 @@ export function bandFor(plan: Rung, plans: Rung[]): Band | null {
   if (plan.isDefault || plan.status !== 'live' || plan.priceGhs <= 0) return null
 
   const next = nextRung(plan, plans)
+
+  /* ⚠️ A CEILING OF ITS OWN WINS, ON ANY RUNG (migration 189). It used to be
+     read only at the top, on the reasoning that a ceiling on a middle rung
+     would overlap the plan above it. That stopped being true when the ladder
+     gained GAPS: Bronze ends at GHS 105 and Silver starts at 145, so a middle
+     rung's own ceiling is the only thing that describes it, and the plan above
+     is nowhere near. `plan_band_max_minor` does exactly this. */
+  if (plan.ownBandMaxGhs !== null && plan.ownBandMaxGhs !== undefined) {
+    const toGhs = plan.ownBandMaxGhs
+    return { fromGhs: plan.priceGhs, toGhs, isTop: !next, empty: toGhs < plan.priceGhs }
+  }
+
   if (!next) {
-    /* THE PLAN ABOVE STILL WINS WHEREVER THERE IS ONE, which is why this is
-       only read at the top: a ceiling set on a middle rung would overlap the
-       plan above it, and `plan_band_max_minor` ignores it for exactly that
-       reason. Since migration 102 the top rung may carry its own. */
-    const toGhs = plan.ownBandMaxGhs ?? plan.priceGhs
-    return { fromGhs: plan.priceGhs, toGhs, isTop: true, empty: toGhs < plan.priceGhs }
+    return {
+      fromGhs: plan.priceGhs,
+      toGhs: plan.priceGhs,
+      isTop: true,
+      empty: false,
+    }
   }
 
   // One pesewa under the next plan's price, exactly as the SQL does it.

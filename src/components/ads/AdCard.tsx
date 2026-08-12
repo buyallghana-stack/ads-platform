@@ -90,9 +90,11 @@ export function AdCard({
         collapsed box landed on the title (operator, 2026-08-11 and again
         2026-08-12 after two fixes aimed at the cover).
 
-        The probe at /diag proved it on the phone: the identical markup in a
-        <div> reported a 192px cover, `flex / column` and a solid border. The
-        only difference left was this element.
+        Proved on the phone rather than reasoned about: a throwaway probe page
+        rendered this exact markup on the operator's iPhone 7 and reported a
+        192px cover, `flex / column` and a solid border when the root was a
+        <div>. The only difference left was this element. The probe was deleted
+        once the fix was confirmed (2026-08-12) — it was scaffolding.
 
         So the button keeps the frame — border, radius, shadow, focus ring —
         and every bit of LAYOUT moves to the span inside it. Buttons are the

@@ -137,10 +137,33 @@ describe.skipIf(!HAS_DB)('the earnings breakdown adds up', () => {
       await pinEconomy(tx)
       const user = await createUser(tx, { name: 'Three Formats' })
 
+      /* ⚠️ ONE AD PER FORMAT, MADE HERE. This read the live pool and took
+         whatever it found, so on 2026-08-12 — when the operator emptied the
+         pool — it looped over nothing, asserted nothing, and PASSED. A test
+         that silently checks nothing is worse than one that fails. */
+      /* ⚠️ EACH FORMAT HAS ITS OWN SHAPE, and `ads_video_shape` enforces all
+         three: a video carries a source and an id; a survey must carry
+         neither; an article carries a body, EXACTLY ONE cta link, and a
+         reading time of at least 3 seconds — the dwell that is the whole
+         defence against farming that format. */
       const { rows } = await tx.query<{ id: string; format: string }>(
-        `select distinct on (format) id, format::text
-           from public.ads where status = 'active' order by format, id`,
+        `insert into public.ads (title, format, status, points_reward, video_source,
+                                 youtube_video_id, duration_seconds, min_watch_seconds,
+                                 weight, article_body, cta_label, cta_links)
+         values
+           ('Breakdown video', 'video', 'active', 100, 'youtube', 'dQw4w9WgXcQ',
+            30, 0, 100, null, null, '[]'::jsonb),
+           ('Breakdown survey', 'survey', 'active', 100, null, null,
+            null, null, 100, null, null, '[]'::jsonb),
+           ('Breakdown article', 'link', 'active', 100, null, null,
+            null, 15, 100,
+            'An article long enough to satisfy the forty character minimum on ad bodies.',
+            'Read more',
+            '[{"label": "Open", "url": "https://example.com"}]'::jsonb)
+         returning id, format::text`,
       )
+      // The sweep must have something to sweep.
+      expect(rows.length).toBe(3)
       /* `ad_view` covers videos AND articles; only `ads.format` separates
          them. If this ever regresses, articles silently become videos. */
       for (const ad of rows) {
@@ -166,8 +189,17 @@ describe.skipIf(!HAS_DB)('the earnings breakdown adds up', () => {
       await pinEconomy(tx)
       const user = await createUser(tx, { name: 'Repeat Watcher' })
 
+      /* ⚠️ ITS OWN AD, NOT ONE BORROWED FROM THE POOL. This used to read
+         `select id from public.ads ... limit 1`, which passed for as long as
+         the project happened to contain a video ad and threw the day the
+         operator emptied the pool (2026-08-12). A test that depends on live
+         content is a test that reports someone else's housekeeping as a bug. */
       const { rows } = await tx.query<{ id: string }>(
-        `select id from public.ads where status = 'active' and format = 'video' limit 1`,
+        `insert into public.ads (title, format, status, points_reward, video_source,
+                                 youtube_video_id, duration_seconds, min_watch_seconds, weight)
+         values ('Breakdown fixture', 'video', 'active', 100, 'youtube',
+                 'dQw4w9WgXcQ', 30, 0, 100)
+         returning id`,
       )
       const adId = rows[0]!.id
 

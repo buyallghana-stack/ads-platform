@@ -4283,7 +4283,8 @@
       "progress": "{percent}% of your training done",
       "needed": "{threshold}% needed",
       "ctaJoin": "See the training",
-      "ctaLearn": "Continue your training"
+      "ctaLearn": "Continue your training",
+      "ctaStart": "Get the training"
     },
     "complete": {
       "eyebrow": "Course complete",

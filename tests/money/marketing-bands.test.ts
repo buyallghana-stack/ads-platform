@@ -21,11 +21,14 @@ import { HAS_DB, type Tx, withRollback } from '../support/db'
  * TypeScript at all.
  */
 
-/** The rule `marketing/plans.ts` implements, applied to the same rows. */
+/** The rule `marketing/plans.ts` implements, applied to the same rows.
+ *  ⚠️ A rung's OWN ceiling wins since migration 189: the ladder has gaps
+ *  between the plans, so a band no longer ends where the next one begins. */
 function derive(rows: { price_minor: number; band_max_minor: number | null }[], index: number) {
   const row = rows[index]!
   const next = rows[index + 1]
-  return next ? Number(next.price_minor) - 1 : Number(row.band_max_minor ?? row.price_minor)
+  if (row.band_max_minor !== null) return Number(row.band_max_minor)
+  return next ? Number(next.price_minor) - 1 : Number(row.price_minor)
 }
 
 describe.skipIf(!HAS_DB)('the band on the front page', () => {
@@ -64,19 +67,34 @@ describe.skipIf(!HAS_DB)('the band on the front page', () => {
     })
   })
 
-  it('ends a middle rung one pesewa below the next price, and the top on its own ceiling', async () => {
+  it('ends every rung on its own ceiling, or a pesewa below the next without one', async () => {
     await withRollback(async (tx) => {
       const rows = await rungs(tx)
       const paid = rows.filter((r) => Number(r.price_minor) > 0)
 
-      for (let i = 0; i < paid.length - 1; i += 1) {
-        expect(Number(paid[i]!.from_sql)).toBe(Number(paid[i + 1]!.price_minor) - 1)
-      }
+      for (let i = 0; i < paid.length; i += 1) {
+        const rung = paid[i]!
+        const next = paid[i + 1]
 
-      const top = paid.at(-1)!
-      /* The top rung has no rung above it to be cut against, so its ceiling is
-         whatever the operator stored, and it is INCLUSIVE. */
-      expect(Number(top.from_sql)).toBe(Number(top.band_max_minor ?? top.price_minor))
+        if (rung.band_max_minor !== null) {
+          /* ⚠️ ITS OWN CEILING, AND IT IS INCLUSIVE. Since migration 189 every
+             rung carries one, because the plans no longer touch: Bronze ends
+             at GHS 105 and Silver starts at 145. Cutting against the next
+             plan's price would sell Bronze up to GHS 144.99 at Bronze's top
+             rate, which is the gap the ladder exists to avoid. */
+          expect([rung.slug, Number(rung.from_sql)]).toEqual([
+            rung.slug,
+            Number(rung.band_max_minor),
+          ])
+          continue
+        }
+
+        // No ceiling of its own: the old rule still applies underneath.
+        expect([rung.slug, Number(rung.from_sql)]).toEqual([
+          rung.slug,
+          next ? Number(next.price_minor) - 1 : Number(rung.price_minor),
+        ])
+      }
     })
   })
 
