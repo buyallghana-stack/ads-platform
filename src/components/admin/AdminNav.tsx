@@ -27,6 +27,7 @@ import {
   SquareArrowOutUpRight,
   Tag,
   Users,
+  Users2,
   Wallet,
   X,
 } from 'lucide-react'
@@ -138,6 +139,9 @@ const GROUPS: NavGroup[] = [
          PAYS somebody, a coupon reduces a price. One is a liability, the other
          is a discount on revenue. */
       { key: 'coupons', href: '/admin/coupons', Icon: Tag },
+      /* Also content the operator hands out: a link to somewhere off the
+         platform, which a user reaches from their Profile tab. */
+      { key: 'communities', href: '/admin/communities', Icon: Users2 },
       // Content the operator authors, like ads and gift codes — the prize
       // table is the game.
       { key: 'games', href: '/admin/games', Icon: Gamepad2 },

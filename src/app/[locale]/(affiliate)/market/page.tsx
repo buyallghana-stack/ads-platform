@@ -1,6 +1,12 @@
 import type { Metadata } from 'next'
 
-import { AlertTriangle, Clock, PauseCircle } from 'lucide-react'
+import {
+  AlertTriangle,
+  ChartColumnBig,
+  ChevronRight,
+  Clock,
+  PauseCircle,
+} from 'lucide-react'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { AffiliateHeader } from '@/components/affiliate/AffiliateHeader'
@@ -205,6 +211,30 @@ export default async function AffiliateHomePage({
         minimumMinor={dashboard.payout_minimum_minor ?? 0}
         periodSlot={<PeriodPicker days={days} />}
       />
+
+      {/* The same door the ads dashboard has, in the same place relative to
+          the balance it explains. Violet rather than blue, because this side
+          of the platform wears violet everywhere. */}
+      <Link
+        href="/commission/breakdown"
+        className="flex items-center gap-3 rounded-(--radius-card) border border-ink-200 bg-surface px-4 py-3 transition-colors hover:border-ink-300"
+      >
+        <span
+          aria-hidden
+          className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-500/12 text-brand-600"
+        >
+          <ChartColumnBig className="size-4.5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[0.875rem] font-medium text-ink-900">
+            {t('breakdown.title')}
+          </span>
+          <span className="mt-0.5 block text-[0.75rem] leading-snug text-ink-500">
+            {t('breakdown.hint')}
+          </span>
+        </span>
+        <ChevronRight aria-hidden className="size-4 shrink-0 text-ink-400" />
+      </Link>
 
       <StatStrip
         clicks={performance.clicks}

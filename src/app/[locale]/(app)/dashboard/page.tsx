@@ -1,6 +1,13 @@
 import type { Metadata } from 'next'
 
-import { ArrowUpRight, PlayCircle, TrendingUp, Trophy } from 'lucide-react'
+import {
+  ArrowUpRight,
+  ChartColumnBig,
+  ChevronRight,
+  PlayCircle,
+  TrendingUp,
+  Trophy,
+} from 'lucide-react'
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { Logo } from '@/components/brand/Logo'
@@ -267,6 +274,36 @@ export default async function HomePage({
           </Link>
         </div>
       </section>
+
+      {/*
+        THE WAY INTO THE BREAKDOWN. Operator asked for a button or an icon and
+        left the choice to me: it is a labelled strip rather than an icon in
+        the hero corner, because an unlabelled glyph on a card somebody reads
+        for one number is a feature nobody finds. It sits directly under the
+        balance it explains and above the shortcuts, spans the full width so it
+        survives 320px, and reads as a destination rather than an action.
+      */}
+      <Link
+        href="/earnings"
+        style={{ '--rise-delay': '0.09s' } as React.CSSProperties}
+        className="animate-rise flex items-center gap-3 rounded-(--radius-card) border border-ink-200 bg-surface px-4 py-3 transition-colors hover:border-ink-300"
+      >
+        <span
+          aria-hidden
+          className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700"
+        >
+          <ChartColumnBig className="size-4.5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[0.875rem] font-medium text-ink-900">
+            {t('breakdown.title')}
+          </span>
+          <span className="mt-0.5 block text-[0.75rem] leading-snug text-ink-500">
+            {t('breakdown.hint')}
+          </span>
+        </span>
+        <ChevronRight aria-hidden className="size-4 shrink-0 text-ink-400" />
+      </Link>
 
       {/* Shortcuts, directly under the balance so they are the first thing a
           thumb reaches. Three are disabled until their features exist. */}

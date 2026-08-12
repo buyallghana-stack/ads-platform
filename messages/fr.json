@@ -573,7 +573,11 @@
     "adsWaiting": "{n} publicités vous attendent aujourd’hui",
     "capReachedToday": "C’est tout pour aujourd’hui : retour à minuit",
     "tierCap": "{n} publicités par jour",
-    "tierMultiplier": "×{x} sur chaque publicité"
+    "tierMultiplier": "×{x} sur chaque publicité",
+    "breakdown": {
+      "title": "Détail des gains",
+      "hint": "Chaque cedi gagné, et d'où il vient"
+    }
   },
   "nav": {
     "label": "Navigation principale",
@@ -941,7 +945,8 @@
       "security": "Sécurité",
       "preferences": "Préférences",
       "support": "Assistance",
-      "admin": "Administration"
+      "admin": "Administration",
+      "community": "Communauté"
     },
     "account": {
       "personal": "Informations personnelles",
@@ -982,6 +987,9 @@
     "admin": {
       "dashboard": "Tableau de bord admin",
       "dashboardHint": "Retraits, utilisateurs, annonces et paramètres"
+    },
+    "community": {
+      "hint": "Ces liens ouvrent hors de l'application."
     }
   },
   "payout": {
@@ -1474,7 +1482,8 @@
         "games": "Jeux",
         "tasks": "Objectifs",
         "affiliates": "Affiliés",
-        "training": "Formation"
+        "training": "Formation",
+        "communities": "Communautés"
       },
       "viewUserApp": "Voir l’app utilisateur"
     },
@@ -3419,6 +3428,52 @@
       "saving": "Enregistrement…",
       "cancel": "Annuler",
       "frozenNote": "Les taux ne valent que pour les nouvelles ventes. Une commission déjà versée reste figée sur la vente dont elle provient."
+    },
+    "communities": {
+      "title": "Communautés",
+      "description": "Liens vers vos communautés WhatsApp, Telegram et réseaux sociaux. L'utilisateur voit le nom et le touche pour rejoindre.",
+      "intro": "L'utilisateur ne voit que le nom. Le lien est ce que le clic suit.",
+      "create": "Nouvelle communauté",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "dismiss": "Fermer",
+      "empty": "Aucune communauté. Ajoutez-en une et elle apparaît sur chaque onglet Profil.",
+      "status": {
+        "live": "Actif",
+        "off": "Désactivé"
+      },
+      "platform": {
+        "whatsapp": "WhatsApp",
+        "telegram": "Telegram",
+        "x": "X",
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "tiktok": "TikTok",
+        "other": "Autre"
+      },
+      "business": {
+        "both": "Les deux",
+        "ads": "Côté annonces",
+        "affiliate": "Côté affiliation"
+      },
+      "form": {
+        "name": "Nom de la communauté",
+        "nameHint": "C'est la seule chose que voit l'utilisateur, indiquez donc la plateforme dedans.",
+        "namePlaceholder": "Groupe WhatsApp SidePerks",
+        "url": "Lien",
+        "urlHint": "Doit commencer par https://",
+        "urlError": "Un lien de communauté doit commencer par https://",
+        "platform": "Plateforme",
+        "platformHint": "Détermine l'icône affichée à côté du nom.",
+        "order": "Ordre",
+        "orderHint": "Les plus petits nombres d'abord.",
+        "business": "Où il apparaît",
+        "businessHint": "Les deux côtés, sauf si la communauté ne concerne qu'un seul.",
+        "active": "Actif",
+        "activeHint": "Désactivé conserve la ligne mais la retire de tous les onglets Profil."
+      }
     }
   },
   "giftCode": {
@@ -4214,6 +4269,10 @@
       "panelTitle": "Cours terminé",
       "panelBody": "Vous avez terminé toutes les leçons de ce cours.",
       "panelBodyGraded": "Vous avez terminé toutes les leçons, avec une note de {grade} %."
+    },
+    "breakdown": {
+      "title": "Détail des commissions",
+      "hint": "Chaque cedi gagné, et d'où il vient"
     }
   },
   "checkout": {
@@ -4236,6 +4295,74 @@
         "nothing_off": "Ce code ne retire rien sur cet achat",
         "no_code": "Saisissez un code"
       }
+    }
+  },
+  "earnings": {
+    "title": "Détail des gains",
+    "subtitle": "Chaque cedi que vous avez gagné, et d'où il vient.",
+    "earnedLabel": "Total gagné",
+    "since": "Depuis le {when}",
+    "balanceNow": "Solde actuel",
+    "paidOut": "Versé",
+    "waiting": "En attente",
+    "empty": "Rien pour le moment. Regardez une annonce et cette page se remplira.",
+    "sourcesTitle": "D'où viennent vos gains",
+    "outTitle": "Sorties",
+    "reconcile": "Vous avez gagné {earned}. {out} a été retiré ou est en cours, ce qui laisse {balance}.",
+    "plansTitle": "Dépensé en formules",
+    "plansCount": "{count, plural, =0 {aucun paiement} one {# paiement} other {# paiements}}",
+    "plansNote": "Une formule achète un meilleur taux sur chaque annonce regardée. Ce n'est pas un dépôt, et cela n'est pas déduit de vos gains.",
+    "source": {
+      "ads": "Annonces",
+      "videos": "Vidéos",
+      "surveys": "Sondages",
+      "articles": "Articles",
+      "referrals": "Parrainage",
+      "referralSignup": "Bonus d'inscription",
+      "referralActivation": "Bonus d'activation",
+      "referralPurchase": "Leurs achats",
+      "games": "Jeux",
+      "tasks": "Objectifs",
+      "giftCodes": "Codes cadeaux",
+      "adjustments": "Ajustements"
+    },
+    "out": {
+      "paid": "Versé à vous",
+      "fees": "Frais de retrait",
+      "pending": "En attente de versement",
+      "refunded": "Rendu à votre solde"
+    }
+  },
+  "commissionBreakdown": {
+    "title": "Détail des commissions",
+    "subtitle": "Chaque cedi que vous avez gagné, et d'où il vient.",
+    "earnedLabel": "Total gagné",
+    "made": "{sales, plural, =0 {Aucune vente} one {# vente} other {# ventes}}, {recruits, plural, =0 {aucune recrue} one {# recrue} other {# recrues}}",
+    "balanceNow": "Solde actuel",
+    "paidOut": "Versé",
+    "clearing": "En cours de validation",
+    "empty": "Rien pour le moment. Partagez un produit et cette page se remplira.",
+    "sourcesTitle": "D'où viennent vos gains",
+    "outTitle": "Sorties",
+    "reconcile": "Vous avez gagné {earned}. {out} a été retiré ou est en cours, ce qui laisse {balance}.",
+    "reversedNote": "Une vente remboursée reprend sa commission. Voici le total repris.",
+    "trainingTitle": "Dépensé en formation",
+    "trainingCount": "{count, plural, =0 {aucun achat} one {# achat} other {# achats}}",
+    "trainingNote": "La formation vous permet de gagner des commissions et détermine jusqu'où elles descendent dans votre équipe. Elle n'est pas déduite de vos gains.",
+    "source": {
+      "salesL1": "Vos propres ventes",
+      "salesL2": "Les ventes de votre équipe",
+      "games": "Jeux",
+      "tasks": "Objectifs",
+      "giftCodes": "Codes cadeaux",
+      "adjustments": "Ajustements",
+      "reversed": "Repris"
+    },
+    "out": {
+      "paid": "Versé à vous",
+      "fees": "Frais de retrait",
+      "pending": "En attente de versement",
+      "rejected": "Refusé"
     }
   }
 }

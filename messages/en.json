@@ -573,7 +573,11 @@
     "adsWaiting": "{n} ads waiting for you today",
     "capReachedToday": "That is every ad for today: back at midnight",
     "tierCap": "{n} ads a day",
-    "tierMultiplier": "×{x} on every ad"
+    "tierMultiplier": "×{x} on every ad",
+    "breakdown": {
+      "title": "Earnings breakdown",
+      "hint": "Every cedi you have earned, and where it came from"
+    }
   },
   "nav": {
     "label": "Main navigation",
@@ -941,7 +945,8 @@
       "security": "Security",
       "preferences": "Preferences",
       "support": "Support",
-      "admin": "Administration"
+      "admin": "Administration",
+      "community": "Community"
     },
     "account": {
       "personal": "Personal information",
@@ -982,6 +987,9 @@
     "admin": {
       "dashboard": "Admin dashboard",
       "dashboardHint": "Payouts, users, ads and platform settings"
+    },
+    "community": {
+      "hint": "These open outside the app."
     }
   },
   "payout": {
@@ -1474,7 +1482,8 @@
         "games": "Games",
         "tasks": "Tasks",
         "affiliates": "Affiliates",
-        "training": "Training"
+        "training": "Training",
+        "communities": "Communities"
       },
       "viewUserApp": "View user app"
     },
@@ -3419,6 +3428,52 @@
       "saving": "Saving…",
       "cancel": "Cancel",
       "frozenNote": "Rates apply to new sales only. Commission somebody has already been paid is frozen on the sale it came from."
+    },
+    "communities": {
+      "title": "Communities",
+      "description": "Links to your WhatsApp, Telegram and social communities. A user sees the name and taps it to join.",
+      "intro": "A user sees only the name. The link is what the tap follows.",
+      "create": "New community",
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "dismiss": "Dismiss",
+      "empty": "No communities yet. Add one and it appears on every Profile tab.",
+      "status": {
+        "live": "Live",
+        "off": "Switched off"
+      },
+      "platform": {
+        "whatsapp": "WhatsApp",
+        "telegram": "Telegram",
+        "x": "X",
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "tiktok": "TikTok",
+        "other": "Other"
+      },
+      "business": {
+        "both": "Both",
+        "ads": "Ads side",
+        "affiliate": "Affiliate side"
+      },
+      "form": {
+        "name": "Community name",
+        "nameHint": "This is the only thing a user sees, so put the platform in it.",
+        "namePlaceholder": "SidePerks WhatsApp group",
+        "url": "Link",
+        "urlHint": "Must start with https://",
+        "urlError": "A community link has to start with https://",
+        "platform": "Platform",
+        "platformHint": "Chooses the icon beside the name.",
+        "order": "Order",
+        "orderHint": "Lower numbers come first.",
+        "business": "Where it appears",
+        "businessHint": "Both sides unless this community is only for one of them.",
+        "active": "Live",
+        "activeHint": "Off keeps the row but removes it from every Profile tab."
+      }
     }
   },
   "giftCode": {
@@ -4214,6 +4269,10 @@
       "panelTitle": "Course complete",
       "panelBody": "You have finished every lesson in this course.",
       "panelBodyGraded": "You have finished every lesson, with a grade of {grade}%."
+    },
+    "breakdown": {
+      "title": "Commission breakdown",
+      "hint": "Every cedi you have earned, and where it came from"
     }
   },
   "checkout": {
@@ -4236,6 +4295,74 @@
         "nothing_off": "That code takes nothing off this purchase",
         "no_code": "Enter a code"
       }
+    }
+  },
+  "earnings": {
+    "title": "Earnings breakdown",
+    "subtitle": "Every cedi you have earned, and where it came from.",
+    "earnedLabel": "Earned in total",
+    "since": "Since {when}",
+    "balanceNow": "Balance now",
+    "paidOut": "Paid out",
+    "waiting": "Waiting",
+    "empty": "Nothing here yet. Watch an ad and this page fills in.",
+    "sourcesTitle": "Where it came from",
+    "outTitle": "Money out",
+    "reconcile": "You have earned {earned}. {out} has been withdrawn or is on its way, which leaves {balance}.",
+    "plansTitle": "Spent on plans",
+    "plansCount": "{count, plural, =0 {no payments} one {# payment} other {# payments}}",
+    "plansNote": "A plan buys a higher rate on every ad you watch. It is not a deposit, and it is not counted against what you earned.",
+    "source": {
+      "ads": "Ads",
+      "videos": "Videos",
+      "surveys": "Surveys",
+      "articles": "Articles",
+      "referrals": "Referrals",
+      "referralSignup": "Signup bonus",
+      "referralActivation": "Activation bonus",
+      "referralPurchase": "Their purchases",
+      "games": "Games",
+      "tasks": "Tasks",
+      "giftCodes": "Gift codes",
+      "adjustments": "Adjustments"
+    },
+    "out": {
+      "paid": "Paid to you",
+      "fees": "Withdrawal fees",
+      "pending": "Waiting to be paid",
+      "refunded": "Returned to your balance"
+    }
+  },
+  "commissionBreakdown": {
+    "title": "Commission breakdown",
+    "subtitle": "Every cedi you have earned, and where it came from.",
+    "earnedLabel": "Earned in total",
+    "made": "{sales, plural, =0 {No sales yet} one {# sale} other {# sales}}, {recruits, plural, =0 {no recruits} one {# recruit} other {# recruits}}",
+    "balanceNow": "Balance now",
+    "paidOut": "Paid out",
+    "clearing": "Still clearing",
+    "empty": "Nothing here yet. Share a product and this page fills in.",
+    "sourcesTitle": "Where it came from",
+    "outTitle": "Money out",
+    "reconcile": "You have earned {earned}. {out} has been withdrawn or is on its way, which leaves {balance}.",
+    "reversedNote": "A sale that is refunded takes its commission back. This is the total that has been reversed.",
+    "trainingTitle": "Spent on training",
+    "trainingCount": "{count, plural, =0 {no purchases} one {# purchase} other {# purchases}}",
+    "trainingNote": "Training is what lets you earn commission and how far down your team it reaches. It is not counted against what you have earned.",
+    "source": {
+      "salesL1": "Your own sales",
+      "salesL2": "Your team's sales",
+      "games": "Games",
+      "tasks": "Tasks",
+      "giftCodes": "Gift codes",
+      "adjustments": "Adjustments",
+      "reversed": "Clawed back"
+    },
+    "out": {
+      "paid": "Paid to you",
+      "fees": "Withdrawal fees",
+      "pending": "Waiting to be paid",
+      "rejected": "Refused"
     }
   }
 }

@@ -1033,6 +1033,48 @@ export type Database = {
           },
         ]
       }
+      /* ── HAND-ADDED with migration 182. This repo patches this file
+         rather than regenerating it, so a new table needs its shape written
+         in here in the same change that creates it. ── */
+      communities: {
+        Row: {
+          business: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          name: string
+          platform: string
+          sort_order: number
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          business?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          platform?: string
+          sort_order?: number
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          business?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          platform?: string
+          sort_order?: number
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       commission_payouts: {
         Row: {
           affiliate_id: string
@@ -3973,6 +4015,74 @@ export type Database = {
          above it. This repo patches this file rather than regenerating it, so
          a new function needs its signature written in here in the same change
          that creates it (migrations 178 and 179). ── */
+      admin_save_community: {
+        Args: {
+          p_admin_id: string
+          p_business: string
+          p_id?: string | null
+          p_is_active: boolean
+          p_name: string
+          p_platform: string
+          p_sort_order: number
+          p_url: string
+        }
+        Returns: Record<string, unknown>
+      }
+      admin_delete_community: {
+        Args: { p_admin_id: string; p_id: string }
+        Returns: undefined
+      }
+      get_earnings_breakdown: {
+        Args: { p_user_id: string }
+        Returns: {
+          adjustment_points: number
+          articles_points: number
+          balance_points: number
+          earned_points: number
+          fees_currency: number
+          first_earned_at: string | null
+          game_points: number
+          gift_code_points: number
+          paid_out_currency: number
+          plans_count: number
+          plans_spent_minor: number
+          points_per_currency_unit: number
+          referral_activation_points: number
+          referral_purchase_points: number
+          referral_signup_points: number
+          surveys_points: number
+          task_points: number
+          videos_points: number
+          withdrawn_paid_points: number
+          withdrawn_pending_points: number
+          withdrawn_refunded_points: number
+        }[]
+      }
+      get_commission_breakdown: {
+        Args: { p_user_id: string }
+        Returns: {
+          adjustment_minor: number
+          balance_minor: number
+          earned_minor: number
+          fees_minor: number
+          first_earned_at: string | null
+          game_minor: number
+          gift_minor: number
+          net_paid_minor: number
+          pending_minor: number
+          recruits_count: number
+          reversed_minor: number
+          sales_count: number
+          sales_l1_minor: number
+          sales_l2_minor: number
+          task_minor: number
+          training_count: number
+          training_spent_minor: number
+          withdrawn_paid_minor: number
+          withdrawn_pending_minor: number
+          withdrawn_rejected_minor: number
+        }[]
+      }
       coupon_quote: {
         Args: {
           p_amount_minor: number

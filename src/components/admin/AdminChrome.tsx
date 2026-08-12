@@ -40,6 +40,7 @@ const REAL_ADMIN_SECTIONS = [
   '/admin/announcements',
   '/admin/gift-codes',
   '/admin/coupons',
+  '/admin/communities',
   '/admin/leaderboard',
   '/admin/games',
   '/admin/tasks',

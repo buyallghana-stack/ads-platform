@@ -24,11 +24,13 @@ import { LogOutButton } from '@/components/app/LogOutButton'
 import { Avatar } from '@/components/profile/Avatar'
 import { LanguageToggle } from '@/components/profile/LanguageToggle'
 import { DeletionPendingBanner } from '@/components/profile/DeletionPendingBanner'
+import { CommunityLinks } from '@/components/profile/CommunityLinks'
 import { SettingsGroup, SettingsRow } from '@/components/profile/SettingsRow'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { Link, redirect } from '@/i18n/navigation'
 import { getProfile, getViewerUser } from '@/lib/auth/session'
 import { avatarPublicUrl } from '@/lib/profile/avatar'
+import { getCommunities } from '@/lib/communities/data'
 import { getDeletionStatus } from '@/lib/security/deletion-data'
 import { getTwoFactorStatus } from '@/lib/security/two-factor-data'
 import { isAdminUser } from '@/lib/auth/landing'
@@ -67,6 +69,7 @@ export default async function ProfilePage({
   const twoFactor = await getTwoFactorStatus()
   // Plans STACK, so "upgrade" is only the right word before you own one.
   const planStanding = await getPlanStanding(user!.id)
+  const communities = await getCommunities('ads')
   const isAdmin = await isAdminUser(user!.id)
   const deletion = await getDeletionStatus()
   const fullName = profile?.full_name ?? user!.email ?? ''
@@ -153,6 +156,18 @@ export default async function ProfilePage({
           <SettingsRow href="/profile/payout" icon={<Wallet />} tone="teal" label={t('account.payout')} description={t('account.payoutHint')} />
           <SettingsRow href="/profile/pin" icon={<KeyRound />} tone="orange" label={t('account.pin')} description={t('account.pinHint')} />
         </SettingsGroup>
+
+        {/* Community -----------------------------------------------------
+            Between the account rows and the security ones on purpose: it is
+            somewhere to GO rather than something to change, so it does not
+            belong among settings, and it should not sit under the sign-out
+            row at the bottom where nobody scrolls. Renders nothing at all
+            until the operator has added a community. */}
+        <CommunityLinks
+          communities={communities}
+          title={t('groups.community')}
+          hint={t('community.hint')}
+        />
 
         {/* Security ------------------------------------------------------ */}
         <SettingsGroup title={t('groups.security')}>
