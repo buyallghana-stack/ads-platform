@@ -9,6 +9,7 @@ import {
   Megaphone,
   BadgeCheck,
   Building2,
+  ClipboardCheck,
   ClipboardList,
   Flag,
   Gauge,
@@ -119,6 +120,10 @@ const GROUPS: NavGroup[] = [
     key: 'content',
     items: [
       { key: 'ads', href: '/admin/ads', Icon: LayoutGrid, area: 'ads' },
+      /* ⚠️ NO `area: 'ads'` ON THIS ONE. An ads manager writes the surveys and
+         does not read who answered them: every row carries a respondent's name
+         and phone number, so it is super admin only, the same as Payouts. */
+      { key: 'adResponses', href: '/admin/ad-responses', Icon: ClipboardCheck },
       // Phase 2's content, sitting with Phase 1's. A course is authored the
       // same way an ad is — the operator writes it, then publishes it — so it
       // belongs beside Ads rather than in a group of its own.

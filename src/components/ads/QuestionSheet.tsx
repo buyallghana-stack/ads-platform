@@ -65,9 +65,23 @@ export function QuestionSheet({
         e.preventDefault()
         if (answered && !submitting) onSubmit()
       }}
-      className="flex w-full flex-col gap-4"
+      /* ⚠️ A BOUNDED COLUMN, NOT A GROWING ONE (operator, 2026-08-12: with
+         eight options "the question missed and it cant be scroll up or down").
+
+         The sheet is anchored to the BOTTOM of the screen on a phone. A card
+         with no ceiling therefore grows upwards, and once the options are
+         taller than the screen the question leaves through the top of the
+         viewport — where nothing can scroll it back, because the card was
+         never a scroll container and the stage behind it does not move.
+
+         So: the card is capped, the question and the buttons are pinned, and
+         the OPTIONS are the only part that scrolls. Pinning the question
+         rather than scrolling the whole card is the deliberate half — with a
+         long list you want to see what you are answering while you answer
+         it. */
+      className="flex max-h-[80dvh] w-full flex-col gap-4 md:max-h-[70dvh]"
     >
-      <div>
+      <div className="shrink-0">
         {step && (
           <div className="mb-2.5 flex items-center gap-2">
             {/* Segment per question rather than a single bar: on a five-part
@@ -114,7 +128,15 @@ export function QuestionSheet({
       </div>
 
       {question.format === 'multiple_choice' ? (
-        <div role="radiogroup" aria-labelledby={groupId} className="flex flex-col gap-2">
+        /* `min-h-0` is what makes a flex child scrollable at all: without it
+           the track refuses to shrink below its content and the overflow
+           silently escapes the card again. `overscroll-contain` keeps a flick
+           at the end of the list from dragging the page behind the sheet. */
+        <div
+          role="radiogroup"
+          aria-labelledby={groupId}
+          className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain"
+        >
           {question.options.map((option) => {
             const selected = value === option.id
             return (
@@ -206,7 +228,7 @@ export function QuestionSheet({
       */}
       <div
         className={cn(
-          'grid items-center gap-2',
+          'grid shrink-0 items-center gap-2',
           onBack ? 'grid-cols-[auto_minmax(0,1fr)]' : 'grid-cols-1',
           'md:flex md:justify-end',
         )}

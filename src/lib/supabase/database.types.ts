@@ -6790,6 +6790,36 @@ export type Database = {
         Returns: number
       }
       user_has_fresh_ads: { Args: { p_user_id: string }; Returns: boolean }
+      /* Hand-added with migration 191, same reason as the two below. */
+      admin_ad_responses: {
+        Args: {
+          p_admin_id: string
+          p_ad_id?: string | null
+          p_from?: string | null
+          p_to?: string | null
+        }
+        Returns: {
+          answered_at: string
+          ad_title: string
+          ad_format: string
+          ad_id: string
+          question_position: number | null
+          question_text: string
+          answer_format: string
+          graded: boolean
+          answer: string | null
+          option_id: string | null
+          correct: boolean | null
+          occasion: number
+          attempt_number: number
+          watch_seconds: number | null
+          respondent: string
+          phone: string | null
+          user_id: string
+          plan: string
+          points_awarded: number | null
+        }[]
+      }
       /* Hand-added with migration 187, like `commission_payouts` before it:
          this repo patches this file rather than regenerating it. */
       user_ad_allowances: {

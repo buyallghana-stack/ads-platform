@@ -1486,7 +1486,8 @@
         "training": "Formation",
         "communities": "Communautés"
       },
-      "viewUserApp": "Voir l’app utilisateur"
+      "viewUserApp": "Voir l’app utilisateur",
+      "adResponses": "Réponses aux sondages"
     },
     "overview": {
       "title": "Aperçu",
@@ -2125,7 +2126,13 @@
         "summaryDwell": "{seconds}s de lecture avant que le lien ne paie",
         "summaryDestination": "Une destination définie",
         "summaryNoDestination": "Aucune destination. La publicité ne peut pas être enregistrée",
-        "summaryLinkCaveat": "Personne ne peut vérifier si l'article a été lu, ni ce qui se passe après le clic."
+        "summaryLinkCaveat": "Personne ne peut vérifier si l'article a été lu, ni ce qui se passe après le clic.",
+        "bucket": "Lot",
+        "bucketHint": "Le forfait pour lequel cette pub est stockée.",
+        "bucketEveryone": "Hors lot : tous les forfaits la voient et elle compte dans la limite quotidienne de chacun.",
+        "bucketOne": "Seuls les membres {plan} voient cette pub. Elle occupe l'une de leurs places quotidiennes.",
+        "rewardFixed": "Chaque pub paie {points} points au taux gratuit",
+        "rewardFixedHint": "Ce qu'un membre reçoit réellement, c'est cette base multipliée par le taux de son forfait, qui suit le montant payé dans la fourchette du forfait. La base se change dans les réglages de la plateforme, pas sur chaque pub."
       },
       "newAd": "Nouvelle publicité",
       "chooser": {
@@ -2534,6 +2541,11 @@
           "label": "Points par cedi",
           "description": "Combien de points font 1,00 GHS.",
           "warning": "Sans effet rétroactif. Les points déjà gagnés gardent le taux auquel ils ont été écrits. Augmenter ce nombre rend chaque point futur moins précieux."
+        },
+        "baseAdPoints": {
+          "label": "Ce que paie une pub",
+          "description": "La base que paie chaque pub avant tout multiplicateur — la valeur par pub du forfait gratuit. Définie ici plutôt que sur chaque pub, pour que l'échelle et le fil ne se contredisent pas.",
+          "warning": "C'est le nombre sur lequel repose toute l'échelle : chaque forfait paie cette base multipliée par son propre taux. Le changer modifie d'un coup ce que paiera chaque future pub, sur tous les forfaits."
         },
         "combineMode": {
           "label": "Combinaison des avantages",
@@ -3486,6 +3498,32 @@
         "businessHint": "Les deux côtés, sauf si la communauté ne concerne qu'un seul.",
         "active": "Actif",
         "activeHint": "Désactivé conserve la ligne mais la retire de tous les onglets Profil."
+      }
+    },
+    "responses": {
+      "title": "Réponses aux sondages",
+      "description": "Toutes les réponses données, avec un CSV à remettre à un annonceur.",
+      "tabsLabel": "Filtrer par pub",
+      "allAds": "Toutes les pubs",
+      "search": "Nom, téléphone, question ou réponse",
+      "download": "{n, plural, =0 {Rien à télécharger} =1 {Télécharger 1 réponse} other {Télécharger # réponses}}",
+      "empty": "Aucune réponse pour le moment. Elles apparaissent dès qu’un sondage est terminé.",
+      "noMatch": "Aucune réponse ne correspond à cette recherche.",
+      "noAnswer": "(laissé vide)",
+      "graded": "a une bonne réponse",
+      "ungraded": "avis, non noté",
+      "correct": "Correct",
+      "incorrect": "Incorrect",
+      "occasion": "visionnage {n}",
+      "seconds": "{n} s",
+      "truncated": "Affichage des {shown} plus récentes sur {total}. Le téléchargement les contient toutes.",
+      "privacy": "Ce fichier nomme des personnes : chaque ligne porte un nom et un numéro de téléphone. Traitez-le comme des données personnelles, et réfléchissez avant de l’envoyer à un annonceur qui demandait seulement quelle option a gagné.",
+      "col": {
+        "when": "Quand",
+        "question": "Question",
+        "answer": "Réponse",
+        "who": "Qui a répondu",
+        "watched": "Regardé"
       }
     }
   },

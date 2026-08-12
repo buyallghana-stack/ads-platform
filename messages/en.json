@@ -1486,7 +1486,8 @@
         "training": "Training",
         "communities": "Communities"
       },
-      "viewUserApp": "View user app"
+      "viewUserApp": "View user app",
+      "adResponses": "Survey responses"
     },
     "overview": {
       "title": "Overview",
@@ -2125,7 +2126,13 @@
         "summaryDwell": "{seconds}s of reading before the link pays",
         "summaryDestination": "One destination set",
         "summaryNoDestination": "No destination: this ad cannot be saved",
-        "summaryLinkCaveat": "Nobody can check that the article was read, or what happens after the tap."
+        "summaryLinkCaveat": "Nobody can check that the article was read, or what happens after the tap.",
+        "bucket": "Bucket",
+        "bucketHint": "Which plan this ad is stocked for.",
+        "bucketEveryone": "Not in a bucket, so every plan sees it and it counts towards every plan’s daily limit.",
+        "bucketOne": "Only {plan} members see this ad. It fills one of their daily slots.",
+        "rewardFixed": "Every ad pays {points} points at the free rate",
+        "rewardFixedHint": "What a member actually receives is that base times their plan’s rate, which follows the amount they paid inside the plan’s range. Change the base in Platform settings; it is not set per ad."
       },
       "newAd": "New ad",
       "chooser": {
@@ -2534,6 +2541,11 @@
           "label": "Points per cedi",
           "description": "How many points make GHS 1.00.",
           "warning": "Forward-only. Changing this does not revalue points already earned. History keeps the rate it was written at. Raising it makes every future point worth less."
+        },
+        "baseAdPoints": {
+          "label": "What one ad pays",
+          "description": "The base every ad pays before any plan multiplier — the free plan’s per-ad value. Set here rather than on each ad, so the ladder and the feed cannot disagree.",
+          "warning": "This is the number the whole ladder is built on: every plan pays this base times its own rate. Changing it moves what every future ad pays on every plan at once."
         },
         "combineMode": {
           "label": "How plan benefits combine",
@@ -3486,6 +3498,32 @@
         "businessHint": "Both sides unless this community is only for one of them.",
         "active": "Live",
         "activeHint": "Off keeps the row but removes it from every Profile tab."
+      }
+    },
+    "responses": {
+      "title": "Survey responses",
+      "description": "Every answer people have given, with a CSV you can hand to an advertiser.",
+      "tabsLabel": "Filter by ad",
+      "allAds": "All ads",
+      "search": "Name, phone, question or answer",
+      "download": "{n, plural, =0 {Nothing to download} =1 {Download 1 answer} other {Download # answers}}",
+      "empty": "No answers yet. They appear here the moment somebody finishes a survey.",
+      "noMatch": "No answer matches that search.",
+      "noAnswer": "(left blank)",
+      "graded": "has a right answer",
+      "ungraded": "opinion, not graded",
+      "correct": "Correct",
+      "incorrect": "Incorrect",
+      "occasion": "watch {n}",
+      "seconds": "{n}s",
+      "truncated": "Showing the newest {shown} of {total}. The download has all of them.",
+      "privacy": "This file names people: every row carries a respondent’s name and phone number. Treat it as personal data, and think before forwarding it to an advertiser who only asked which option won.",
+      "col": {
+        "when": "When",
+        "question": "Question",
+        "answer": "Answer",
+        "who": "Who answered",
+        "watched": "Watched"
       }
     }
   },
