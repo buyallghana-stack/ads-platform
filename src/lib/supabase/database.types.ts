@@ -4823,7 +4823,13 @@ export type Database = {
       affiliate_performance: { Args: { p_days?: number; p_user_id: string }; Returns: Json }
       affiliate_statement: { Args: { p_limit?: number; p_user_id: string }; Returns: Json }
       request_commission_payout: {
-        Args: { p_amount_minor: number; p_user_id: string }
+        Args: {
+          p_amount_minor: number
+          /* Added with migration 185: the function refuses to guess when
+             somebody holds both a mobile money and a crypto destination. */
+          p_method?: string | null
+          p_user_id: string
+        }
         Returns: {
           id: string
           affiliate_id: string

@@ -78,8 +78,10 @@ export type CommissionWithdrawResult =
 export async function requestCommissionWithdrawal(input: {
   amountMinor: number
   pin: string
+  /** Which of their destinations. Omitted only when they hold exactly one. */
+  method?: 'mobile_money' | 'crypto'
 }): Promise<CommissionWithdrawResult> {
-  const { amountMinor, pin } = input
+  const { amountMinor, pin, method } = input
 
   if (!/^[0-9]{4}$/.test(pin)) return { ok: false, reason: 'error' }
   if (!Number.isSafeInteger(amountMinor) || amountMinor <= 0) {
@@ -130,6 +132,9 @@ export async function requestCommissionWithdrawal(input: {
   const { data, error } = await admin.rpc('request_commission_payout', {
     p_user_id: user.id,
     p_amount_minor: amountMinor,
+    /* Which destination. Sent explicitly because the function refuses to
+       guess when somebody holds two, rather than paying an arbitrary one. */
+    p_method: method ?? null,
   })
 
   if (error) {

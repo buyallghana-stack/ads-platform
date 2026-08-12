@@ -57,14 +57,20 @@ export function CommissionWithdraw({
   balanceMinor,
   minimumMinor,
   feePercent,
-  destination,
+  destinations,
   payoutsEnabled,
   openRequest,
 }: {
   balanceMinor: number
   minimumMinor: number
   feePercent: number
-  destination: Destination | null
+  /* ⚠️ A LIST, NOT ONE. `user_payout_details` is keyed (user_id, method), so
+     somebody may hold a mobile money destination AND a crypto one. This screen
+     used to be handed a single row read with `.maybeSingle()`, which ERRORS on
+     two rows and returns null — so adding a second payout method made the
+     screen insist there were none, which is exactly what the operator hit on
+     the manager account (2026-08-12). */
+  destinations: Destination[]
   payoutsEnabled: boolean
   /** One at a time, by unique index. Said here rather than discovered by
    *  filling the form in and being refused by a constraint. */
@@ -74,6 +80,12 @@ export function CommissionWithdraw({
 
   const [amount, setAmount] = useState('')
   const [pin, setPin] = useState('')
+  /* Which destination this withdrawal goes to. The database is told
+     explicitly: with two rows and no method it used to select an arbitrary
+     one, so somebody could be paid to the account they did not choose. */
+  const [method, setMethod] = useState<Destination['method'] | null>(
+    destinations[0]?.method ?? null,
+  )
   const [stage, setStage] = useState<'amount' | 'confirm'>('amount')
   const [result, setResult] = useState<CommissionWithdrawResult | null>(null)
   const [pending, startTransition] = useTransition()
@@ -145,9 +157,15 @@ export function CommissionWithdraw({
     </>
   )
 
+  const destination = destinations.find((d) => d.method === method) ?? destinations[0] ?? null
+
   const submit = () => {
     startTransition(async () => {
-      const outcome = await requestCommissionWithdrawal({ amountMinor, pin })
+      const outcome = await requestCommissionWithdrawal({
+        amountMinor,
+        pin,
+        method: destination?.method,
+      })
       setResult(outcome)
       if (!outcome.ok) setPin('')
     })
@@ -395,6 +413,48 @@ export function CommissionWithdraw({
             />
             <Row label={t('youGet')} value={cedis(netMinor)} strong />
           </dl>
+        )}
+
+        {/* One destination reads as a statement; two or more have to be a
+            CHOICE, because the database is now told which one and will refuse
+            to guess. Disabled once the amount is confirmed: the figure on the
+            review was quoted for this destination, and a crypto quote is
+            frozen against the coin. */}
+        {destinations.length > 1 && (
+          <fieldset className="mt-4" disabled={stage === 'confirm'}>
+            <legend className="mb-1.5 text-[0.75rem] text-ink-500">{t('sendingTo')}</legend>
+            <div className="flex flex-col gap-2">
+              {destinations.map((option) => (
+                <label
+                  key={option.method}
+                  className={cn(
+                    'flex cursor-pointer items-center gap-3 rounded-(--radius-card) border px-3.5 py-3',
+                    option.method === destination?.method
+                      ? 'border-brand-600 bg-brand-50'
+                      : 'border-ink-200 bg-surface',
+                    stage === 'confirm' && 'cursor-default opacity-60',
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="commission-destination"
+                    value={option.method}
+                    checked={option.method === destination?.method}
+                    onChange={() => setMethod(option.method)}
+                    className="size-4 shrink-0 accent-brand-600"
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[0.8125rem] font-medium text-ink-900">
+                      {option.title}
+                    </span>
+                    <span className="block truncate font-mono text-[0.75rem] text-ink-500">
+                      {option.detail}
+                    </span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
         )}
 
         <div className="mt-4 flex items-center gap-3 rounded-(--radius-card) bg-ink-50 px-3.5 py-3">

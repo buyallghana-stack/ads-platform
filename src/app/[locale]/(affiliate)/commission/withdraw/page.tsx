@@ -69,8 +69,14 @@ export default async function CommissionWithdrawPage({
       .select(
         'method, msisdn, account_name, wallet_address, provider:payout_providers(name), coin:payout_coins(code), network:payout_coin_networks(name)',
       )
-      .eq('user_id', user!.id)
-      .maybeSingle(),
+      /* ⚠️ NOT `.maybeSingle()`. `user_payout_details` is keyed
+         (user_id, method), so a person may hold BOTH a mobile money row and a
+         crypto one, and `.maybeSingle()` errors on two rows and hands back
+         null — which this screen read as "no destination at all". Adding a
+         second payout method therefore removed the first from the product,
+         which is what the operator hit on 2026-08-12. The ads withdrawal has
+         always read this table as an array, which is why it never broke. */
+      .eq('user_id', user!.id),
     /* One open request at a time is a unique INDEX in the database, so
          without this the form is fillable and the refusal arrives as
          `duplicate key value violates unique constraint …`. The action still
@@ -88,20 +94,26 @@ export default async function CommissionWithdrawPage({
     (configRows ?? []).find((r) => r.key === 'redemption_fee_percent')?.value ?? 0,
   )
 
-  const destination =
-    details?.method === 'mobile_money' && details.provider
-      ? {
-          method: 'mobile_money' as const,
-          title: details.provider.name,
-          detail: `${maskTail(details.msisdn ?? '')} · ${details.account_name ?? ''}`,
-        }
-      : details?.method === 'crypto' && details.coin
+  /* Every destination they hold, masked. Mobile money first: it is what almost
+     everybody uses, so it is the one that should be selected on arrival. */
+  const destinations = (details ?? [])
+    .map((row) =>
+      row.method === 'mobile_money' && row.provider
         ? {
-            method: 'crypto' as const,
-            title: `${details.coin.code}${details.network?.name ? ` · ${details.network.name}` : ''}`,
-            detail: maskWallet(details.wallet_address ?? ''),
+            method: 'mobile_money' as const,
+            title: row.provider.name,
+            detail: `${maskTail(row.msisdn ?? '')} · ${row.account_name ?? ''}`,
           }
-        : null
+        : row.method === 'crypto' && row.coin
+          ? {
+              method: 'crypto' as const,
+              title: `${row.coin.code}${row.network?.name ? ` · ${row.network.name}` : ''}`,
+              detail: maskWallet(row.wallet_address ?? ''),
+            }
+          : null,
+    )
+    .filter((d): d is NonNullable<typeof d> => d !== null)
+    .sort((a, b) => (a.method === 'mobile_money' ? -1 : b.method === 'mobile_money' ? 1 : 0))
 
   return (
     /*
@@ -131,7 +143,7 @@ export default async function CommissionWithdrawPage({
         balanceMinor={dashboard.balance_minor ?? 0}
         minimumMinor={dashboard.payout_minimum_minor ?? 0}
         feePercent={Number.isFinite(feePercent) ? feePercent : 0}
-        destination={destination}
+        destinations={destinations}
         payoutsEnabled={dashboard.payouts_enabled ?? false}
         openRequest={statement.payouts.some(
           (p) => p.status === 'requested' || p.status === 'approved',

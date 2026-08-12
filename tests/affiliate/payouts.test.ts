@@ -221,8 +221,14 @@ describe.skipIf(!HAS_DB)('asking for the money', () => {
       await open(tx)
       const { user } = await earner(tx, by, 'Just Changed', 20_000)
 
+      /* CHANGE THE DESTINATION, rather than stamping the column by hand.
+         Since migration 185 `last_changed_at` is derived by a trigger from
+         whether the destination actually moved, because adding one for the
+         first time was starting a 48-hour lock nobody had earned. Setting the
+         column directly now carries the old value forward, which is the point:
+         the clock belongs to the data, not to whoever writes the row. */
       await tx.query(
-        `update public.user_payout_details set last_changed_at = now() where user_id = $1`,
+        `update public.user_payout_details set msisdn = '0249999999' where user_id = $1`,
         [user.id],
       )
 

@@ -190,10 +190,13 @@ describe.skipIf(!HAS_DB)('requesting a payout', () => {
       await givePayoutDetails(tx, user.id)
       await creditPoints(tx, user.id, POINTS_EARNED)
 
-      // Undo the fixture's backdating: details changed just now, which is the
-      // account-takeover pattern the cool-off exists to slow down.
+      /* CHANGE THE DESTINATION, which is the account-takeover pattern the
+         cool-off exists to slow down. Stamping `last_changed_at` by hand used
+         to work and no longer does: since migration 185 a trigger derives it
+         from whether the destination actually moved, because adding a first
+         payout account was starting a 48-hour lock nobody had earned. */
       await tx.query(
-        `update public.user_payout_details set last_changed_at = now() where user_id = $1`,
+        `update public.user_payout_details set msisdn = '0249999999' where user_id = $1`,
         [user.id],
       )
 

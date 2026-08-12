@@ -236,12 +236,10 @@ export async function givePayoutDetails(
     [userId, msisdn, accountName],
   )
 
-  await tx.query(
-    `update public.user_payout_details
-        set last_changed_at = now() - interval '400 hours'
-      where user_id = $1`,
-    [userId],
-  )
+  /* The backdating that used to live here is gone. Since migration 185 a
+     first-time insert stamps `last_changed_at` at the epoch, because adding a
+     destination is not changing one, so a fresh fixture is never inside the
+     cool-off and there is nothing to undo. */
 }
 
 /**
