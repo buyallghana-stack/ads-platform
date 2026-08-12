@@ -49,7 +49,7 @@
       "rate": "Ce que rapporte une publicité sur une formule payante",
       "bestRate": "Meilleur taux",
       "monthsValue": "{months}",
-      "months": "Mois sur chaque formule payante"
+      "months": "{months, plural, one {Mois} other {Mois}} sur chaque forfait payant"
     },
     "ways": {
       "eyebrow": "Façons de gagner",
@@ -1365,7 +1365,6 @@
       "perAdHint": "soit {money} par publicité regardée"
     },
     "card": {
-      "period": "pour {months} mois",
       "choose": "Prendre {plan}",
       "held": "Actif",
       "popular": "Le plus choisi",
@@ -1381,7 +1380,7 @@
     },
     "checkout": {
       "title": "Forfait {plan}",
-      "subtitle": "Un seul paiement, {months} mois d'avantages.",
+      "subtitle": "Un seul paiement, {days, plural, one {# jour} other {# jours}} d'avantages.",
       "total": "Total à payer",
       "payWith": "Payer avec",
       "momo": "Mobile Money",

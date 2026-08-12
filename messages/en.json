@@ -49,7 +49,7 @@
       "rate": "What one ad pays on a paid plan",
       "bestRate": "Top earning rate",
       "monthsValue": "{months}",
-      "months": "Months on every paid plan"
+      "months": "{months, plural, one {Month} other {Months}} on every paid plan"
     },
     "ways": {
       "eyebrow": "Ways to earn",
@@ -1365,7 +1365,6 @@
       "perAdHint": "that is {money} for every ad you watch"
     },
     "card": {
-      "period": "for {months} months",
       "choose": "Get {plan}",
       "held": "Active",
       "popular": "Most popular",
@@ -1381,7 +1380,7 @@
     },
     "checkout": {
       "title": "{plan} plan",
-      "subtitle": "One payment, {months} months of benefits.",
+      "subtitle": "One payment, {days, plural, one {# day} other {# days}} of benefits.",
       "total": "Total to pay",
       "payWith": "Pay with",
       "momo": "Mobile Money",

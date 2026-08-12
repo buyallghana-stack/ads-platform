@@ -110,7 +110,13 @@ export default async function LandingPage({
     { icon: <PlayCircle />, value: num(freeAds), label: t('stats.freeAds') },
     { icon: <Coins />, value: perAdHeadline, label: t('stats.rate') },
     { icon: <TrendingUp />, value: `${bestRate}×`, label: t('stats.bestRate') },
-    { icon: <Clock3 />, value: t('stats.monthsValue', { months }), label: t('stats.months') },
+    /* The label is plural-aware because the figure is read from the plans and
+       every one of them is 30 days today, so this tile said "1 Months". */
+    {
+      icon: <Clock3 />,
+      value: t('stats.monthsValue', { months }),
+      label: t('stats.months', { months }),
+    },
   ]
 
   const steps = [

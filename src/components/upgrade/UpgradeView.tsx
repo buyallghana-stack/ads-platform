@@ -17,7 +17,10 @@ import { cn } from '@/lib/cn'
  *
  * Two things this screen has to get across, because both are unusual and both
  * cost money if misunderstood: plans STACK (holding two gives you both), and
- * each one runs for three months rather than renewing monthly.
+ * each one runs for a fixed period rather than renewing monthly. That period
+ * is `billing_period_days` on the plan and is currently 30 days on all five;
+ * it is never assumed here, because it was once written into the checkout as
+ * "3 months" and stayed there after the plans changed.
  *
  * The benefits summary at the top is computed by the database, not here —
  * resolve_user_tier owns the combining rules, and a second implementation in
@@ -204,7 +207,18 @@ export function UpgradeView({
                   {t('checkout.title', { plan: selected.plan.name })}
                 </h2>
                 <p className="mt-0.5 text-[0.8125rem] text-ink-500">
-                  {t('checkout.subtitle', { months: 3 })}
+                  {/* ⚠️ THE PERIOD COMES FROM THE PLAN. This said "3 months"
+                      with the 3 TYPED IN, while every plan on sale runs for 30
+                      days: the checkout promised three times what it sold, on
+                      the last screen before somebody pays. The card beside it
+                      has always read `plan.periodDays`, so the two screens
+                      disagreed with each other as well.
+
+                      Days rather than months, like the card: the operator sets
+                      `billing_period_days` per plan, and any figure derived by
+                      dividing it is a rounding waiting to become another false
+                      promise. */}
+                  {t('checkout.subtitle', { days: selected.plan.periodDays })}
                 </p>
               </div>
               <button
