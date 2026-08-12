@@ -74,6 +74,11 @@ export function AdCard({
       type="button"
       onClick={() => onOpen(ad)}
       style={style}
+      /* A handle for `verify-legacy-css.mjs`, which checks this card still has
+         a painted border on a browser with no `@property` support. The card is
+         a <button> rather than an <article>, so there is no element role to
+         select it by. */
+      data-ad-card=""
       className={cn(
         'group animate-rise relative flex h-full w-full flex-col overflow-hidden text-left',
         'rounded-(--radius-card) border border-ink-200 bg-surface',

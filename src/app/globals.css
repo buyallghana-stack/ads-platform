@@ -175,6 +175,69 @@
    =========================================================================== */
 
 @layer base {
+  /*
+    ⚠️ THE @property FALLBACKS, AND WHY THE ADS TAB WAS DISTORTED ON AN
+    IPHONE 7.
+
+    Tailwind v4 registers its internal variables with `@property`, which gives
+    them an initial value the browser supplies when nobody sets one. Safari
+    only learned `@property` in 16.4, and an iPhone 7 stops at 15.6 — so on
+    that phone every one of these is EMPTY, and a declaration that reads an
+    empty variable is invalid and thrown away entirely.
+
+    The one that did the damage is `--tw-border-style`, because `.border`
+    compiles to `border-style: var(--tw-border-style); border-width: 1px`. Lose
+    the first half and the second does nothing: the default border style is
+    `none`. Every bordered card on the Ads tab therefore had no outline, and a
+    column of white cards on a white page reads as one distorted slab. The Home
+    tab survived it because its balance card is a filled panel, which is why
+    the operator saw one tab break and the other look right (2026-08-12).
+
+    `-translate-x-1/2` and its siblings fail the same way and take centred
+    overlays with them, which is the other half of what that phone showed.
+
+    These are the initial values Tailwind itself registers, restated as plain
+    declarations so a browser without `@property` has them too. A class always
+    wins over `*`, so nothing here overrides a utility. Registered properties
+    with no initial value are deliberately absent: those are meant to be empty.
+
+    Regenerate after a Tailwind upgrade with the @property scan in
+    `scripts/check-legacy-css.mjs`, which fails if the two lists drift apart.
+  */
+  *,
+  ::before,
+  ::after,
+  ::backdrop {
+    --tw-translate-x: 0;
+    --tw-translate-y: 0;
+    --tw-translate-z: 0;
+    --tw-scale-x: 1;
+    --tw-scale-y: 1;
+    --tw-scale-z: 1;
+    --tw-space-y-reverse: 0;
+    --tw-divide-x-reverse: 0;
+    --tw-divide-y-reverse: 0;
+    --tw-border-style: solid;
+    --tw-gradient-from: transparent;
+    --tw-gradient-via: transparent;
+    --tw-gradient-to: transparent;
+    --tw-gradient-from-position: 0%;
+    --tw-gradient-via-position: 50%;
+    --tw-gradient-to-position: 100%;
+    --tw-shadow: 0 0 transparent;
+    --tw-shadow-alpha: 100%;
+    --tw-inset-shadow: 0 0 transparent;
+    --tw-inset-shadow-alpha: 100%;
+    --tw-ring-shadow: 0 0 transparent;
+    --tw-inset-ring-shadow: 0 0 transparent;
+    --tw-ring-offset-width: 0;
+    --tw-ring-offset-color: #fff;
+    --tw-ring-offset-shadow: 0 0 transparent;
+    --tw-outline-style: solid;
+    --tw-drop-shadow-alpha: 100%;
+    --tw-content: '';
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
     /* Anchor navigation should not slam content under a sticky header. */
