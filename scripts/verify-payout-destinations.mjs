@@ -283,6 +283,43 @@ try {
   const productText = await body(upPage)
   check('and a line saying why it is lower', /only pay the difference/i.test(productText))
 
+  /* ⚠️ NO COUPON BOX ON AN UPGRADE (operator, 2026-08-12). The charge runs
+     through `start_training_upgrade`, which takes no code, so a field here
+     would accept one and the till would ignore it. */
+  const upgradeCoupon = await upPage.getByLabel(/coupon code/i).count()
+  check('no coupon field on an upgrade', upgradeCoupon === 0, `${upgradeCoupon} field(s)`)
+
+  /* The locked lesson sells the same course, so it owes the same two things. */
+  const { rows: locked } = await db.query(
+    `select l.id from public.lessons l
+       join public.course_sections s on s.id = l.section_id
+      where s.product_id = $1 and not l.is_preview
+      order by l.position limit 1`,
+    [upper.id],
+  )
+  if (locked.length) {
+    await upPage.goto(`${BASE}/learn/${upper.slug}?lesson=${locked[0].id}`, {
+      waitUntil: 'networkidle',
+    })
+    const lockedText = await body(upPage)
+    check(
+      'the locked lesson quotes the difference too',
+      lockedText.includes(cedis(expectedMinor)) && /only pay the difference/i.test(lockedText),
+      lockedText.includes(cedis(Number(upper.price_minor)))
+        ? 'full price is present (struck through, expected)'
+        : 'difference not found',
+    )
+    const lockedCoupon = await upPage.getByLabel(/coupon code/i).count()
+    check('no coupon field on the locked lesson either', lockedCoupon === 0, `${lockedCoupon}`)
+  }
+
+  /* AND IT IS STILL THERE WHERE IT WORKS. The admin holds the dearer course,
+     so the cheaper one is an ordinary purchase for them, not an upgrade. A
+     rule that hides the box everywhere would pass every check above. */
+  await page.goto(`${BASE}/p/${lower.slug}`, { waitUntil: 'networkidle' })
+  const plainCoupon = await page.getByLabel(/coupon code/i).count()
+  check('the coupon field survives on an ordinary purchase', plainCoupon === 1, `${plainCoupon}`)
+
   /* The panel that sells the upgrade. Its button carried the list price. */
   await upPage.goto(`${BASE}/market/account`, { waitUntil: 'networkidle' })
   const cta = (

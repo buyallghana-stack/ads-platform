@@ -118,6 +118,24 @@ export default async function CoursePage({
 
   const resources = await getCourseResources(product.id, user!.id)
 
+  /* ⚠️ THE LOCKED LESSON SELLS THIS COURSE TOO, so it has the same two
+     obligations as the product page: quote what the till will actually take,
+     and offer no coupon box on a path that cannot honour one. Somebody holding
+     Beginner previewing a Professional lesson is upgrading, and
+     `start_product_order` prices that as the difference (migration 186). Only
+     asked for when they do not own it, because that is the only case where the
+     offer is rendered at all. */
+  const upgradeMinor = product.owned
+    ? null
+    : await createAdminClient()
+        .rpc('training_upgrade_offer', { p_user_id: user!.id })
+        .then((r) => {
+          const offer = r.data as { product_id?: string; upgrade_minor?: number } | null
+          return offer && offer.product_id === product.id && offer.upgrade_minor != null
+            ? offer.upgrade_minor
+            : null
+        })
+
   /*
     Only asked for once the course is finished, because that is the only time
     the answer can be anything but null — and it is the answer that decides
@@ -225,6 +243,7 @@ export default async function CoursePage({
                         priceMinor: product.priceMinor,
                         listPriceMinor: product.listPriceMinor,
                         onSale: product.onSale,
+                        upgradeMinor,
                         lessons: product.lessons,
                         certificate: training?.certificate ?? false,
                       }

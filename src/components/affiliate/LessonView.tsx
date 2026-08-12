@@ -648,6 +648,10 @@ export type LessonOffer = {
   priceMinor: number
   listPriceMinor: number
   onSale: boolean
+  /** What an upgrade would cost this viewer, or null when this is an ordinary
+   *  purchase. Someone holding a lower training is charged the difference by
+   *  `start_product_order` (migration 186), whichever screen they buy from. */
+  upgradeMinor: number | null
   lessons: number
   certificate: boolean
 }
@@ -705,16 +709,33 @@ function LockedOffer({ offer }: { offer: LessonOffer }) {
             ))}
         </ul>
 
+        {/* An upgrade is quoted at the difference with the course's own price
+            struck through beside it, exactly as the product page does. The
+            sale price is struck through only when `onSale` is true: a fake
+            original beside a real one is the oldest trick in retail. */}
         <p className="mt-4 flex items-baseline justify-center gap-2">
           <span className="text-[1.5rem] font-bold tracking-[-0.02em] text-ink-900">
-            {cedis(offer.priceMinor)}
+            {cedis(offer.upgradeMinor ?? offer.priceMinor)}
           </span>
-          {offer.onSale && offer.listPriceMinor > offer.priceMinor && (
+          {offer.upgradeMinor !== null ? (
             <span className="text-[0.9375rem] text-ink-400 line-through">
-              {cedis(offer.listPriceMinor)}
+              {cedis(offer.priceMinor)}
             </span>
+          ) : (
+            offer.onSale &&
+            offer.listPriceMinor > offer.priceMinor && (
+              <span className="text-[0.9375rem] text-ink-400 line-through">
+                {cedis(offer.listPriceMinor)}
+              </span>
+            )
           )}
         </p>
+
+        {offer.upgradeMinor !== null && (
+          <p className="mx-auto mt-1.5 max-w-xs text-[0.75rem] leading-relaxed text-ink-500">
+            {t('upgradePrice')}
+          </p>
+        )}
 
         {/* Straight to Paystack. Same component and same server action as the
             product page, so there is one checkout to keep working. */}
@@ -722,6 +743,9 @@ function LockedOffer({ offer }: { offer: LessonOffer }) {
           productId={offer.productId}
           label={t('cta')}
           className="mx-auto mt-4 max-w-xs"
+          /* No coupon box on an upgrade: `start_training_upgrade` takes no
+             code, so one applied here would be accepted and then ignored. */
+          couponsAllowed={offer.upgradeMinor === null}
         />
       </div>
     </section>

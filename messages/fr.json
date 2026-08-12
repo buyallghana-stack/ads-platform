@@ -4041,7 +4041,8 @@
         "perkLessons": "Les {n} leçons, à vous pendant un an",
         "perkCertificate": "Un certificat à la fin",
         "perkEarn": "Gagnez une commission sur chaque vente que vous apportez",
-        "cta": "Obtenir le cours complet"
+        "cta": "Obtenir le cours complet",
+        "upgradePrice": "Vous détenez déjà le cours inférieur, vous ne payez donc que la différence."
       }
     },
     "quiz": {

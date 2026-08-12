@@ -336,6 +336,9 @@ export default async function PublicProductPage({
                   productId={product.id}
                   label={t('buy')}
                   initialCoupon={sp.coupon ?? null}
+                  /* No coupon box on an upgrade: the charge runs through
+                     `start_training_upgrade`, which takes no code. */
+                  couponsAllowed={upgrade === null}
                 />
               ) : (
                 /* Signed out. The click has already been recorded against the

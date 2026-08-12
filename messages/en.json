@@ -4041,7 +4041,8 @@
         "perkLessons": "All {n} lessons, yours for a year",
         "perkCertificate": "A certificate when you finish",
         "perkEarn": "Earn commission on every sale you bring in",
-        "cta": "Get the full course"
+        "cta": "Get the full course",
+        "upgradePrice": "You already hold the course below this one, so you only pay the difference."
       }
     },
     "quiz": {
