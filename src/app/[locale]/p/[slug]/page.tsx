@@ -12,6 +12,7 @@ import { getSessionUser } from '@/lib/auth/session'
 import { recordClick } from '@/lib/market/attribution'
 import { courseLength, coverUrl } from '@/lib/market/covers'
 import { getShopProduct } from '@/lib/market/data'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { cedis } from '@/lib/market/money'
 
 const LESSON_ICON: Record<string, typeof PlayCircle> = {
@@ -103,11 +104,31 @@ export default async function PublicProductPage({
   const cover = coverUrl(product.coverPath)
   const length = courseLength(product.seconds)
 
+  /* ⚠️ IS THIS AN UPGRADE FOR THIS VIEWER? `start_product_order` charges the
+     difference when somebody already holds a lower training (migration 186),
+     so a page that keeps advertising the list price quotes a figure the till
+     will not take. Same source as the charge: `training_upgrade_offer`. */
+  const upgrade =
+    user && product.purpose === 'training_program'
+      ? await createAdminClient()
+          .rpc('training_upgrade_offer', { p_user_id: user.id })
+          .then((r) => {
+            const offer = r.data as { product_id?: string; upgrade_minor?: number } | null
+            return offer && offer.product_id === product.id && offer.upgrade_minor != null
+              ? offer.upgrade_minor
+              : null
+          })
+      : null
+
   return (
     <div className="min-h-dvh bg-canvas">
       <header className="border-b border-ink-200 bg-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3.5 sm:px-6">
-          <Link href="/">
+          {/* ⚠️ SIGNED IN, THE LOGO GOES BACK INTO THE APP. This page is
+              public, so its logo pointed at the marketing site — which threw a
+              signed-in affiliate out of the product mid-purchase, and looked
+              like being logged out (operator, 2026-08-12). */}
+          <Link href={user ? '/market' : '/'}>
             <Logo variant="dark" />
           </Link>
           {!user && (
@@ -265,14 +286,19 @@ export default async function PublicProductPage({
           <div className="rounded-(--radius-panel) border border-ink-200 bg-surface p-5">
             <p className="flex items-baseline gap-2">
               <span className="text-[1.875rem] font-bold leading-none tabular-nums text-ink-900">
-                {cedis(product.priceMinor)}
+                {cedis(upgrade ?? product.priceMinor)}
               </span>
-              {product.onSale && (
+              {(upgrade !== null || product.onSale) && (
                 <span className="text-[0.875rem] text-ink-400 line-through">
-                  {cedis(product.listPriceMinor)}
+                  {cedis(upgrade !== null ? product.priceMinor : product.listPriceMinor)}
                 </span>
               )}
             </p>
+            {upgrade !== null && (
+              <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-ink-500">
+                {t('upgradePrice')}
+              </p>
+            )}
 
             {training && (
               <ul className="mt-4 flex flex-col gap-2.5 border-t border-ink-200 pt-4">

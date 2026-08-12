@@ -3949,7 +3949,8 @@
       "mustSignIn": "Please sign in before buying.",
       "freeNotSupported": "This product has no price set. Please contact support.",
       "termsNote": "By buying this programme you become an affiliate and accept our <terms>terms</terms>. We record which version you accepted.",
-      "watchPreview": "Watch preview"
+      "watchPreview": "Watch preview",
+      "upgradePrice": "You already hold the course below this one, so you only pay the difference."
     },
     "callback": {
       "ok": {
@@ -4240,7 +4241,8 @@
       "benefitValidity": "{days} days of access from the day you buy",
       "benefitCertificate": "A certificate when you finish",
       "keepsNote": "You keep everything you have already bought. The upgrade is its own course with its own certificate; nothing you have finished has to be done again.",
-      "cta": "Upgrade for {price}"
+      "cta": "Upgrade for {price}",
+      "differenceNote": "You already paid {paid} for the course you hold, so you only pay the difference. The full price is {full}."
     },
     "linksLocked": {
       "title": "Your links are not live yet",

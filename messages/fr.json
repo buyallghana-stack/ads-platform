@@ -3949,7 +3949,8 @@
       "mustSignIn": "Veuillez vous connecter avant d’acheter.",
       "freeNotSupported": "Ce produit n’a pas de prix défini. Contactez le support.",
       "termsNote": "En achetant ce programme, vous devenez affilié et acceptez nos <terms>conditions</terms>. Nous enregistrons la version que vous avez acceptée.",
-      "watchPreview": "Voir l’aperçu"
+      "watchPreview": "Voir l’aperçu",
+      "upgradePrice": "Vous détenez déjà le cours inférieur, vous ne payez donc que la différence."
     },
     "callback": {
       "ok": {
@@ -4240,7 +4241,8 @@
       "benefitValidity": "{days} jours d'accès à partir de l'achat",
       "benefitCertificate": "Un certificat à la fin",
       "keepsNote": "Vous gardez tout ce que vous avez déjà acheté. La mise à niveau est un cours à part, avec son propre certificat ; rien de ce que vous avez terminé n'est à refaire.",
-      "cta": "Passer au niveau supérieur pour {price}"
+      "cta": "Passer au niveau supérieur pour {price}",
+      "differenceNote": "Vous avez déjà payé {paid} pour le cours que vous détenez, vous ne payez donc que la différence. Le prix complet est {full}."
     },
     "linksLocked": {
       "title": "Vos liens ne sont pas encore actifs",
