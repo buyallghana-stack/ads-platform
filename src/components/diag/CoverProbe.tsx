@@ -24,6 +24,12 @@ type Row = { label: string; value: string; bad?: boolean }
 export function CoverProbe() {
   const card = useRef<HTMLDivElement>(null)
   const cover = useRef<HTMLDivElement>(null)
+  /* The same markup in a <button>, which is what the ad feed actually uses.
+     WebKit ignored flex and grid ON BUTTONS until Safari 16, so this is the
+     one that should collapse on the phone — and the third, with the layout
+     moved to a span inside the button, is the fix. */
+  const buttonCover = useRef<HTMLDivElement>(null)
+  const fixedCover = useRef<HTMLDivElement>(null)
   const [rows, setRows] = useState<Row[] | null>(null)
 
   useEffect(() => {
@@ -51,8 +57,21 @@ export function CoverProbe() {
         }
       }
 
+      const buttonBox = buttonCover.current?.getBoundingClientRect()
+      const fixedBox = fixedCover.current?.getBoundingClientRect()
+
       setRows([
         { label: 'screen', value: `${window.innerWidth} x ${window.innerHeight}` },
+        {
+          label: 'IN A BUTTON',
+          value: buttonBox ? `${Math.round(buttonBox.height)}px` : 'n/a',
+          bad: !buttonBox || buttonBox.height < 40,
+        },
+        {
+          label: 'BUTTON + SPAN',
+          value: fixedBox ? `${Math.round(fixedBox.height)}px` : 'n/a',
+          bad: !fixedBox || fixedBox.height < 40,
+        },
         {
           label: 'COVER HEIGHT',
           value: `${Math.round(coverBox.height)}px  (want ~${Math.round((coverBox.width * 9) / 16)})`,
@@ -142,12 +161,13 @@ export function CoverProbe() {
       </div>
 
       <p className="mt-5 text-[0.75rem] text-ink-500">
-        The card below is the real one, with the real classes.
+        Three cards, identical inside. The middle one is a button with the
+        layout on the button, which is what the ad feed used to be.
       </p>
 
-      {/* The ad card's own markup, copied rather than imported, because the
-          card takes a feed row and this page has no database. The classes are
-          the ones that matter: the flex column, the border, the cover. */}
+      {/* 1. A PLAIN DIV, which is what the first probe used and what reported
+             a correct 192px cover on the operator's iPhone 7. */}
+      <p className="mt-4 text-[0.75rem] font-semibold text-ink-700">1. div</p>
       <div
         ref={card}
         className="group relative mt-2 flex h-full w-full flex-col overflow-hidden rounded-(--radius-card) border border-ink-200 bg-surface text-left"
@@ -172,6 +192,46 @@ export function CoverProbe() {
           </span>
         </div>
       </div>
+
+      {/* 2. THE OLD AD CARD: layout on the button itself. */}
+      <p className="mt-4 text-[0.75rem] font-semibold text-ink-700">2. button, flex on the button</p>
+      <button
+        type="button"
+        className="group relative mt-1 flex h-full w-full flex-col overflow-hidden rounded-(--radius-card) border border-ink-200 bg-surface text-left"
+      >
+        <div ref={buttonCover} className="relative">
+          <AdCover seed="probe-seed" src={null} title="Probe" format="video" className="w-full" />
+        </div>
+        <div className="flex items-start gap-3 px-3.5 py-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-(--radius-input) bg-brand-600 text-[0.875rem] font-bold text-white">
+            P
+          </span>
+          <span className="block text-[0.9375rem] font-semibold text-ink-900">
+            A title long enough to wrap onto a second line
+          </span>
+        </div>
+      </button>
+
+      {/* 3. THE FIX: same button, layout on a span inside it. */}
+      <p className="mt-4 text-[0.75rem] font-semibold text-ink-700">3. button, flex on a span</p>
+      <button
+        type="button"
+        className="group relative mt-1 block h-full w-full overflow-hidden rounded-(--radius-card) border border-ink-200 bg-surface text-left"
+      >
+        <span className="flex h-full w-full flex-col">
+          <span ref={fixedCover} className="relative block">
+            <AdCover seed="probe-seed" src={null} title="Probe" format="video" className="w-full" />
+          </span>
+          <span className="flex items-start gap-3 px-3.5 py-3">
+            <span className="grid size-9 shrink-0 place-items-center rounded-(--radius-input) bg-brand-600 text-[0.875rem] font-bold text-white">
+              P
+            </span>
+            <span className="block text-[0.9375rem] font-semibold text-ink-900">
+              A title long enough to wrap onto a second line
+            </span>
+          </span>
+        </span>
+      </button>
     </div>
   )
 }
