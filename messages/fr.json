@@ -4110,7 +4110,9 @@
         "reference": "Référence",
         "youGet": "Vous recevez",
         "inCoin": "En {coin}",
-        "back": "Retour aux gains"
+        "back": "Retour aux gains",
+        "bodyTo": "{amount} en route vers {account}.",
+        "bodyCoin": "{amount} {coin} en route vers {account}."
       },
       "notYet": {
         "title": "Encore {amount}",
@@ -4122,7 +4124,19 @@
         "half": "Moitié",
         "max": "Tout"
       },
-      "afterFee": "{net} après les {percent} % de frais"
+      "afterFee": "Vous recevrez {net} après les {percent}% de frais.",
+      "toTitle": "Envoyer vers",
+      "manageHint": "Gérez vos comptes de paiement dans votre profil.",
+      "amountTitle": "Montant",
+      "confirmHeading": "Confirmer le retrait",
+      "to": "Vers",
+      "amountRow": "Montant",
+      "feeFree": "Gratuit",
+      "holdNote": "Les retraits sont vérifiés pour des raisons de sécurité et aboutissent généralement sous 72 heures.",
+      "pinTitle": "Saisissez votre code de retrait",
+      "pinSubmitting": "Envoi de votre demande…",
+      "confirmCta": "Confirmer",
+      "pinFor": "Envoi de {amount} vers {account}."
     },
     "links": {
       "label": "Autres actions",

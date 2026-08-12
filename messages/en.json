@@ -4110,7 +4110,9 @@
         "reference": "Reference",
         "youGet": "You receive",
         "inCoin": "In {coin}",
-        "back": "Back to earnings"
+        "back": "Back to earnings",
+        "bodyTo": "{amount} on their way to {account}.",
+        "bodyCoin": "{amount} {coin} on their way to {account}."
       },
       "notYet": {
         "title": "{amount} to go",
@@ -4122,7 +4124,19 @@
         "half": "Half",
         "max": "All of it"
       },
-      "afterFee": "{net} after the {percent}% fee"
+      "afterFee": "You'll receive {net} after the {percent}% fee.",
+      "toTitle": "Withdraw to",
+      "manageHint": "Manage your payout accounts in your Profile.",
+      "amountTitle": "Amount",
+      "confirmHeading": "Confirm withdrawal",
+      "to": "To",
+      "amountRow": "Amount",
+      "feeFree": "Free",
+      "holdNote": "Withdrawals are reviewed for security and typically complete within 72 hours.",
+      "pinTitle": "Enter your withdrawal PIN",
+      "pinSubmitting": "Submitting your request…",
+      "confirmCta": "Confirm",
+      "pinFor": "Sending {amount} to {account}."
     },
     "links": {
       "label": "More things to do",

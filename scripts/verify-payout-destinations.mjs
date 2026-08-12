@@ -170,13 +170,38 @@ try {
     text.slice(0, 110),
   )
 
-  const options = await page.locator('input[name="commission-destination"]').count()
+  /* Cards with `role="radio"`, not `<input type="radio">`: the flow imitates
+     the ads withdrawal, whose account step is a list of tappable cards. */
+  const options = await page.locator('[role="radio"][data-method]').count()
   check('both destinations are offered', options === 2, `${options} offered`)
 
   const checked = await page
-    .locator('input[name="commission-destination"]:checked')
-    .getAttribute('value')
-  check('mobile money is selected on arrival', checked === 'mobile_money', String(checked))
+    .locator('[role="radio"][data-method="mobile_money"]')
+    .getAttribute('aria-checked')
+  check('mobile money is selected on arrival', checked === 'true', `aria-checked=${checked}`)
+
+  /* THE FLOW ITSELF, which is what the operator asked for: destination, then
+     amount, then a confirmation table, then the PIN pad. Each Continue has to
+     move it on, or the screens exist and nobody can reach them. */
+  await page.getByRole('button', { name: /^continue$/i }).click()
+  await page.waitForTimeout(250)
+  const amountStep = await body(page)
+  check('Continue reaches the amount step', /amount/i.test(amountStep), amountStep.slice(0, 80))
+
+  await page.locator('#cw-amount').fill('1.00')
+  await page.getByRole('button', { name: /^continue$/i }).click()
+  await page.waitForTimeout(250)
+  const confirmStep = await body(page)
+  check(
+    'the confirmation lists where it goes, the fee and the net',
+    /confirm withdrawal/i.test(confirmStep) && /you receive/i.test(confirmStep),
+    confirmStep.slice(0, 120),
+  )
+
+  await page.getByRole('button', { name: /^confirm$/i }).click()
+  await page.waitForTimeout(250)
+  const pinStep = await page.getByRole('button', { name: '1' }).count()
+  check('the PIN step is the shared pad', pinStep === 1, `${pinStep} keypad`)
 
   /* The ads withdrawal reads the same table and must be unaffected. */
   const ads = await page.goto(`${BASE}/withdraw`, { waitUntil: 'networkidle' })
