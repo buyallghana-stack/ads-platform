@@ -31,13 +31,21 @@ import type { AdResponseRow } from '@/lib/admin/responses-data'
  * Horizontal rather than vertical because option text is long ("None of these"),
  * and a rotated label is a label nobody reads.
  *
- * ── ONE SVG, TWO DESTINATIONS ──
+ * ── A FILE, NOT A PANEL ──
  *
- * The same string is rendered on screen and rasterised for the download, so the
- * picture in the file is the picture that was checked. It is deliberately a
- * single light-mode look: this is a document that gets emailed to an
- * advertiser, and a chart that changed colour with the reader's OS would be a
- * different artefact each time it was opened.
+ * Operator, 2026-08-12: *"remove the chart from the screen on the admin
+ * dashboard, i just want the option to download only."* So nothing is drawn on
+ * the page: the answers table below already carries the detail, and a chart
+ * repeating it in pictures earned its space only if you were reading it there.
+ * The button builds the picture on demand.
+ *
+ * That also retired the machinery that rebuilt the drawing at the measured
+ * screen width — with no on-screen render there is one width, the sheet's, and
+ * the file no longer depends on the phone it was exported from.
+ *
+ * It is deliberately a single light-mode look: this is a document that gets
+ * emailed to an advertiser, and a picture that changed colour with the
+ * reader's OS would be a different artefact each time it was opened.
  *
  * Colours are the validated sequential blue (`#2a78d6`, light end `#86b6ef`):
  * monotone lightness, one hue, light end clear of the surface at 2.06:1.
@@ -70,6 +78,9 @@ const escape = (s: string) =>
 
 /** Cut to fit, because an SVG has no ellipsis of its own. */
 const clip = (s: string, max: number) => (s.length <= max ? s : `${s.slice(0, max - 1)}…`)
+
+/** The width the downloaded picture is always drawn at. */
+const SHEET = 760
 
 export function SurveySummary({ rows, scope }: { rows: AdResponseRow[]; scope: string }) {
   const t = useTranslations('admin.responses.summary')
@@ -128,11 +139,11 @@ export function SurveySummary({ rows, scope }: { rows: AdResponseRow[]; scope: s
     return { questions, people: people.size, answers: rows.length, earliest, latest }
   }, [rows])
 
-  const svg = useMemo(() => buildSvg(summary, scope, t), [summary, scope, t])
-
   const downloadPng = () => {
     setBusy(true)
-    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' })
+    const blob = new Blob([buildSvg(summary, scope, t, SHEET)], {
+      type: 'image/svg+xml;charset=utf-8',
+    })
     const url = URL.createObjectURL(blob)
     const image = new Image()
 
@@ -175,28 +186,30 @@ export function SurveySummary({ rows, scope }: { rows: AdResponseRow[]; scope: s
   if (summary.answers === 0) return null
 
   return (
-    <section className="mb-5">
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-[0.9375rem] font-semibold tracking-[-0.01em] text-ink-900">
-          {t('title')}
-        </h2>
-        <button
-          type="button"
-          onClick={downloadPng}
-          disabled={busy}
-          className="inline-flex items-center gap-2 rounded-full border border-ink-200 px-3 py-1.5 text-[0.75rem] font-semibold text-ink-700 transition-colors hover:border-brand-600 hover:text-brand-700 disabled:opacity-60"
-        >
-          <ImageDown aria-hidden className="size-3.5" />
-          {busy ? t('preparing') : t('download')}
-        </button>
+    <section className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-(--radius-card) border border-ink-200 bg-surface px-4 py-3">
+      <div className="min-w-0">
+        <h2 className="text-[0.875rem] font-semibold text-ink-900">{t('title')}</h2>
+        <p className="mt-0.5 text-[0.75rem] text-ink-500">
+          {t('caption', {
+            answers: summary.answers,
+            people: summary.people,
+            span:
+              summary.earliest && summary.latest
+                ? `${summary.earliest.slice(0, 10)} → ${summary.latest.slice(0, 10)}`
+                : '',
+          })}
+        </p>
       </div>
 
-      {/* The same SVG the download rasterises. Generated here from our own
-          data with every label escaped, never from anything a browser sent. */}
-      <div
-        className="mt-3 overflow-x-auto rounded-(--radius-card) border border-ink-200 bg-white"
-        dangerouslySetInnerHTML={{ __html: svg }}
-      />
+      <button
+        type="button"
+        onClick={downloadPng}
+        disabled={busy}
+        className="inline-flex shrink-0 items-center gap-2 rounded-(--radius-input) bg-brand-600 px-4 py-2.5 text-[0.875rem] font-semibold text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
+      >
+        <ImageDown aria-hidden className="size-4" />
+        {busy ? t('preparing') : t('download')}
+      </button>
     </section>
   )
 }
@@ -215,12 +228,22 @@ function buildSvg(
   },
   scope: string,
   t: (key: string, values?: Record<string, string | number>) => string,
+  W: number,
 ): string {
-  const W = 760
-  const PAD = 28
-  const LABEL_W = 200
-  const BAR_MAX = W - PAD * 2 - LABEL_W - 92 // room for the value label
+  /* Everything below is derived from the width rather than fixed, which is
+     what lets the same builder draw a 340px phone and a 760px sheet without
+     the type changing size. */
+  const narrow = W < 520
+  const PAD = narrow ? 14 : 28
+  const LABEL_W = Math.round(Math.min(200, Math.max(96, W * 0.3)))
+  const VALUE_W = narrow ? 64 : 92 // room for "14  36%" at the bar's end
+  const BAR_MAX = Math.max(W - PAD * 2 - LABEL_W - VALUE_W, 40)
   const ROW = 30 // 22px bar + 8px air, so bars never fill their slot
+  /* How many characters fit in a given number of pixels. The per-character
+     estimate has to follow the TYPE SIZE, not be one number: at 6.4px it suits
+     12px regular and overruns a 13px semibold heading, which is exactly how
+     two question titles still ran off a 375px phone after the first fix. */
+  const chars = (px: number, per = 6.4) => Math.max(Math.floor(px / per), 8)
   const parts: string[] = []
 
   let y = PAD
@@ -228,7 +251,7 @@ function buildSvg(
   // ── heading ──────────────────────────────────────────────────────────────
   parts.push(
     `<text x="${PAD}" y="${y + 16}" font-size="17" font-weight="700" fill="${INK}">${escape(
-      clip(scope, 58),
+      clip(scope, chars(W - PAD * 2, 9.4)), // 17px bold, widest-case glyphs
     )}</text>`,
   )
   y += 26
@@ -249,18 +272,24 @@ function buildSvg(
     [String(summary.people), t('tiles.people')],
     [String(summary.questions.length), t('tiles.questions')],
   ]
-  const tileW = (W - PAD * 2 - 16) / 3
+  /* Three across on the sheet; two across on a phone, where a third 100px
+     tile is where the old drawing started disappearing. */
+  const perRow = narrow ? 2 : 3
+  const tileW = (W - PAD * 2 - 8 * (perRow - 1)) / perRow
   tiles.forEach(([value, label], i) => {
-    const x = PAD + i * (tileW + 8)
+    const x = PAD + (i % perRow) * (tileW + 8)
+    const row = Math.floor(i / perRow)
     parts.push(
-      `<rect x="${x}" y="${y}" width="${tileW}" height="58" rx="10" fill="#f7f9fc" />` +
-        `<text x="${x + 14}" y="${y + 27}" font-size="20" font-weight="700" fill="${INK}">${escape(
+      `<rect x="${x}" y="${y + row * 66}" width="${tileW}" height="58" rx="10" fill="#f7f9fc" />` +
+        `<text x="${x + 14}" y="${y + row * 66 + 27}" font-size="20" font-weight="700" fill="${INK}">${escape(
           value,
         )}</text>` +
-        `<text x="${x + 14}" y="${y + 45}" font-size="11" fill="${MUTED}">${escape(label)}</text>`,
+        `<text x="${x + 14}" y="${y + row * 66 + 45}" font-size="11" fill="${MUTED}">${escape(
+          clip(label, chars(tileW - 20)),
+        )}</text>`,
     )
   })
-  y += 78
+  y += 20 + Math.ceil(tiles.length / perRow) * 66
 
   // ── one block per question ───────────────────────────────────────────────
   for (const q of summary.questions) {
@@ -275,7 +304,7 @@ function buildSvg(
        anybody who needs to line the two up. */
     parts.push(
       `<text x="${PAD}" y="${y}" font-size="13" font-weight="600" fill="${INK}">${escape(
-        clip(q.text, 92),
+        clip(q.text, chars(W - PAD * 2, 8.0)), // 13px semibold, widest-case glyphs
       )}</text>`,
     )
     y += 16
@@ -294,7 +323,7 @@ function buildSvg(
 
         parts.push(
           `<text x="${PAD}" y="${cy + 15}" font-size="12" fill="${MUTED}">${escape(
-            clip(option.label, 26),
+            clip(option.label, chars(LABEL_W - 8)),
           )}</text>`,
         )
         /* 4px rounded data-end, square at the baseline: two rects, the second
@@ -321,7 +350,7 @@ function buildSvg(
       for (const sample of q.samples) {
         parts.push(
           `<text x="${PAD}" y="${y + 14}" font-size="12" fill="${MUTED}">${escape(
-            `“${clip(sample, 88)}”`,
+            `“${clip(sample, chars(W - PAD * 2) - 2)}”`,
           )}</text>`,
         )
         y += 20
@@ -340,7 +369,11 @@ function buildSvg(
   const H = y + PAD - 12
 
   return [
+    /* Its OWN width, with `max-width` as the only concession: the drawing is
+       already built for the space it has, so stretching it to 100% would
+       enlarge a 760px sheet to fill a 976px column and blur every label. */
     `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"`,
+    ` style="max-width:100%;height:auto;display:block"`,
     ` font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" role="img">`,
     `<rect width="${W}" height="${H}" fill="${SURFACE}" />`,
     parts.join(''),
