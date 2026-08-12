@@ -71,7 +71,10 @@ export default async function PublicProductPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; slug: string }>
-  searchParams: Promise<{ ref?: string; subid?: string }>
+  /* `coupon` joins `ref` and `subid`: an affiliate link and a discount link
+     are both just query parameters on the same product page, and one link can
+     carry both. */
+  searchParams: Promise<{ ref?: string; subid?: string; coupon?: string }>
 }) {
   const { locale, slug } = await params
   setRequestLocale(locale)
@@ -303,7 +306,11 @@ export default async function PublicProductPage({
                   {t('owned')}
                 </Link>
               ) : user ? (
-                <BuyButton productId={product.id} label={t('buy')} />
+                <BuyButton
+                  productId={product.id}
+                  label={t('buy')}
+                  initialCoupon={sp.coupon ?? null}
+                />
               ) : (
                 /* Signed out. The click has already been recorded against the
                    visitor token, so signing up does not lose the attribution —

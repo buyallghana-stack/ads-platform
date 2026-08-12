@@ -25,6 +25,7 @@ import {
   Settings,
   ShieldAlert,
   SquareArrowOutUpRight,
+  Tag,
   Users,
   Wallet,
   X,
@@ -132,6 +133,11 @@ const GROUPS: NavGroup[] = [
       // Sits with Ads rather than under SYSTEM: a gift code is content the
       // operator creates and hands out, not a setting they configure.
       { key: 'giftCodes', href: '/admin/gift-codes', Icon: Gift },
+      /* Beside the gift codes because both are codes the operator hands out,
+         but they are not the same tool and do not share a screen: a gift code
+         PAYS somebody, a coupon reduces a price. One is a liability, the other
+         is a discount on revenue. */
+      { key: 'coupons', href: '/admin/coupons', Icon: Tag },
       // Content the operator authors, like ads and gift codes — the prize
       // table is the game.
       { key: 'games', href: '/admin/games', Icon: Gamepad2 },
@@ -341,7 +347,7 @@ function AdminIdentity({ admin, onNavigate }: { admin: AdminChip; onNavigate?: (
       <div className="flex items-center gap-2.5 rounded-(--radius-input) px-2 py-1.5">
         <span
           aria-hidden
-          className="grid size-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-600 to-(--color-brand-accent) text-[0.75rem] font-bold text-white"
+          className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-600 bg-gradient-to-br from-brand-600 to-(--color-brand-accent) text-[0.75rem] font-bold text-white"
         >
           {admin.name.slice(0, 2).toUpperCase()}
         </span>

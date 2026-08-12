@@ -28,8 +28,13 @@ export const metadata: Metadata = {
  */
 export default async function UpgradePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>
+  /* `?coupon=CODE`, so a code can be shared as a link rather than typed from a
+     broadcast message. It is only a prefill: the code is validated in SQL when
+     the purchase starts, exactly as a typed one is. */
+  searchParams: Promise<{ coupon?: string }>
 }) {
   const { locale } = await params
   setRequestLocale(locale)
@@ -54,6 +59,7 @@ export default async function UpgradePage({
       baseAdPoints={references.baseAdPoints}
       pointsPerCurrencyUnit={references.pointsPerCurrencyUnit}
       checkoutEnabled={Boolean(serverEnv().PAYSTACK_SECRET_KEY)}
+      initialCoupon={(await searchParams).coupon ?? null}
     />
   )
 }

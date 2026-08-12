@@ -39,6 +39,7 @@ const REAL_ADMIN_SECTIONS = [
   '/admin/messages',
   '/admin/announcements',
   '/admin/gift-codes',
+  '/admin/coupons',
   '/admin/leaderboard',
   '/admin/games',
   '/admin/tasks',
@@ -254,7 +255,7 @@ export function PersonCell({
           aria-hidden
           className={cn(
             'grid shrink-0 place-items-center rounded-full font-semibold text-white',
-            'bg-gradient-to-br from-brand-600 to-(--color-brand-accent)',
+            'bg-brand-600 bg-gradient-to-br from-brand-600 to-(--color-brand-accent)',
             size === 'md' ? 'size-10 text-[0.8125rem]' : 'size-8 text-[0.6875rem]',
           )}
         >

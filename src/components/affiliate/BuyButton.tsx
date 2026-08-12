@@ -5,7 +5,8 @@ import { useState, useTransition } from 'react'
 import { Loader2, ShoppingBag } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { startCheckout } from '@/app/[locale]/p/[slug]/actions'
+import { previewProductCoupon, startCheckout } from '@/app/[locale]/p/[slug]/actions'
+import { CouponField, type AppliedCoupon } from '@/components/checkout/CouponField'
 import { cn } from '@/lib/cn'
 
 /**
@@ -29,19 +30,23 @@ export function BuyButton({
   productId,
   label,
   className,
+  initialCoupon,
 }: {
   productId: string
   label: string
   className?: string
+  /** From a shared link, `?coupon=CODE`. */
+  initialCoupon?: string | null
 }) {
   const t = useTranslations('affiliate.public')
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [coupon, setCoupon] = useState<AppliedCoupon | null>(null)
 
   const buy = () => {
     setError(null)
     startTransition(async () => {
-      const result = await startCheckout(productId)
+      const result = await startCheckout(productId, coupon?.code)
       if (!result.ok) {
         setError(result.message)
         return
@@ -69,6 +74,18 @@ export function BuyButton({
         )}
         {pending ? t('starting') : label}
       </button>
+
+      {/* Below the button, not above it. The price on this page is the product's
+          own; a code changes what is charged, and the buyer sees that in the
+          box the moment it is applied. */}
+      <CouponField
+        currency="GHS"
+        initialCode={initialCoupon}
+        applied={coupon}
+        disabled={pending}
+        onApplied={setCoupon}
+        preview={(value) => previewProductCoupon(productId, value)}
+      />
 
       {error && (
         <p role="alert" className="mt-2 text-[0.8125rem] text-danger-600">

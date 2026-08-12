@@ -3969,6 +3969,99 @@ export type Database = {
           won_today: number
         }[]
       }
+      /* ── HAND-ADDED, like `commission_payouts` and the three commission RPCs
+         above it. This repo patches this file rather than regenerating it, so
+         a new function needs its signature written in here in the same change
+         that creates it (migrations 178 and 179). ── */
+      coupon_quote: {
+        Args: {
+          p_amount_minor: number
+          p_code: string
+          p_kind?: Database["public"]["Enums"]["order_kind"]
+          /* Nullable, and sent as an explicit `null` rather than omitted:
+             PostgREST resolves the overload from the argument names present,
+             and supabase-js drops undefined ones. */
+          p_product_id?: string | null
+          p_tier_id?: string | null
+          p_user_id: string
+        }
+        Returns: {
+          charged_minor: number
+          coupon_id: string | null
+          discount_minor: number
+          list_minor: number
+          ok: boolean
+          reason: string | null
+        }[]
+      }
+      admin_list_coupons: {
+        Args: { p_admin_id: string }
+        Returns: {
+          amount_minor: number | null
+          business: string
+          code: string
+          created_at: string
+          discount_given_minor: number
+          discount_kind: string
+          ends_at: string | null
+          first_purchase_only: boolean
+          id: string
+          is_active: boolean
+          max_discount_minor: number | null
+          min_spend_minor: number
+          note: string | null
+          per_user_limit: number
+          percent: number | null
+          product_id: string | null
+          quota: number
+          revenue_minor: number
+          starts_at: string | null
+          target_name: string | null
+          tier_id: string | null
+          used: number
+        }[]
+      }
+      admin_list_coupon_redemptions: {
+        Args: { p_admin_id: string; p_coupon_id: string }
+        Returns: {
+          charged_minor: number
+          created_at: string
+          discount_minor: number
+          email: string
+          id: string
+          list_minor: number
+          person: string | null
+          status: string | null
+          user_id: string
+        }[]
+      }
+      admin_save_coupon: {
+        Args: {
+          p_admin_id: string
+          p_amount_minor?: number | null
+          p_business: string
+          p_code: string
+          p_discount_kind: string
+          p_ends_at?: string | null
+          p_first_purchase_only?: boolean
+          p_id?: string | null
+          p_is_active?: boolean
+          p_max_discount_minor?: number | null
+          p_min_spend_minor?: number | null
+          p_note?: string | null
+          p_per_user_limit?: number
+          p_percent?: number | null
+          p_product_id?: string | null
+          p_quota: number
+          p_starts_at?: string | null
+          p_tier_id?: string | null
+        }
+        Returns: Record<string, unknown>
+      }
+      admin_delete_coupon: {
+        Args: { p_admin_id: string; p_id: string }
+        Returns: undefined
+      }
       admin_list_gift_codes: {
         Args: { p_status?: Database["public"]["Enums"]["gift_code_status"] }
         Returns: {
@@ -6429,6 +6522,9 @@ export type Database = {
       }
       start_product_order: {
         Args: {
+          /* Hand-added with migration 179, along with `p_coupon_code` on
+             `start_subscription_payment` and `coupon_quote` below. */
+          p_coupon_code?: string
           p_method: Database["public"]["Enums"]["order_payment_method"]
           p_product_id: string
           p_user_id: string
@@ -6459,6 +6555,7 @@ export type Database = {
       start_subscription_payment: {
         Args: {
           p_amount_minor?: number
+          p_coupon_code?: string
           p_method: Database["public"]["Enums"]["subscription_payment_method"]
           p_tier_id: string
           p_user_id: string

@@ -5,7 +5,8 @@ import { useEffect, useState, useTransition } from 'react'
 import { Gem, Layers, Smartphone, Wallet, X } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
-import { startPaystackCheckout } from '@/app/[locale]/(app)/upgrade/actions'
+import { previewPlanCoupon, startPaystackCheckout } from '@/app/[locale]/(app)/upgrade/actions'
+import { CouponField, type AppliedCoupon } from '@/components/checkout/CouponField'
 import { PlanCard } from '@/components/upgrade/PlanCard'
 import { Button } from '@/components/ui/Button'
 import type { HeldPlan, Plan, ResolvedBenefits } from '@/lib/subscriptions/data'
@@ -31,6 +32,7 @@ export function UpgradeView({
   baseAdPoints,
   pointsPerCurrencyUnit,
   checkoutEnabled,
+  initialCoupon,
 }: {
   plans: Plan[]
   held: HeldPlan[]
@@ -45,6 +47,8 @@ export function UpgradeView({
   pointsPerCurrencyUnit: number
   /** False until mobile money and crypto checkout are wired up. */
   checkoutEnabled: boolean
+  /** From a shared link, `/upgrade?coupon=CODE`. */
+  initialCoupon?: string | null
 }) {
   const t = useTranslations('upgrade')
   const format = useFormatter()
@@ -53,6 +57,11 @@ export function UpgradeView({
   const [selected, setSelected] = useState<{ plan: Plan; amountMinor: number } | null>(null)
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  /* The applied coupon, if any. Cleared whenever the sheet opens on a
+     different plan or a different amount: a code names ONE plan, and a
+     discount left over from the last sheet would be a price the database
+     refuses at the till. */
+  const [coupon, setCoupon] = useState<AppliedCoupon | null>(null)
 
   /*
     Hands off to Paystack's hosted page. A full document navigation, not the
@@ -61,7 +70,10 @@ export function UpgradeView({
   const pay = (plan: Plan, amountMinor: number) => {
     setError(null)
     startTransition(async () => {
-      const res = await startPaystackCheckout(plan.id, amountMinor)
+      /* The AMOUNT sent is the one they chose inside the band, never the
+         discounted figure: the coupon comes off in SQL, so a tampered request
+         cannot buy a band it did not pay for. */
+      const res = await startPaystackCheckout(plan.id, amountMinor, coupon?.code)
       if (!res.ok) {
         setError(res.message ?? t('checkout.failed'))
         return
@@ -162,7 +174,12 @@ export function UpgradeView({
             }
             baseAdPoints={baseAdPoints}
             pointsPerCurrencyUnit={pointsPerCurrencyUnit}
-            onChoose={(amountMinor) => setSelected({ plan, amountMinor })}
+            onChoose={(amountMinor) => {
+              /* A code belongs to one plan and one amount. Carrying one over
+                 into the next sheet would show a price the till refuses. */
+              setCoupon(null)
+              setSelected({ plan, amountMinor })
+            }}
           />
         ))}
       </div>
@@ -202,14 +219,49 @@ export function UpgradeView({
 
             <div className="mt-4 flex items-center justify-between rounded-(--radius-card) border border-ink-200 bg-ink-50 px-4 py-3">
               <span className="text-[0.8125rem] text-ink-600">{t('checkout.total')}</span>
-              <span className="text-[1.125rem] font-semibold tracking-[-0.02em] text-ink-900">
-                {format.number(selected.amountMinor / 100, {
-                  style: 'currency',
-                  currency: selected.plan.currencyCode,
-                  maximumFractionDigits: 0,
-                })}
+              <span className="flex items-baseline gap-2">
+                {/* The old price stays visible beside the new one. A total that
+                    simply changes leaves somebody wondering whether the code
+                    worked or the plan did. */}
+                {coupon && (
+                  <span className="text-[0.8125rem] text-ink-400 line-through">
+                    {format.number(selected.amountMinor / 100, {
+                      style: 'currency',
+                      currency: selected.plan.currencyCode,
+                      maximumFractionDigits: 0,
+                    })}
+                  </span>
+                )}
+                <span className="text-[1.125rem] font-semibold tracking-[-0.02em] text-ink-900">
+                  {format.number((coupon?.chargedMinor ?? selected.amountMinor) / 100, {
+                    style: 'currency',
+                    currency: selected.plan.currencyCode,
+                    maximumFractionDigits: coupon ? 2 : 0,
+                  })}
+                </span>
               </span>
             </div>
+
+            {/* The plan is unchanged by the discount: a code names its tier, so
+                it takes money off the price and leaves the band alone. Said
+                here because a struck-through total otherwise reads as "you are
+                buying less". */}
+            {coupon && (
+              <p className="mt-1.5 text-[0.75rem] leading-relaxed text-ink-500">
+                {t('checkout.stillFullPlan', { plan: selected.plan.name })}
+              </p>
+            )}
+
+            {checkoutEnabled && (
+              <CouponField
+                currency={selected.plan.currencyCode}
+                initialCode={initialCoupon}
+                applied={coupon}
+                disabled={pending}
+                onApplied={setCoupon}
+                preview={(value) => previewPlanCoupon(selected.plan.id, selected.amountMinor, value)}
+              />
+            )}
 
             <p className="mt-4 text-[0.75rem] font-semibold tracking-[0.04em] text-ink-500 uppercase">
               {t('checkout.payWith')}
@@ -262,10 +314,10 @@ export function UpgradeView({
                 onClick={() => pay(selected.plan, selected.amountMinor)}
               >
                 {t('checkout.pay', {
-                  amount: format.number(selected.amountMinor / 100, {
+                  amount: format.number((coupon?.chargedMinor ?? selected.amountMinor) / 100, {
                     style: 'currency',
                     currency: selected.plan.currencyCode,
-                    maximumFractionDigits: 0,
+                    maximumFractionDigits: coupon ? 2 : 0,
                   }),
                 })}
               </Button>

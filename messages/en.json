@@ -1392,7 +1392,8 @@
       "back": "Back to plans",
       "card": "Card or bank",
       "pay": "Pay {amount}",
-      "failed": "Could not start this payment. Please try again."
+      "failed": "Could not start this payment. Please try again.",
+      "stillFullPlan": "Your plan is still {plan} in full. The code takes money off the price, not off what you get."
     },
     "result": {
       "help": "Something wrong? Get help",
@@ -1469,6 +1470,7 @@
         "audit": "Audit log",
         "settings": "Admin settings",
         "giftCodes": "Gift codes",
+        "coupons": "Coupons",
         "leaderboard": "Leaderboard",
         "games": "Games",
         "tasks": "Tasks",
@@ -2823,6 +2825,88 @@
         "ads": "Ads side only"
       }
     },
+    "coupons": {
+      "title": "Coupons",
+      "description": "A code that takes money off one plan or one training programme. It never pays anybody out, it only reduces what the buyer is charged.",
+      "intro": "Every coupon names the plan or programme it applies to. A code cannot be used anywhere else.",
+      "create": "New coupon",
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "who": "Who used it",
+      "empty": "No coupons yet.",
+      "dismiss": "Dismiss",
+      "loading": "Loading",
+      "none": "None",
+      "noneYet": "Nobody has used this code yet.",
+      "noTarget": "No target",
+      "usedOf": "{used} of {quota}",
+      "cost": "GHS {off} off, GHS {took} taken",
+      "valuePercent": "{percent}% off",
+      "valueFixed": "GHS {amount} off",
+      "tookOff": "took GHS {off} off and paid GHS {paid}",
+      "overCommission": "This programme pays {pays} percent in commission across both levels, and the affiliate is paid on the price before the coupon. Taking off more than {most} percent would pay out more than the sale brings in.",
+      "business": {
+        "ads": "Ads",
+        "affiliate": "Affiliate"
+      },
+      "kind": {
+        "percent": "Percentage",
+        "fixed": "Fixed amount"
+      },
+      "status": {
+        "active": "Live",
+        "off": "Switched off"
+      },
+      "redemption": {
+        "pending": "not paid yet",
+        "failed": "payment failed",
+        "refunded": "refunded"
+      },
+      "worth": {
+        "one": "Takes GHS {off} off the price of GHS {price}, so the buyer pays GHS {pays}.",
+        "band": "Takes GHS {off} off at the floor of GHS {price}, and GHS {offTop} at the top of GHS {top}. Expect people to buy at the top, where the discount is worth most."
+      },
+      "col": {
+        "code": "Code",
+        "target": "Applies to",
+        "value": "Discount",
+        "used": "Used",
+        "cost": "Given away",
+        "status": "Status"
+      },
+      "form": {
+        "business": "Business",
+        "businessHint": "Which side of the platform this code belongs to. It cannot be changed once the code exists.",
+        "target": "Applies to",
+        "targetHint": "A coupon always names one plan or one programme.",
+        "targetPlaceholder": "Choose one",
+        "code": "Code",
+        "codeHint": "Letters, numbers and dashes. Case does not matter when it is typed.",
+        "kind": "Discount",
+        "percent": "Percentage off",
+        "cap": "Most it can take off",
+        "capHint": "A plan is a price range, so a percentage is worth more the more somebody chooses to pay. This caps that.",
+        "amount": "Amount off",
+        "minSpend": "Minimum purchase",
+        "minSpendHint": "Leave empty to allow any amount.",
+        "quota": "How many times it can be used",
+        "quotaHint": "Across everybody. An unconfirmed checkout holds a place for an hour and then releases it.",
+        "perUser": "Times one person can use it",
+        "perUserHint": "One is usually right. It stops a single person taking the whole quota.",
+        "startsAt": "Starts",
+        "endsAt": "Ends",
+        "windowHint": "Leave both empty for a code that works until you switch it off.",
+        "firstOnly": "First purchase only",
+        "firstOnlyHint": "On, it cannot be used on a renewal or an upgrade, so it reaches new buyers rather than the people already paying.",
+        "active": "Live",
+        "activeHint": "Off keeps the code and its history but stops it working.",
+        "note": "Note",
+        "notePlaceholder": "What this code is for, for your own records",
+        "submit": "Create coupon"
+      }
+    },
     "giftCodes": {
       "title": "Gift codes",
       "description": "Generate a code, attach points to it, and hand it out. Each code can be redeemed exactly once.",
@@ -4131,6 +4215,28 @@
       "panelTitle": "Course complete",
       "panelBody": "You have finished every lesson in this course.",
       "panelBodyGraded": "You have finished every lesson, with a grade of {grade}%."
+    }
+  },
+  "checkout": {
+    "coupon": {
+      "label": "Coupon code",
+      "placeholder": "Have a code?",
+      "apply": "Apply",
+      "remove": "Remove",
+      "applied": "{code} applied, {off} off",
+      "reason": {
+        "unknown": "That code is not recognised",
+        "inactive": "That code is no longer active",
+        "not_started": "That code cannot be used yet",
+        "expired": "That code has expired",
+        "wrong_target": "That code is for a different plan",
+        "first_purchase_only": "That code is for a first purchase only",
+        "min_spend": "That code needs a larger purchase",
+        "already_used": "You have already used that code",
+        "exhausted": "That code has been fully used",
+        "nothing_off": "That code takes nothing off this purchase",
+        "no_code": "Enter a code"
+      }
     }
   }
 }

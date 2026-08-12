@@ -44,12 +44,17 @@ export type StartOutcome =
 export async function startProductOrder(
   userId: string,
   productId: string,
+  couponCode?: string | null,
 ): Promise<StartOutcome> {
   const admin = createAdminClient()
   const { data, error } = await admin.rpc('start_product_order', {
     p_user_id: userId,
     p_product_id: productId,
     p_method: 'paystack',
+    /* A string, never a discount. `start_product_order` re-validates it
+       against the product it names, the quota, the window and this buyer's own
+       history, and works out the money itself. */
+    p_coupon_code: couponCode?.trim() || undefined,
   })
 
   if (error || !data) {

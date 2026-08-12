@@ -26,6 +26,7 @@ export type CheckoutResult =
 export async function startPaystackCheckout(
   tierId: string,
   amountMinor?: number,
+  couponCode?: string,
 ): Promise<CheckoutResult> {
   const user = await getSessionUser()
   if (!user?.email) return { ok: false, errorKey: 'notSignedIn' }
@@ -39,6 +40,10 @@ export async function startPaystackCheckout(
     // Undefined means "the floor price", which is what the database defaults
     // to — the cheapest way into the band, never the dearest.
     p_amount_minor: Number.isFinite(amountMinor) ? amountMinor : undefined,
+    /* The code is re-validated in SQL against the quota, the window, the plan
+       it names and this user's own history. What the browser sends is a
+       string, never a discount. */
+    p_coupon_code: couponCode?.trim() || undefined,
   })
 
   if (error || !payment) {
@@ -72,4 +77,51 @@ export async function startPaystackCheckout(
   }
 
   return { ok: true, authorizationUrl: initialised.authorizationUrl }
+}
+
+/**
+ * What a code would do to this purchase, before anybody pays.
+ *
+ * ⚠️ THE SAME FUNCTION THE CHECKOUT USES. `coupon_quote` is what
+ * `start_subscription_payment` applies through `take_coupon`, so the price
+ * previewed here is the price that will be charged. A separate preview would
+ * eventually promise a discount the database refuses, and the buyer would find
+ * out on the Paystack page.
+ *
+ * Quoting is not reserving: the place in the quota is only taken when the
+ * checkout starts, so somebody typing a code and walking away holds nothing.
+ */
+export type CouponPreview =
+  | { ok: true; discountMinor: number; chargedMinor: number }
+  | { ok: false; reason: string }
+
+export async function previewPlanCoupon(
+  tierId: string,
+  amountMinor: number,
+  code: string,
+): Promise<CouponPreview> {
+  const user = await getSessionUser()
+  if (!user) return { ok: false, reason: 'unknown' }
+
+  const admin = createAdminClient()
+  const { data, error } = await admin.rpc('coupon_quote', {
+    p_user_id: user.id,
+    p_code: code.trim(),
+    p_tier_id: tierId,
+    /* `null`, not `undefined`. supabase-js drops undefined keys and PostgREST
+       then cannot match the overload, which fails as "function not found"
+       rather than as a bad argument. */
+    p_product_id: null,
+    p_amount_minor: amountMinor,
+  })
+
+  const row = Array.isArray(data) ? data[0] : data
+  if (error || !row) return { ok: false, reason: 'unknown' }
+  if (!row.ok) return { ok: false, reason: row.reason ?? 'unknown' }
+
+  return {
+    ok: true,
+    discountMinor: Number(row.discount_minor),
+    chargedMinor: Number(row.charged_minor),
+  }
 }

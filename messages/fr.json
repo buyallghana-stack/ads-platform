@@ -1392,7 +1392,8 @@
       "back": "Retour aux forfaits",
       "card": "Carte ou banque",
       "pay": "Payer {amount}",
-      "failed": "Impossible de démarrer ce paiement. Veuillez réessayer."
+      "failed": "Impossible de démarrer ce paiement. Veuillez réessayer.",
+      "stillFullPlan": "Votre formule reste {plan} en entier. Le code réduit le prix, pas ce que vous obtenez."
     },
     "result": {
       "help": "Un problème ? Obtenir de l'aide",
@@ -1469,6 +1470,7 @@
         "audit": "Journal",
         "settings": "Paramètres admin",
         "giftCodes": "Codes cadeaux",
+        "coupons": "Coupons",
         "leaderboard": "Classement",
         "games": "Jeux",
         "tasks": "Objectifs",
@@ -2823,6 +2825,88 @@
         "ads": "Côté publicités uniquement"
       }
     },
+    "coupons": {
+      "title": "Coupons",
+      "description": "Un code qui réduit le prix d'une seule formule ou d'un seul programme de formation. Il ne verse jamais d'argent, il réduit seulement ce qui est facturé.",
+      "intro": "Chaque coupon désigne la formule ou le programme auquel il s'applique. Un code ne peut servir nulle part ailleurs.",
+      "create": "Nouveau coupon",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "who": "Qui l'a utilisé",
+      "empty": "Aucun coupon pour le moment.",
+      "dismiss": "Fermer",
+      "loading": "Chargement",
+      "none": "Aucun",
+      "noneYet": "Personne n'a encore utilisé ce code.",
+      "noTarget": "Sans cible",
+      "usedOf": "{used} sur {quota}",
+      "cost": "GHS {off} accordés, GHS {took} encaissés",
+      "valuePercent": "{percent} % de remise",
+      "valueFixed": "GHS {amount} de remise",
+      "tookOff": "a obtenu GHS {off} de remise et payé GHS {paid}",
+      "overCommission": "Ce programme verse {pays} pour cent de commission sur les deux niveaux, et l'affilié est payé sur le prix avant le coupon. Retirer plus de {most} pour cent verserait plus que ce que la vente rapporte.",
+      "business": {
+        "ads": "Annonces",
+        "affiliate": "Affiliation"
+      },
+      "kind": {
+        "percent": "Pourcentage",
+        "fixed": "Montant fixe"
+      },
+      "status": {
+        "active": "Actif",
+        "off": "Désactivé"
+      },
+      "redemption": {
+        "pending": "pas encore payé",
+        "failed": "paiement échoué",
+        "refunded": "remboursé"
+      },
+      "worth": {
+        "one": "Retire GHS {off} du prix de GHS {price}, l'acheteur paie donc GHS {pays}.",
+        "band": "Retire GHS {off} au plancher de GHS {price}, et GHS {offTop} au plafond de GHS {top}. Attendez-vous à des achats au plafond, là où la remise vaut le plus."
+      },
+      "col": {
+        "code": "Code",
+        "target": "S'applique à",
+        "value": "Remise",
+        "used": "Utilisé",
+        "cost": "Accordé",
+        "status": "Statut"
+      },
+      "form": {
+        "business": "Activité",
+        "businessHint": "De quel côté de la plateforme relève ce code. Non modifiable une fois le code créé.",
+        "target": "S'applique à",
+        "targetHint": "Un coupon désigne toujours une formule ou un programme.",
+        "targetPlaceholder": "Choisissez",
+        "code": "Code",
+        "codeHint": "Lettres, chiffres et tirets. La casse n'a pas d'importance à la saisie.",
+        "kind": "Remise",
+        "percent": "Pourcentage de remise",
+        "cap": "Remise maximale",
+        "capHint": "Une formule est une fourchette de prix, donc un pourcentage vaut plus si la personne choisit de payer plus. Ceci le plafonne.",
+        "amount": "Montant de la remise",
+        "minSpend": "Achat minimum",
+        "minSpendHint": "Laissez vide pour autoriser tout montant.",
+        "quota": "Nombre d'utilisations possibles",
+        "quotaHint": "Pour tout le monde. Un paiement non confirmé réserve une place pendant une heure puis la libère.",
+        "perUser": "Utilisations par personne",
+        "perUserHint": "Une seule convient généralement. Cela évite qu'une personne prenne tout le quota.",
+        "startsAt": "Début",
+        "endsAt": "Fin",
+        "windowHint": "Laissez les deux vides pour un code actif jusqu'à ce que vous l'arrêtiez.",
+        "firstOnly": "Premier achat uniquement",
+        "firstOnlyHint": "Activé, il ne s'applique ni à un renouvellement ni à une amélioration, il touche donc de nouveaux acheteurs plutôt que ceux qui paient déjà.",
+        "active": "Actif",
+        "activeHint": "Désactivé, le code et son historique sont conservés mais il cesse de fonctionner.",
+        "note": "Note",
+        "notePlaceholder": "À quoi sert ce code, pour vos archives",
+        "submit": "Créer le coupon"
+      }
+    },
     "giftCodes": {
       "title": "Codes cadeaux",
       "description": "Générez un code, attribuez-lui des points et distribuez-le. Chaque code ne peut être utilisé qu'une seule fois.",
@@ -4131,6 +4215,28 @@
       "panelTitle": "Cours terminé",
       "panelBody": "Vous avez terminé toutes les leçons de ce cours.",
       "panelBodyGraded": "Vous avez terminé toutes les leçons, avec une note de {grade} %."
+    }
+  },
+  "checkout": {
+    "coupon": {
+      "label": "Code de réduction",
+      "placeholder": "Vous avez un code ?",
+      "apply": "Appliquer",
+      "remove": "Retirer",
+      "applied": "{code} appliqué, {off} de remise",
+      "reason": {
+        "unknown": "Ce code n'est pas reconnu",
+        "inactive": "Ce code n'est plus actif",
+        "not_started": "Ce code n'est pas encore utilisable",
+        "expired": "Ce code a expiré",
+        "wrong_target": "Ce code concerne une autre formule",
+        "first_purchase_only": "Ce code est réservé à un premier achat",
+        "min_spend": "Ce code exige un achat plus important",
+        "already_used": "Vous avez déjà utilisé ce code",
+        "exhausted": "Ce code a été entièrement utilisé",
+        "nothing_off": "Ce code ne retire rien sur cet achat",
+        "no_code": "Saisissez un code"
+      }
     }
   }
 }

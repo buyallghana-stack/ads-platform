@@ -6,6 +6,7 @@ import { getSessionUser } from '@/lib/auth/session'
 import { initialiseTransaction } from '@/lib/payments/paystack'
 import { startProductOrder } from '@/lib/market/orders'
 import { getOrigin } from '@/lib/request-context'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
  * Buying a product.
@@ -30,14 +31,17 @@ import { getOrigin } from '@/lib/request-context'
  */
 export type BuyResult = { ok: true; url: string } | { ok: false; message: string }
 
-export async function startCheckout(productId: string): Promise<BuyResult> {
+export async function startCheckout(
+  productId: string,
+  couponCode?: string | null,
+): Promise<BuyResult> {
   const t = await getTranslations('affiliate.public')
   const locale = await getLocale()
 
   const user = await getSessionUser()
   if (!user) return { ok: false, message: t('mustSignIn') }
 
-  const order = await startProductOrder(user.id, productId)
+  const order = await startProductOrder(user.id, productId, couponCode)
   if (!order.ok) return { ok: false, message: order.message }
 
   /*
@@ -61,4 +65,49 @@ export async function startCheckout(productId: string): Promise<BuyResult> {
 
   if (!started.ok) return { ok: false, message: started.message }
   return { ok: true, url: started.authorizationUrl }
+}
+
+/**
+ * What a code would do to this purchase, before anybody pays.
+ *
+ * The same `coupon_quote` the checkout applies, so the price previewed is the
+ * price charged. Quoting takes no place in the quota: that happens when the
+ * order is started.
+ */
+export type CouponPreviewResult =
+  | { ok: true; discountMinor: number; chargedMinor: number }
+  | { ok: false; reason: string }
+
+export async function previewProductCoupon(
+  productId: string,
+  code: string,
+): Promise<CouponPreviewResult> {
+  const user = await getSessionUser()
+  if (!user) return { ok: false, reason: 'unknown' }
+
+  const admin = createAdminClient()
+
+  /* The price the coupon comes off is read here rather than sent: a browser
+     that names its own list price names its own discount. */
+  const { data: price } = await admin.rpc('product_price_minor', { p_product_id: productId })
+
+  const { data, error } = await admin.rpc('coupon_quote', {
+    p_user_id: user.id,
+    p_code: code.trim(),
+    /* `null`, not `undefined`: an omitted key changes which function
+       PostgREST looks for, and it then finds none. */
+    p_tier_id: null,
+    p_product_id: productId,
+    p_amount_minor: Number(price ?? 0),
+  })
+
+  const row = Array.isArray(data) ? data[0] : data
+  if (error || !row) return { ok: false, reason: 'unknown' }
+  if (!row.ok) return { ok: false, reason: row.reason ?? 'unknown' }
+
+  return {
+    ok: true,
+    discountMinor: Number(row.discount_minor),
+    chargedMinor: Number(row.charged_minor),
+  }
 }
