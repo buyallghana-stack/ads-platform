@@ -87,6 +87,16 @@ const feedIds = async (tx: Tx, userId: string) => {
  * where the same problem was solved the same way.
  */
 const onlyTheseAds = async (tx: Tx, keep: string[]) => {
+  /* ⚠️ CLEAR THE EXISTING TAGS FIRST. Adding a platinum tag is not enough once
+     the operator starts filling buckets: an ad already sitting in the FREE
+     bucket stays visible to a test user with no plan. A live survey in that
+     bucket broke seven of these on 2026-08-12. */
+  await tx.query(
+    `delete from public.ad_tiers x
+      using public.ads a
+      where a.id = x.ad_id and a.status = 'active' and a.id <> all($1::uuid[])`,
+    [keep],
+  )
   await tx.query(
     `insert into public.ad_tiers (ad_id, tier_id)
      select a.id, (select id from public.tiers where slug = 'platinum')
