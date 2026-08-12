@@ -68,6 +68,7 @@ export default async function HomePage({
     notifications,
     unreadCount,
     gamesEnabled,
+    { data: allowances },
   ] =
     await Promise.all([
       // SECURITY DEFINER with its own authorisation check (§8).
@@ -80,6 +81,11 @@ export default async function HomePage({
       getUnreadCount('ads'),
       // Cheap public-config read; drives whether the Games tile is live.
       getGamesEnabled(),
+      /* ⚠️ ONE RATE IS NOT THE WHOLE STORY ANY MORE (migration 187). A stacked
+         account spends its best allowance first and then drops to the next
+         plan's rate, so "×6.43 on every ad" would be false from the 14th ad
+         on. This says how far the top rate actually reaches. */
+      admin.rpc('user_ad_allowances', { p_user_id: user!.id }),
     ])
   const now = serverNow()
 
@@ -88,8 +94,13 @@ export default async function HomePage({
   const cap = status?.daily_ad_cap ?? 0
   const done = status?.ads_completed_today ?? 0
   const remaining = status?.ads_remaining_today ?? 0
-  // Resolved across stacked plans and already clamped by the database.
+  // The rate of the NEXT ad: the best allowance they still hold.
   const multiplier = Number(status?.reward_multiplier ?? 1)
+  /* How many ads that rate covers. Only said when they hold more than one
+     plan, because on one plan it covers the whole day and naming a number
+     there would read as a restriction that does not exist. */
+  const topRateAds =
+    Array.isArray(allowances) && allowances.length > 1 ? Number(allowances[0]?.ads ?? 0) : null
   const { name: pickedName, sizeClass } = pickDisplayName(profile?.full_name)
   const greetName = pickedName ?? t('there')
 
@@ -352,7 +363,17 @@ export default async function HomePage({
           value={status?.tier_name ?? '—'}
           sublabel={
             multiplier > 1
-              ? t('tierMultiplier', { x: format.number(multiplier, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) })
+              ? topRateAds
+                ? /* Stacked: the top rate runs out, and the screen says when
+                     rather than letting somebody find out on the 14th ad. */
+                  t('tierMultiplierFirst', {
+                    x: format.number(multiplier, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }),
+                    n: topRateAds,
+                  })
+                : t('tierMultiplier', { x: format.number(multiplier, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) })
               : cap > 0
                 ? t('tierCap', { n: cap })
                 : undefined

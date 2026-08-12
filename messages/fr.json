@@ -574,6 +574,7 @@
     "capReachedToday": "C’est tout pour aujourd’hui : retour à minuit",
     "tierCap": "{n} publicités par jour",
     "tierMultiplier": "×{x} sur chaque publicité",
+    "tierMultiplierFirst": "×{x} sur vos {n} premières pubs",
     "breakdown": {
       "title": "Détail des gains",
       "hint": "Chaque cedi gagné, et d'où il vient"
@@ -2538,7 +2539,8 @@
         },
         "adCapMode": {
           "label": "Combinaison des limites quotidiennes",
-          "description": "Quand une personne détient plusieurs formules. La page d'accueil promet que les limites s'additionnent, et une formule ne peut jamais laisser moins d'annonces que ce que le total payé permet déjà.",
+          "description": "Lorsqu'une personne détient plusieurs forfaits. Les pubs de chaque forfait sont payées au taux de ce forfait, le meilleur d'abord : ce réglage décide du nombre de pubs, pas de leur valeur.",
+          "sum": "Chaque forfait apporte toute sa limite",
           "sumBonus": "Ajouter la limite de chaque formule au-dessus de l'offre gratuite",
           "band": "Uniquement ce que le total payé permet",
           "highest": "Formule la plus élevée uniquement"

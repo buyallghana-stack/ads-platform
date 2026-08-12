@@ -6790,6 +6790,24 @@ export type Database = {
         Returns: number
       }
       user_has_fresh_ads: { Args: { p_user_id: string }; Returns: boolean }
+      /* Hand-added with migration 187, like `commission_payouts` before it:
+         this repo patches this file rather than regenerating it. */
+      user_ad_allowances: {
+        Args: { p_user_id: string }
+        Returns: {
+          slot: number
+          tier_id: string
+          slug: string
+          name: string
+          /** How many ads this plan brings at its own rate. */
+          ads: number
+          multiplier: number
+        }[]
+      }
+      ad_reward_points: {
+        Args: { p_user_id: string; p_base: number; p_done?: number }
+        Returns: number
+      }
       user_target_tiers: {
         Args: { p_user_id: string }
         Returns: {

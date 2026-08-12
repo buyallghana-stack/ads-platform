@@ -574,6 +574,7 @@
     "capReachedToday": "That is every ad for today: back at midnight",
     "tierCap": "{n} ads a day",
     "tierMultiplier": "×{x} on every ad",
+    "tierMultiplierFirst": "×{x} on your first {n} ads",
     "breakdown": {
       "title": "Earnings breakdown",
       "hint": "Every cedi you have earned, and where it came from"
@@ -2538,7 +2539,8 @@
         },
         "adCapMode": {
           "label": "How daily ad limits combine",
-          "description": "When somebody holds more than one plan. The landing page promises the limits add up, and a plan can never leave somebody with fewer ads than their total spend already buys.",
+          "description": "When somebody holds more than one plan. Each plan's ads are paid at that plan's own rate, best first, so the mode decides how many ads there are and not what they are worth.",
+          "sum": "Every plan brings its whole limit",
           "sumBonus": "Add each plan's limit above the free one",
           "band": "Only what the total paid buys",
           "highest": "Highest plan only"

@@ -479,19 +479,35 @@ describe.skipIf(!HAS_DB)('the daily limit when plans stack', () => {
     for (const rung of paid) await buy(tx, userId, rung.slug, rung.priceGhs)
   }
 
-  it('counts the free allowance once and adds what each plan gives above it', async () => {
+  it('gives every plan its whole allowance', async () => {
     await withRollback(async (tx) => {
       await pinLadder(tx)
       const user = await createUser(tx, { name: 'All Four' })
       await buyEverything(tx, user.id)
 
-      const expected =
-        free.dailyAdCap + paid.reduce((sum, r) => sum + Math.max(r.dailyAdCap - free.dailyAdCap, 0), 0)
+      /* 3 + 4 + 7 + 13 = 27 on the pinned ladder. Operator, 2026-08-12: four
+         plans is 27 ads, not 24 — each plan now brings its own allowance at
+         its own rate (migration 187), so subtracting the free ad from every
+         plan takes an ad away from a plan that was paid for. */
+      expect((await resolved(tx, user.id)).dailyAdCap).toBe(
+        paid.reduce((sum, r) => sum + r.dailyAdCap, 0),
+      )
+    })
+  })
 
-      /* 1 + 2 + 3 + 6 + 12 = 24 on the pinned ladder. The free allowance is
-         added once rather than four times, or holding four plans would hand
-         out the free tier three extra times. */
-      expect((await resolved(tx, user.id)).dailyAdCap).toBe(expected)
+  it('still counts the free allowance once when the operator asks for it', async () => {
+    await withRollback(async (tx) => {
+      await pinLadder(tx)
+      await setConfig(tx, 'ad_cap_combine_mode', 'sum_bonus')
+      const user = await createUser(tx, { name: 'Old Rule' })
+      await buyEverything(tx, user.id)
+
+      /* The rule that shipped between 2026-08-11 and 2026-08-12: 1 + 2 + 3 +
+         6 + 12 = 24. Kept as a setting rather than deleted, like `band`. */
+      expect((await resolved(tx, user.id)).dailyAdCap).toBe(
+        free.dailyAdCap +
+          paid.reduce((sum, r) => sum + Math.max(r.dailyAdCap - free.dailyAdCap, 0), 0),
+      )
     })
   })
 
@@ -506,21 +522,31 @@ describe.skipIf(!HAS_DB)('the daily limit when plans stack', () => {
     })
   })
 
-  it('never hands out less than the total spend already bought', async () => {
+  it('reads the band off the best plan held, not off the total spent', async () => {
     await withRollback(async (tx) => {
       await pinLadder(tx)
       const user = await createUser(tx, { name: 'Deep In Two Bands' })
 
       /* Bronze and Silver bought at the TOP of their bands: GHS 139 + 249 =
-         388, which lands in Gold. Gold's cap is 7, the two plans add up to 6,
-         and the answer has to be 7 — a rule that could cut somebody's ads for
-         paying more would be worse than the bug it replaced. */
+         388, which as a single payment would land in Gold. It does not any
+         more. Operator, 2026-08-12: money buys ADS, not a better rate on ads
+         bought earlier, so this is a Silver holder with two allowances. The
+         old rule promoted the whole day to the Gold rate and paid every one of
+         these ads at it. */
       await buy(tx, user.id, 'bronze', 139)
       await buy(tx, user.id, 'silver', 249)
 
       const standing = await resolved(tx, user.id)
-      expect(standing.name).toBe('Gold')
-      expect(standing.dailyAdCap).toBe(PINNED_LADDER.find((r) => r.slug === 'gold')!.dailyAdCap)
+      const bronze = PINNED_LADDER.find((r) => r.slug === 'bronze')!
+      const silver = PINNED_LADDER.find((r) => r.slug === 'silver')!
+
+      expect(standing.name).toBe('Silver')
+      expect(standing.dailyAdCap).toBe(bronze.dailyAdCap + silver.dailyAdCap)
+      /* Below Gold's rate, which is the whole point: 249 is inside Silver's
+         band and that is what these ads are worth. */
+      expect(standing.multiplier).toBeLessThan(
+        PINNED_LADDER.find((r) => r.slug === 'gold')!.multiplier,
+      )
     })
   })
 

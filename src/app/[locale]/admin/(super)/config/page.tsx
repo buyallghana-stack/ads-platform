@@ -221,6 +221,11 @@ export default async function AdminConfigPage({
           description: t('fields.adCapMode.description'),
           kind: 'select',
           options: [
+            /* `sum` leads and is the default since migration 187: every plan
+               brings its WHOLE allowance, at its own rate. Without it in this
+               list the live value would have no matching option and the select
+               would render empty on the one screen that can change it. */
+            { value: 'sum', label: t('fields.adCapMode.sum') },
             { value: 'sum_bonus', label: t('fields.adCapMode.sumBonus') },
             { value: 'band', label: t('fields.adCapMode.band') },
             { value: 'highest', label: t('fields.adCapMode.highest') },
