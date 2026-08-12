@@ -35,7 +35,7 @@ function AdvertiserMark({ name }: { name: string | null }) {
       aria-hidden
       className={cn(
         'grid size-8 shrink-0 place-items-center rounded-[0.625rem]',
-        'bg-gradient-to-br from-brand-600 to-(--color-brand-accent)',
+        'bg-brand-600 bg-gradient-to-br from-brand-600 to-(--color-brand-accent)',
         'text-[0.8125rem] font-bold text-white',
       )}
     >
@@ -97,6 +97,11 @@ export function AdCard({
             'w-full',
             featured ? 'aspect-video min-h-0 flex-1 xl:aspect-auto' : 'aspect-video',
           )}
+          /* The ratio spacer inside the cover holds its height where
+             `aspect-ratio` does not resolve. The featured card drops it at xl,
+             which is the one place the cover is meant to STRETCH to fill the
+             two rows it spans rather than keep 16:9. */
+          spacerClassName={featured ? 'xl:hidden' : undefined}
         />
 
         {/* Play affordance. A dark disc rather than a light one: these covers

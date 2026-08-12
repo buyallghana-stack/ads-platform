@@ -44,7 +44,10 @@ export function Avatar({
       aria-hidden
       className={cn(
         'grid shrink-0 place-items-center rounded-full font-bold text-white',
-        'bg-gradient-to-br from-brand-600 to-(--color-brand-accent)',
+        /* Solid colour under the gradient: Safari before 16.4 has no @property,
+           so a Tailwind gradient paints nothing and white initials would sit on
+           whatever is behind. See the dashboard hero for the whole story. */
+        'bg-brand-600 bg-gradient-to-br from-brand-600 to-(--color-brand-accent)',
         className,
       )}
     >

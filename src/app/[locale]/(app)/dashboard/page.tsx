@@ -192,7 +192,15 @@ export default async function HomePage({
       <section
         aria-label={t('balance')}
         style={{ '--rise-delay': '0.06s' } as React.CSSProperties}
-        className="animate-rise relative isolate overflow-hidden rounded-(--radius-panel) bg-gradient-to-br from-brand-600 to-(--color-brand-accent) px-5 py-6 text-white shadow-[0_1px_2px_rgb(15_23_42/0.06),0_16px_40px_-16px_rgb(0_58_134/0.5)] sm:px-7"
+        /* `bg-brand-600` UNDER the gradient, and it is load-bearing. A
+           Tailwind v4 gradient is assembled from `@property` variables, which
+           Safari did not ship until 16.4, and an iPhone 7 stops at 15.6. There
+           the gradient paints nothing, and `text-white` was then white on the
+           page's near-white background: the operator's friend could not read
+           their own balance (2026-08-11). A background COLOUR needs no modern
+           CSS, so the card stays brand blue and the text stays legible even
+           when the gradient is thrown away. */
+        className="animate-rise relative isolate overflow-hidden rounded-(--radius-panel) bg-brand-600 bg-gradient-to-br from-brand-600 to-(--color-brand-accent) px-5 py-6 text-white shadow-[0_1px_2px_rgb(15_23_42/0.06),0_16px_40px_-16px_rgb(0_58_134/0.5)] sm:px-7"
       >
         {/* Decorative field, echoing the auth panel's treatment: two soft
             light pools plus a hairline ring drifting off the corner — the
