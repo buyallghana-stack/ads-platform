@@ -93,14 +93,23 @@ export function AdCard({
           src={ad.thumbnailUrl}
           title={ad.title}
           format={ad.format}
-          className={cn(
-            'w-full',
-            featured ? 'aspect-video min-h-0 flex-1 xl:aspect-auto' : 'aspect-video',
-          )}
-          /* The ratio spacer inside the cover holds its height where
-             `aspect-ratio` does not resolve. The featured card drops it at xl,
-             which is the one place the cover is meant to STRETCH to fill the
-             two rows it spans rather than keep 16:9. */
+          /* ⚠️ NO `aspect-video` HERE, AND THAT IS THE FIX. The 16:9 comes
+             from the padding spacer inside the cover and from nothing else.
+
+             The first attempt kept `aspect-ratio` and added the spacer as a
+             fallback, on the theory that Safari 15 ignores the property. It
+             did not fix the operator's phone. Safari does not ignore it on a
+             flex item, it resolves it to a definite height of ZERO, and a
+             definite zero plus `overflow-hidden` clips the spacer instead of
+             letting it grow the box. A fallback cannot help while the broken
+             value is still winning.
+
+             Percentage padding has meant "of the container's width" since
+             CSS 2.1, so this needs no feature from any browser. */
+          className={cn('w-full', featured && 'min-h-0 flex-1')}
+          /* The featured card drops the spacer at xl, which is the one place
+             the cover is meant to STRETCH to fill the two rows it spans
+             rather than keep 16:9. That is what `xl:aspect-auto` used to do. */
           spacerClassName={featured ? 'xl:hidden' : undefined}
         />
 
