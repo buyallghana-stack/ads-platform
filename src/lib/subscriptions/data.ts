@@ -66,41 +66,50 @@ export const getPlans = cache(async (): Promise<Plan[]> => {
 
   const rows = data ?? []
 
-  return rows.map((row, i) => ({
-    /* The band runs to one pesewa under the NEXT plan. Derived from the
-       ordered list rather than stored, so a price change cannot leave a band
-       pointing at a gap — the same rule plan_band_max_minor() applies in the
-       database, which is what the server validates against. */
-    bandMinMinor: Number(row.price_minor),
-    /* The top plan may carry its own ceiling since migration 102 — Platinum
-       sells from GHS 520 to GHS 1,000 with no rung above it. Where it has
-       none, the band is still the single price it always was. */
-    bandMaxMinor:
-      i + 1 < rows.length
-        ? Number(rows[i + 1].price_minor) - 1
-        : Number(row.band_max_minor ?? row.price_minor),
-    nextMultiplier:
-      i + 1 < rows.length
-        ? Number(rows[i + 1].reward_multiplier)
-        : Number(row.band_max_multiplier ?? row.reward_multiplier),
-    lineEndMinor:
-      i + 1 < rows.length
-        ? Number(rows[i + 1].price_minor)
-        : Number(row.band_max_minor ?? row.price_minor),
-    id: row.id,
-    slug: row.slug,
-    name: row.name,
-    description: row.description,
-    priceMinor: Number(row.price_minor),
-    currencyCode: row.currency_code,
-    periodDays: row.billing_period_days,
-    dailyAdCap: row.daily_ad_cap,
-    rewardMultiplier: Number(row.reward_multiplier),
-    redemptionMinimumPoints: Number(row.redemption_minimum_points),
-    referralBonusMultiplier: Number(row.referral_bonus_multiplier),
-    adPriority: row.ad_priority,
-    sortOrder: row.sort_order,
-  }))
+  return rows.map((row, i) => {
+    /* ⚠️ A PLAN'S OWN CEILING WINS (migration 189). Since the ladder gained
+       gaps between the plans, a band no longer ends where the next one begins:
+       Bronze sells GHS 85 to 105 and Silver starts at 145, so deriving the end
+       from the next rung would price Bronze's ceiling as if the band ran to
+       GHS 145 and quote a rate the database will not pay.
+
+       Where a rung carries no ceiling of its own the old rule still applies —
+       the band runs to one pesewa under the next plan — which is what keeps a
+       continuous ladder (and every fixture that pins one) working unchanged.
+
+       This mirrors `plan_multiplier_for_amount` line for line. The last test in
+       flexible-pricing.test.ts sweeps the whole live ladder comparing the two,
+       and it is the reason this comment exists rather than a bug report. */
+    const own = row.band_max_minor === null ? null : Number(row.band_max_minor)
+    const ownRate = row.band_max_multiplier === null ? null : Number(row.band_max_multiplier)
+    const next = i + 1 < rows.length ? rows[i + 1] : null
+
+    const lineEnd = own ?? (next ? Number(next.price_minor) : Number(row.price_minor))
+    const endRate =
+      ownRate ?? (next ? Number(next.reward_multiplier) : Number(row.reward_multiplier))
+
+    return {
+      bandMinMinor: Number(row.price_minor),
+      /* One pesewa under the next plan only when the end IS the next plan;
+         a band with its own ceiling sells right up to it. */
+      bandMaxMinor: own ?? (next ? Number(next.price_minor) - 1 : Number(row.price_minor)),
+      nextMultiplier: endRate,
+      lineEndMinor: lineEnd,
+      id: row.id,
+      slug: row.slug,
+      name: row.name,
+      description: row.description,
+      priceMinor: Number(row.price_minor),
+      currencyCode: row.currency_code,
+      periodDays: row.billing_period_days,
+      dailyAdCap: row.daily_ad_cap,
+      rewardMultiplier: Number(row.reward_multiplier),
+      redemptionMinimumPoints: Number(row.redemption_minimum_points),
+      referralBonusMultiplier: Number(row.referral_bonus_multiplier),
+      adPriority: row.ad_priority,
+      sortOrder: row.sort_order,
+    }
+  })
 })
 
 /** The plans this user currently holds — active, or inside their grace period. */

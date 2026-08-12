@@ -400,31 +400,31 @@ describe.skipIf(!HAS_DB)('the slider and the database agree', () => {
            from public.tiers where is_active order by sort_order`,
       )
 
-      /* Built the way `getPlans` builds it, including the top rung's own
-         ceiling — otherwise this proves the screen agrees with the database
-         about a Platinum that stops at GHS 520, which is not the one on
-         sale. */
+      /* Built the way `getPlans` builds it, own ceiling first.
+         ⚠️ Since migration 189 a plan's own `band_max_minor` wins over the next
+         rung's price, because the ladder has GAPS between the plans — Bronze
+         sells GHS 85 to 105 and Silver starts at 145. Deriving the end from the
+         next rung here would prove the screen agrees with a database that does
+         not exist. Where a rung carries no ceiling the old rule still holds. */
       const plans = rows
         .filter((r) => Number(r.price_minor) > 0)
-        .map((r) => ({
-          id: r.id,
-          slug: r.slug,
-          name: r.name,
-          rewardMultiplier: Number(r.reward_multiplier),
-          bandMinMinor: Number(r.price_minor),
-          bandMaxMinor:
-            r.next_price === null
-              ? Number(r.band_max_minor ?? r.price_minor)
-              : Number(r.next_price) - 1,
-          nextMultiplier:
-            r.next_multiplier === null
-              ? Number(r.band_max_multiplier ?? r.reward_multiplier)
-              : Number(r.next_multiplier),
-          lineEndMinor:
-            r.next_price === null
-              ? Number(r.band_max_minor ?? r.price_minor)
-              : Number(r.next_price),
-        })) as unknown as Plan[]
+        .map((r) => {
+          const own = r.band_max_minor === null ? null : Number(r.band_max_minor)
+          const ownRate = r.band_max_multiplier === null ? null : Number(r.band_max_multiplier)
+          const nextPrice = r.next_price === null ? null : Number(r.next_price)
+          const nextRate = r.next_multiplier === null ? null : Number(r.next_multiplier)
+
+          return {
+            id: r.id,
+            slug: r.slug,
+            name: r.name,
+            rewardMultiplier: Number(r.reward_multiplier),
+            bandMinMinor: Number(r.price_minor),
+            bandMaxMinor: own ?? (nextPrice === null ? Number(r.price_minor) : nextPrice - 1),
+            nextMultiplier: ownRate ?? nextRate ?? Number(r.reward_multiplier),
+            lineEndMinor: own ?? nextPrice ?? Number(r.price_minor),
+          }
+        }) as unknown as Plan[]
 
       /* Every amount in ONE query rather than one query per amount: a round
          trip per cedi is a thousand of them against a remote database, which
