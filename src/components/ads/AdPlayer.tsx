@@ -13,7 +13,7 @@ import {
 } from '@/app/[locale]/(app)/ads/actions'
 import { Button } from '@/components/ui/Button'
 import type { FeedAd } from '@/lib/ads/data'
-import { hasBranching, visibleQuestions } from '@/lib/ads/visibility'
+import { hasBranching, nextDueQuestion, visibleQuestions } from '@/lib/ads/visibility'
 import { cn } from '@/lib/cn'
 
 import { AdCta } from './AdCta'
@@ -122,6 +122,16 @@ export function AdPlayer({
      minimum watch time is not up yet, so playback continues and submission
      happens on the tick that satisfies it. */
   const pendingSubmitRef = useRef<Record<string, string> | null>(null)
+  /*
+    The film has run out. Tracked because "go back to the video" stops being a
+    sane answer once it has: playVideo() on an ENDED player REWINDS it, on both
+    sources, so returning to a finished film restarts the advert from zero.
+    Kept as a ref AND state for the usual reason in this file — the ref is read
+    inside callbacks that must not go stale, the state is what render may look
+    at (see the submit label).
+  */
+  const endedRef = useRef(false)
+  const [ended, setEnded] = useState(false)
 
   /*
     The server's rule, mirrored exactly (see submit_ad_answers): the required
@@ -132,6 +142,15 @@ export function AdPlayer({
   */
   const requiredWatch =
     ad.minWatchSeconds ?? (ad.questionCount === 0 ? (ad.durationSeconds ?? 0) : 0)
+
+  /*
+    Is there any film left? The end event is the reliable half; the clock is
+    the belt and braces, because a stream that stalls on its last frame can
+    leave onEnded unfired, and "go back to the video" must not be the answer
+    then either. A duration of 0 means the source never reported one, in which
+    case only the event can say.
+  */
+  const filmOver = ended || (duration > 0 && elapsed >= duration - 1)
 
   const setPhaseNow = useCallback((next: Phase) => {
     phaseRef.current = next
@@ -204,23 +223,37 @@ export function AdPlayer({
     [ad.id, onResolved, setPhaseNow],
   )
 
+  /** Put a question on screen. askedRef is added to synchronously because the
+   *  4 Hz tick reads it, and state would lag behind by a render. */
+  const openQuestion = useCallback(
+    (question: AdQuestion) => {
+      askedRef.current.add(question.id)
+      setAskedIds([...askedRef.current])
+      setCurrentId(question.id)
+      setDraft('')
+      setPhaseNow('question')
+    },
+    [setPhaseNow],
+  )
+
+  /** The questions these answers still leave to ask, in the admin's order. */
+  const stillToAsk = useCallback(
+    (collected: Record<string, string>) =>
+      visibleQuestions(questions, collected).filter((q) => !askedRef.current.has(q.id)),
+    [questions],
+  )
+
   /** Questions still unanswered once the video is over. */
   const askNextPending = useCallback(
     (collected: Record<string, string>) => {
-      const pending = visibleQuestions(questions, collected).find(
-        (q) => !askedRef.current.has(q.id),
-      )
+      const pending = stillToAsk(collected)[0]
       if (pending) {
-        askedRef.current.add(pending.id)
-        setAskedIds([...askedRef.current])
-        setCurrentId(pending.id)
-        setDraft('')
-        setPhaseNow('question')
+        openQuestion(pending)
         return
       }
       submit(collected)
     },
-    [questions, submit, setPhaseNow],
+    [openQuestion, stillToAsk, submit],
   )
 
   // ---- Playback ----------------------------------------------------------
@@ -260,16 +293,16 @@ export function AdPlayer({
           visible.some((v) => v.id === q.id),
       )
       if (!due) return
-      askedRef.current.add(due.id)
-      setAskedIds([...askedRef.current])
-      setCurrentId(due.id)
-      setDraft('')
-      setPhaseNow('question')
+      openQuestion(due)
     },
-    [cued, questions.length, requiredWatch, submit, setPhaseNow, visible],
+    [cued, openQuestion, questions.length, requiredWatch, submit, visible],
   )
 
   const handleEnded = useCallback(() => {
+    /* Recorded before any early return: the film running out is a fact about
+       the film, not about what the player happens to be showing. */
+    endedRef.current = true
+    setEnded(true)
     if (phaseRef.current !== 'playing') return
     /*
       Watching on after the credit — the film simply finishes, and NOTHING
@@ -297,11 +330,29 @@ export function AdPlayer({
     setAnswers(collected)
 
     if (isVideo) {
-      const unanswered = visibleQuestions(questions, collected).some(
-        (q) => !askedRef.current.has(q.id),
-      )
-      if (unanswered) {
-        // More cues to come — back to the video.
+      const pending = stillToAsk(collected)
+
+      /*
+        A question that is due NOW opens now, straight on top of this one, and
+        the video is never returned to.
+
+        This is the operator's bug of 2026-08-13. Two questions were set at the
+        END of a video, and answering the first sent the player back to a film
+        that had already finished — where `playVideo()` does not resume,
+        it REWINDS. The advert restarted from zero and the second question was
+        unreachable until the whole thing had played again. See nextDueQuestion
+        for the rule; the short version is that a finished film has no clock
+        left to raise anything with, so waiting on it waits forever.
+      */
+      const dueNow = nextDueQuestion(pending, { elapsed, filmOver: endedRef.current || filmOver })
+      if (dueNow) {
+        openQuestion(dueNow)
+        return
+      }
+
+      if (pending.length > 0) {
+        // A cue still ahead of the clock — that one genuinely is worth going
+        // back to the video for.
         setCurrentId(null)
         setPhaseNow('playing')
         return
@@ -316,8 +367,14 @@ export function AdPlayer({
         The one exception is a minimum watch time that has not elapsed yet:
         then playback continues and the answers submit the moment it does,
         rather than being sent into a certain 'too_fast'.
+
+        Unless the film is over, in which case there is no playback left to
+        continue and going back would rewind it. An admin who gates an ad at
+        more seconds than the film runs for has made it unwinnable either way;
+        submitting is what turns that into a refusal the viewer can read
+        instead of an advert that replays forever.
       */
-      if (elapsed >= requiredWatch) {
+      if (elapsed >= requiredWatch || endedRef.current || filmOver) {
         submit(collected)
       } else {
         pendingSubmitRef.current = collected
@@ -366,6 +423,8 @@ export function AdPlayer({
     setResult(null)
     setCredited(false)
     setElapsed(0)
+    endedRef.current = false
+    setEnded(false)
     setPhaseNow('starting')
     setRunKey((k) => k + 1)
   }
@@ -431,6 +490,21 @@ export function AdPlayer({
   /** Whether there is any film left worth staying for. A video whose duration
    *  is unknown counts as "yes" — the viewer decides, not a missing field. */
   const moreToWatch = duration === 0 || elapsed < duration - 1
+
+  /*
+    What answering the question on screen will actually do, computed the way
+    answerCurrent computes it: with the answer being typed folded in, because
+    that answer is exactly what may open or close a branch behind it. This
+    only exists to label the button honestly — the decision itself is taken in
+    answerCurrent, from the same two functions.
+  */
+  const pendingAfterCurrent = current
+    ? visibleQuestions(questions, { ...answers, [current.id]: draft }).filter(
+        (q) => !askedIds.includes(q.id),
+      )
+    : []
+  const nextUpIsImmediate =
+    nextDueQuestion(pendingAfterCurrent, { elapsed, filmOver }) !== null
 
   return (
     <div
@@ -750,15 +824,23 @@ export function AdPlayer({
               }
               submitLabel={
                 isVideo
-                  ? // "Continue watching" only when the video genuinely has
-                    // more to show: another cue, or a minimum watch still to
-                    // run down. Otherwise this button ends the ad.
-                    // askedIds, not askedRef: the ref exists to beat the 4 Hz
-                    // tick, and refs must not be read during render.
-                    questions.some((q) => q.id !== current.id && !askedIds.includes(q.id)) ||
-                    elapsed < requiredWatch
-                    ? t('question.resume')
-                    : t('question.finish')
+                  ? /*
+                       Three things this button can do, and it has to say which.
+                       "Next" when another question opens the instant this one
+                       is answered, "Continue watching" when there is film or a
+                       watch requirement still to run, "Finish" when it ends the
+                       ad. Getting this wrong is how the operator's bug looked
+                       from the outside: the button promised more video and
+                       then delivered the advert from the top.
+
+                       askedIds, not askedRef: the ref exists to beat the 4 Hz
+                       tick, and refs must not be read during render.
+                    */
+                    nextUpIsImmediate
+                    ? t('question.next')
+                    : pendingAfterCurrent.length > 0 || elapsed < requiredWatch
+                      ? t('question.resume')
+                      : t('question.finish')
                   : visible.findIndex((q) => q.id === current.id) === visible.length - 1
                     ? t('question.finish')
                     : t('question.next')

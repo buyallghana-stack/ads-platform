@@ -36,6 +36,16 @@ function loadEnvFile(): void {
 loadEnvFile()
 
 export default defineConfig({
+  /*
+    `@/` means `src/` here exactly as it does in the app, so a test that
+    exercises a pure module imports it by the same path the component does.
+    Vitest does not read tsconfig `paths` on its own, and the alternative is a
+    `../../src/...` climb that goes stale the moment a test file moves.
+  */
+  resolve: {
+    alias: { '@': resolve(process.cwd(), 'src') },
+  },
+
   test: {
     include: ['tests/**/*.test.ts'],
     environment: 'node',

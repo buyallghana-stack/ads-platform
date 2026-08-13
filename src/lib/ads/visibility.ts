@@ -94,3 +94,51 @@ export function visibleQuestions<T extends Conditional>(
 export function hasBranching(questions: { rules: QuestionRule[] }[]): boolean {
   return questions.some((q) => q.rules.length > 0)
 }
+
+/** A question's cue: the second it interrupts the film at, or null for "ask it
+ *  when the film is over". */
+type Cued = { showAtSeconds: number | null }
+
+/**
+ * The question that should open RIGHT NOW, without going back to the video.
+ *
+ * ── WHY THIS EXISTS ──
+ *
+ * Operator, 2026-08-13, on a video ad in the Bronze bucket with two questions
+ * both set at the end: *"the video ended and a question came, i answered and
+ * instead of a follow up question, the ad started for the ad to end before i
+ * could answer the next question."*
+ *
+ * The player had one rule for "there are questions left": go back to the film
+ * and let the clock raise them. That is right for a cue in the future and
+ * wrong for everything else, because a finished film has no clock left to
+ * run. Worse than a no-op, `playVideo()` on an ENDED player REWINDS it — both
+ * sources do, YouTube and a plain `<video>` — so answering the first
+ * end-of-film question restarted the advert from zero and the second question
+ * could not be reached until the whole thing had played again.
+ *
+ * ── THE RULE ──
+ *
+ * Once the film is over, every remaining question is due; there is nothing
+ * left to wait for. While it is still running, a question is due only if it
+ * carries a cue that the clock has already passed, which also covers two
+ * questions sharing one cue second: the second opens straight after the first
+ * instead of flickering back to a frame of video for 250ms.
+ *
+ * A question with no cue on a film still running is NOT due. That is the whole
+ * meaning of "ask it at the end", and the player returns to the video for it.
+ *
+ * `pending` must be the VISIBLE, NOT-YET-ASKED questions in the admin's
+ * position order — order is what decides ties, so the caller filters, this
+ * chooses.
+ */
+export function nextDueQuestion<T extends Cued>(
+  pending: T[],
+  clock: { elapsed: number; filmOver: boolean },
+): T | null {
+  if (pending.length === 0) return null
+  if (clock.filmOver) return pending[0]!
+  return (
+    pending.find((q) => q.showAtSeconds !== null && clock.elapsed >= q.showAtSeconds) ?? null
+  )
+}
