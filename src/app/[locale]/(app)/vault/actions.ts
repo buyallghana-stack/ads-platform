@@ -37,7 +37,7 @@ export async function startVaultPaystackCheckout(
     amountMinor: Number(row.amount_minor),
     currency: row.currency_code,
     reference: row.id,
-    callbackUrl: `${clientEnv().NEXT_PUBLIC_SITE_URL}/vault/callback?ref=${row.id}`,
+    callbackUrl: `${clientEnv.NEXT_PUBLIC_SITE_URL}/vault/callback?ref=${row.id}`,
     metadata: {
       user_id: user.id,
       vault_plan_id: planId,

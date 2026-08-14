@@ -26,7 +26,10 @@ export default async function VaultPage({
   setRequestLocale(locale)
 
   const user = await getViewerUser()
-  if (!user) redirect({ href: '/login', locale })
+  if (!user) {
+    redirect({ href: '/login', locale })
+    return null
+  }
 
   const [vaultEnabled, plans, investments] = await Promise.all([
     getVaultEnabled(),
