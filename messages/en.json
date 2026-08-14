@@ -1384,6 +1384,8 @@
       "previewPerDay": "Per day",
       "previewAds": "{count, plural, one {if you watch # a day} other {if you watch all # a day}}",
       "points": "pts",
+      "amountPaid": "Amount paid",
+      "adValue": "Ad value",
       "less": "Lower by {step}",
       "more": "Raise by {step}"
     },

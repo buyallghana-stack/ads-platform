@@ -1384,6 +1384,8 @@
       "previewPerDay": "Par jour",
       "previewAds": "{count, plural, one {si vous en regardez #} other {si vous en regardez #}}",
       "points": "pts",
+      "amountPaid": "Montant payé",
+      "adValue": "Valeur par annonce",
       "less": "Réduire de {step}",
       "more": "Augmenter de {step}"
     },

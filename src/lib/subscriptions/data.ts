@@ -52,6 +52,7 @@ export type HeldPlan = {
   status: string
   endsAt: string
   startedAt: string
+  amountMinor: number | null
 }
 
 /** Paid, purchasable plans, cheapest first. The default tier is not one. */
@@ -117,7 +118,7 @@ export const getHeldPlans = cache(async (userId: string): Promise<HeldPlan[]> =>
   const supabase = await createClient()
   const { data } = await supabase
     .from('user_subscriptions')
-    .select('tier_id, status, current_period_end, started_at, grace_ends_at')
+    .select('tier_id, status, current_period_end, started_at, grace_ends_at, amount_minor')
     .eq('user_id', userId)
     .in('status', ['active', 'grace'])
 
@@ -138,6 +139,7 @@ export const getHeldPlans = cache(async (userId: string): Promise<HeldPlan[]> =>
         row.status === 'grace' && row.grace_ends_at
           ? row.grace_ends_at
           : row.current_period_end,
+      amountMinor: row.amount_minor !== null ? Number(row.amount_minor) : null,
     }))
 })
 

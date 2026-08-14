@@ -28,6 +28,7 @@ const NOTICE_KEY = 'sideperks.flexiblePricingNotice'
 export function PlanCard({
   plan,
   held,
+  amountPaidMinor,
   endsAt,
   recommended,
   previousName,
@@ -38,6 +39,7 @@ export function PlanCard({
 }: {
   plan: Plan
   held: boolean
+  amountPaidMinor?: number | null
   endsAt: string | null
   recommended: boolean
   /** The plan one rung below this one — Free for the cheapest paid plan.
@@ -141,10 +143,19 @@ export function PlanCard({
     onChoose(amountMinor)
   }
 
+  const effectivePaidMinor = held ? (amountPaidMinor ?? plan.priceMinor) : amountMinor
+  const activeMultiplier = multiplierForAmount(plan, effectivePaidMinor)
+  const activePerAdPoints = pointsPerAd(baseAdPoints, activeMultiplier)
+  const activePerAdMoney = activePerAdPoints / pointsPerCurrencyUnit
+  const activePerDay = activePerAdMoney * plan.dailyAdCap
+
   const multiplier = multiplierForAmount(plan, amountMinor)
   const perAdPoints = pointsPerAd(baseAdPoints, multiplier)
   const perAdMoney = perAdPoints / pointsPerCurrencyUnit
   const perDay = perAdMoney * plan.dailyAdCap
+
+  const displayPerAdPoints = held ? activePerAdPoints : perAdPoints
+  const displayPerAdMoney = held ? activePerAdMoney : perAdMoney
 
   const money = (value: number, digits = 2) =>
     format.number(value, {
@@ -177,8 +188,8 @@ export function PlanCard({
     },
     {
       icon: Gem,
-      text: t('benefits.perAd', { points: format.number(perAdPoints) }),
-      hint: t('benefits.perAdHint', { money: money(perAdMoney) }),
+      text: t('benefits.perAd', { points: format.number(displayPerAdPoints) }),
+      hint: t('benefits.perAdHint', { money: money(displayPerAdMoney) }),
     },
     /* "Withdraw from X points" was here until 2026-08-01, when the operator
        made the threshold platform-wide: "no plan should have its own
@@ -381,23 +392,55 @@ export function PlanCard({
         </div>
       )}
 
-      {held && endsAt ? (
-        <p className="mt-4 rounded-(--radius-input) bg-success-50 px-3 py-2 text-center text-[0.75rem] font-medium text-success-700">
-          {t('card.endsOn', {
-            date: format.dateTime(new Date(endsAt), {
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric',
-            }),
-          })}
-        </p>
+      {held ? (
+        <div className="mt-4 rounded-(--radius-card) border border-success-500/30 bg-success-50/60 p-3.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[0.75rem] font-medium text-success-800">
+              {t('card.amountPaid')}
+            </span>
+            <span className="text-[0.9375rem] font-bold text-success-900 tabular-nums">
+              {money(effectivePaidMinor / 100, 2)}
+            </span>
+          </div>
+
+          <dl className="mt-2.5 grid grid-cols-2 gap-2 border-t border-success-500/20 pt-2.5">
+            <div>
+              <dt className="text-[0.625rem] font-semibold tracking-[0.04em] text-success-700 uppercase">
+                {t('card.adValue')}
+              </dt>
+              <dd className="text-[0.9375rem] font-bold text-success-900 tabular-nums">
+                {money(activePerAdMoney)}
+              </dd>
+              <dd className="text-[0.6875rem] font-medium text-success-700 tabular-nums">
+                {format.number(activePerAdPoints)} {t('card.points')}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[0.625rem] font-semibold tracking-[0.04em] text-success-700 uppercase">
+                {t('card.previewPerDay')}
+              </dt>
+              <dd className="text-[0.9375rem] font-bold text-success-900 tabular-nums">
+                {money(activePerDay)}
+              </dd>
+              <dd className="text-[0.6875rem] text-success-700">
+                {t('card.previewAds', { count: plan.dailyAdCap })}
+              </dd>
+            </div>
+          </dl>
+
+          {endsAt && (
+            <p className="mt-2.5 border-t border-success-500/20 pt-2 text-center text-[0.75rem] font-medium text-success-800">
+              {t('card.endsOn', {
+                date: format.dateTime(new Date(endsAt), {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                }),
+              })}
+            </p>
+          )}
+        </div>
       ) : (
-        /* EVERY plan gets the primary button, not just the popular one.
-           Operator, 2026-07-31: a blue button on one card and grey ones beside
-           it read as "this is the only plan you can actually buy" — which is
-           the opposite of the point, since plans stack and any of them can be
-           added. The "Popular" tag already tells that story, and it is the
-           only thing that should. */
         <Button variant="primary" fullWidth className="mt-4" onClick={choose}>
           {t('card.choose', { plan: plan.name })}
         </Button>

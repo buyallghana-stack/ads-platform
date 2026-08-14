@@ -162,29 +162,33 @@ export function UpgradeView({
           'sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5',
         )}
       >
-        {plans.map((plan, index) => (
-          <PlanCard
-            key={plan.id}
-            plan={plan}
-            held={heldByTier.has(plan.id)}
-            endsAt={heldByTier.get(plan.id)?.endsAt ?? null}
-            // The middle plan carries the badge: it is the one most people
-            // should land on, and an unmarked grid makes everyone hesitate.
-            recommended={!heldByTier.has(plan.id) && plan.slug === 'silver'}
-            previousName={index === 0 ? freeName : plans[index - 1]!.name}
-            previousDailyAdCap={
-              index === 0 ? freeDailyAdCap : plans[index - 1]!.dailyAdCap
-            }
-            baseAdPoints={baseAdPoints}
-            pointsPerCurrencyUnit={pointsPerCurrencyUnit}
-            onChoose={(amountMinor) => {
-              /* A code belongs to one plan and one amount. Carrying one over
-                 into the next sheet would show a price the till refuses. */
-              setCoupon(null)
-              setSelected({ plan, amountMinor })
-            }}
-          />
-        ))}
+        {plans.map((plan, index) => {
+          const heldInfo = heldByTier.get(plan.id)
+          return (
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              held={!!heldInfo}
+              amountPaidMinor={heldInfo?.amountMinor ?? null}
+              endsAt={heldInfo?.endsAt ?? null}
+              // The middle plan carries the badge: it is the one most people
+              // should land on, and an unmarked grid makes everyone hesitate.
+              recommended={!heldInfo && plan.slug === 'silver'}
+              previousName={index === 0 ? freeName : plans[index - 1]!.name}
+              previousDailyAdCap={
+                index === 0 ? freeDailyAdCap : plans[index - 1]!.dailyAdCap
+              }
+              baseAdPoints={baseAdPoints}
+              pointsPerCurrencyUnit={pointsPerCurrencyUnit}
+              onChoose={(amountMinor) => {
+                /* A code belongs to one plan and one amount. Carrying one over
+                   into the next sheet would show a price the till refuses. */
+                setCoupon(null)
+                setSelected({ plan, amountMinor })
+              }}
+            />
+          )
+        })}
       </div>
 
       <p className="mt-4 text-center text-[0.75rem] leading-relaxed text-ink-400">
