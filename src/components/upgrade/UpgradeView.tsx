@@ -111,8 +111,8 @@ export function UpgradeView({
         className={cn(
           'animate-rise mt-5 rounded-(--radius-card) border p-4 sm:p-5',
           heldCount === 0 && freeEarningOver
-            ? 'border-rose-300 bg-rose-50/80 shadow-xs'
-            : 'border-violet-600/20 bg-violet-50'
+            ? 'border-danger-500/30 bg-danger-50 text-ink-900'
+            : 'border-violet-600/20 bg-violet-50 text-ink-900'
         )}
       >
         <div className="flex items-center gap-3">
@@ -120,7 +120,7 @@ export function UpgradeView({
             className={cn(
               'grid size-10 shrink-0 place-items-center rounded-full',
               heldCount === 0 && freeEarningOver
-                ? 'bg-rose-100 text-rose-600'
+                ? 'bg-danger-500/15 text-danger-600'
                 : 'bg-violet-600/10 text-violet-600'
             )}
           >
@@ -134,7 +134,7 @@ export function UpgradeView({
             <p
               className={cn(
                 'text-[0.875rem] font-semibold',
-                heldCount === 0 && freeEarningOver ? 'text-rose-700' : 'text-violet-700'
+                heldCount === 0 && freeEarningOver ? 'text-danger-700' : 'text-violet-700'
               )}
             >
               {heldCount === 0
