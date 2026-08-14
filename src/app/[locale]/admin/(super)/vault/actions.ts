@@ -2,13 +2,13 @@
 
 import { revalidatePath } from 'next/cache'
 
-import { getAdminRole } from '@/lib/admin/roles'
+import { actingSuperAdminId } from '@/lib/admin/roles'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function toggleVaultEnabledAction(enabled: boolean) {
-  const role = await getAdminRole()
-  if (role !== 'super_admin') {
-    return { ok: false, message: 'Not authorised to change vault configuration' }
+  const adminId = await actingSuperAdminId()
+  if (!adminId) {
+    return { ok: false, message: 'Not authorised. Super admin privileges required.' }
   }
 
   const admin = createAdminClient()
@@ -23,6 +23,7 @@ export async function toggleVaultEnabledAction(enabled: boolean) {
 
   revalidatePath('/[locale]/admin/(super)/vault', 'page')
   revalidatePath('/[locale]/(app)/vault', 'page')
+  revalidatePath('/[locale]/(app)/dashboard', 'page')
   return { ok: true }
 }
 
@@ -31,6 +32,7 @@ export type VaultPlanInput = {
   name: string
   description?: string
   priceMinor: number
+  currencyCode?: string
   periodDays: number
   dailyReturnPercent: number
   isActive: boolean
@@ -38,12 +40,13 @@ export type VaultPlanInput = {
 }
 
 export async function saveVaultPlanAction(input: VaultPlanInput) {
-  const role = await getAdminRole()
-  if (role !== 'super_admin') {
-    return { ok: false, message: 'Not authorised to modify vault plans' }
+  const adminId = await actingSuperAdminId()
+  if (!adminId) {
+    return { ok: false, message: 'Not authorised. Super admin privileges required.' }
   }
 
-  if (!input.name.trim()) {
+  const name = input.name.trim()
+  if (!name) {
     return { ok: false, message: 'Plan name is required' }
   }
   if (input.priceMinor <= 0) {
@@ -62,9 +65,10 @@ export async function saveVaultPlanAction(input: VaultPlanInput) {
     const { error } = await admin
       .from('vault_plans')
       .update({
-        name: input.name.trim(),
+        name,
         description: input.description?.trim() || null,
         price_minor: input.priceMinor,
+        currency_code: input.currencyCode ?? 'GHS',
         period_days: input.periodDays,
         daily_return_percent: input.dailyReturnPercent,
         is_active: input.isActive,
@@ -76,9 +80,10 @@ export async function saveVaultPlanAction(input: VaultPlanInput) {
     if (error) return { ok: false, message: error.message }
   } else {
     const { error } = await admin.from('vault_plans').insert({
-      name: input.name.trim(),
+      name,
       description: input.description?.trim() || null,
       price_minor: input.priceMinor,
+      currency_code: input.currencyCode ?? 'GHS',
       period_days: input.periodDays,
       daily_return_percent: input.dailyReturnPercent,
       is_active: input.isActive,
@@ -94,9 +99,9 @@ export async function saveVaultPlanAction(input: VaultPlanInput) {
 }
 
 export async function deleteVaultPlanAction(planId: string) {
-  const role = await getAdminRole()
-  if (role !== 'super_admin') {
-    return { ok: false, message: 'Not authorised to delete vault plans' }
+  const adminId = await actingSuperAdminId()
+  if (!adminId) {
+    return { ok: false, message: 'Not authorised. Super admin privileges required.' }
   }
 
   const admin = createAdminClient()
@@ -107,7 +112,8 @@ export async function deleteVaultPlanAction(planId: string) {
     if (error.code === '23503') {
       await admin.from('vault_plans').update({ is_active: false }).eq('id', planId)
       revalidatePath('/[locale]/admin/(super)/vault', 'page')
-      return { ok: true, message: 'Plan has active investments and has been deactivated instead.' }
+      revalidatePath('/[locale]/(app)/vault', 'page')
+      return { ok: true, message: 'Plan has associated user investments and has been deactivated instead.' }
     }
     return { ok: false, message: error.message }
   }

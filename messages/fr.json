@@ -3559,11 +3559,16 @@
       "vaultDisabledMsg": "Le coffre a été mis en pause.",
       "planSavedMsg": "Le plan de coffre a été enregistré avec succès.",
       "planDeletedMsg": "Le plan a été supprimé ou désactivé.",
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer ou désactiver ce plan ?",
       "active": "Actif",
       "inactive": "Inactif",
       "days": "jours",
       "profit": "bénéfice",
       "points": "pts",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "cancel": "Annuler",
+      "save": "Enregistrer les modifications",
       "metrics": {
         "totalPlans": "Total Plans",
         "activePlans": "Actifs",
@@ -3580,6 +3585,7 @@
       },
       "plansTable": {
         "title": "Plans de Coffre Disponibles",
+        "subtitle": "Gérez les montants, les durées et les taux de rendement journalier.",
         "createBtn": "Nouveau Plan",
         "name": "Plan",
         "price": "Prix (GHS)",
@@ -3592,6 +3598,7 @@
       },
       "investmentsTable": {
         "title": "Investissements Actifs et Réclamés",
+        "subtitle": "Aperçu des fonds bloqués par les utilisateurs et statuts d'échéance.",
         "user": "Utilisateur",
         "plan": "Nom du Plan",
         "deposit": "Principal",
@@ -3606,18 +3613,22 @@
         "matured": "Échu",
         "claimed": "Réclamé"
       },
-      "modal": {
+      "form": {
         "createTitle": "Créer un Plan de Coffre",
         "editTitle": "Modifier le Plan",
-        "planName": "Nom du Plan",
+        "name": "Nom du Plan",
+        "price": "Montant du Dépôt",
+        "duration": "Durée de Blocage",
+        "dailyReturn": "Taux de Rendement Quotidien",
         "description": "Courte Description",
-        "priceGhs": "Montant du Dépôt (GHS)",
-        "periodDays": "Durée de Blocage (Jours)",
-        "dailyReturnPercent": "Taux de Rendement Quotidien (%)",
-        "isActiveLabel": "Actif (visible pour les utilisateurs)",
-        "cancel": "Annuler",
-        "save": "Enregistrer",
-        "saving": "Enregistrement…"
+        "descriptionHint": "Résumé facultatif affiché sur la carte de l'utilisateur",
+        "active": "Plan Actif",
+        "activeHint": "Lorsque désactivé, les utilisateurs ne peuvent pas souscrire à ce plan",
+        "livePreview": "Calcul des Rendements en Direct",
+        "dailyEarning": "Gain Journalier",
+        "totalProfit": "Bénéfice Net Total",
+        "maturityPayout": "Versement à Échéance",
+        "submit": "Créer le Plan"
       }
     }
   },

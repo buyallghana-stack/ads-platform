@@ -44,6 +44,7 @@ const REAL_ADMIN_SECTIONS = [
   '/admin/leaderboard',
   '/admin/games',
   '/admin/tasks',
+  '/admin/vault',
   // The overview itself. Matched EXACTLY — a `startsWith('/admin')` would
   // mark every screen in the area live, including the ones still showing
   // invented money, which is the precise mistake this badge exists to stop.

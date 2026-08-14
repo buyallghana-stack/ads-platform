@@ -3560,11 +3560,16 @@
       "vaultDisabledMsg": "Vault has been paused platform-wide.",
       "planSavedMsg": "Vault plan has been saved successfully.",
       "planDeletedMsg": "Vault plan has been deleted/deactivated.",
+      "confirmDelete": "Are you sure you want to delete or deactivate this plan?",
       "active": "Active",
       "inactive": "Inactive",
       "days": "days",
       "profit": "profit",
       "points": "pts",
+      "edit": "Edit",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "save": "Save Changes",
       "metrics": {
         "totalPlans": "Total Plans",
         "activePlans": "Active",
@@ -3581,6 +3586,7 @@
       },
       "plansTable": {
         "title": "Available Vault Plans",
+        "subtitle": "Manage prices, durations, and daily interest yield rates.",
         "createBtn": "New Vault Plan",
         "name": "Plan",
         "price": "Price (GHS)",
@@ -3593,6 +3599,7 @@
       },
       "investmentsTable": {
         "title": "Active & Claimed Vault Investments",
+        "subtitle": "Overview of user locked funds and maturity statuses.",
         "user": "User",
         "plan": "Plan Name",
         "deposit": "Principal",
@@ -3607,18 +3614,22 @@
         "matured": "Matured",
         "claimed": "Claimed"
       },
-      "modal": {
+      "form": {
         "createTitle": "Create New Vault Plan",
         "editTitle": "Edit Vault Plan",
-        "planName": "Plan Name",
+        "name": "Plan Name",
+        "price": "Deposit Price",
+        "duration": "Lock Duration",
+        "dailyReturn": "Daily Return Rate",
         "description": "Short Description",
-        "priceGhs": "Deposit Price (GHS)",
-        "periodDays": "Lock Duration (Days)",
-        "dailyReturnPercent": "Daily Return Rate (%)",
-        "isActiveLabel": "Active (visible to users)",
-        "cancel": "Cancel",
-        "save": "Save Plan",
-        "saving": "Saving…"
+        "descriptionHint": "Optional summary shown on the user card",
+        "active": "Plan is Active",
+        "activeHint": "When disabled, users cannot purchase this plan",
+        "livePreview": "Live Returns Calculation",
+        "dailyEarning": "Daily Yield",
+        "totalProfit": "Total Net Profit",
+        "maturityPayout": "Payout at Maturity",
+        "submit": "Create Plan"
       }
     }
   },

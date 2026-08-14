@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 
 import {
   AlertCircle,
-  Check,
+  AlertTriangle,
   CheckCircle2,
   Clock,
   Coins,
@@ -32,6 +32,9 @@ import { useRouter } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
 import type { VaultInvestment, VaultPlan } from '@/lib/vault/data'
 
+import { StatusDot } from './AdminChrome'
+import { Field, SwitchRow, inputClass } from './FormBits'
+
 export function VaultBoard({
   vaultEnabled,
   plans,
@@ -47,17 +50,8 @@ export function VaultBoard({
 
   const [isPending, startTransition] = useTransition()
   const [activeTab, setActiveTab] = useState<'plans' | 'investments'>('plans')
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingPlan, setEditingPlan] = useState<VaultPlan | null>(null)
+  const [editing, setEditing] = useState<VaultPlan | 'new' | null>(null)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
-
-  // Form State
-  const [formName, setFormName] = useState('')
-  const [formDescription, setFormDescription] = useState('')
-  const [formPriceGhs, setFormPriceGhs] = useState('100')
-  const [formPeriodDays, setFormPeriodDays] = useState('30')
-  const [formDailyReturnPercent, setFormDailyReturnPercent] = useState('1.5')
-  const [formIsActive, setFormIsActive] = useState(true)
 
   // Metrics
   const activeInvestments = investments.filter((i) => i.status === 'active')
@@ -82,74 +76,8 @@ export function VaultBoard({
     })
   }
 
-  const openCreateModal = () => {
-    setEditingPlan(null)
-    setFormName('')
-    setFormDescription('')
-    setFormPriceGhs('100')
-    setFormPeriodDays('30')
-    setFormDailyReturnPercent('1.5')
-    setFormIsActive(true)
-    setIsModalOpen(true)
-  }
-
-  const openEditModal = (plan: VaultPlan) => {
-    setEditingPlan(plan)
-    setFormName(plan.name)
-    setFormDescription(plan.description ?? '')
-    setFormPriceGhs((plan.priceMinor / 100).toString())
-    setFormPeriodDays(plan.periodDays.toString())
-    setFormDailyReturnPercent(plan.dailyReturnPercent.toString())
-    setFormIsActive(plan.isActive)
-    setIsModalOpen(true)
-  }
-
-  const handleSavePlan = (e: React.FormEvent) => {
-    e.preventDefault()
-    setFeedback(null)
-
-    const priceMinor = Math.round(parseFloat(formPriceGhs) * 100)
-    const periodDays = parseInt(formPeriodDays, 10)
-    const dailyReturnPercent = parseFloat(formDailyReturnPercent)
-
-    if (isNaN(priceMinor) || priceMinor <= 0) {
-      setFeedback({ type: 'error', message: 'Please enter a valid price in GHS' })
-      return
-    }
-    if (isNaN(periodDays) || periodDays <= 0) {
-      setFeedback({ type: 'error', message: 'Please enter valid period in days' })
-      return
-    }
-    if (isNaN(dailyReturnPercent) || dailyReturnPercent <= 0) {
-      setFeedback({ type: 'error', message: 'Please enter a valid daily return percentage' })
-      return
-    }
-
-    startTransition(async () => {
-      const input: VaultPlanInput = {
-        id: editingPlan?.id,
-        name: formName.trim(),
-        description: formDescription.trim() || undefined,
-        priceMinor,
-        periodDays,
-        dailyReturnPercent,
-        isActive: formIsActive,
-      }
-
-      const res = await saveVaultPlanAction(input)
-      if (!res.ok) {
-        setFeedback({ type: 'error', message: res.message ?? 'Failed to save vault plan' })
-        return
-      }
-
-      setIsModalOpen(false)
-      setFeedback({ type: 'success', message: t('planSavedMsg') })
-      router.refresh()
-    })
-  }
-
   const handleDeletePlan = (planId: string) => {
-    if (!confirm('Are you sure you want to delete or deactivate this plan?')) return
+    if (!confirm(t('confirmDelete') || 'Are you sure you want to delete or deactivate this plan?')) return
     setFeedback(null)
 
     startTransition(async () => {
@@ -175,15 +103,11 @@ export function VaultBoard({
         {/* Global Toggle Switch */}
         <div className="flex items-center gap-3 rounded-(--radius-card) border border-ink-200 bg-surface p-2 shadow-xs">
           <div className="flex items-center gap-2 px-2">
-            <span
-              className={cn(
-                'size-2.5 rounded-full',
-                vaultEnabled ? 'bg-emerald-500 animate-pulse' : 'bg-ink-300',
-              )}
-            />
-            <span className="text-xs font-semibold text-ink-800">
-              {vaultEnabled ? t('globalActive') : t('globalPaused')}
-            </span>
+            <StatusDot tone={vaultEnabled ? 'success' : 'neutral'}>
+              <span className="text-xs font-semibold text-ink-800">
+                {vaultEnabled ? t('globalActive') : t('globalPaused')}
+              </span>
+            </StatusDot>
           </div>
           <Button
             size="sm"
@@ -200,73 +124,95 @@ export function VaultBoard({
       {/* Feedback Alert */}
       {feedback && (
         <div
+          role="alert"
           className={cn(
-            'flex items-center gap-2 rounded-(--radius-card) border p-3.5 text-xs font-medium',
+            'flex items-center justify-between gap-2 rounded-(--radius-card) border p-3.5 text-xs font-medium',
             feedback.type === 'success'
               ? 'border-emerald-500/30 bg-emerald-50 text-emerald-800'
               : 'border-danger-500/30 bg-danger-50 text-danger-800',
           )}
         >
-          {feedback.type === 'success' ? (
-            <CheckCircle2 className="size-4 shrink-0" />
-          ) : (
-            <AlertCircle className="size-4 shrink-0" />
-          )}
-          <span>{feedback.message}</span>
+          <div className="flex items-center gap-2">
+            {feedback.type === 'success' ? (
+              <CheckCircle2 className="size-4 shrink-0" />
+            ) : (
+              <AlertCircle className="size-4 shrink-0" />
+            )}
+            <span>{feedback.message}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setFeedback(null)}
+            className="rounded p-1 hover:bg-black/5 text-ink-500"
+          >
+            <X className="size-3.5" />
+          </button>
         </div>
       )}
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-        <Card className="border-ink-200 bg-surface p-4 shadow-xs">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Card className="border-ink-200 bg-surface p-3.5 sm:p-4 shadow-xs">
           <div className="flex items-center justify-between text-ink-500">
-            <span className="text-xs font-medium uppercase tracking-wider">{t('metrics.totalPlans')}</span>
+            <span className="text-[0.6875rem] sm:text-xs font-medium uppercase tracking-wider">
+              {t('metrics.totalPlans')}
+            </span>
             <Vault className="size-4 text-brand-600" />
           </div>
-          <p className="mt-2 text-2xl font-bold text-ink-900">{plans.length}</p>
-          <p className="mt-0.5 text-xs text-ink-500">
+          <p className="mt-2 text-xl sm:text-2xl font-bold text-ink-900">{plans.length}</p>
+          <p className="mt-0.5 text-[0.6875rem] text-ink-500">
             {plans.filter((p) => p.isActive).length} {t('metrics.activePlans')}
           </p>
         </Card>
 
-        <Card className="border-ink-200 bg-surface p-4 shadow-xs">
+        <Card className="border-ink-200 bg-surface p-3.5 sm:p-4 shadow-xs">
           <div className="flex items-center justify-between text-ink-500">
-            <span className="text-xs font-medium uppercase tracking-wider">{t('metrics.activeVaults')}</span>
+            <span className="text-[0.6875rem] sm:text-xs font-medium uppercase tracking-wider">
+              {t('metrics.activeVaults')}
+            </span>
             <Lock className="size-4 text-amber-500" />
           </div>
-          <p className="mt-2 text-2xl font-bold text-ink-900">{activeInvestments.length}</p>
-          <p className="mt-0.5 text-xs text-ink-500">
+          <p className="mt-2 text-xl sm:text-2xl font-bold text-ink-900">{activeInvestments.length}</p>
+          <p className="mt-0.5 text-[0.6875rem] text-ink-500">
             {investments.length} {t('metrics.totalDeposits')}
           </p>
         </Card>
 
-        <Card className="border-ink-200 bg-surface p-4 shadow-xs">
+        <Card className="border-ink-200 bg-surface p-3.5 sm:p-4 shadow-xs">
           <div className="flex items-center justify-between text-ink-500">
-            <span className="text-xs font-medium uppercase tracking-wider">{t('metrics.capitalLocked')}</span>
+            <span className="text-[0.6875rem] sm:text-xs font-medium uppercase tracking-wider">
+              {t('metrics.capitalLocked')}
+            </span>
             <Coins className="size-4 text-emerald-500" />
           </div>
-          <p className="mt-2 text-2xl font-bold text-emerald-600">
+          <p className="mt-2 text-lg sm:text-2xl font-bold text-emerald-600">
             GHS {format.number(totalLockedMinor / 100, { minimumFractionDigits: 2 })}
           </p>
-          <p className="mt-0.5 text-xs text-ink-500">{t('metrics.currentlyLocked')}</p>
+          <p className="mt-0.5 text-[0.6875rem] text-ink-500">{t('metrics.currentlyLocked')}</p>
         </Card>
 
-        <Card className="border-ink-200 bg-surface p-4 shadow-xs">
+        <Card className="border-ink-200 bg-surface p-3.5 sm:p-4 shadow-xs">
           <div className="flex items-center justify-between text-ink-500">
-            <span className="text-xs font-medium uppercase tracking-wider">{t('metrics.claimedPayouts')}</span>
+            <span className="text-[0.6875rem] sm:text-xs font-medium uppercase tracking-wider">
+              {t('metrics.claimedPayouts')}
+            </span>
             <TrendingUp className="size-4 text-brand-500" />
           </div>
-          <p className="mt-2 text-2xl font-bold text-ink-900">
-            {format.number(totalClaimedPoints)} {t('points')}
+          <p className="mt-2 text-lg sm:text-2xl font-bold text-ink-900">
+            {format.number(totalClaimedPoints)}
           </p>
-          <p className="mt-0.5 text-xs text-ink-500">{t('metrics.paidToUsers')}</p>
+          <p className="mt-0.5 text-[0.6875rem] text-ink-500">{t('metrics.paidToUsers')}</p>
         </Card>
       </div>
 
-      {/* Tabs */}
+      {/* Tabs Switcher */}
       <div className="flex items-center gap-2 border-b border-ink-200 pb-2">
         <button
-          onClick={() => setActiveTab('plans')}
+          type="button"
+          onClick={() => {
+            setActiveTab('plans')
+            setEditing(null)
+          }}
           className={cn(
             'rounded-md px-3.5 py-1.5 text-xs font-semibold transition-colors',
             activeTab === 'plans'
@@ -277,7 +223,11 @@ export function VaultBoard({
           {t('tabs.plans')} ({plans.length})
         </button>
         <button
-          onClick={() => setActiveTab('investments')}
+          type="button"
+          onClick={() => {
+            setActiveTab('investments')
+            setEditing(null)
+          }}
           className={cn(
             'rounded-md px-3.5 py-1.5 text-xs font-semibold transition-colors',
             activeTab === 'investments'
@@ -292,14 +242,118 @@ export function VaultBoard({
       {/* Tab: Plans */}
       {activeTab === 'plans' && (
         <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-base font-bold text-ink-900">{t('plansTable.title')}</h2>
-            <Button size="sm" onClick={openCreateModal} leadingIcon={<Plus className="size-3.5" />}>
-              {t('plansTable.createBtn')}
-            </Button>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-bold text-ink-900">{t('plansTable.title')}</h2>
+              <p className="text-xs text-ink-500">{t('plansTable.subtitle')}</p>
+            </div>
+            {!editing && (
+              <Button size="sm" onClick={() => setEditing('new')} leadingIcon={<Plus className="size-3.5" />}>
+                {t('plansTable.createBtn')}
+              </Button>
+            )}
           </div>
 
-          <div className="overflow-x-auto rounded-(--radius-card) border border-ink-200 bg-surface shadow-xs">
+          {/* Form when editing or creating */}
+          {editing && (
+            <PlanForm
+              plan={editing === 'new' ? null : editing}
+              onClose={() => setEditing(null)}
+              onSaved={() => {
+                setEditing(null)
+                setFeedback({ type: 'success', message: t('planSavedMsg') })
+                router.refresh()
+              }}
+              onError={(msg) => setFeedback({ type: 'error', message: msg })}
+            />
+          )}
+
+          {/* Mobile Plans Card List */}
+          <ul className="flex flex-col gap-3 lg:hidden">
+            {plans.length === 0 ? (
+              <li className="rounded-(--radius-card) border border-dashed border-ink-200 p-6 text-center text-xs text-ink-500">
+                {t('plansTable.noPlans')}
+              </li>
+            ) : (
+              plans.map((plan) => {
+                const priceGhs = plan.priceMinor / 100
+                const dailyProfitGhs = priceGhs * (plan.dailyReturnPercent / 100)
+                const totalProfitGhs = dailyProfitGhs * plan.periodDays
+                const totalReturnGhs = priceGhs + totalProfitGhs
+
+                return (
+                  <li
+                    key={plan.id}
+                    className="flex flex-col gap-3 rounded-(--radius-card) border border-ink-200 bg-surface p-4 shadow-xs"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h3 className="font-bold text-ink-900">{plan.name}</h3>
+                        {plan.description && (
+                          <p className="mt-0.5 text-xs text-ink-500">{plan.description}</p>
+                        )}
+                      </div>
+                      <StatusDot tone={plan.isActive ? 'success' : 'neutral'}>
+                        {plan.isActive ? t('active') : t('inactive')}
+                      </StatusDot>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 rounded-md bg-ink-50/75 p-2.5 text-xs">
+                      <div>
+                        <span className="text-[0.6875rem] text-ink-500 uppercase">{t('plansTable.price')}</span>
+                        <p className="font-bold text-ink-900">
+                          GHS {format.number(priceGhs, { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-[0.6875rem] text-ink-500 uppercase">{t('plansTable.duration')}</span>
+                        <p className="font-medium text-ink-800">
+                          {plan.periodDays} {t('days')}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-[0.6875rem] text-ink-500 uppercase">{t('plansTable.dailyReturn')}</span>
+                        <p className="font-semibold text-emerald-600">
+                          +{plan.dailyReturnPercent}%/day
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-[0.6875rem] text-ink-500 uppercase">{t('plansTable.totalReturn')}</span>
+                        <p className="font-bold text-brand-700">
+                          GHS {format.number(totalReturnGhs, { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2 border-t border-ink-100 pt-2.5">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setEditing(plan)}
+                        leadingIcon={<Edit2 className="size-3.5" />}
+                      >
+                        {t('edit')}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeletePlan(plan.id)}
+                        className="text-danger-600 hover:text-danger-700 hover:bg-danger-50"
+                        leadingIcon={<Trash2 className="size-3.5" />}
+                      >
+                        {t('delete')}
+                      </Button>
+                    </div>
+                  </li>
+                )
+              })
+            )}
+          </ul>
+
+          {/* Desktop Plans Table */}
+          <div className="hidden overflow-hidden rounded-(--radius-card) border border-ink-200 bg-surface shadow-xs lg:block">
             <table className="w-full text-left text-xs">
               <thead className="border-b border-ink-100 bg-ink-50/75 text-ink-500 uppercase font-semibold">
                 <tr>
@@ -353,23 +407,16 @@ export function VaultBoard({
                           </p>
                         </td>
                         <td className="p-3.5">
-                          <span
-                            className={cn(
-                              'rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold',
-                              plan.isActive
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : 'bg-ink-100 text-ink-600',
-                            )}
-                          >
+                          <StatusDot tone={plan.isActive ? 'success' : 'neutral'}>
                             {plan.isActive ? t('active') : t('inactive')}
-                          </span>
+                          </StatusDot>
                         </td>
                         <td className="p-3.5 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => openEditModal(plan)}
+                              onClick={() => setEditing(plan)}
                               aria-label="Edit Plan"
                             >
                               <Edit2 className="size-3.5" />
@@ -398,9 +445,79 @@ export function VaultBoard({
       {/* Tab: User Investments */}
       {activeTab === 'investments' && (
         <div className="flex flex-col gap-4">
-          <h2 className="text-base font-bold text-ink-900">{t('investmentsTable.title')}</h2>
+          <div>
+            <h2 className="text-base font-bold text-ink-900">{t('investmentsTable.title')}</h2>
+            <p className="text-xs text-ink-500">{t('investmentsTable.subtitle')}</p>
+          </div>
 
-          <div className="overflow-x-auto rounded-(--radius-card) border border-ink-200 bg-surface shadow-xs">
+          {/* Mobile Investments Card List */}
+          <ul className="flex flex-col gap-3 lg:hidden">
+            {investments.length === 0 ? (
+              <li className="rounded-(--radius-card) border border-dashed border-ink-200 p-6 text-center text-xs text-ink-500">
+                {t('investmentsTable.noInvestments')}
+              </li>
+            ) : (
+              investments.map((inv) => {
+                const now = new Date()
+                const endsAt = new Date(inv.endsAt)
+                const isMatured = now >= endsAt
+                const tone = inv.status === 'claimed' ? 'neutral' : isMatured ? 'warning' : 'success'
+
+                return (
+                  <li
+                    key={inv.id}
+                    className="flex flex-col gap-2.5 rounded-(--radius-card) border border-ink-200 bg-surface p-4 shadow-xs"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="font-bold text-ink-900">{inv.planName}</p>
+                        <p className="text-xs text-ink-500">
+                          {inv.userFullName ?? inv.userEmail ?? inv.userId.slice(0, 8)}
+                        </p>
+                      </div>
+                      <StatusDot tone={tone}>
+                        {inv.status === 'claimed'
+                          ? t('status.claimed')
+                          : isMatured
+                            ? t('status.matured')
+                            : t('status.active')}
+                      </StatusDot>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 rounded-md bg-ink-50/75 p-2.5 text-xs">
+                      <div>
+                        <span className="text-[0.6875rem] text-ink-500 uppercase">{t('investmentsTable.deposit')}</span>
+                        <p className="font-bold text-ink-900">
+                          GHS {format.number(inv.amountMinor / 100, { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-[0.6875rem] text-ink-500 uppercase">{t('investmentsTable.duration')}</span>
+                        <p className="font-medium text-ink-800">
+                          {inv.periodDays} {t('days')} ({inv.dailyReturnPercent}%/d)
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-[0.6875rem] text-ink-500 uppercase">{t('investmentsTable.expectedReturn')}</span>
+                        <p className="font-bold text-emerald-600">
+                          GHS {format.number(inv.expectedReturnMinor / 100, { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-[0.6875rem] text-ink-500 uppercase">{t('investmentsTable.maturityDate')}</span>
+                        <p className="font-medium text-ink-800">
+                          {format.dateTime(endsAt, { dateStyle: 'short' })}
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                )
+              })
+            )}
+          </ul>
+
+          {/* Desktop Investments Table */}
+          <div className="hidden overflow-hidden rounded-(--radius-card) border border-ink-200 bg-surface shadow-xs lg:block">
             <table className="w-full text-left text-xs">
               <thead className="border-b border-ink-100 bg-ink-50/75 text-ink-500 uppercase font-semibold">
                 <tr>
@@ -421,164 +538,238 @@ export function VaultBoard({
                     </td>
                   </tr>
                 ) : (
-                  investments.map((inv) => (
-                    <tr key={inv.id} className="hover:bg-ink-50/50">
-                      <td className="p-3.5 font-medium text-ink-900">
-                        {inv.userFullName ?? inv.userId.slice(0, 8)}
-                      </td>
-                      <td className="p-3.5 font-bold text-ink-900">{inv.planName}</td>
-                      <td className="p-3.5 font-semibold text-ink-900">
-                        GHS {format.number(inv.amountMinor / 100, { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="p-3.5">
-                        {inv.periodDays} {t('days')} ({inv.dailyReturnPercent}%/d)
-                      </td>
-                      <td className="p-3.5 font-bold text-emerald-600">
-                        GHS {format.number(inv.expectedReturnMinor / 100, { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="p-3.5 text-ink-500">
-                        {format.dateTime(new Date(inv.endsAt), { dateStyle: 'medium' })}
-                      </td>
-                      <td className="p-3.5">
-                        <span
-                          className={cn(
-                            'rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold',
-                            inv.status === 'claimed'
-                              ? 'bg-ink-100 text-ink-700'
-                              : new Date() >= new Date(inv.endsAt)
-                                ? 'bg-amber-100 text-amber-800'
-                                : 'bg-emerald-100 text-emerald-800',
-                          )}
-                        >
-                          {inv.status === 'claimed'
-                            ? t('status.claimed')
-                            : new Date() >= new Date(inv.endsAt)
-                              ? t('status.matured')
-                              : t('status.active')}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                  investments.map((inv) => {
+                    const now = new Date()
+                    const endsAt = new Date(inv.endsAt)
+                    const isMatured = now >= endsAt
+                    const tone = inv.status === 'claimed' ? 'neutral' : isMatured ? 'warning' : 'success'
+
+                    return (
+                      <tr key={inv.id} className="hover:bg-ink-50/50">
+                        <td className="p-3.5 font-medium text-ink-900">
+                          <div>
+                            <p>{inv.userFullName ?? inv.userEmail ?? inv.userId.slice(0, 8)}</p>
+                            {inv.userEmail && inv.userFullName && (
+                              <p className="text-[0.6875rem] text-ink-400">{inv.userEmail}</p>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-3.5 font-bold text-ink-900">{inv.planName}</td>
+                        <td className="p-3.5 font-semibold text-ink-900">
+                          GHS {format.number(inv.amountMinor / 100, { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="p-3.5">
+                          {inv.periodDays} {t('days')} ({inv.dailyReturnPercent}%/d)
+                        </td>
+                        <td className="p-3.5 font-bold text-emerald-600">
+                          GHS {format.number(inv.expectedReturnMinor / 100, { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="p-3.5 text-ink-500">
+                          {format.dateTime(endsAt, { dateStyle: 'medium' })}
+                        </td>
+                        <td className="p-3.5">
+                          <StatusDot tone={tone}>
+                            {inv.status === 'claimed'
+                              ? t('status.claimed')
+                              : isMatured
+                                ? t('status.matured')
+                                : t('status.active')}
+                          </StatusDot>
+                        </td>
+                      </tr>
+                    )
+                  })
                 )}
               </tbody>
             </table>
           </div>
         </div>
       )}
+    </div>
+  )
+}
 
-      {/* Create / Edit Plan Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-          <div className="animate-rise w-full max-w-md rounded-(--radius-panel) border border-ink-200 bg-surface p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-ink-100 pb-3">
-              <h3 className="text-base font-bold text-ink-900">
-                {editingPlan ? t('modal.editTitle') : t('modal.createTitle')}
-              </h3>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-ink-400 hover:text-ink-700"
-              >
-                <X className="size-5" />
-              </button>
+function PlanForm({
+  plan,
+  onClose,
+  onSaved,
+  onError,
+}: {
+  plan: VaultPlan | null
+  onClose: () => void
+  onSaved: () => void
+  onError: (msg: string) => void
+}) {
+  const t = useTranslations('admin.vault')
+  const format = useFormatter()
+  const [pending, startTransition] = useTransition()
+
+  const [name, setName] = useState(plan?.name ?? '')
+  const [description, setDescription] = useState(plan?.description ?? '')
+  const [priceGhs, setPriceGhs] = useState(plan ? (plan.priceMinor / 100).toString() : '100')
+  const [periodDays, setPeriodDays] = useState(plan ? plan.periodDays.toString() : '30')
+  const [dailyReturnPercent, setDailyReturnPercent] = useState(
+    plan ? plan.dailyReturnPercent.toString() : '1.5',
+  )
+  const [isActive, setIsActive] = useState(plan?.isActive ?? true)
+
+  // Live calculations
+  const calcPrice = parseFloat(priceGhs) || 0
+  const calcDays = parseInt(periodDays, 10) || 0
+  const calcPercent = parseFloat(dailyReturnPercent) || 0
+  const calcDailyProfit = calcPrice * (calcPercent / 100)
+  const calcTotalProfit = calcDailyProfit * calcDays
+  const calcTotalMaturity = calcPrice + calcTotalProfit
+
+  const ready = name.trim().length > 0 && calcPrice > 0 && calcDays > 0 && calcPercent > 0
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!ready) return
+
+    startTransition(async () => {
+      const input: VaultPlanInput = {
+        id: plan?.id,
+        name: name.trim(),
+        description: description.trim() || undefined,
+        priceMinor: Math.round(calcPrice * 100),
+        currencyCode: 'GHS',
+        periodDays: calcDays,
+        dailyReturnPercent: calcPercent,
+        isActive,
+      }
+
+      const res = await saveVaultPlanAction(input)
+      if (!res.ok) {
+        onError(res.message ?? 'Failed to save vault plan')
+        return
+      }
+
+      onSaved()
+    })
+  }
+
+  return (
+    <form
+      onSubmit={submit}
+      className="flex flex-col gap-4 rounded-(--radius-card) border border-brand-500/30 bg-surface p-4 sm:p-5 shadow-sm"
+    >
+      <div className="flex items-center justify-between border-b border-ink-100 pb-3">
+        <h3 className="text-base font-bold text-ink-900">
+          {plan ? t('form.editTitle') : t('form.createTitle')}
+        </h3>
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={pending}
+          className="rounded p-1 text-ink-400 hover:text-ink-900"
+        >
+          <X className="size-4" />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+        <Field label={t('form.name')} className="sm:col-span-2">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. 30-Day Growth Vault"
+            className={inputClass()}
+            required
+          />
+        </Field>
+
+        <Field label={t('form.price')} suffix="GHS">
+          <input
+            type="number"
+            step="0.01"
+            min="1"
+            value={priceGhs}
+            onChange={(e) => setPriceGhs(e.target.value)}
+            className={inputClass()}
+            required
+          />
+        </Field>
+
+        <Field label={t('form.duration')} suffix={t('days')}>
+          <input
+            type="number"
+            step="1"
+            min="1"
+            value={periodDays}
+            onChange={(e) => setPeriodDays(e.target.value)}
+            className={inputClass()}
+            required
+          />
+        </Field>
+
+        <Field label={t('form.dailyReturn')} suffix="%" className="sm:col-span-2">
+          <input
+            type="number"
+            step="0.01"
+            min="0.01"
+            value={dailyReturnPercent}
+            onChange={(e) => setDailyReturnPercent(e.target.value)}
+            className={inputClass()}
+            required
+          />
+        </Field>
+
+        <Field label={t('form.description')} hint={t('form.descriptionHint')} className="sm:col-span-2">
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Brief explanation of this vault tier"
+            rows={2}
+            className={cn(inputClass(), 'h-auto py-2')}
+          />
+        </Field>
+      </div>
+
+      <div className="mt-1">
+        <SwitchRow
+          title={t('form.active')}
+          description={t('form.activeHint')}
+          checked={isActive}
+          onChange={setIsActive}
+        />
+      </div>
+
+      {/* Live Financial Preview */}
+      {ready && (
+        <div className="rounded-(--radius-card) border border-brand-500/20 bg-brand-50/50 p-3.5 text-xs text-ink-700">
+          <p className="font-semibold text-brand-900 mb-1">{t('form.livePreview')}</p>
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <span className="text-[0.6875rem] text-ink-500 block">{t('form.dailyEarning')}</span>
+              <span className="font-bold text-ink-900">
+                +GHS {format.number(calcDailyProfit, { minimumFractionDigits: 2 })}
+              </span>
             </div>
-
-            <form onSubmit={handleSavePlan} className="mt-4 flex flex-col gap-4">
-              <div>
-                <label className="text-xs font-semibold text-ink-700">{t('modal.planName')}</label>
-                <input
-                  type="text"
-                  required
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  placeholder="e.g. 30-Day Growth Vault"
-                  className="mt-1 w-full rounded-(--radius-input) border border-ink-300 bg-surface px-3 py-2 text-xs text-ink-900 focus:border-brand-500 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-ink-700">{t('modal.description')}</label>
-                <input
-                  type="text"
-                  value={formDescription}
-                  onChange={(e) => setFormDescription(e.target.value)}
-                  placeholder="e.g. Lock for 30 days and earn 1.8% daily"
-                  className="mt-1 w-full rounded-(--radius-input) border border-ink-300 bg-surface px-3 py-2 text-xs text-ink-900 focus:border-brand-500 focus:outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-semibold text-ink-700">{t('modal.priceGhs')}</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="1"
-                    required
-                    value={formPriceGhs}
-                    onChange={(e) => setFormPriceGhs(e.target.value)}
-                    className="mt-1 w-full rounded-(--radius-input) border border-ink-300 bg-surface px-3 py-2 text-xs text-ink-900 focus:border-brand-500 focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-ink-700">{t('modal.periodDays')}</label>
-                  <input
-                    type="number"
-                    min="1"
-                    required
-                    value={formPeriodDays}
-                    onChange={(e) => setFormPeriodDays(e.target.value)}
-                    className="mt-1 w-full rounded-(--radius-input) border border-ink-300 bg-surface px-3 py-2 text-xs text-ink-900 focus:border-brand-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-ink-700">{t('modal.dailyReturnPercent')}</label>
-                <div className="relative mt-1">
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    required
-                    value={formDailyReturnPercent}
-                    onChange={(e) => setFormDailyReturnPercent(e.target.value)}
-                    className="w-full rounded-(--radius-input) border border-ink-300 bg-surface px-3 py-2 text-xs text-ink-900 focus:border-brand-500 focus:outline-none pr-8"
-                  />
-                  <span className="absolute right-3 top-2 text-xs text-ink-400">%</span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  id="isActive"
-                  checked={formIsActive}
-                  onChange={(e) => setFormIsActive(e.target.checked)}
-                  className="rounded text-brand-600 focus:ring-brand-500"
-                />
-                <label htmlFor="isActive" className="text-xs font-semibold text-ink-700 cursor-pointer">
-                  {t('modal.isActiveLabel')}
-                </label>
-              </div>
-
-              <div className="mt-4 flex items-center justify-end gap-2 border-t border-ink-100 pt-3">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  {t('modal.cancel')}
-                </Button>
-                <Button type="submit" size="sm" disabled={isPending}>
-                  {isPending ? t('modal.saving') : t('modal.save')}
-                </Button>
-              </div>
-            </form>
+            <div>
+              <span className="text-[0.6875rem] text-ink-500 block">{t('form.totalProfit')}</span>
+              <span className="font-bold text-emerald-600">
+                +GHS {format.number(calcTotalProfit, { minimumFractionDigits: 2 })}
+              </span>
+            </div>
+            <div>
+              <span className="text-[0.6875rem] text-ink-500 block">{t('form.maturityPayout')}</span>
+              <span className="font-bold text-brand-700">
+                GHS {format.number(calcTotalMaturity, { minimumFractionDigits: 2 })}
+              </span>
+            </div>
           </div>
         </div>
       )}
-    </div>
+
+      <div className="flex items-center justify-end gap-2 border-t border-ink-100 pt-3">
+        <Button type="button" variant="ghost" size="md" onClick={onClose} disabled={pending}>
+          {t('cancel')}
+        </Button>
+        <Button type="submit" size="md" disabled={!ready || pending} loading={pending}>
+          {plan ? t('save') : t('form.submit')}
+        </Button>
+      </div>
+    </form>
   )
 }
