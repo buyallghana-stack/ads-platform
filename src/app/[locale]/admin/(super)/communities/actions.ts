@@ -31,9 +31,9 @@ export async function saveCommunity(input: SaveCommunityInput): Promise<Communit
   const admin = createAdminClient()
   const { error } = await admin.rpc('admin_save_community', {
     p_admin_id: adminId,
-    p_id: input.id ?? null,
+    p_id: (input.id ?? null) as unknown as string,
     p_name: input.name,
-    p_platform: input.platform,
+    p_platform: input.platform as never,
     p_url: input.url.trim(),
     p_business: input.business,
     p_is_active: input.isActive,

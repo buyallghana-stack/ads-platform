@@ -134,7 +134,7 @@ export async function requestCommissionWithdrawal(input: {
     p_amount_minor: amountMinor,
     /* Which destination. Sent explicitly because the function refuses to
        guess when somebody holds two, rather than paying an arbitrary one. */
-    p_method: method ?? null,
+    p_method: method ?? undefined,
   })
 
   if (error) {

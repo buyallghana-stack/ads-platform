@@ -96,7 +96,7 @@ export async function previewProductCoupon(
     p_code: code.trim(),
     /* `null`, not `undefined`: an omitted key changes which function
        PostgREST looks for, and it then finds none. */
-    p_tier_id: null,
+    p_tier_id: null as unknown as string,
     p_product_id: productId,
     p_amount_minor: Number(price ?? 0),
   })

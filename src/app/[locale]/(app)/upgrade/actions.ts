@@ -111,7 +111,7 @@ export async function previewPlanCoupon(
     /* `null`, not `undefined`. supabase-js drops undefined keys and PostgREST
        then cannot match the overload, which fails as "function not found"
        rather than as a bad argument. */
-    p_product_id: null,
+    p_product_id: null as unknown as string,
     p_amount_minor: amountMinor,
   })
 

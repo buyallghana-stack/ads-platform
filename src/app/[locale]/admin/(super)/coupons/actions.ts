@@ -63,24 +63,24 @@ export async function saveCoupon(input: SaveCouponInput): Promise<CouponActionRe
      not, deliberately: a default on a money field is a value nobody chose. */
   const { error } = await admin.rpc('admin_save_coupon', {
     p_admin_id: adminId,
-    p_id: input.id ?? null,
+    p_id: (input.id ?? null) as unknown as string,
     p_code: input.code,
     p_business: input.business,
-    p_tier_id: input.business === 'ads' ? (input.tierId ?? null) : null,
-    p_product_id: input.business === 'affiliate' ? (input.productId ?? null) : null,
+    p_tier_id: (input.business === 'ads' ? (input.tierId ?? null) : null) as unknown as string,
+    p_product_id: (input.business === 'affiliate' ? (input.productId ?? null) : null) as unknown as string,
     p_discount_kind: input.discountKind,
-    p_percent: input.discountKind === 'percent' ? (input.percent ?? null) : null,
-    p_amount_minor: input.discountKind === 'fixed' ? (input.amountMinor ?? null) : null,
+    p_percent: (input.discountKind === 'percent' ? (input.percent ?? null) : null) as unknown as number,
+    p_amount_minor: (input.discountKind === 'fixed' ? (input.amountMinor ?? null) : null) as unknown as number,
     p_max_discount_minor:
-      input.discountKind === 'percent' ? (input.maxDiscountMinor ?? null) : null,
+      (input.discountKind === 'percent' ? (input.maxDiscountMinor ?? null) : null) as unknown as number,
     p_min_spend_minor: input.minSpendMinor ?? 0,
     p_quota: input.quota,
     p_per_user_limit: input.perUserLimit,
     p_first_purchase_only: input.firstPurchaseOnly,
-    p_starts_at: input.startsAt || null,
-    p_ends_at: input.endsAt || null,
+    p_starts_at: (input.startsAt || null) as unknown as string,
+    p_ends_at: (input.endsAt || null) as unknown as string,
     p_is_active: input.isActive,
-    p_note: input.note ?? null,
+    p_note: (input.note ?? null) as unknown as string,
   })
 
   /* Surfaced verbatim. Every refusal in `admin_save_coupon` is already written

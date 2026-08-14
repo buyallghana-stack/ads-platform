@@ -67,7 +67,7 @@ export const getNotifications = cache(
       .from('notifications')
       .select(COLUMNS)
       .eq('user_id', user.id)
-      .in('business', visibleTo(business))
+      .in('business', visibleTo(business) as never)
       .order('created_at', { ascending: false })
     if (limit) query = query.limit(limit)
 
@@ -92,7 +92,7 @@ export const getUnreadCount = cache(async (business: NotificationBusiness): Prom
     .from('notifications')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', user.id)
-    .in('business', visibleTo(business))
+    .in('business', visibleTo(business) as never)
     .is('read_at', null)
   return count ?? 0
 })
