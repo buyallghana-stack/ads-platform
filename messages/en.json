@@ -4447,5 +4447,17 @@
       "pending": "Waiting to be paid",
       "rejected": "Refused"
     }
+  },
+  "regionUnavailable": {
+    "title": "Service not available in your region",
+    "subtitle": "SidePerks is currently only available to users located in Ghana.",
+    "badge": "Ghana only",
+    "metaTitle": "Region Unavailable",
+    "metaDescription": "SidePerks is currently exclusive to users in Ghana.",
+    "reasonTitle": "Why am I seeing this?",
+    "reasonBody": "SidePerks rewards are pegged to the Ghanaian Cedi (GHS) and integrate with local Ghanaian Mobile Money providers. To comply with local financial and licensing frameworks, platform access is restricted to Ghana.",
+    "futureTitle": "Expansion plans",
+    "futureBody": "We are preparing to launch in additional African and international regions soon. Stay tuned for announcements.",
+    "supportNote": "If you are currently in Ghana and believe this is an error, please try turning off any active VPN or proxy connections."
   }
 }

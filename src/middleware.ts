@@ -53,6 +53,37 @@ const handleI18n = createIntlMiddleware(routing)
  */
 export default async function middleware(request: NextRequest) {
   /*
+    GHANA-ONLY GEO RESTRICTION (§6.9)
+
+    When enabled in production, the entire platform is restricted to visitors
+    originating from Ghana (ISO 3166-1 alpha-2 'GH'). Non-Ghana traffic is
+    redirected to the dedicated /unavailable notice.
+
+    Vercel sets `x-vercel-ip-country` at the edge with zero runtime cost.
+    In development, absence of the header is allowed so local work is unblocked;
+    `x-geo-country` can be provided to test or simulate country headers.
+  */
+  if (process.env.GEO_RESTRICTION_ENABLED === 'true') {
+    const rawCountry =
+      request.headers.get('x-vercel-ip-country') ??
+      (request as unknown as { geo?: { country?: string } }).geo?.country ??
+      request.headers.get('x-geo-country')
+    const country = rawCountry ? rawCountry.trim().toUpperCase() : null
+
+    const pathWithoutLocale = request.nextUrl.pathname.replace(/^\/(en|fr)(?=\/|$)/, '')
+    const isUnavailablePage =
+      pathWithoutLocale === '/unavailable' || pathWithoutLocale.startsWith('/unavailable/')
+
+    const isGhana = country === 'GH' || (!country && process.env.NODE_ENV !== 'production')
+
+    if (!isGhana && !isUnavailablePage) {
+      const isFr = request.nextUrl.pathname.startsWith('/fr/') || request.nextUrl.pathname === '/fr'
+      const redirectPath = isFr ? '/fr/unavailable' : '/unavailable'
+      return NextResponse.redirect(new URL(redirectPath, request.nextUrl.origin), { status: 307 })
+    }
+  }
+
+  /*
     "VIEW AS USER" IS READ ONLY, AND THIS IS WHERE THAT IS TRUE.
 
     While a super admin is viewing somebody's account, every request that could

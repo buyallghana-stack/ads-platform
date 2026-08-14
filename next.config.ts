@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
     // Pinned explicitly. pnpm-workspace.yaml in the project root makes Turbopack
     // infer a monorepo and pick the wrong root, which crashed the dev server
     // with "We couldn't find the Next.js package from the project directory".
-    root: path.resolve(__dirname),
+    root: process.cwd(),
   },
 
   /*
