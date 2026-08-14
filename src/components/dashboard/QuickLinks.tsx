@@ -77,11 +77,13 @@ function Tile({
   label,
   ready,
   tone,
+  hasDot = false,
 }: {
   icon: React.ReactNode
   label: string
   ready: boolean
   tone: Tone
+  hasDot?: boolean
 }) {
   return (
     <span
@@ -92,15 +94,23 @@ function Tile({
           : 'cursor-not-allowed text-ink-300',
       )}
     >
-      <span
-        aria-hidden
-        className={cn(
-          'grid size-11 place-items-center rounded-full border transition-colors',
-          ready ? TONE_ON[tone] : 'border-ink-200 bg-ink-50 text-ink-300',
+      <span className="relative">
+        <span
+          aria-hidden
+          className={cn(
+            'grid size-11 place-items-center rounded-full border transition-colors',
+            ready ? TONE_ON[tone] : 'border-ink-200 bg-ink-50 text-ink-300',
+          )}
+        >
+          {/* Sized here rather than on each icon so the four are identical. */}
+          <span className="[&>svg]:size-[1.15rem]">{icon}</span>
+        </span>
+        {ready && hasDot && (
+          <span
+            aria-hidden
+            className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full border-2 border-surface bg-rose-500 shadow-xs"
+          />
         )}
-      >
-        {/* Sized here rather than on each icon so the four are identical. */}
-        <span className="[&>svg]:size-[1.15rem]">{icon}</span>
       </span>
       <span className="text-center text-[0.6875rem] font-medium leading-tight">{label}</span>
     </span>
@@ -112,10 +122,16 @@ export function QuickLinks({
   soonLabel,
   navLabel,
   gamesEnabled = false,
+  hasUnplayedGames = false,
+  hasUnclaimedTasks = false,
 }: {
   labels: Record<Item['key'], string>
   /** Drives the Games tile. See the note on ITEMS. */
   gamesEnabled?: boolean
+  /** Whether user has unplayed free spins/games remaining. */
+  hasUnplayedGames?: boolean
+  /** Whether user has completed tasks ready to claim. */
+  hasUnclaimedTasks?: boolean
   /** Read by assistive tech on the ones that are not built yet. */
   soonLabel: string
   /** Names the landmark. It was wrongly reading the Gift code label, which
@@ -130,9 +146,13 @@ export function QuickLinks({
     >
       {ITEMS.map((raw) => {
         const item = raw.key === 'games' ? { ...raw, ready: gamesEnabled } : raw
+        const hasDot =
+          (item.key === 'games' && hasUnplayedGames) ||
+          (item.key === 'tasks' && hasUnclaimedTasks)
+
         return item.ready ? (
           <Link key={item.key} href={item.href} className="rounded-(--radius-card)">
-            <Tile icon={item.icon} label={labels[item.key]} ready tone={item.tone} />
+            <Tile icon={item.icon} label={labels[item.key]} ready tone={item.tone} hasDot={hasDot} />
           </Link>
         ) : (
           <span
@@ -142,7 +162,7 @@ export function QuickLinks({
                the markup has to say the same thing. */
             title={`${labels[item.key]} — ${soonLabel}`}
           >
-            <Tile icon={item.icon} label={labels[item.key]} ready={false} tone={item.tone} />
+            <Tile icon={item.icon} label={labels[item.key]} ready={false} tone={item.tone} hasDot={false} />
             <span className="sr-only">{soonLabel}</span>
           </span>
         )

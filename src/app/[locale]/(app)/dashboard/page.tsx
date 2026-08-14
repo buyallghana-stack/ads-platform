@@ -28,8 +28,9 @@ import { Link, redirect } from '@/i18n/navigation'
 import { getProfile, getViewerUser } from '@/lib/auth/session'
 import { pickDisplayName } from '@/lib/dashboard/display-name'
 import { getHomeData } from '@/lib/dashboard/home-data'
-import { getGamesEnabled } from '@/lib/games/data'
+import { getGameStatus } from '@/lib/games/data'
 import { getNotifications, getUnreadCount } from '@/lib/notifications/data'
+import { getTasks } from '@/lib/tasks/data'
 import { getVaultEnabled, getUserHasActiveVault } from '@/lib/vault/data'
 import { serverNow } from '@/lib/server-now'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -71,9 +72,10 @@ export default async function HomePage({
     { feed, daily },
     notifications,
     unreadCount,
-    gamesEnabled,
+    gameStatus,
     vaultEnabled,
     hasActiveVault,
+    tasks,
     { data: allowances },
   ] =
     await Promise.all([
@@ -85,10 +87,11 @@ export default async function HomePage({
       // Own rows via RLS (user client); recent slice feeds the dropdown panel.
       getNotifications('ads', 30),
       getUnreadCount('ads'),
-      // Cheap public-config read; drives whether the Games tile is live.
-      getGamesEnabled(),
+      // Cheap game status read; drives whether the Games tile is live and remaining plays.
+      getGameStatus(),
       getVaultEnabled(),
       getUserHasActiveVault(user!.id),
+      getTasks(),
       /* ⚠️ ONE RATE IS NOT THE WHOLE STORY ANY MORE (migration 187). A stacked
          account spends its best allowance first and then drops to the next
          plan's rate, so "×6.43 on every ad" would be false from the 14th ad
@@ -96,6 +99,10 @@ export default async function HomePage({
       admin.rpc('user_ad_allowances', { p_user_id: user!.id }),
     ])
   const now = serverNow()
+
+  const gamesEnabled = gameStatus.enabled
+  const hasUnplayedGames = gameStatus.enabled && gameStatus.remaining > 0
+  const hasUnclaimedTasks = tasks.some((t) => t.claimable && !t.claimedAt)
 
   const balance = status?.balance ?? 0
   const currency = Number(status?.currency_value ?? 0)
@@ -368,6 +375,8 @@ export default async function HomePage({
         soonLabel={t('quick.soon')}
         navLabel={t('quick.label')}
         gamesEnabled={gamesEnabled}
+        hasUnplayedGames={hasUnplayedGames}
+        hasUnclaimedTasks={hasUnclaimedTasks}
       />
 
       {/* ------------------------------------------------------------------ */}
