@@ -7228,6 +7228,35 @@ export type Database = {
           section_title: string
         }[]
       }
+      purchase_vault_with_balance: {
+        Args: { p_plan_id: string }
+        Returns: {
+          amount_minor: number
+          claimed_at: string | null
+          claimed_points: number | null
+          created_at: string
+          currency_code: string
+          daily_return_percent: number
+          ends_at: string
+          expected_profit_minor: number
+          expected_return_minor: number
+          id: string
+          payment_id: string | null
+          period_days: number
+          plan_id: string
+          plan_name: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vault_investments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       quiz_for_learner: {
         Args: { p_quiz_id: string }
         Returns: {
@@ -8037,6 +8066,7 @@ export type Database = {
         | "game_prize"
         | "task_reward"
         | "vault_payout"
+        | "vault_deposit"
       lesson_kind: "video" | "article" | "pdf" | "quiz"
       notification_business: "ads" | "affiliate" | "both"
       notification_type: "announcement" | "payout" | "flag" | "support"
@@ -8315,6 +8345,7 @@ export const Constants = {
         "game_prize",
         "task_reward",
         "vault_payout",
+        "vault_deposit",
       ],
       lesson_kind: ["video", "article", "pdf", "quiz"],
       notification_business: ["ads", "affiliate", "both"],
