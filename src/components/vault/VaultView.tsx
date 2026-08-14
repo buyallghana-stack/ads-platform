@@ -526,9 +526,9 @@ export function VaultView({
               </div>
 
               {/* Order Summary Rows */}
-              <div className="mt-4 flex flex-col divide-y divide-ink-100 rounded-(--radius-card) border border-ink-200 bg-ink-50/70 text-xs">
+              <div className="mt-4 flex flex-col divide-y divide-ink-100 rounded-(--radius-card) border border-ink-200 bg-ink-100/40 text-xs">
                 <div className="flex items-center justify-between p-3">
-                  <span className="text-ink-600">{t('checkout.depositAmount')}</span>
+                  <span className="font-medium text-ink-600">{t('checkout.depositAmount')}</span>
                   <span className="font-semibold text-ink-900 tabular-nums">
                     GHS {format.number(priceGhs, { minimumFractionDigits: 2 })}
                     <span className="ml-1 text-[0.6875rem] font-normal text-ink-500">
@@ -537,8 +537,8 @@ export function VaultView({
                   </span>
                 </div>
                 <div className="flex items-center justify-between p-3">
-                  <span className="text-ink-600">{t('totalAtMaturity')}</span>
-                  <span className="font-bold text-violet-700 tabular-nums">
+                  <span className="font-medium text-ink-600">{t('totalAtMaturity')}</span>
+                  <span className="font-bold text-violet-600 dark:text-violet-400 tabular-nums">
                     GHS {format.number(totalMaturityGhs, { minimumFractionDigits: 2 })}
                   </span>
                 </div>
@@ -547,25 +547,39 @@ export function VaultView({
               {/* Account Balance Card */}
               <div
                 className={cn(
-                  'mt-3 rounded-(--radius-card) border p-3 text-xs transition-colors',
+                  'mt-3 rounded-(--radius-card) border p-3.5 text-xs transition-colors',
                   hasEnoughBalance
-                    ? 'border-emerald-500/25 bg-emerald-50/40 text-emerald-950'
-                    : 'border-ink-200 bg-surface text-ink-700',
+                    ? 'border-emerald-500/30 bg-emerald-500/[0.06] text-ink-900'
+                    : 'border-amber-500/30 bg-amber-500/[0.06] text-ink-900',
                 )}
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="flex items-center gap-1.5 font-medium text-ink-700">
-                    <Wallet className={cn('size-4 shrink-0', hasEnoughBalance ? 'text-emerald-600' : 'text-ink-400')} />
+                    <Wallet
+                      className={cn(
+                        'size-4 shrink-0',
+                        hasEnoughBalance ? 'text-emerald-500' : 'text-amber-500',
+                      )}
+                    />
                     {t('checkout.yourBalance')}
                   </span>
-                  <span className="font-semibold text-ink-900 tabular-nums">
-                    GHS {format.number(userBalanceGhs, { minimumFractionDigits: 2 })}
+                  <span className="font-bold text-ink-900 tabular-nums">
+                    <span className={hasEnoughBalance ? 'text-emerald-600 dark:text-emerald-400' : 'text-ink-900'}>
+                      GHS {format.number(userBalanceGhs, { minimumFractionDigits: 2 })}
+                    </span>
                     <span className="ml-1 text-[0.6875rem] font-normal text-ink-500">
                       ({format.number(userBalancePoints)} pts)
                     </span>
                   </span>
                 </div>
-                <p className="mt-1 text-[0.6875rem] leading-normal text-ink-500">
+                <p
+                  className={cn(
+                    'mt-1.5 text-[0.75rem] leading-relaxed',
+                    hasEnoughBalance
+                      ? 'text-ink-600 dark:text-ink-400'
+                      : 'text-amber-700 dark:text-amber-300 font-medium',
+                  )}
+                >
                   {hasEnoughBalance
                     ? t('checkout.deductionNote', {
                         points: format.number(pricePoints),
