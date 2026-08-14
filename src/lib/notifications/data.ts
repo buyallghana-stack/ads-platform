@@ -25,7 +25,7 @@ import { createClient } from '@/lib/supabase/server'
  * "own rows" is quietly false everywhere in this schema.
  */
 
-export type NotificationType = 'announcement' | 'payout' | 'flag' | 'support'
+export type NotificationType = 'announcement' | 'payout' | 'flag' | 'support' | 'vault'
 
 /**
  * Which business a notification belongs to.

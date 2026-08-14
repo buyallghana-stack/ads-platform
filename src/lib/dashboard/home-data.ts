@@ -40,6 +40,7 @@ export type TxKind =
   | 'refund'
   | 'subscription'
   | 'adjustment'
+  | 'vault'
 
 export type TxRow = {
   id: string
@@ -90,6 +91,8 @@ const LEDGER_KIND: Record<string, TxKind> = {
   redemption_request: 'withdrawal',
   redemption_refund: 'refund',
   admin_adjustment: 'adjustment',
+  vault_deposit: 'vault',
+  vault_payout: 'vault',
 }
 
 export type DailyPoint = {
@@ -113,7 +116,7 @@ export async function getHomeData(userId: string): Promise<HomeData> {
   const supabase = await createClient()
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
 
-  const [ledgerRes, chartRes, subsRes] = await Promise.all([
+  const [ledgerRes, chartRes, subsRes, vaultRes] = await Promise.all([
     supabase
       .from('points_ledger')
       .select(
@@ -146,17 +149,6 @@ export async function getHomeData(userId: string): Promise<HomeData> {
       reaches the card form, so abandoning the page — or paying on a second
       attempt after the first one stalled — leaves a pending row behind
       permanently.
-
-      Reported 2026-07-31: the operator bought Silver on the .icloud account,
-      the purchase went through (confirmed 16:30:05, plan active), and the
-      statement still showed "pending" — because it was showing the ABANDONED
-      attempt from 16:27, two minutes earlier, alongside the successful one.
-      Nothing was stuck; the statement was listing an unfinished checkout as
-      though it were a transaction.
-
-      `refunded` is included because a refund is money moving, and it is
-      excluded from nothing else. No code path sets it today — when the refund
-      flow is built it needs its own kind and label, not this one.
     */
     supabase
       .from('subscription_payments')
@@ -165,10 +157,19 @@ export async function getHomeData(userId: string): Promise<HomeData> {
       .in('status', ['confirmed', 'refunded'])
       .order('created_at', { ascending: false })
       .limit(20),
+    supabase
+      .from('vault_payments')
+      .select('id, method, status, amount_minor, currency_code, created_at')
+      .eq('user_id', userId)
+      .eq('method', 'paystack')
+      .eq('status', 'confirmed')
+      .order('created_at', { ascending: false })
+      .limit(20),
   ])
 
   const ledger = ledgerRes.data ?? []
   const subs = subsRes.data ?? []
+  const vaults = vaultRes.data ?? []
 
   // Withdrawal rows want the payout method (MoMo vs crypto) on the icon.
   // The ledger stores the redemption id; one IN query resolves them all.
@@ -228,11 +229,20 @@ export async function getHomeData(userId: string): Promise<HomeData> {
         ghs: s.amount_minor / 100,
         at: s.created_at,
         direction: 'out',
-        /* Both statuses that reach here are finished states, so neither
-           renders a chip. The `failed` arm is kept because the query filter
-           is what excludes it, and a filter is easier to widen by accident
-           than a mapping is. */
         status: s.status === 'failed' ? 'failed' : 'settled',
+      }),
+    ),
+    ...vaults.map(
+      (v): TxRow => ({
+        id: `v-${v.id}`,
+        kind: 'vault',
+        method: v.method,
+        points: null,
+        balanceAfter: null,
+        ghs: v.amount_minor / 100,
+        at: v.created_at,
+        direction: 'out',
+        status: 'settled',
       }),
     ),
   ].sort((a, b) => (a.at < b.at ? 1 : -1))

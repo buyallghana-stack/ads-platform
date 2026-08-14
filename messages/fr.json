@@ -521,7 +521,8 @@
         "survey": "Sondage",
         "ad": "Annonces",
         "game": "Jeu",
-        "task": "Objectif"
+        "task": "Objectif",
+        "vault": "Coffre"
       },
       "kindHint": {
         "bonus": "Bonus de parrainage",
@@ -533,7 +534,8 @@
         "survey": "Récompense de sondage",
         "ad": "Récompense publicitaire",
         "game": "Gain de jeu",
-        "task": "Récompense d'objectif"
+        "task": "Récompense d'objectif",
+        "vault": "Dépôt / retour de coffre"
       },
       "method": {
         "mobile_money": "Mobile Money",

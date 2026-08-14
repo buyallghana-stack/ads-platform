@@ -18,6 +18,7 @@ import {
   Target,
   Gem,
   Ticket,
+  Vault,
   Wrench,
 } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
@@ -40,7 +41,7 @@ import { cn } from '@/lib/cn'
  * server-driven pagination arrives with the full history screen.
  */
 
-const KIND_ORDER: TxKind[] = ['ad', 'survey', 'bonus', 'gift', 'game', 'task', 'withdrawal', 'refund', 'subscription', 'adjustment']
+const KIND_ORDER: TxKind[] = ['ad', 'survey', 'bonus', 'gift', 'game', 'task', 'vault', 'withdrawal', 'refund', 'subscription', 'adjustment']
 
 const KIND_ICON: Record<TxKind, React.ComponentType<{ className?: string }>> = {
   ad: PlayCircle,
@@ -52,6 +53,7 @@ const KIND_ICON: Record<TxKind, React.ComponentType<{ className?: string }>> = {
   gift: Ticket,
   game: Gamepad2,
   task: Target,
+  vault: Vault,
   withdrawal: Smartphone,
   refund: RotateCcw,
   subscription: Gem,
@@ -86,6 +88,7 @@ const KIND_CHIP: Record<TxKind, string> = {
   // Teal, the 'something you set up' hue this app already uses for refunds
   // and profile — a task reward is progress, not luck and not earnings.
   task: 'bg-teal-50 text-teal-600',
+  vault: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400',
   withdrawal: 'bg-brand-50 text-brand-600',
   refund: 'bg-teal-50 text-teal-600',
   subscription: 'bg-violet-50 text-violet-600',

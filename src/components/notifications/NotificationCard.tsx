@@ -1,6 +1,6 @@
 'use client'
 
-import { Megaphone, MessageCircle, ShieldAlert, Wallet } from 'lucide-react'
+import { Megaphone, MessageCircle, ShieldAlert, Vault, Wallet } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import { Link } from '@/i18n/navigation'
@@ -15,6 +15,7 @@ import { cn } from '@/lib/cn'
  *   announcement -> yellow (Megaphone)
  *   payout       -> green  (Wallet)
  *   flag         -> red    (ShieldAlert) + a "Contact support" action
+ *   vault        -> amber  (Vault)
  *
  * Colour lives in the icon chip and the unread dot, echoing the StatCard tone
  * chips elsewhere, so the type reads at a glance without shouting.
@@ -47,6 +48,11 @@ const TYPE_META: Record<
     Icon: MessageCircle,
     chip: 'border-brand-600/25 bg-brand-50 text-brand-600',
     dot: 'bg-brand-600',
+  },
+  vault: {
+    Icon: Vault,
+    chip: 'border-amber-500/25 bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400',
+    dot: 'bg-amber-500',
   },
 }
 

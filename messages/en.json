@@ -521,7 +521,8 @@
         "survey": "Survey",
         "ad": "Ads",
         "game": "Game",
-        "task": "Task"
+        "task": "Task",
+        "vault": "Vault"
       },
       "kindHint": {
         "bonus": "Referral bonus",
@@ -533,7 +534,8 @@
         "survey": "Survey reward",
         "ad": "Ad reward",
         "game": "Game prize",
-        "task": "Task reward"
+        "task": "Task reward",
+        "vault": "Vault deposit / return"
       },
       "method": {
         "mobile_money": "Mobile Money",
