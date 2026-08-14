@@ -440,7 +440,6 @@ export function VaultView({
                       fullWidth
                       onClick={() => handleStartCheckout(plan)}
                       disabled={!checkoutEnabled}
-                      leadingIcon={<Vault className="size-4" />}
                     >
                       {t('plans.depositBtn')}
                     </Button>
