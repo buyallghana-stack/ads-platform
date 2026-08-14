@@ -8,18 +8,21 @@ import {
   CheckCircle2,
   Clock,
   Coins,
+  Gem,
   Lock,
   PauseCircle,
   Percent,
+  ShieldCheck,
   Sparkles,
   TrendingUp,
   Vault,
+  X,
 } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import { claimVaultInvestmentAction, startVaultPaystackCheckout } from '@/app/[locale]/(app)/vault/actions'
 import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
+import { Stat } from '@/components/ui/Card'
 import { Link, useRouter } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
 import type { VaultInvestment, VaultPlan } from '@/lib/vault/data'
@@ -39,7 +42,7 @@ export function VaultView({
   const format = useFormatter()
   const router = useRouter()
 
-  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
+  const [selectedPlan, setSelectedPlan] = useState<VaultPlan | null>(null)
   const [claimingId, setClaimingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
@@ -51,16 +54,20 @@ export function VaultView({
   const totalExpectedReturnMinor = activeInvestments.reduce((sum, i) => sum + i.expectedReturnMinor, 0)
   const totalAccruedProfitMinor = activeInvestments.reduce((sum, i) => sum + i.expectedProfitMinor, 0)
 
-  const handleDeposit = (planId: string) => {
+  const handleStartCheckout = (plan: VaultPlan) => {
     setError(null)
     setSuccessMessage(null)
-    setSelectedPlanId(planId)
+    setSelectedPlan(plan)
+  }
+
+  const handleConfirmPaystack = () => {
+    if (!selectedPlan) return
+    setError(null)
 
     startTransition(async () => {
-      const res = await startVaultPaystackCheckout(planId)
+      const res = await startVaultPaystackCheckout(selectedPlan.id)
       if (!res.ok) {
         setError(res.message ?? t('depositFailed'))
-        setSelectedPlanId(null)
         return
       }
       window.location.assign(res.authorizationUrl)
@@ -84,42 +91,17 @@ export function VaultView({
     })
   }
 
-  if (!vaultEnabled) {
-    return (
-      <div className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <span className="grid size-14 place-items-center rounded-full bg-warning-50 text-warning-600 ring-8 ring-warning-500/15">
-            <PauseCircle aria-hidden className="size-6" />
-          </span>
-          <h1 className="text-xl font-semibold text-ink-900">{t('pausedTitle')}</h1>
-          <p className="max-w-[42ch] text-[0.875rem] leading-relaxed text-ink-500">
-            {t('pausedBody')}
-          </p>
-          <Link href="/dashboard">
-            <Button size="md" variant="secondary" className="mt-2">
-              {t('backToDashboard')}
-            </Button>
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 md:py-7">
-      {/* Header */}
+      {/* Header ----------------------------------------------------------- */}
       <header className="animate-rise">
-        <div className="flex items-center gap-2 text-brand-600">
-          <Vault className="size-5" />
-          <span className="text-xs font-bold uppercase tracking-wider">{t('badge')}</span>
-        </div>
-        <h1 className="mt-1 text-2xl font-bold tracking-[-0.02em] text-ink-900 sm:text-3xl">
+        <h1 className="text-2xl font-bold tracking-[-0.02em] text-ink-900 sm:text-3xl">
           {t('title')}
         </h1>
-        <p className="mt-1 max-w-2xl text-[0.875rem] text-ink-500">{t('subtitle')}</p>
+        <p className="mt-0.5 text-[0.8125rem] text-ink-500">{t('subtitle')}</p>
       </header>
 
-      {/* Messages */}
+      {/* Messages --------------------------------------------------------- */}
       {error && (
         <div className="mt-4 flex items-center gap-2 rounded-(--radius-card) border border-danger-500/30 bg-danger-50 p-3 text-[0.8125rem] font-medium text-danger-700">
           <AlertCircle className="size-4 shrink-0" />
@@ -133,52 +115,71 @@ export function VaultView({
         </div>
       )}
 
-      {/* Portfolio Stats */}
-      {investments.length > 0 && (
-        <div
-          style={{ '--rise-delay': '0.05s' } as React.CSSProperties}
-          className="animate-rise mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3"
-        >
-          <div className="rounded-(--radius-card) border border-ink-200 bg-surface p-4 shadow-xs">
-            <div className="flex items-center justify-between text-ink-500">
-              <span className="text-xs font-medium uppercase tracking-wider">{t('stats.locked')}</span>
-              <Lock className="size-4 text-brand-500" />
-            </div>
-            <p className="mt-2 text-xl font-bold tracking-tight text-ink-900">
-              GHS {format.number(totalLockedMinor / 100, { minimumFractionDigits: 2 })}
+      {/* What the user holds right now (Top Card matching UpgradeView) ---- */}
+      <div
+        style={{ '--rise-delay': '0.05s' } as React.CSSProperties}
+        className={cn(
+          'animate-rise mt-5 rounded-(--radius-card) border p-4 sm:p-5',
+          activeInvestments.length > 0
+            ? 'border-violet-600/20 bg-violet-50 text-ink-900'
+            : 'border-ink-200 bg-surface text-ink-900',
+        )}
+      >
+        <div className="flex items-center gap-3">
+          <span
+            className={cn(
+              'grid size-10 shrink-0 place-items-center rounded-full',
+              activeInvestments.length > 0
+                ? 'bg-violet-600/10 text-violet-600'
+                : 'bg-ink-100 text-ink-500',
+            )}
+          >
+            <Vault aria-hidden className="size-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[0.875rem] font-semibold text-ink-900">
+              {activeInvestments.length > 0
+                ? t('holdingActiveVaults', { count: activeInvestments.length })
+                : t('noActiveVaults')}
             </p>
-            <p className="mt-0.5 text-xs text-ink-500">
-              {t('stats.activeCount', { count: activeInvestments.length })}
+            <p className="mt-0.5 text-[0.75rem] leading-snug text-ink-600">
+              {activeInvestments.length > 0
+                ? t('holdingActiveHint')
+                : t('noActiveHint')}
             </p>
-          </div>
-
-          <div className="rounded-(--radius-card) border border-ink-200 bg-surface p-4 shadow-xs">
-            <div className="flex items-center justify-between text-ink-500">
-              <span className="text-xs font-medium uppercase tracking-wider">{t('stats.projectedProfit')}</span>
-              <TrendingUp className="size-4 text-emerald-500" />
-            </div>
-            <p className="mt-2 text-xl font-bold tracking-tight text-emerald-600">
-              +GHS {format.number(totalAccruedProfitMinor / 100, { minimumFractionDigits: 2 })}
-            </p>
-            <p className="mt-0.5 text-xs text-ink-500">{t('stats.guaranteedReturn')}</p>
-          </div>
-
-          <div className="rounded-(--radius-card) border border-ink-200 bg-surface p-4 shadow-xs">
-            <div className="flex items-center justify-between text-ink-500">
-              <span className="text-xs font-medium uppercase tracking-wider">{t('stats.totalMaturity')}</span>
-              <Coins className="size-4 text-amber-500" />
-            </div>
-            <p className="mt-2 text-xl font-bold tracking-tight text-ink-900">
-              GHS {format.number(totalExpectedReturnMinor / 100, { minimumFractionDigits: 2 })}
-            </p>
-            <p className="mt-0.5 text-xs text-ink-500">{t('stats.principalAndProfit')}</p>
           </div>
         </div>
-      )}
 
-      {/* User's Active & Matured Vaults */}
+        {activeInvestments.length > 0 && (
+          <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <Stat
+              label={t('stats.locked')}
+              value={`GHS ${format.number(totalLockedMinor / 100, { minimumFractionDigits: 2 })}`}
+            />
+            <Stat
+              label={t('stats.projectedProfit')}
+              value={`+GHS ${format.number(totalAccruedProfitMinor / 100, { minimumFractionDigits: 2 })}`}
+            />
+            <Stat
+              label={t('stats.totalMaturity')}
+              value={`GHS ${format.number(totalExpectedReturnMinor / 100, { minimumFractionDigits: 2 })}`}
+            />
+          </dl>
+        )}
+      </div>
+
+      {/* How Vault Works Explanation Banner ------------------------------- */}
+      <div
+        style={{ '--rise-delay': '0.1s' } as React.CSSProperties}
+        className="animate-rise mt-3 flex items-start gap-2.5 rounded-(--radius-card) border border-ink-200 bg-surface px-4 py-3"
+      >
+        <ShieldCheck aria-hidden className="mt-0.5 size-4 shrink-0 text-brand-600" />
+        <p className="text-[0.8125rem] leading-relaxed text-ink-600">{t('howItWorks')}</p>
+      </div>
+
+      {/* User's Active Vaults Roster (If any) ----------------------------- */}
       {investments.length > 0 && (
-        <section style={{ '--rise-delay': '0.1s' } as React.CSSProperties} className="animate-rise mt-8">
+        <section style={{ '--rise-delay': '0.12s' } as React.CSSProperties} className="animate-rise mt-6">
           <h2 className="text-base font-semibold text-ink-900">{t('myVaults.title')}</h2>
           <p className="text-xs text-ink-500">{t('myVaults.subtitle')}</p>
 
@@ -204,7 +205,7 @@ export function VaultView({
                       ? 'border-ink-200 bg-surface/60 opacity-80'
                       : isMatured
                         ? 'border-amber-500/40 bg-amber-500/5 shadow-xs'
-                        : 'border-brand-500/30 bg-surface shadow-xs',
+                        : 'border-violet-600/30 bg-surface shadow-xs',
                   )}
                 >
                   <div className="min-w-0 flex-1">
@@ -216,7 +217,7 @@ export function VaultView({
                             ? 'bg-ink-100 text-ink-500'
                             : isMatured
                               ? 'bg-amber-100 text-amber-700'
-                              : 'bg-brand-50 text-brand-600',
+                              : 'bg-violet-50 text-violet-600',
                         )}
                       >
                         {inv.status === 'claimed' ? (
@@ -237,7 +238,7 @@ export function VaultView({
                                 ? 'bg-ink-100 text-ink-600'
                                 : isMatured
                                   ? 'bg-amber-100 text-amber-800 animate-pulse'
-                                  : 'bg-brand-100 text-brand-700',
+                                  : 'bg-violet-100 text-violet-700',
                             )}
                           >
                             {inv.status === 'claimed'
@@ -249,7 +250,7 @@ export function VaultView({
                         </div>
                         <p className="mt-0.5 text-xs text-ink-500">
                           {t('myVaults.deposit')}: GHS {format.number(inv.amountMinor / 100, { minimumFractionDigits: 2 })} •{' '}
-                          {inv.dailyReturnPercent}%/day for {inv.periodDays} days
+                          +{inv.dailyReturnPercent}%/day for {inv.periodDays} days
                         </p>
                       </div>
                     </div>
@@ -272,7 +273,7 @@ export function VaultView({
                               ? 'bg-ink-400'
                               : isMatured
                                 ? 'bg-amber-500'
-                                : 'bg-brand-600',
+                                : 'bg-violet-600',
                           )}
                           style={{ width: `${progressPercent}%` }}
                         />
@@ -313,7 +314,7 @@ export function VaultView({
         </section>
       )}
 
-      {/* Available Vault Plans */}
+      {/* Available Plans Grid (styled like PlanCard in Upgrade) ------------ */}
       <section style={{ '--rise-delay': '0.15s' } as React.CSSProperties} className="animate-rise mt-8">
         <div className="flex items-center justify-between">
           <div>
@@ -322,91 +323,218 @@ export function VaultView({
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {plans.map((plan) => {
-            const priceGhs = plan.priceMinor / 100
-            const dailyReturnGhs = priceGhs * (plan.dailyReturnPercent / 100)
-            const totalProfitGhs = dailyReturnGhs * plan.periodDays
-            const totalMaturityGhs = priceGhs + totalProfitGhs
-            const isSelected = selectedPlanId === plan.id && isPending
+        {!vaultEnabled ? (
+          <div className="mt-4 flex items-center gap-3 rounded-(--radius-card) border border-warning-500/30 bg-warning-50 p-4 text-warning-800">
+            <PauseCircle className="size-5 shrink-0 text-warning-600" />
+            <p className="text-xs leading-relaxed font-medium">{t('pausedBody')}</p>
+          </div>
+        ) : (
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {plans.map((plan, idx) => {
+              const priceGhs = plan.priceMinor / 100
+              const dailyProfitGhs = priceGhs * (plan.dailyReturnPercent / 100)
+              const totalProfitGhs = dailyProfitGhs * plan.periodDays
+              const totalMaturityGhs = priceGhs + totalProfitGhs
+              const isPopular = idx === 1
 
-            return (
-              <Card
-                key={plan.id}
-                className="relative flex flex-col justify-between overflow-hidden border-ink-200 bg-surface p-5 shadow-sm transition-all hover:border-brand-500/50 hover:shadow-md"
-              >
-                <div>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="text-lg font-bold tracking-tight text-ink-900">{plan.name}</h3>
-                      <p className="mt-0.5 text-xs text-ink-500">{plan.description}</p>
-                    </div>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-semibold text-brand-700">
-                      <Percent className="size-3" />
-                      {plan.dailyReturnPercent}% / day
+              return (
+                <div
+                  key={plan.id}
+                  className={cn(
+                    'relative flex flex-col rounded-(--radius-card) border bg-surface p-5 transition-shadow',
+                    isPopular
+                      ? 'border-violet-600/40 shadow-[0_1px_2px_0_rgb(15_23_42/0.06),0_12px_28px_-16px_rgb(124_58_237/0.45)]'
+                      : 'border-ink-200 shadow-[0_1px_2px_0_rgb(15_23_42/0.04)]',
+                  )}
+                >
+                  {isPopular && (
+                    <span className="absolute -top-2.5 left-5 rounded-full bg-violet-600 px-2.5 py-0.5 text-[0.6875rem] font-semibold text-white">
+                      {t('popular')}
                     </span>
-                  </div>
+                  )}
 
-                  {/* Pricing and Duration */}
-                  <div className="mt-4 rounded-(--radius-card) border border-ink-100 bg-ink-50/50 p-3">
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-xs text-ink-500">{t('plans.depositPrice')}</span>
-                      <span className="text-lg font-extrabold text-ink-900">
-                        GHS {format.number(priceGhs, { minimumFractionDigits: 2 })}
-                      </span>
-                    </div>
-
-                    <div className="mt-2 flex items-center justify-between text-xs text-ink-600 border-t border-ink-100/80 pt-2">
-                      <span className="flex items-center gap-1">
-                        <Clock className="size-3 text-ink-400" />
-                        {t('plans.duration')}
-                      </span>
-                      <span className="font-semibold text-ink-900">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <h3 className="text-[1.0625rem] font-semibold tracking-[-0.01em] text-ink-900">
+                      {plan.name}
+                    </h3>
+                    <div className="text-right">
+                      <p className="text-[1.125rem] font-semibold tracking-[-0.02em] text-ink-900">
+                        GHS {format.number(priceGhs, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-[0.6875rem] text-ink-500">
                         {plan.periodDays} {t('days')}
-                      </span>
+                      </p>
                     </div>
                   </div>
 
-                  {/* Return Breakdown */}
-                  <dl className="mt-4 flex flex-col gap-1.5 text-xs">
-                    <div className="flex justify-between text-ink-600">
-                      <span>{t('plans.dailyEarn')}</span>
-                      <span className="font-medium text-emerald-600">
-                        +GHS {format.number(dailyReturnGhs, { minimumFractionDigits: 2 })} / day
+                  {plan.description && (
+                    <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-ink-500">
+                      {plan.description}
+                    </p>
+                  )}
+
+                  {/* Benefits List (matching Upgrade PlanCard) */}
+                  <ul className="mt-4 flex flex-1 flex-col gap-2">
+                    <li className="flex items-start gap-2.5">
+                      <span className="mt-0.5 grid size-4.5 shrink-0 place-items-center rounded-full bg-violet-50 text-violet-600">
+                        <Percent aria-hidden className="size-3" />
                       </span>
-                    </div>
-                    <div className="flex justify-between text-ink-600">
-                      <span>{t('plans.totalProfit')}</span>
-                      <span className="font-medium text-emerald-600">
-                        +GHS {format.number(totalProfitGhs, { minimumFractionDigits: 2 })}
+                      <span className="min-w-0">
+                        <span className="block text-[0.8125rem] font-medium leading-relaxed text-ink-700">
+                          +{plan.dailyReturnPercent}% {t('dailyReturnRate')}
+                        </span>
+                        <span className="block text-[0.75rem] leading-snug text-ink-400">
+                          +GHS {format.number(dailyProfitGhs, { minimumFractionDigits: 2 })} / day
+                        </span>
                       </span>
-                    </div>
-                    <div className="flex justify-between border-t border-ink-100 pt-1.5 font-bold text-ink-900">
-                      <span>{t('plans.totalReturn')}</span>
-                      <span className="text-brand-700">
+                    </li>
+
+                    <li className="flex items-start gap-2.5">
+                      <span className="mt-0.5 grid size-4.5 shrink-0 place-items-center rounded-full bg-violet-50 text-violet-600">
+                        <Clock aria-hidden className="size-3" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-[0.8125rem] font-medium leading-relaxed text-ink-700">
+                          {plan.periodDays} {t('days')} {t('lockDuration')}
+                        </span>
+                        <span className="block text-[0.75rem] leading-snug text-ink-400">
+                          {t('lockDurationHint')}
+                        </span>
+                      </span>
+                    </li>
+
+                    <li className="flex items-start gap-2.5">
+                      <span className="mt-0.5 grid size-4.5 shrink-0 place-items-center rounded-full bg-violet-50 text-violet-600">
+                        <Coins aria-hidden className="size-3" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-[0.8125rem] font-medium leading-relaxed text-ink-700">
+                          GHS {format.number(totalProfitGhs, { minimumFractionDigits: 2 })} {t('netProfit')}
+                        </span>
+                        <span className="block text-[0.75rem] leading-snug text-ink-400">
+                          {t('profitOnMaturity')}
+                        </span>
+                      </span>
+                    </li>
+                  </ul>
+
+                  {/* Highlighted Maturity Box */}
+                  <div className="mt-4 rounded-(--radius-card) border border-violet-600/30 bg-violet-50/50 p-3.5">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className="text-[0.75rem] font-medium text-ink-600">
+                        {t('totalAtMaturity')}
+                      </span>
+                      <span className="text-[1.0625rem] font-bold text-violet-700 tabular-nums">
                         GHS {format.number(totalMaturityGhs, { minimumFractionDigits: 2 })}
                       </span>
                     </div>
-                  </dl>
-                </div>
+                    <p className="mt-0.5 text-[0.6875rem] text-ink-500">
+                      GHS {format.number(priceGhs, { minimumFractionDigits: 2 })} deposit + GHS{' '}
+                      {format.number(totalProfitGhs, { minimumFractionDigits: 2 })} profit
+                    </p>
+                  </div>
 
-                <div className="mt-5">
-                  <Button
-                    size="md"
-                    fullWidth
-                    onClick={() => handleDeposit(plan.id)}
-                    disabled={isPending || !checkoutEnabled}
-                    className="bg-brand-600 text-white hover:bg-brand-700"
-                    trailingIcon={<ArrowRight className="size-4" />}
-                  >
-                    {isSelected ? t('initiatingPayment') : t('plans.depositBtn')}
-                  </Button>
+                  {/* Primary CTA */}
+                  <div className="mt-4">
+                    <Button
+                      size="lg"
+                      fullWidth
+                      onClick={() => handleStartCheckout(plan)}
+                      disabled={!checkoutEnabled}
+                      leadingIcon={<Vault className="size-4" />}
+                    >
+                      {t('plans.depositBtn')}
+                    </Button>
+                  </div>
                 </div>
-              </Card>
-            )
-          })}
-        </div>
+              )
+            })}
+          </div>
+        )}
       </section>
+
+      <p className="mt-6 text-center text-[0.75rem] leading-relaxed text-ink-400">
+        {t('footnote')}
+      </p>
+
+      {/* Checkout Sheet Modal (matching Upgrade checkout sheet) ------------ */}
+      {selectedPlan && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-ink-900/40 p-0 sm:items-center sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('checkout.title', { plan: selectedPlan.name })}
+          onClick={(e) => e.target === e.currentTarget && setSelectedPlan(null)}
+        >
+          <div className="w-full max-w-md rounded-t-(--radius-panel) bg-surface p-5 sm:rounded-(--radius-panel) sm:p-6">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-[1.0625rem] font-semibold text-ink-900">
+                  {t('checkout.title', { plan: selectedPlan.name })}
+                </h2>
+                <p className="mt-0.5 text-[0.8125rem] text-ink-500">
+                  {t('checkout.subtitle', { days: selectedPlan.periodDays })}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedPlan(null)}
+                aria-label={t('checkout.close')}
+                className="grid size-8 shrink-0 place-items-center rounded-full text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-900"
+              >
+                <X aria-hidden className="size-4" />
+              </button>
+            </div>
+
+            <div className="mt-4 flex items-center justify-between rounded-(--radius-card) border border-ink-200 bg-ink-50 px-4 py-3">
+              <span className="text-[0.8125rem] text-ink-600">{t('checkout.depositAmount')}</span>
+              <span className="text-[1.125rem] font-semibold tracking-[-0.02em] text-ink-900">
+                GHS {format.number(selectedPlan.priceMinor / 100, { minimumFractionDigits: 2 })}
+              </span>
+            </div>
+
+            <div className="mt-3 flex flex-col gap-1.5 rounded-(--radius-card) border border-violet-600/20 bg-violet-50/50 p-3 text-xs">
+              <div className="flex justify-between text-ink-700 font-medium">
+                <span>{t('dailyReturnRate')}</span>
+                <span className="text-violet-700">+{selectedPlan.dailyReturnPercent}% / day</span>
+              </div>
+              <div className="flex justify-between text-ink-700 font-medium">
+                <span>{t('totalReturnAtMaturity')}</span>
+                <span className="text-violet-700 font-bold">
+                  GHS{' '}
+                  {format.number(
+                    (selectedPlan.priceMinor +
+                      selectedPlan.priceMinor * (selectedPlan.dailyReturnPercent / 100) * selectedPlan.periodDays) /
+                      100,
+                    { minimumFractionDigits: 2 },
+                  )}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-col gap-2">
+              <Button
+                size="lg"
+                fullWidth
+                disabled={isPending}
+                onClick={handleConfirmPaystack}
+                trailingIcon={<ArrowRight className="size-4" />}
+              >
+                {isPending ? t('initiatingPayment') : t('checkout.payWithPaystack')}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                fullWidth
+                onClick={() => setSelectedPlan(null)}
+              >
+                {t('checkout.cancel')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

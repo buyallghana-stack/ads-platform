@@ -247,9 +247,9 @@ export default async function HomePage({
         {/* Top-Right Vault Quick Access */}
         <Link
           href="/vault"
-          className="absolute right-4 top-4 z-10 flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[0.75rem] font-semibold text-white backdrop-blur-xs transition-all hover:border-white/40 hover:bg-white/20 active:scale-95"
+          className="group absolute right-3.5 top-3.5 z-10 flex items-center gap-1.5 rounded-full border border-amber-300/50 bg-gradient-to-r from-amber-400 to-amber-500 px-3.5 py-1.5 text-[0.8125rem] font-bold text-amber-950 shadow-[0_4px_12px_rgba(245,158,11,0.35)] transition-all hover:scale-105 hover:from-amber-300 hover:to-amber-400 active:scale-95 sm:right-5 sm:top-5"
         >
-          <Vault className="size-3.5 text-amber-300" />
+          <Vault className="size-4 text-amber-950 transition-transform group-hover:rotate-12" />
           <span>{t('vault') ?? 'Vault'}</span>
         </Link>
 
