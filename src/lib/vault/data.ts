@@ -185,14 +185,12 @@ export async function getAllVaultInvestmentsAdmin(): Promise<(VaultInvestment & 
 export const getUserPointsBalance = cache(async (userId: string): Promise<number> => {
   const supabase = await createClient()
   const { data } = await supabase
-    .from('points_ledger')
-    .select('balance_after')
+    .from('user_balances')
+    .select('balance')
     .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(1)
     .maybeSingle()
 
-  return Number(data?.balance_after ?? 0)
+  return Number(data?.balance ?? 0)
 })
 
 export const getPointsPerCurrencyUnit = cache(async (): Promise<number> => {
