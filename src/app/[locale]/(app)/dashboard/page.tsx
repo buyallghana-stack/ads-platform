@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 
 import {
+  AlertCircle,
   ArrowUpRight,
   ChartColumnBig,
   ChevronRight,
   PlayCircle,
+  Sparkles,
   TrendingUp,
   Trophy,
 } from 'lucide-react'
@@ -258,22 +260,41 @@ export default async function HomePage({
           it is what the primary button does, and it was previously six grey
           words beside the buttons.
         */}
-        <p className="mt-2 text-[0.875rem] font-medium tabular-nums text-white/85">
-          {remaining > 0
-            ? t('adsWaiting', { n: remaining })
-            : t('capReachedToday')}
-        </p>
+        {freeExhausted ? (
+          <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-full border border-red-400/40 bg-red-500/25 px-3 py-1 text-[0.8125rem] font-semibold text-red-100 backdrop-blur-xs">
+            <AlertCircle aria-hidden className="size-4 shrink-0 text-red-200" />
+            {t('freeExhausted')}
+          </p>
+        ) : (
+          <p className="mt-2 text-[0.875rem] font-medium tabular-nums text-white/85">
+            {remaining > 0
+              ? t('adsWaiting', { n: remaining })
+              : t('capReachedToday')}
+          </p>
+        )}
 
         <div className="mt-5 flex flex-wrap items-center gap-3">
-          <Link href="/ads">
-            <Button
-              size="md"
-              className="border-white/25 bg-surface text-brand-700 shadow-none hover:border-white hover:bg-surface hover:text-brand-800 active:bg-brand-50"
-              leadingIcon={<PlayCircle />}
-            >
-              {t('watchCta')}
-            </Button>
-          </Link>
+          {freeExhausted ? (
+            <Link href="/upgrade">
+              <Button
+                size="md"
+                className="border-white/25 bg-surface text-brand-700 shadow-none hover:border-white hover:bg-surface hover:text-brand-800 active:bg-brand-50"
+                leadingIcon={<Sparkles className="size-4 text-amber-500" />}
+              >
+                {t('upgradeToEarn')}
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/ads">
+              <Button
+                size="md"
+                className="border-white/25 bg-surface text-brand-700 shadow-none hover:border-white hover:bg-surface hover:text-brand-800 active:bg-brand-50"
+                leadingIcon={<PlayCircle />}
+              >
+                {t('watchCta')}
+              </Button>
+            </Link>
+          )}
           <Link href="/withdraw">
             <Button
               size="md"

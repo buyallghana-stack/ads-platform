@@ -571,6 +571,8 @@
       "label": "Shortcuts"
     },
     "adsWaiting": "{n} ads waiting for you today",
+    "freeExhausted": "You have exhausted your free days.",
+    "upgradeToEarn": "Upgrade to earn",
     "capReachedToday": "That is every ad for today: back at midnight",
     "tierCap": "{n} ads a day",
     "tierMultiplier": "×{x} on every ad",
