@@ -535,7 +535,9 @@
         "ad": "Récompense publicitaire",
         "game": "Gain de jeu",
         "task": "Récompense d'objectif",
-        "vault": "Dépôt / retour de coffre"
+        "vault": "Dépôt / retour de coffre",
+        "vault_purchase": "Achat de coffre",
+        "vault_claim": "Réclamation de coffre"
       },
       "method": {
         "mobile_money": "Mobile Money",

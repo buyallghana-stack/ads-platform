@@ -104,6 +104,19 @@ export const getUserVaultInvestments = cache(
   },
 )
 
+export const getUserHasActiveVault = cache(async (userId: string): Promise<boolean> => {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('vault_investments')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .limit(1)
+    .maybeSingle()
+
+  return Boolean(data?.id)
+})
+
 export async function getAllVaultPlansAdmin(): Promise<VaultPlan[]> {
   const admin = createAdminClient()
   const { data } = await admin

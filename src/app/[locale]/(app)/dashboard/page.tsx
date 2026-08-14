@@ -30,7 +30,7 @@ import { pickDisplayName } from '@/lib/dashboard/display-name'
 import { getHomeData } from '@/lib/dashboard/home-data'
 import { getGamesEnabled } from '@/lib/games/data'
 import { getNotifications, getUnreadCount } from '@/lib/notifications/data'
-import { getVaultEnabled } from '@/lib/vault/data'
+import { getVaultEnabled, getUserHasActiveVault } from '@/lib/vault/data'
 import { serverNow } from '@/lib/server-now'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { cn } from '@/lib/cn'
@@ -73,6 +73,7 @@ export default async function HomePage({
     unreadCount,
     gamesEnabled,
     vaultEnabled,
+    hasActiveVault,
     { data: allowances },
   ] =
     await Promise.all([
@@ -87,6 +88,7 @@ export default async function HomePage({
       // Cheap public-config read; drives whether the Games tile is live.
       getGamesEnabled(),
       getVaultEnabled(),
+      getUserHasActiveVault(user!.id),
       /* ⚠️ ONE RATE IS NOT THE WHOLE STORY ANY MORE (migration 187). A stacked
          account spends its best allowance first and then drops to the next
          plan's rate, so "×6.43 on every ad" would be false from the 14th ad
@@ -247,8 +249,8 @@ export default async function HomePage({
           className="absolute -right-2 -top-8 -z-10 size-32 rounded-full border border-white/10"
         />
 
-        {/* Top-Right Vault Quick Access (Only rendered when Vault is enabled by Admin) */}
-        {vaultEnabled && (
+        {/* Top-Right Vault Quick Access (Rendered when Vault is enabled OR user holds an active vault deposit) */}
+        {(vaultEnabled || hasActiveVault) && (
           <Link
             href="/vault"
             className="group absolute right-3.5 top-3.5 z-10 flex items-center gap-1.5 rounded-full border border-amber-300/50 bg-gradient-to-r from-amber-400 to-amber-500 px-3.5 py-1.5 text-[0.8125rem] font-bold text-amber-950 shadow-[0_4px_12px_rgba(245,158,11,0.35)] transition-all hover:scale-105 hover:from-amber-300 hover:to-amber-400 active:scale-95 sm:right-5 sm:top-5"

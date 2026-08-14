@@ -535,7 +535,9 @@
         "ad": "Ad reward",
         "game": "Game prize",
         "task": "Task reward",
-        "vault": "Vault deposit / return"
+        "vault": "Vault deposit / return",
+        "vault_purchase": "Vault purchase",
+        "vault_claim": "Vault claim"
       },
       "method": {
         "mobile_money": "Mobile Money",

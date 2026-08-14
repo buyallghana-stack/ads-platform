@@ -244,11 +244,15 @@ export function TransactionHistory({ rows }: { rows: TxRow[] }) {
             )}
           </p>
           <p className="text-[0.6875rem] text-ink-400">
-            {r.method
-              ? r.method in METHOD_ICON
-                ? t(`method.${r.method as 'mobile_money' | 'crypto' | 'korapay'}`)
-                : r.method
-              : t(`kindHint.${r.kind}`)}
+            {r.kind === 'vault'
+              ? r.direction === 'out'
+                ? t('kindHint.vault_purchase')
+                : t('kindHint.vault_claim')
+              : r.method
+                ? r.method in METHOD_ICON
+                  ? t(`method.${r.method as 'mobile_money' | 'crypto' | 'korapay'}`)
+                  : r.method
+                : t(`kindHint.${r.kind}`)}
           </p>
         </div>
       </div>
