@@ -4617,6 +4617,12 @@
       "subtitle": "Lock period of {days} days with guaranteed daily yield.",
       "close": "Close",
       "depositAmount": "Deposit Amount",
+      "payWithBalance": "Pay with Account Balance (Instant)",
+      "payingWithBalance": "Activating Vault…",
+      "balanceAvailable": "Your Points Balance: {points} pts (GHS {ghs})",
+      "balanceInsufficient": "Need {needed} pts (GHS {ghs}) to pay with balance. You have {points} pts.",
+      "balanceSuccess": "Congratulations! Your Vault plan is now active.",
+      "orDivider": "OR PAY WITH MOBILE MONEY / CARD",
       "payWithPaystack": "Pay with Paystack (Momo & Card)",
       "cancel": "Cancel"
     },

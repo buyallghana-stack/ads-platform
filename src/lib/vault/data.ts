@@ -181,3 +181,28 @@ export async function getAllVaultInvestmentsAdmin(): Promise<(VaultInvestment & 
     userFullName: r.profiles?.full_name ?? undefined,
   }))
 }
+
+export const getUserPointsBalance = cache(async (userId: string): Promise<number> => {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('points_ledger')
+    .select('balance_after')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  return Number(data?.balance_after ?? 0)
+})
+
+export const getPointsPerCurrencyUnit = cache(async (): Promise<number> => {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('app_config')
+    .select('value')
+    .eq('key', 'points_per_currency_unit')
+    .maybeSingle()
+
+  return Number(data?.value ?? 100)
+})
+

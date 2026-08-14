@@ -1,5 +1,7 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
+
 import { getSessionUser } from '@/lib/auth/session'
 import { clientEnv } from '@/lib/env'
 import { initialiseTransaction } from '@/lib/payments/paystack'
@@ -52,6 +54,32 @@ export async function startVaultPaystackCheckout(
   return { ok: true, authorizationUrl: initialised.authorizationUrl }
 }
 
+export type VaultBalancePurchaseResult =
+  | { ok: true; investmentId: string }
+  | { ok: false; message: string }
+
+export async function purchaseVaultWithBalanceAction(
+  planId: string,
+): Promise<VaultBalancePurchaseResult> {
+  const user = await getSessionUser()
+  if (!user) return { ok: false, message: 'You must be signed in to purchase a Vault plan.' }
+
+  const admin = createAdminClient()
+  const { data, error } = await admin.rpc('purchase_vault_with_balance', {
+    p_plan_id: planId,
+    p_user_id: user.id,
+  })
+
+  if (error) {
+    return { ok: false, message: error.message }
+  }
+
+  const row = data as unknown as { id: string }
+  revalidatePath('/[locale]/(app)/vault', 'page')
+  revalidatePath('/[locale]/(app)/dashboard', 'page')
+  return { ok: true, investmentId: row?.id }
+}
+
 export type ClaimVaultResult =
   | { ok: true; points: number }
   | { ok: false; message: string }
@@ -72,5 +100,7 @@ export async function claimVaultInvestmentAction(
   }
 
   const inv = data as unknown as { claimed_points: number }
+  revalidatePath('/[locale]/(app)/vault', 'page')
+  revalidatePath('/[locale]/(app)/dashboard', 'page')
   return { ok: true, points: Number(inv.claimed_points ?? 0) }
 }

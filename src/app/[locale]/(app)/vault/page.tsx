@@ -10,6 +10,8 @@ import {
   getVaultEnabled,
   getVaultPlans,
   getUserVaultInvestments,
+  getUserPointsBalance,
+  getPointsPerCurrencyUnit,
 } from '@/lib/vault/data'
 
 export const metadata: Metadata = {
@@ -31,10 +33,12 @@ export default async function VaultPage({
     return null
   }
 
-  const [vaultEnabled, plans, investments] = await Promise.all([
+  const [vaultEnabled, plans, investments, userBalancePoints, pointsRate] = await Promise.all([
     getVaultEnabled(),
     getVaultPlans(),
     getUserVaultInvestments(user.id),
+    getUserPointsBalance(user.id),
+    getPointsPerCurrencyUnit(),
   ])
 
   return (
@@ -42,6 +46,8 @@ export default async function VaultPage({
       vaultEnabled={vaultEnabled}
       plans={plans}
       investments={investments}
+      userBalancePoints={userBalancePoints}
+      pointsRate={pointsRate}
       checkoutEnabled={Boolean(serverEnv().PAYSTACK_SECRET_KEY)}
     />
   )

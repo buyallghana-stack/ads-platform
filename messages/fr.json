@@ -4616,6 +4616,12 @@
       "subtitle": "Période de blocage de {days} jours avec rendement quotidien garanti.",
       "close": "Fermer",
       "depositAmount": "Montant du Dépôt",
+      "payWithBalance": "Payer avec le Solde de Points (Instantané)",
+      "payingWithBalance": "Activation du Coffre…",
+      "balanceAvailable": "Votre Solde : {points} pts (GHS {ghs})",
+      "balanceInsufficient": "{needed} pts (GHS {ghs}) nécessaires. Vous disposez de {points} pts.",
+      "balanceSuccess": "Félicitations ! Votre plan de coffre est désormais actif.",
+      "orDivider": "OU PAYER PAR MOBILE MONEY / CARTE",
       "payWithPaystack": "Payer avec Paystack (Momo & Carte)",
       "cancel": "Annuler"
     },

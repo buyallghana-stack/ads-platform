@@ -16,11 +16,16 @@ import {
   Sparkles,
   TrendingUp,
   Vault,
+  Wallet,
   X,
 } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
-import { claimVaultInvestmentAction, startVaultPaystackCheckout } from '@/app/[locale]/(app)/vault/actions'
+import {
+  claimVaultInvestmentAction,
+  purchaseVaultWithBalanceAction,
+  startVaultPaystackCheckout,
+} from '@/app/[locale]/(app)/vault/actions'
 import { Button } from '@/components/ui/Button'
 import { Link, useRouter } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
@@ -30,11 +35,15 @@ export function VaultView({
   vaultEnabled,
   plans,
   investments,
+  userBalancePoints = 0,
+  pointsRate = 100,
   checkoutEnabled,
 }: {
   vaultEnabled: boolean
   plans: VaultPlan[]
   investments: VaultInvestment[]
+  userBalancePoints?: number
+  pointsRate?: number
   checkoutEnabled: boolean
 }) {
   const t = useTranslations('vault')
@@ -43,6 +52,7 @@ export function VaultView({
 
   const [selectedPlan, setSelectedPlan] = useState<VaultPlan | null>(null)
   const [claimingId, setClaimingId] = useState<string | null>(null)
+  const [checkoutMode, setCheckoutMode] = useState<'paystack' | 'balance' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -53,6 +63,8 @@ export function VaultView({
   const totalExpectedReturnMinor = activeInvestments.reduce((sum, i) => sum + i.expectedReturnMinor, 0)
   const totalAccruedProfitMinor = activeInvestments.reduce((sum, i) => sum + i.expectedProfitMinor, 0)
 
+  const userBalanceGhs = userBalancePoints / pointsRate
+
   const handleStartCheckout = (plan: VaultPlan) => {
     setError(null)
     setSuccessMessage(null)
@@ -62,14 +74,35 @@ export function VaultView({
   const handleConfirmPaystack = () => {
     if (!selectedPlan) return
     setError(null)
+    setCheckoutMode('paystack')
 
     startTransition(async () => {
       const res = await startVaultPaystackCheckout(selectedPlan.id)
       if (!res.ok) {
         setError(res.message ?? t('depositFailed'))
+        setCheckoutMode(null)
         return
       }
       window.location.assign(res.authorizationUrl)
+    })
+  }
+
+  const handleConfirmBalancePayment = () => {
+    if (!selectedPlan) return
+    setError(null)
+    setCheckoutMode('balance')
+
+    startTransition(async () => {
+      const res = await purchaseVaultWithBalanceAction(selectedPlan.id)
+      if (!res.ok) {
+        setError(res.message ?? t('depositFailed'))
+        setCheckoutMode(null)
+        return
+      }
+      setSelectedPlan(null)
+      setCheckoutMode(null)
+      setSuccessMessage(t('checkout.balanceSuccess'))
+      router.refresh()
     })
   }
 
@@ -439,7 +472,6 @@ export function VaultView({
                       size="lg"
                       fullWidth
                       onClick={() => handleStartCheckout(plan)}
-                      disabled={!checkoutEnabled}
                     >
                       {t('plans.depositBtn')}
                     </Button>
@@ -455,84 +487,157 @@ export function VaultView({
         {t('footnote')}
       </p>
 
-      {/* Checkout Sheet Modal (matching Upgrade checkout sheet) ------------ */}
-      {selectedPlan && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-ink-900/40 p-0 sm:items-center sm:p-6"
-          role="dialog"
-          aria-modal="true"
-          aria-label={t('checkout.title', { plan: selectedPlan.name })}
-          onClick={(e) => e.target === e.currentTarget && setSelectedPlan(null)}
-        >
-          <div className="w-full max-w-md rounded-t-(--radius-panel) bg-surface p-5 sm:rounded-(--radius-panel) sm:p-6">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-[1.0625rem] font-semibold text-ink-900">
-                  {t('checkout.title', { plan: selectedPlan.name })}
-                </h2>
-                <p className="mt-0.5 text-[0.8125rem] text-ink-500">
-                  {t('checkout.subtitle', { days: selectedPlan.periodDays })}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedPlan(null)}
-                aria-label={t('checkout.close')}
-                className="grid size-8 shrink-0 place-items-center rounded-full text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-900"
-              >
-                <X aria-hidden className="size-4" />
-              </button>
-            </div>
+      {/* Checkout Sheet Modal with Dual Funding Options ------------------ */}
+      {selectedPlan && (() => {
+        const priceGhs = selectedPlan.priceMinor / 100
+        const pricePoints = Math.round(priceGhs * pointsRate)
+        const hasEnoughBalance = userBalancePoints >= pricePoints
+        const missingPoints = Math.max(0, pricePoints - userBalancePoints)
+        const missingGhs = (missingPoints / pointsRate).toFixed(2)
 
-            <div className="mt-4 flex items-center justify-between rounded-(--radius-card) border border-ink-200 bg-ink-50 px-4 py-3">
-              <span className="text-[0.8125rem] text-ink-600">{t('checkout.depositAmount')}</span>
-              <span className="text-[1.125rem] font-semibold tracking-[-0.02em] text-ink-900">
-                GHS {format.number(selectedPlan.priceMinor / 100, { minimumFractionDigits: 2 })}
-              </span>
-            </div>
-
-            <div className="mt-3 flex flex-col gap-1.5 rounded-(--radius-card) border border-violet-600/20 bg-violet-50/50 p-3 text-xs">
-              <div className="flex justify-between text-ink-700 font-medium">
-                <span>{t('dailyReturnRate')}</span>
-                <span className="text-violet-700">+{selectedPlan.dailyReturnPercent}% / day</span>
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-end justify-center bg-ink-900/40 p-0 sm:items-center sm:p-6"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t('checkout.title', { plan: selectedPlan.name })}
+            onClick={(e) => e.target === e.currentTarget && setSelectedPlan(null)}
+          >
+            <div className="w-full max-w-md rounded-t-(--radius-panel) bg-surface p-5 sm:rounded-(--radius-panel) sm:p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-[1.0625rem] font-semibold text-ink-900">
+                    {t('checkout.title', { plan: selectedPlan.name })}
+                  </h2>
+                  <p className="mt-0.5 text-[0.8125rem] text-ink-500">
+                    {t('checkout.subtitle', { days: selectedPlan.periodDays })}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPlan(null)}
+                  aria-label={t('checkout.close')}
+                  className="grid size-8 shrink-0 place-items-center rounded-full text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-900"
+                >
+                  <X aria-hidden className="size-4" />
+                </button>
               </div>
-              <div className="flex justify-between text-ink-700 font-medium">
-                <span>{t('totalReturnAtMaturity')}</span>
-                <span className="text-violet-700 font-bold">
-                  GHS{' '}
-                  {format.number(
-                    (selectedPlan.priceMinor +
-                      selectedPlan.priceMinor * (selectedPlan.dailyReturnPercent / 100) * selectedPlan.periodDays) /
-                      100,
-                    { minimumFractionDigits: 2 },
-                  )}
+
+              {/* Deposit Total */}
+              <div className="mt-4 flex items-center justify-between rounded-(--radius-card) border border-ink-200 bg-ink-50 px-4 py-3">
+                <span className="text-[0.8125rem] text-ink-600">{t('checkout.depositAmount')}</span>
+                <span className="text-[1.125rem] font-semibold tracking-[-0.02em] text-ink-900">
+                  GHS {format.number(priceGhs, { minimumFractionDigits: 2 })}{' '}
+                  <span className="text-xs font-normal text-ink-500">({pricePoints} pts)</span>
                 </span>
               </div>
-            </div>
 
-            <div className="mt-6 flex flex-col gap-2">
-              <Button
-                size="lg"
-                fullWidth
-                disabled={isPending}
-                onClick={handleConfirmPaystack}
-                trailingIcon={<ArrowRight className="size-4" />}
-              >
-                {isPending ? t('initiatingPayment') : t('checkout.payWithPaystack')}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                fullWidth
-                onClick={() => setSelectedPlan(null)}
-              >
-                {t('checkout.cancel')}
-              </Button>
+              {/* Returns Summary */}
+              <div className="mt-3 flex flex-col gap-1.5 rounded-(--radius-card) border border-violet-600/20 bg-violet-50/50 p-3 text-xs">
+                <div className="flex justify-between text-ink-700 font-medium">
+                  <span>{t('dailyReturnRate')}</span>
+                  <span className="text-violet-700">+{selectedPlan.dailyReturnPercent}% / day</span>
+                </div>
+                <div className="flex justify-between text-ink-700 font-medium">
+                  <span>{t('totalReturnAtMaturity')}</span>
+                  <span className="text-violet-700 font-bold">
+                    GHS{' '}
+                    {format.number(
+                      (selectedPlan.priceMinor +
+                        selectedPlan.priceMinor * (selectedPlan.dailyReturnPercent / 100) * selectedPlan.periodDays) /
+                        100,
+                      { minimumFractionDigits: 2 },
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              {/* Payment Methods */}
+              <div className="mt-5 flex flex-col gap-3">
+                {/* Method 1: Account Balance Funding */}
+                <div
+                  className={cn(
+                    'rounded-(--radius-card) border p-3.5',
+                    hasEnoughBalance
+                      ? 'border-emerald-500/30 bg-emerald-50/50'
+                      : 'border-ink-200 bg-ink-50/60',
+                  )}
+                >
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-ink-900 flex items-center gap-1.5">
+                      <Wallet className="size-4 text-emerald-600" />
+                      {t('checkout.balanceAvailable', {
+                        points: format.number(userBalancePoints),
+                        ghs: format.number(userBalanceGhs, { minimumFractionDigits: 2 }),
+                      })}
+                    </span>
+                  </div>
+
+                  {hasEnoughBalance ? (
+                    <Button
+                      size="md"
+                      fullWidth
+                      disabled={isPending}
+                      onClick={handleConfirmBalancePayment}
+                      className="mt-2.5 bg-emerald-600 text-white hover:bg-emerald-700"
+                      leadingIcon={<Sparkles className="size-4" />}
+                    >
+                      {isPending && checkoutMode === 'balance'
+                        ? t('checkout.payingWithBalance')
+                        : t('checkout.payWithBalance')}
+                    </Button>
+                  ) : (
+                    <p className="mt-1.5 text-[0.6875rem] text-ink-500">
+                      {t('checkout.balanceInsufficient', {
+                        needed: pricePoints,
+                        points: format.number(userBalancePoints),
+                        ghs: missingGhs,
+                      })}
+                    </p>
+                  )}
+                </div>
+
+                {/* Method 2: Paystack Checkout */}
+                {checkoutEnabled && (
+                  <>
+                    <div className="relative my-1 text-center">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-ink-200" />
+                      </div>
+                      <span className="relative bg-surface px-2 text-[0.625rem] font-bold uppercase tracking-wider text-ink-400">
+                        {t('checkout.orDivider')}
+                      </span>
+                    </div>
+
+                    <Button
+                      size="md"
+                      variant="secondary"
+                      fullWidth
+                      disabled={isPending}
+                      onClick={handleConfirmPaystack}
+                      trailingIcon={<ArrowRight className="size-4" />}
+                    >
+                      {isPending && checkoutMode === 'paystack'
+                        ? t('initiatingPayment')
+                        : t('checkout.payWithPaystack')}
+                    </Button>
+                  </>
+                )}
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  fullWidth
+                  onClick={() => setSelectedPlan(null)}
+                >
+                  {t('checkout.cancel')}
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
     </div>
   )
 }
