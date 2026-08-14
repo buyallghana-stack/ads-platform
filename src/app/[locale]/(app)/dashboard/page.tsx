@@ -96,6 +96,7 @@ export default async function HomePage({
   const cap = status?.daily_ad_cap ?? 0
   const done = status?.ads_completed_today ?? 0
   const remaining = status?.ads_remaining_today ?? 0
+  const freeExhausted = Boolean(status?.free_earning_over)
   // The rate of the NEXT ad: the best allowance they still hold.
   const multiplier = Number(status?.reward_multiplier ?? 1)
   /* How many ads that rate covers. Only said when they hold more than one
