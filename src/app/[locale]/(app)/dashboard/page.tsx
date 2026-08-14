@@ -262,8 +262,8 @@ export default async function HomePage({
           words beside the buttons.
         */}
         {freeExhausted ? (
-          <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-full border border-red-400/40 bg-red-500/25 px-3 py-1 text-[0.8125rem] font-semibold text-red-100 backdrop-blur-xs">
-            <AlertCircle aria-hidden className="size-4 shrink-0 text-red-200" />
+          <p className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-rose-400/60 bg-rose-600 px-3.5 py-1 text-[0.8125rem] font-semibold text-white shadow-sm">
+            <AlertCircle aria-hidden className="size-4 shrink-0 text-white" />
             {t('freeExhausted')}
           </p>
         ) : (
