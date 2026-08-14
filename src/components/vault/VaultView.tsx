@@ -22,7 +22,6 @@ import { useFormatter, useTranslations } from 'next-intl'
 
 import { claimVaultInvestmentAction, startVaultPaystackCheckout } from '@/app/[locale]/(app)/vault/actions'
 import { Button } from '@/components/ui/Button'
-import { Stat } from '@/components/ui/Card'
 import { Link, useRouter } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
 import type { VaultInvestment, VaultPlan } from '@/lib/vault/data'
@@ -535,6 +534,17 @@ export function VaultView({
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-(--radius-input) bg-surface/70 px-3 py-2 text-center">
+      <dt className="text-[0.6875rem] leading-tight text-ink-500">{label}</dt>
+      <dd className="mt-0.5 text-[0.9375rem] font-semibold tracking-[-0.01em] text-ink-900">
+        {value}
+      </dd>
     </div>
   )
 }
