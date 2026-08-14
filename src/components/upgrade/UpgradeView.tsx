@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from 'react'
 
-import { Gem, Layers, Smartphone, Wallet, X } from 'lucide-react'
+import { AlertCircle, Gem, Layers, Smartphone, Wallet, X } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import { previewPlanCoupon, startPaystackCheckout } from '@/app/[locale]/(app)/upgrade/actions'
@@ -30,6 +30,7 @@ export function UpgradeView({
   plans,
   held,
   benefits,
+  freeEarningOver = false,
   freeDailyAdCap,
   freeName,
   baseAdPoints,
@@ -40,6 +41,7 @@ export function UpgradeView({
   plans: Plan[]
   held: HeldPlan[]
   benefits: ResolvedBenefits | null
+  freeEarningOver?: boolean
   /** The free allowance and its name, so the cheapest paid plan has a rung
    *  to compare against. Every plan after it compares to its predecessor. */
   freeDailyAdCap: number
@@ -106,36 +108,64 @@ export function UpgradeView({
       {/* What the user has right now ------------------------------------- */}
       <div
         style={{ '--rise-delay': '0.05s' } as React.CSSProperties}
-        className="animate-rise mt-5 rounded-(--radius-card) border border-violet-600/20 bg-violet-50 p-4 sm:p-5"
+        className={cn(
+          'animate-rise mt-5 rounded-(--radius-card) border p-4 sm:p-5',
+          heldCount === 0 && freeEarningOver
+            ? 'border-rose-300 bg-rose-50/80 shadow-xs'
+            : 'border-violet-600/20 bg-violet-50'
+        )}
       >
         <div className="flex items-center gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-violet-600/10 text-violet-600">
-            <Gem aria-hidden className="size-5" />
+          <span
+            className={cn(
+              'grid size-10 shrink-0 place-items-center rounded-full',
+              heldCount === 0 && freeEarningOver
+                ? 'bg-rose-100 text-rose-600'
+                : 'bg-violet-600/10 text-violet-600'
+            )}
+          >
+            {heldCount === 0 && freeEarningOver ? (
+              <AlertCircle aria-hidden className="size-5" />
+            ) : (
+              <Gem aria-hidden className="size-5" />
+            )}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[0.875rem] font-semibold text-violet-700">
-              {heldCount === 0 ? t('current.free') : t('current.holding', { count: heldCount })}
+            <p
+              className={cn(
+                'text-[0.875rem] font-semibold',
+                heldCount === 0 && freeEarningOver ? 'text-rose-700' : 'text-violet-700'
+              )}
+            >
+              {heldCount === 0
+                ? freeEarningOver
+                  ? t('current.freeExpired')
+                  : t('current.free')
+                : t('current.holding', { count: heldCount })}
             </p>
             <p className="mt-0.5 text-[0.75rem] leading-snug text-ink-600">
-              {heldCount === 0 ? t('current.freeHint') : t('current.holdingHint')}
+              {heldCount === 0
+                ? freeEarningOver
+                  ? t('current.freeExpiredHint')
+                  : t('current.freeHint')
+                : t('current.holdingHint')}
             </p>
           </div>
         </div>
 
         {benefits && (
-          /* Two, not three: "withdraw from" used to sit here as if a plan
-             bought you a lower threshold, and since 2026-08-01 every account
-             has the same one. A stat that is identical for everybody is not a
-             standing, it is a platform fact, and it belongs on the screen
-             where somebody is actually withdrawing. */
           <dl className="mt-4 grid grid-cols-2 gap-2">
             <Stat
               label={t('current.dailyAds')}
-              value={format.number(benefits.dailyAdCap)}
+              value={format.number(heldCount === 0 && freeEarningOver ? 0 : benefits.dailyAdCap)}
             />
             <Stat
               label={t('current.rate')}
-              value={`+${Math.round((benefits.rewardMultiplier - 1) * 100)}%`}
+              value={
+                heldCount === 0 && freeEarningOver
+                  ? t('current.paused')
+                  : `+${Math.round((benefits.rewardMultiplier - 1) * 100)}%`
+              }
             />
           </dl>
         )}

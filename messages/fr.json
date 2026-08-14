@@ -1359,6 +1359,9 @@
     "current": {
       "free": "Vous êtes sur le forfait Gratuit",
       "freeHint": "Prenez un forfait pour regarder plus de publicités par jour et gagner à un meilleur taux.",
+      "freeExpired": "Essai gratuit expiré",
+      "freeExpiredHint": "Vous avez épuisé vos jours de gains gratuits. Passez à un forfait ci-dessous pour recommencer à regarder des publicités et gagner.",
+      "paused": "En pause",
       "holding": "{count, plural, one {Vous détenez # forfait} other {Vous détenez # forfaits}}",
       "holdingHint": "Vos forfaits sont cumulés ci-dessous, chacun d'eux est pris en compte.",
       "dailyAds": "Pubs par jour",

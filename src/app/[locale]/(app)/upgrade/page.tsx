@@ -6,6 +6,7 @@ import { UpgradeView } from '@/components/upgrade/UpgradeView'
 import { redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
 import { serverEnv } from '@/lib/env'
+import { createAdminClient } from '@/lib/supabase/admin'
 import {
   getHeldPlans,
   getPlanReferences,
@@ -42,11 +43,13 @@ export default async function UpgradePage({
   const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
 
-  const [plans, held, benefits, references] = await Promise.all([
+  const admin = createAdminClient()
+  const [plans, held, benefits, references, { data: earningStatus }] = await Promise.all([
     getPlans(),
     getHeldPlans(user!.id),
     getResolvedBenefits(user!.id),
     getPlanReferences(),
+    admin.rpc('get_user_earning_status', { p_user_id: user!.id }).maybeSingle(),
   ])
 
   return (
@@ -54,6 +57,7 @@ export default async function UpgradePage({
       plans={plans}
       held={held}
       benefits={benefits}
+      freeEarningOver={Boolean(earningStatus?.free_earning_over)}
       freeDailyAdCap={references.freeDailyAdCap}
       freeName={references.freeName}
       baseAdPoints={references.baseAdPoints}

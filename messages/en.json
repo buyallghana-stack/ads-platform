@@ -1359,6 +1359,9 @@
     "current": {
       "free": "You're on the Free plan",
       "freeHint": "Buy a plan to watch more ads a day and earn at a better rate.",
+      "freeExpired": "Free trial expired",
+      "freeExpiredHint": "You have exhausted your free earning days. Upgrade to any plan below to resume watching ads and earning.",
+      "paused": "Paused",
       "holding": "{count, plural, one {You hold # plan} other {You hold # plans}}",
       "holdingHint": "Your plans are combined below. Every one you hold is counted.",
       "dailyAds": "Ads a day",
