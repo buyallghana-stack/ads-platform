@@ -494,6 +494,7 @@ export function VaultView({
         const hasEnoughBalance = userBalancePoints >= pricePoints
         const missingPoints = Math.max(0, pricePoints - userBalancePoints)
         const missingGhs = (missingPoints / pointsRate).toFixed(2)
+        const totalMaturityGhs = (selectedPlan.priceMinor + selectedPlan.priceMinor * (selectedPlan.dailyReturnPercent / 100) * selectedPlan.periodDays) / 100
 
         return (
           <div
@@ -504,6 +505,7 @@ export function VaultView({
             onClick={(e) => e.target === e.currentTarget && setSelectedPlan(null)}
           >
             <div className="w-full max-w-md rounded-t-(--radius-panel) bg-surface p-5 sm:rounded-(--radius-panel) sm:p-6">
+              {/* Header */}
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-[1.0625rem] font-semibold text-ink-900">
@@ -523,105 +525,90 @@ export function VaultView({
                 </button>
               </div>
 
-              {/* Deposit Total */}
-              <div className="mt-4 flex items-center justify-between rounded-(--radius-card) border border-ink-200 bg-ink-50 px-4 py-3">
-                <span className="text-[0.8125rem] text-ink-600">{t('checkout.depositAmount')}</span>
-                <span className="text-[1.125rem] font-semibold tracking-[-0.02em] text-ink-900">
-                  GHS {format.number(priceGhs, { minimumFractionDigits: 2 })}{' '}
-                  <span className="text-xs font-normal text-ink-500">({pricePoints} pts)</span>
-                </span>
-              </div>
-
-              {/* Returns Summary */}
-              <div className="mt-3 flex flex-col gap-1.5 rounded-(--radius-card) border border-violet-600/20 bg-violet-50/50 p-3 text-xs">
-                <div className="flex justify-between text-ink-700 font-medium">
-                  <span>{t('dailyReturnRate')}</span>
-                  <span className="text-violet-700">+{selectedPlan.dailyReturnPercent}% / day</span>
+              {/* Order Summary Rows */}
+              <div className="mt-4 flex flex-col divide-y divide-ink-100 rounded-(--radius-card) border border-ink-200 bg-ink-50/70 text-xs">
+                <div className="flex items-center justify-between p-3">
+                  <span className="text-ink-600">{t('checkout.depositAmount')}</span>
+                  <span className="font-semibold text-ink-900 tabular-nums">
+                    GHS {format.number(priceGhs, { minimumFractionDigits: 2 })}
+                    <span className="ml-1 text-[0.6875rem] font-normal text-ink-500">
+                      ({format.number(pricePoints)} pts)
+                    </span>
+                  </span>
                 </div>
-                <div className="flex justify-between text-ink-700 font-medium">
-                  <span>{t('totalReturnAtMaturity')}</span>
-                  <span className="text-violet-700 font-bold">
-                    GHS{' '}
-                    {format.number(
-                      (selectedPlan.priceMinor +
-                        selectedPlan.priceMinor * (selectedPlan.dailyReturnPercent / 100) * selectedPlan.periodDays) /
-                        100,
-                      { minimumFractionDigits: 2 },
-                    )}
+                <div className="flex items-center justify-between p-3">
+                  <span className="text-ink-600">{t('totalAtMaturity')}</span>
+                  <span className="font-bold text-violet-700 tabular-nums">
+                    GHS {format.number(totalMaturityGhs, { minimumFractionDigits: 2 })}
                   </span>
                 </div>
               </div>
 
-              {/* Payment Methods */}
-              <div className="mt-5 flex flex-col gap-3">
-                {/* Method 1: Account Balance Funding */}
-                <div
-                  className={cn(
-                    'rounded-(--radius-card) border p-3.5',
-                    hasEnoughBalance
-                      ? 'border-emerald-500/30 bg-emerald-50/50'
-                      : 'border-ink-200 bg-ink-50/60',
-                  )}
-                >
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-ink-900 flex items-center gap-1.5">
-                      <Wallet className="size-4 text-emerald-600" />
-                      {t('checkout.balanceAvailable', {
-                        points: format.number(userBalancePoints),
-                        ghs: format.number(userBalanceGhs, { minimumFractionDigits: 2 }),
-                      })}
+              {/* Account Balance Card */}
+              <div
+                className={cn(
+                  'mt-3 rounded-(--radius-card) border p-3 text-xs transition-colors',
+                  hasEnoughBalance
+                    ? 'border-emerald-500/25 bg-emerald-50/40 text-emerald-950'
+                    : 'border-ink-200 bg-surface text-ink-700',
+                )}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-1.5 font-medium text-ink-700">
+                    <Wallet className={cn('size-4 shrink-0', hasEnoughBalance ? 'text-emerald-600' : 'text-ink-400')} />
+                    {t('checkout.yourBalance')}
+                  </span>
+                  <span className="font-semibold text-ink-900 tabular-nums">
+                    GHS {format.number(userBalanceGhs, { minimumFractionDigits: 2 })}
+                    <span className="ml-1 text-[0.6875rem] font-normal text-ink-500">
+                      ({format.number(userBalancePoints)} pts)
                     </span>
-                  </div>
-
-                  {hasEnoughBalance ? (
-                    <Button
-                      size="md"
-                      fullWidth
-                      disabled={isPending}
-                      onClick={handleConfirmBalancePayment}
-                      className="mt-2.5 bg-emerald-600 text-white hover:bg-emerald-700"
-                      leadingIcon={<Sparkles className="size-4" />}
-                    >
-                      {isPending && checkoutMode === 'balance'
-                        ? t('checkout.payingWithBalance')
-                        : t('checkout.payWithBalance')}
-                    </Button>
-                  ) : (
-                    <p className="mt-1.5 text-[0.6875rem] text-ink-500">
-                      {t('checkout.balanceInsufficient', {
-                        needed: pricePoints,
-                        points: format.number(userBalancePoints),
-                        ghs: missingGhs,
-                      })}
-                    </p>
-                  )}
+                  </span>
                 </div>
+                <p className="mt-1 text-[0.6875rem] leading-normal text-ink-500">
+                  {hasEnoughBalance
+                    ? t('checkout.deductionNote', {
+                        points: format.number(pricePoints),
+                        ghs: format.number(priceGhs, { minimumFractionDigits: 2 }),
+                      })
+                    : t('checkout.insufficientNote', {
+                        needed: format.number(missingPoints),
+                        missingGhs,
+                      })}
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="mt-5 flex flex-col gap-2.5">
+                {/* Method 1: Account Balance Funding */}
+                <Button
+                  size="lg"
+                  fullWidth
+                  disabled={!hasEnoughBalance || isPending}
+                  onClick={handleConfirmBalancePayment}
+                  leadingIcon={<Sparkles className="size-4" />}
+                >
+                  {isPending && checkoutMode === 'balance'
+                    ? t('checkout.payingWithBalance')
+                    : t('checkout.payWithBalance', {
+                        amount: format.number(priceGhs, { minimumFractionDigits: 2 }),
+                      })}
+                </Button>
 
                 {/* Method 2: Paystack Checkout */}
                 {checkoutEnabled && (
-                  <>
-                    <div className="relative my-1 text-center">
-                      <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-ink-200" />
-                      </div>
-                      <span className="relative bg-surface px-2 text-[0.625rem] font-bold uppercase tracking-wider text-ink-400">
-                        {t('checkout.orDivider')}
-                      </span>
-                    </div>
-
-                    <Button
-                      size="md"
-                      variant="secondary"
-                      fullWidth
-                      disabled={isPending}
-                      onClick={handleConfirmPaystack}
-                      trailingIcon={<ArrowRight className="size-4" />}
-                    >
-                      {isPending && checkoutMode === 'paystack'
-                        ? t('initiatingPayment')
-                        : t('checkout.payWithPaystack')}
-                    </Button>
-                  </>
+                  <Button
+                    size="lg"
+                    variant="secondary"
+                    fullWidth
+                    disabled={isPending}
+                    onClick={handleConfirmPaystack}
+                    trailingIcon={<ArrowRight className="size-4" />}
+                  >
+                    {isPending && checkoutMode === 'paystack'
+                      ? t('initiatingPayment')
+                      : t('checkout.payWithPaystack')}
+                  </Button>
                 )}
 
                 <Button
@@ -629,6 +616,7 @@ export function VaultView({
                   variant="ghost"
                   size="sm"
                   fullWidth
+                  disabled={isPending}
                   onClick={() => setSelectedPlan(null)}
                 >
                   {t('checkout.cancel')}

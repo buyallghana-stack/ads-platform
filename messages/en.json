@@ -4614,16 +4614,17 @@
     },
     "checkout": {
       "title": "Lock funds in {plan}",
-      "subtitle": "Lock period of {days} days with guaranteed daily yield.",
+      "subtitle": "{days}-day lock period with guaranteed daily yield.",
       "close": "Close",
-      "depositAmount": "Deposit Amount",
-      "payWithBalance": "Pay with Account Balance (Instant)",
+      "depositAmount": "Lock Amount",
+      "yourBalance": "Available Balance",
+      "deductionNote": "Deducts {points} pts (GHS {ghs}) directly from your account balance.",
+      "insufficientNote": "You need {needed} more points (GHS {missingGhs}) to fund from balance.",
+      "payWithBalance": "Pay GHS {amount} with Balance",
       "payingWithBalance": "Activating Vault…",
-      "balanceAvailable": "Your Points Balance: {points} pts (GHS {ghs})",
-      "balanceInsufficient": "Need {needed} pts (GHS {ghs}) to pay with balance. You have {points} pts.",
       "balanceSuccess": "Congratulations! Your Vault plan is now active.",
       "orDivider": "OR PAY WITH MOBILE MONEY / CARD",
-      "payWithPaystack": "Pay with Paystack (Momo & Card)",
+      "payWithPaystack": "Pay with Mobile Money / Card",
       "cancel": "Cancel"
     },
     "paymentResult": {
