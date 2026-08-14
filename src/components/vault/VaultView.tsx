@@ -59,6 +59,7 @@ export function VaultView({
 
   // Metrics
   const activeInvestments = investments.filter((i) => i.status === 'active')
+  const activePlanIds = new Set(activeInvestments.map((i) => i.planId))
   const totalLockedMinor = activeInvestments.reduce((sum, i) => sum + i.amountMinor, 0)
   const totalExpectedReturnMinor = activeInvestments.reduce((sum, i) => sum + i.expectedReturnMinor, 0)
   const totalAccruedProfitMinor = activeInvestments.reduce((sum, i) => sum + i.expectedProfitMinor, 0)
@@ -367,23 +368,30 @@ export function VaultView({
               const dailyProfitGhs = priceGhs * (plan.dailyReturnPercent / 100)
               const totalProfitGhs = dailyProfitGhs * plan.periodDays
               const totalMaturityGhs = priceGhs + totalProfitGhs
-              const isPopular = idx === 1
+              const isPopular = idx === 1 && !activePlanIds.has(plan.id)
+              const isPlanActive = activePlanIds.has(plan.id)
 
               return (
                 <div
                   key={plan.id}
                   className={cn(
                     'relative flex flex-col rounded-(--radius-card) border bg-surface p-5 transition-shadow',
-                    isPopular
-                      ? 'border-violet-600/40 shadow-[0_1px_2px_0_rgb(15_23_42/0.06),0_12px_28px_-16px_rgb(124_58_237/0.45)]'
-                      : 'border-ink-200 shadow-[0_1px_2px_0_rgb(15_23_42/0.04)]',
+                    isPlanActive
+                      ? 'border-emerald-500/40 shadow-[0_1px_2px_0_rgb(15_23_42/0.06),0_8px_20px_-12px_rgb(16_185_129/0.25)]'
+                      : isPopular
+                        ? 'border-violet-600/40 shadow-[0_1px_2px_0_rgb(15_23_42/0.06),0_12px_28px_-16px_rgb(124_58_237/0.45)]'
+                        : 'border-ink-200 shadow-[0_1px_2px_0_rgb(15_23_42/0.04)]',
                   )}
                 >
-                  {isPopular && (
+                  {isPlanActive ? (
+                    <span className="absolute -top-2.5 right-5 rounded-full bg-emerald-600 px-2.5 py-0.5 text-[0.6875rem] font-semibold text-white shadow-xs">
+                      {t('plans.currentlyActive')}
+                    </span>
+                  ) : isPopular ? (
                     <span className="absolute -top-2.5 left-5 rounded-full bg-violet-600 px-2.5 py-0.5 text-[0.6875rem] font-semibold text-white">
                       {t('popular')}
                     </span>
-                  )}
+                  ) : null}
 
                   <div className="flex items-baseline justify-between gap-3">
                     <h3 className="text-[1.0625rem] font-semibold tracking-[-0.01em] text-ink-900">
@@ -471,9 +479,15 @@ export function VaultView({
                     <Button
                       size="lg"
                       fullWidth
+                      disabled={isPlanActive}
                       onClick={() => handleStartCheckout(plan)}
+                      className={
+                        isPlanActive
+                          ? 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold cursor-not-allowed opacity-90'
+                          : ''
+                      }
                     >
-                      {t('plans.depositBtn')}
+                      {isPlanActive ? t('plans.alreadyActiveBtn') : t('plans.depositBtn')}
                     </Button>
                   </div>
                 </div>

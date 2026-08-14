@@ -4610,7 +4610,9 @@
       "dailyEarn": "Daily Earnings",
       "totalProfit": "Total Net Profit",
       "totalReturn": "Total at Maturity",
-      "depositBtn": "Lock in Vault"
+      "depositBtn": "Lock in Vault",
+      "currentlyActive": "Active Deposit",
+      "alreadyActiveBtn": "Already Active in Vault"
     },
     "checkout": {
       "title": "Lock funds in {plan}",

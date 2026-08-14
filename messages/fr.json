@@ -4609,7 +4609,9 @@
       "dailyEarn": "Gain quotidien",
       "totalProfit": "Bénéfice net total",
       "totalReturn": "Total à échéance",
-      "depositBtn": "Bloquer dans le Coffre"
+      "depositBtn": "Bloquer dans le Coffre",
+      "currentlyActive": "Dépôt Actif",
+      "alreadyActiveBtn": "Déjà Actif dans le Coffre"
     },
     "checkout": {
       "title": "Bloquer des fonds dans {plan}",
