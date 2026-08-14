@@ -231,6 +231,85 @@ export type Database = {
           },
         ]
       }
+      ad_responses: {
+        Row: {
+          ad_id: string
+          answer_format: string
+          answer_label: string | null
+          answer_text: string | null
+          answered_at: string
+          attempt_number: number
+          id: number
+          is_correct: boolean | null
+          is_graded: boolean
+          occasion: number
+          option_id: string | null
+          question_id: string | null
+          question_position: number | null
+          question_text: string
+          user_id: string
+          watch_seconds: number | null
+        }
+        Insert: {
+          ad_id: string
+          answer_format: string
+          answer_label?: string | null
+          answer_text?: string | null
+          answered_at?: string
+          attempt_number?: number
+          id?: never
+          is_correct?: boolean | null
+          is_graded?: boolean
+          occasion?: number
+          option_id?: string | null
+          question_id?: string | null
+          question_position?: number | null
+          question_text: string
+          user_id: string
+          watch_seconds?: number | null
+        }
+        Update: {
+          ad_id?: string
+          answer_format?: string
+          answer_label?: string | null
+          answer_text?: string | null
+          answered_at?: string
+          attempt_number?: number
+          id?: never
+          is_correct?: boolean | null
+          is_graded?: boolean
+          occasion?: number
+          option_id?: string | null
+          question_id?: string | null
+          question_position?: number | null
+          question_text?: string
+          user_id?: string
+          watch_seconds?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_responses_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "ads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_responses_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "ad_question_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ad_responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "ad_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ad_tiers: {
         Row: {
           ad_id: string
@@ -377,7 +456,7 @@ export type Database = {
           id?: string
           max_completions?: number | null
           min_watch_seconds?: number | null
-          points_reward: number
+          points_reward?: number
           starts_at?: string | null
           status?: Database["public"]["Enums"]["ad_status"]
           storage_path?: string | null
@@ -682,6 +761,114 @@ export type Database = {
           },
         ]
       }
+      affiliate_game_plays: {
+        Row: {
+          affiliate_id: string
+          amount_minor: number
+          created_at: string
+          extra_plays_awarded: number
+          game: Database["public"]["Enums"]["affiliate_game_kind"]
+          id: string
+          prize_id: string | null
+          roll: number | null
+          slot: number | null
+          user_id: string
+          week_start: string
+          weight_total: number | null
+        }
+        Insert: {
+          affiliate_id: string
+          amount_minor?: number
+          created_at?: string
+          extra_plays_awarded?: number
+          game: Database["public"]["Enums"]["affiliate_game_kind"]
+          id?: string
+          prize_id?: string | null
+          roll?: number | null
+          slot?: number | null
+          user_id: string
+          week_start: string
+          weight_total?: number | null
+        }
+        Update: {
+          affiliate_id?: string
+          amount_minor?: number
+          created_at?: string
+          extra_plays_awarded?: number
+          game?: Database["public"]["Enums"]["affiliate_game_kind"]
+          id?: string
+          prize_id?: string | null
+          roll?: number | null
+          slot?: number | null
+          user_id?: string
+          week_start?: string
+          weight_total?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_game_plays_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_game_plays_prize_id_fkey"
+            columns: ["prize_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_game_prizes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_game_prizes: {
+        Row: {
+          amount_minor: number
+          colour: string | null
+          created_at: string
+          daily_cap: number
+          extra_plays: number
+          game: Database["public"]["Enums"]["affiliate_game_kind"]
+          id: string
+          is_active: boolean
+          label: string
+          slot: number
+          updated_at: string
+          weekly_cap: number
+          weight: number
+        }
+        Insert: {
+          amount_minor?: number
+          colour?: string | null
+          created_at?: string
+          daily_cap?: number
+          extra_plays?: number
+          game: Database["public"]["Enums"]["affiliate_game_kind"]
+          id?: string
+          is_active?: boolean
+          label: string
+          slot: number
+          updated_at?: string
+          weekly_cap?: number
+          weight?: number
+        }
+        Update: {
+          amount_minor?: number
+          colour?: string | null
+          created_at?: string
+          daily_cap?: number
+          extra_plays?: number
+          game?: Database["public"]["Enums"]["affiliate_game_kind"]
+          id?: string
+          is_active?: boolean
+          label?: string
+          slot?: number
+          updated_at?: string
+          weekly_cap?: number
+          weight?: number
+        }
+        Relationships: []
+      }
       affiliate_programs: {
         Row: {
           attribution_window_hours: number
@@ -732,10 +919,91 @@ export type Database = {
           },
         ]
       }
+      affiliate_task_completions: {
+        Row: {
+          claimed_at: string
+          id: string
+          progress_at_claim: number
+          reward_minor: number
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string
+          id?: string
+          progress_at_claim: number
+          reward_minor: number
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string
+          id?: string
+          progress_at_claim?: number
+          reward_minor?: number
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_task_completions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      affiliate_tasks: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          metric: Database["public"]["Enums"]["affiliate_task_metric"]
+          name: string
+          reward_minor: number
+          sort_order: number
+          target: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          metric: Database["public"]["Enums"]["affiliate_task_metric"]
+          name: string
+          reward_minor?: number
+          sort_order?: number
+          target: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          metric?: Database["public"]["Enums"]["affiliate_task_metric"]
+          name?: string
+          reward_minor?: number
+          sort_order?: number
+          target?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           audience: string
           body: string
+          business: Database["public"]["Enums"]["notification_business"]
           created_at: string
           id: string
           recipient_count: number
@@ -745,6 +1013,7 @@ export type Database = {
         Insert: {
           audience?: string
           body: string
+          business?: Database["public"]["Enums"]["notification_business"]
           created_at?: string
           id?: string
           recipient_count: number
@@ -754,6 +1023,7 @@ export type Database = {
         Update: {
           audience?: string
           body?: string
+          business?: Database["public"]["Enums"]["notification_business"]
           created_at?: string
           id?: string
           recipient_count?: number
@@ -937,22 +1207,28 @@ export type Database = {
       }
       certificates: {
         Row: {
+          grade_percent: number | null
           id: string
           issued_at: string
+          legal_name: string | null
           product_id: string
           user_id: string
           verification_code: string
         }
         Insert: {
+          grade_percent?: number | null
           id?: string
           issued_at?: string
+          legal_name?: string | null
           product_id: string
           user_id: string
           verification_code: string
         }
         Update: {
+          grade_percent?: number | null
           id?: string
           issued_at?: string
+          legal_name?: string | null
           product_id?: string
           user_id?: string
           verification_code?: string
@@ -967,6 +1243,90 @@ export type Database = {
           },
         ]
       }
+      commission_gift_code_redemptions: {
+        Row: {
+          affiliate_id: string
+          amount_minor: number
+          created_at: string
+          gift_code_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          affiliate_id: string
+          amount_minor: number
+          created_at?: string
+          gift_code_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          affiliate_id?: string
+          amount_minor?: number
+          created_at?: string
+          gift_code_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_gift_code_redemptions_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commission_gift_code_redemptions_gift_code_id_fkey"
+            columns: ["gift_code_id"]
+            isOneToOne: true
+            referencedRelation: "commission_gift_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commission_gift_codes: {
+        Row: {
+          amount_minor: number
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          note: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: Database["public"]["Enums"]["gift_code_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount_minor: number
+          code: string
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          note?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: Database["public"]["Enums"]["gift_code_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount_minor?: number
+          code?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          note?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: Database["public"]["Enums"]["gift_code_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       commission_ledger: {
         Row: {
           affiliate_id: string
@@ -979,6 +1339,7 @@ export type Database = {
           entry_type: Database["public"]["Enums"]["commission_entry_type"]
           id: string
           idempotency_key: string
+          kind: string | null
           level: number | null
           reason: string | null
           status: Database["public"]["Enums"]["commission_status"]
@@ -995,6 +1356,7 @@ export type Database = {
           entry_type: Database["public"]["Enums"]["commission_entry_type"]
           id?: string
           idempotency_key: string
+          kind?: string | null
           level?: number | null
           reason?: string | null
           status?: Database["public"]["Enums"]["commission_status"]
@@ -1011,6 +1373,7 @@ export type Database = {
           entry_type?: Database["public"]["Enums"]["commission_entry_type"]
           id?: string
           idempotency_key?: string
+          kind?: string | null
           level?: number | null
           reason?: string | null
           status?: Database["public"]["Enums"]["commission_status"]
@@ -1032,48 +1395,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      /* ── HAND-ADDED with migration 182. This repo patches this file
-         rather than regenerating it, so a new table needs its shape written
-         in here in the same change that creates it. ── */
-      communities: {
-        Row: {
-          business: string
-          created_at: string
-          created_by: string | null
-          id: string
-          is_active: boolean
-          name: string
-          platform: string
-          sort_order: number
-          updated_at: string
-          url: string
-        }
-        Insert: {
-          business?: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          is_active?: boolean
-          name: string
-          platform?: string
-          sort_order?: number
-          updated_at?: string
-          url: string
-        }
-        Update: {
-          business?: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          is_active?: boolean
-          name?: string
-          platform?: string
-          sort_order?: number
-          updated_at?: string
-          url?: string
-        }
-        Relationships: []
       }
       commission_payouts: {
         Row: {
@@ -1186,6 +1507,45 @@ export type Database = {
           },
         ]
       }
+      communities: {
+        Row: {
+          business: Database["public"]["Enums"]["notification_business"]
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          name: string
+          platform: Database["public"]["Enums"]["community_platform"]
+          sort_order: number
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          business?: Database["public"]["Enums"]["notification_business"]
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          platform?: Database["public"]["Enums"]["community_platform"]
+          sort_order?: number
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          business?: Database["public"]["Enums"]["notification_business"]
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          platform?: Database["public"]["Enums"]["community_platform"]
+          sort_order?: number
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       conversions: {
         Row: {
           affiliate_id: string
@@ -1282,6 +1642,148 @@ export type Database = {
             columns: ["program_id"]
             isOneToOne: false
             referencedRelation: "affiliate_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coupon_redemptions: {
+        Row: {
+          charged_minor: number
+          coupon_id: string
+          created_at: string
+          discount_minor: number
+          id: string
+          list_minor: number
+          order_id: string | null
+          subscription_payment_id: string | null
+          user_id: string
+        }
+        Insert: {
+          charged_minor: number
+          coupon_id: string
+          created_at?: string
+          discount_minor: number
+          id?: string
+          list_minor: number
+          order_id?: string | null
+          subscription_payment_id?: string | null
+          user_id: string
+        }
+        Update: {
+          charged_minor?: number
+          coupon_id?: string
+          created_at?: string
+          discount_minor?: number
+          id?: string
+          list_minor?: number
+          order_id?: string | null
+          subscription_payment_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_redemptions_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupon_redemptions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupon_redemptions_subscription_payment_id_fkey"
+            columns: ["subscription_payment_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coupons: {
+        Row: {
+          amount_minor: number | null
+          business: Database["public"]["Enums"]["coupon_business"]
+          code: string
+          created_at: string
+          created_by: string | null
+          discount_kind: Database["public"]["Enums"]["coupon_discount_kind"]
+          ends_at: string | null
+          first_purchase_only: boolean
+          id: string
+          is_active: boolean
+          max_discount_minor: number | null
+          min_spend_minor: number
+          note: string | null
+          per_user_limit: number
+          percent: number | null
+          product_id: string | null
+          quota: number
+          starts_at: string | null
+          tier_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_minor?: number | null
+          business: Database["public"]["Enums"]["coupon_business"]
+          code: string
+          created_at?: string
+          created_by?: string | null
+          discount_kind: Database["public"]["Enums"]["coupon_discount_kind"]
+          ends_at?: string | null
+          first_purchase_only?: boolean
+          id?: string
+          is_active?: boolean
+          max_discount_minor?: number | null
+          min_spend_minor?: number
+          note?: string | null
+          per_user_limit?: number
+          percent?: number | null
+          product_id?: string | null
+          quota: number
+          starts_at?: string | null
+          tier_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_minor?: number | null
+          business?: Database["public"]["Enums"]["coupon_business"]
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          discount_kind?: Database["public"]["Enums"]["coupon_discount_kind"]
+          ends_at?: string | null
+          first_purchase_only?: boolean
+          id?: string
+          is_active?: boolean
+          max_discount_minor?: number | null
+          min_spend_minor?: number
+          note?: string | null
+          per_user_limit?: number
+          percent?: number | null
+          product_id?: string | null
+          quota?: number
+          starts_at?: string | null
+          tier_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupons_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupons_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "tiers"
             referencedColumns: ["id"]
           },
         ]
@@ -1866,6 +2368,7 @@ export type Database = {
       notifications: {
         Row: {
           body: string
+          business: Database["public"]["Enums"]["notification_business"]
           created_at: string
           id: string
           is_clearable: boolean | null
@@ -1877,6 +2380,7 @@ export type Database = {
         }
         Insert: {
           body: string
+          business?: Database["public"]["Enums"]["notification_business"]
           created_at?: string
           id?: string
           is_clearable?: boolean | null
@@ -1888,6 +2392,7 @@ export type Database = {
         }
         Update: {
           body?: string
+          business?: Database["public"]["Enums"]["notification_business"]
           created_at?: string
           id?: string
           is_clearable?: boolean | null
@@ -2163,6 +2668,7 @@ export type Database = {
       }
       products: {
         Row: {
+          category: string | null
           content_language: string
           cover_path: string | null
           created_at: string
@@ -2170,6 +2676,7 @@ export type Database = {
           description: string | null
           id: string
           kind: Database["public"]["Enums"]["product_kind"]
+          learning_outcomes: string[]
           min_affiliate_tier: Database["public"]["Enums"]["affiliate_tier"]
           price_minor: number
           published_at: string | null
@@ -2184,6 +2691,7 @@ export type Database = {
           vendor_id: string | null
         }
         Insert: {
+          category?: string | null
           content_language?: string
           cover_path?: string | null
           created_at?: string
@@ -2191,6 +2699,7 @@ export type Database = {
           description?: string | null
           id?: string
           kind: Database["public"]["Enums"]["product_kind"]
+          learning_outcomes?: string[]
           min_affiliate_tier?: Database["public"]["Enums"]["affiliate_tier"]
           price_minor: number
           published_at?: string | null
@@ -2205,6 +2714,7 @@ export type Database = {
           vendor_id?: string | null
         }
         Update: {
+          category?: string | null
           content_language?: string
           cover_path?: string | null
           created_at?: string
@@ -2212,6 +2722,7 @@ export type Database = {
           description?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["product_kind"]
+          learning_outcomes?: string[]
           min_affiliate_tier?: Database["public"]["Enums"]["affiliate_tier"]
           price_minor?: number
           published_at?: string | null
@@ -2250,6 +2761,7 @@ export type Database = {
           flagged_reason: string | null
           full_name: string
           id: string
+          legal_name: string | null
           phone: string | null
           referral_code: string
           referred_by: string | null
@@ -2270,6 +2782,7 @@ export type Database = {
           flagged_reason?: string | null
           full_name: string
           id: string
+          legal_name?: string | null
           phone?: string | null
           referral_code: string
           referred_by?: string | null
@@ -2290,6 +2803,7 @@ export type Database = {
           flagged_reason?: string | null
           full_name?: string
           id?: string
+          legal_name?: string | null
           phone?: string | null
           referral_code?: string
           referred_by?: string | null
@@ -2760,6 +3274,32 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_products: {
+        Row: {
+          created_at: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_payments: {
         Row: {
           amount_minor: number
@@ -2769,6 +3309,7 @@ export type Database = {
           external_reference: string | null
           failure_reason: string | null
           id: string
+          list_minor: number | null
           method: Database["public"]["Enums"]["subscription_payment_method"]
           period_days: number
           provider_payload: Json
@@ -2784,6 +3325,7 @@ export type Database = {
           external_reference?: string | null
           failure_reason?: string | null
           id?: string
+          list_minor?: number | null
           method: Database["public"]["Enums"]["subscription_payment_method"]
           period_days: number
           provider_payload?: Json
@@ -2799,6 +3341,7 @@ export type Database = {
           external_reference?: string | null
           failure_reason?: string | null
           id?: string
+          list_minor?: number | null
           method?: Database["public"]["Enums"]["subscription_payment_method"]
           period_days?: number
           provider_payload?: Json
@@ -3509,19 +4052,190 @@ export type Database = {
           },
         ]
       }
-      saved_products: {
-        Row: { user_id: string; product_id: string; created_at: string }
-        Insert: { user_id: string; product_id: string; created_at?: string }
-        Update: { user_id?: string; product_id?: string; created_at?: string }
+      vault_investments: {
+        Row: {
+          amount_minor: number
+          claimed_at: string | null
+          claimed_points: number | null
+          created_at: string
+          currency_code: string
+          daily_return_percent: number
+          ends_at: string
+          expected_profit_minor: number
+          expected_return_minor: number
+          id: string
+          payment_id: string | null
+          period_days: number
+          plan_id: string
+          plan_name: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_minor: number
+          claimed_at?: string | null
+          claimed_points?: number | null
+          created_at?: string
+          currency_code?: string
+          daily_return_percent: number
+          ends_at: string
+          expected_profit_minor: number
+          expected_return_minor: number
+          id?: string
+          payment_id?: string | null
+          period_days: number
+          plan_id: string
+          plan_name: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_minor?: number
+          claimed_at?: string | null
+          claimed_points?: number | null
+          created_at?: string
+          currency_code?: string
+          daily_return_percent?: number
+          ends_at?: string
+          expected_profit_minor?: number
+          expected_return_minor?: number
+          id?: string
+          payment_id?: string | null
+          period_days?: number
+          plan_id?: string
+          plan_name?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vault_investments_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "vault_payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vault_investments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "vault_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vault_payments: {
+        Row: {
+          amount_minor: number
+          confirmed_at: string | null
+          created_at: string
+          currency_code: string
+          external_reference: string | null
+          failure_reason: string | null
+          id: string
+          method: string
+          plan_id: string
+          provider_payload: Json | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_minor: number
+          confirmed_at?: string | null
+          created_at?: string
+          currency_code?: string
+          external_reference?: string | null
+          failure_reason?: string | null
+          id?: string
+          method?: string
+          plan_id: string
+          provider_payload?: Json | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_minor?: number
+          confirmed_at?: string | null
+          created_at?: string
+          currency_code?: string
+          external_reference?: string | null
+          failure_reason?: string | null
+          id?: string
+          method?: string
+          plan_id?: string
+          provider_payload?: Json | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vault_payments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "vault_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vault_plans: {
+        Row: {
+          created_at: string
+          currency_code: string
+          daily_return_percent: number
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          period_days: number
+          price_minor: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency_code?: string
+          daily_return_percent: number
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          period_days: number
+          price_minor: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency_code?: string
+          daily_return_percent?: number
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          period_days?: number
+          price_minor?: number
+          sort_order?: number
+          updated_at?: string
+        }
         Relationships: []
       }
       vendors: {
         Row: {
+          avatar_path: string | null
+          bio: string | null
           contact_email: string | null
           contact_name: string | null
           contact_phone: string | null
           created_at: string
           created_by: string
+          display_name: string | null
+          headline: string | null
           id: string
           name: string
           notes: string | null
@@ -3529,11 +4243,15 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          avatar_path?: string | null
+          bio?: string | null
           contact_email?: string | null
           contact_name?: string | null
           contact_phone?: string | null
           created_at?: string
           created_by: string
+          display_name?: string | null
+          headline?: string | null
           id?: string
           name: string
           notes?: string | null
@@ -3541,11 +4259,15 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          avatar_path?: string | null
+          bio?: string | null
           contact_email?: string | null
           contact_name?: string | null
           contact_phone?: string | null
           created_at?: string
           created_by?: string
+          display_name?: string | null
+          headline?: string | null
           id?: string
           name?: string
           notes?: string | null
@@ -3563,12 +4285,56 @@ export type Database = {
         Args: { p_ad_id: string; p_occasion: number }
         Returns: string
       }
+      ad_repeat_ready: { Args: { p_finished_at: string }; Returns: boolean }
+      ad_reward_points:
+        | {
+            Args: {
+              p_ad_id: string
+              p_base: number
+              p_done?: number
+              p_user_id: string
+            }
+            Returns: number
+          }
+        | {
+            Args: { p_base: number; p_done?: number; p_user_id: string }
+            Returns: number
+          }
       admin_active_view_session: {
         Args: { p_token: string }
         Returns: {
           admin_id: string
           expires_at: string
           target_user_id: string
+        }[]
+      }
+      admin_ad_responses: {
+        Args: {
+          p_ad_id?: string
+          p_admin_id: string
+          p_from?: string
+          p_to?: string
+        }
+        Returns: {
+          ad_format: string
+          ad_id: string
+          ad_title: string
+          answer: string
+          answer_format: string
+          answered_at: string
+          attempt_number: number
+          correct: boolean
+          graded: boolean
+          occasion: number
+          option_id: string
+          phone: string
+          plan: string
+          points_awarded: number
+          question_position: number
+          question_text: string
+          respondent: string
+          user_id: string
+          watch_seconds: number
         }[]
       }
       admin_affiliate_promotion_report: {
@@ -3590,16 +4356,43 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_affiliate_task_exposure: {
+        Args: {
+          p_admin_id: string
+          p_metric: Database["public"]["Enums"]["affiliate_task_metric"]
+          p_target: number
+          p_task_id?: string
+        }
+        Returns: Json
+      }
+      admin_affiliate_terms_status: {
+        Args: { p_admin_id: string }
+        Returns: {
+          affiliate_code: string
+          affiliate_id: string
+          current_version: number
+          is_current: boolean
+          name: string
+          terms_accepted_at: string
+          terms_version: number
+        }[]
+      }
       admin_announcement_audience: { Args: never; Returns: number }
       admin_area_allowed: {
         Args: { p_area: string; p_user_id: string }
         Returns: boolean
       }
       admin_broadcast_announcement: {
-        Args: { p_admin: string; p_body: string; p_title: string }
+        Args: {
+          p_admin: string
+          p_audience?: string
+          p_body: string
+          p_title: string
+        }
         Returns: {
           audience: string
           body: string
+          business: Database["public"]["Enums"]["notification_business"]
           created_at: string
           id: string
           recipient_count: number
@@ -3643,6 +4436,16 @@ export type Database = {
           section_position: number
           section_title: string
         }[]
+      }
+      admin_create_commission_gift_code: {
+        Args: {
+          p_admin_id: string
+          p_amount_minor: number
+          p_code: string
+          p_expires_at?: string
+          p_note?: string
+        }
+        Returns: Json
       }
       admin_create_gift_code: {
         Args: {
@@ -3746,6 +4549,18 @@ export type Database = {
         Args: { p_admin_id: string; p_payment_id: string }
         Returns: undefined
       }
+      admin_delete_affiliate_task: {
+        Args: { p_admin_id: string; p_task_id: string }
+        Returns: string
+      }
+      admin_delete_community: {
+        Args: { p_admin_id: string; p_id: string }
+        Returns: undefined
+      }
+      admin_delete_coupon: {
+        Args: { p_admin_id: string; p_id: string }
+        Returns: undefined
+      }
       admin_delete_lesson: {
         Args: { p_admin_id: string; p_lesson_id: string }
         Returns: undefined
@@ -3753,6 +4568,10 @@ export type Database = {
       admin_delete_plan: {
         Args: { p_admin_id: string; p_plan_id: string }
         Returns: string
+      }
+      admin_delete_quiz: {
+        Args: { p_admin_id: string; p_quiz_id: string }
+        Returns: undefined
       }
       admin_delete_quiz_question: {
         Args: { p_admin_id: string; p_question_id: string }
@@ -3823,6 +4642,10 @@ export type Database = {
       admin_grant_role: {
         Args: { p_admin_id: string; p_role: string; p_target_id: string }
         Returns: undefined
+      }
+      admin_lesson_detail: {
+        Args: { p_admin_id: string; p_lesson_id: string }
+        Returns: Json
       }
       admin_list_administrators: {
         Args: never
@@ -3897,6 +4720,44 @@ export type Database = {
           status: string
         }[]
       }
+      admin_list_affiliate_prizes: {
+        Args: {
+          p_admin_id: string
+          p_game: Database["public"]["Enums"]["affiliate_game_kind"]
+        }
+        Returns: {
+          amount_minor: number
+          colour: string
+          daily_cap: number
+          extra_plays: number
+          id: string
+          is_active: boolean
+          label: string
+          paid_minor: number
+          slot: number
+          times_won: number
+          weekly_cap: number
+          weight: number
+        }[]
+      }
+      admin_list_affiliate_tasks: {
+        Args: { p_admin_id: string }
+        Returns: {
+          claimed_count: number
+          code: string
+          description: string
+          eligible_now: number
+          icon: string
+          id: string
+          is_active: boolean
+          metric: Database["public"]["Enums"]["affiliate_task_metric"]
+          name: string
+          paid_minor: number
+          reward_minor: number
+          sort_order: number
+          target: number
+        }[]
+      }
       admin_list_affiliates: {
         Args: { p_scope?: string }
         Returns: {
@@ -3947,6 +4808,44 @@ export type Database = {
           target: string
         }[]
       }
+      admin_list_commission_gift_codes: {
+        Args: {
+          p_admin_id: string
+          p_status?: Database["public"]["Enums"]["gift_code_status"]
+        }
+        Returns: {
+          amount_minor: number
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          note: string
+          redeemed_at: string
+          redeemed_by: string
+          status: string
+        }[]
+      }
+      admin_list_commission_payouts: {
+        Args: { p_status?: string }
+        Returns: {
+          affiliate_code: string
+          affiliate_id: string
+          amount_minor: number
+          balance_after: number
+          coin_amount: number
+          coin_code: string
+          destination: string
+          fee_minor: number
+          method: string
+          name: string
+          net_minor: number
+          paid_at: string
+          payout_id: string
+          requested_at: string
+          review_notes: string
+          status: string
+        }[]
+      }
       admin_list_commissions: {
         Args: { p_affiliate_id?: string; p_from?: string; p_status?: string }
         Returns: {
@@ -3990,6 +4889,47 @@ export type Database = {
           subid: string
         }[]
       }
+      admin_list_coupon_redemptions: {
+        Args: { p_admin_id: string; p_coupon_id: string }
+        Returns: {
+          charged_minor: number
+          created_at: string
+          discount_minor: number
+          email: string
+          id: string
+          list_minor: number
+          person: string
+          status: string
+          user_id: string
+        }[]
+      }
+      admin_list_coupons: {
+        Args: { p_admin_id: string }
+        Returns: {
+          amount_minor: number
+          business: Database["public"]["Enums"]["coupon_business"]
+          code: string
+          created_at: string
+          discount_given_minor: number
+          discount_kind: Database["public"]["Enums"]["coupon_discount_kind"]
+          ends_at: string
+          first_purchase_only: boolean
+          id: string
+          is_active: boolean
+          max_discount_minor: number
+          min_spend_minor: number
+          note: string
+          per_user_limit: number
+          percent: number
+          product_id: string
+          quota: number
+          revenue_minor: number
+          starts_at: string
+          target_name: string
+          tier_id: string
+          used: number
+        }[]
+      }
       admin_list_game_prizes: {
         Args: {
           p_admin_id: string
@@ -4010,167 +4950,6 @@ export type Database = {
           won_this_week: number
           won_today: number
         }[]
-      }
-      /* ── HAND-ADDED, like `commission_payouts` and the three commission RPCs
-         above it. This repo patches this file rather than regenerating it, so
-         a new function needs its signature written in here in the same change
-         that creates it (migrations 178 and 179). ── */
-      admin_save_community: {
-        Args: {
-          p_admin_id: string
-          p_business: string
-          p_id?: string | null
-          p_is_active: boolean
-          p_name: string
-          p_platform: string
-          p_sort_order: number
-          p_url: string
-        }
-        Returns: Record<string, unknown>
-      }
-      admin_delete_community: {
-        Args: { p_admin_id: string; p_id: string }
-        Returns: undefined
-      }
-      get_earnings_breakdown: {
-        Args: { p_user_id: string }
-        Returns: {
-          adjustment_points: number
-          articles_points: number
-          balance_points: number
-          earned_points: number
-          fees_currency: number
-          first_earned_at: string | null
-          game_points: number
-          gift_code_points: number
-          paid_out_currency: number
-          plans_count: number
-          plans_spent_minor: number
-          points_per_currency_unit: number
-          referral_activation_points: number
-          referral_purchase_points: number
-          referral_signup_points: number
-          surveys_points: number
-          task_points: number
-          videos_points: number
-          withdrawn_paid_points: number
-          withdrawn_pending_points: number
-          withdrawn_refunded_points: number
-        }[]
-      }
-      get_commission_breakdown: {
-        Args: { p_user_id: string }
-        Returns: {
-          adjustment_minor: number
-          balance_minor: number
-          earned_minor: number
-          fees_minor: number
-          first_earned_at: string | null
-          game_minor: number
-          gift_minor: number
-          net_paid_minor: number
-          pending_minor: number
-          recruits_count: number
-          reversed_minor: number
-          sales_count: number
-          sales_l1_minor: number
-          sales_l2_minor: number
-          task_minor: number
-          training_count: number
-          training_spent_minor: number
-          withdrawn_paid_minor: number
-          withdrawn_pending_minor: number
-          withdrawn_rejected_minor: number
-        }[]
-      }
-      coupon_quote: {
-        Args: {
-          p_amount_minor: number
-          p_code: string
-          p_kind?: Database["public"]["Enums"]["order_kind"]
-          /* Nullable, and sent as an explicit `null` rather than omitted:
-             PostgREST resolves the overload from the argument names present,
-             and supabase-js drops undefined ones. */
-          p_product_id?: string | null
-          p_tier_id?: string | null
-          p_user_id: string
-        }
-        Returns: {
-          charged_minor: number
-          coupon_id: string | null
-          discount_minor: number
-          list_minor: number
-          ok: boolean
-          reason: string | null
-        }[]
-      }
-      admin_list_coupons: {
-        Args: { p_admin_id: string }
-        Returns: {
-          amount_minor: number | null
-          business: string
-          code: string
-          created_at: string
-          discount_given_minor: number
-          discount_kind: string
-          ends_at: string | null
-          first_purchase_only: boolean
-          id: string
-          is_active: boolean
-          max_discount_minor: number | null
-          min_spend_minor: number
-          note: string | null
-          per_user_limit: number
-          percent: number | null
-          product_id: string | null
-          quota: number
-          revenue_minor: number
-          starts_at: string | null
-          target_name: string | null
-          tier_id: string | null
-          used: number
-        }[]
-      }
-      admin_list_coupon_redemptions: {
-        Args: { p_admin_id: string; p_coupon_id: string }
-        Returns: {
-          charged_minor: number
-          created_at: string
-          discount_minor: number
-          email: string
-          id: string
-          list_minor: number
-          person: string | null
-          status: string | null
-          user_id: string
-        }[]
-      }
-      admin_save_coupon: {
-        Args: {
-          p_admin_id: string
-          p_amount_minor?: number | null
-          p_business: string
-          p_code: string
-          p_discount_kind: string
-          p_ends_at?: string | null
-          p_first_purchase_only?: boolean
-          p_id?: string | null
-          p_is_active?: boolean
-          p_max_discount_minor?: number | null
-          p_min_spend_minor?: number | null
-          p_note?: string | null
-          p_per_user_limit?: number
-          p_percent?: number | null
-          p_product_id?: string | null
-          p_quota: number
-          p_starts_at?: string | null
-          p_tier_id?: string | null
-        }
-        Returns: Record<string, unknown>
-      }
-      admin_delete_coupon: {
-        Args: { p_admin_id: string; p_id: string }
-        Returns: undefined
       }
       admin_list_gift_codes: {
         Args: { p_status?: Database["public"]["Enums"]["gift_code_status"] }
@@ -4243,36 +5022,24 @@ export type Database = {
           sort_order: number
         }[]
       }
-      admin_remove_affiliate_program: {
-        Args: { p_admin_id: string; p_product_id: string }
-        Returns: Json
-      }
-      admin_save_affiliate_program: {
-        Args: {
-          p_active?: boolean
-          p_admin_id: string
-          p_hold_days?: number
-          p_l1: number
-          p_l2: number
-          p_product_id: string
-          p_window_hours?: number
-        }
-        Returns: Json
-      }
       admin_list_products: {
         Args: { p_purpose?: string }
         Returns: {
+          attribution_window_hours: number
           blockers: number
+          category: string
+          commission_status: string
           content_language: string
+          cover_path: string
           created_at: string
+          description: string
           effective_price_ghs: number
+          hold_days: number
           id: string
           kind: string
-          attribution_window_hours: number
-          commission_status: string
-          hold_days: number
           l1_rate: number
           l2_rate: number
+          learning_outcomes: string[]
           lessons: number
           min_affiliate_tier: string
           price_ghs: number
@@ -4401,6 +5168,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_remove_affiliate_program: {
+        Args: { p_admin_id: string; p_product_id: string }
+        Returns: Json
+      }
       admin_reorder_lessons: {
         Args: {
           p_admin_id: string
@@ -4416,6 +5187,10 @@ export type Database = {
           p_section_ids: string[]
         }
         Returns: number
+      }
+      admin_revoke_commission_gift_code: {
+        Args: { p_admin_id: string; p_code_id: string }
+        Returns: Json
       }
       admin_revoke_gift_code: {
         Args: { p_admin_id: string; p_code_id: string }
@@ -4473,6 +5248,110 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "advertisers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_save_affiliate_prizes: {
+        Args: {
+          p_admin_id: string
+          p_game: Database["public"]["Enums"]["affiliate_game_kind"]
+          p_prizes: Json
+        }
+        Returns: number
+      }
+      admin_save_affiliate_program: {
+        Args: {
+          p_active?: boolean
+          p_admin_id: string
+          p_hold_days?: number
+          p_l1: number
+          p_l2: number
+          p_product_id: string
+          p_window_hours?: number
+        }
+        Returns: Json
+      }
+      admin_save_affiliate_task: {
+        Args: { p_admin_id: string; p_task: Json }
+        Returns: string
+      }
+      admin_save_community: {
+        Args: {
+          p_admin_id: string
+          p_business: Database["public"]["Enums"]["notification_business"]
+          p_id: string
+          p_is_active: boolean
+          p_name: string
+          p_platform: Database["public"]["Enums"]["community_platform"]
+          p_sort_order: number
+          p_url: string
+        }
+        Returns: {
+          business: Database["public"]["Enums"]["notification_business"]
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          name: string
+          platform: Database["public"]["Enums"]["community_platform"]
+          sort_order: number
+          updated_at: string
+          url: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "communities"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_save_coupon: {
+        Args: {
+          p_admin_id: string
+          p_amount_minor: number
+          p_business: Database["public"]["Enums"]["coupon_business"]
+          p_code: string
+          p_discount_kind: Database["public"]["Enums"]["coupon_discount_kind"]
+          p_ends_at: string
+          p_first_purchase_only: boolean
+          p_id: string
+          p_is_active: boolean
+          p_max_discount_minor: number
+          p_min_spend_minor: number
+          p_note: string
+          p_per_user_limit: number
+          p_percent: number
+          p_product_id: string
+          p_quota: number
+          p_starts_at: string
+          p_tier_id: string
+        }
+        Returns: {
+          amount_minor: number | null
+          business: Database["public"]["Enums"]["coupon_business"]
+          code: string
+          created_at: string
+          created_by: string | null
+          discount_kind: Database["public"]["Enums"]["coupon_discount_kind"]
+          ends_at: string | null
+          first_purchase_only: boolean
+          id: string
+          is_active: boolean
+          max_discount_minor: number | null
+          min_spend_minor: number
+          note: string | null
+          per_user_limit: number
+          percent: number | null
+          product_id: string | null
+          quota: number
+          starts_at: string | null
+          tier_id: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "coupons"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -4541,6 +5420,7 @@ export type Database = {
       admin_save_product: {
         Args: { p_admin_id: string; p_product: Json }
         Returns: {
+          category: string | null
           content_language: string
           cover_path: string | null
           created_at: string
@@ -4548,6 +5428,7 @@ export type Database = {
           description: string | null
           id: string
           kind: Database["public"]["Enums"]["product_kind"]
+          learning_outcomes: string[]
           min_affiliate_tier: Database["public"]["Enums"]["affiliate_tier"]
           price_minor: number
           published_at: string | null
@@ -4631,11 +5512,15 @@ export type Database = {
       admin_save_vendor: {
         Args: { p_admin_id: string; p_vendor: Json }
         Returns: {
+          avatar_path: string | null
+          bio: string | null
           contact_email: string | null
           contact_name: string | null
           contact_phone: string | null
           created_at: string
           created_by: string
+          display_name: string | null
+          headline: string | null
           id: string
           name: string
           notes: string | null
@@ -4749,6 +5634,7 @@ export type Database = {
           p_status: Database["public"]["Enums"]["product_status"]
         }
         Returns: {
+          category: string | null
           content_language: string
           cover_path: string | null
           created_at: string
@@ -4756,6 +5642,7 @@ export type Database = {
           description: string | null
           id: string
           kind: Database["public"]["Enums"]["product_kind"]
+          learning_outcomes: string[]
           min_affiliate_tier: Database["public"]["Enums"]["affiliate_tier"]
           price_minor: number
           published_at: string | null
@@ -4808,172 +5695,16 @@ export type Database = {
         Args: { p_admin_id: string; p_email: string }
         Returns: string
       }
-      affiliate_balance_minor: {
-        Args: { p_affiliate_id: string }
-        Returns: number
-      }
-      admin_lesson_detail: { Args: { p_admin_id: string; p_lesson_id: string }; Returns: Json }
-      admin_delete_quiz: { Args: { p_admin_id: string; p_quiz_id: string }; Returns: undefined }
-      shop_products: { Args: { p_user_id?: string }; Returns: Json[] }
-      shop_product: { Args: { p_slug: string; p_user_id?: string }; Returns: Json }
-      affiliate_promote_info: { Args: { p_product_id: string; p_user_id: string }; Returns: Json }
-      my_learning: { Args: { p_user_id: string }; Returns: Json }
-      certificate_grade_for: { Args: { p_product_id: string; p_user_id: string }; Returns: number }
-      affiliate_dashboard: { Args: { p_user_id: string }; Returns: Json }
-      affiliate_performance: { Args: { p_days?: number; p_user_id: string }; Returns: Json }
-      affiliate_statement: { Args: { p_limit?: number; p_user_id: string }; Returns: Json }
-      request_commission_payout: {
-        Args: {
-          p_amount_minor: number
-          /* Added with migration 185: the function refuses to guess when
-             somebody holds both a mobile money and a crypto destination. */
-          p_method?: string | null
-          p_user_id: string
-        }
-        Returns: {
-          id: string
-          affiliate_id: string
-          user_id: string
-          method: string
-          amount_minor: number
-          fee_percent: number
-          fee_minor: number
-          net_minor: number
-          currency_code: string
-          snapshot_coin_code: string | null
-          coin_amount: number | null
-          status: string
-          created_at: string
-        }
-      }
-      admin_list_affiliate_prizes: {
-        Args: { p_admin_id: string; p_game: string }
-        Returns: {
-          id: string
-          slot: number
-          label: string
-          amount_minor: number
-          extra_plays: number
-          weight: number
-          colour: string | null
-          daily_cap: number
-          weekly_cap: number
-          is_active: boolean
-          times_won: number
-          paid_minor: number
-        }[]
-      }
-      admin_save_affiliate_prizes: {
-        Args: { p_admin_id: string; p_game: string; p_prizes: Json }
-        Returns: number
-      }
-      admin_list_affiliate_tasks: {
-        Args: { p_admin_id: string }
-        Returns: {
-          id: string
-          code: string
-          name: string
-          description: string | null
-          metric: string
-          target: number
-          reward_minor: number
-          icon: string | null
-          sort_order: number
-          is_active: boolean
-          claimed_count: number
-          paid_minor: number
-          eligible_now: number
-        }[]
-      }
-      admin_affiliate_task_exposure: {
-        Args: { p_admin_id: string; p_metric: string; p_target: number; p_task_id?: string }
-        Returns: Json
-      }
-      admin_save_affiliate_task: { Args: { p_admin_id: string; p_task: Json }; Returns: string }
-      admin_delete_affiliate_task: {
-        Args: { p_admin_id: string; p_task_id: string }
-        Returns: string
-      }
-      affiliate_game_board: {
-        Args: { p_game: string }
-        Returns: {
-          slot: number
-          label: string
-          amount_minor: number
-          extra_plays: number
-          colour: string | null
-        }[]
-      }
-      affiliate_game_status: { Args: { p_user_id: string }; Returns: Json }
-      affiliate_leaderboard: {
-        Args: { p_limit?: number; p_period?: string }
-        Returns: {
-          rank: number
-          user_id: string
-          display_name: string
-          avatar_path: string | null
-          amount_minor: number
-          previous_rank: number | null
-          movement: string
-        }[]
-      }
-      affiliate_leaderboard_standing: {
-        Args: { p_period?: string; p_user_id: string }
-        Returns: Json
-      }
-      get_affiliate_tasks: { Args: { p_user_id: string }; Returns: Json }
-      play_affiliate_game: { Args: { p_game: string; p_user_id: string }; Returns: Json }
-      claim_affiliate_task: { Args: { p_task_id: string; p_user_id: string }; Returns: Json }
       admin_vendor_sales_report: {
         Args: { p_from?: string; p_to?: string }
         Returns: Json
       }
-      admin_list_commission_payouts: {
-        Args: { p_status?: string | null }
-        Returns: {
-          payout_id: string
-          requested_at: string
-          affiliate_id: string
-          affiliate_code: string
-          name: string
-          method: string
-          amount_minor: number
-          fee_minor: number
-          net_minor: number
-          coin_amount: number | null
-          coin_code: string | null
-          destination: string
-          balance_after: number
-          status: string
-          review_notes: string | null
-          paid_at: string | null
-        }[]
+      affiliate_balance_minor: {
+        Args: { p_affiliate_id: string }
+        Returns: number
       }
-      decide_commission_payout: {
-        Args: {
-          p_admin_id: string
-          p_decision: string
-          p_note?: string | null
-          p_payout_id: string
-        }
-        Returns: {
-          id: string
-          status: string
-          net_minor: number
-          review_notes: string | null
-        }
-      }
-      mark_commission_payout_paid: {
-        Args: { p_admin_id: string; p_payout_id: string; p_reference: string }
-        Returns: {
-          id: string
-          status: string
-          net_minor: number
-          paid_at: string | null
-          external_reference: string | null
-        }
-      }
-      lesson_for_learner: { Args: { p_lesson_id: string; p_user_id: string }; Returns: Json }
+      affiliate_dashboard: { Args: { p_user_id: string }; Returns: Json }
+      affiliate_dashboard_core: { Args: { p_user_id: string }; Returns: Json }
       affiliate_depth_now: { Args: { p_affiliate_id: string }; Returns: number }
       affiliate_earnings_by_year: {
         Args: { p_year?: number }
@@ -4988,9 +5719,71 @@ export type Database = {
           year: number
         }[]
       }
+      affiliate_eligible_prizes: {
+        Args: {
+          p_game: Database["public"]["Enums"]["affiliate_game_kind"]
+          p_week: string
+        }
+        Returns: {
+          amount_minor: number
+          colour: string | null
+          created_at: string
+          daily_cap: number
+          extra_plays: number
+          game: Database["public"]["Enums"]["affiliate_game_kind"]
+          id: string
+          is_active: boolean
+          label: string
+          slot: number
+          updated_at: string
+          weekly_cap: number
+          weight: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "affiliate_game_prizes"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      affiliate_game_board: {
+        Args: { p_game: Database["public"]["Enums"]["affiliate_game_kind"] }
+        Returns: {
+          amount_minor: number
+          colour: string
+          extra_plays: number
+          label: string
+          slot: number
+        }[]
+      }
+      affiliate_game_status: { Args: { p_user_id: string }; Returns: Json }
+      affiliate_leaderboard: {
+        Args: { p_limit?: number; p_period?: string }
+        Returns: {
+          amount_minor: number
+          avatar_path: string
+          display_name: string
+          movement: string
+          previous_rank: number
+          rank: number
+          user_id: string
+        }[]
+      }
+      affiliate_leaderboard_standing: {
+        Args: { p_period?: string; p_user_id: string }
+        Returns: Json
+      }
       affiliate_pending_minor: {
         Args: { p_affiliate_id: string }
         Returns: number
+      }
+      affiliate_performance: {
+        Args: { p_days?: number; p_user_id: string }
+        Returns: Json
+      }
+      affiliate_promote_info: {
+        Args: { p_product_id: string; p_user_id: string }
+        Returns: Json
       }
       affiliate_recruitment_share: {
         Args: { p_from?: string; p_to?: string }
@@ -5000,6 +5793,23 @@ export type Database = {
           total_minor: number
           training_minor: number
         }[]
+      }
+      affiliate_statement: {
+        Args: { p_limit?: number; p_user_id: string }
+        Returns: Json
+      }
+      affiliate_task_progress: {
+        Args: {
+          p_metric: Database["public"]["Enums"]["affiliate_task_metric"]
+          p_user_id: string
+        }
+        Returns: number
+      }
+      affiliate_upline_for: { Args: { p_user_id: string }; Returns: string }
+      affiliate_week_start: { Args: never; Returns: string }
+      affiliate_weekly_play_allowance: {
+        Args: { p_user_id: string }
+        Returns: number
       }
       apply_referral_code: {
         Args: {
@@ -5122,9 +5932,12 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      base_ad_points: { Args: never; Returns: number }
       broadcast_notification: {
         Args: {
+          p_audience?: string
           p_body: string
+          p_business?: Database["public"]["Enums"]["notification_business"]
           p_reference?: Json
           p_title: string
           p_type: Database["public"]["Enums"]["notification_type"]
@@ -5200,13 +6013,51 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      certificate_by_code: { Args: { p_code: string }; Returns: Json }
+      certificate_grade_for: {
+        Args: { p_product_id: string; p_user_id: string }
+        Returns: number
+      }
       check_referral_activation: {
         Args: { p_referee_id: string }
         Returns: boolean
       }
+      claim_affiliate_task: {
+        Args: { p_task_id: string; p_user_id: string }
+        Returns: Json
+      }
       claim_task: {
         Args: { p_task_id: string; p_user_id: string }
         Returns: Json
+      }
+      claim_vault_investment: {
+        Args: { p_investment_id: string }
+        Returns: {
+          amount_minor: number
+          claimed_at: string | null
+          claimed_points: number | null
+          created_at: string
+          currency_code: string
+          daily_return_percent: number
+          ends_at: string
+          expected_profit_minor: number
+          expected_return_minor: number
+          id: string
+          payment_id: string | null
+          period_days: number
+          plan_id: string
+          plan_name: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vault_investments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       claw_back_referral_points: {
         Args: {
@@ -5236,6 +6087,7 @@ export type Database = {
           flagged_reason: string | null
           full_name: string
           id: string
+          legal_name: string | null
           phone: string | null
           referral_code: string
           referred_by: string | null
@@ -5309,45 +6161,60 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: undefined
       }
+      confirm_vault_payment: {
+        Args: { p_payload?: Json; p_payment_id: string; p_reference: string }
+        Returns: {
+          amount_minor: number
+          claimed_at: string | null
+          claimed_points: number | null
+          created_at: string
+          currency_code: string
+          daily_return_percent: number
+          ends_at: string
+          expected_profit_minor: number
+          expected_return_minor: number
+          id: string
+          payment_id: string | null
+          period_days: number
+          plan_id: string
+          plan_name: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vault_investments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       consume_backup_code: {
         Args: { p_code: string; p_user_id: string }
         Returns: Json
       }
-      training_upgrade_offer: {
-        Args: { p_user_id: string }
-        Returns: Json
+      coupon_quote: {
+        Args: {
+          p_amount_minor: number
+          p_code: string
+          p_kind?: Database["public"]["Enums"]["order_kind"]
+          p_product_id: string
+          p_tier_id: string
+          p_user_id: string
+        }
+        Returns: {
+          charged_minor: number
+          coupon_id: string
+          discount_minor: number
+          list_minor: number
+          ok: boolean
+          reason: string
+        }[]
       }
-      owned_training_rank: {
-        Args: { p_user_id: string }
+      coupon_uses: {
+        Args: { p_coupon_id: string; p_user_id?: string }
         Returns: number
-      }
-      training_level_rank: {
-        Args: { p_level: string }
-        Returns: number
-      }
-      certificate_by_code: {
-        Args: { p_code: string }
-        Returns: Json
-      }
-      my_certificate: {
-        Args: { p_product_id: string; p_user_id: string }
-        Returns: Json
-      }
-      lesson_quiz_states: {
-        Args: { p_lesson_id: string; p_user_id: string }
-        Returns: Json
-      }
-      quiz_is_passed: {
-        Args: { p_quiz_id: string; p_user_id: string }
-        Returns: boolean
-      }
-      lesson_checkpoints_passed: {
-        Args: { p_lesson_id: string; p_user_id: string }
-        Returns: boolean
-      }
-      set_certificate_name: {
-        Args: { p_legal_name: string; p_product_id: string; p_user_id: string }
-        Returns: Json
       }
       course_curriculum: {
         Args: { p_product_id: string; p_user_id?: string }
@@ -5370,53 +6237,6 @@ export type Database = {
           word_count: number
         }[]
       }
-      admin_create_commission_gift_code: {
-        Args: {
-          p_admin_id: string
-          p_amount_minor: number
-          p_code: string
-          p_expires_at?: string
-          p_note?: string
-        }
-        Returns: Json
-      }
-      admin_list_commission_gift_codes: {
-        Args: { p_admin_id: string; p_status?: Database["public"]["Enums"]["gift_code_status"] }
-        Returns: {
-          amount_minor: number
-          code: string
-          created_at: string
-          expires_at: string
-          id: string
-          note: string
-          redeemed_at: string
-          redeemed_by: string
-          status: string
-        }[]
-      }
-      admin_revoke_commission_gift_code: {
-        Args: { p_admin_id: string; p_code_id: string }
-        Returns: Json
-      }
-      generate_commission_gift_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      redeem_commission_gift_code: {
-        Args: { p_code: string; p_user_id: string }
-        Returns: Json
-      }
-      course_resources: {
-        Args: { p_product_id: string; p_user_id?: string }
-        Returns: {
-          byte_size: number
-          lesson_id: string
-          lesson_title: string
-          resource_id: string
-          section_title: string
-          title: string
-        }[]
-      }
       course_outline: {
         Args: { p_product_id: string }
         Returns: {
@@ -5430,9 +6250,21 @@ export type Database = {
           section_title: string
         }[]
       }
+      course_resources: {
+        Args: { p_product_id: string; p_user_id?: string }
+        Returns: {
+          byte_size: number
+          lesson_id: string
+          lesson_title: string
+          resource_id: string
+          section_title: string
+          title: string
+        }[]
+      }
       create_notification: {
         Args: {
           p_body: string
+          p_business?: Database["public"]["Enums"]["notification_business"]
           p_reference?: Json
           p_title: string
           p_type: Database["public"]["Enums"]["notification_type"]
@@ -5502,6 +6334,51 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      decide_commission_payout: {
+        Args: {
+          p_admin_id: string
+          p_decision: string
+          p_note?: string
+          p_payout_id: string
+        }
+        Returns: {
+          affiliate_id: string
+          amount_minor: number
+          coin_amount: number | null
+          coin_usd: number | null
+          created_at: string
+          currency_code: string
+          external_reference: string | null
+          failure_reason: string | null
+          fee_minor: number
+          fee_percent: number
+          id: string
+          ledger_entry_id: string | null
+          method: Database["public"]["Enums"]["payout_method"]
+          net_minor: number
+          paid_at: string | null
+          quoted_at: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          snapshot_account_name: string | null
+          snapshot_coin_code: string | null
+          snapshot_msisdn: string | null
+          snapshot_network_code: string | null
+          snapshot_provider_code: string | null
+          snapshot_wallet: string | null
+          status: Database["public"]["Enums"]["commission_payout_status"]
+          updated_at: string
+          usd_ghs: number | null
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "commission_payouts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       disable_totp: { Args: { p_user_id: string }; Returns: undefined }
       disable_user_account: {
         Args: { p_admin_id: string; p_reason: string; p_user_id: string }
@@ -5519,6 +6396,7 @@ export type Database = {
           flagged_reason: string | null
           full_name: string
           id: string
+          legal_name: string | null
           phone: string | null
           referral_code: string
           referred_by: string | null
@@ -5561,6 +6439,7 @@ export type Database = {
           flagged_reason: string | null
           full_name: string
           id: string
+          legal_name: string | null
           phone: string | null
           referral_code: string
           referred_by: string | null
@@ -5619,6 +6498,7 @@ export type Database = {
           flagged_reason: string | null
           full_name: string
           id: string
+          legal_name: string | null
           phone: string | null
           referral_code: string
           referred_by: string | null
@@ -5680,6 +6560,7 @@ export type Database = {
       game_week_start: { Args: never; Returns: string }
       generate_affiliate_code: { Args: never; Returns: string }
       generate_certificate_code: { Args: never; Returns: string }
+      generate_commission_gift_code: { Args: never; Returns: string }
       generate_gift_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       get_active_sessions: {
@@ -5746,7 +6627,59 @@ export type Database = {
           show_at_seconds: number
         }[]
       }
+      get_affiliate_tasks: { Args: { p_user_id: string }; Returns: Json }
+      get_commission_breakdown: {
+        Args: { p_user_id: string }
+        Returns: {
+          adjustment_minor: number
+          balance_minor: number
+          earned_minor: number
+          fees_minor: number
+          first_earned_at: string
+          game_minor: number
+          gift_minor: number
+          net_paid_minor: number
+          pending_minor: number
+          recruits_count: number
+          reversed_minor: number
+          sales_count: number
+          sales_l1_minor: number
+          sales_l2_minor: number
+          task_minor: number
+          training_count: number
+          training_spent_minor: number
+          withdrawn_paid_minor: number
+          withdrawn_pending_minor: number
+          withdrawn_rejected_minor: number
+        }[]
+      }
       get_deletion_status: { Args: never; Returns: Json }
+      get_earnings_breakdown: {
+        Args: { p_user_id: string }
+        Returns: {
+          adjustment_points: number
+          articles_points: number
+          balance_points: number
+          earned_points: number
+          fees_currency: number
+          first_earned_at: string
+          game_points: number
+          gift_code_points: number
+          paid_out_currency: number
+          plans_count: number
+          plans_spent_minor: number
+          points_per_currency_unit: number
+          referral_activation_points: number
+          referral_purchase_points: number
+          referral_signup_points: number
+          surveys_points: number
+          task_points: number
+          videos_points: number
+          withdrawn_paid_points: number
+          withdrawn_pending_points: number
+          withdrawn_refunded_points: number
+        }[]
+      }
       get_eligible_ads: {
         Args: { p_limit?: number; p_user_id: string }
         Returns: {
@@ -5984,8 +6917,60 @@ export type Database = {
         Args: { p_period: string }
         Returns: Record<string, unknown>
       }
+      lesson_checkpoints_passed: {
+        Args: { p_lesson_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      lesson_for_learner: {
+        Args: { p_lesson_id: string; p_user_id: string }
+        Returns: Json
+      }
       lesson_is_ready: { Args: { p_lesson_id: string }; Returns: string }
+      lesson_quiz_states: {
+        Args: { p_lesson_id: string; p_user_id: string }
+        Returns: Json
+      }
       mark_all_notifications_read: { Args: never; Returns: undefined }
+      mark_commission_payout_paid: {
+        Args: { p_admin_id: string; p_payout_id: string; p_reference: string }
+        Returns: {
+          affiliate_id: string
+          amount_minor: number
+          coin_amount: number | null
+          coin_usd: number | null
+          created_at: string
+          currency_code: string
+          external_reference: string | null
+          failure_reason: string | null
+          fee_minor: number
+          fee_percent: number
+          id: string
+          ledger_entry_id: string | null
+          method: Database["public"]["Enums"]["payout_method"]
+          net_minor: number
+          paid_at: string | null
+          quoted_at: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          snapshot_account_name: string | null
+          snapshot_coin_code: string | null
+          snapshot_msisdn: string | null
+          snapshot_network_code: string | null
+          snapshot_provider_code: string | null
+          snapshot_wallet: string | null
+          status: Database["public"]["Enums"]["commission_payout_status"]
+          updated_at: string
+          usd_ghs: number | null
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "commission_payouts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       mark_lesson_read: {
         Args: { p_lesson_id: string; p_user_id: string }
         Returns: boolean
@@ -6090,6 +7075,11 @@ export type Database = {
       mark_support_read: { Args: never; Returns: number }
       mask_payout_value: { Args: { p_value: string }; Returns: string }
       may_repeat_ads: { Args: { p_user_id: string }; Returns: boolean }
+      my_certificate: {
+        Args: { p_product_id: string; p_user_id: string }
+        Returns: Json
+      }
+      my_learning: { Args: { p_user_id: string }; Returns: Json }
       normalise_phone: { Args: { p_phone: string }; Returns: string }
       notify_admins: {
         Args: {
@@ -6100,6 +7090,7 @@ export type Database = {
         }
         Returns: number
       }
+      owned_training_rank: { Args: { p_user_id: string }; Returns: number }
       pay_conversion_commissions: {
         Args: { p_conversion_id: string }
         Returns: number
@@ -6203,6 +7194,13 @@ export type Database = {
       }
       plan_band_max_minor: { Args: { p_tier_id: string }; Returns: number }
       plan_multiplier_for_amount: { Args: { p_minor: number }; Returns: number }
+      play_affiliate_game: {
+        Args: {
+          p_game: Database["public"]["Enums"]["affiliate_game_kind"]
+          p_user_id: string
+        }
+        Returns: Json
+      }
       play_game: {
         Args: {
           p_game: Database["public"]["Enums"]["game_kind"]
@@ -6244,6 +7242,10 @@ export type Database = {
           quiz_id: string
           quiz_title: string
         }[]
+      }
+      quiz_is_passed: {
+        Args: { p_quiz_id: string; p_user_id: string }
+        Returns: boolean
       }
       quote_crypto_payout: {
         Args: { p_coin: string; p_ghs: number }
@@ -6346,6 +7348,10 @@ export type Database = {
           p_user_id: string
         }
         Returns: undefined
+      }
+      redeem_commission_gift_code: {
+        Args: { p_code: string; p_user_id: string }
+        Returns: Json
       }
       redeem_gift_code: {
         Args: { p_code: string; p_user_id: string }
@@ -6464,6 +7470,50 @@ export type Database = {
         Returns: number
       }
       request_account_deletion: { Args: { p_user_id: string }; Returns: string }
+      request_commission_payout: {
+        Args: {
+          p_amount_minor: number
+          p_method?: Database["public"]["Enums"]["payout_method"]
+          p_user_id: string
+        }
+        Returns: {
+          affiliate_id: string
+          amount_minor: number
+          coin_amount: number | null
+          coin_usd: number | null
+          created_at: string
+          currency_code: string
+          external_reference: string | null
+          failure_reason: string | null
+          fee_minor: number
+          fee_percent: number
+          id: string
+          ledger_entry_id: string | null
+          method: Database["public"]["Enums"]["payout_method"]
+          net_minor: number
+          paid_at: string | null
+          quoted_at: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          snapshot_account_name: string | null
+          snapshot_coin_code: string | null
+          snapshot_msisdn: string | null
+          snapshot_network_code: string | null
+          snapshot_provider_code: string | null
+          snapshot_wallet: string | null
+          status: Database["public"]["Enums"]["commission_payout_status"]
+          updated_at: string
+          usd_ghs: number | null
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "commission_payouts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       request_redemption: {
         Args: {
           p_ip?: unknown
@@ -6580,6 +7630,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      set_certificate_name: {
+        Args: { p_legal_name: string; p_product_id: string; p_user_id: string }
+        Returns: Json
+      }
       set_fx_rate: {
         Args: { p_pair: string; p_rate: number; p_source: string }
         Returns: {
@@ -6636,10 +7690,42 @@ export type Database = {
         Args: { p_lesson_id: string; p_user_id: string }
         Returns: boolean
       }
+      shop_product: {
+        Args: { p_slug: string; p_user_id?: string }
+        Returns: Json
+      }
+      shop_products: {
+        Args: { p_user_id?: string }
+        Returns: {
+          can_promote: boolean
+          category: string
+          content_language: string
+          cover_path: string
+          description: string
+          id: string
+          instructor_avatar: string
+          instructor_headline: string
+          instructor_name: string
+          kind: string
+          l1_earn_minor: number
+          l1_rate: number
+          lessons: number
+          list_price_minor: number
+          min_affiliate_tier: string
+          on_sale: boolean
+          owned: boolean
+          percent: number
+          price_minor: number
+          purpose: string
+          quizzes: number
+          saved: boolean
+          seconds: number
+          slug: string
+          title: string
+        }[]
+      }
       start_product_order: {
         Args: {
-          /* Hand-added with migration 179, along with `p_coupon_code` on
-             `start_subscription_payment` and `coupon_quote` below. */
           p_coupon_code?: string
           p_method: Database["public"]["Enums"]["order_payment_method"]
           p_product_id: string
@@ -6684,6 +7770,7 @@ export type Database = {
           external_reference: string | null
           failure_reason: string | null
           id: string
+          list_minor: number | null
           method: Database["public"]["Enums"]["subscription_payment_method"]
           period_days: number
           provider_payload: Json
@@ -6760,6 +7847,29 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      start_vault_payment: {
+        Args: { p_plan_id: string; p_user_id: string }
+        Returns: {
+          amount_minor: number
+          confirmed_at: string | null
+          created_at: string
+          currency_code: string
+          external_reference: string | null
+          failure_reason: string | null
+          id: string
+          method: string
+          plan_id: string
+          provider_payload: Json | null
+          status: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vault_payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       submit_ad_answers: {
         Args: { p_ad_id: string; p_answers: Json; p_user_id: string }
         Returns: Database["public"]["CompositeTypes"]["ad_answer_result"]
@@ -6777,6 +7887,21 @@ export type Database = {
           score_percent: number
         }[]
       }
+      take_coupon: {
+        Args: {
+          p_amount_minor: number
+          p_code: string
+          p_kind?: Database["public"]["Enums"]["order_kind"]
+          p_product_id: string
+          p_tier_id: string
+          p_user_id: string
+        }
+        Returns: {
+          charged_minor: number
+          coupon_id: string
+          discount_minor: number
+        }[]
+      }
       team_member_ids: {
         Args: { p_user_id: string }
         Returns: {
@@ -6789,55 +7914,21 @@ export type Database = {
         Args: { p_product_id: string; p_user_id: string }
         Returns: number
       }
-      user_has_fresh_ads: { Args: { p_user_id: string }; Returns: boolean }
-      /* Hand-added with migration 191, same reason as the two below. */
-      admin_ad_responses: {
-        Args: {
-          p_admin_id: string
-          p_ad_id?: string | null
-          p_from?: string | null
-          p_to?: string | null
-        }
-        Returns: {
-          answered_at: string
-          ad_title: string
-          ad_format: string
-          ad_id: string
-          question_position: number | null
-          question_text: string
-          answer_format: string
-          graded: boolean
-          answer: string | null
-          option_id: string | null
-          correct: boolean | null
-          occasion: number
-          attempt_number: number
-          watch_seconds: number | null
-          respondent: string
-          phone: string | null
-          user_id: string
-          plan: string
-          points_awarded: number | null
-        }[]
-      }
-      /* Hand-added with migration 187, like `commission_payouts` before it:
-         this repo patches this file rather than regenerating it. */
+      training_level_rank: { Args: { p_level: string }; Returns: number }
+      training_offers_json: { Args: never; Returns: Json }
+      training_upgrade_offer: { Args: { p_user_id: string }; Returns: Json }
       user_ad_allowances: {
         Args: { p_user_id: string }
         Returns: {
-          slot: number
-          tier_id: string
-          slug: string
-          name: string
-          /** How many ads this plan brings at its own rate. */
           ads: number
           multiplier: number
+          name: string
+          slot: number
+          slug: string
+          tier_id: string
         }[]
       }
-      ad_reward_points: {
-        Args: { p_user_id: string; p_base: number; p_done?: number }
-        Returns: number
-      }
+      user_has_fresh_ads: { Args: { p_user_id: string }; Returns: boolean }
       user_target_tiers: {
         Args: { p_user_id: string }
         Returns: {
@@ -6887,7 +7978,13 @@ export type Database = {
       ad_status: "draft" | "active" | "paused" | "exhausted" | "archived"
       advertiser_status: "pending" | "active" | "ended"
       affiliate_entitlement_status: "active" | "expired" | "revoked"
+      affiliate_game_kind: "mystery_box" | "spin_wheel"
       affiliate_status: "pending" | "active" | "suspended"
+      affiliate_task_metric:
+        | "sales"
+        | "referrals"
+        | "games_played"
+        | "leaderboard_rank"
       affiliate_tier: "beginner" | "professional"
       alert_severity: "info" | "warning" | "critical"
       answer_format: "multiple_choice" | "short_text"
@@ -6898,15 +7995,30 @@ export type Database = {
         | "redemption_request"
         | "payout_details_change"
       commission_entry_type: "credit" | "reversal" | "payout" | "adjustment"
-      commission_payout_status: "requested" | "approved" | "paid" | "rejected" | "cancelled"
+      commission_payout_status:
+        | "requested"
+        | "approved"
+        | "paid"
+        | "rejected"
+        | "cancelled"
       commission_status:
         | "pending"
         | "cleared"
         | "requested"
         | "paid"
         | "reversed"
+      community_platform:
+        | "whatsapp"
+        | "telegram"
+        | "x"
+        | "instagram"
+        | "facebook"
+        | "tiktok"
+        | "other"
       config_value_type: "int" | "decimal" | "bool" | "text"
       conversion_status: "attributed" | "reversed"
+      coupon_business: "ads" | "affiliate"
+      coupon_discount_kind: "percent" | "fixed"
       entitlement_status: "active" | "expired" | "revoked"
       fraud_action: "flag" | "block"
       fraud_review_status: "none" | "pending" | "cleared" | "confirmed_fraud"
@@ -6924,7 +8036,9 @@ export type Database = {
         | "gift_code"
         | "game_prize"
         | "task_reward"
+        | "vault_payout"
       lesson_kind: "video" | "article" | "pdf" | "quiz"
+      notification_business: "ads" | "affiliate" | "both"
       notification_type: "announcement" | "payout" | "flag" | "support"
       order_kind: "purchase" | "training_renewal" | "training_upgrade"
       order_payment_method: "paystack" | "crypto"
@@ -7137,7 +8251,14 @@ export const Constants = {
       ad_status: ["draft", "active", "paused", "exhausted", "archived"],
       advertiser_status: ["pending", "active", "ended"],
       affiliate_entitlement_status: ["active", "expired", "revoked"],
+      affiliate_game_kind: ["mystery_box", "spin_wheel"],
       affiliate_status: ["pending", "active", "suspended"],
+      affiliate_task_metric: [
+        "sales",
+        "referrals",
+        "games_played",
+        "leaderboard_rank",
+      ],
       affiliate_tier: ["beginner", "professional"],
       alert_severity: ["info", "warning", "critical"],
       answer_format: ["multiple_choice", "short_text"],
@@ -7149,7 +8270,13 @@ export const Constants = {
         "payout_details_change",
       ],
       commission_entry_type: ["credit", "reversal", "payout", "adjustment"],
-      commission_payout_status: ["requested", "approved", "paid", "rejected", "cancelled"],
+      commission_payout_status: [
+        "requested",
+        "approved",
+        "paid",
+        "rejected",
+        "cancelled",
+      ],
       commission_status: [
         "pending",
         "cleared",
@@ -7157,8 +8284,19 @@ export const Constants = {
         "paid",
         "reversed",
       ],
+      community_platform: [
+        "whatsapp",
+        "telegram",
+        "x",
+        "instagram",
+        "facebook",
+        "tiktok",
+        "other",
+      ],
       config_value_type: ["int", "decimal", "bool", "text"],
       conversion_status: ["attributed", "reversed"],
+      coupon_business: ["ads", "affiliate"],
+      coupon_discount_kind: ["percent", "fixed"],
       entitlement_status: ["active", "expired", "revoked"],
       fraud_action: ["flag", "block"],
       fraud_review_status: ["none", "pending", "cleared", "confirmed_fraud"],
@@ -7176,8 +8314,10 @@ export const Constants = {
         "gift_code",
         "game_prize",
         "task_reward",
+        "vault_payout",
       ],
       lesson_kind: ["video", "article", "pdf", "quiz"],
+      notification_business: ["ads", "affiliate", "both"],
       notification_type: ["announcement", "payout", "flag", "support"],
       order_kind: ["purchase", "training_renewal", "training_upgrade"],
       order_payment_method: ["paystack", "crypto"],
