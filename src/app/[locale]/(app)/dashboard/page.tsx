@@ -9,6 +9,7 @@ import {
   Sparkles,
   TrendingUp,
   Trophy,
+  Vault,
 } from 'lucide-react'
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server'
 
@@ -242,6 +243,16 @@ export default async function HomePage({
           aria-hidden
           className="absolute -right-2 -top-8 -z-10 size-32 rounded-full border border-white/10"
         />
+
+        {/* Top-Right Vault Quick Access */}
+        <Link
+          href="/vault"
+          className="absolute right-4 top-4 z-10 flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[0.75rem] font-semibold text-white backdrop-blur-xs transition-all hover:border-white/40 hover:bg-white/20 active:scale-95"
+        >
+          <Vault className="size-3.5 text-amber-300" />
+          <span>{t('vault') ?? 'Vault'}</span>
+        </Link>
+
         <p className="text-[0.75rem] font-medium uppercase tracking-[0.08em] text-white/70">
           {t('balance')}
         </p>

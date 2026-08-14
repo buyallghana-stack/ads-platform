@@ -29,6 +29,7 @@ import {
   Tag,
   Users,
   Users2,
+  Vault,
   Wallet,
   X,
 } from 'lucide-react'
@@ -98,6 +99,7 @@ const GROUPS: NavGroup[] = [
       { key: 'finance', href: '/admin/finance', Icon: BadgeCheck },
       { key: 'advertisers', href: '/admin/advertisers', Icon: Building2, area: 'ads' },
       { key: 'subscriptions', href: '/admin/subscriptions', Icon: ClipboardList },
+      { key: 'vault', href: '/admin/vault', Icon: Vault },
     ],
   },
   {

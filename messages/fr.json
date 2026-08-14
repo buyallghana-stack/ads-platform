@@ -1492,7 +1492,8 @@
         "tasks": "Objectifs",
         "affiliates": "Affiliés",
         "training": "Formation",
-        "communities": "Communautés"
+        "communities": "Communautés",
+        "vault": "Coffre"
       },
       "viewUserApp": "Voir l’app utilisateur"
     },
@@ -3546,6 +3547,78 @@
         "opinionNote": "{n} réponses · avis, non noté",
         "written": "{n} réponses écrites dans le CSV"
       }
+    },
+    "vault": {
+      "title": "Gestion du Coffre",
+      "subtitle": "Configurez les plans d'investissement, gérez les durées de blocage et les taux de rendement quotidien.",
+      "globalActive": "Le Coffre est Ouvert",
+      "globalPaused": "Le Coffre est en Pause",
+      "enableVault": "Ouvrir le Coffre",
+      "pauseVault": "Mettre en Pause",
+      "vaultEnabledMsg": "Le coffre a été ouvert sur toute la plateforme.",
+      "vaultDisabledMsg": "Le coffre a été mis en pause.",
+      "planSavedMsg": "Le plan de coffre a été enregistré avec succès.",
+      "planDeletedMsg": "Le plan a été supprimé ou désactivé.",
+      "active": "Actif",
+      "inactive": "Inactif",
+      "days": "jours",
+      "profit": "bénéfice",
+      "points": "pts",
+      "metrics": {
+        "totalPlans": "Total Plans",
+        "activePlans": "Actifs",
+        "activeVaults": "Coffres Actifs",
+        "totalDeposits": "Total dépôts utilisateurs",
+        "capitalLocked": "Capital Bloqué",
+        "currentlyLocked": "Principal actuellement bloqué",
+        "claimedPayouts": "Total Versé",
+        "paidToUsers": "Réclamé par les utilisateurs"
+      },
+      "tabs": {
+        "plans": "Plans de Coffre",
+        "investments": "Investissements Utilisateurs"
+      },
+      "plansTable": {
+        "title": "Plans de Coffre Disponibles",
+        "createBtn": "Nouveau Plan",
+        "name": "Plan",
+        "price": "Prix (GHS)",
+        "duration": "Période de blocage",
+        "dailyReturn": "Rendement Quotidien",
+        "totalReturn": "Rendement Total à Échéance",
+        "status": "Statut",
+        "actions": "Actions",
+        "noPlans": "Aucun plan créé pour le moment."
+      },
+      "investmentsTable": {
+        "title": "Investissements Actifs et Réclamés",
+        "user": "Utilisateur",
+        "plan": "Nom du Plan",
+        "deposit": "Principal",
+        "duration": "Durée",
+        "expectedReturn": "Rendement à Échéance",
+        "maturityDate": "Échéance",
+        "status": "Statut",
+        "noInvestments": "Aucun investissement trouvé."
+      },
+      "status": {
+        "active": "Actif",
+        "matured": "Échu",
+        "claimed": "Réclamé"
+      },
+      "modal": {
+        "createTitle": "Créer un Plan de Coffre",
+        "editTitle": "Modifier le Plan",
+        "planName": "Nom du Plan",
+        "description": "Courte Description",
+        "priceGhs": "Montant du Dépôt (GHS)",
+        "periodDays": "Durée de Blocage (Jours)",
+        "dailyReturnPercent": "Taux de Rendement Quotidien (%)",
+        "isActiveLabel": "Actif (visible pour les utilisateurs)",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "saving": "Enregistrement…"
+      }
     }
   },
   "giftCode": {
@@ -4466,5 +4539,69 @@
     "futureTitle": "Projets d'expansion",
     "futureBody": "Nous préparons le lancement dans d'autres pays très bientôt. Restez informés de nos prochaines annonces.",
     "supportNote": "Si vous êtes actuellement au Ghana et pensez qu'il s'agit d'une erreur, veuillez désactiver tout VPN ou proxy actif."
+  },
+  "vault": {
+    "badge": "Rendement & Investissement",
+    "title": "Coffre SidePerks",
+    "subtitle": "Bloquez des fonds dans des plans de coffre et gagnez des rendements quotidiens. Principal et profits débloqués à échéance.",
+    "depositFailed": "Impossible d'initier le paiement. Veuillez réessayer.",
+    "claimedSuccess": "Félicitations ! {points} points ont été crédités sur votre solde.",
+    "profit": "bénéfice",
+    "days": "Jours",
+    "initiatingPayment": "Connexion à Paystack…",
+    "claimBtn": "Réclamer le gain",
+    "claiming": "Réclamation…",
+    "backToDashboard": "Retour à l'accueil",
+    "pausedTitle": "Les Coffres sont Temporairement en Pause",
+    "pausedBody": "La fenêtre d'investissement dans le Coffre est actuellement fermée pour de nouveaux dépôts. Veuillez revenir bientôt.",
+    "stats": {
+      "locked": "Capital Actif Bloqué",
+      "activeCount": "{count, plural, =0 {Aucun coffre actif} one {# coffre actif} other {# coffres渐atifs}}",
+      "projectedProfit": "Profit Garanti",
+      "guaranteedReturn": "Accumulation quotidienne",
+      "totalMaturity": "Total à Échéance",
+      "principalAndProfit": "Principal + Total Profits"
+    },
+    "myVaults": {
+      "title": "Mon Portefeuille de Coffres",
+      "subtitle": "Suivez vos périodes de blocage et réclamez vos gains arrivés à échéance.",
+      "deposit": "Déposé",
+      "daysRemaining": "{days} jours restants",
+      "maturedOn": "Échu le {date}",
+      "maturityPayout": "Versement à Échéance",
+      "claimedPayout": "Versement Réclamé"
+    },
+    "status": {
+      "active": "Actif",
+      "matured": "Échu",
+      "claimed": "Réclamé"
+    },
+    "plans": {
+      "title": "Plans de Coffre Disponibles",
+      "subtitle": "Choisissez un plan pour bloquer votre capital et gagner des intérêts quotidiens garantis.",
+      "depositPrice": "Montant à bloquer",
+      "duration": "Période de blocage",
+      "dailyEarn": "Gain quotidien",
+      "totalProfit": "Bénéfice net total",
+      "totalReturn": "Total à échéance",
+      "depositBtn": "Bloquer dans le Coffre"
+    },
+    "paymentResult": {
+      "success": {
+        "title": "Dépôt dans le Coffre Activé !",
+        "body": "Votre dépôt a été confirmé et votre Coffre est maintenant actif. Les rendements quotidiens s'accumulent désormais.",
+        "cta": "Voir Mon Coffre"
+      },
+      "pending": {
+        "title": "Paiement en Attente",
+        "body": "Nous attendons la confirmation de votre opérateur de paiement. Votre Coffre s'activera dès réception de la confirmation.",
+        "cta": "Aller au Coffre"
+      },
+      "failed": {
+        "title": "Échec du Paiement",
+        "body": "La transaction n'a pas pu aboutir. Aucun fond n'a été prélevé. Vous pouvez réessayer quand vous le souhaitez.",
+        "cta": "Réessayer"
+      }
+    }
   }
 }
