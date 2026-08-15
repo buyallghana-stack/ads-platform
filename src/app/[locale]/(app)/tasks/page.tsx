@@ -2,9 +2,10 @@ import type { Metadata } from 'next'
 
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
-import { TasksView } from '@/components/tasks/TasksView'
+import { TasksAndBonusView } from '@/components/tasks/TasksAndBonusView'
 import { getViewerUser } from '@/lib/auth/session'
 import { getTasks } from '@/lib/tasks/data'
+import { getWeeklyBonusStatus } from '@/lib/weekly-bonus/data'
 
 export async function generateMetadata({
   params,
@@ -30,7 +31,10 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   const user = await getViewerUser()
   if (!user) return null
 
-  const tasks = await getTasks()
+  const [tasks, bonusStatus] = await Promise.all([
+    getTasks(),
+    getWeeklyBonusStatus(),
+  ])
 
-  return <TasksView tasks={tasks} />
+  return <TasksAndBonusView tasks={tasks} bonusStatus={bonusStatus} />
 }

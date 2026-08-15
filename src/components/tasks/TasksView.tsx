@@ -79,12 +79,7 @@ export function TasksView({ tasks }: { tasks: UserTask[] }) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-1 pb-10 pt-2">
-      <header className="animate-rise text-center">
-        <h1 className="text-[1.5rem] font-bold tracking-[-0.02em] text-ink-900">{t('title')}</h1>
-        <p className="mt-1 text-[0.875rem] text-ink-500">{t('subtitle')}</p>
-      </header>
-
+    <>
       {/* The summary earns its place only when there is something to collect. */}
       {claimable > 0 && (
         <div
@@ -234,6 +229,6 @@ export function TasksView({ tasks }: { tasks: UserTask[] }) {
       <p className="mt-5 text-center text-[0.75rem] text-ink-400">
         {t('footer', { claimed, total: rows.length })}
       </p>
-    </div>
+    </>
   )
 }

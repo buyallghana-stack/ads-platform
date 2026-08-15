@@ -4589,6 +4589,10 @@ export type Database = {
         Args: { p_admin_id: string; p_task_id: string }
         Returns: string
       }
+      admin_delete_weekly_bonus_campaign: {
+        Args: { p_admin_id: string; p_campaign_id: string }
+        Returns: string
+      }
       admin_end_view_session: { Args: { p_token: string }; Returns: undefined }
       admin_finance_statement: {
         Args: { p_months?: number }
@@ -5109,6 +5113,24 @@ export type Database = {
           target: number
         }[]
       }
+      admin_list_weekly_bonus_campaigns: {
+        Args: { p_admin_id: string }
+        Returns: {
+          claims_count: number
+          created_at: string
+          description: string | null
+          enrolled_count: number
+          id: string
+          is_active: boolean
+          max_referrals: number | null
+          min_referrals: number
+          name: string
+          reward_minor: number
+          sort_order: number
+          total_paid_minor: number
+          updated_at: string
+        }[]
+      }
       admin_list_tier_game_plays: {
         Args: { p_admin_id: string }
         Returns: {
@@ -5507,6 +5529,10 @@ export type Database = {
       }
       admin_save_task: {
         Args: { p_admin_id: string; p_task: Json }
+        Returns: string
+      }
+      admin_save_weekly_bonus_campaign: {
+        Args: { p_admin_id: string; p_campaign: Json }
         Returns: string
       }
       admin_save_vendor: {
@@ -6028,6 +6054,10 @@ export type Database = {
       }
       claim_task: {
         Args: { p_task_id: string; p_user_id: string }
+        Returns: Json
+      }
+      claim_weekly_bonus: {
+        Args: { p_user_id: string }
         Returns: Json
       }
       claim_vault_investment: {
@@ -6838,6 +6868,22 @@ export type Database = {
           tier_name: string
           tier_slug: string
         }[]
+      }
+      get_active_referral_count: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
+      get_weekly_bonus_status: {
+        Args: never
+        Returns: Json
+      }
+      enroll_weekly_bonus: {
+        Args: never
+        Returns: Json
+      }
+      unenroll_weekly_bonus: {
+        Args: never
+        Returns: Json
       }
       grant_order_entitlements: {
         Args: { p_order_id: string }
@@ -8065,6 +8111,7 @@ export type Database = {
         | "gift_code"
         | "game_prize"
         | "task_reward"
+        | "weekly_bonus"
         | "vault_payout"
         | "vault_deposit"
       lesson_kind: "video" | "article" | "pdf" | "quiz"
@@ -8344,6 +8391,7 @@ export const Constants = {
         "gift_code",
         "game_prize",
         "task_reward",
+        "weekly_bonus",
         "vault_payout",
         "vault_deposit",
       ],

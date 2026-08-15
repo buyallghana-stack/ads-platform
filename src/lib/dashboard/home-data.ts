@@ -88,6 +88,7 @@ const LEDGER_KIND: Record<string, TxKind> = {
   game_prize: 'game',
   // Fourth time. See the note above gift_code.
   task_reward: 'task',
+  weekly_bonus: 'bonus',
   redemption_request: 'withdrawal',
   redemption_refund: 'refund',
   admin_adjustment: 'adjustment',
