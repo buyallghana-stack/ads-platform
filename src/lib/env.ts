@@ -87,8 +87,13 @@ const serverSchema = z.object({
  */
 const parsedClient = clientSchema.safeParse({
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  NEXT_PUBLIC_SITE_URL:
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    'http://localhost:3000',
 })
 
 if (!parsedClient.success) {
@@ -117,7 +122,10 @@ export function serverEnv(): z.infer<typeof serverSchema> {
   if (serverEnvCache) return serverEnvCache
 
   const parsed = serverSchema.safeParse({
-    SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY || undefined,
+    SUPABASE_SECRET_KEY:
+      process.env.SUPABASE_SECRET_KEY ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      undefined,
     PAYOUTS_ENABLED: process.env.PAYOUTS_ENABLED,
     GEO_RESTRICTION_ENABLED: process.env.GEO_RESTRICTION_ENABLED,
     TOTP_SECRET_KEY: process.env.TOTP_SECRET_KEY || undefined,
