@@ -3,13 +3,10 @@
 import { useEffect, useState, useTransition } from 'react'
 
 import {
-  AlertCircle,
   CalendarCheck,
-  Check,
   Clock,
   Coins,
-  Sparkles,
-  Users,
+  Gift,
 } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
@@ -28,16 +25,9 @@ import type {
 /**
  * Weekly Bonus View.
  *
- * Recurring rewards for building an active, paid team across 2 levels (L1 + L2).
- *
- * Requirements & Logic:
- * 1. Referral count is strictly ACTIVE paid users (non-free subscriptions in active/grace status).
- * 2. Automatic tier qualification based on current count.
- * 3. Users can only be enrolled in one campaign tier at a time.
- * 4. A user cannot enter below their qualification level. Clicking on a tier gives direct feedback.
- * 5. Claims happen after the completed weekly cycle (previous completed Monday-Sunday cycle).
+ * Implements recurring rewards for maintaining active referred users on paid plans
+ * across 2 levels (L1 + L2). Follows the standard SidePerks visual design language.
  */
-
 export function WeeklyBonusView({
   status: initialStatus,
 }: {
@@ -56,14 +46,13 @@ export function WeeklyBonusView({
   const [timeRemaining, setTimeRemaining] = useState<string>('')
   const [, startTransition] = useTransition()
 
-  // Calculate live countdown to the next Monday 00:00 UTC (start of next claim cycle)
+  // Calculate live countdown to next Monday 00:00 UTC
   useEffect(() => {
     const updateCountdown = () => {
       const now = new Date()
       const nextMonday = new Date(now)
       nextMonday.setUTCHours(0, 0, 0, 0)
       const day = nextMonday.getUTCDay()
-      // If Sunday (0), next Monday is 1 day away. Otherwise (8 - day) days away.
       const daysUntilMonday = day === 0 ? 1 : 8 - day
       nextMonday.setUTCDate(nextMonday.getUTCDate() + daysUntilMonday)
 
@@ -124,7 +113,7 @@ export function WeeklyBonusView({
     })
   }
 
-  // Handle unenrollment / leaving
+  // Handle unenrollment
   const handleUnenroll = () => {
     if (busy) return
     if (!window.confirm(t('leaveConfirm'))) return
@@ -153,7 +142,7 @@ export function WeeklyBonusView({
     })
   }
 
-  // Handle claiming weekly reward
+  // Handle claim
   const handleClaim = () => {
     if (busy || !status.canClaim) return
     setBusy('claim')
@@ -195,27 +184,23 @@ export function WeeklyBonusView({
     })
   }
 
-  // Handle clicking on an individual campaign card to give instant feedback
+  // Interaction feedback when clicking on a tier card
   const handleTierClick = (campaign: WeeklyBonusCampaign) => {
     const activeCount = status.activeReferrals
     const minRequired = campaign.minReferrals
     const maxAllowed = campaign.maxReferrals
 
-    // Scenario 1: User has not met minimum requirement overall (< 20 active referrals)
+    // Rule 1: User has < 20 active referrals
     if (activeCount < 20) {
       showToast('error', t('notQualified', { min: minRequired }))
       return
     }
 
-    // Scenario 2: User has more referrals than this tier's maximum
+    // Rule 2: User has more referrals than this tier
     if (maxAllowed !== null && activeCount > maxAllowed) {
-      const higherTier =
-        status.matchedCampaign?.name ?? t('yourTier')
+      const higherTier = status.matchedCampaign?.name ?? t('yourTier')
       const higherReward = status.matchedCampaign
-        ? format.number(status.matchedCampaign.rewardGhs, {
-            style: 'currency',
-            currency: 'GHS',
-          })
+        ? `GHS ${format.number(status.matchedCampaign.rewardGhs, { minimumFractionDigits: 2 })}/${t('weekShort')}`
         : ''
       showToast(
         'info',
@@ -228,14 +213,14 @@ export function WeeklyBonusView({
       return
     }
 
-    // Scenario 3: User hasn't reached this higher tier yet
+    // Rule 3: User needs more referrals to reach this tier
     if (activeCount < minRequired) {
       const needed = minRequired - activeCount
       showToast('info', t('needMoreReferrals', { count: needed }))
       return
     }
 
-    // Scenario 4: User is on this tier! If not enrolled, enroll them
+    // Rule 4: User is currently on this tier
     if (!status.enrolled) {
       handleEnroll()
     } else {
@@ -244,10 +229,7 @@ export function WeeklyBonusView({
         t('overQualified', {
           count: activeCount,
           campaign: campaign.name,
-          reward: format.number(campaign.rewardGhs, {
-            style: 'currency',
-            currency: 'GHS',
-          }),
+          reward: `GHS ${format.number(campaign.rewardGhs, { minimumFractionDigits: 2 })}/${t('weekShort')}`,
         }),
       )
     }
@@ -260,39 +242,125 @@ export function WeeklyBonusView({
   )
 
   return (
-    <div className="space-y-4">
-      {/* Toast Alert */}
-      {toast && (
-        <div
-          role="alert"
-          className={cn(
-            'animate-rise flex items-center justify-center gap-2 rounded-(--radius-input) border px-4 py-2.5 text-center text-[0.8125rem] font-medium shadow-sm transition-all',
-            toast.type === 'error'
-              ? 'border-danger-500/30 bg-danger-50 text-danger-700'
-              : toast.type === 'success'
-                ? 'border-success-500/30 bg-success-50 text-success-700'
-                : 'border-brand-500/30 bg-brand-50 text-brand-700',
-          )}
-        >
-          {toast.type === 'error' ? (
-            <AlertCircle aria-hidden className="size-4 shrink-0" />
-          ) : toast.type === 'success' ? (
-            <Check aria-hidden className="size-4 shrink-0" />
-          ) : (
-            <Sparkles aria-hidden className="size-4 shrink-0" />
-          )}
-          <span>{toast.message}</span>
-        </div>
-      )}
+    <>
+      {/* ---- Active Referrals & Status Meter Card ----------------------- */}
+      <section
+        style={{ '--rise-delay': '0.05s' } as React.CSSProperties}
+        className="animate-rise rounded-(--radius-panel) border border-ink-200 bg-surface px-4 py-3.5 sm:px-5"
+      >
+        <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+          <div>
+            <p className="text-[0.6875rem] font-semibold tracking-[0.08em] text-ink-400 uppercase">
+              {t('activeReferrals')}
+            </p>
+            <p className="mt-1 text-[1.375rem] leading-none font-bold text-ink-900 tabular-nums">
+              {format.number(status.activeReferrals)}
+              <span className="text-[0.8125rem] font-medium text-ink-400">
+                {' '}{t('levelsCombinedHint')}
+              </span>
+            </p>
+          </div>
 
-      {/* Claim Celebration Banner */}
+          <div className="text-right">
+            <p className="text-[0.6875rem] font-semibold tracking-[0.08em] text-ink-400 uppercase">
+              {status.enrolled ? t('currentStatus') : t('programme')}
+            </p>
+            {status.enrolled ? (
+              <p className="mt-1 text-[0.875rem] leading-none font-semibold text-brand-600">
+                {status.matchedCampaign ? (
+                  <>
+                    GHS {format.number(status.matchedCampaign.rewardGhs, { minimumFractionDigits: 2 })}
+                    <span className="text-[0.75rem] font-medium text-ink-400">/{t('weekShort')}</span>
+                  </>
+                ) : (
+                  <span className="text-[0.75rem] text-ink-400">{t('pendingQualification')}</span>
+                )}
+              </p>
+            ) : (
+              <p className="mt-1 text-[0.8125rem] leading-none font-semibold text-ink-500">
+                {t('notEnrolled')}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Level 1 + Level 2 helper note */}
+        <p className="mt-2.5 text-[0.75rem] text-ink-500">
+          {t('levelsCombined')}
+        </p>
+
+        {/* Card action row (Join, Claim, or Countdown) */}
+        <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2.5 border-t border-ink-100 pt-3">
+          {!status.enrolled ? (
+            <div className="flex w-full items-center justify-between gap-3">
+              <span className="text-[0.8125rem] text-ink-600">
+                {status.activeReferrals >= 20
+                  ? t('qualifiedToJoin', { tier: qualifyingTier?.name ?? '' })
+                  : t('needMinimumToJoin', { min: 20 })}
+              </span>
+              <Button
+                size="sm"
+                onClick={handleEnroll}
+                loading={busy === 'enroll'}
+                disabled={busy !== null}
+              >
+                <CalendarCheck aria-hidden className="size-4" />
+                {t('joinButton')}
+              </Button>
+            </div>
+          ) : status.canClaim ? (
+            <div className="flex w-full items-center justify-between gap-3">
+              <span className="text-[0.8125rem] font-semibold text-success-700">
+                {t('claimAvailable')}
+              </span>
+              <Button
+                size="sm"
+                onClick={handleClaim}
+                loading={busy === 'claim'}
+                disabled={busy !== null}
+              >
+                {t('claimButton', {
+                  amount: format.number(status.matchedCampaign?.rewardGhs ?? 0, {
+                    minimumFractionDigits: 2,
+                  }),
+                })}
+              </Button>
+            </div>
+          ) : (
+            <div className="flex w-full items-center justify-between gap-2 text-[0.75rem] text-ink-500">
+              <div className="flex items-center gap-1.5">
+                <Clock aria-hidden className="size-3.5 text-ink-400" />
+                <span>
+                  {t('nextClaimIn')}{' '}
+                  <span className="font-semibold text-ink-900 tabular-nums">
+                    {timeRemaining || '...'}
+                  </span>
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleUnenroll}
+                disabled={busy !== null}
+                className="text-[0.6875rem] font-medium text-ink-400 transition-colors hover:text-danger-600"
+              >
+                {t('leaveButton')}
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Claim Celebration Banner matching Tasks summary style */}
       {won && (
         <div
           role="status"
-          className="animate-rise flex items-center justify-center gap-2.5 rounded-(--radius-panel) border border-success-500/30 bg-success-50 p-4 text-center text-success-800"
+          style={{ '--rise-delay': '0.06s' } as React.CSSProperties}
+          className="animate-rise mt-4 flex items-center gap-3 rounded-(--radius-panel) border border-success-500/25 bg-success-50 px-4 py-3"
         >
-          <Coins aria-hidden className="size-5 shrink-0 text-success-600" />
-          <p className="text-[0.9375rem] font-bold">
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-success-500/15 text-success-700">
+            <Coins aria-hidden className="size-4.5" />
+          </span>
+          <p className="text-[0.8125rem] font-semibold text-success-700">
             {t('claimed', {
               amount: format.number(won.amount, { minimumFractionDigits: 2 }),
               campaign: won.campaignName,
@@ -301,181 +369,78 @@ export function WeeklyBonusView({
         </div>
       )}
 
-      {/* Active Referrals Hero Card */}
-      <section
-        className="animate-rise relative overflow-hidden rounded-(--radius-panel) border border-ink-200 bg-surface p-5 shadow-xs"
-        style={{ '--rise-delay': '0s' } as React.CSSProperties}
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-start gap-3.5">
-            <div className="grid size-11 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-600">
-              <Users aria-hidden className="size-5.5" />
-            </div>
-            <div>
-              <p className="text-[0.6875rem] font-semibold tracking-[0.08em] text-ink-400 uppercase">
-                {t('activeReferrals')}
-              </p>
-              <div className="mt-0.5 flex items-baseline gap-2">
-                <span className="text-[1.875rem] leading-none font-bold text-ink-900 tabular-nums">
-                  {format.number(status.activeReferrals)}
-                </span>
-                <span className="text-[0.8125rem] text-ink-500">
-                  {t('referralCount', { count: status.activeReferrals })}
-                </span>
-              </div>
-              <p className="mt-1 text-[0.75rem] text-ink-400">
-                {t('levelsCombined')}
-              </p>
-            </div>
-          </div>
+      {/* Feedback Toast / Alert matching Tasks style */}
+      {toast && (
+        <p
+          role="alert"
+          className={cn(
+            'animate-rise mt-4 rounded-(--radius-input) border px-3.5 py-2.5 text-center text-[0.8125rem]',
+            toast.type === 'error'
+              ? 'border-danger-500/25 bg-danger-50 text-danger-700'
+              : toast.type === 'success'
+                ? 'border-success-500/25 bg-success-50 text-success-700'
+                : 'border-brand-500/25 bg-brand-50 text-brand-700',
+          )}
+        >
+          {toast.message}
+        </p>
+      )}
 
-          {/* User Status / Action Button */}
-          <div className="flex flex-col sm:items-end gap-2">
-            {status.enrolled ? (
-              <>
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-success-50 px-2.5 py-1 text-[0.75rem] font-bold text-success-700">
-                    <span aria-hidden className="size-1.5 rounded-full bg-success-500" />
-                    {t('enrolled')}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleUnenroll}
-                    disabled={busy !== null}
-                    className="text-[0.75rem] font-medium text-ink-400 hover:text-danger-600 transition-colors"
-                  >
-                    {t('leaveButton')}
-                  </button>
-                </div>
+      {/* Campaign Tiers List matching TasksView / TeamView style */}
+      {status.campaigns.length === 0 ? (
+        <p className="mt-6 rounded-(--radius-panel) border border-dashed border-ink-200 px-6 py-12 text-center text-[0.875rem] text-ink-500">
+          {t('noCampaigns')}
+        </p>
+      ) : (
+        <ol className="mt-4 space-y-2.5">
+          {status.campaigns.map((campaign, index) => {
+            const isUserTier = qualifyingTier?.id === campaign.id
+            const isAboveQualification =
+              campaign.maxReferrals !== null &&
+              status.activeReferrals > campaign.maxReferrals
 
-                {status.matchedCampaign && (
-                  <p className="text-[0.8125rem] font-semibold text-ink-700">
-                    {status.matchedCampaign.name} ·{' '}
-                    <span className="text-brand-600">
-                      GHS{' '}
-                      {format.number(status.matchedCampaign.rewardGhs, {
-                        minimumFractionDigits: 2,
-                      })}
-                      /{t('weekShort')}
-                    </span>
-                  </p>
+            return (
+              <li
+                key={campaign.id}
+                onClick={() => handleTierClick(campaign)}
+                style={
+                  {
+                    '--rise-delay': `${0.08 + Math.min(index, 10) * 0.02}s`,
+                  } as React.CSSProperties
+                }
+                className={cn(
+                  'animate-rise flex cursor-pointer items-center justify-between rounded-(--radius-panel) border bg-surface p-4 transition-colors',
+                  isUserTier
+                    ? 'border-brand-500/40 shadow-[0_1px_2px_rgb(15_23_42/0.06)]'
+                    : 'border-ink-200 hover:border-ink-300',
+                  isAboveQualification && 'opacity-65',
                 )}
-              </>
-            ) : (
-              <Button
-                onClick={handleEnroll}
-                loading={busy === 'enroll'}
-                disabled={busy !== null}
-                size="md"
               >
-                <CalendarCheck aria-hidden className="size-4" />
-                {t('joinButton')}
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Claim Bar / Countdown */}
-        {status.enrolled && (
-          <div className="mt-4 pt-4 border-t border-ink-100 flex flex-wrap items-center justify-between gap-3">
-            {status.canClaim ? (
-              <div className="flex items-center justify-between w-full gap-3">
-                <div className="flex items-center gap-2 text-success-700">
-                  <Sparkles aria-hidden className="size-4 text-success-600" />
-                  <span className="text-[0.8125rem] font-semibold">
-                    {t('claimAvailable')}
+                <div className="flex min-w-0 items-center gap-3">
+                  <span
+                    className={cn(
+                      'grid size-10 shrink-0 place-items-center rounded-full text-base',
+                      isUserTier
+                        ? 'bg-brand-50 text-brand-600'
+                        : 'bg-ink-100 text-ink-500',
+                    )}
+                  >
+                    <Gift aria-hidden className="size-5" />
                   </span>
-                </div>
-                <Button
-                  size="sm"
-                  onClick={handleClaim}
-                  loading={busy === 'claim'}
-                  disabled={busy !== null}
-                >
-                  {t('claimButton', {
-                    amount: format.number(
-                      status.matchedCampaign?.rewardGhs ?? 0,
-                      { minimumFractionDigits: 2 },
-                    ),
-                  })}
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 text-ink-500 text-[0.8125rem]">
-                <Clock aria-hidden className="size-4 text-ink-400" />
-                <span>
-                  {t('nextClaimIn')}{' '}
-                  <span className="font-semibold text-ink-900 tabular-nums">
-                    {timeRemaining || '...'}
-                  </span>
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-      </section>
 
-      {/* Campaign Tiers List */}
-      <section
-        className="animate-rise space-y-2.5"
-        style={{ '--rise-delay': '0.05s' } as React.CSSProperties}
-      >
-        <div className="flex items-center justify-between px-1">
-          <h2 className="text-[0.9375rem] font-semibold text-ink-900">
-            {t('campaignTiers')}
-          </h2>
-          <span className="text-[0.75rem] text-ink-400">
-            {status.campaigns.length} tiers
-          </span>
-        </div>
-
-        {status.campaigns.length === 0 ? (
-          <p className="rounded-(--radius-panel) border border-dashed border-ink-200 px-6 py-12 text-center text-[0.875rem] text-ink-500">
-            {t('noCampaigns')}
-          </p>
-        ) : (
-          <ol className="space-y-2">
-            {status.campaigns.map((campaign, index) => {
-              const isUserTier = qualifyingTier?.id === campaign.id
-              const isAboveQualification =
-                campaign.maxReferrals !== null &&
-                status.activeReferrals > campaign.maxReferrals
-
-              return (
-                <li
-                  key={campaign.id}
-                  onClick={() => handleTierClick(campaign)}
-                  style={
-                    {
-                      '--rise-delay': `${0.06 + Math.min(index, 10) * 0.02}s`,
-                    } as React.CSSProperties
-                  }
-                  className={cn(
-                    'animate-rise flex cursor-pointer items-center justify-between rounded-(--radius-panel) border p-3.5 transition-all',
-                    isUserTier
-                      ? 'border-brand-500/50 bg-brand-50/50 shadow-xs ring-1 ring-brand-500/20'
-                      : 'border-ink-200 bg-surface hover:border-ink-300 hover:bg-canvas/40',
-                    isAboveQualification && 'opacity-70',
-                  )}
-                >
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <p
-                        className={cn(
-                          'text-[0.875rem] font-semibold truncate',
-                          isUserTier ? 'text-brand-950' : 'text-ink-900',
-                        )}
-                      >
+                      <p className="truncate text-[0.875rem] font-semibold text-ink-900">
                         {campaign.name}
                       </p>
                       {isUserTier && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-brand-600 px-2 py-0.5 text-[0.6875rem] font-bold text-white shadow-xs">
+                        <span className="rounded-full border border-brand-500/30 bg-brand-50 px-2 py-0.5 text-[0.6875rem] font-bold text-brand-700">
                           ⭐ {t('yourTier')}
                         </span>
                       )}
                     </div>
 
-                    <p className="mt-0.5 text-[0.75rem] text-ink-500 font-mono">
+                    <p className="mt-0.5 font-mono text-[0.75rem] text-ink-500">
                       {campaign.maxReferrals === null
                         ? t('referralsRangeOpen', {
                             min: campaign.minReferrals,
@@ -486,31 +451,24 @@ export function WeeklyBonusView({
                           })}
                     </p>
                   </div>
+                </div>
 
-                  <div className="flex shrink-0 items-center gap-3 text-right">
-                    <div>
-                      <p
-                        className={cn(
-                          'text-[0.9375rem] font-bold tabular-nums',
-                          isUserTier ? 'text-brand-700' : 'text-success-700',
-                        )}
-                      >
-                        GHS{' '}
-                        {format.number(campaign.rewardGhs, {
-                          minimumFractionDigits: 2,
-                        })}
-                      </p>
-                      <p className="text-[0.6875rem] text-ink-400">
-                        /{t('week')}
-                      </p>
-                    </div>
-                  </div>
-                </li>
-              )
-            })}
-          </ol>
-        )}
-      </section>
-    </div>
+                <div className="shrink-0 text-right">
+                  <p className="text-[0.9375rem] font-bold tabular-nums text-ink-900">
+                    GHS{' '}
+                    {format.number(campaign.rewardGhs, {
+                      minimumFractionDigits: 2,
+                    })}
+                  </p>
+                  <p className="text-[0.6875rem] text-ink-400">
+                    /{t('week')}
+                  </p>
+                </div>
+              </li>
+            )
+          })}
+        </ol>
+      )}
+    </>
   )
 }

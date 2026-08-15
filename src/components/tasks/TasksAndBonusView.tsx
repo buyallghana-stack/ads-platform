@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Gift, Target } from 'lucide-react'
+
+import { CalendarCheck, Target } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { TasksView } from '@/components/tasks/TasksView'
@@ -20,20 +21,37 @@ export function TasksAndBonusView({
   tasks: UserTask[]
   bonusStatus: WeeklyBonusStatus
 }) {
-  const t = useTranslations('tasks')
+  const tTasks = useTranslations('tasks')
+  const tBonus = useTranslations('weeklyBonus')
   const [tab, setTab] = useState<Tab>('tasks')
+
+  const claimableTasks = tasks.filter((t) => t.claimable).length
+  const canClaimBonus = bonusStatus.enrolled && bonusStatus.canClaim
 
   return (
     <div className="mx-auto w-full max-w-2xl px-1 pb-10 pt-2">
-      {/* Segmented toggle matching the Ads page pattern */}
+      {/* Page Header matching SidePerks pattern */}
+      <header className="animate-rise text-center">
+        <h1 className="text-[1.5rem] font-bold tracking-[-0.02em] text-ink-900">
+          {tab === 'tasks' ? tTasks('title') : tBonus('title')}
+        </h1>
+        <p className="mt-1 text-[0.875rem] text-ink-500">
+          {tab === 'tasks' ? tTasks('subtitle') : tBonus('subtitle')}
+        </p>
+      </header>
+
+      {/* Segmented toggle matching the Ads / Team page pattern */}
       <div
         role="tablist"
-        aria-label={t('tabs.label')}
-        className="animate-rise mb-4 flex gap-1 rounded-(--radius-input) bg-ink-100 p-1"
+        aria-label={tTasks('tabs.label')}
+        style={{ '--rise-delay': '0.04s' } as React.CSSProperties}
+        className="animate-rise mt-4 flex gap-1 rounded-(--radius-input) bg-ink-100 p-1"
       >
         {TABS.map((key) => {
           const selected = key === tab
-          const Icon = key === 'tasks' ? Target : Gift
+          const Icon = key === 'tasks' ? Target : CalendarCheck
+          const badgeCount = key === 'tasks' ? claimableTasks : canClaimBonus ? 1 : 0
+
           return (
             <button
               key={key}
@@ -51,16 +69,26 @@ export function TasksAndBonusView({
             >
               <Icon
                 aria-hidden
-                className={cn('hidden size-4 shrink-0 sm:block', selected ? 'text-brand-600' : 'text-ink-400')}
+                className={cn(
+                  'hidden size-4 shrink-0 sm:block',
+                  selected ? 'text-brand-600' : 'text-ink-400',
+                )}
               />
-              <span className="truncate">{t(`tabs.${key}`)}</span>
+              <span className="truncate">
+                {key === 'tasks' ? tTasks('tabs.tasks') : tTasks('tabs.bonus')}
+              </span>
+              {badgeCount > 0 && (
+                <span className="inline-flex size-5 items-center justify-center rounded-full bg-brand-600 text-[0.6875rem] font-bold text-white">
+                  {badgeCount}
+                </span>
+              )}
             </button>
           )
         })}
       </div>
 
-      {/* Tab panels */}
-      <div role="tabpanel">
+      {/* Tab Panels */}
+      <div role="tabpanel" className="mt-4">
         {tab === 'tasks' ? (
           <TasksView tasks={tasks} />
         ) : (
