@@ -4695,7 +4695,9 @@
       "subtitle": "Suivez vos périodes de blocage et réclamez vos gains arrivés à échéance.",
       "deposit": "Déposé",
       "daysRemaining": "{days} jours restants",
+      "timeRemaining": "{time} restant",
       "maturedOn": "Échu le {date}",
+      "claimedOn": "Réclamé le {date}",
       "maturityPayout": "Versement à Échéance",
       "claimedPayout": "Versement Réclamé"
     },

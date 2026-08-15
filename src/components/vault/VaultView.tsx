@@ -222,12 +222,11 @@ export function VaultView({
               const endDate = new Date(inv.endsAt)
               const now = new Date()
               const isMatured = now >= endDate
-              const totalDays = inv.periodDays
-              const diffMs = endDate.getTime() - now.getTime()
-              const daysRemaining = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)))
+              const totalDurationMs = Math.max(1, endDate.getTime() - startDate.getTime())
+              const elapsedMs = Math.max(0, now.getTime() - startDate.getTime())
               const progressPercent = isMatured
                 ? 100
-                : Math.min(100, Math.max(0, Math.round(((totalDays - daysRemaining) / totalDays) * 100)))
+                : Math.min(100, Math.max(0, Math.round((elapsedMs / totalDurationMs) * 100)))
 
               return (
                 <div
@@ -288,17 +287,23 @@ export function VaultView({
                       </div>
                     </div>
 
-                    {/* Progress Bar */}
+                    {/* Progress Bar & Live Countdown Timer */}
                     <div className="mt-3">
-                      <div className="flex justify-between text-[0.6875rem] text-ink-500">
-                        <span>
-                          {isMatured
-                            ? t('myVaults.maturedOn', { date: format.dateTime(endDate, { dateStyle: 'medium' }) })
-                            : t('myVaults.daysRemaining', { days: daysRemaining })}
+                      <div className="flex items-center justify-between text-[0.6875rem] text-ink-500">
+                        <span className="flex items-center gap-1.5">
+                          {inv.status === 'claimed' ? (
+                            <span>{t('myVaults.claimedOn', { date: format.dateTime(new Date(inv.claimedAt ?? inv.updatedAt), { dateStyle: 'medium' }) })}</span>
+                          ) : isMatured ? (
+                            <span className="font-medium text-amber-700">
+                              {t('myVaults.maturedOn', { date: format.dateTime(endDate, { dateStyle: 'medium' }) })}
+                            </span>
+                          ) : (
+                            <VaultCountdown endDate={endDate} />
+                          )}
                         </span>
-                        <span>{progressPercent}%</span>
+                        <span className="font-mono font-semibold tabular-nums text-ink-700">{progressPercent}%</span>
                       </div>
-                      <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-ink-100">
+                      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-ink-100">
                         <div
                           className={cn(
                             'h-full rounded-full transition-all duration-500',
@@ -668,3 +673,43 @@ function Stat({ label, value }: { label: string; value: string }) {
     </div>
   )
 }
+
+function VaultCountdown({
+  endDate,
+  onExpire,
+}: {
+  endDate: Date
+  onExpire?: () => void
+}) {
+  const t = useTranslations('vault')
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const current = Date.now()
+      setNow(current)
+      if (current >= endDate.getTime() && onExpire) {
+        onExpire()
+      }
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [endDate, onExpire])
+
+  const diffMs = endDate.getTime() - now
+  if (diffMs <= 0) return null
+
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((diffMs / (1000 * 60 * 60)) % 24)
+  const minutes = Math.floor((diffMs / (1000 * 60)) % 60)
+  const seconds = Math.floor((diffMs / 1000) % 60)
+
+  const timeString = `${days > 0 ? `${days}d ` : ''}${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`
+
+  return (
+    <span className="inline-flex items-center gap-1 font-mono font-medium tabular-nums text-violet-700 dark:text-violet-400">
+      <Clock aria-hidden className="size-3 shrink-0 text-violet-500" />
+      <span>{t('myVaults.timeRemaining', { time: timeString })}</span>
+    </span>
+  )
+}
+

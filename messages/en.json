@@ -4696,7 +4696,9 @@
       "subtitle": "Track your active lock durations and claim matured returns.",
       "deposit": "Deposited",
       "daysRemaining": "{days} days remaining",
+      "timeRemaining": "{time} remaining",
       "maturedOn": "Matured on {date}",
+      "claimedOn": "Claimed on {date}",
       "maturityPayout": "Payout at Maturity",
       "claimedPayout": "Claimed Payout"
     },
