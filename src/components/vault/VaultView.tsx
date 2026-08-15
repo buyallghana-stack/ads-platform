@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 
 import {
   AlertCircle,
@@ -292,7 +292,7 @@ export function VaultView({
                       <div className="flex items-center justify-between text-[0.6875rem] text-ink-500">
                         <span className="flex items-center gap-1.5">
                           {inv.status === 'claimed' ? (
-                            <span>{t('myVaults.claimedOn', { date: format.dateTime(new Date(inv.claimedAt ?? inv.updatedAt), { dateStyle: 'medium' }) })}</span>
+                            <span>{t('myVaults.claimedOn', { date: format.dateTime(new Date(inv.claimedAt ?? inv.createdAt), { dateStyle: 'medium' }) })}</span>
                           ) : isMatured ? (
                             <span className="font-medium text-amber-700">
                               {t('myVaults.maturedOn', { date: format.dateTime(endDate, { dateStyle: 'medium' }) })}
