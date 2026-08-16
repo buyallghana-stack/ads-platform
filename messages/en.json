@@ -3132,7 +3132,7 @@
         "claims": "{count} claims",
         "paid": "GHS {amount} paid"
       },
-      "range": "{min}–{max} referrals",
+      "range": "{min} to {max} referrals",
       "rangeOpen": "{min}+ referrals",
       "reward": "GHS {amount}/week",
       "errors": {
@@ -3842,14 +3842,14 @@
     "weekShort": "wk",
     "referrals": "referrals",
     "you": "You",
-    "referralsRange": "{min}–{max} referrals",
+    "referralsRange": "{min} to {max} referrals",
     "referralsRangeOpen": "{min}+ referrals",
     "campaignTiers": "Campaign Tiers",
     "enrolled": "Enrolled",
     "notQualified": "You need at least {min} active referrals with paid plans to qualify.",
-    "overQualified": "You have {count} active referrals — you automatically qualify for {campaign} ({reward}/week).",
+    "overQualified": "You have {count} active referrals: you automatically qualify for {campaign} ({reward}/week).",
     "needMoreReferrals": "You need {count} more active {count, plural, one {referral} other {referrals}} to qualify for this tier.",
-    "cannotJoinLower": "You have {count} active referrals — you qualify for {campaign} ({reward}/week) and cannot enter a lower campaign.",
+    "cannotJoinLower": "You have {count} active referrals: you qualify for {campaign} ({reward}/week) and cannot enter a lower campaign.",
     "countDropped": "Your active referrals dropped to {count}. You need at least {min} to claim.",
     "noCampaigns": "No weekly bonus campaigns are running right now. Check back soon.",
     "errors": {
