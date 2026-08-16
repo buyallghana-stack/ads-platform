@@ -159,7 +159,7 @@ export async function getAdsData(userId: string): Promise<AdsData> {
     youtubeId: r.youtube_video_id,
     thumbnailUrl: adThumbnailUrl(r),
     durationSeconds: r.duration_seconds,
-    minWatchSeconds: r.min_watch_seconds,
+    minWatchSeconds: r.format === 'video' || r.format === 'link' ? 10 : r.min_watch_seconds,
     questionCount: r.question_count,
     gradedCount: r.graded_count,
     attemptsRemaining: r.attempts_remaining,

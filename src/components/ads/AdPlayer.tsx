@@ -140,8 +140,9 @@ export function AdPlayer({
     test. Mirroring it here is what stops the client submitting into a
     guaranteed 'too_fast'; the server still decides.
   */
-  const requiredWatch =
-    ad.minWatchSeconds ?? (ad.questionCount === 0 ? (ad.durationSeconds ?? 0) : 0)
+  const requiredWatch = isVideo
+    ? (ad.minWatchSeconds ?? 10)
+    : (ad.minWatchSeconds ?? (ad.questionCount === 0 ? (ad.durationSeconds ?? 0) : 0))
 
   /*
     Is there any film left? The end event is the reliable half; the clock is

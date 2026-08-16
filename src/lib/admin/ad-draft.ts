@@ -68,11 +68,11 @@ export function blankQuestion(format: AdFormat): AdQuestionDraft {
  * `linkDwellSeconds` comes from `link_dwell_seconds_default`, which is the
  * operator's one lever over how hard this format is to farm. It is passed in
  * rather than read here because this module is pure — and defaulted to the
- * same 15 the config row ships with, so a caller that cannot reach the
+ * same 10 the config row ships with, so a caller that cannot reach the
  * database still produces a legal ad rather than one the shape constraint
  * rejects.
  */
-export function blankDraft(format: AdFormat, linkDwellSeconds = 15): AdDraft {
+export function blankDraft(format: AdFormat, linkDwellSeconds = 10): AdDraft {
   return {
     id: null,
     title: '',
@@ -91,9 +91,8 @@ export function blankDraft(format: AdFormat, linkDwellSeconds = 15): AdDraft {
     youtubeId: null,
     thumbnailPath: null,
     durationSeconds: null,
-    // On a link ad this is the reading time before the link will pay, and the
-    // database requires it — so it is never null for one.
-    minWatchSeconds: format === 'link' ? linkDwellSeconds : null,
+    // Mandatory watch/read duration for video and article ads
+    minWatchSeconds: format === 'video' ? 10 : format === 'link' ? linkDwellSeconds : null,
     maxCompletions: 5000,
     weight: 100,
     startsAt: null,

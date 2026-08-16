@@ -205,8 +205,8 @@ export function AdCard({
             >
               {/* A link ad's reading time is a real number the user is held to,
                   so it goes where a video puts its length. */}
-              {isLink && ad.minWatchSeconds
-                ? t('card.readSeconds', { seconds: ad.minWatchSeconds })
+              {isLink
+                ? t('card.readSeconds', { seconds: ad.minWatchSeconds ?? 10 })
                 : (duration ?? t('card.quick'))}
             </span>
           )}

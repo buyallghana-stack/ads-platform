@@ -64,8 +64,9 @@ export function LinkAdReader({
 
   const [phase, setPhase] = useState<Phase>('starting')
   const [result, setResult] = useState<SubmitAdResult | null>(null)
+  const minReadSeconds = ad.minWatchSeconds ?? 10
   /** Seconds of reading still required. Seeded from the ad, ticked locally. */
-  const [remaining, setRemaining] = useState(ad.minWatchSeconds ?? 0)
+  const [remaining, setRemaining] = useState(minReadSeconds)
   /** Bumped by a retry, which re-registers the view and restarts the clock. */
   const [runKey, setRunKey] = useState(0)
   /** The "leave this ad?" dialog — the same one a video and a survey show. */
@@ -88,13 +89,13 @@ export function LinkAdReader({
         setPhase('unavailable')
         return
       }
-      setRemaining(ad.minWatchSeconds ?? 0)
+      setRemaining(minReadSeconds)
       setPhase('reading')
     })
     return () => {
       cancelled = true
     }
-  }, [ad.id, ad.minWatchSeconds, runKey])
+  }, [ad.id, minReadSeconds, runKey])
 
   // ---- The reading countdown ---------------------------------------------
   useEffect(() => {
@@ -117,7 +118,7 @@ export function LinkAdReader({
    * points are already paid, leaving costs nothing and a confirmation would
    * only teach people to dismiss confirmations without reading them.
    */
-  const secondsRead = Math.max((ad.minWatchSeconds ?? 0) - remaining, 0)
+  const secondsRead = Math.max(minReadSeconds - remaining, 0)
   const hasProgress = phase === 'reading' && secondsRead > 0
 
   const requestClose = useCallback(() => {
@@ -321,9 +322,9 @@ export function LinkAdReader({
           progress={
             <>
               <LeaveFact className="mt-1.5">
-                {t('leave.read', { seconds: secondsRead, total: ad.minWatchSeconds ?? 0 })}
+                {t('leave.read', { seconds: secondsRead, total: minReadSeconds })}
               </LeaveFact>
-              <LeaveBar fraction={secondsRead / Math.max(ad.minWatchSeconds ?? 1, 1)} />
+              <LeaveBar fraction={secondsRead / Math.max(minReadSeconds, 1)} />
             </>
           }
         />

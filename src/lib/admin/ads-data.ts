@@ -135,7 +135,7 @@ export async function getAdEditorContext(): Promise<{
       sortOrder: t.sort_order ?? 0,
     })),
     pointsPerGhs: Number(config.get('points_per_currency_unit') ?? 1000),
-    linkDwellSeconds: Number(config.get('link_dwell_seconds_default') ?? 15),
+    linkDwellSeconds: Number(config.get('link_dwell_seconds_default') ?? 10),
   }
 }
 
