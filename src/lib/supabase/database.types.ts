@@ -8159,6 +8159,7 @@ export type Database = {
         | "has_avatar"
         | "has_withdrawal_pin"
         | "referrals_purchased"
+        | "vault_deposits_made"
       user_ad_status: "in_progress" | "completed" | "failed_locked"
       vendor_status: "active" | "archived"
       video_source: "upload" | "youtube"
@@ -8442,6 +8443,7 @@ export const Constants = {
         "has_avatar",
         "has_withdrawal_pin",
         "referrals_purchased",
+        "vault_deposits_made",
       ],
       user_ad_status: ["in_progress", "completed", "failed_locked"],
       vendor_status: ["active", "archived"],

@@ -3098,7 +3098,8 @@
         "has_2fa": "Double authentification activée",
         "has_avatar": "Photo de profil définie",
         "has_withdrawal_pin": "Code de retrait défini",
-        "referrals_purchased": "Filleuls ayant acheté un forfait"
+        "referrals_purchased": "Filleuls ayant acheté un forfait",
+        "vault_deposits_made": "Dépôts dans le coffre-fort effectués"
       }
     },
     "affiliates": {

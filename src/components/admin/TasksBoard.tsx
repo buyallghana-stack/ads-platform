@@ -39,6 +39,7 @@ const ONE_SHOT_METRICS: TaskMetric[] = [
 const EMOJI_SUGGESTIONS = [
   '🎉', '📸', '▶️', '🍿', '🗳️', '🔐', '🛡️', '💎',
   '🪙', '🤝', '🏆', '💸', '🎰', '🎯', '🔥', '⭐',
+  '🏦', '💰', '👋', '👑',
 ]
 
 const blank = (): TaskInput => ({

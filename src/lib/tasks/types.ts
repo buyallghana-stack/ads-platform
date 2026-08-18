@@ -11,6 +11,7 @@ export const TASK_METRICS = [
   'points_earned',
   'referrals_activated',
   'referrals_purchased',
+  'vault_deposits_made',
   'games_played',
   'gift_codes_redeemed',
   'withdrawals_made',

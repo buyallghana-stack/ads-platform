@@ -3098,7 +3098,8 @@
         "has_2fa": "Two-factor enabled",
         "has_avatar": "Profile picture set",
         "has_withdrawal_pin": "Withdrawal PIN set",
-        "referrals_purchased": "Referrals who bought a plan"
+        "referrals_purchased": "Referrals who bought a plan",
+        "vault_deposits_made": "Vault deposits made"
       }
     },
     "affiliates": {

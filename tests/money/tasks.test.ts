@@ -286,6 +286,50 @@ describe.skipIf(!HAS_DB)('tasks', () => {
     })
   })
 
+  it('counts vault deposits made by the user', async () => {
+    await withRollback(async (tx) => {
+      const user = await createUser(tx, { name: 'Vault Saver' })
+      const read = async () => {
+        const { rows } = await tx.query(
+          `select public.user_task_metric($1, 'vault_deposits_made') as v`,
+          [user.id],
+        )
+        return Number(rows[0]!.v)
+      }
+
+      expect(await read()).toBe(0)
+
+      // Insert a vault plan if not exists
+      const { rows: planRows } = await tx.query(
+        `insert into public.vault_plans (name, price_minor, period_days, daily_return_percent)
+         values ('Test Vault', 10000, 30, 2.50)
+         returning id`,
+      )
+      const planId = planRows[0]!.id
+
+      // Insert vault investments
+      await tx.query(
+        `insert into public.vault_investments
+           (user_id, plan_id, plan_name, amount_minor, currency_code, daily_return_percent,
+            period_days, ends_at, expected_profit_minor, expected_return_minor)
+         values ($1, $2, 'Test Vault', 10000, 'GHS', 2.50, 30, now() + interval '30 days', 7500, 17500)`,
+        [user.id, planId],
+      )
+
+      expect(await read()).toBe(1)
+
+      await tx.query(
+        `insert into public.vault_investments
+           (user_id, plan_id, plan_name, amount_minor, currency_code, daily_return_percent,
+            period_days, ends_at, expected_profit_minor, expected_return_minor)
+         values ($1, $2, 'Test Vault', 10000, 'GHS', 2.50, 30, now() + interval '30 days', 7500, 17500)`,
+        [user.id, planId],
+      )
+
+      expect(await read()).toBe(2)
+    })
+  })
+
   /* Requesting a withdrawal and cancelling in a loop must not complete a
      task, so the metric counts money that actually left. */
   it('counts only withdrawals that were paid', async () => {
