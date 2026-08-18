@@ -9,7 +9,6 @@ import {
   Megaphone,
   BadgeCheck,
   Building2,
-  CalendarCheck,
   ClipboardCheck,
   ClipboardList,
   Flag,
@@ -155,7 +154,6 @@ const GROUPS: NavGroup[] = [
       { key: 'games', href: '/admin/games', Icon: Gamepad2 },
       // Also content the operator authors: a task is a goal they write.
       { key: 'tasks', href: '/admin/tasks', Icon: Target },
-      { key: 'weeklyBonus', href: '/admin/weekly-bonus', Icon: CalendarCheck },
     ],
   },
   {

@@ -44,7 +44,6 @@ const REAL_ADMIN_SECTIONS = [
   '/admin/leaderboard',
   '/admin/games',
   '/admin/tasks',
-  '/admin/weekly-bonus',
   '/admin/vault',
   // The overview itself. Matched EXACTLY — a `startsWith('/admin')` would
   // mark every screen in the area live, including the ones still showing
