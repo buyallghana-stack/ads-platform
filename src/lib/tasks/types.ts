@@ -9,7 +9,6 @@ export const TASK_METRICS = [
   'ads_watched',
   'surveys_completed',
   'points_earned',
-  'referrals_activated',
   'referrals_purchased',
   'vault_deposits_made',
   'games_played',

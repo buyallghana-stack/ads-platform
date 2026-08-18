@@ -8151,7 +8151,6 @@ export type Database = {
         | "ads_watched"
         | "surveys_completed"
         | "points_earned"
-        | "referrals_activated"
         | "games_played"
         | "gift_codes_redeemed"
         | "withdrawals_made"
@@ -8435,7 +8434,6 @@ export const Constants = {
         "ads_watched",
         "surveys_completed",
         "points_earned",
-        "referrals_activated",
         "games_played",
         "gift_codes_redeemed",
         "withdrawals_made",

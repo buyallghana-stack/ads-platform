@@ -146,7 +146,7 @@ describe.skipIf(!HAS_DB)('tasks', () => {
       // Everything else starts at zero for a fresh account.
       for (const metric of [
         'plans_purchased', 'ads_watched', 'surveys_completed', 'points_earned',
-        'referrals_activated', 'games_played', 'gift_codes_redeemed',
+        'referrals_purchased', 'vault_deposits_made', 'games_played', 'gift_codes_redeemed',
         'withdrawals_made', 'has_2fa', 'has_avatar', 'has_withdrawal_pin',
       ]) {
         expect(await read(metric), metric).toBe(0)
@@ -176,62 +176,6 @@ describe.skipIf(!HAS_DB)('tasks', () => {
       )
       expect(await read('has_withdrawal_pin')).toBe(1)
       expect(await read('has_2fa')).toBe(1)
-    })
-  })
-
-  /* Anti-farming. Counting raw signups would pay somebody for creating
-     accounts, which is the fraud the device layer exists to catch. */
-  it('counts only referrals who actually watched an ad', async () => {
-    await withRollback(async (tx) => {
-      const inviter = await createUser(tx, { name: 'The Inviter' })
-      const idle = await createUser(tx, { name: 'Signed Up Only' })
-      const active = await createUser(tx, { name: 'Actually Watched' })
-
-      await tx.query(`update public.profiles set referred_by = $1 where id in ($2, $3)`, [
-        inviter.id,
-        idle.id,
-        active.id,
-      ])
-
-      const read = async () => {
-        const { rows } = await tx.query(
-          `select public.user_task_metric($1, 'referrals_activated') as v`,
-          [inviter.id],
-        )
-        return Number(rows[0]!.v)
-      }
-
-      // Two signups, neither has watched anything.
-      expect(await read()).toBe(0)
-
-      await credit(tx, active.id, 'ad_view', 1)
-      expect(await read()).toBe(1)
-    })
-  })
-
-  /* Operator correction, 2026-07-30: it only looked for `ad_view`, so an
-     invitee who joined and answered three surveys counted for nothing. A
-     survey is more work than a video, not less. */
-  it('counts a referral who took a survey, not only one who watched a video', async () => {
-    await withRollback(async (tx) => {
-      const inviter = await createUser(tx, { name: 'Survey Inviter' })
-      const surveyer = await createUser(tx, { name: 'Answered Surveys' })
-      await tx.query(`update public.profiles set referred_by = $1 where id = $2`, [
-        inviter.id,
-        surveyer.id,
-      ])
-
-      const read = async () => {
-        const { rows } = await tx.query(
-          `select public.user_task_metric($1, 'referrals_activated') as v`,
-          [inviter.id],
-        )
-        return Number(rows[0]!.v)
-      }
-
-      expect(await read()).toBe(0)
-      await credit(tx, surveyer.id, 'survey', 1)
-      expect(await read()).toBe(1)
     })
   })
 
