@@ -80,8 +80,8 @@ export function AdCta({
     <div className={cn('flex flex-col gap-2', className)}>
       <p
         className={cn(
-          'text-[0.6875rem] font-medium tracking-[0.04em] uppercase',
-          onVideo ? 'text-white/50' : 'text-ink-400',
+          'text-[0.75rem] font-semibold tracking-[0.05em] uppercase',
+          onVideo ? 'text-white/80' : 'text-ink-500',
         )}
       >
         {t('heading')}
@@ -101,17 +101,17 @@ export function AdCta({
           rel="noopener noreferrer nofollow"
           className={cn(
             'inline-flex h-10 min-w-0 items-center gap-2 rounded-(--radius-input) px-3.5',
-            'text-[0.8125rem] font-semibold transition-colors',
+            'text-[0.8125rem] font-bold transition-colors',
             onVideo
-              ? 'bg-white text-ink-900 hover:bg-white/90'
-              : 'border border-brand-600/25 bg-brand-50 text-brand-700 hover:border-brand-600/45',
+              ? 'bg-white text-slate-950 shadow-md ring-1 ring-white/40 hover:bg-slate-100'
+              : 'border border-brand-600/30 bg-brand-50 text-brand-700 hover:border-brand-600/50 dark:border-brand-500/30 dark:bg-brand-500/15 dark:text-brand-300',
           )}
         >
-          <PrimaryIcon aria-hidden className="size-4 shrink-0" />
+          <PrimaryIcon aria-hidden className="size-4 shrink-0 text-inherit" />
           <span className="truncate">
             {label?.trim() || t(`default.${primary.link.kind}`)}
           </span>
-          <ArrowUpRight aria-hidden className="size-3.5 shrink-0 opacity-60" />
+          <ArrowUpRight aria-hidden className="size-3.5 shrink-0 opacity-80" />
         </a>
 
         {rest.map((entry, i) => {
@@ -128,8 +128,8 @@ export function AdCta({
                 'inline-flex h-10 items-center gap-1.5 rounded-(--radius-input) px-3',
                 'text-[0.75rem] font-medium transition-colors',
                 onVideo
-                  ? 'bg-white/12 text-white ring-1 ring-white/20 hover:bg-white/20'
-                  : 'border border-ink-200 bg-surface text-ink-600 hover:text-ink-900',
+                  ? 'bg-white/15 text-white ring-1 ring-white/30 backdrop-blur-sm hover:bg-white/25'
+                  : 'border border-ink-200 bg-surface text-ink-700 hover:border-ink-300 hover:text-ink-900',
               )}
             >
               <Icon aria-hidden className="size-4 shrink-0" />

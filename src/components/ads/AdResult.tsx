@@ -8,8 +8,11 @@ import {
   Coins,
   Gem,
   Hourglass,
+  Link2,
+  ListChecks,
   Lock,
   Play,
+  PlayCircle,
   RotateCcw,
   X,
 } from 'lucide-react'
@@ -80,6 +83,8 @@ export function AdResult({
   result,
   format,
   ad,
+  nextAd,
+  nextAdCount,
   onNext,
   onRetry,
   onKeepWatching,
@@ -90,10 +95,14 @@ export function AdResult({
    *  all, so "Watch again" is the wrong word for two thirds of these screens.
    *  The copy branches on format rather than pretending every ad is a video. */
   format: 'video' | 'survey' | 'link'
-  /** Close and move on to the rest of the feed. */
-  onNext: () => void
   /** The ad just watched, for the advertiser's links. */
   ad: FeedAd
+  /** The ad that would come next (in the same or another category), or null. */
+  nextAd?: FeedAd | null
+  /** Remaining count of ads in the next format category. */
+  nextAdCount?: number
+  /** Close and move on to the rest of the feed. */
+  onNext: () => void
   /** Restart this ad from the top — a wrong answer clears the server-side
    *  watch stamp, so the video genuinely has to be watched again. */
   onRetry: () => void
@@ -125,6 +134,8 @@ export function AdResult({
       : isLink && (shape.key === 'tooFast' || shape.key === 'notWatched')
         ? `${shape.key}Link`
         : shape.key
+
+  const isCrossFormat = nextAd && nextAd.format !== format
 
   return (
     <div className="flex flex-col items-center gap-4 px-6 py-8 text-center">
@@ -187,12 +198,25 @@ export function AdResult({
 
         {onNextAd && (
           <Button
-            variant={onKeepWatching ? 'primary' : 'secondary'}
+            variant={onKeepWatching ? 'secondary' : 'primary'}
             fullWidth
             onClick={onNextAd}
             trailingIcon={<ArrowRight />}
+            leadingIcon={
+              isCrossFormat ? (
+                nextAd.format === 'survey' ? (
+                  <ListChecks className="size-4 shrink-0" />
+                ) : nextAd.format === 'link' ? (
+                  <Link2 className="size-4 shrink-0" />
+                ) : (
+                  <PlayCircle className="size-4 shrink-0" />
+                )
+              ) : undefined
+            }
           >
-            {t('result.nextAd')}
+            {isCrossFormat
+              ? t(`result.nextFormat.${nextAd.format}`, { count: nextAdCount ?? 1 })
+              : t('result.nextAd')}
           </Button>
         )}
 

@@ -415,44 +415,82 @@ export function AdsView({ data }: { data: AdsData }) {
         )}
       </div>
 
-      {/* Two surfaces, chosen by format. A link ad has no timeline and no
-          questions, so it gets a reader rather than a player — see
-          LinkAdReader for why that is a separate component and not a third
-          branch inside the player. */}
-      {playing && playing.format === 'link' && (
-        <LinkAdReader
-          key={playing.id}
-          ad={playing}
-          nextAd={list.slice(0, count).find((a) => a.id !== playing.id) ?? null}
-          onClose={() => setPlaying(null)}
-          onNextAd={() => {
-            const next = list.slice(0, count).find((a) => a.id !== playing.id)
-            setPlaying(next ?? null)
-          }}
-          onResolved={handleResolved}
-        />
-      )}
+      {/* Next ad resolution: within current format first, or across other formats if current is finished */}
+      {(() => {
+        if (!playing) return null
 
-      {playing && playing.format !== 'link' && (
-        <AdPlayer
-          // Keyed by ad so opening a second ad gets a genuinely fresh player
-          // rather than a reused one holding the previous ad's questions.
-          key={playing.id}
-          ad={playing}
-          /* The next card this user could actually watch — inside today's
-             allowance, and not the one on screen. Computed here because the
-             feed is the only thing that knows what is left; the player must
-             not offer a "next ad" that the cap would refuse. */
-          nextAd={list.slice(0, count).find((a) => a.id !== playing.id) ?? null}
-          onClose={() => setPlaying(null)}
-          onNextAd={() => {
-            const next = list.slice(0, count).find((a) => a.id !== playing.id)
-            if (next) setPlaying(next)
-            else setPlaying(null)
-          }}
-          onResolved={handleResolved}
-        />
-      )}
+        const playingFormat = playing.format
+        const currentFormatList = byTab[playingFormat]
+        const currentFormatCount = counts[playingFormat]
+
+        // Next in same format (excluding current playing ad)
+        const nextInSameFormat =
+          currentFormatList
+            .slice(0, currentFormatCount)
+            .find((a) => a.id !== playing.id) ?? null
+
+        // Next across other formats if same format has none remaining
+        const otherTabsWithAds = TABS.filter(
+          (key) => key !== playingFormat && counts[key] > 0,
+        )
+        const nextCrossFormat =
+          otherTabsWithAds.length > 0 ? byTab[otherTabsWithAds[0]][0] ?? null : null
+        const nextCrossFormatCount =
+          otherTabsWithAds.length > 0 ? counts[otherTabsWithAds[0]] : 0
+
+        const nextAdToOffer = nextInSameFormat ?? nextCrossFormat
+        const nextAdCountToOffer = nextInSameFormat
+          ? Math.max(0, currentFormatCount - 1)
+          : nextCrossFormatCount
+
+        const handleNextAd = (targetAd?: FeedAd) => {
+          const next = targetAd ?? nextAdToOffer
+          if (next) {
+            setTab(next.format)
+            setPlaying(next)
+          } else {
+            handleClosePlayer()
+          }
+        }
+
+        const handleClosePlayer = () => {
+          setPlaying(null)
+          // If the currently viewed tab has no ads left, switch to the first tab that has ads remaining
+          const currentTabCount = counts[tab]
+          if (currentTabCount <= 0) {
+            const nextTabWithAds = TABS.find((key) => counts[key] > 0)
+            if (nextTabWithAds) {
+              setTab(nextTabWithAds)
+            }
+          }
+        }
+
+        if (playing.format === 'link') {
+          return (
+            <LinkAdReader
+              key={playing.id}
+              ad={playing}
+              nextAd={nextAdToOffer}
+              nextAdCount={nextAdCountToOffer}
+              onClose={handleClosePlayer}
+              onNextAd={handleNextAd}
+              onResolved={handleResolved}
+            />
+          )
+        }
+
+        return (
+          <AdPlayer
+            key={playing.id}
+            ad={playing}
+            nextAd={nextAdToOffer}
+            nextAdCount={nextAdCountToOffer}
+            onClose={handleClosePlayer}
+            onNextAd={handleNextAd}
+            onResolved={handleResolved}
+          />
+        )
+      })()}
     </div>
   )
 }

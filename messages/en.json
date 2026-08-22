@@ -780,6 +780,11 @@
       },
       "keepWatching": "Keep watching",
       "nextAd": "Next ad",
+      "nextFormat": {
+        "video": "{count, plural, one {Next: Video (# left)} other {Next: Video (# left)}}",
+        "survey": "{count, plural, one {Next: Survey (# left)} other {Next: Survey (# left)}}",
+        "link": "{count, plural, one {Next: Article (# left)} other {Next: Article (# left)}}"
+      },
       "backToAds": "Back to ads",
       "readAgain": "Read it again",
       "tooFastLink": {

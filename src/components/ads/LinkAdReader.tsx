@@ -49,6 +49,7 @@ type Phase = 'starting' | 'unavailable' | 'reading' | 'submitting' | 'result'
 export function LinkAdReader({
   ad,
   nextAd,
+  nextAdCount,
   onClose,
   onNextAd,
   onResolved,
@@ -56,8 +57,10 @@ export function LinkAdReader({
   ad: FeedAd
   /** The ad that would come next inside today's allowance, or null. */
   nextAd: FeedAd | null
+  /** Remaining count of ads in the next format category. */
+  nextAdCount?: number
   onClose: () => void
-  onNextAd: () => void
+  onNextAd: (targetAd?: FeedAd) => void
   onResolved: (adId: string, result: SubmitAdResult) => void
 }) {
   const t = useTranslations('ads')
@@ -286,7 +289,7 @@ export function LinkAdReader({
                    nothing — and they would never know why. */
                 <div
                   aria-live="polite"
-                  className="flex h-12 w-full items-center justify-center gap-2 rounded-(--radius-input) border border-ink-200 bg-ink-100 text-[0.875rem] font-semibold text-ink-500 tabular-nums"
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-(--radius-input) border border-ink-200 bg-ink-100 text-[0.875rem] font-semibold text-ink-700 dark:border-ink-300 dark:text-ink-300 tabular-nums"
                 >
                   {t('link.waiting', { seconds: remaining })}
                 </div>
@@ -345,9 +348,11 @@ export function LinkAdReader({
                   result={result}
                   format="link"
                   ad={ad}
+                  nextAd={nextAd}
+                  nextAdCount={nextAdCount}
                   onNext={onClose}
                   onRetry={retry}
-                  onNextAd={nextAd ? onNextAd : undefined}
+                  onNextAd={nextAd ? () => onNextAd(nextAd) : undefined}
                 />
               )
             )}

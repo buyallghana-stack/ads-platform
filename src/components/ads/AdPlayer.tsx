@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { Check, Loader2, Play, X } from 'lucide-react'
+import { Check, Clock, Loader2, Play, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import {
@@ -66,6 +66,7 @@ type Phase =
 export function AdPlayer({
   ad,
   nextAd,
+  nextAdCount,
   onClose,
   onNextAd,
   onResolved,
@@ -77,8 +78,10 @@ export function AdPlayer({
    * that lands on an empty feed.
    */
   nextAd: FeedAd | null
+  /** Remaining count of ads in the next format category. */
+  nextAdCount?: number
   onClose: () => void
-  onNextAd: () => void
+  onNextAd: (targetAd?: FeedAd) => void
   /** Fired once the server has ruled on the attempt, so the feed can drop the
    *  card and move the counters. */
   onResolved: (adId: string, result: SubmitAdResult) => void
@@ -705,18 +708,42 @@ export function AdPlayer({
             Once it is satisfied it says so rather than disappearing — a
             counter that vanishes reads as a counter that broke.
           */}
-          <div className="mt-2 flex items-center justify-between gap-3 text-[0.6875rem] tabular-nums">
-            <span className={cn(watchLeft > 0 ? 'font-semibold text-white/80' : 'text-success-400')}>
-              {credited
-                ? t('player.watchFree')
-                : requiredWatch > 0
-                  ? watchLeft > 0
-                    ? t('player.watchLeft', { seconds: watchLeft })
-                    : t('player.watchDone')
-                  : ''}
+          <div className="mt-2 flex items-center justify-between gap-3 text-xs sm:text-[0.8125rem] tabular-nums">
+            <span
+              className={cn(
+                'inline-flex items-center gap-1.5 font-semibold',
+                credited
+                  ? 'text-emerald-400'
+                  : requiredWatch > 0
+                    ? watchLeft > 0
+                      ? 'text-white'
+                      : 'text-emerald-400'
+                    : 'text-white',
+              )}
+            >
+              {credited ? (
+                <>
+                  <Check aria-hidden className="size-3.5 shrink-0 text-emerald-400" strokeWidth={2.5} />
+                  <span>{t('player.watchFree')}</span>
+                </>
+              ) : requiredWatch > 0 ? (
+                watchLeft > 0 ? (
+                  <>
+                    <Clock aria-hidden className="size-3.5 shrink-0 text-white/80" />
+                    <span>{t('player.watchLeft', { seconds: watchLeft })}</span>
+                  </>
+                ) : (
+                  <>
+                    <Check aria-hidden className="size-3.5 shrink-0 text-emerald-400" strokeWidth={2.5} />
+                    <span>{t('player.watchDone')}</span>
+                  </>
+                )
+              ) : (
+                ''
+              )}
             </span>
             {questions.length > 0 && (
-              <span className="text-white/50">
+              <span className="font-medium text-white/85">
                 {t('player.answeredCount', { done: answeredCount, total: questions.length })}
               </span>
             )}
@@ -745,13 +772,15 @@ export function AdPlayer({
       {credited && phase === 'playing' && (
         <div className="shrink-0 border-t border-white/10 bg-black/60 px-3 py-3 sm:px-5">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="mr-auto inline-flex items-center gap-1.5 text-[0.8125rem] font-semibold text-success-400">
-              <Check aria-hidden className="size-4" />
+            <span className="mr-auto inline-flex items-center gap-1.5 text-[0.8125rem] font-semibold text-emerald-400">
+              <Check aria-hidden className="size-4" strokeWidth={2.5} />
               {t('player.creditedChip', { points: result?.pointsAwarded ?? ad.points })}
             </span>
             {nextAd && (
-              <Button size="sm" onClick={onNextAd}>
-                {t('result.nextAd')}
+              <Button size="sm" onClick={() => onNextAd(nextAd)}>
+                {nextAd.format === ad.format
+                  ? t('result.nextAd')
+                  : t(`result.nextFormat.${nextAd.format}`, { count: nextAdCount ?? 1 })}
               </Button>
             )}
             <Button size="sm" variant="secondary" onClick={onClose}>
@@ -904,6 +933,8 @@ export function AdPlayer({
                   result={result}
                   format={ad.format}
                   ad={ad}
+                  nextAd={nextAd}
+                  nextAdCount={nextAdCount}
                   onNext={onClose}
                   onRetry={retry}
                   /* Only offered when there is genuinely more film: a card
@@ -912,7 +943,7 @@ export function AdPlayer({
                   onKeepWatching={
                     credited && isVideo && moreToWatch ? () => setPhaseNow('playing') : undefined
                   }
-                  onNextAd={nextAd ? onNextAd : undefined}
+                  onNextAd={nextAd ? () => onNextAd(nextAd) : undefined}
                 />
               )
             )}

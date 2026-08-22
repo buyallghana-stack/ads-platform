@@ -780,6 +780,11 @@
       },
       "keepWatching": "Continuer à regarder",
       "nextAd": "Publicité suivante",
+      "nextFormat": {
+        "video": "{count, plural, one {Suivant : Vidéo (# restante)} other {Suivant : Vidéo (# restantes)}}",
+        "survey": "{count, plural, one {Suivant : Sondage (# restant)} other {Suivant : Sondage (# restants)}}",
+        "link": "{count, plural, one {Suivant : Article (# restant)} other {Suivant : Article (# restants)}}"
+      },
       "backToAds": "Retour aux publicités",
       "readAgain": "Relire",
       "tooFastLink": {
