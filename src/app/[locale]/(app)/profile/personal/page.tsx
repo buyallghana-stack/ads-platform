@@ -7,6 +7,7 @@ import { AvatarUploader } from '@/components/profile/AvatarUploader'
 import { Card } from '@/components/ui/Card'
 import { Link, redirect } from '@/i18n/navigation'
 import { getProfile, getViewerUser } from '@/lib/auth/session'
+import { createClient } from '@/lib/supabase/server'
 
 import { PersonalInfoForm } from './PersonalInfoForm'
 
@@ -33,7 +34,25 @@ export default async function PersonalInfoPage({
   if (!user) redirect({ href: '/login', locale })
 
   const t = await getTranslations('personal')
-  const profile = await getProfile(user!.id)
+  const supabase = await createClient()
+  const [profile, payoutRes] = await Promise.all([
+    getProfile(user!.id),
+    supabase
+      .from('user_payout_details')
+      .select('method, msisdn, provider:payout_providers(name)')
+      .eq('user_id', user!.id)
+      .maybeSingle(),
+  ])
+
+  const momoPhone =
+    payoutRes.data?.method === 'mobile_money' && payoutRes.data.msisdn
+      ? payoutRes.data.msisdn
+      : profile?.phone ?? null
+
+  const providerName =
+    payoutRes.data?.method === 'mobile_money'
+      ? ((payoutRes.data.provider as { name: string } | null)?.name ?? null)
+      : null
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-5 sm:px-6 md:py-7">
@@ -62,7 +81,8 @@ export default async function PersonalInfoPage({
 
         <PersonalInfoForm
           defaultName={profile?.full_name ?? ''}
-          defaultPhone={profile?.phone ?? ''}
+          momoPhone={momoPhone}
+          providerName={providerName}
           email={user!.email ?? ''}
         />
       </Card>

@@ -159,7 +159,7 @@ export default async function LandingPage({
       <main>
         {/* ================= HERO ================= */}
         <Section className="pt-10 pb-4 sm:pt-14 lg:pt-20 lg:pb-8">
-          <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-16">
+          <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.2fr)] lg:gap-16">
             <div className="flex flex-col items-start">
               <a
                 href="#earning"
@@ -207,14 +207,7 @@ export default async function LandingPage({
             {/* Hero visual: the real ads feed on a soft brand field. The two
                 floating chips quote the screen behind them, so nothing here
                 claims more than the screenshot already shows. */}
-            {/* The outer px-3 and the plate's -inset-x-3 cancel exactly, so
-                the tinted plate reaches the column's edge and never past it.
-                An earlier version used `inset-x-[-8%]`, which is a percentage
-                of a column that is full-width on a phone — it hung 23px off
-                the right edge at 320px and made the whole document scroll
-                sideways. Negative insets in a hero must be fixed lengths
-                inside a box that has been padded to absorb them. */}
-            <div className="mx-auto w-full max-w-[26rem] px-3 lg:mx-0">
+            <div className="mx-auto w-full max-w-[34rem] lg:max-w-none px-2 sm:px-3">
               <div className="relative">
                 <div
                   aria-hidden
@@ -227,8 +220,7 @@ export default async function LandingPage({
                   desktopSrcLight="/marketing/desktop-ads-light.webp"
                   desktopSrcDark="/marketing/desktop-ads-dark.webp"
                   alt={t('hero.shotAlt')}
-                  mobileOnly={true}
-                  className="relative mx-auto max-w-[19rem] sm:max-w-[21rem]"
+                  className="relative mx-auto w-full"
                 />
 
                 {/* Floating chips quote the screen behind them. Hidden below
@@ -416,8 +408,7 @@ export default async function LandingPage({
                 desktopSrcLight="/marketing/desktop-ads-light.webp"
                 desktopSrcDark="/marketing/desktop-ads-dark.webp"
                 alt={t('earning.feed.shotAlt')}
-                mobileOnly={true}
-                className="mx-auto w-full max-w-[18rem] sm:max-w-[20rem] lg:order-first"
+                className="mx-auto w-full lg:order-first"
               />
             </div>
 
@@ -451,8 +442,7 @@ export default async function LandingPage({
                 desktopSrcLight="/marketing/desktop-home-light.webp"
                 desktopSrcDark="/marketing/desktop-home-dark.webp"
                 alt={t('earning.balance.shotAlt')}
-                mobileOnly={true}
-                className="mx-auto w-full max-w-[18rem] sm:max-w-[20rem]"
+                className="mx-auto w-full"
               />
             </div>
           </div>

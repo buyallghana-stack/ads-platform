@@ -303,7 +303,7 @@
       "haveAccount": "Vous avez déjà un compte ?",
       "logIn": "Se connecter",
       "fullName": "Nom complet",
-      "fullNamePlaceholder": "Kwame Mensah",
+      "fullNamePlaceholder": "Jones Williams",
       "email": "Adresse e-mail",
       "emailPlaceholder": "vous@exemple.com",
       "phone": "Numéro de téléphone",
@@ -1003,7 +1003,7 @@
       "providerPlaceholder": "Choisir un réseau",
       "number": "Numéro Mobile Money",
       "name": "Nom sur le compte",
-      "namePlaceholder": "ex. Kwame Mensah",
+      "namePlaceholder": "ex. Jones Williams",
       "nameHint": "Il doit correspondre au nom enregistré sur le compte Mobile Money."
     },
     "crypto": {
@@ -1096,7 +1096,8 @@
       "phone": "Numéro de téléphone",
       "optional": "Facultatif",
       "phonePlaceholder": "ex. 024 123 4567",
-      "phoneHint": "Pour vous joindre au sujet de votre compte. Ce n'est pas votre numéro de paiement.",
+      "phoneHint": "Récupéré automatiquement depuis votre compte Mobile Money.",
+      "noMomoPhone": "Aucun compte Mobile Money ajouté pour le moment",
       "email": "E-mail",
       "emailHint": "Votre e-mail est géré dans Sécurité."
     },

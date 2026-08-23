@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Lock, Mail, Phone, Ticket, UserRound, UserRoundPlus } from 'lucide-react'
+import { Lock, Mail, Ticket, UserRound, UserRoundPlus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Controller, useForm } from 'react-hook-form'
 
@@ -215,18 +215,6 @@ export function SignUpForm() {
           leadingIcon={<Mail />}
           error={msg(errors.email?.message)}
           {...register('email')}
-        />
-
-        <TextField
-          label={t('phone')}
-          type="tel"
-          inputMode="tel"
-          placeholder={t('phonePlaceholder')}
-          autoComplete="tel"
-          leadingIcon={<Phone />}
-          hint={t('phoneHint')}
-          error={msg(errors.phone?.message)}
-          {...register('phone')}
         />
 
         <Controller

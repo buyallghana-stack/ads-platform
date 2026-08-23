@@ -303,7 +303,7 @@
       "haveAccount": "Already have an account?",
       "logIn": "Log in",
       "fullName": "Full name",
-      "fullNamePlaceholder": "Kwame Mensah",
+      "fullNamePlaceholder": "Jones Williams",
       "email": "Email address",
       "emailPlaceholder": "you@example.com",
       "phone": "Phone number",
@@ -1003,7 +1003,7 @@
       "providerPlaceholder": "Choose a network",
       "number": "Mobile Money number",
       "name": "Name on the account",
-      "namePlaceholder": "e.g. Kwame Mensah",
+      "namePlaceholder": "e.g. Jones Williams",
       "nameHint": "This must match the name registered on the Mobile Money account."
     },
     "crypto": {
@@ -1096,7 +1096,8 @@
       "phone": "Phone number",
       "optional": "Optional",
       "phonePlaceholder": "e.g. 024 123 4567",
-      "phoneHint": "Used to reach you about your account. This is not your payout number.",
+      "phoneHint": "Taken automatically from your Mobile Money payout account.",
+      "noMomoPhone": "No Mobile Money payout account added yet",
       "email": "Email",
       "emailHint": "Your email is managed under Security."
     },

@@ -48,10 +48,10 @@ export async function PromoPanel() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <span className="grid size-8 place-items-center rounded-full bg-brand-100 text-[0.6875rem] font-bold text-brand-700">
-                  KM
+                  JW
                 </span>
                 <div>
-                  <p className="text-[0.75rem] font-semibold text-ink-900">Kwame M.</p>
+                  <p className="text-[0.75rem] font-semibold text-ink-900">Jones W.</p>
                   <p className="text-[0.625rem] text-ink-400">{t('mockup.tier')}</p>
                 </div>
               </div>

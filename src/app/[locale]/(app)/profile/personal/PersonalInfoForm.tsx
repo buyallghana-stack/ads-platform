@@ -20,33 +20,34 @@ import { personalSchema } from '@/lib/validation/personal'
  */
 export function PersonalInfoForm({
   defaultName,
-  defaultPhone,
+  momoPhone,
+  providerName,
   email,
 }: {
   defaultName: string
-  defaultPhone: string
+  momoPhone: string | null
+  providerName?: string | null
   email: string
 }) {
   const t = useTranslations('personal')
   const router = useRouter()
   const [name, setName] = useState(defaultName)
-  const [phone, setPhone] = useState(defaultPhone)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [pending, startTransition] = useTransition()
 
-  const dirty = name !== defaultName || phone !== defaultPhone
+  const dirty = name !== defaultName
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setSaved(false)
 
-    const parsed = personalSchema.safeParse({ fullName: name, phone })
+    const parsed = personalSchema.safeParse({ fullName: name })
     if (!parsed.success) return setError(t(`errors.${parsed.error.issues[0].message}`))
 
     startTransition(async () => {
-      const res = await updatePersonalInfo({ fullName: name, phone })
+      const res = await updatePersonalInfo({ fullName: name })
       if (!res.ok) {
         setError(res.errorKey ? t(`errors.${res.errorKey}`) : (res.message ?? t('errors.generic')))
         return
@@ -71,18 +72,10 @@ export function PersonalInfoForm({
         required
       />
 
-      <TextField
+      <ReadOnlyField
         label={t('fields.phone')}
-        optionalLabel={t('fields.optional')}
-        value={phone}
-        onChange={(e) => {
-          setPhone(e.target.value)
-          setSaved(false)
-        }}
+        value={momoPhone ? `${momoPhone}${providerName ? ` (${providerName})` : ''}` : t('fields.noMomoPhone')}
         leadingIcon={<Phone />}
-        inputMode="tel"
-        autoComplete="tel"
-        placeholder={t('fields.phonePlaceholder')}
         hint={t('fields.phoneHint')}
       />
 

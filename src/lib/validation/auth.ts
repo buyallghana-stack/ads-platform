@@ -50,7 +50,7 @@ export const signUpSchema = z.object({
     .transform((v) => v.trim())
     .refine((v) => v.length >= 2, 'fullNameTooShort'),
   email,
-  phone,
+  phone: phone.optional().or(z.literal('')),
   password,
   // Optional, but must be well-formed when present. The alphabet matches
   // generate_referral_code() in migration 001: Crockford-style, no I/L/O/U.

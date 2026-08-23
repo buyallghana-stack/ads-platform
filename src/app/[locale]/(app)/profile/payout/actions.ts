@@ -62,5 +62,9 @@ export async function savePayoutDetails(input: PayoutInput): Promise<PayoutResul
     return { ok: false, message: error.message }
   }
 
+  if (data.method === 'mobile_money' && data.msisdn) {
+    await admin.from('profiles').update({ phone: data.msisdn }).eq('id', user.id)
+  }
+
   return { ok: true }
 }

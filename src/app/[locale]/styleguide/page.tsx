@@ -172,7 +172,7 @@ export default async function StyleguidePage({
                   </div>
                   <div className="flex justify-between gap-4">
                     <dt className="text-ink-500">Name</dt>
-                    <dd className="font-medium text-ink-900">Kwame Mensah</dd>
+                    <dd className="font-medium text-ink-900">Jones Williams</dd>
                   </div>
                 </dl>
               </CardBody>

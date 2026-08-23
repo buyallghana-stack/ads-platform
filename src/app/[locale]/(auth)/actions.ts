@@ -46,7 +46,7 @@ const literal = (message: string): ActionResult => ({ ok: false, errorKey: '', m
 export async function signUpAction(formData: {
   fullName: string
   email: string
-  phone: string
+  phone?: string
   password: string
   referralCode?: string
   acceptTerms: boolean
@@ -120,7 +120,7 @@ export async function signUpAction(formData: {
   */
   const { data: blocked } = await admin.rpc('is_identity_blocked', {
     p_email: data.email,
-    p_phone: data.phone,
+    p_phone: data.phone || '',
   })
   if (blocked) return { ok: false, errorKey: 'identityBlocked', field: 'email' }
 
@@ -160,7 +160,7 @@ export async function signUpAction(formData: {
       // profile in the same transaction as the auth user.
       data: {
         full_name: data.fullName,
-        phone: data.phone,
+        phone: data.phone || null,
         signup_country: country ?? 'GH',
       },
     },

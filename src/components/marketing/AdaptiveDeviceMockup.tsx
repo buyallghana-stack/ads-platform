@@ -50,34 +50,26 @@ export function AdaptiveDeviceMockup({
       return
     }
 
-    const ua = navigator.userAgent || ''
-    const isIOS = /iPhone|iPod/i.test(ua)
-    const isAndroid = /Android/i.test(ua)
-    const isOtherMobile = /webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua)
-    const isTablet =
-      /iPad/i.test(ua) ||
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
-      (isAndroid && !/Mobile/i.test(ua))
-
-    let detected: DevicePlatform = 'desktop'
-    if (mobileOnly) {
-      detected = isIOS ? 'ios' : 'android'
-    } else {
-      if (isTablet || window.innerWidth >= 1024 || (!isIOS && !isAndroid && !isOtherMobile)) {
-        // Laptop, desktop, or tablet -> Safari
-        detected = 'desktop'
-      } else if (isIOS) {
-        // iOS Mobile -> iPhone
-        detected = 'ios'
-      } else {
-        // Android / Other mobile phone -> Android
-        detected = 'android'
+    const checkDevice = () => {
+      // 1. Tablet & Laptop / Desktop: determined by screen width (>= 768px)
+      if (window.innerWidth >= 768) {
+        setDetectedPlatform('desktop')
+        setPlatform('desktop')
+        return
       }
+
+      // 2. Mobile screen (< 768px): determined by mobile Operating System
+      const ua = navigator.userAgent || ''
+      const isIOS = /iPhone|iPod|iPad/i.test(ua)
+      const detected: DevicePlatform = isIOS ? 'ios' : 'android'
+      setDetectedPlatform(detected)
+      setPlatform(detected)
     }
 
-    setDetectedPlatform(detected)
-    setPlatform(detected)
-  }, [forcedPlatform, mobileOnly])
+    checkDevice()
+    window.addEventListener('resize', checkDevice)
+    return () => window.removeEventListener('resize', checkDevice)
+  }, [forcedPlatform])
 
   const dLight = desktopSrcLight || srcLight
   const dDark = desktopSrcDark || srcDark
