@@ -362,7 +362,9 @@
       "deletionPending": {
         "title": "Compte programmé pour suppression",
         "subtitle": "Une demande de suppression de votre compte est en attente.",
+        "requestedLabel": "Suppression demandée",
         "requestedAt": "Demandée le {date}",
+        "effectiveLabel": "Suppression définitive programmée",
         "effectiveAt": "Suppression définitive le {date}",
         "warning": "Après cette date et heure, la suppression est définitive et irréversible. Tous vos gains, historiques et données seront définitivement effacés.",
         "prompt": "Se connecter annulera automatiquement cette demande de suppression et restaurera votre compte. Pour laisser la suppression se poursuivre, restez déconnecté.",

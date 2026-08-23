@@ -163,7 +163,7 @@ export function LogInForm() {
     return (
       <div>
         <FormHeader
-          icon={<CalendarClock className="text-warning-600 dark:text-warning-400" />}
+          icon={<CalendarClock className="text-amber-600 dark:text-amber-400" />}
           title={t('deletionPending.title')}
           subtitle={t('deletionPending.subtitle')}
         />
@@ -171,44 +171,54 @@ export function LogInForm() {
         {formError && (
           <div
             role="alert"
-            className="mb-5 rounded-(--radius-input) border border-danger-500/25 bg-danger-50 px-3 py-2.5 text-[0.8125rem] text-danger-700"
+            className="mb-5 rounded-(--radius-input) border border-danger-500/25 bg-danger-50 px-3 py-2.5 text-[0.8125rem] text-danger-700 dark:bg-danger-950/40 dark:text-danger-400"
           >
             {formError}
           </div>
         )}
 
         <div className="flex flex-col gap-4">
-          <div className="rounded-(--radius-card) border border-warning-500/30 bg-warning-50/75 p-4 dark:border-warning-500/30 dark:bg-warning-50/20">
-            <div className="flex flex-col gap-2.5 text-[0.8125rem]">
+          <div className="rounded-(--radius-card) border border-amber-500/30 bg-amber-50/80 p-4 dark:border-amber-500/30 dark:bg-amber-950/25">
+            <div className="flex flex-col gap-3">
               {requestedDateStr && (
-                <div className="flex items-start gap-2 text-ink-700 dark:text-ink-300">
-                  <Clock className="mt-0.5 size-4 shrink-0 text-warning-600 dark:text-warning-400" />
-                  <span>
-                    <strong className="font-semibold text-ink-900 dark:text-ink-100">
-                      {t('deletionPending.requestedAt', { date: requestedDateStr })}
-                    </strong>
-                  </span>
+                <div className="flex items-start gap-3">
+                  <div className="grid size-8 shrink-0 place-items-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">
+                    <Clock className="size-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[0.75rem] font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                      {t('deletionPending.requestedLabel')}
+                    </p>
+                    <p className="mt-0.5 text-[0.875rem] font-semibold text-ink-900">
+                      {requestedDateStr}
+                    </p>
+                  </div>
                 </div>
               )}
 
               {effectiveDateStr && (
-                <div className="flex items-start gap-2 text-ink-700 dark:text-ink-300">
-                  <CalendarClock className="mt-0.5 size-4 shrink-0 text-danger-600 dark:text-danger-400" />
-                  <span>
-                    <strong className="font-semibold text-danger-700 dark:text-danger-400">
-                      {t('deletionPending.effectiveAt', { date: effectiveDateStr })}
-                    </strong>
-                  </span>
+                <div className="flex items-start gap-3">
+                  <div className="grid size-8 shrink-0 place-items-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300">
+                    <CalendarClock className="size-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[0.75rem] font-semibold uppercase tracking-wider text-rose-800 dark:text-rose-300">
+                      {t('deletionPending.effectiveLabel')}
+                    </p>
+                    <p className="mt-0.5 text-[0.875rem] font-semibold text-rose-600 dark:text-rose-300">
+                      {effectiveDateStr}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
 
-            <p className="mt-3 border-t border-warning-500/20 pt-3 text-[0.75rem] leading-relaxed text-ink-600 dark:text-ink-400">
+            <p className="mt-3.5 border-t border-amber-500/20 pt-3 text-[0.8125rem] leading-relaxed text-ink-700">
               {t('deletionPending.warning')}
             </p>
           </div>
 
-          <p className="text-[0.8125rem] leading-relaxed text-ink-600 dark:text-ink-400">
+          <p className="text-[0.8125rem] leading-relaxed text-ink-700">
             {t('deletionPending.prompt')}
           </p>
 

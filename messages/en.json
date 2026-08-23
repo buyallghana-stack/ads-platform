@@ -362,7 +362,9 @@
       "deletionPending": {
         "title": "Account scheduled for deletion",
         "subtitle": "A request to delete your account is currently pending.",
+        "requestedLabel": "Deletion requested",
         "requestedAt": "Requested on {date}",
+        "effectiveLabel": "Permanent deletion scheduled",
         "effectiveAt": "Permanent deletion on {date}",
         "warning": "After this date and time, the deletion is final and cannot be undone. All your earnings, records, and data will be permanently removed.",
         "prompt": "Signing in will automatically cancel this deletion request and restore your account. To let the deletion proceed as scheduled, remain logged out.",
