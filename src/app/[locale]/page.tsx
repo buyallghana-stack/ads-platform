@@ -221,9 +221,10 @@ export default async function LandingPage({
                   priority
                   srcLight="/marketing/ads-feed-light.webp"
                   srcDark="/marketing/ads-feed-dark.webp"
+                  desktopSrcLight="/marketing/desktop-ads-light.webp"
+                  desktopSrcDark="/marketing/desktop-ads-dark.webp"
                   alt={t('hero.shotAlt')}
-                  width={780}
-                  height={1440}
+                  mobileOnly={true}
                   className="relative mx-auto max-w-[19rem] sm:max-w-[21rem]"
                 />
 
@@ -409,10 +410,11 @@ export default async function LandingPage({
               <PhoneFrame
                 srcLight="/marketing/ads-feed-light.webp"
                 srcDark="/marketing/ads-feed-dark.webp"
+                desktopSrcLight="/marketing/desktop-ads-light.webp"
+                desktopSrcDark="/marketing/desktop-ads-dark.webp"
                 alt={t('earning.feed.shotAlt')}
-                width={780}
-                height={1440}
-                className="mx-auto w-full max-w-[18rem] lg:order-first"
+                mobileOnly={true}
+                className="mx-auto w-full max-w-[18rem] sm:max-w-[20rem] lg:order-first"
               />
             </div>
 
@@ -443,10 +445,11 @@ export default async function LandingPage({
               <PhoneFrame
                 srcLight="/marketing/home-light.webp"
                 srcDark="/marketing/home-dark.webp"
+                desktopSrcLight="/marketing/desktop-home-light.webp"
+                desktopSrcDark="/marketing/desktop-home-dark.webp"
                 alt={t('earning.balance.shotAlt')}
-                width={780}
-                height={1440}
-                className="mx-auto w-full max-w-[18rem]"
+                mobileOnly={true}
+                className="mx-auto w-full max-w-[18rem] sm:max-w-[20rem]"
               />
             </div>
           </div>
