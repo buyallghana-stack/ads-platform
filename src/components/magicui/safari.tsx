@@ -33,7 +33,7 @@ export function Safari({
   imageSrcDark,
   alt = 'Safari preview',
   videoSrc,
-  url = 'sideperks.com',
+  url = 'sideperks.org',
   mode = 'default',
   priority = false,
   className,

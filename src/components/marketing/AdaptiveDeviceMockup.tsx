@@ -32,7 +32,7 @@ export function AdaptiveDeviceMockup({
   desktopSrcLight,
   desktopSrcDark,
   alt,
-  url = 'sideperks.com/dashboard',
+  url = 'sideperks.org',
   priority = false,
   className,
   forcedPlatform,
