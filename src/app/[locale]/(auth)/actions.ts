@@ -1,11 +1,14 @@
 'use server'
 
+import { createClient as createStatelessClient } from '@supabase/supabase-js'
+
 import { clearLoginVerified, isTwoFactorEnabled } from '@/lib/security/login-2fa'
 import { recordSessionContext } from '@/lib/security/session-record'
 import { verifyTurnstile } from '@/lib/fraud/turnstile'
 import { reportUnexpected } from '@/lib/observability/report'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { clientEnv } from '@/lib/env'
 import { landingFor } from '@/lib/auth/landing'
 import { getSessionUser } from '@/lib/auth/session'
 import { getOrigin, getRequestContext } from '@/lib/request-context'
@@ -294,19 +297,19 @@ export async function logInAction(formData: {
     return { ok: false, errorKey: first.message, field: String(first.path[0] ?? '') }
   }
 
-  const supabase = await createClient()
-  const { data: session, error } = await supabase.auth.signInWithPassword({
+  // First, verify credentials with a stateless client WITHOUT creating any session cookies yet.
+  const stateless = createStatelessClient(
+    clientEnv.NEXT_PUBLIC_SUPABASE_URL,
+    clientEnv.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  )
+  const { data: authData, error: authError } = await stateless.auth.signInWithPassword({
     email: parsed.data.email,
     password: parsed.data.password,
   })
 
-  if (error) {
-    /*
-      One message for both "no such account" and "wrong password". Telling
-      them apart hands an attacker a way to enumerate registered emails, which
-      on a platform that pays out money is exactly the list worth phishing.
-    */
-    if (error.message.toLowerCase().includes('not confirmed')) {
+  if (authError || !authData.user) {
+    if (authError?.message?.toLowerCase().includes('not confirmed')) {
       return {
         ok: false,
         errorKey: 'emailNotVerified',
@@ -316,17 +319,38 @@ export async function logInAction(formData: {
     return { ok: false, errorKey: 'invalidCredentials' }
   }
 
-  /*
-    A fresh password sign-in never inherits a previous challenge: clear the
-    marker first, so an enrolled account is always asked again. Doing it before
-    the redirect decision means a failure anywhere below still leaves the
-    session half-authenticated rather than fully trusted.
-  */
+  // Check if account deletion has been requested and is currently pending.
+  const { data: profile } = await createAdminClient()
+    .from('profiles')
+    .select('deletion_requested_at, deletion_effective_at, deleted_at')
+    .eq('id', authData.user.id)
+    .maybeSingle()
+
+  if (profile?.deletion_requested_at && !profile.deleted_at) {
+    // Return deletion pending metadata. NO session cookie is set on the browser,
+    // so the user cannot enter the app without making an explicit choice.
+    return {
+      ok: true,
+      deletionPending: true,
+      requestedAt: profile.deletion_requested_at,
+      effectiveAt: profile.deletion_effective_at ?? undefined,
+    }
+  }
+
+  // Account does not have pending deletion: establish full session with cookies.
+  const supabase = await createClient()
+  const { data: session, error } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  })
+
+  if (error || !session.user) {
+    return { ok: false, errorKey: 'invalidCredentials' }
+  }
+
   await clearLoginVerified()
 
   if (session.user) {
-    // Capture the real device/IP for this session while we still have the
-    // browser's request context — auth.sessions only ever sees our server.
     await recordSessionContext(session.session?.access_token, session.user.id)
 
     const { ip, userAgent, country } = await getRequestContext()
@@ -337,33 +361,10 @@ export async function logInAction(formData: {
         p_ip: ip ?? undefined,
         p_user_agent: userAgent ?? undefined,
         p_country: country ?? undefined,
-        // Signals on SIGN-IN too, not just signup. Somebody who registers ten
-        // accounts from ten places and then farms them all from one phone is
-        // invisible to a signup-only check, and that is the cheaper attack.
         p_fingerprint: parsed.data.fingerprint || undefined,
       })
     } catch {
       // A missing login signal must never block a login.
-    }
-
-    /*
-      Check if account deletion has been requested and is currently pending.
-      Instead of immediately cancelling the deletion without warning, prompt the user
-      to choose whether to restore their account (cancel deletion) or stay logged out.
-    */
-    const { data: profile } = await createAdminClient()
-      .from('profiles')
-      .select('deletion_requested_at, deletion_effective_at, deleted_at')
-      .eq('id', session.user.id)
-      .maybeSingle()
-
-    if (profile?.deletion_requested_at && !profile.deleted_at) {
-      return {
-        ok: true,
-        deletionPending: true,
-        requestedAt: profile.deletion_requested_at,
-        effectiveAt: profile.deletion_effective_at ?? undefined,
-      }
     }
 
     // Enrolled accounts finish signing in on the challenge screen.
@@ -378,19 +379,52 @@ export async function logInAction(formData: {
 }
 
 /**
- * Confirms sign-in and cancels the pending account deletion request.
+ * Confirms sign-in, establishes the session, and cancels the pending account deletion request.
  */
-export async function confirmLoginAndCancelDeletionAction(): Promise<ActionResult> {
-  const user = await getSessionUser()
-  if (!user) return { ok: false, errorKey: 'invalidCredentials' }
+export async function confirmLoginAndCancelDeletionAction(formData: {
+  email: string
+  password: string
+  fingerprint?: string
+}): Promise<ActionResult> {
+  const parsed = logInSchema.safeParse(formData)
+  if (!parsed.success) {
+    return { ok: false, errorKey: 'invalidCredentials' }
+  }
+
+  const supabase = await createClient()
+  const { data: session, error } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  })
+
+  if (error || !session.user) {
+    return { ok: false, errorKey: 'invalidCredentials' }
+  }
+
+  await clearLoginVerified()
+  await recordSessionContext(session.session?.access_token, session.user.id)
+
+  const { ip, userAgent, country } = await getRequestContext()
+  try {
+    await createAdminClient().rpc('record_auth_signal', {
+      p_user_id: session.user.id,
+      p_event_type: 'login',
+      p_ip: ip ?? undefined,
+      p_user_agent: userAgent ?? undefined,
+      p_country: country ?? undefined,
+      p_fingerprint: parsed.data.fingerprint || undefined,
+    })
+  } catch {
+    // Never block
+  }
 
   try {
     const { data: cancelled } = await createAdminClient().rpc('cancel_account_deletion', {
-      p_user_id: user.id,
+      p_user_id: session.user.id,
     })
     if (cancelled) {
       await createAdminClient().rpc('create_notification', {
-        p_user_id: user.id,
+        p_user_id: session.user.id,
         p_type: 'announcement',
         p_title: 'Account deletion cancelled',
         p_body:
@@ -403,11 +437,11 @@ export async function confirmLoginAndCancelDeletionAction(): Promise<ActionResul
   }
 
   // Enrolled accounts finish signing in on the challenge screen.
-  if (await isTwoFactorEnabled(user.id)) {
+  if (await isTwoFactorEnabled(session.user.id)) {
     return { ok: true, redirectTo: '/verify-2fa' }
   }
 
-  return { ok: true, redirectTo: await landingFor(user.id) }
+  return { ok: true, redirectTo: await landingFor(session.user.id) }
 }
 
 /**

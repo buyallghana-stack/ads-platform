@@ -35,6 +35,10 @@ export function LogInForm() {
     requestedAt?: string
     effectiveAt?: string
   } | null>(null)
+  const [pendingCredentials, setPendingCredentials] = useState<{
+    email: string
+    password: string
+  } | null>(null)
   const [actionLoading, setActionLoading] = useState<'cancel' | 'stay' | null>(null)
 
   const {
@@ -69,6 +73,7 @@ export function LogInForm() {
 
     if (result.ok) {
       if (result.deletionPending) {
+        setPendingCredentials({ email: values.email, password: values.password })
         setDeletionInfo({
           requestedAt: result.requestedAt,
           effectiveAt: result.effectiveAt,
@@ -129,9 +134,14 @@ export function LogInForm() {
       : null
 
     const handleCancelAndLogin = async () => {
+      if (!pendingCredentials) return
       setFormError(null)
       setActionLoading('cancel')
-      const res = await confirmLoginAndCancelDeletionAction()
+      const res = await confirmLoginAndCancelDeletionAction({
+        email: pendingCredentials.email,
+        password: pendingCredentials.password,
+        fingerprint: await deviceFingerprint(),
+      })
       if (res.ok) {
         router.replace(res.redirectTo ?? '/dashboard')
         router.refresh()
@@ -146,6 +156,7 @@ export function LogInForm() {
       await stayLoggedOutAction()
       setActionLoading(null)
       setDeletionInfo(null)
+      setPendingCredentials(null)
       setNoticeMessage(t('deletionPending.loggedOutNotice'))
     }
 

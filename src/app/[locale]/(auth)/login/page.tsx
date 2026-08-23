@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { AuthLayout } from '@/components/auth/AuthLayout'
 import { LogInForm } from '@/components/auth/LogInForm'
 import { redirect } from '@/i18n/navigation'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 
 export async function generateMetadata({
@@ -26,19 +27,29 @@ export default async function Page({
   setRequestLocale(locale)
 
   /*
-   * Someone who already has a session does not belong on the login form.
-   * Found in production (2026-07-24): a phone user's login succeeded and set
-   * its cookie, but the client-side navigation to the dashboard was
-   * interrupted — leaving them "stuck" on a login form that showed no hint
-   * they were in fact signed in. With this check, any arrival here while
-   * authenticated — retry, refresh, revisiting the link — lands on the
-   * dashboard instead.
+   * Someone who already has a session does not belong on the login form,
+   * UNLESS their account is currently scheduled for deletion (in which case
+   * their session must be cleared so they can authenticate and see the
+   * deletion cancellation choice).
    */
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (user) redirect({ href: '/dashboard', locale })
+
+  if (user) {
+    const { data: profile } = await createAdminClient()
+      .from('profiles')
+      .select('deletion_requested_at, deleted_at')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (profile?.deletion_requested_at && !profile.deleted_at) {
+      await supabase.auth.signOut()
+    } else {
+      redirect({ href: '/dashboard', locale })
+    }
+  }
 
   return (
     <AuthLayout>

@@ -23,7 +23,6 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { LogOutButton } from '@/components/app/LogOutButton'
 import { Avatar } from '@/components/profile/Avatar'
 import { LanguageToggle } from '@/components/profile/LanguageToggle'
-import { DeletionPendingBanner } from '@/components/profile/DeletionPendingBanner'
 import { CommunityLinks } from '@/components/profile/CommunityLinks'
 import { SettingsGroup, SettingsRow } from '@/components/profile/SettingsRow'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
@@ -31,7 +30,6 @@ import { Link, redirect } from '@/i18n/navigation'
 import { getProfile, getViewerUser } from '@/lib/auth/session'
 import { avatarPublicUrl } from '@/lib/profile/avatar'
 import { getCommunities } from '@/lib/communities/data'
-import { getDeletionStatus } from '@/lib/security/deletion-data'
 import { getTwoFactorStatus } from '@/lib/security/two-factor-data'
 import { isAdminUser } from '@/lib/auth/landing'
 import { getPlanStanding } from '@/lib/subscriptions/data'
@@ -71,7 +69,6 @@ export default async function ProfilePage({
   const planStanding = await getPlanStanding(user!.id)
   const communities = await getCommunities('ads')
   const isAdmin = await isAdminUser(user!.id)
-  const deletion = await getDeletionStatus()
   const fullName = profile?.full_name ?? user!.email ?? ''
 
   return (
@@ -80,13 +77,6 @@ export default async function ProfilePage({
         <h1 className="text-lg font-semibold tracking-[-0.02em] text-ink-900">{t('title')}</h1>
         <p className="mt-0.5 text-[0.8125rem] text-ink-500">{t('subtitle')}</p>
       </header>
-
-      {deletion.pending && deletion.effectiveAt && (
-        <DeletionPendingBanner
-          effectiveAt={deletion.effectiveAt}
-          daysLeft={deletion.daysLeft ?? 0}
-        />
-      )}
 
       {/* Profile card ---------------------------------------------------- */}
       <div

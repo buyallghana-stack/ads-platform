@@ -10,6 +10,8 @@ import { ViewAsBanner } from '@/components/app/ViewAsBanner'
 import { avatarPublicUrl } from '@/lib/profile/avatar'
 import { needsLoginChallenge } from '@/lib/security/login-2fa'
 import { getPlanStanding } from '@/lib/subscriptions/data'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 
 /**
  * Shell for every signed-in screen: Home, Ads, Upgrade, Profile, Withdraw.
@@ -35,6 +37,18 @@ export default async function AppLayout({
 
   const signedIn = await getSessionUser()
   if (!signedIn) redirect({ href: '/login', locale })
+
+  const { data: deletionProfile } = await createAdminClient()
+    .from('profiles')
+    .select('deletion_requested_at, deleted_at')
+    .eq('id', signedIn!.id)
+    .maybeSingle()
+
+  if (deletionProfile?.deletion_requested_at && !deletionProfile.deleted_at) {
+    const supabase = await createClient()
+    await supabase.auth.signOut()
+    redirect({ href: '/login', locale })
+  }
 
   /*
     A session alone is not enough for an enrolled account. Supabase issues it
