@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Mail, UserRound } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { CalendarClock, Clock, LogIn, LogOut, Mail, UserRound } from 'lucide-react'
+import { useFormatter, useTranslations } from 'next-intl'
 import { Controller, useForm } from 'react-hook-form'
 
 import { FormHeader } from '@/components/auth/FormHeader'
@@ -12,7 +12,11 @@ import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { PasswordField } from '@/components/ui/PasswordField'
 import { TextField } from '@/components/ui/TextField'
-import { logInAction } from '@/app/[locale]/(auth)/actions'
+import {
+  confirmLoginAndCancelDeletionAction,
+  logInAction,
+  stayLoggedOutAction,
+} from '@/app/[locale]/(auth)/actions'
 import { deviceFingerprint, warmFingerprint } from '@/lib/fraud/fingerprint'
 import { Link, useRouter } from '@/i18n/navigation'
 import { logInSchema, type LogInInput } from '@/lib/validation/auth'
@@ -22,9 +26,16 @@ export function LogInForm() {
   const t = useTranslations('auth.logIn')
   const tError = useTranslations('auth.errors')
   const router = useRouter()
+  const format = useFormatter()
   const msg = useAuthErrorMessage()
 
   const [formError, setFormError] = useState<string | null>(null)
+  const [noticeMessage, setNoticeMessage] = useState<string | null>(null)
+  const [deletionInfo, setDeletionInfo] = useState<{
+    requestedAt?: string
+    effectiveAt?: string
+  } | null>(null)
+  const [actionLoading, setActionLoading] = useState<'cancel' | 'stay' | null>(null)
 
   const {
     register,
@@ -48,6 +59,7 @@ export function LogInForm() {
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null)
+    setNoticeMessage(null)
 
     const result = await logInAction({
       email: values.email,
@@ -56,6 +68,14 @@ export function LogInForm() {
     })
 
     if (result.ok) {
+      if (result.deletionPending) {
+        setDeletionInfo({
+          requestedAt: result.requestedAt,
+          effectiveAt: result.effectiveAt,
+        })
+        return
+      }
+
       /*
        * Client-side navigation, not a full document reload. The login page has
        * already downloaded the framework and React, so moving to the dashboard
@@ -87,9 +107,144 @@ export function LogInForm() {
     setFormError(result.message ?? msg(result.errorKey) ?? tError('generic'))
   })
 
+  if (deletionInfo) {
+    const requestedDateStr = deletionInfo.requestedAt
+      ? format.dateTime(new Date(deletionInfo.requestedAt), {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : null
+
+    const effectiveDateStr = deletionInfo.effectiveAt
+      ? format.dateTime(new Date(deletionInfo.effectiveAt), {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : null
+
+    const handleCancelAndLogin = async () => {
+      setFormError(null)
+      setActionLoading('cancel')
+      const res = await confirmLoginAndCancelDeletionAction()
+      if (res.ok) {
+        router.replace(res.redirectTo ?? '/dashboard')
+        router.refresh()
+      } else {
+        setActionLoading(null)
+        setFormError(res.message ?? msg(res.errorKey) ?? tError('generic'))
+      }
+    }
+
+    const handleStayLoggedOut = async () => {
+      setActionLoading('stay')
+      await stayLoggedOutAction()
+      setActionLoading(null)
+      setDeletionInfo(null)
+      setNoticeMessage(t('deletionPending.loggedOutNotice'))
+    }
+
+    return (
+      <div>
+        <FormHeader
+          icon={<CalendarClock className="text-warning-600 dark:text-warning-400" />}
+          title={t('deletionPending.title')}
+          subtitle={t('deletionPending.subtitle')}
+        />
+
+        {formError && (
+          <div
+            role="alert"
+            className="mb-5 rounded-(--radius-input) border border-danger-500/25 bg-danger-50 px-3 py-2.5 text-[0.8125rem] text-danger-700"
+          >
+            {formError}
+          </div>
+        )}
+
+        <div className="flex flex-col gap-4">
+          <div className="rounded-(--radius-card) border border-warning-500/30 bg-warning-50/75 p-4 dark:border-warning-500/30 dark:bg-warning-50/20">
+            <div className="flex flex-col gap-2.5 text-[0.8125rem]">
+              {requestedDateStr && (
+                <div className="flex items-start gap-2 text-ink-700 dark:text-ink-300">
+                  <Clock className="mt-0.5 size-4 shrink-0 text-warning-600 dark:text-warning-400" />
+                  <span>
+                    <strong className="font-semibold text-ink-900 dark:text-ink-100">
+                      {t('deletionPending.requestedAt', { date: requestedDateStr })}
+                    </strong>
+                  </span>
+                </div>
+              )}
+
+              {effectiveDateStr && (
+                <div className="flex items-start gap-2 text-ink-700 dark:text-ink-300">
+                  <CalendarClock className="mt-0.5 size-4 shrink-0 text-danger-600 dark:text-danger-400" />
+                  <span>
+                    <strong className="font-semibold text-danger-700 dark:text-danger-400">
+                      {t('deletionPending.effectiveAt', { date: effectiveDateStr })}
+                    </strong>
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <p className="mt-3 border-t border-warning-500/20 pt-3 text-[0.75rem] leading-relaxed text-ink-600 dark:text-ink-400">
+              {t('deletionPending.warning')}
+            </p>
+          </div>
+
+          <p className="text-[0.8125rem] leading-relaxed text-ink-600 dark:text-ink-400">
+            {t('deletionPending.prompt')}
+          </p>
+
+          <div className="flex flex-col gap-2.5 pt-2">
+            <Button
+              type="button"
+              size="lg"
+              fullWidth
+              loading={actionLoading === 'cancel'}
+              disabled={actionLoading !== null}
+              onClick={handleCancelAndLogin}
+              leadingIcon={<LogIn className="size-4" />}
+            >
+              {t('deletionPending.cancelAndLogin')}
+            </Button>
+
+            <Button
+              type="button"
+              variant="secondary"
+              size="lg"
+              fullWidth
+              loading={actionLoading === 'stay'}
+              disabled={actionLoading !== null}
+              onClick={handleStayLoggedOut}
+              leadingIcon={<LogOut className="size-4" />}
+            >
+              {t('deletionPending.stayLoggedOut')}
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div>
       <FormHeader icon={<UserRound />} title={t('title')} subtitle={t('subtitle')} />
+
+      {noticeMessage && (
+        <div
+          role="status"
+          className="mb-5 flex items-start gap-2.5 rounded-(--radius-input) border border-warning-500/30 bg-warning-50 px-3.5 py-3 text-[0.8125rem] text-warning-800 dark:border-warning-500/30 dark:bg-warning-50/20 dark:text-warning-300"
+        >
+          <CalendarClock className="mt-0.5 size-4 shrink-0 text-warning-600 dark:text-warning-400" />
+          <p className="leading-relaxed">{noticeMessage}</p>
+        </div>
+      )}
 
       {formError && (
         <div

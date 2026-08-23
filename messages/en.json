@@ -358,7 +358,18 @@
       "rememberMe": "Keep me signed in",
       "forgotPassword": "Forgot password?",
       "noAccount": "New here?",
-      "signUp": "Create an account"
+      "signUp": "Create an account",
+      "deletionPending": {
+        "title": "Account scheduled for deletion",
+        "subtitle": "A request to delete your account is currently pending.",
+        "requestedAt": "Requested on {date}",
+        "effectiveAt": "Permanent deletion on {date}",
+        "warning": "After this date and time, the deletion is final and cannot be undone. All your earnings, records, and data will be permanently removed.",
+        "prompt": "Signing in will automatically cancel this deletion request and restore your account. To let the deletion proceed as scheduled, remain logged out.",
+        "cancelAndLogin": "Log In & Cancel Deletion",
+        "stayLoggedOut": "Stay Logged Out",
+        "loggedOutNotice": "Your account remains scheduled for deletion. You have been signed out."
+      }
     },
     "verify": {
       "checkEmail": {

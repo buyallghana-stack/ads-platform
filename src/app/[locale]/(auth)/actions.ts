@@ -7,6 +7,7 @@ import { reportUnexpected } from '@/lib/observability/report'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { landingFor } from '@/lib/auth/landing'
+import { getSessionUser } from '@/lib/auth/session'
 import { getOrigin, getRequestContext } from '@/lib/request-context'
 import {
   forgotPasswordSchema,
@@ -27,8 +28,14 @@ import {
  */
 
 export type ActionResult =
-  | { ok: true; redirectTo?: string }
-  | { ok: false; errorKey: string; message?: string; field?: string }
+  | {
+      ok: true
+      redirectTo?: string
+      deletionPending?: boolean
+      requestedAt?: string
+      effectiveAt?: string
+    }
+  | { ok: false; errorKey: string; message?: string; field?: string; redirectTo?: string }
 
 /** A raw message from a check that already produced human copy. */
 const literal = (message: string): ActionResult => ({ ok: false, errorKey: '', message })
@@ -340,28 +347,23 @@ export async function logInAction(formData: {
     }
 
     /*
-      Signing in IS the cancel gesture for a pending deletion (operator spec
-      2026-07-25). Done here rather than behind the 2FA challenge on purpose:
-      the person has proved the password on an account they asked to delete,
-      and the kind reading — they came back — is also the reversible one. The
-      request can always be made again.
+      Check if account deletion has been requested and is currently pending.
+      Instead of immediately cancelling the deletion without warning, prompt the user
+      to choose whether to restore their account (cancel deletion) or stay logged out.
     */
-    try {
-      const { data: cancelled } = await createAdminClient().rpc('cancel_account_deletion', {
-        p_user_id: session.user.id,
-      })
-      if (cancelled) {
-        await createAdminClient().rpc('create_notification', {
-          p_user_id: session.user.id,
-          p_type: 'announcement',
-          p_title: 'Account deletion cancelled',
-          p_body:
-            'Welcome back. Because you signed in, your account is no longer scheduled for deletion.',
-          p_reference: {},
-        })
+    const { data: profile } = await createAdminClient()
+      .from('profiles')
+      .select('deletion_requested_at, deletion_effective_at, deleted_at')
+      .eq('id', session.user.id)
+      .maybeSingle()
+
+    if (profile?.deletion_requested_at && !profile.deleted_at) {
+      return {
+        ok: true,
+        deletionPending: true,
+        requestedAt: profile.deletion_requested_at,
+        effectiveAt: profile.deletion_effective_at ?? undefined,
       }
-    } catch {
-      // Never block a sign-in on this.
     }
 
     // Enrolled accounts finish signing in on the challenge screen.
@@ -373,6 +375,49 @@ export async function logInAction(formData: {
   // Administrators land in the admin dashboard: it is what they signed in to
   // do, and until this existed /admin was unreachable without typing it.
   return { ok: true, redirectTo: await landingFor(session.user!.id) }
+}
+
+/**
+ * Confirms sign-in and cancels the pending account deletion request.
+ */
+export async function confirmLoginAndCancelDeletionAction(): Promise<ActionResult> {
+  const user = await getSessionUser()
+  if (!user) return { ok: false, errorKey: 'invalidCredentials' }
+
+  try {
+    const { data: cancelled } = await createAdminClient().rpc('cancel_account_deletion', {
+      p_user_id: user.id,
+    })
+    if (cancelled) {
+      await createAdminClient().rpc('create_notification', {
+        p_user_id: user.id,
+        p_type: 'announcement',
+        p_title: 'Account deletion cancelled',
+        p_body:
+          'Welcome back. Because you signed in, your account is no longer scheduled for deletion.',
+        p_reference: {},
+      })
+    }
+  } catch {
+    // Never block a sign-in on this.
+  }
+
+  // Enrolled accounts finish signing in on the challenge screen.
+  if (await isTwoFactorEnabled(user.id)) {
+    return { ok: true, redirectTo: '/verify-2fa' }
+  }
+
+  return { ok: true, redirectTo: await landingFor(user.id) }
+}
+
+/**
+ * Signs the user out while keeping their deletion schedule intact.
+ */
+export async function stayLoggedOutAction(): Promise<ActionResult> {
+  const supabase = await createClient()
+  await supabase.auth.signOut()
+  await clearLoginVerified()
+  return { ok: true }
 }
 
 /**

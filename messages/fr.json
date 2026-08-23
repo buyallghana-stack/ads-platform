@@ -358,7 +358,18 @@
       "rememberMe": "Rester connecté",
       "forgotPassword": "Mot de passe oublié ?",
       "noAccount": "Nouveau ici ?",
-      "signUp": "Créer un compte"
+      "signUp": "Créer un compte",
+      "deletionPending": {
+        "title": "Compte programmé pour suppression",
+        "subtitle": "Une demande de suppression de votre compte est en attente.",
+        "requestedAt": "Demandée le {date}",
+        "effectiveAt": "Suppression définitive le {date}",
+        "warning": "Après cette date et heure, la suppression est définitive et irréversible. Tous vos gains, historiques et données seront définitivement effacés.",
+        "prompt": "Se connecter annulera automatiquement cette demande de suppression et restaurera votre compte. Pour laisser la suppression se poursuivre, restez déconnecté.",
+        "cancelAndLogin": "Se connecter et annuler la suppression",
+        "stayLoggedOut": "Rester déconnecté",
+        "loggedOutNotice": "Votre compte reste programmé pour suppression. Vous avez été déconnecté."
+      }
     },
     "verify": {
       "checkEmail": {
