@@ -6,7 +6,6 @@ import { Crown, Minus, TrendingDown, TrendingUp } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import { Avatar } from '@/components/profile/Avatar'
-import { cedis } from '@/lib/market/money'
 import { cn } from '@/lib/cn'
 import type {
   LeaderboardData,
@@ -77,33 +76,15 @@ function MovementMark({ movement, label }: { movement: Movement; label: string }
 
 export function LeaderboardView({
   data,
-  unit = 'points',
 }: {
   data: LeaderboardData
-  /**
-   * Which board this is. Points for the ads side, cedis of cleared commission
-   * for the affiliate side.
-   *
-   * ⚠️ A STRING, not a formatter. Functions cannot be passed from a server
-   * component to a client one, which is how the first version of this returned
-   * a 500 on every render.
-   *
-   * Nothing else is skinnable, deliberately: the operator asked for the two
-   * boards to be the same board (2026-08-07), so the podium, the medals, the
-   * movement arrows and the jump-to-me button are shared exactly.
-   */
-  unit?: 'points' | 'money'
 }) {
   const t = useTranslations('leaderboard')
   const format = useFormatter()
 
-  const score = (value: number) => (unit === 'money' ? cedis(value) : format.number(value))
-  /* The four strings that name the unit. Everything else on this screen reads
-     the same in both businesses, which is the point of sharing it. */
-  const say = (key: 'title' | 'subtitle' | 'empty' | 'onlyPodium') =>
-    unit === 'money' ? t(`${key}Money`) : t(key)
-  const standing = (value: number) =>
-    unit === 'money' ? t('yourEarnings', { amount: score(value) }) : t('yourPoints', { points: score(value) })
+  const score = (value: number) => format.number(value)
+  const say = (key: 'title' | 'subtitle' | 'empty' | 'onlyPodium') => t(key)
+  const standing = (value: number) => t('yourPoints', { points: score(value) })
 
   const [period, setPeriod] = useState<LeaderboardPeriod>('week')
   const board = data.boards[period]

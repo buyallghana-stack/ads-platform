@@ -14,7 +14,6 @@ import {
 import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { Logo } from '@/components/brand/Logo'
-import { ModeSwitchButton } from '@/components/app/ModeSwitch'
 import { PerformanceChart } from '@/components/dashboard/PerformanceChart'
 import { QuickLinks } from '@/components/dashboard/QuickLinks'
 import { ReferralCard } from '@/components/dashboard/ReferralCard'
@@ -150,33 +149,7 @@ export default async function HomePage({
       <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-3">
       <header className="flex min-w-0 flex-1 items-center gap-2">
         <Logo variant="dark" className="min-w-0 md:hidden" />
-        {/*
-          THE PHONE'S ONLY ROUTE INTO THE SECOND BUSINESS.
-
-          The sidebar carries the same switch, and the sidebar is `md:flex` —
-          so without this there is no way into Phase 2 on a phone, which is the
-          bug the first mode switch shipped with and which is invisible in the
-          source because the component is plainly imported and used.
-
-          `md:hidden` here, because above md the sidebar's card is the better
-          affordance and two doors on one screen is one too many.
-        */}
         <div className="ml-auto flex shrink-0 items-center gap-2">
-        <ModeSwitchButton to="market" className="hidden sm:inline-flex md:hidden" />
-        {/*
-          The three icons used to float loose on the wash: no container, no
-          edge, nothing saying they belong together or that they are controls
-          at all. Against `bg-field` they read as decoration.
-
-          Grouping them in one bordered pill fixes both problems at once — it
-          gives the glyphs a surface to sit on so they have contrast wherever
-          the gradient happens to be, and it says "toolbar" without adding
-          three text labels that would eat the header on a 390px phone.
-
-          The bell keeps a divider after it because it is the only one of the
-          three that carries state (the unread badge); the theme switch and
-          support chat are stateless twins and sit together.
-        */}
         <div className="flex shrink-0 items-center rounded-full border border-ink-200 bg-surface/80 p-0.5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] backdrop-blur-sm">
           <NotificationBell notifications={notifications} unreadCount={unreadCount} now={now} />
           <span aria-hidden className="mx-0.5 h-5 w-px bg-ink-200" />
@@ -185,9 +158,6 @@ export default async function HomePage({
         </div>
         </div>
       </header>
-
-      {/* The phone copy. Only one of the two is displayed at a time. */}
-      <ModeSwitchButton to="market" className="w-fit sm:hidden" />
       </div>
 
       <div className="animate-rise">

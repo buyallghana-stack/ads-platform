@@ -4,7 +4,6 @@ import { AdminRail, AdminSidebar } from '@/components/admin/AdminNav'
 import { AdminTopBar } from '@/components/admin/AdminChrome'
 import { redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser } from '@/lib/auth/session'
-import { countCommissionPayoutsAwaitingDecision } from '@/lib/admin/data/affiliates'
 import { countPayoutsAwaitingDecision } from '@/lib/admin/data/payouts'
 import { countFlaggedAccounts, countUnreadSupport } from '@/lib/admin/data/people'
 import { PREVIEW } from '@/lib/admin/preview'
@@ -83,17 +82,12 @@ export default async function AdminLayout({
     All three in parallel: this layout runs on every admin screen, and
     sequential awaits would add a round trip to each of them.
   */
-  const [payouts, flagged, messages, affiliates] = await Promise.all([
+  const [payouts, flagged, messages] = await Promise.all([
     countPayoutsAwaitingDecision(),
     countFlaggedAccounts(),
     countUnreadSupport(),
-    /* Commission withdrawals are their own queue and their own badge — folding
-       them into `payouts` would have one number covering two ledgers, and an
-       operator clicking Payouts to find the four it promised would find none
-       of them there. */
-    countCommissionPayoutsAwaitingDecision(),
   ])
-  const counts = { payouts, flagged, messages, affiliates }
+  const counts = { payouts, flagged, messages }
 
   const admin = {
     name: profile?.full_name ?? user!.email ?? 'Admin',

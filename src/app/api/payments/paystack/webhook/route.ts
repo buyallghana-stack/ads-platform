@@ -4,7 +4,6 @@ import { serverEnv } from '@/lib/env'
 import { reportUnexpected } from '@/lib/observability/report'
 import { confirmPaystackReference } from '@/lib/payments/confirm'
 import { verifyWebhookSignature } from '@/lib/payments/paystack'
-import { confirmProductOrder } from '@/lib/market/orders'
 import { confirmVaultPaystackReference } from '@/lib/payments/vault-confirm'
 
 /**
@@ -72,13 +71,6 @@ export async function POST(request: Request) {
   */
   let outcome: { ok: true; alreadyDone: boolean } | { ok: false; reason: string } =
     await confirmPaystackReference(event.data.reference)
-
-  if (!outcome.ok && outcome.reason === 'not_found') {
-    /* No cookie on a webhook, so no visitor token. Attribution still works
-       through the account-side binding: a click made while signed in is
-       recorded against the user as well as the browser. */
-    outcome = await confirmProductOrder(event.data.reference, null)
-  }
 
   if (!outcome.ok && outcome.reason === 'not_found') {
     outcome = await confirmVaultPaystackReference(event.data.reference)

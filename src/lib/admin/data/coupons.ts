@@ -128,34 +128,19 @@ export type CouponTarget = {
   priceMinor: number
   /** Only plans have one: the top of the band. */
   bandMaxMinor: number | null
-  /** Only affiliate products have one: what the two commission levels cost. */
   commissionPercent: number | null
 }
 
 export async function getCouponTargets(): Promise<CouponTarget[]> {
   const supabase = createAdminClient()
 
-  const [tiers, products, programs] = await Promise.all([
-    supabase
-      .from('tiers')
-      .select('id, name, price_minor, band_max_minor, is_default, is_active, sort_order')
-      .eq('is_active', true)
-      .order('sort_order'),
-    supabase
-      .from('products')
-      .select('id, title, price_minor, status')
-      .eq('status', 'published')
-      .order('title'),
-    supabase.from('affiliate_programs').select('product_id, l1_rate_value, l2_rate_value, status'),
-  ])
+  const { data: tiers } = await supabase
+    .from('tiers')
+    .select('id, name, price_minor, band_max_minor, is_default, is_active, sort_order')
+    .eq('is_active', true)
+    .order('sort_order')
 
-  const commission = new Map<string, number>()
-  for (const p of (programs.data ?? []) as Array<Record<string, unknown>>) {
-    if (p.status !== 'active') continue
-    commission.set(String(p.product_id), Number(p.l1_rate_value ?? 0) + Number(p.l2_rate_value ?? 0))
-  }
-
-  const plans: CouponTarget[] = ((tiers.data ?? []) as Array<Record<string, unknown>>)
+  const plans: CouponTarget[] = ((tiers ?? []) as Array<Record<string, unknown>>)
     /* The free plan is not buyable, so a code for it could never be redeemed.
        Offering it would be offering a coupon that does nothing. */
     .filter((t) => !t.is_default && Number(t.price_minor) > 0)
@@ -168,16 +153,5 @@ export async function getCouponTargets(): Promise<CouponTarget[]> {
       commissionPercent: null,
     }))
 
-  const catalogue: CouponTarget[] = ((products.data ?? []) as Array<Record<string, unknown>>).map(
-    (p) => ({
-      id: String(p.id),
-      label: String(p.title),
-      business: 'affiliate' as const,
-      priceMinor: Number(p.price_minor),
-      bandMaxMinor: null,
-      commissionPercent: commission.get(String(p.id)) ?? null,
-    }),
-  )
-
-  return [...plans, ...catalogue]
+  return plans
 }

@@ -41,24 +41,6 @@ export type AdsBreakdown = {
   firstEarnedAt: string | null
 }
 
-export type AffiliateBreakdown = {
-  sources: EarningLine[]
-  earned: number
-  balance: number
-  pending: number
-  reversed: number
-  paidOut: number
-  paidOutNet: number
-  fees: number
-  pendingOut: number
-  rejectedOut: number
-  trainingSpent: number
-  trainingCount: number
-  salesCount: number
-  recruitsCount: number
-  firstEarnedAt: string | null
-}
-
 /* bigint and numeric arrive as strings over PostgREST once large enough. */
 const n = (v: unknown) => Number(v ?? 0)
 
@@ -110,42 +92,6 @@ export async function getAdsBreakdown(userId: string): Promise<AdsBreakdown | nu
     refundedOut: cedis(row.withdrawn_refunded_points),
     plansSpent: n(row.plans_spent_minor) / 100,
     plansCount: n(row.plans_count),
-    firstEarnedAt: (row.first_earned_at as string | null) ?? null,
-  }
-}
-
-export async function getAffiliateBreakdown(userId: string): Promise<AffiliateBreakdown | null> {
-  const admin = createAdminClient()
-  const { data, error } = await admin.rpc('get_commission_breakdown', { p_user_id: userId })
-  const row = Array.isArray(data) ? data[0] : data
-  if (error || !row) return null
-
-  /* Minor units to cedis. The affiliate business never had points, so this is
-     the only conversion it needs. */
-  const c = (minor: unknown) => n(minor) / 100
-
-  return {
-    sources: [
-      { key: 'salesL1', cedis: c(row.sales_l1_minor) },
-      { key: 'salesL2', cedis: c(row.sales_l2_minor) },
-      { key: 'games', cedis: c(row.game_minor) },
-      { key: 'tasks', cedis: c(row.task_minor) },
-      { key: 'giftCodes', cedis: c(row.gift_minor) },
-      { key: 'adjustments', cedis: c(row.adjustment_minor) },
-    ],
-    earned: c(row.earned_minor),
-    balance: c(row.balance_minor),
-    pending: c(row.pending_minor),
-    reversed: c(row.reversed_minor),
-    paidOut: c(row.withdrawn_paid_minor),
-    paidOutNet: c(row.net_paid_minor),
-    fees: c(row.fees_minor),
-    pendingOut: c(row.withdrawn_pending_minor),
-    rejectedOut: c(row.withdrawn_rejected_minor),
-    trainingSpent: c(row.training_spent_minor),
-    trainingCount: n(row.training_count),
-    salesCount: n(row.sales_count),
-    recruitsCount: n(row.recruits_count),
     firstEarnedAt: (row.first_earned_at as string | null) ?? null,
   }
 }

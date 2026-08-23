@@ -1,7 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { BottomTabBar, Sidebar } from '@/components/app/AppNav'
-import { ModeSwitchCard } from '@/components/app/ModeSwitch'
 import { Link } from '@/i18n/navigation'
 import { redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser, getViewerUser } from '@/lib/auth/session'
@@ -103,10 +102,6 @@ export default async function AppLayout({
       <div className="flex min-h-dvh bg-canvas">
       <Sidebar
         user={navUser}
-        /* The door into the second business. Its twin lives in the Home
-           header, because this sidebar is `md:flex` and a phone would
-           otherwise have no route into Phase 2 at all. */
-        modeSlot={<ModeSwitchCard to="market" />}
         upgradeSlot={
           planStanding === 'all' ? null : (
             <Link
