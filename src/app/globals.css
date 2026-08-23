@@ -459,14 +459,7 @@
   background-image: var(--gradient-field);
 }
 
-/*
-  The earnings panel at the top of the affiliate dashboard. Deep violet with
-  two light pools, the same anatomy as the ads balance hero — deliberately, so
-  the two businesses feel like one company — in the other business's hue.
-*/
-@utility bg-affiliate-hero {
-  background: var(--gradient-affiliate-hero);
-}
+
 
 /* ===========================================================================
    Themeable gradients + dark overrides

@@ -29,7 +29,7 @@ export type Community = {
  *
  * `business` is 'ads' or 'affiliate'; rows marked 'both' appear on either side.
  */
-export async function getCommunities(business: 'ads' | 'affiliate'): Promise<Community[]> {
+export async function getCommunities(business: 'ads' = 'ads'): Promise<Community[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('communities')

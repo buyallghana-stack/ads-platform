@@ -92,43 +92,45 @@ export function CommunitiesBoard({ communities }: { communities: AdminCommunity[
                 <div className="min-w-0">
                   <p className="truncate text-[0.9375rem] font-semibold text-ink-900">{c.name}</p>
                   <p className="mt-0.5 text-[0.75rem] text-ink-500">
-                    {t(`platform.${c.platform}`)} · {t(`business.${c.business}`)}
+                    {t(`platform.${c.platform}`)}
                   </p>
                 </div>
                 <StatusDot tone={c.isActive ? 'success' : 'neutral'}>
                   {t(c.isActive ? 'status.live' : 'status.off')}
                 </StatusDot>
               </div>
-
-              {/* The url IS shown here. The user never sees it; the operator
-                  has to be able to check what they pasted. */}
-              <a
-                href={c.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 flex items-center gap-1.5 text-[0.75rem] break-all text-brand-700 hover:underline"
-              >
-                <ExternalLink aria-hidden className="size-3.5 shrink-0" />
-                {c.url}
-              </a>
-
-              <div className="mt-2.5 flex flex-wrap gap-2">
-                <Button type="button" size="sm" variant="ghost" onClick={() => setEditing(c)}>
-                  {t('edit')}
-                </Button>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => remove(c.id)}
-                  className={cn(
-                    'inline-flex items-center gap-1.5 rounded-(--radius-input) px-3 py-2',
-                    'text-[0.8125rem] font-medium text-danger-700 hover:bg-danger-50',
-                    'disabled:opacity-50',
-                  )}
+              <div className="mt-3 flex items-center justify-between gap-3 border-t border-ink-200/60 pt-3">
+                <a
+                  href={c.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[0.8125rem] text-ink-600 hover:text-ink-900"
                 >
-                  <Trash2 aria-hidden className="size-3.5" />
-                  {t('delete')}
-                </button>
+                  <span className="max-w-[240px] truncate sm:max-w-sm">{c.url}</span>
+                  <ExternalLink aria-hidden className="size-3 shrink-0" />
+                </a>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setEditing(c)}
+                    className="rounded-(--radius-input) px-3 py-1.5 text-[0.8125rem] font-medium text-ink-700 hover:bg-ink-100"
+                  >
+                    {t('edit')}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => remove(c.id)}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-(--radius-input) px-3 py-2',
+                      'text-[0.8125rem] font-medium text-danger-700 hover:bg-danger-50',
+                      'disabled:opacity-50',
+                    )}
+                  >
+                    <Trash2 aria-hidden className="size-3.5" />
+                    {t('delete')}
+                  </button>
+                </div>
               </div>
             </li>
           ))}
@@ -155,9 +157,6 @@ function CommunityForm({
   const [name, setName] = useState(community?.name ?? '')
   const [platform, setPlatform] = useState(community?.platform ?? 'whatsapp')
   const [url, setUrl] = useState(community?.url ?? '')
-  const [business, setBusiness] = useState<'ads' | 'affiliate' | 'both'>(
-    community?.business ?? 'both',
-  )
   const [isActive, setIsActive] = useState(community?.isActive ?? true)
   const [sortOrder, setSortOrder] = useState(String(community?.sortOrder ?? 0))
 
@@ -174,7 +173,7 @@ function CommunityForm({
         name: name.trim(),
         platform,
         url: url.trim(),
-        business,
+        business: 'ads',
         isActive,
         sortOrder: Number(sortOrder) || 0,
       })
@@ -233,19 +232,6 @@ function CommunityForm({
             className={inputClass()}
           />
         </Field>
-
-        <FieldSet label={t('form.business')} hint={t('form.businessHint')} className="sm:col-span-2">
-          <Segmented
-            value={business}
-            label={t('form.business')}
-            onChange={setBusiness}
-            options={[
-              { value: 'both', label: t('business.both') },
-              { value: 'ads', label: t('business.ads') },
-              { value: 'affiliate', label: t('business.affiliate') },
-            ]}
-          />
-        </FieldSet>
       </div>
 
       <div className="mt-3.5">

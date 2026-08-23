@@ -31,10 +31,10 @@
     },
     "hero": {
       "badgeChip": "Nouveau",
-      "badge": "Deux activités, un seul compte",
+      "badge": "Véritables récompenses quotidiennes en Cedis",
       "title": "Soyez payé pour votre",
       "titleAccent": "attention.",
-      "lead": "Regardez de courtes publicités et répondez à des sondages, ou faites la promotion de produits contre une commission. Les deux paient en cedis, directement sur votre Mobile Money.",
+      "lead": "Regardez de courtes vidéos publicitaires et répondez à des sondages rapides sur votre téléphone. Gagnez des points indexés sur le cédi et retirez directement par Mobile Money.",
       "primaryCta": "Créer un compte gratuit",
       "secondaryCta": "Voir comment ça marche",
       "note": "Commencez avec la formule gratuite. Passez à la vitesse supérieure quand vous voulez gagner plus vite.",
@@ -53,9 +53,9 @@
     },
     "ways": {
       "eyebrow": "Façons de gagner",
-      "title": "Trois façons",
-      "titleAccent": "d'être payé.",
-      "lead": "Regardez des publicités dans vos moments libres. Faites la promotion de produits que les gens veulent déjà. Amenez vos amis. Les trois sont actives et paient en cedis.",
+      "title": "Deux façons d'",
+      "titleAccent": "être rémunéré.",
+      "lead": "Regardez des publicités pendant votre temps libre et invitez vos amis. Tous les gains sont réels et payés en cédis.",
       "watch": {
         "chip": "En ligne",
         "title": "Regardez des publicités et répondez à des sondages",
@@ -73,12 +73,6 @@
         "title": "Amenez vos amis",
         "body": "Chaque compte a son lien de parrainage. Partagez-le : vous gagnez quand les personnes inscrites commencent à regarder.",
         "cta": "Comment ça marche"
-      },
-      "affiliate": {
-        "chip": "En ligne",
-        "title": "Faites la promotion, gardez votre part",
-        "body": "Suivez une courte formation, obtenez votre propre lien pour tout ce qui est en boutique, et gardez un pourcentage de chaque vente que vous apportez.",
-        "cta": "Voir les formations"
       }
     },
     "how": {
@@ -221,7 +215,7 @@
       "items": {
         "free": {
           "q": "Combien ça coûte pour commencer ?",
-          "a": "Rien pour créer un compte, et la formule gratuite donne {freeAds} publicités par jour pendant vos {days} premiers jours. Ensuite, une formule payante permet de continuer à gagner, et les points déjà gagnés restent les vôtres dans tous les cas. Le côté affiliation est différent : il commence par une formation payante."
+          "a": "Créer un compte ne coûte rien, et le forfait gratuit vous donne {freeAds} publicités par jour pendant vos {days} premiers jours. Ensuite, un forfait payant vous permet de continuer à gagner, et vos points acquis restent toujours à vous."
         },
         "worth": {
           "q": "Que vaut réellement un point ?",
@@ -262,30 +256,6 @@
       "blurb": "SidePerks vous paie pour regarder de courtes vidéos publicitaires et répondre à des sondages depuis votre téléphone. Conçu au Ghana, pour le Ghana.",
       "copyright": "© {year} SidePerks. Tous droits réservés.",
       "madeIn": "Conçu au Ghana · English & Français"
-    },
-    "affiliateSection": {
-      "eyebrow": "Marketing d’affiliation",
-      "title": "Vendez ce que les gens",
-      "titleAccent": "veulent déjà.",
-      "lead": "Apprenez le métier en un après-midi, puis gagnez une commission sur chaque vente que vous apportez. Vos gains ont leur propre solde et se retirent de la même façon.",
-      "depthOne": "Vous gagnez sur chaque vente que vous réalisez",
-      "depthTwo": "Vous gagnez sur vos ventes et sur celles des affiliés que vous recrutez",
-      "rate": "Vous gardez {l1} %",
-      "rateTwo": "Vous gardez {l1} %, plus {l2} % sur vos recrues",
-      "lessons": "{n, plural, one {# leçon} other {# leçons}}",
-      "validity": "Accès pendant {n, plural, one {# jour} other {# jours}}",
-      "certificate": "Certificat à la fin",
-      "cta": "Voir la formation",
-      "dashboardEyebrow": "Votre côté affilié",
-      "dashboardTitle": "Un second solde, et un tableau de bord assorti",
-      "dashboardBody": "Clics, ventes et commissions au même endroit, avec votre lien pour chaque produit et un retrait vers le compte qui reçoit déjà vos points.",
-      "dashboardPoints": {
-        "links": "Un lien suivi pour chaque produit",
-        "clicks": "Voyez les clics et les ventes en direct",
-        "cleared": "La commission se valide et devient retirable",
-        "board": "Un classement des gains et des tâches récompensées"
-      },
-      "shotAlt": "Le tableau de bord affilié de SidePerks sur un téléphone, avec un solde de commissions en cedis"
     },
     "extras": {
       "eyebrow": "Plus que regarder",
@@ -1659,10 +1629,7 @@
       },
       "errors": {
         "dismiss": "Fermer"
-      },
-      "otherQueue": "Les retraits de commissions du côté affiliation forment une file distincte.",
-      "otherQueueCta": "Ouvrir les retraits de commissions",
-      "otherQueueWaiting": "{n, plural, =0 {aucun en attente} one {# en attente} other {# en attente}}"
+      }
     },
     "people": {
       "tabsLabel": "Filtrer les personnes",
@@ -2528,10 +2495,6 @@
         "leaderboard": {
           "title": "Classement et codes cadeaux",
           "description": "Ce que le classement public compte et affiche, et la difficulté à deviner un code cadeau."
-        },
-        "affiliate": {
-          "title": "Activité d’affiliation",
-          "description": "La seconde activité : des personnes qui vendent vos produits pour une part. En cedis, pas en points."
         }
       },
       "fields": {
@@ -2702,44 +2665,6 @@
         "freeEarningDays": {
           "label": "Durée de gain gratuite",
           "description": "Nombre de jours après l'inscription pendant lesquels un compte gratuit peut gagner. Prendre un forfait lève la limite immédiatement. 0 = aucune limite. C'est le plafond de ce que peut rapporter un compte créé pour de la fraude."
-        },
-        "affiliatePayouts": {
-          "label": "Les affiliés peuvent retirer leurs commissions",
-          "description": "Désactivé, la commission continue de s’accumuler sans pouvoir être retirée. Rien n’expire pendant ce temps. Indépendant du commutateur des retraits en points ci-dessus.",
-          "warning": "Activer ceci laisse sortir de l’argent réel. Vérifiez la file d’attente des retraits sur Affiliés le jour même."
-        },
-        "commissionMinimum": {
-          "label": "Retrait de commission minimum",
-          "description": "En pesewas, 5000 correspond à 50,00 GHS. Un seul montant pour tous les affiliés, quel que soit leur volume."
-        },
-        "affiliateL1": {
-          "label": "Taux par défaut pour le vendeur",
-          "description": "Le taux de départ d’un nouveau produit pour celui qui réalise la vente. Chaque produit porte son propre taux : modifier ceci ne change rien à ce qui est déjà en vente."
-        },
-        "affiliateL2": {
-          "label": "Taux par défaut pour son parrain",
-          "description": "Payé sur ce qui reste après le vendeur, à l’affilié qui l’a recruté. Zéro désactive le second niveau."
-        },
-        "affiliateGames": {
-          "label": "Les affiliés peuvent jouer aux jeux",
-          "description": "Désactivé, l’écran l’explique et aucune partie n’est possible. Les parties viennent du programme de formation, pas d’une formule publicitaire.",
-          "warning": "Un lot ici verse de vrais cedis sur un solde de commissions, qui est retirable. Réglez la table des lots avant d’activer."
-        },
-        "affiliatePlaysBeginner": {
-          "label": "Parties par semaine, Débutant",
-          "description": "Combien de parties reçoit chaque semaine un affilié du programme Débutant."
-        },
-        "affiliatePlaysPro": {
-          "label": "Parties par semaine, Professionnel",
-          "description": "Combien de parties reçoit chaque semaine un affilié du programme Professionnel. Détenir les deux programmes retient le chiffre le plus élevé."
-        },
-        "affiliateBoardRanks": {
-          "label": "Places au classement des gains",
-          "description": "Jusqu’où descend le classement des affiliés. Une personne au-delà de la limite connaît quand même sa propre position."
-        },
-        "affiliateBoardZeros": {
-          "label": "Afficher les affiliés sans gain",
-          "description": "Désactivé, le classement se limite aux personnes ayant réellement gagné sur la période."
         }
       }
     },
@@ -2885,7 +2810,6 @@
       "audienceLabel": "Qui doit le recevoir",
       "audience": {
         "all": "Tout le monde",
-        "affiliates": "Affiliés uniquement",
         "ads": "Côté publicités uniquement"
       }
     },
@@ -2910,11 +2834,6 @@
       "valuePercent": "{percent} % de remise",
       "valueFixed": "GHS {amount} de remise",
       "tookOff": "a obtenu GHS {off} de remise et payé GHS {paid}",
-      "overCommission": "Ce programme verse {pays} pour cent de commission sur les deux niveaux, et l'affilié est payé sur le prix avant le coupon. Retirer plus de {most} pour cent verserait plus que ce que la vente rapporte.",
-      "business": {
-        "ads": "Annonces",
-        "affiliate": "Affiliation"
-      },
       "kind": {
         "percent": "Pourcentage",
         "fixed": "Montant fixe"
@@ -3066,9 +2985,7 @@
         "hint": "Un seul pool partagé entre les deux jeux. Un utilisateur détenant plusieurs forfaits obtient le plus élevé, pas le total, modifiable via game_plays_combine_mode dans les paramètres.",
         "free": "Gratuit",
         "playsFor": "Parties hebdomadaires pour {plan}"
-      },
-      "affiliateNote": "Ces lots versent des points, pour les personnes qui regardent des publicités. L’activité d’affiliation propose les deux mêmes jeux et verse des cedis, avec sa propre table.",
-      "affiliateLink": "Lots des affiliés"
+      }
     },
     "tasks": {
       "title": "Objectifs",
@@ -3119,122 +3036,6 @@
         "vault_deposits_made": "Dépôts dans le coffre-fort effectués"
       }
     },
-    "vendorSales": {
-      "title": "Ventes des fournisseurs",
-      "description": "Ce que les produits de chaque fournisseur ont vendu, pour pouvoir les régler.",
-      "back": "Finances",
-      "periodLabel": "Choisir une période",
-      "period": {
-        "this_month": "Ce mois-ci",
-        "last_month": "Le mois dernier",
-        "last_90": "90 derniers jours",
-        "all": "Depuis le début"
-      },
-      "export": "Exporter en CSV",
-      "empty": "Aucun produit de fournisseur n’a été vendu sur cette période.",
-      "summary": {
-        "gross": "Payé par les acheteurs",
-        "units": "{n} ventes",
-        "refunded": "Remboursé",
-        "commission": "Commission d’affiliation",
-        "net": "Restant après les deux"
-      },
-      "col": {
-        "vendor": "Fournisseur",
-        "units": "Ventes",
-        "gross": "Payé",
-        "refunded": "Remboursé",
-        "commission": "Commission",
-        "net": "Restant"
-      },
-      "card": {
-        "units": "{n} ventes sur {products} produits",
-        "products": "{n} produits"
-      },
-      "note": "Ce sont des chiffres de ventes, pas un montant dû. Ce qu’un fournisseur perçoit relève de votre contrat de licence avec lui, que ce système ne conserve délibérément pas. Rien ici ne peut donc indiquer la somme à envoyer. Une vente compte dans la période où elle a été confirmée, et un remboursement ultérieur est déduit de cette même période."
-    },
-    "promotion": {
-      "back": "Retraits",
-      "title": "D’où viennent les commissions",
-      "description": "Quelle part vient de la vente de produits, et quelle part du recrutement de personnes.",
-      "windowLabel": "Choisir une période",
-      "window": "{n} derniers jours",
-      "view": {
-        "summary": "Par affilié",
-        "ledger": "Chaque ligne"
-      },
-      "summary": {
-        "share": "Issu du recrutement",
-        "shareDetail": "de toutes les commissions",
-        "training": "Ventes de formation",
-        "product": "Ventes de produits",
-        "total": "Commissions totales",
-        "recruits": "{n} recrutés"
-      },
-      "note": "Les ventes de formation versent une commission sur deux niveaux : cette répartition mérite donc d’être suivie plutôt que supposée. Une part élevée signifie que l’essentiel de l’argent provient de personnes qui en inscrivent d’autres, et non de produits vendus. Rien ici ne modifie un taux : c’est une mesure, et les taux sont dans Réglages de la plateforme.",
-      "empty": "Aucune commission gagnée sur cette période.",
-      "emptyLedger": "Aucune ligne de commission sur cette période.",
-      "col": {
-        "affiliate": "Affilié",
-        "training": "Formation",
-        "product": "Produits",
-        "share": "Recrutement",
-        "recruits": "Recrutés",
-        "conversion": "Conversion"
-      },
-      "ledger": {
-        "when": "Quand",
-        "affiliate": "Affilié",
-        "what": "Quoi",
-        "kind": "Type",
-        "amount": "Montant",
-        "status": "Statut",
-        "level": "N{n}"
-      },
-      "kind": {
-        "credit": "Vente",
-        "reversal": "Annulé",
-        "payout": "Versé",
-        "adjustment": "Ajustement"
-      }
-    },
-    "commissionGiftCodes": {
-      "title": "Codes cadeaux de commission",
-      "description": "Codes qui ajoutent des cédis au solde de commissions d'un affilié.",
-      "intro": "Chaque code est utilisable une seule fois, par un seul affilié.",
-      "create": "Nouveau code",
-      "empty": "Aucun code cadeau de commission pour le moment.",
-      "revoke": "Révoquer",
-      "dismiss": "Fermer",
-      "none": "Aucun",
-      "redeemedBy": "Utilisé par {name}",
-      "createdOn": "Créé le {when}",
-      "status": {
-        "active": "Actif",
-        "redeemed": "Utilisé",
-        "revoked": "Révoqué"
-      },
-      "col": {
-        "code": "Code",
-        "amount": "Valeur",
-        "status": "Statut",
-        "note": "Note",
-        "redeemed": "Utilisé par"
-      },
-      "form": {
-        "code": "Code",
-        "generating": "Génération",
-        "regenerate": "Générer un autre code",
-        "codeHint": "Généré pour être impossible à deviner. Touchez pour en changer.",
-        "amount": "Valeur (GHS)",
-        "amountHint": "Ce que l'affilié reçoit, en cédis.",
-        "worth": "Vaut {amount}",
-        "note": "Note",
-        "notePlaceholder": "À quoi sert ce code",
-        "save": "Créer le code",
-        "cancel": "Annuler"
-      }
-    },
     "communities": {
       "title": "Communautés",
       "description": "Liens vers vos communautés WhatsApp, Telegram et réseaux sociaux. L'utilisateur voit le nom et le touche pour rejoindre.",
@@ -3258,11 +3059,6 @@
         "facebook": "Facebook",
         "tiktok": "TikTok",
         "other": "Autre"
-      },
-      "business": {
-        "both": "Les deux",
-        "ads": "Côté annonces",
-        "affiliate": "Côté affiliation"
       },
       "form": {
         "name": "Nom de la communauté",

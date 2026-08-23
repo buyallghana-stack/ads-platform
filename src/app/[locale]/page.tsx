@@ -38,13 +38,10 @@ import { getMarketingFigures } from '@/lib/marketing/plans'
  * SidePerks landing page. Replaces the redirect that used to send every
  * visitor straight to /signup.
  *
- * WHAT THIS PAGE SELLS, AND WHY (operator decision, 2026-07-26). SidePerks is
- * meant to cover ad-watching and affiliate marketing. Only one of those is
- * built: the ad and survey loop ships and pays today, while outbound affiliate
- * marketing is a later phase (plan §12, "currently dropped/deferred"). So
- * watching leads the page, the invite programme — which does exist — takes the
- * secondary slot, and affiliate offers appear once, clearly marked as not yet
- * available. Nothing here advertises a screen a visitor cannot reach.
+ * WHAT THIS PAGE SELLS, AND WHY:
+ * SidePerks is the premier platform in Ghana for earning real money by
+ * watching short video ads, taking surveys, and completing daily tasks.
+ * Earning is pegged directly to the Ghana Cedi and withdrawable to Mobile Money.
  *
  * EVERY NUMBER ON THIS PAGE COMES FROM THE DATABASE (`getMarketingFigures`) —
  * prices, daily limits, the points-to-cedi rate, withdrawal thresholds. There
@@ -103,7 +100,13 @@ export default async function LandingPage({
   const cedis = (amount: number) =>
     `${figures.plans[0]?.currency ?? 'GHS'} ${amount.toFixed(2)}`
   const cheapestPaid = paidPlans[0]
-  const perAdHeadline = cheapestPaid ? cedis(cheapestPaid.perAdFrom) : cedis(1)
+  const topPaid = paidPlans[paidPlans.length - 1]
+  const perAdHeadline =
+    cheapestPaid && topPaid && cheapestPaid !== topPaid
+      ? `${cedis(cheapestPaid.perAdFrom)} – ${cedis(topPaid.perAdTo > topPaid.perAdFrom ? topPaid.perAdTo : topPaid.perAdFrom)}`
+      : cheapestPaid
+        ? cedis(cheapestPaid.perAdFrom)
+        : cedis(1)
 
   /* --- Stat band. Four figures, every one of them read from config. ----- */
   const stats = [

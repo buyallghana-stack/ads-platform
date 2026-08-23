@@ -45,7 +45,7 @@ export default async function PayoutPage({
     `redirect(searchParams.from)`.
   */
   const from = (await searchParams).from
-  const returnTo = from === 'commission' ? '/commission/withdraw' : from === 'withdraw' ? '/withdraw' : null
+  const returnTo = from === 'withdraw' ? '/withdraw' : null
 
   const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })

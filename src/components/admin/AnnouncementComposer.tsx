@@ -37,12 +37,7 @@ export function AnnouncementComposer({
   const t = useTranslations('admin.announcements')
   const format = useFormatter()
 
-  /* ⚠️ Who it reaches AND which bell it lands in are the same choice here.
-     An affiliate announcement reaches only people with an affiliate account
-     and appears only in their affiliate bell; "everyone" is account-wide news
-     and shows in both. Sending "your commission rates have changed" to
-     somebody who has never opened the marketplace is how an app gets muted. */
-  const [sendTo, setSendTo] = useState<'all' | 'affiliates' | 'ads'>('all')
+  const [sendTo, setSendTo] = useState<'all' | 'ads'>('all')
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [confirming, setConfirming] = useState(false)
@@ -109,7 +104,7 @@ export function AnnouncementComposer({
               {t('audienceLabel')}
             </span>
             <div className="mb-4 flex flex-wrap gap-2">
-              {(['all', 'affiliates', 'ads'] as const).map((option) => (
+              {(['all', 'ads'] as const).map((option) => (
                 <button
                   key={option}
                   type="button"

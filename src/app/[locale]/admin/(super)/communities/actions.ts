@@ -12,7 +12,7 @@ export type SaveCommunityInput = {
   name: string
   platform: string
   url: string
-  business: 'ads' | 'affiliate' | 'both'
+  business?: 'ads'
   isActive: boolean
   sortOrder: number
 }
@@ -35,7 +35,7 @@ export async function saveCommunity(input: SaveCommunityInput): Promise<Communit
     p_name: input.name,
     p_platform: input.platform as never,
     p_url: input.url.trim(),
-    p_business: input.business,
+    p_business: input.business ?? 'ads',
     p_is_active: input.isActive,
     p_sort_order: input.sortOrder,
   })

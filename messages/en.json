@@ -31,10 +31,10 @@
     },
     "hero": {
       "badgeChip": "New",
-      "badge": "Two businesses, one account",
+      "badge": "Real daily rewards in Cedis",
       "title": "Get paid for your",
       "titleAccent": "attention.",
-      "lead": "Watch short ads and take surveys on your phone, or promote products for commission. Both pay in cedis, straight to your Mobile Money.",
+      "lead": "Watch short video ads and answer quick surveys on your phone. Earn points pegged directly to the Ghana Cedi and withdraw straight to Mobile Money.",
       "primaryCta": "Create free account",
       "secondaryCta": "See how it works",
       "note": "Start on the free plan. Move up when you want to earn faster.",
@@ -53,9 +53,9 @@
     },
     "ways": {
       "eyebrow": "Ways to earn",
-      "title": "Three ways to",
+      "title": "Two ways to",
       "titleAccent": "get paid.",
-      "lead": "Watch ads in your spare minutes. Promote products people already want. Bring your friends along. All three are live, and all three pay in cedis.",
+      "lead": "Watch ads in your spare minutes and bring your friends along. All earning is live, and all pays in real cedis.",
       "watch": {
         "chip": "Live now",
         "title": "Watch ads and take surveys",
@@ -73,12 +73,6 @@
         "title": "Bring your friends",
         "body": "Every account comes with an invite link. Share it, and you earn when the people who join through it start watching.",
         "cta": "How inviting works"
-      },
-      "affiliate": {
-        "chip": "Live now",
-        "title": "Promote products, keep a share",
-        "body": "Take a short training programme, get your own link for everything in the shop, and keep a percentage of every sale you bring in.",
-        "cta": "See the programmes"
       }
     },
     "how": {
@@ -221,7 +215,7 @@
       "items": {
         "free": {
           "q": "What does it cost to start?",
-          "a": "Nothing to create an account, and the free plan gives you {freeAds} ads a day for your first {days} days. After that a paid plan keeps you earning, and the points you have already earned stay yours either way. The affiliate side is different: it starts with a paid training programme."
+          "a": "Nothing to create an account, and the free plan gives you {freeAds} ads a day for your first {days} days. After that a paid plan keeps you earning, and the points you have already earned stay yours either way."
         },
         "worth": {
           "q": "What is a point actually worth?",
@@ -262,30 +256,6 @@
       "blurb": "SidePerks pays you for watching short video ads and taking surveys on your phone. Built in Ghana, for Ghana.",
       "copyright": "© {year} SidePerks. All rights reserved.",
       "madeIn": "Made in Ghana · English & Français"
-    },
-    "affiliateSection": {
-      "eyebrow": "Affiliate marketing",
-      "title": "Sell what people",
-      "titleAccent": "already want.",
-      "lead": "Learn the trade in an afternoon, then earn commission on every sale you bring in. Your earnings sit in their own balance and withdraw the same way.",
-      "depthOne": "Earn on every sale you make",
-      "depthTwo": "Earn on your own sales and on sales by affiliates you bring in",
-      "rate": "You keep {l1}%",
-      "rateTwo": "You keep {l1}%, plus {l2}% on your recruits",
-      "lessons": "{n, plural, one {# lesson} other {# lessons}}",
-      "validity": "Access for {n, plural, one {# day} other {# days}}",
-      "certificate": "Certificate when you finish",
-      "cta": "See the programme",
-      "dashboardEyebrow": "Your affiliate side",
-      "dashboardTitle": "A second balance, and a dashboard to match",
-      "dashboardBody": "Clicks, sales and commission in one place, with your own link for every product and a payout button that goes to the same account your points do.",
-      "dashboardPoints": {
-        "links": "A tracked link for every product",
-        "clicks": "See clicks and sales as they happen",
-        "cleared": "Commission clears and becomes withdrawable",
-        "board": "An earnings board and tasks with cash rewards"
-      },
-      "shotAlt": "The SidePerks affiliate dashboard on a phone, showing a commission balance in Ghana cedis"
     },
     "extras": {
       "eyebrow": "More than watching",
@@ -1659,10 +1629,7 @@
       },
       "errors": {
         "dismiss": "Dismiss"
-      },
-      "otherQueue": "Commission withdrawals from the affiliate business are a separate queue.",
-      "otherQueueCta": "Open commission withdrawals",
-      "otherQueueWaiting": "{n, plural, =0 {none waiting} one {# waiting} other {# waiting}}"
+      }
     },
     "people": {
       "tabsLabel": "Filter people",
@@ -2528,10 +2495,6 @@
         "leaderboard": {
           "title": "Leaderboard and gift codes",
           "description": "What the public board counts and shows, and how hard a gift code is to guess at."
-        },
-        "affiliate": {
-          "title": "Affiliate business",
-          "description": "The second business: people who sell your products for a cut. Cedis, not points."
         }
       },
       "fields": {
@@ -2702,44 +2665,6 @@
         "freeEarningDays": {
           "label": "Free earning window",
           "description": "How many days after signing up a free account can earn. Buying any plan lifts it immediately. 0 means no limit. This is the ceiling on what a farmed account can ever be worth."
-        },
-        "affiliatePayouts": {
-          "label": "Affiliates can withdraw commission",
-          "description": "Off means commission still builds up and simply cannot be taken out yet. Nothing expires while it is off. Separate from the points payout switch above. One business can open without the other.",
-          "warning": "Turning this on lets real money leave. Check the withdrawal queue on Affiliates the same day."
-        },
-        "commissionMinimum": {
-          "label": "Smallest commission withdrawal",
-          "description": "In pesewas, 5000 is GHS 50.00. One figure for every affiliate, whatever they have sold."
-        },
-        "affiliateL1": {
-          "label": "Default rate for the seller",
-          "description": "What a new product starts at for whoever made the sale. Each product carries its own rate, so changing this re-prices nothing already selling."
-        },
-        "affiliateL2": {
-          "label": "Default rate for their recruiter",
-          "description": "Paid out of what is left after the seller, to the affiliate who brought them in. Zero switches the second level off."
-        },
-        "affiliateGames": {
-          "label": "Affiliates can play the games",
-          "description": "Off means the screen explains itself and no play is possible. Plays come from the training programme, not from an ads plan.",
-          "warning": "A prize here pays real cedis into a commission balance, which is withdrawable. Set the prize table before turning this on."
-        },
-        "affiliatePlaysBeginner": {
-          "label": "Plays a week, Beginner",
-          "description": "How many games an affiliate on the Beginner programme gets each week."
-        },
-        "affiliatePlaysPro": {
-          "label": "Plays a week, Professional",
-          "description": "How many games an affiliate on the Professional programme gets each week. Holding both programmes takes the higher figure."
-        },
-        "affiliateBoardRanks": {
-          "label": "Places on the earnings board",
-          "description": "How far down the affiliate leaderboard goes. Somebody below the cut is still told their own position."
-        },
-        "affiliateBoardZeros": {
-          "label": "Show affiliates who earned nothing",
-          "description": "Off keeps the board to people who actually earned in the period."
         }
       }
     },
@@ -2885,7 +2810,6 @@
       "audienceLabel": "Who should get this",
       "audience": {
         "all": "Everyone",
-        "affiliates": "Affiliates only",
         "ads": "Ads side only"
       }
     },
@@ -2910,11 +2834,6 @@
       "valuePercent": "{percent}% off",
       "valueFixed": "GHS {amount} off",
       "tookOff": "took GHS {off} off and paid GHS {paid}",
-      "overCommission": "This programme pays {pays} percent in commission across both levels, and the affiliate is paid on the price before the coupon. Taking off more than {most} percent would pay out more than the sale brings in.",
-      "business": {
-        "ads": "Ads",
-        "affiliate": "Affiliate"
-      },
       "kind": {
         "percent": "Percentage",
         "fixed": "Fixed amount"
@@ -3066,9 +2985,7 @@
         "hint": "One shared pool across both games. A user holding several plans gets the highest of them, not the total. Change that with game_plays_combine_mode in Platform settings.",
         "free": "Free",
         "playsFor": "Weekly plays for {plan}"
-      },
-      "affiliateNote": "These prizes pay points, for people watching ads. The affiliate business runs the same two games and pays cedis, with its own table.",
-      "affiliateLink": "Affiliate prizes"
+      }
     },
     "tasks": {
       "title": "Tasks",
@@ -3119,122 +3036,6 @@
         "vault_deposits_made": "Vault deposits made"
       }
     },
-    "vendorSales": {
-      "title": "Vendor sales",
-      "description": "What each vendor’s products sold, so you can settle with them.",
-      "back": "Finance",
-      "periodLabel": "Choose a period",
-      "period": {
-        "this_month": "This month",
-        "last_month": "Last month",
-        "last_90": "Last 90 days",
-        "all": "All time"
-      },
-      "export": "Export CSV",
-      "empty": "No vendor product has sold in this period.",
-      "summary": {
-        "gross": "Buyers paid",
-        "units": "{n} sales",
-        "refunded": "Refunded",
-        "commission": "Affiliate commission",
-        "net": "Left after both"
-      },
-      "col": {
-        "vendor": "Vendor",
-        "units": "Sales",
-        "gross": "Buyers paid",
-        "refunded": "Refunded",
-        "commission": "Commission",
-        "net": "Left"
-      },
-      "card": {
-        "units": "{n} sales across {products} products",
-        "products": "{n} products"
-      },
-      "note": "These are sales figures, not an amount owed. What a vendor is paid is your licence agreement with them, which this system deliberately does not hold. So nothing here can tell you the figure to send. A sale counts in the period it was confirmed, and a later refund is deducted from that same period."
-    },
-    "promotion": {
-      "back": "Withdrawals",
-      "title": "Where commission comes from",
-      "description": "How much of it is people selling products, and how much is people recruiting people.",
-      "windowLabel": "Choose a window",
-      "window": "Last {n} days",
-      "view": {
-        "summary": "By affiliate",
-        "ledger": "Every line"
-      },
-      "summary": {
-        "share": "From recruiting",
-        "shareDetail": "of all commission",
-        "training": "Training sales",
-        "product": "Product sales",
-        "total": "Total commission",
-        "recruits": "{n} recruited"
-      },
-      "note": "Training sales pay commission at both levels, which is why this split is worth watching rather than assuming. A high share means most of the money is coming from people signing other people up rather than from products being sold. Nothing here changes any rate; it is a measurement, and the rates are on Platform settings.",
-      "empty": "No commission was earned in this window.",
-      "emptyLedger": "No commission lines in this window.",
-      "col": {
-        "affiliate": "Affiliate",
-        "training": "From training",
-        "product": "From products",
-        "share": "Recruiting",
-        "recruits": "Recruited",
-        "conversion": "Conversion"
-      },
-      "ledger": {
-        "when": "When",
-        "affiliate": "Affiliate",
-        "what": "What",
-        "kind": "Kind",
-        "amount": "Amount",
-        "status": "Status",
-        "level": "L{n}"
-      },
-      "kind": {
-        "credit": "Sale",
-        "reversal": "Reversed",
-        "payout": "Paid out",
-        "adjustment": "Adjustment"
-      }
-    },
-    "commissionGiftCodes": {
-      "title": "Commission gift codes",
-      "description": "Codes that add cedis to an affiliate's commission balance.",
-      "intro": "Each code can be redeemed once, by one affiliate.",
-      "create": "New code",
-      "empty": "No commission gift codes yet.",
-      "revoke": "Revoke",
-      "dismiss": "Dismiss",
-      "none": "None",
-      "redeemedBy": "Redeemed by {name}",
-      "createdOn": "Created {when}",
-      "status": {
-        "active": "Active",
-        "redeemed": "Redeemed",
-        "revoked": "Revoked"
-      },
-      "col": {
-        "code": "Code",
-        "amount": "Worth",
-        "status": "Status",
-        "note": "Note",
-        "redeemed": "Redeemed by"
-      },
-      "form": {
-        "code": "Code",
-        "generating": "Generating",
-        "regenerate": "Generate a different code",
-        "codeHint": "Generated so it cannot be guessed. Tap to change it.",
-        "amount": "Worth (GHS)",
-        "amountHint": "What the affiliate receives, in cedis.",
-        "worth": "Worth {amount}",
-        "note": "Note",
-        "notePlaceholder": "What this code is for",
-        "save": "Create code",
-        "cancel": "Cancel"
-      }
-    },
     "communities": {
       "title": "Communities",
       "description": "Links to your WhatsApp, Telegram and social communities. A user sees the name and taps it to join.",
@@ -3258,11 +3059,6 @@
         "facebook": "Facebook",
         "tiktok": "TikTok",
         "other": "Other"
-      },
-      "business": {
-        "both": "Both",
-        "ads": "Ads side",
-        "affiliate": "Affiliate side"
       },
       "form": {
         "name": "Community name",

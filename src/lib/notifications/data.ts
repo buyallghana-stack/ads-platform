@@ -40,10 +40,10 @@ export type NotificationType = 'announcement' | 'payout' | 'flag' | 'support' | 
  * whichever bell is being looked at, because hiding a support reply until you
  * switch modes is a worse bug than the one being fixed.
  */
-export type NotificationBusiness = 'ads' | 'affiliate'
+export type NotificationBusiness = 'ads'
 
 /** What a bell in `business` mode is allowed to show. */
-const visibleTo = (business: NotificationBusiness) => [business, 'both']
+const visibleTo = (business: NotificationBusiness = 'ads') => [business, 'both']
 
 export type NotificationRow = {
   id: string

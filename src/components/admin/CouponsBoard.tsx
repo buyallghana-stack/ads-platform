@@ -143,7 +143,7 @@ function CouponForm({
   const [isActive, setIsActive] = useState(coupon?.isActive ?? true)
   const [note, setNote] = useState(coupon?.note ?? '')
 
-  const choices = useMemo(() => targets.filter((x) => x.business === business), [targets, business])
+  const choices = targets
   const target = choices.find((x) => x.id === targetId) ?? null
 
   /* What it is worth, at the floor of the band and at the top of it. */
@@ -160,15 +160,6 @@ function CouponForm({
     return { floor, ceiling }
   }, [target, kind, percent, amount, cap])
 
-  /* The guard the commission rule created, shown before the save is refused.
-     An affiliate is paid on the price before the coupon, so a discount past
-     100 minus both commission rates pays out more than the sale brings in. */
-  const overCommission =
-    business === 'affiliate' &&
-    target?.commissionPercent != null &&
-    kind === 'percent' &&
-    Number(percent) > 100 - target.commissionPercent
-
   const ready =
     code.trim().length >= 3 &&
     targetId !== '' &&
@@ -176,7 +167,6 @@ function CouponForm({
     Number(quota) >= 1 &&
     Number(perUser) >= 1 &&
     Number(perUser) <= Number(quota) &&
-    !overCommission &&
     !pending
 
   const submit = () =>
@@ -185,9 +175,9 @@ function CouponForm({
       const input: SaveCouponInput = {
         id: coupon?.id ?? null,
         code: code.trim().toUpperCase(),
-        business,
-        tierId: business === 'ads' ? targetId : null,
-        productId: business === 'affiliate' ? targetId : null,
+        business: 'ads',
+        tierId: targetId,
+        productId: null,
         discountKind: kind,
         percent: kind === 'percent' ? Number(percent) : null,
         amountMinor: kind === 'fixed' ? toMinor(amount) : null,
@@ -209,22 +199,6 @@ function CouponForm({
   return (
     <div className="mb-5 rounded-(--radius-card) border border-ink-200 bg-surface p-4 sm:p-5">
       <div className="grid gap-3.5 sm:grid-cols-2">
-        <FieldSet label={t('form.business')} hint={t('form.businessHint')}>
-          <Segmented
-            value={business}
-            label={t('form.business')}
-            disabled={Boolean(coupon)}
-            onChange={(v) => {
-              setBusiness(v)
-              setTargetId('')
-            }}
-            options={[
-              { value: 'ads', label: t('business.ads') },
-              { value: 'affiliate', label: t('business.affiliate') },
-            ]}
-          />
-        </FieldSet>
-
         <Field label={t('form.target')} hint={t('form.targetHint')}>
           <select
             value={targetId}
@@ -271,7 +245,7 @@ function CouponForm({
                 max={100}
                 value={percent}
                 onChange={(e) => setPercent(e.target.value)}
-                className={inputClass(overCommission)}
+                className={inputClass()}
               />
             </Field>
             <Field label={t('form.cap')} suffix="GHS" hint={t('form.capHint')}>
@@ -389,18 +363,6 @@ function CouponForm({
                 offTop: cedis(worth.ceiling),
                 top: cedis(target.bandMaxMinor ?? 0),
               })}
-        </p>
-      )}
-
-      {overCommission && target?.commissionPercent != null && (
-        <p
-          role="alert"
-          className="mt-2.5 rounded-(--radius-card) border border-danger-500/25 bg-danger-50 px-3.5 py-2.5 text-[0.75rem] leading-relaxed text-danger-700"
-        >
-          {t('overCommission', {
-            pays: target.commissionPercent,
-            most: 100 - target.commissionPercent,
-          })}
         </p>
       )}
 

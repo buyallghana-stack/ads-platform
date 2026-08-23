@@ -36,8 +36,8 @@ export type SendAnnouncementResult =
 export async function sendAnnouncement(input: {
   title: string
   body: string
-  /** Who it reaches AND which bell it lands in. 'all' shows in both. */
-  audience?: 'all' | 'affiliates' | 'ads'
+  /** Who it reaches AND which bell it lands in. */
+  audience?: 'all' | 'ads'
 }): Promise<SendAnnouncementResult> {
   const user = await getSessionUser()
   if (!user || !(await isAdminUser(user.id))) return { ok: false, message: UNAUTHORISED }

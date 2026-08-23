@@ -71,26 +71,10 @@ export async function GET(request: Request) {
     outcomes[outcome] = (outcomes[outcome] ?? 0) + 1
   }
 
-  /*
-    Phase 2 maintenance, in its own try. The SQL function already isolates its
-    three steps from each other and raises a system alert if any of them fail;
-    this catch is the outer belt, so a Phase 2 problem can never turn a
-    successful deletion run into a 500 that looks like deletions broke.
-  */
-  let maintenance: unknown = null
-  try {
-    const { data, error: maintenanceError } = await admin.rpc('run_affiliate_maintenance')
-    if (maintenanceError) throw maintenanceError
-    maintenance = Array.isArray(data) ? data[0] : data
-  } catch (maintenanceError) {
-    reportUnexpected(maintenanceError, 'cron.affiliate-maintenance')
-  }
-
   return NextResponse.json({
     due: rows.length,
     outcomes,
     failures: failures.length,
-    maintenance,
     ranAt: new Date().toISOString(),
   })
 }
