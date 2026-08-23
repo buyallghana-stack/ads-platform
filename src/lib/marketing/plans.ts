@@ -39,6 +39,7 @@ export type MarketingPlan = {
   price: number
   currency: string
   months: number
+  billingPeriodDays: number
   adsPerDay: number
   /** 1.5 means +50% points on every ad. What the FLOOR of the band pays. */
   rewardMultiplier: number
@@ -202,6 +203,7 @@ export async function getMarketingFigures(): Promise<MarketingFigures> {
     currency: t.currency_code,
     // Every paid plan is sold as a period of months, not days.
     months: Math.max(1, Math.round(t.billing_period_days / 30)),
+    billingPeriodDays: t.billing_period_days,
     adsPerDay: t.daily_ad_cap,
     rewardMultiplier: Number(t.reward_multiplier),
     bandMaxGhs: bandOf(index).maxGhs,

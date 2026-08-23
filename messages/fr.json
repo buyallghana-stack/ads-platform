@@ -45,11 +45,10 @@
       "chipDailyValue": "{count} pubs"
     },
     "stats": {
-      "freeAds": "Publicités gratuites par jour",
-      "rate": "Ce que rapporte une publicité sur une formule payante",
-      "bestRate": "Meilleur taux",
-      "monthsValue": "{months}",
-      "months": "{months, plural, one {Mois} other {Mois}} sur chaque forfait payant"
+      "ads": "Publicités quotidiennes par forfait",
+      "rate": "Ce qu'une pub rapporte sur forfait",
+      "bestRate": "Plage de multiplicateurs de gains",
+      "days": "Jours actifs sur forfaits payants"
     },
     "ways": {
       "eyebrow": "Façons de gagner",

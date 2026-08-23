@@ -85,41 +85,49 @@ export default async function LandingPage({
   const figures = await getMarketingFigures()
 
   const num = (n: number) => format.number(n)
-  const freeAds = figures.free?.adsPerDay ?? 20
-  const bestRate = figures.best?.rewardMultiplier ?? 2
-  const months = figures.plans.find((p) => !p.isDefault)?.months ?? 3
-  const paidPlans = figures.plans.filter((p) => !p.isDefault)
-
-  /*
-    MONEY, THE WAY A VISITOR THINKS ABOUT IT (operator, 2026-08-07). Somebody
-    who has never used the app has no idea what a point is worth, so every
-    headline figure on this page is a cedi figure. The conversion is the live
-    peg, and the per-ad numbers come from what the ads in the feed actually
-    pay, so a retuned rate moves the page with it.
-  */
+  const freeAds = figures.free?.adsPerDay ?? 1
   const cedis = (amount: number) =>
     `${figures.plans[0]?.currency ?? 'GHS'} ${amount.toFixed(2)}`
+  const paidPlans = figures.plans.filter((p) => !p.isDefault)
   const cheapestPaid = paidPlans[0]
   const topPaid = paidPlans[paidPlans.length - 1]
-  const perAdHeadline =
-    cheapestPaid && topPaid && cheapestPaid !== topPaid
-      ? `${cedis(cheapestPaid.perAdFrom)} – ${cedis(topPaid.perAdTo > topPaid.perAdFrom ? topPaid.perAdTo : topPaid.perAdFrom)}`
-      : cheapestPaid
-        ? cedis(cheapestPaid.perAdFrom)
-        : cedis(1)
 
-  /* --- Stat band. Four figures, every one of them read from config. ----- */
+  /*
+    MONEY & PLAN STATS, THE WAY A VISITOR THINKS ABOUT IT (operator spec).
+    All four stats are dynamic ranges read live from active plans in the database:
+    1. Daily ads: 1 (free) up to 13 (highest plan)
+    2. Pay per ad: GHS 1.13 – 4.62 (fits single line)
+    3. Earning rate multiplier: 1.0× – 4.6×
+    4. Active earning days: 50 – 55 days on paid plans
+  */
+  const minAds = figures.free?.adsPerDay ?? 1
+  const maxAds = figures.plans.reduce((max, p) => Math.max(max, p.adsPerDay), 1)
+  const adsRange = minAds === maxAds ? `${minAds}` : `${minAds} – ${maxAds}`
+
+  const currency = figures.plans[0]?.currency ?? 'GHS'
+  const fromGhs = cheapestPaid ? cheapestPaid.perAdFrom.toFixed(2) : '1.13'
+  const toGhs = topPaid
+    ? (topPaid.perAdTo > topPaid.perAdFrom ? topPaid.perAdTo : topPaid.perAdFrom).toFixed(2)
+    : '4.62'
+  const perAdHeadline = `${currency} ${fromGhs} – ${toGhs}`
+
+  const minRate = (figures.free?.rewardMultiplier ?? 1).toFixed(1)
+  const maxRate = figures.plans
+    .reduce((top, p) => Math.max(top, p.bandMaxMultiplier || p.rewardMultiplier), 1)
+    .toFixed(1)
+  const rateRange = minRate === maxRate ? `${minRate}×` : `${minRate}× – ${maxRate}×`
+
+  const paidBillingDays = paidPlans.map((p) => p.billingPeriodDays).filter(Boolean)
+  const minDays = paidBillingDays.length > 0 ? Math.min(...paidBillingDays) : 50
+  const maxDays = paidBillingDays.length > 0 ? Math.max(...paidBillingDays) : 55
+  const daysRange = minDays === maxDays ? `${minDays} days` : `${minDays} – ${maxDays} days`
+
+  /* --- Stat band. Four live figures matching app configuration. ----- */
   const stats = [
-    { icon: <PlayCircle />, value: num(freeAds), label: t('stats.freeAds') },
+    { icon: <PlayCircle />, value: adsRange, label: t('stats.ads') },
     { icon: <Coins />, value: perAdHeadline, label: t('stats.rate') },
-    { icon: <TrendingUp />, value: `${bestRate}×`, label: t('stats.bestRate') },
-    /* The label is plural-aware because the figure is read from the plans and
-       every one of them is 30 days today, so this tile said "1 Months". */
-    {
-      icon: <Clock3 />,
-      value: t('stats.monthsValue', { months }),
-      label: t('stats.months', { months }),
-    },
+    { icon: <TrendingUp />, value: rateRange, label: t('stats.bestRate') },
+    { icon: <Clock3 />, value: daysRange, label: t('stats.days') },
   ]
 
   const steps = [
@@ -256,7 +264,7 @@ export default async function LandingPage({
                   <span aria-hidden className="text-ink-400 [&>svg]:size-6">
                     {s.icon}
                   </span>
-                  <dd className="text-[1.75rem] leading-tight font-semibold tracking-[-0.02em] text-ink-900 sm:text-[2rem]">
+                  <dd className="text-xl sm:text-2xl lg:text-[1.75rem] leading-tight font-semibold tracking-[-0.02em] text-ink-900 whitespace-nowrap">
                     {s.value}
                   </dd>
                   <dt className="text-sm text-balance text-ink-500">{s.label}</dt>

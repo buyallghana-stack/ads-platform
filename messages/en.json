@@ -45,11 +45,10 @@
       "chipDailyValue": "{count} ads"
     },
     "stats": {
-      "freeAds": "Free ads every day",
+      "ads": "Daily ads per plan",
       "rate": "What one ad pays on a paid plan",
-      "bestRate": "Top earning rate",
-      "monthsValue": "{months}",
-      "months": "{months, plural, one {Month} other {Months}} on every paid plan"
+      "bestRate": "Reward multiplier range",
+      "days": "Active earning days on paid plans"
     },
     "ways": {
       "eyebrow": "Ways to earn",
