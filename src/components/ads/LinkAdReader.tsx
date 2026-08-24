@@ -102,10 +102,10 @@ export function LinkAdReader({
 
   // ---- The reading countdown ---------------------------------------------
   useEffect(() => {
-    if (phase !== 'reading' || remaining <= 0) return
+    if (phase !== 'reading' || confirmingClose || remaining <= 0) return
     const id = setInterval(() => setRemaining((s) => Math.max(s - 1, 0)), 1000)
     return () => clearInterval(id)
-  }, [phase, remaining])
+  }, [phase, confirmingClose, remaining])
 
   /**
    * Whether leaving now would throw something away.
