@@ -2,7 +2,7 @@
 
 import { getSessionUser } from '@/lib/auth/session'
 import { clientEnv } from '@/lib/env'
-import { initialiseTransaction } from '@/lib/payments/paystack'
+import { hubInitialise } from '@/lib/payments/hub/client'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
@@ -18,6 +18,14 @@ import { createAdminClient } from '@/lib/supabase/admin'
  * forged request can do is pay a legal price for the plan it names. The
  * currency and period still come from the tier, and the user id from the
  * verified session, never from the payload.
+ *
+ * WHO ACTUALLY TAKES THE MONEY, since 2026-09-16: the Tech Store. Both
+ * products sit on one Paystack account, which Paystack asked to be the
+ * store's, so this app holds no Paystack key and makes no Paystack call. It
+ * asks the store's hub to start the payment and the hub answers with the page
+ * to send the buyer to. Everything above this line is unchanged, because the
+ * price is still decided here and the hub is only ever told a figure this
+ * database has already agreed to. See docs/payment-hub-contract.md.
  */
 export type CheckoutResult =
   | { ok: true; authorizationUrl: string }
@@ -57,23 +65,42 @@ export async function startPaystackCheckout(
     currency_code: string
   }
 
-  const initialised = await initialiseTransaction({
-    // The payment row's id doubles as the Paystack reference, so the webhook
-    // and callback both name the exact row they are confirming.
-    reference: row.id,
-    email: user.email,
+  /*
+    The payment row's id is what the hub is told as `external_ref`, so its
+    answer always names the exact row it refers to. Asking twice for the same
+    id returns the payment already running rather than starting a second one,
+    which is what makes a reloaded checkout page harmless.
+  */
+  const initialised = await hubInitialise({
+    externalRef: row.id,
     amountMinor: Number(row.amount_minor),
     currency: row.currency_code.trim(),
-    callbackUrl: `${clientEnv.NEXT_PUBLIC_SITE_URL}/upgrade/payment`,
-    metadata: { payment_id: row.id, tier_id: tierId, user_id: user.id },
+    customerEmail: user.email,
+    returnUrl: `${clientEnv.NEXT_PUBLIC_SITE_URL}/payments/return`,
   })
 
   if (!initialised.ok) {
-    await admin
-      .from('subscription_payments')
-      .update({ status: 'failed', failure_reason: initialised.message })
-      .eq('id', row.id)
+    /* A retryable fault is the hub's or the network's, and the row is left
+       pending so the reconciliation sweep can finish it if the payment did in
+       fact start. Only a refusal we know is final marks the row failed. */
+    if (!initialised.retryable) {
+      await admin
+        .from('subscription_payments')
+        .update({ status: 'failed', failure_reason: initialised.message })
+        .eq('id', row.id)
+    }
     return { ok: false, message: initialised.message }
+  }
+
+  /* The hub's reference is stored BEFORE the user leaves, because it is the
+     only thing the return page and the confirm endpoint carry. Losing it here
+     would mean a paid customer we cannot match to a plan. */
+  const { error: attachError } = await admin.rpc('attach_hub_reference', {
+    p_payment_id: row.id,
+    p_reference: initialised.reference,
+  })
+  if (attachError) {
+    return { ok: false, message: 'Could not start this payment. Please try again.' }
   }
 
   return { ok: true, authorizationUrl: initialised.authorizationUrl }

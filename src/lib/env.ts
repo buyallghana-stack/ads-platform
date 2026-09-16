@@ -77,6 +77,26 @@ const serverSchema = z.object({
    * checkout path asserts it at point of use.
    */
   PAYSTACK_SECRET_KEY: z.string().optional(),
+
+  /**
+   * The Tech Store payment hub. Paystack's own guidance put both products on
+   * one account, owned by the store, so this app buys through the store and
+   * holds no Paystack key of its own. See docs/payment-hub-contract.md.
+   */
+  TECHSTORE_HUB_URL: z.string().optional(),
+
+  /**
+   * ⚠️ THE NAMES MIRROR. What the store calls its INBOUND secret is this
+   * app's OUTBOUND one, because a direction is named from where you stand.
+   * Getting them the wrong way round produces a valid signature that the
+   * other side refuses, which reads exactly like a wrong secret.
+   *
+   * Both are comma separated lists, newest first: sign with the first, accept
+   * any of them. That is the whole of the rotation story, and it is why these
+   * are plural.
+   */
+  HUB_OUTBOUND_SECRETS: z.string().optional(),
+  HUB_INBOUND_SECRETS: z.string().optional(),
 })
 
 /**
@@ -131,6 +151,9 @@ export function serverEnv(): z.infer<typeof serverSchema> {
     TOTP_SECRET_KEY: process.env.TOTP_SECRET_KEY || undefined,
     CRON_SECRET: process.env.CRON_SECRET || undefined,
     PAYSTACK_SECRET_KEY: process.env.PAYSTACK_SECRET_KEY || undefined,
+    TECHSTORE_HUB_URL: process.env.TECHSTORE_HUB_URL || undefined,
+    HUB_OUTBOUND_SECRETS: process.env.HUB_OUTBOUND_SECRETS || undefined,
+    HUB_INBOUND_SECRETS: process.env.HUB_INBOUND_SECRETS || undefined,
   })
 
   if (!parsed.success) {
@@ -201,4 +224,46 @@ export function requirePaystackKey(): string {
     )
   }
   return key
+}
+
+/**
+ * The secrets for one direction, newest first.
+ *
+ * Empty entries are dropped rather than tolerated: a trailing comma in a
+ * dashboard field would otherwise become an empty secret that signs and
+ * verifies everything it is offered.
+ */
+export function hubSecrets(direction: 'inbound' | 'outbound'): string[] {
+  const raw =
+    direction === 'inbound'
+      ? serverEnv().HUB_INBOUND_SECRETS
+      : serverEnv().HUB_OUTBOUND_SECRETS
+  return (raw ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+}
+
+/**
+ * Asserts the hub is configured before a payment is attempted.
+ *
+ * Money paths do not get to degrade quietly. Without this the first symptom of
+ * a missing variable is a checkout that sends the user to `undefined`.
+ */
+export function requireHubConfig(): { url: string; secrets: string[] } {
+  const url = serverEnv().TECHSTORE_HUB_URL
+  if (!url) {
+    throw new Error(
+      'TECHSTORE_HUB_URL is not set. It is the base URL of the Tech Store ' +
+        'payment hub, e.g. https://techstoreghana.com.',
+    )
+  }
+  const secrets = hubSecrets('outbound')
+  if (secrets.length === 0) {
+    throw new Error(
+      'HUB_OUTBOUND_SECRETS is not set. It is the secret this app SIGNS with, ' +
+        'and it is the one the Tech Store stores as HUB_INBOUND_SECRETS.',
+    )
+  }
+  return { url: url.replace(/\/+$/, ''), secrets }
 }

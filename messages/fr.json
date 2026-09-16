@@ -1401,7 +1401,9 @@
       "card": "Carte ou banque",
       "pay": "Payer {amount}",
       "failed": "Impossible de démarrer ce paiement. Veuillez réessayer.",
-      "stillFullPlan": "Votre formule reste {plan} en entier. Le code réduit le prix, pas ce que vous obtenez."
+      "stillFullPlan": "Votre formule reste {plan} en entier. Le code réduit le prix, pas ce que vous obtenez.",
+      "merchantName": "Tech Store Ghana",
+      "processedBy": "Les paiements sont traites en toute securite par {merchant}. C'est le nom qui apparaitra sur la page de paiement et sur votre releve bancaire ou Mobile Money."
     },
     "result": {
       "help": "Un problème ? Obtenir de l'aide",

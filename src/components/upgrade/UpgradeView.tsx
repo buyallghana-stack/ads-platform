@@ -334,6 +334,17 @@ export function UpgradeView({
               ))}
             </div>
 
+            {/* Who the money actually goes to. Required, not decorative: the name
+                on the payment page and on the bank statement is the Tech
+                Store's, because both products sit on one Paystack account that
+                Paystack asked to be theirs. Somebody who does not expect that
+                name reads it as fraud and charges it back. The name is a
+                translation key rather than a literal so it can be corrected
+                without a deploy of new code. */}
+            <p className="mt-3 text-[0.75rem] leading-relaxed text-ink-500">
+              {t('checkout.processedBy', { merchant: t('checkout.merchantName') })}
+            </p>
+
             {!checkoutEnabled && (
               <div
                 className={cn(

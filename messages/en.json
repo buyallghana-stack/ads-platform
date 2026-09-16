@@ -1401,7 +1401,9 @@
       "card": "Card or bank",
       "pay": "Pay {amount}",
       "failed": "Could not start this payment. Please try again.",
-      "stillFullPlan": "Your plan is still {plan} in full. The code takes money off the price, not off what you get."
+      "stillFullPlan": "Your plan is still {plan} in full. The code takes money off the price, not off what you get.",
+      "merchantName": "Tech Store Ghana",
+      "processedBy": "Payments are handled securely by {merchant}. That is the name you will see on the payment page and on your bank or mobile money statement."
     },
     "result": {
       "help": "Something wrong? Get help",

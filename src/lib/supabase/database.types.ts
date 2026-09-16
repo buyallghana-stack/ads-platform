@@ -1582,6 +1582,56 @@ export type Database = {
         }
         Relationships: []
       }
+      hub_inbound_events: {
+        Row: {
+          amount_minor: number | null
+          currency_code: string | null
+          detail: string | null
+          event: string
+          hub_reference: string
+          id: string
+          payload: Json
+          payment_id: string | null
+          received_at: string
+          request_id: string
+          result: string
+        }
+        Insert: {
+          amount_minor?: number | null
+          currency_code?: string | null
+          detail?: string | null
+          event: string
+          hub_reference: string
+          id?: string
+          payload?: Json
+          payment_id?: string | null
+          received_at?: string
+          request_id: string
+          result: string
+        }
+        Update: {
+          amount_minor?: number | null
+          currency_code?: string | null
+          detail?: string | null
+          event?: string
+          hub_reference?: string
+          id?: string
+          payload?: Json
+          payment_id?: string | null
+          received_at?: string
+          request_id?: string
+          result?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hub_inbound_events_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_progress: {
         Row: {
           completed_at: string | null
@@ -4743,6 +4793,31 @@ export type Database = {
         Returns: undefined
       }
       assert_not_anonymous: { Args: never; Returns: undefined }
+      attach_hub_reference: {
+        Args: { p_payment_id: string; p_reference: string }
+        Returns: {
+          amount_minor: number
+          confirmed_at: string | null
+          created_at: string
+          currency_code: string
+          external_reference: string | null
+          failure_reason: string | null
+          id: string
+          list_minor: number | null
+          method: Database["public"]["Enums"]["subscription_payment_method"]
+          period_days: number
+          provider_payload: Json
+          status: Database["public"]["Enums"]["subscription_payment_status"]
+          tier_id: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "subscription_payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       attribute_order: {
         Args: { p_order_id: string; p_visitor_token?: string }
         Returns: {
@@ -4773,7 +4848,6 @@ export type Database = {
       base_ad_points: { Args: never; Returns: number }
       broadcast_notification: {
         Args: {
-          p_audience?: string
           p_body: string
           p_business?: Database["public"]["Enums"]["notification_business"]
           p_reference?: Json
@@ -5240,6 +5314,31 @@ export type Database = {
           to_expired: number
           to_grace: number
         }[]
+      }
+      fail_subscription_payment: {
+        Args: { p_payment_id: string; p_reason?: string }
+        Returns: {
+          amount_minor: number
+          confirmed_at: string | null
+          created_at: string
+          currency_code: string
+          external_reference: string | null
+          failure_reason: string | null
+          id: string
+          list_minor: number | null
+          method: Database["public"]["Enums"]["subscription_payment_method"]
+          period_days: number
+          provider_payload: Json
+          status: Database["public"]["Enums"]["subscription_payment_status"]
+          tier_id: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "subscription_payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       finalise_account_deletion: { Args: { p_user_id: string }; Returns: Json }
       flag_user_account: {
@@ -6254,8 +6353,34 @@ export type Database = {
         Args: { p_conversion_id: string; p_reason: string }
         Returns: number
       }
+      reverse_subscription_payment: {
+        Args: { p_payment_id: string; p_reason?: string }
+        Returns: {
+          amount_minor: number
+          confirmed_at: string | null
+          created_at: string
+          currency_code: string
+          external_reference: string | null
+          failure_reason: string | null
+          id: string
+          list_minor: number | null
+          method: Database["public"]["Enums"]["subscription_payment_method"]
+          period_days: number
+          provider_payload: Json
+          status: Database["public"]["Enums"]["subscription_payment_status"]
+          tier_id: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "subscription_payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       revoke_other_sessions: { Args: never; Returns: number }
       revoke_session: { Args: { p_session_id: string }; Returns: boolean }
+      ring_payment_reconciliation: { Args: never; Returns: number }
       run_affiliate_maintenance: {
         Args: never
         Returns: {
@@ -6711,12 +6836,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -6740,11 +6865,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -6765,11 +6890,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -6790,11 +6915,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -6807,11 +6932,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
