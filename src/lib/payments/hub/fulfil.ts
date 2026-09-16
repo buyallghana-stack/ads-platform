@@ -73,11 +73,20 @@ export async function applyHubEvent(input: {
     const gotCurrency = (input.currency ?? wantCurrency).trim().toUpperCase()
 
     if (paid !== expected || gotCurrency !== wantCurrency) {
+      /* ⚠️ MAJOR UNITS IN THE SENTENCE, MINOR UNITS IN THE COMPARISON.
+         Everything on this path is integer pesewas, and the first version of
+         this message printed them raw: "Expected 23000 GHS, the hub reported
+         100 GHS" for a GHS 230.00 plan charged GHS 1.00. Out by a factor of a
+         hundred, on the one line an admin reads to decide whether a payment is
+         wrong. Caught by looking at the admin screen rather than by a test. */
+      const inCedis = (minor: number) => (minor / 100).toFixed(2)
       return {
         ok: false,
         reason: 'mismatch',
         paymentId: payment.id,
-        detail: `Expected ${expected} ${wantCurrency}, the hub reported ${paid} ${gotCurrency}`,
+        detail:
+          `Expected ${wantCurrency} ${inCedis(expected)}, ` +
+          `the hub reported ${gotCurrency} ${inCedis(paid)}`,
       }
     }
   }
