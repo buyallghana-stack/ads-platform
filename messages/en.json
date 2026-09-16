@@ -143,7 +143,7 @@
         "body": "{ads} a day for your first {days} days, and you can withdraw from {threshold} points.",
         "cta": "Start free"
       },
-      "stacking": "Plans stack. Every plan you hold adds its own daily ad limit, and its ads are paid at its own rate, best first. So holding Bronze and Gold gives you Gold's 7 ads at Gold's rate and then Bronze's 3 at Bronze's rate. You can hold each plan once.",
+      "stacking": "Plans stack for ads. Every plan you hold adds its own daily ad limit, and its ads are paid at its own rate, best first. So holding Bronze and Gold gives you Gold's 7 ads at Gold's rate and then Bronze's 3 at Bronze's rate. Weekly game plays are the exception: they follow your best plan rather than adding up. You can hold each plan once.",
       "range": "{from} to {to}",
       "rangeHint": "Pay anything in that range. The more you pay, the more each ad is worth to you.",
       "rateRange": "+{from}% to +{to}%",
@@ -1347,7 +1347,7 @@
   "upgrade": {
     "title": "Upgrade",
     "subtitle": "Raise your daily limit and earn at a better rate.",
-    "stacking": "Plans stack. Every plan you hold adds its own daily ad limit, and its ads are paid at its own rate, best first. So holding Bronze and Gold gives you Gold's 7 ads at Gold's rate and then Bronze's 3 at Bronze's rate. You can hold each plan once.",
+    "stacking": "Plans stack for ads. Every plan you hold adds its own daily ad limit, and its ads are paid at its own rate, best first. So holding Bronze and Gold gives you Gold's 7 ads at Gold's rate and then Bronze's 3 at Bronze's rate. Weekly game plays are the exception: they follow your best plan rather than adding up. You can hold each plan once.",
     "footnote": "Each plan runs for the period shown on its card. Prices are one-off for that period. Nothing renews automatically.",
     "current": {
       "free": "You're on the Free plan",
