@@ -6,41 +6,44 @@ import { HAS_DB, type Tx, withRollback } from '../support/db'
  * The no-dash rule reaches the DATABASE too.
  *
  * `no-dashes.test.ts` guards `messages/` and `src/content/legal/`, and it was
- * written believing those were the two places a user reads. They are not. The
- * affiliate course is thirty lessons, quizzes and answer options stored as
- * ROWS, written by the same hand and carrying the same habit: opening the
- * player after the light theme landed showed "There is no waiting period — it
- * lands in your commission balance straight away" on the first screen an
- * affiliate reads. Twenty-five sentences across eleven lesson bodies, one
- * lesson title and eighteen answer options.
+ * written believing those were the two places a user reads. They are not. Copy
+ * typed into the admin is copy nobody reviewed, and it reaches a screen just
+ * the same.
  *
- * ⚠️ THIS ONE FAILS ON DATA, NOT ON CODE, so it cannot be fixed by editing a
- * file in the repo. Fix it with an UPDATE, and rewrite the sentence rather than
+ * ⚠️ RETARGETED 2026-09-16. This file used to read the affiliate course:
+ * lessons, sections, quizzes and product descriptions. Migration
+ * 20260865000000 dropped every one of those tables, so the test was failing on
+ * relations that no longer exist rather than on anything anybody had written.
+ * The rule did not go away with the course, so it now watches the copy that IS
+ * still authored by hand: ads, announcements and the plan ladder.
+ *
+ * ⚠️ IT FAILS ON DATA, NOT ON CODE, so it cannot be fixed by editing a file in
+ * the repo. Fix it with an UPDATE, and rewrite the sentence rather than
  * swapping the character: a blanket comma leaves splices ("no waiting period,
  * it lands straight away") and a blanket full stop leaves fragments ("With a
  * checkpoint at 4s."). What the punctuation should be depends on what the two
  * halves are doing.
  *
- * ⚠️ IT READS COMMITTED ROWS, so it is checking the live catalogue rather than
- * a fixture. That is the point: a lesson added through the admin next month is
+ * ⚠️ IT READS COMMITTED ROWS, so it is checking what is live rather than a
+ * fixture. That is the point: an ad written through the admin next month is
  * copy nobody reviewed, and this is what reviews it.
  */
 
 const DASH = /[—–]/
 
-/** Columns a learner actually reads. Slugs and storage paths are excluded. */
+/** Columns a user actually reads. Slugs and storage paths are excluded. */
 const COPY = [
-  ['lessons', 'title'],
-  ['lessons', 'body'],
-  ['course_sections', 'title'],
-  ['quizzes', 'title'],
-  ['quiz_questions', 'prompt'],
-  ['quiz_options', 'body'],
-  ['products', 'title'],
-  ['products', 'description'],
+  ['ads', 'title'],
+  ['ads', 'description'],
+  ['ads', 'cta_label'],
+  ['ads', 'article_body'],
+  ['announcements', 'title'],
+  ['announcements', 'body'],
+  ['tiers', 'name'],
+  ['tiers', 'description'],
 ] as const
 
-describe.skipIf(!HAS_DB)('no dashes in course content', () => {
+describe.skipIf(!HAS_DB)('no dashes in admin-authored copy', () => {
   for (const [table, column] of COPY) {
     it(`carries no em or en dash in ${table}.${column}`, async () => {
       await withRollback(async (tx: Tx) => {

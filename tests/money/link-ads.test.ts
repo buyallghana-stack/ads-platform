@@ -66,7 +66,17 @@ async function newLinkAd(
      returning id`,
     [status, points, dwell, article],
   )
-  return rows[0]!.id
+  const id = rows[0]!.id
+  /* ⚠️ Tagged to `free`, and it has to be. Since strict plan matching
+     (20260866000000) the feed only carries ads explicitly tagged to a bucket
+     the reader holds, so an untagged fixture is invisible and every assertion
+     about what the feed sends would pass against an empty list. */
+  await tx.query(
+    `insert into public.ad_tiers (ad_id, tier_id)
+     select $1::uuid, t.id from public.tiers t where t.slug = 'free'`,
+    [id],
+  )
+  return id
 }
 
 /**

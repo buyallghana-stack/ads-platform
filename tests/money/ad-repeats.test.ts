@@ -34,7 +34,15 @@ import {
  * both sides.
  */
 
-/** An ad nobody has seen, live and payable. */
+/**
+ * An ad nobody has seen, live and payable.
+ *
+ * ⚠️ TAGGED TO `free`, and it has to be. Since strict plan matching
+ * (20260866000000) the feed shows a user only ads explicitly tagged to a
+ * bucket they hold, so an ad with no `ad_tiers` row reaches nobody and every
+ * assertion about repeats below would pass against an empty feed, which proves
+ * nothing at all.
+ */
 const newAd = async (tx: Tx, title: string, points = 50) => {
   const { rows } = await tx.query<{ id: string }>(
     `insert into public.ads (title, format, status, points_reward, video_source,
@@ -43,7 +51,13 @@ const newAd = async (tx: Tx, title: string, points = 50) => {
      returning id`,
     [title, points],
   )
-  return rows[0]!.id
+  const id = rows[0]!.id
+  await tx.query(
+    `insert into public.ad_tiers (ad_id, tier_id)
+     select $1::uuid, t.id from public.tiers t where t.slug = 'free'`,
+    [id],
+  )
+  return id
 }
 
 /** Watch it through and be paid, the way the application does it. */

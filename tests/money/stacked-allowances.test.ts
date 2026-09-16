@@ -264,7 +264,16 @@ describe.skipIf(!HAS_DB)('what one ad is worth', () => {
    * paid less than a Bronze member on a 100-point one — the ladder promised
    * one thing and the feed did another.
    */
-  const anAd = async (tx: Tx, points: number) => {
+  /*
+    `bucket` is not decoration. Since strict plan matching shipped, the feed
+    shows a user only the ads tagged to a plan they actually HOLD, and
+    `user_target_tiers` gives a paid subscriber their own plan alone: the
+    default tier is the fallback for somebody holding nothing, not a floor
+    everyone inherits. An untagged ad therefore reaches nobody who has paid,
+    and a test asking what one ad is worth has to put it in the buyer's bucket
+    first or it reads an empty feed and fails on `rows[0]` being undefined.
+  */
+  const anAd = async (tx: Tx, points: number, bucket?: string) => {
     const { rows } = await tx.query<{ id: string; points_reward: string }>(
       `insert into public.ads (title, format, status, points_reward, video_source,
                                youtube_video_id, duration_seconds, min_watch_seconds, weight)
@@ -273,7 +282,15 @@ describe.skipIf(!HAS_DB)('what one ad is worth', () => {
        returning id, points_reward::text`,
       [points],
     )
-    return rows[0]!
+    const ad = rows[0]!
+    if (bucket) {
+      await tx.query(
+        `insert into public.ad_tiers (ad_id, tier_id)
+         select $1::uuid, t.id from public.tiers t where t.slug = $2`,
+        [ad.id, bucket],
+      )
+    }
+    return ad
   }
 
   it('ignores what the ad says and pays the platform base', async () => {
@@ -284,7 +301,7 @@ describe.skipIf(!HAS_DB)('what one ad is worth', () => {
 
       /* Asked for 30. The trigger overwrites it, and even if it had not, the
          feed and the credit no longer read the column. */
-      const ad = await anAd(tx, 30)
+      const ad = await anAd(tx, 30, 'platinum')
       const { rows } = await tx.query<{ points_award: string }>(
         `select points_award::text from public.get_ad_feed($1, null, 50) where id = $2`,
         [user.id, ad.id],
@@ -314,7 +331,7 @@ describe.skipIf(!HAS_DB)('what one ad is worth', () => {
       const bronze = PINNED_LADDER.find((r) => r.slug === 'bronze')!
 
       await setConfig(tx, 'base_ad_points', '250')
-      const ad = await anAd(tx, 100)
+      const ad = await anAd(tx, 100, 'bronze')
 
       const { rows } = await tx.query<{ points_award: string }>(
         `select points_award::text from public.get_ad_feed($1, null, 50) where id = $2`,

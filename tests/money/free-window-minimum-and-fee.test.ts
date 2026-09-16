@@ -128,16 +128,38 @@ describe.skipIf(!HAS_DB)('the free earning window', () => {
     })
   })
 
-  it('stops every kind of earning, not only ads', async () => {
+  /*
+    ⚠️ NARROWED ON PURPOSE, and this test used to assert the opposite. It read
+    "stops every kind of earning, not only ads" and walked task rewards, game
+    prizes and referral bonuses through the same rejection.
+    20260849000000 changed the rule and said why in the function itself: the
+    window is the free ad-watching TRIAL, so it closes the two things a free
+    account can farm, and it must never swallow money somebody else's action
+    earned them. A referral bonus is paid for bringing a person in, not for
+    watching anything, and confiscating it on day 22 would punish the wrong
+    behaviour.
+  */
+  it('stops watching and answering, and leaves earned commission alone', async () => {
     await withRollback(async (tx) => {
       const user = await joinedDaysAgo(tx, 22)
-      for (const entry of ['ad_view', 'survey', 'task_reward', 'game_prize', 'referral_signup']) {
+
+      for (const entry of ['ad_view', 'survey']) {
         const message = await expectRejection(tx, () =>
           tx.query(`select public.credit_points($1, 10, $2::public.ledger_entry_type)`, [user.id, entry]),
         )
         expect(message).toMatch(/free plan earns/i)
       }
       expect(await balanceOf(tx, user.id)).toBe(0)
+
+      /* Not farming, so not stopped: somebody they introduced signed up, and
+         an admin can always put something right by hand. */
+      for (const entry of ['referral_signup', 'admin_adjustment']) {
+        await tx.query(`select public.credit_points($1, 10, $2::public.ledger_entry_type)`, [
+          user.id,
+          entry,
+        ])
+      }
+      expect(await balanceOf(tx, user.id)).toBe(20)
     })
   })
 

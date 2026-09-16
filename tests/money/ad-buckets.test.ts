@@ -30,12 +30,21 @@ import {
  * had 1 row against 11 live ads. Untested because unused.
  */
 
+/*
+  ⚠️ THE DEFAULT BUCKET IS NOT A CONVENIENCE. Since strict plan matching
+  (20260866000000) an ad with no `ad_tiers` row at all reaches NOBODY, not even
+  somebody holding no plan, because the match is an explicit tag rather than a
+  rank comparison. The same migration backfilled every untagged live ad into
+  `free`, so a fixture with no bucket is a state production does not have. New
+  ads here go to `free` for that reason, and a test that wants a genuinely
+  untagged ad asks for it with `tierSlugs: []`.
+*/
 const newAd = async (
   tx: Tx,
   title: string,
   options: { points?: number; tierSlugs?: string[] } = {},
 ) => {
-  const { points = 100, tierSlugs = [] } = options
+  const { points = 100, tierSlugs = ['free'] } = options
   const { rows } = await tx.query<{ id: string }>(
     `insert into public.ads (title, format, status, points_reward, video_source,
                              youtube_video_id, duration_seconds, min_watch_seconds, weight)
@@ -171,19 +180,38 @@ describe.skipIf(!HAS_DB)('a bucket per plan', () => {
     })
   })
 
-  it('still shows an untagged ad to everybody', async () => {
+  it('shows an ad only to a bucket it is tagged to, and an untagged one to nobody', async () => {
     await withRollback(async (tx) => {
       await pinLadder(tx)
-      /* The eleven ads live on 2026-08-12 carry no tag, and turning targeting
-         exclusive must not make them disappear from every feed at once. */
-      const houseAd = await newAd(tx, 'No bucket at all')
+      /*
+        ⚠️ REVERSED ON 2026-08-24. This used to assert the opposite: that an
+        untagged ad stayed visible to everybody, so that the eleven untagged
+        ads live on 2026-08-12 would not vanish at once. The operator settled
+        it the other way in 20260866000000, which tagged those eleven into
+        `free` and made the match explicit. An ad with no bucket now reaches
+        nobody at all, and that is the point of this test: it is the only
+        thing that says out loud what happens to an ad somebody forgets to
+        tag.
+      */
+      const houseAd = await newAd(tx, 'No bucket at all', { tierSlugs: [] })
+      const freeAd = await newAd(tx, 'Free bucket', { tierSlugs: ['free'] })
 
       const free = await createUser(tx, { name: 'No Plan' })
       const gold = await createUser(tx, { name: 'Gold' })
       await buy(tx, gold.id, 'gold', 250)
 
-      expect(await feedIds(tx, free.id)).toContain(houseAd)
-      expect(await feedIds(tx, gold.id)).toContain(houseAd)
+      const freeSees = await feedIds(tx, free.id)
+      const goldSees = await feedIds(tx, gold.id)
+
+      expect(freeSees).not.toContain(houseAd)
+      expect(goldSees).not.toContain(houseAd)
+
+      /* And the strict half: holding a paid plan means the paid bucket, not
+         the paid bucket plus everything below it. `user_target_tiers` hands a
+         subscriber their own plans alone, and falls back to the default tier
+         only for somebody holding nothing. */
+      expect(freeSees).toContain(freeAd)
+      expect(goldSees).not.toContain(freeAd)
     })
   })
 })
