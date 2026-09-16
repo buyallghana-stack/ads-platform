@@ -197,3 +197,60 @@ team `buyallghana-stacks-projects`. GitHub `buyallghana-stack/ads-platform`.
 
 Tokens for all three were issued during the Part A session and should be
 rotated once Part B is finished.
+
+---
+
+## Round two, 16 September 2026: what the store changed and what we answered
+
+The store replied to `docs/for-the-tech-store.md` with `for-sideperks.md`. Four
+things in this file were affected. Read these before trusting the sections
+above.
+
+**`abandoned` is now reachable.** It had been in the status list since this
+contract was written and the store had never once sent it, because nothing on
+their side read their own `hub_intent_abandon_after_hours` setting. A sweep now
+does. It asks Paystack about every intent still `initialized` past the window
+before closing it, so `abandoned` means "we checked, the money was not taken",
+which is a definite negative and not an unknown. This app maps it to the same
+outcome as `failed` in `settleFromHub`, and records which of the two closed the
+row in `provider_payload.hub_status`.
+
+**Their window is 24 hours; ours is 48, on purpose.** Point 3 above was always
+right and `docs/for-the-tech-store.md` was wrong to call our 48 "matching your
+abandonment rule". Theirs is a setting their owner can change from a dashboard
+without a deploy, so it is not a number to copy. Longer than theirs is the safe
+direction: they close an attempt, with Paystack consulted, before we would
+close it on our clock alone.
+
+**Point 2 above describes their index, not our behaviour.** "Keep the order, do
+not invent a new one" is what their unique index permits. This app does invent
+one: `start_subscription_payment` inserts a fresh `subscription_payments` row on
+every checkout, and `external_ref` is that row's id, so a buyer who abandons and
+retries arrives as a NEW `external_ref` and never as a reused one. That is
+deliberate, because the amount is chosen inside a band and a coupon may be
+attached, so a second attempt is not always the same sale as the first. The
+practical consequence is that `reused: true` is effectively unreachable from
+here, and that their old stale-intent bug could never strand one of our buyers
+on a dead link.
+
+**There is no `payment.abandoned` event and we are not asking for one.** The
+outbound enum stays at three members. The reconciliation sweep already polls,
+which is the thing an event would have saved.
+
+Two of their decisions, recorded so nobody reopens them:
+
+- **The 422 wording stays** as "Could not reach the payment provider", even when
+  Paystack refused the customer's email. Owner's decision, not an oversight.
+  What protects the buyer is on our side and must not be removed:
+  `hubInitialise` sets `refused` on a 422, the buyer is shown the `refused`
+  copy, and the hub's own sentence is kept on the payment row and in the error
+  report where it is useful rather than misleading.
+- **Nothing is to be built for the referrer.** The 302 hop proposed in
+  `docs/for-the-tech-store.md` would not have worked: a referrer is fixed when
+  the browser begins the navigation and is carried across redirects unchanged,
+  so a redirect can weaken it but never replace it. `Referrer-Policy:
+  no-referrer` on the checkout route is the whole fix and it is already
+  deployed.
+
+Their admin screen for these payments is live at `techstoreghana.com/admin/hub`.
+Look there before asking anyone to open a database.

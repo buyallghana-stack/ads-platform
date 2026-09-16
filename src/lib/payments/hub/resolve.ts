@@ -77,8 +77,24 @@ export async function settleFromHub(reference: string): Promise<SettleResult> {
     return { state: 'reversed' }
   }
 
+  /*
+    `abandoned` closes a payment exactly as `failed` does, and it is a DEFINITE
+    answer rather than a strange one.
+
+    The hub only reaches it by asking Paystack about an attempt that has sat
+    unfinished past its own window, so it means "we checked, the money was not
+    taken, this attempt is closed", not "we stopped hearing about it". Store
+    handover, 16 September 2026. Nothing here treats it as unexpected: doing
+    that would leave a buyer watching a spinner over a status the hub is
+    entitled to send. The verdict is kept in the payload so the payment row
+    records WHICH of the two closed it.
+  */
   if (status.status === 'failed' || status.status === 'abandoned') {
-    await applyHubEvent({ event: 'payment.failed', reference, payload: { via: 'return_page' } })
+    await applyHubEvent({
+      event: 'payment.failed',
+      reference,
+      payload: { via: 'return_page', hub_status: status.status },
+    })
     return { state: 'failed' }
   }
 

@@ -18,9 +18,17 @@ import { createAdminClient } from '@/lib/supabase/admin'
  * WHY TEN MINUTES. A payment younger than that is very likely still happening:
  * the buyer is on the Paystack page, or the confirm endpoint is one second
  * behind. Asking the hub about it wastes a call and can only ever answer
- * "initialized". Older than 48 hours it is marked failed, matching the hub's
- * own abandonment rule so the two sides do not disagree about what a stale
- * intent means.
+ * "initialized". Older than 48 hours it is marked failed here.
+ *
+ * WHY FORTY-EIGHT AND NOT THE HUB'S NUMBER. An earlier version of this comment
+ * said 48 "matched the hub's abandonment rule". It never did: the hub's window
+ * is 24 hours, held in a setting its owner can change from a dashboard without
+ * a deploy, so it is not a number to copy. Being the LONGER of the two is the
+ * safe direction and is the reason nothing needs to change. The hub asks
+ * Paystack before closing anything, so in practice a stale payment comes back
+ * from it as `abandoned` at around 24 hours and is closed on the hub's verdict
+ * here, hours before this sweep would reach for its own clock. The 48 hour
+ * branch below is only for a hub that never gave a verdict at all.
  *
  * ⚠️ NOTHING HERE IS A SECOND WAY TO GRANT A PLAN. It calls the same
  * `settleFromHub` the return page does, which calls the same idempotent
@@ -33,7 +41,8 @@ export const maxDuration = 60
 
 /** Younger than this and the payment is probably still in flight. */
 const SETTLE_AFTER_MINUTES = 10
-/** Older than this and the hub has given up too. */
+/** Older than this and we close it ourselves. Deliberately longer than the
+ *  hub's own 24 hour window, never equal to it: see above. */
 const ABANDON_AFTER_HOURS = 48
 /** A ceiling per run, so one sweep cannot run past the function timeout. */
 const BATCH = 40
@@ -66,7 +75,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const counts = { checked: 0, confirmed: 0, failed: 0, reversed: 0, abandoned: 0, unreachable: 0 }
+  const counts = { checked: 0, confirmed: 0, failed: 0, reversed: 0, gaveUp: 0, unreachable: 0 }
 
   for (const row of rows ?? []) {
     const reference = row.external_reference
@@ -74,9 +83,8 @@ export async function GET(request: Request) {
     counts.checked += 1
 
     if (row.created_at < abandonBefore) {
-      /* Past the point where the hub itself gives up. Ask once more anyway,
-         because "old" is not "unpaid", and only mark it abandoned if the hub
-         still has nothing. */
+      /* Well past the hub's own window. Ask once more anyway, because "old" is
+         not "unpaid", and only close it if the hub still says nothing. */
       const settled = await settleFromHub(reference)
       if (settled.state === 'confirmed') {
         counts.confirmed += 1
@@ -87,12 +95,17 @@ export async function GET(request: Request) {
         continue
       }
       if (settled.state === 'pending') {
+        /* `gave_up`, not `abandoned`. The hub's `abandoned` means it asked
+           Paystack and the money was not taken. This one means the hub is
+           still saying `initialized` two days later and we closed the row on
+           our own clock without any such confirmation, which is a weaker
+           thing and should not read like the strong one on the payment row. */
         await applyHubEvent({
           event: 'payment.failed',
           reference,
-          payload: { via: 'reconciliation', reason: 'abandoned' },
+          payload: { via: 'reconciliation', reason: 'gave_up' },
         })
-        counts.abandoned += 1
+        counts.gaveUp += 1
         continue
       }
       counts.failed += 1
