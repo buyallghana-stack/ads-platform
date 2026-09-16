@@ -28,11 +28,29 @@ import {
  * prices is a test that goes red on a Tuesday for no reason.
  */
 
+/**
+ * A super admin to save coupons as, made rather than found.
+ *
+ * ⚠️ This used to read one out of `user_roles`, which worked only because the
+ * suite ran against production, where a super admin has always existed. On a
+ * database built from the migration history there are no accounts at all, and
+ * it failed on `rows[0]` before a single assertion ran.
+ *
+ * A fixture that leans on a row somebody created by hand months ago is not a
+ * fixture. This one makes its own inside the transaction, and the rollback
+ * takes it away with everything else.
+ */
 const superAdmin = async (tx: Tx) => {
   const { rows } = await tx.query<{ id: string }>(
     `select user_id as id from public.user_roles where role = 'super_admin' limit 1`,
   )
-  return rows[0]!.id
+  if (rows[0]) return rows[0].id
+
+  const admin = await createUser(tx, { name: 'Coupon Admin', joinedDaysAgo: 200 })
+  await tx.query(`insert into public.user_roles (user_id, role) values ($1, 'super_admin')`, [
+    admin.id,
+  ])
+  return admin.id
 }
 
 const tierId = async (tx: Tx, slug: string) => {

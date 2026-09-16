@@ -7,6 +7,7 @@ import {
   balanceOf,
   createUser,
   pinLadder,
+  setConfig,
   withRollback,
 } from '../support/db'
 
@@ -46,6 +47,26 @@ const buy = async (tx: Tx, userId: string, slug: string, ghs: number) => {
   return paymentId
 }
 
+/**
+ * The commission rates this test asserts against, pinned rather than read.
+ *
+ * ⚠️ WHY. The seeded default for both is 0, and production reads 10 and 7
+ * because the operator set them in the admin. Written against production, this
+ * file passed by inheriting those numbers, and went red the first time it ran
+ * on a database built from the migration history, where a referred purchase
+ * pays nothing and there is no commission to claw back.
+ *
+ * Same rule as `pinLadder`: a money test that reads a live figure is asserting
+ * whatever somebody last typed into the admin, and it goes red on a Tuesday
+ * for no reason anybody can reconstruct.
+ */
+const pinCommission = async (tx: Tx) => {
+  await setConfig(tx, 'referral_purchase_commission_percent', '10')
+  await setConfig(tx, 'referral_purchase_commission_percent_l2', '7')
+  await setConfig(tx, 'referral_purchase_commission_cap_points', '0')
+  await setConfig(tx, 'referral_purchase_commission_scope', 'new_plans')
+}
+
 const commissionsFor = async (tx: Tx, paymentId: string) => {
   const { rows } = await tx.query<{
     level: number
@@ -73,6 +94,7 @@ describe.skipIf(!HAS_DB)('a reversal takes back both halves', () => {
   it('pays a referrer on a referred purchase, then takes it back when the payment reverses', async () => {
     await withRollback(async (tx) => {
       await pinLadder(tx)
+      await pinCommission(tx)
       const bronze = PINNED_LADDER.find((r) => r.slug === 'bronze')!
 
       const referrer = await createUser(tx, { name: 'The Referrer' })
@@ -128,6 +150,7 @@ describe.skipIf(!HAS_DB)('a reversal takes back both halves', () => {
   it('does not push a referrer negative when they have already spent it', async () => {
     await withRollback(async (tx) => {
       await pinLadder(tx)
+      await pinCommission(tx)
       const bronze = PINNED_LADDER.find((r) => r.slug === 'bronze')!
 
       const referrer = await createUser(tx, { name: 'Already Spent It' })
