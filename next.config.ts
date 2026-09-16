@@ -37,6 +37,41 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  /*
+    ⚠️ THE ONE HARD RULE OF THE PAYMENT HUB IS ENFORCED HERE, NOT ONLY IN THE
+    PAYLOAD WE SEND.
+
+    Nothing reaching Paystack may reveal SidePerks. The hub honours that: its
+    request carries an opaque reference, an amount, a currency and an email,
+    and no metadata at all. The BROWSER broke it anyway. Clicking Pay is a
+    cross-origin navigation, the default referrer policy sends the origin, and
+    Paystack's checkout copies `document.referrer` straight into the
+    transaction record:
+
+        metadata: {"referrer":"https://sideperks.org/"}
+
+    Confirmed on TS-E8B549558EB9 by reading it back from Paystack's own API.
+    It lands before anybody pays, so an abandoned checkout leaks it too.
+
+    `no-referrer` on the pages that start a payment is what stops it. It is
+    scoped rather than global on purpose: link ads send readers to advertisers
+    who have a legitimate reason to see where their traffic came from, and a
+    site-wide policy would take that away to fix something that only happens
+    here.
+
+    This can only REMOVE the referrer, never substitute another one. Making
+    Paystack see the store instead would mean the hub returning a URL on its
+    own domain that redirects to Paystack, which is a change on their side.
+  */
+  async headers() {
+    return [
+      {
+        source: '/:path(upgrade|en/upgrade|fr/upgrade)',
+        headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }],
+      },
+    ]
+  },
+
   // Fail the production build on type errors rather than shipping them. It is
   // the default already; stated explicitly so turning it off has to be
   // deliberate. (Next 16 removed the equivalent `eslint` key — linting runs
