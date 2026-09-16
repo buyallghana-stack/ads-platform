@@ -2,6 +2,7 @@
 
 import { getSessionUser } from '@/lib/auth/session'
 import { clientEnv } from '@/lib/env'
+import { reportUnexpected } from '@/lib/observability/report'
 import { hubInitialise } from '@/lib/payments/hub/client'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -89,7 +90,24 @@ export async function startPaystackCheckout(
         .update({ status: 'failed', failure_reason: initialised.message })
         .eq('id', row.id)
     }
-    return { ok: false, message: initialised.message }
+
+    /*
+      ⚠️ THE HUB'S WORDING DOES NOT GO TO THE BUYER.
+
+      Its message for a refused payment is "Could not reach the payment
+      provider", and it says that when Paystack simply would not accept the
+      customer's EMAIL. Passing it through tells somebody their payment failed
+      for a reason that is not true, and sends support looking for an outage.
+
+      The real text is kept where it is useful: on the payment row, and in the
+      error report. What the buyer gets is one sentence they can act on.
+    */
+    reportUnexpected(new Error(initialised.message), 'upgrade.checkout', {
+      paymentId: row.id,
+      refused: initialised.refused,
+      retryable: initialised.retryable,
+    })
+    return { ok: false, errorKey: initialised.refused ? 'refused' : 'failed' }
   }
 
   /* The hub's reference is stored BEFORE the user leaves, because it is the

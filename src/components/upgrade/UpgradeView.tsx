@@ -80,7 +80,10 @@ export function UpgradeView({
          cannot buy a band it did not pay for. */
       const res = await startPaystackCheckout(plan.id, amountMinor, coupon?.code)
       if (!res.ok) {
-        setError(res.message ?? t('checkout.failed'))
+        /* `errorKey` is the server naming a case it wants worded a particular
+           way. Anything else falls back to the generic line rather than
+           surfacing a message written for a log. */
+        setError(res.errorKey === 'refused' ? t('checkout.refused') : t('checkout.failed'))
         return
       }
       window.location.assign(res.authorizationUrl)
@@ -333,17 +336,6 @@ export function UpgradeView({
                 </div>
               ))}
             </div>
-
-            {/* Who the money actually goes to. Required, not decorative: the name
-                on the payment page and on the bank statement is the Tech
-                Store's, because both products sit on one Paystack account that
-                Paystack asked to be theirs. Somebody who does not expect that
-                name reads it as fraud and charges it back. The name is a
-                translation key rather than a literal so it can be corrected
-                without a deploy of new code. */}
-            <p className="mt-3 text-[0.75rem] leading-relaxed text-ink-500">
-              {t('checkout.processedBy', { merchant: t('checkout.merchantName') })}
-            </p>
 
             {!checkoutEnabled && (
               <div

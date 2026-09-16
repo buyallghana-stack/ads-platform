@@ -22,7 +22,7 @@ const TIMEOUT_MS = 20_000
 
 export type HubInitialiseResult =
   | { ok: true; reference: string; authorizationUrl: string; reused: boolean }
-  | { ok: false; retryable: boolean; message: string }
+  | { ok: false; retryable: boolean; refused: boolean; message: string }
 
 export type HubStatus = 'initialized' | 'success' | 'failed' | 'abandoned' | 'reversed'
 
@@ -104,7 +104,7 @@ export async function hubInitialise(input: {
   /* Integer pesewas. 52000 is GHS 520.00. A float here would be rejected by
      the hub, and worse, a rounding error would be a real price difference. */
   if (!Number.isInteger(input.amountMinor) || input.amountMinor <= 0) {
-    return { ok: false, retryable: false, message: 'A payment amount must be whole pesewas.' }
+    return { ok: false, retryable: false, refused: false, message: 'A payment amount must be whole pesewas.' }
   }
 
   const body = JSON.stringify({
@@ -116,7 +116,7 @@ export async function hubInitialise(input: {
   })
 
   const called = await callHub('/api/internal/hub/payments/initialize', { method: 'POST', body })
-  if ('error' in called) return { ok: false, retryable: true, message: called.error }
+  if ('error' in called) return { ok: false, retryable: true, refused: false, message: called.error }
 
   const { response, text } = called
   if (!response.ok) {
@@ -126,6 +126,12 @@ export async function hubInitialise(input: {
     return {
       ok: false,
       retryable: response.status >= 500,
+      /* 422 is the hub REFUSING on business grounds, and in practice that
+         almost always means Paystack would not accept the customer's email.
+         It matters that this is distinguishable, because the hub's own wording
+         for it is "Could not reach the payment provider", which sends whoever
+         reads it hunting for a network fault that is not there. */
+      refused: response.status === 422,
       message: messageFrom(text, `The payment hub returned ${response.status}.`),
     }
   }
@@ -134,11 +140,11 @@ export async function hubInitialise(input: {
   try {
     parsed = JSON.parse(text) as typeof parsed
   } catch {
-    return { ok: false, retryable: true, message: 'The payment hub sent an unreadable answer.' }
+    return { ok: false, retryable: true, refused: false, message: 'The payment hub sent an unreadable answer.' }
   }
 
   if (!parsed.reference || !parsed.authorization_url) {
-    return { ok: false, retryable: true, message: 'The payment hub did not return a payment link.' }
+    return { ok: false, retryable: true, refused: false, message: 'The payment hub did not return a payment link.' }
   }
 
   return {
