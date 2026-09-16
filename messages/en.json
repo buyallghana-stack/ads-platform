@@ -1487,7 +1487,8 @@
         "affiliates": "Affiliates",
         "training": "Training",
         "communities": "Communities",
-        "vault": "Vault"
+        "vault": "Vault",
+        "payments": "Payments"
       },
       "viewUserApp": "View user app"
     },
@@ -3199,6 +3200,55 @@
         "totalProfit": "Total Net Profit",
         "maturityPayout": "Payout at Maturity",
         "submit": "Create Plan"
+      }
+    },
+    "payments": {
+      "title": "Payments",
+      "description": "Plan purchases as they came through the Tech Store hub, and anything that arrived and was not acted on.",
+      "empty": "No payments have gone through the hub yet.",
+      "noEvents": "Nothing back yet",
+      "eventCount": "{count} events",
+      "columns": {
+        "person": "Buyer",
+        "plan": "Plan",
+        "amount": "Amount",
+        "status": "Status",
+        "lastEvent": "Last word from the hub",
+        "started": "Started",
+        "actions": "Actions"
+      },
+      "status": {
+        "pending": "Waiting",
+        "confirmed": "Paid",
+        "failed": "Failed",
+        "refunded": "Reversed"
+      },
+      "result": {
+        "confirmed": "Confirmed",
+        "already_done": "Already done",
+        "failed": "Failed",
+        "reversed": "Reversed",
+        "mismatch": "Amount mismatch",
+        "error": "Could not apply",
+        "unknown_reference": "Unknown reference",
+        "received": "Recorded, then nothing"
+      },
+      "state": {
+        "confirmed": "paid",
+        "pending": "still waiting",
+        "failed": "failed",
+        "reversed": "reversed",
+        "unknown": "not recognised"
+      },
+      "flags": {
+        "title": "Needs attention ({count})",
+        "description": "The hub sent these and this app did not act on them. An unknown reference has no payment behind it at all, so nothing else on this screen will show it. Each one is money that moved at the provider and did not move here."
+      },
+      "recheck": {
+        "action": "Ask the hub again",
+        "rowLabel": "Ask the hub again about {reference}",
+        "done": "The hub says this is {state}.",
+        "unreachable": "The hub could not be reached. Nothing was changed."
       }
     }
   },

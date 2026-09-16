@@ -28,6 +28,7 @@ import {
   Users2,
   Vault,
   Wallet,
+  CreditCard,
   X,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -88,6 +89,7 @@ const GROUPS: NavGroup[] = [
     items: [
       { key: 'overview', href: '/admin', Icon: Gauge, exact: true },
       { key: 'payouts', href: '/admin/payouts', Icon: Wallet },
+      { key: 'payments', href: '/admin/payments', Icon: CreditCard },
       { key: 'finance', href: '/admin/finance', Icon: BadgeCheck },
       { key: 'advertisers', href: '/admin/advertisers', Icon: Building2, area: 'ads' },
       { key: 'subscriptions', href: '/admin/subscriptions', Icon: ClipboardList },

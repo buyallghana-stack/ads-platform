@@ -1487,7 +1487,8 @@
         "affiliates": "Affiliés",
         "training": "Formation",
         "communities": "Communautés",
-        "vault": "Coffre"
+        "vault": "Coffre",
+        "payments": "Paiements"
       },
       "viewUserApp": "Voir l’app utilisateur"
     },
@@ -3199,6 +3200,55 @@
         "totalProfit": "Bénéfice Net Total",
         "maturityPayout": "Versement à Échéance",
         "submit": "Créer le Plan"
+      }
+    },
+    "payments": {
+      "title": "Paiements",
+      "description": "Les achats de forfaits passés par le hub Tech Store, et tout ce qui est arrivé sans être traité.",
+      "empty": "Aucun paiement n'est encore passé par le hub.",
+      "noEvents": "Rien pour l'instant",
+      "eventCount": "{count} événements",
+      "columns": {
+        "person": "Acheteur",
+        "plan": "Forfait",
+        "amount": "Montant",
+        "status": "Statut",
+        "lastEvent": "Dernier retour du hub",
+        "started": "Démarré",
+        "actions": "Actions"
+      },
+      "status": {
+        "pending": "En attente",
+        "confirmed": "Payé",
+        "failed": "Échoué",
+        "refunded": "Annulé"
+      },
+      "result": {
+        "confirmed": "Confirmé",
+        "already_done": "Déjà traité",
+        "failed": "Échoué",
+        "reversed": "Annulé",
+        "mismatch": "Montant incohérent",
+        "error": "Application impossible",
+        "unknown_reference": "Référence inconnue",
+        "received": "Enregistré, puis rien"
+      },
+      "state": {
+        "confirmed": "payé",
+        "pending": "toujours en attente",
+        "failed": "échoué",
+        "reversed": "annulé",
+        "unknown": "non reconnu"
+      },
+      "flags": {
+        "title": "À vérifier ({count})",
+        "description": "Le hub a envoyé ceci et l'application ne l'a pas traité. Une référence inconnue n'a aucun paiement associé, donc rien d'autre sur cet écran ne la montrera. Chaque ligne est de l'argent qui a bougé chez le prestataire et pas ici."
+      },
+      "recheck": {
+        "action": "Redemander au hub",
+        "rowLabel": "Redemander au hub pour {reference}",
+        "done": "Le hub indique : {state}.",
+        "unreachable": "Le hub est injoignable. Rien n'a été modifié."
       }
     }
   },

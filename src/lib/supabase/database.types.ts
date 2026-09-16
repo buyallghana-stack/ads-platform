@@ -590,176 +590,6 @@ export type Database = {
         }
         Relationships: []
       }
-      affiliate_entitlements: {
-        Row: {
-          affiliate_id: string
-          commission_depth: number
-          created_at: string
-          expires_at: string
-          grace_ends_at: string
-          id: string
-          order_id: string
-          starts_at: string
-          status: Database["public"]["Enums"]["affiliate_entitlement_status"]
-          training_program_id: string
-          updated_at: string
-        }
-        Insert: {
-          affiliate_id: string
-          commission_depth: number
-          created_at?: string
-          expires_at: string
-          grace_ends_at: string
-          id?: string
-          order_id: string
-          starts_at: string
-          status?: Database["public"]["Enums"]["affiliate_entitlement_status"]
-          training_program_id: string
-          updated_at?: string
-        }
-        Update: {
-          affiliate_id?: string
-          commission_depth?: number
-          created_at?: string
-          expires_at?: string
-          grace_ends_at?: string
-          id?: string
-          order_id?: string
-          starts_at?: string
-          status?: Database["public"]["Enums"]["affiliate_entitlement_status"]
-          training_program_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      affiliate_game_plays: {
-        Row: {
-          affiliate_id: string
-          amount_minor: number
-          created_at: string
-          extra_plays_awarded: number
-          game: Database["public"]["Enums"]["affiliate_game_kind"]
-          id: string
-          prize_id: string | null
-          roll: number | null
-          slot: number | null
-          user_id: string
-          week_start: string
-          weight_total: number | null
-        }
-        Insert: {
-          affiliate_id: string
-          amount_minor?: number
-          created_at?: string
-          extra_plays_awarded?: number
-          game: Database["public"]["Enums"]["affiliate_game_kind"]
-          id?: string
-          prize_id?: string | null
-          roll?: number | null
-          slot?: number | null
-          user_id: string
-          week_start: string
-          weight_total?: number | null
-        }
-        Update: {
-          affiliate_id?: string
-          amount_minor?: number
-          created_at?: string
-          extra_plays_awarded?: number
-          game?: Database["public"]["Enums"]["affiliate_game_kind"]
-          id?: string
-          prize_id?: string | null
-          roll?: number | null
-          slot?: number | null
-          user_id?: string
-          week_start?: string
-          weight_total?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "affiliate_game_plays_prize_id_fkey"
-            columns: ["prize_id"]
-            isOneToOne: false
-            referencedRelation: "affiliate_game_prizes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      affiliate_game_prizes: {
-        Row: {
-          amount_minor: number
-          colour: string | null
-          created_at: string
-          daily_cap: number
-          extra_plays: number
-          game: Database["public"]["Enums"]["affiliate_game_kind"]
-          id: string
-          is_active: boolean
-          label: string
-          slot: number
-          updated_at: string
-          weekly_cap: number
-          weight: number
-        }
-        Insert: {
-          amount_minor?: number
-          colour?: string | null
-          created_at?: string
-          daily_cap?: number
-          extra_plays?: number
-          game: Database["public"]["Enums"]["affiliate_game_kind"]
-          id?: string
-          is_active?: boolean
-          label: string
-          slot: number
-          updated_at?: string
-          weekly_cap?: number
-          weight?: number
-        }
-        Update: {
-          amount_minor?: number
-          colour?: string | null
-          created_at?: string
-          daily_cap?: number
-          extra_plays?: number
-          game?: Database["public"]["Enums"]["affiliate_game_kind"]
-          id?: string
-          is_active?: boolean
-          label?: string
-          slot?: number
-          updated_at?: string
-          weekly_cap?: number
-          weight?: number
-        }
-        Relationships: []
-      }
-      affiliate_task_completions: {
-        Row: {
-          claimed_at: string
-          id: string
-          progress_at_claim: number
-          reward_minor: number
-          task_id: string
-          user_id: string
-        }
-        Insert: {
-          claimed_at?: string
-          id?: string
-          progress_at_claim: number
-          reward_minor: number
-          task_id: string
-          user_id: string
-        }
-        Update: {
-          claimed_at?: string
-          id?: string
-          progress_at_claim?: number
-          reward_minor?: number
-          task_id?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       announcements: {
         Row: {
           audience: string
@@ -933,24 +763,6 @@ export type Database = {
         }
         Relationships: []
       }
-      bundle_items: {
-        Row: {
-          bundle_product_id: string
-          position: number
-          product_id: string
-        }
-        Insert: {
-          bundle_product_id: string
-          position?: number
-          product_id: string
-        }
-        Update: {
-          bundle_product_id?: string
-          position?: number
-          product_id?: string
-        }
-        Relationships: []
-      }
       communities: {
         Row: {
           business: Database["public"]["Enums"]["notification_business"]
@@ -989,71 +801,6 @@ export type Database = {
           url?: string
         }
         Relationships: []
-      }
-      conversions: {
-        Row: {
-          affiliate_id: string
-          attributed_at: string
-          attribution_model: string
-          base_minor: number
-          click_id: string | null
-          created_at: string
-          id: string
-          l1_rate: number
-          l2_affiliate_id: string | null
-          l2_depth_at_conversion: number | null
-          l2_entitlement_id: string | null
-          l2_rate: number | null
-          order_id: string
-          program_id: string
-          status: Database["public"]["Enums"]["conversion_status"]
-          subid: string | null
-        }
-        Insert: {
-          affiliate_id: string
-          attributed_at?: string
-          attribution_model?: string
-          base_minor: number
-          click_id?: string | null
-          created_at?: string
-          id?: string
-          l1_rate: number
-          l2_affiliate_id?: string | null
-          l2_depth_at_conversion?: number | null
-          l2_entitlement_id?: string | null
-          l2_rate?: number | null
-          order_id: string
-          program_id: string
-          status?: Database["public"]["Enums"]["conversion_status"]
-          subid?: string | null
-        }
-        Update: {
-          affiliate_id?: string
-          attributed_at?: string
-          attribution_model?: string
-          base_minor?: number
-          click_id?: string | null
-          created_at?: string
-          id?: string
-          l1_rate?: number
-          l2_affiliate_id?: string | null
-          l2_depth_at_conversion?: number | null
-          l2_entitlement_id?: string | null
-          l2_rate?: number | null
-          order_id?: string
-          program_id?: string
-          status?: Database["public"]["Enums"]["conversion_status"]
-          subid?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "conversions_l2_entitlement_id_fkey"
-            columns: ["l2_entitlement_id"]
-            isOneToOne: false
-            referencedRelation: "affiliate_entitlements"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       coupon_redemptions: {
         Row: {
@@ -1632,66 +1379,6 @@ export type Database = {
           },
         ]
       }
-      lesson_progress: {
-        Row: {
-          completed_at: string | null
-          lesson_id: string
-          quiz_passed: boolean
-          seconds_watched: number
-          updated_at: string
-          user_id: string
-          watched_percent: number
-        }
-        Insert: {
-          completed_at?: string | null
-          lesson_id: string
-          quiz_passed?: boolean
-          seconds_watched?: number
-          updated_at?: string
-          user_id: string
-          watched_percent?: number
-        }
-        Update: {
-          completed_at?: string | null
-          lesson_id?: string
-          quiz_passed?: boolean
-          seconds_watched?: number
-          updated_at?: string
-          user_id?: string
-          watched_percent?: number
-        }
-        Relationships: []
-      }
-      lesson_resources: {
-        Row: {
-          byte_size: number | null
-          created_at: string
-          id: string
-          lesson_id: string
-          position: number
-          storage_path: string
-          title: string
-        }
-        Insert: {
-          byte_size?: number | null
-          created_at?: string
-          id?: string
-          lesson_id: string
-          position?: number
-          storage_path: string
-          title: string
-        }
-        Update: {
-          byte_size?: number | null
-          created_at?: string
-          id?: string
-          lesson_id?: string
-          position?: number
-          storage_path?: string
-          title?: string
-        }
-        Relationships: []
-      }
       notifications: {
         Row: {
           body: string
@@ -2008,68 +1695,6 @@ export type Database = {
           },
         ]
       }
-      quiz_options: {
-        Row: {
-          body: string
-          created_at: string
-          id: string
-          is_correct: boolean
-          position: number
-          question_id: string
-        }
-        Insert: {
-          body: string
-          created_at?: string
-          id?: string
-          is_correct?: boolean
-          position?: number
-          question_id: string
-        }
-        Update: {
-          body?: string
-          created_at?: string
-          id?: string
-          is_correct?: boolean
-          position?: number
-          question_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "quiz_options_question_id_fkey"
-            columns: ["question_id"]
-            isOneToOne: false
-            referencedRelation: "quiz_questions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      quiz_questions: {
-        Row: {
-          created_at: string
-          explanation: string | null
-          id: string
-          position: number
-          prompt: string
-          quiz_id: string
-        }
-        Insert: {
-          created_at?: string
-          explanation?: string | null
-          id?: string
-          position?: number
-          prompt: string
-          quiz_id: string
-        }
-        Update: {
-          created_at?: string
-          explanation?: string | null
-          id?: string
-          position?: number
-          prompt?: string
-          quiz_id?: string
-        }
-        Relationships: []
-      }
       reading_progress: {
         Row: {
           chapter_id: string | null
@@ -2368,24 +1993,6 @@ export type Database = {
           signup_bonus_points?: number
           status?: Database["public"]["Enums"]["referral_status"]
           updated_at?: string
-        }
-        Relationships: []
-      }
-      saved_products: {
-        Row: {
-          created_at: string
-          product_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          product_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          product_id?: string
-          user_id?: string
         }
         Relationships: []
       }
@@ -3258,57 +2865,6 @@ export type Database = {
         }
         Relationships: []
       }
-      vendors: {
-        Row: {
-          avatar_path: string | null
-          bio: string | null
-          contact_email: string | null
-          contact_name: string | null
-          contact_phone: string | null
-          created_at: string
-          created_by: string
-          display_name: string | null
-          headline: string | null
-          id: string
-          name: string
-          notes: string | null
-          status: Database["public"]["Enums"]["vendor_status"]
-          updated_at: string
-        }
-        Insert: {
-          avatar_path?: string | null
-          bio?: string | null
-          contact_email?: string | null
-          contact_name?: string | null
-          contact_phone?: string | null
-          created_at?: string
-          created_by: string
-          display_name?: string | null
-          headline?: string | null
-          id?: string
-          name: string
-          notes?: string | null
-          status?: Database["public"]["Enums"]["vendor_status"]
-          updated_at?: string
-        }
-        Update: {
-          avatar_path?: string | null
-          bio?: string | null
-          contact_email?: string | null
-          contact_name?: string | null
-          contact_phone?: string | null
-          created_at?: string
-          created_by?: string
-          display_name?: string | null
-          headline?: string | null
-          id?: string
-          name?: string
-          notes?: string | null
-          status?: Database["public"]["Enums"]["vendor_status"]
-          updated_at?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
@@ -3370,46 +2926,6 @@ export type Database = {
           watch_seconds: number
         }[]
       }
-      admin_affiliate_promotion_report: {
-        Args: { p_from?: string; p_to?: string }
-        Returns: {
-          affiliate_code: string
-          affiliate_id: string
-          clicks: number
-          conversion_rate_pct: number
-          name: string
-          product_commission_minor: number
-          product_sales: number
-          recruitment_share_pct: number
-          recruits: number
-          status: string
-          total_commission_minor: number
-          training_commission_minor: number
-          training_sales: number
-          user_id: string
-        }[]
-      }
-      admin_affiliate_task_exposure: {
-        Args: {
-          p_admin_id: string
-          p_metric: Database["public"]["Enums"]["affiliate_task_metric"]
-          p_target: number
-          p_task_id?: string
-        }
-        Returns: Json
-      }
-      admin_affiliate_terms_status: {
-        Args: { p_admin_id: string }
-        Returns: {
-          affiliate_code: string
-          affiliate_id: string
-          current_version: number
-          is_current: boolean
-          name: string
-          terms_accepted_at: string
-          terms_version: number
-        }[]
-      }
       admin_announcement_audience: { Args: never; Returns: number }
       admin_area_allowed: {
         Args: { p_area: string; p_user_id: string }
@@ -3439,47 +2955,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      admin_commission_totals: {
-        Args: { p_from?: string; p_to?: string }
-        Returns: {
-          affiliates_owed: number
-          cleared_minor: number
-          owed_minor: number
-          paid_minor: number
-          pending_minor: number
-          reversed_minor: number
-        }[]
-      }
       admin_count_unread_support: { Args: never; Returns: number }
-      admin_course_curriculum: {
-        Args: { p_product_id: string }
-        Returns: {
-          duration_seconds: number
-          is_preview: boolean
-          kind: string
-          learners_started: number
-          lesson_id: string
-          lesson_position: number
-          lesson_title: string
-          problem: string
-          question_count: number
-          quiz_count: number
-          resource_count: number
-          section_id: string
-          section_position: number
-          section_title: string
-        }[]
-      }
-      admin_create_commission_gift_code: {
-        Args: {
-          p_admin_id: string
-          p_amount_minor: number
-          p_code: string
-          p_expires_at?: string
-          p_note?: string
-        }
-        Returns: Json
-      }
       admin_create_gift_code: {
         Args: {
           p_admin_id: string
@@ -3582,10 +3058,6 @@ export type Database = {
         Args: { p_admin_id: string; p_payment_id: string }
         Returns: undefined
       }
-      admin_delete_affiliate_task: {
-        Args: { p_admin_id: string; p_task_id: string }
-        Returns: string
-      }
       admin_delete_community: {
         Args: { p_admin_id: string; p_id: string }
         Returns: undefined
@@ -3594,17 +3066,9 @@ export type Database = {
         Args: { p_admin_id: string; p_id: string }
         Returns: undefined
       }
-      admin_delete_lesson: {
-        Args: { p_admin_id: string; p_lesson_id: string }
-        Returns: undefined
-      }
       admin_delete_plan: {
         Args: { p_admin_id: string; p_plan_id: string }
         Returns: string
-      }
-      admin_delete_quiz: {
-        Args: { p_admin_id: string; p_quiz_id: string }
-        Returns: undefined
       }
       admin_delete_quiz_question: {
         Args: { p_admin_id: string; p_question_id: string }
@@ -3612,10 +3076,6 @@ export type Database = {
       }
       admin_delete_resource: {
         Args: { p_admin_id: string; p_resource_id: string }
-        Returns: undefined
-      }
-      admin_delete_section: {
-        Args: { p_admin_id: string; p_section_id: string }
         Returns: undefined
       }
       admin_delete_task: {
@@ -3675,10 +3135,6 @@ export type Database = {
       admin_grant_role: {
         Args: { p_admin_id: string; p_role: string; p_target_id: string }
         Returns: undefined
-      }
-      admin_lesson_detail: {
-        Args: { p_admin_id: string; p_lesson_id: string }
-        Returns: Json
       }
       admin_list_administrators: {
         Args: never
@@ -3773,49 +3229,6 @@ export type Database = {
           weight: number
         }[]
       }
-      admin_list_affiliate_tasks: {
-        Args: { p_admin_id: string }
-        Returns: {
-          claimed_count: number
-          code: string
-          description: string
-          eligible_now: number
-          icon: string
-          id: string
-          is_active: boolean
-          metric: Database["public"]["Enums"]["affiliate_task_metric"]
-          name: string
-          paid_minor: number
-          reward_minor: number
-          sort_order: number
-          target: number
-        }[]
-      }
-      admin_list_affiliates: {
-        Args: { p_scope?: string }
-        Returns: {
-          activated_at: string
-          affiliate_code: string
-          affiliate_id: string
-          balance_minor: number
-          clicks: number
-          conversions: number
-          depth_now: number
-          email: string
-          gross_minor: number
-          joined_at: string
-          name: string
-          paid_out_minor: number
-          pending_minor: number
-          promotion_ends: string
-          recruits: number
-          reversed_minor: number
-          status: string
-          tier: string
-          upline_name: string
-          user_id: string
-        }[]
-      }
       admin_list_announcements: {
         Args: { p_limit?: number }
         Returns: {
@@ -3839,87 +3252,6 @@ export type Database = {
           id: string
           note: string
           target: string
-        }[]
-      }
-      admin_list_commission_gift_codes: {
-        Args: {
-          p_admin_id: string
-          p_status?: Database["public"]["Enums"]["gift_code_status"]
-        }
-        Returns: {
-          amount_minor: number
-          code: string
-          created_at: string
-          expires_at: string
-          id: string
-          note: string
-          redeemed_at: string
-          redeemed_by: string
-          status: string
-        }[]
-      }
-      admin_list_commission_payouts: {
-        Args: { p_status?: string }
-        Returns: {
-          affiliate_code: string
-          affiliate_id: string
-          amount_minor: number
-          balance_after: number
-          coin_amount: number
-          coin_code: string
-          destination: string
-          fee_minor: number
-          method: string
-          name: string
-          net_minor: number
-          paid_at: string
-          payout_id: string
-          requested_at: string
-          review_notes: string
-          status: string
-        }[]
-      }
-      admin_list_commissions: {
-        Args: { p_affiliate_id?: string; p_from?: string; p_status?: string }
-        Returns: {
-          affiliate_code: string
-          affiliate_id: string
-          affiliate_name: string
-          amount_minor: number
-          clears_at: string
-          created_at: string
-          entry_type: string
-          ledger_id: string
-          level: number
-          order_id: string
-          product_title: string
-          reason: string
-          status: string
-        }[]
-      }
-      admin_list_conversions: {
-        Args: { p_affiliate_id?: string; p_from?: string; p_to?: string }
-        Returns: {
-          affiliate_code: string
-          affiliate_name: string
-          attributed_at: string
-          attributed_by: string
-          base_minor: number
-          buyer_name: string
-          clicked_at: string
-          conversion_id: string
-          l1_minor: number
-          l1_rate: number
-          l2_affiliate_name: string
-          l2_depth_at_conversion: number
-          l2_minor: number
-          l2_rate: number
-          order_id: string
-          order_kind: string
-          product_purpose: string
-          product_title: string
-          status: string
-          subid: string
         }[]
       }
       admin_list_coupon_redemptions: {
@@ -4000,6 +3332,44 @@ export type Database = {
           status: Database["public"]["Enums"]["gift_code_status"]
         }[]
       }
+      admin_list_hub_flags: {
+        Args: { p_limit?: number }
+        Returns: {
+          amount_minor: number
+          currency_code: string
+          detail: string
+          event: string
+          hub_reference: string
+          id: string
+          payment_id: string
+          person: string
+          received_at: string
+          request_id: string
+          result: string
+        }[]
+      }
+      admin_list_hub_payments: {
+        Args: { p_limit?: number }
+        Returns: {
+          amount_minor: number
+          confirmed_at: string
+          created_at: string
+          currency_code: string
+          email: string
+          event_count: number
+          failure_reason: string
+          hub_reference: string
+          id: string
+          last_detail: string
+          last_event: string
+          last_event_at: string
+          last_result: string
+          person: string
+          status: Database["public"]["Enums"]["subscription_payment_status"]
+          tier_name: string
+          user_id: string
+        }[]
+      }
       admin_list_people: {
         Args: { p_scope?: string }
         Returns: {
@@ -4053,38 +3423,6 @@ export type Database = {
           reward_multiplier: number
           slug: string
           sort_order: number
-        }[]
-      }
-      admin_list_products: {
-        Args: { p_purpose?: string }
-        Returns: {
-          attribution_window_hours: number
-          blockers: number
-          category: string
-          commission_status: string
-          content_language: string
-          cover_path: string
-          created_at: string
-          description: string
-          effective_price_ghs: number
-          hold_days: number
-          id: string
-          kind: string
-          l1_rate: number
-          l2_rate: number
-          learning_outcomes: string[]
-          lessons: number
-          min_affiliate_tier: string
-          price_ghs: number
-          purpose: string
-          revenue_ghs: number
-          sale_price_ghs: number
-          sales: number
-          sections: number
-          slug: string
-          status: string
-          title: string
-          vendor_name: string
         }[]
       }
       admin_list_redemptions: {
@@ -4154,19 +3492,6 @@ export type Database = {
           weekly_game_plays: number
         }[]
       }
-      admin_list_vendors: {
-        Args: never
-        Returns: {
-          contact_email: string
-          contact_name: string
-          contact_phone: string
-          created_at: string
-          id: string
-          name: string
-          products: number
-          status: string
-        }[]
-      }
       admin_mark_support_read: {
         Args: { p_admin: string; p_user: string }
         Returns: number
@@ -4200,30 +3525,6 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
-      }
-      admin_remove_affiliate_program: {
-        Args: { p_admin_id: string; p_product_id: string }
-        Returns: Json
-      }
-      admin_reorder_lessons: {
-        Args: {
-          p_admin_id: string
-          p_lesson_ids: string[]
-          p_section_id: string
-        }
-        Returns: number
-      }
-      admin_reorder_sections: {
-        Args: {
-          p_admin_id: string
-          p_product_id: string
-          p_section_ids: string[]
-        }
-        Returns: number
-      }
-      admin_revoke_commission_gift_code: {
-        Args: { p_admin_id: string; p_code_id: string }
-        Returns: Json
       }
       admin_revoke_gift_code: {
         Args: { p_admin_id: string; p_code_id: string }
@@ -4292,22 +3593,6 @@ export type Database = {
           p_prizes: Json
         }
         Returns: number
-      }
-      admin_save_affiliate_program: {
-        Args: {
-          p_active?: boolean
-          p_admin_id: string
-          p_hold_days?: number
-          p_l1: number
-          p_l2: number
-          p_product_id: string
-          p_window_hours?: number
-        }
-        Returns: Json
-      }
-      admin_save_affiliate_task: {
-        Args: { p_admin_id: string; p_task: Json }
-        Returns: string
       }
       admin_save_community: {
         Args: {
@@ -4433,52 +3718,9 @@ export type Database = {
         Args: { p_admin_id: string; p_question: Json }
         Returns: string
       }
-      admin_save_resource: {
-        Args: { p_admin_id: string; p_resource: Json }
-        Returns: {
-          byte_size: number | null
-          created_at: string
-          id: string
-          lesson_id: string
-          position: number
-          storage_path: string
-          title: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "lesson_resources"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
       admin_save_task: {
         Args: { p_admin_id: string; p_task: Json }
         Returns: string
-      }
-      admin_save_vendor: {
-        Args: { p_admin_id: string; p_vendor: Json }
-        Returns: {
-          avatar_path: string | null
-          bio: string | null
-          contact_email: string | null
-          contact_name: string | null
-          contact_phone: string | null
-          created_at: string
-          created_by: string
-          display_name: string | null
-          headline: string | null
-          id: string
-          name: string
-          notes: string | null
-          status: Database["public"]["Enums"]["vendor_status"]
-          updated_at: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "vendors"
-          isOneToOne: true
-          isSetofReturn: false
-        }
       }
       admin_save_weekly_bonus_campaign: {
         Args: { p_admin_id: string; p_campaign: Json }
@@ -4583,57 +3825,6 @@ export type Database = {
         Args: { p_admin_id: string; p_email: string }
         Returns: string
       }
-      admin_vendor_sales_report: {
-        Args: { p_from?: string; p_to?: string }
-        Returns: Json
-      }
-      affiliate_balance_minor: {
-        Args: { p_affiliate_id: string }
-        Returns: number
-      }
-      affiliate_dashboard: { Args: { p_user_id: string }; Returns: Json }
-      affiliate_dashboard_core: { Args: { p_user_id: string }; Returns: Json }
-      affiliate_depth_now: { Args: { p_affiliate_id: string }; Returns: number }
-      affiliate_earnings_by_year: {
-        Args: { p_year?: number }
-        Returns: {
-          affiliate_id: string
-          gross_minor: number
-          name: string
-          net_minor: number
-          paid_out_minor: number
-          reversed_minor: number
-          user_id: string
-          year: number
-        }[]
-      }
-      affiliate_eligible_prizes: {
-        Args: {
-          p_game: Database["public"]["Enums"]["affiliate_game_kind"]
-          p_week: string
-        }
-        Returns: {
-          amount_minor: number
-          colour: string | null
-          created_at: string
-          daily_cap: number
-          extra_plays: number
-          game: Database["public"]["Enums"]["affiliate_game_kind"]
-          id: string
-          is_active: boolean
-          label: string
-          slot: number
-          updated_at: string
-          weekly_cap: number
-          weight: number
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "affiliate_game_prizes"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
       affiliate_game_board: {
         Args: { p_game: Database["public"]["Enums"]["affiliate_game_kind"] }
         Returns: {
@@ -4645,60 +3836,11 @@ export type Database = {
         }[]
       }
       affiliate_game_status: { Args: { p_user_id: string }; Returns: Json }
-      affiliate_leaderboard: {
-        Args: { p_limit?: number; p_period?: string }
-        Returns: {
-          amount_minor: number
-          avatar_path: string
-          display_name: string
-          movement: string
-          previous_rank: number
-          rank: number
-          user_id: string
-        }[]
-      }
       affiliate_leaderboard_standing: {
         Args: { p_period?: string; p_user_id: string }
         Returns: Json
       }
-      affiliate_pending_minor: {
-        Args: { p_affiliate_id: string }
-        Returns: number
-      }
-      affiliate_performance: {
-        Args: { p_days?: number; p_user_id: string }
-        Returns: Json
-      }
-      affiliate_promote_info: {
-        Args: { p_product_id: string; p_user_id: string }
-        Returns: Json
-      }
-      affiliate_recruitment_share: {
-        Args: { p_from?: string; p_to?: string }
-        Returns: {
-          product_minor: number
-          recruitment_share_pct: number
-          total_minor: number
-          training_minor: number
-        }[]
-      }
-      affiliate_statement: {
-        Args: { p_limit?: number; p_user_id: string }
-        Returns: Json
-      }
-      affiliate_task_progress: {
-        Args: {
-          p_metric: Database["public"]["Enums"]["affiliate_task_metric"]
-          p_user_id: string
-        }
-        Returns: number
-      }
-      affiliate_upline_for: { Args: { p_user_id: string }; Returns: string }
       affiliate_week_start: { Args: never; Returns: string }
-      affiliate_weekly_play_allowance: {
-        Args: { p_user_id: string }
-        Returns: number
-      }
       apply_referral_code: {
         Args: {
           p_code: string
@@ -4818,33 +3960,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      attribute_order: {
-        Args: { p_order_id: string; p_visitor_token?: string }
-        Returns: {
-          affiliate_id: string
-          attributed_at: string
-          attribution_model: string
-          base_minor: number
-          click_id: string | null
-          created_at: string
-          id: string
-          l1_rate: number
-          l2_affiliate_id: string | null
-          l2_depth_at_conversion: number | null
-          l2_entitlement_id: string | null
-          l2_rate: number | null
-          order_id: string
-          program_id: string
-          status: Database["public"]["Enums"]["conversion_status"]
-          subid: string | null
-        }
-        SetofOptions: {
-          from: "*"
-          to: "conversions"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
       base_ad_points: { Args: never; Returns: number }
       broadcast_notification: {
         Args: {
@@ -4925,11 +4040,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      certificate_by_code: { Args: { p_code: string }; Returns: Json }
-      certificate_grade_for: {
-        Args: { p_product_id: string; p_user_id: string }
-        Returns: number
-      }
       check_referral_activation: {
         Args: { p_referee_id: string }
         Returns: boolean
@@ -4976,7 +4086,6 @@ export type Database = {
         }
         Returns: number
       }
-      clear_due_commissions: { Args: never; Returns: number }
       clear_notifications: { Args: never; Returns: undefined }
       clear_totp_failures: { Args: { p_user_id: string }; Returns: undefined }
       clear_user_flag: {
@@ -5094,51 +4203,6 @@ export type Database = {
       coupon_uses: {
         Args: { p_coupon_id: string; p_user_id?: string }
         Returns: number
-      }
-      course_curriculum: {
-        Args: { p_product_id: string; p_user_id?: string }
-        Returns: {
-          checkpoints_passed: boolean
-          completed: boolean
-          duration_seconds: number
-          is_preview: boolean
-          kind: string
-          lesson_id: string
-          lesson_position: number
-          lesson_title: string
-          quiz_count: number
-          resource_count: number
-          seconds_watched: number
-          section_id: string
-          section_position: number
-          section_title: string
-          watched_percent: number
-          word_count: number
-        }[]
-      }
-      course_outline: {
-        Args: { p_product_id: string }
-        Returns: {
-          duration_seconds: number
-          is_preview: boolean
-          lesson_id: string
-          lesson_position: number
-          lesson_title: string
-          section_id: string
-          section_position: number
-          section_title: string
-        }[]
-      }
-      course_resources: {
-        Args: { p_product_id: string; p_user_id?: string }
-        Returns: {
-          byte_size: number
-          lesson_id: string
-          lesson_title: string
-          resource_id: string
-          section_title: string
-          title: string
-        }[]
       }
       create_notification: {
         Args: {
@@ -5287,10 +4351,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      evaluate_affiliate_activation: {
-        Args: { p_product_id: string; p_user_id: string }
-        Returns: boolean
-      }
       evaluate_signup_fraud: {
         Args: {
           p_email: string
@@ -5417,9 +4477,7 @@ export type Database = {
         }
       }
       game_week_start: { Args: never; Returns: string }
-      generate_affiliate_code: { Args: never; Returns: string }
       generate_certificate_code: { Args: never; Returns: string }
-      generate_commission_gift_code: { Args: never; Returns: string }
       generate_gift_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       get_active_referral_count: {
@@ -5490,7 +4548,6 @@ export type Database = {
           show_at_seconds: number
         }[]
       }
-      get_affiliate_tasks: { Args: { p_user_id: string }; Returns: Json }
       get_deletion_status: { Args: never; Returns: Json }
       get_earnings_breakdown: {
         Args: { p_user_id: string }
@@ -5677,10 +4734,6 @@ export type Database = {
           tier_slug: string
         }[]
       }
-      grant_order_entitlements: {
-        Args: { p_order_id: string }
-        Returns: number
-      }
       has_entitlement: {
         Args: { p_product_id: string; p_user_id: string }
         Returns: boolean
@@ -5739,10 +4792,6 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { p_user_id?: string }; Returns: boolean }
-      issue_certificate_if_earned: {
-        Args: { p_product_id: string; p_user_id: string }
-        Returns: string
-      }
       leaderboard_counted_types: {
         Args: never
         Returns: Database["public"]["Enums"]["ledger_entry_type"][]
@@ -5755,24 +4804,7 @@ export type Database = {
         Args: { p_period: string }
         Returns: Record<string, unknown>
       }
-      lesson_checkpoints_passed: {
-        Args: { p_lesson_id: string; p_user_id: string }
-        Returns: boolean
-      }
-      lesson_for_learner: {
-        Args: { p_lesson_id: string; p_user_id: string }
-        Returns: Json
-      }
-      lesson_is_ready: { Args: { p_lesson_id: string }; Returns: string }
-      lesson_quiz_states: {
-        Args: { p_lesson_id: string; p_user_id: string }
-        Returns: Json
-      }
       mark_all_notifications_read: { Args: never; Returns: undefined }
-      mark_lesson_read: {
-        Args: { p_lesson_id: string; p_user_id: string }
-        Returns: boolean
-      }
       mark_notification_read: { Args: { p_id: string }; Returns: undefined }
       mark_redemption_failed: {
         Args: { p_admin_id: string; p_reason: string; p_redemption_id: string }
@@ -5873,11 +4905,6 @@ export type Database = {
       mark_support_read: { Args: never; Returns: number }
       mask_payout_value: { Args: { p_value: string }; Returns: string }
       may_repeat_ads: { Args: { p_user_id: string }; Returns: boolean }
-      my_certificate: {
-        Args: { p_product_id: string; p_user_id: string }
-        Returns: Json
-      }
-      my_learning: { Args: { p_user_id: string }; Returns: Json }
       normalise_phone: { Args: { p_phone: string }; Returns: string }
       notify_admins: {
         Args: {
@@ -5886,11 +4913,6 @@ export type Database = {
           p_title: string
           p_type: Database["public"]["Enums"]["notification_type"]
         }
-        Returns: number
-      }
-      owned_training_rank: { Args: { p_user_id: string }; Returns: number }
-      pay_conversion_commissions: {
-        Args: { p_conversion_id: string }
         Returns: number
       }
       pay_one_referral_commission: {
@@ -5992,13 +5014,6 @@ export type Database = {
       }
       plan_band_max_minor: { Args: { p_tier_id: string }; Returns: number }
       plan_multiplier_for_amount: { Args: { p_minor: number }; Returns: number }
-      play_affiliate_game: {
-        Args: {
-          p_game: Database["public"]["Enums"]["affiliate_game_kind"]
-          p_user_id: string
-        }
-        Returns: Json
-      }
       play_game: {
         Args: {
           p_game: Database["public"]["Enums"]["game_kind"]
@@ -6016,93 +5031,34 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      product_price_minor: { Args: { p_product_id: string }; Returns: number }
-      product_publish_blockers: {
-        Args: { p_product_id: string }
+      purchase_vault_with_balance: {
+        Args: { p_plan_id: string; p_user_id?: string }
         Returns: {
-          lesson_id: string
-          lesson_title: string
-          problem: string
-          section_title: string
-        }[]
-      }
-      purchase_vault_with_balance:
-        | {
-            Args: { p_plan_id: string }
-            Returns: {
-              amount_minor: number
-              claimed_at: string | null
-              claimed_points: number | null
-              created_at: string
-              currency_code: string
-              daily_return_percent: number
-              ends_at: string
-              expected_profit_minor: number
-              expected_return_minor: number
-              id: string
-              payment_id: string | null
-              period_days: number
-              plan_id: string
-              plan_name: string
-              started_at: string
-              status: string
-              updated_at: string
-              user_id: string
-            }
-            SetofOptions: {
-              from: "*"
-              to: "vault_investments"
-              isOneToOne: true
-              isSetofReturn: false
-            }
-          }
-        | {
-            Args: { p_plan_id: string; p_user_id?: string }
-            Returns: {
-              amount_minor: number
-              claimed_at: string | null
-              claimed_points: number | null
-              created_at: string
-              currency_code: string
-              daily_return_percent: number
-              ends_at: string
-              expected_profit_minor: number
-              expected_return_minor: number
-              id: string
-              payment_id: string | null
-              period_days: number
-              plan_id: string
-              plan_name: string
-              started_at: string
-              status: string
-              updated_at: string
-              user_id: string
-            }
-            SetofOptions: {
-              from: "*"
-              to: "vault_investments"
-              isOneToOne: true
-              isSetofReturn: false
-            }
-          }
-      quiz_for_learner: {
-        Args: { p_quiz_id: string }
-        Returns: {
-          at_seconds: number
-          option_body: string
-          option_id: string
-          option_position: number
-          pass_percent: number
-          prompt: string
-          question_id: string
-          question_position: number
-          quiz_id: string
-          quiz_title: string
-        }[]
-      }
-      quiz_is_passed: {
-        Args: { p_quiz_id: string; p_user_id: string }
-        Returns: boolean
+          amount_minor: number
+          claimed_at: string | null
+          claimed_points: number | null
+          created_at: string
+          currency_code: string
+          daily_return_percent: number
+          ends_at: string
+          expected_profit_minor: number
+          expected_return_minor: number
+          id: string
+          payment_id: string | null
+          period_days: number
+          plan_id: string
+          plan_name: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vault_investments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       quote_crypto_payout: {
         Args: { p_coin: string; p_ghs: number }
@@ -6128,14 +5084,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      reconcile_commission_ledger: {
-        Args: never
-        Returns: {
-          affiliate_id: string
-          detail: Json
-          problem: string
-        }[]
-      }
       reconcile_user_balance: {
         Args: { p_user_id: string }
         Returns: {
@@ -6156,21 +5104,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      record_affiliate_click: {
-        Args: {
-          p_affiliate_code: string
-          p_fingerprint?: string
-          p_ip?: unknown
-          p_landing_url?: string
-          p_product_id: string
-          p_referrer?: string
-          p_subid?: string
-          p_user_agent?: string
-          p_user_id?: string
-          p_visitor_token?: string
-        }
-        Returns: string
-      }
       record_auth_signal: {
         Args: {
           p_country?: string
@@ -6185,16 +5118,6 @@ export type Database = {
       record_fraud_signal: {
         Args: { p_check_code: string; p_details?: Json; p_user_id: string }
         Returns: boolean
-      }
-      record_lesson_progress: {
-        Args: {
-          p_lesson_id: string
-          p_percent: number
-          p_quiz_passed?: boolean
-          p_seconds: number
-          p_user_id: string
-        }
-        Returns: number
       }
       record_session_context: {
         Args: {
@@ -6349,10 +5272,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      reverse_conversion_commissions: {
-        Args: { p_conversion_id: string; p_reason: string }
-        Returns: number
-      }
       reverse_subscription_payment: {
         Args: { p_payment_id: string; p_reason?: string }
         Returns: {
@@ -6440,10 +5359,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      set_certificate_name: {
-        Args: { p_legal_name: string; p_product_id: string; p_user_id: string }
-        Returns: Json
-      }
       set_fx_rate: {
         Args: { p_pair: string; p_rate: number; p_source: string }
         Returns: {
@@ -6495,44 +5410,6 @@ export type Database = {
       set_withdrawal_pin: {
         Args: { p_current_pin?: string; p_new_pin: string; p_user_id: string }
         Returns: undefined
-      }
-      settle_lesson_completion: {
-        Args: { p_lesson_id: string; p_user_id: string }
-        Returns: boolean
-      }
-      shop_product: {
-        Args: { p_slug: string; p_user_id?: string }
-        Returns: Json
-      }
-      shop_products: {
-        Args: { p_user_id?: string }
-        Returns: {
-          can_promote: boolean
-          category: string
-          content_language: string
-          cover_path: string
-          description: string
-          id: string
-          instructor_avatar: string
-          instructor_headline: string
-          instructor_name: string
-          kind: string
-          l1_earn_minor: number
-          l1_rate: number
-          lessons: number
-          list_price_minor: number
-          min_affiliate_tier: string
-          on_sale: boolean
-          owned: boolean
-          percent: number
-          price_minor: number
-          purpose: string
-          quizzes: number
-          saved: boolean
-          seconds: number
-          slug: string
-          title: string
-        }[]
       }
       start_subscription_payment: {
         Args: {
@@ -6625,13 +5502,7 @@ export type Database = {
         }[]
       }
       totp_lock_state: { Args: { p_user_id: string }; Returns: Json }
-      training_completion_percent: {
-        Args: { p_product_id: string; p_user_id: string }
-        Returns: number
-      }
       training_level_rank: { Args: { p_level: string }; Returns: number }
-      training_offers_json: { Args: never; Returns: Json }
-      training_upgrade_offer: { Args: { p_user_id: string }; Returns: Json }
       user_ad_allowances: {
         Args: { p_user_id: string }
         Returns: {
@@ -6674,7 +5545,6 @@ export type Database = {
           question_position: number
         }[]
       }
-      warn_expiring_entitlements: { Args: never; Returns: number }
     }
     Enums: {
       ad_answer_outcome:

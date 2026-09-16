@@ -33,10 +33,24 @@ const env = Object.fromEntries(
     }),
 )
 
-if (!env.SUPABASE_DB_URL) {
-  console.error('SUPABASE_DB_URL is not in .env.local')
+/*
+  ⚠️ TARGETS PRODUCTION, AND SAYS SO BEFORE IT ACTS.
+
+  `SUPABASE_DB_URL` is the TEST database now, because that is what the suite
+  reads. A migration runner that quietly followed it would report "already
+  applied" after the replay had put the version in the test ledger, and
+  production would silently never receive it. That happened once.
+
+  So the live database is named separately, and the project ref is printed
+  before anything runs. The test database is not kept up to date by this
+  script; `scripts/replay-migrations.cjs` does that.
+*/
+const target = env.PRODUCTION_DB_URL || env.SUPABASE_DB_URL
+if (!target) {
+  console.error('Neither PRODUCTION_DB_URL nor SUPABASE_DB_URL is in .env.local')
   process.exit(1)
 }
+const ref = (target.match(/postgres\.([a-z0-9]+)/) || [])[1] || 'unknown project'
 
 const file = path.join('supabase', 'migrations', path.basename(arg))
 if (!fs.existsSync(file)) {
@@ -50,7 +64,8 @@ const version = base.slice(0, 14)
 const name = base.slice(15)
 
 ;(async () => {
-  const client = new Client({ connectionString: env.SUPABASE_DB_URL })
+  console.log('target: ' + ref)
+  const client = new Client({ connectionString: target })
   await client.connect()
   try {
     const already = await client.query(
