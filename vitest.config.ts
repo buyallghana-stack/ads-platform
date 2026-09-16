@@ -50,10 +50,31 @@ export default defineConfig({
     include: ['tests/**/*.test.ts'],
     environment: 'node',
 
-    // Every test runs inside one transaction on a SHARED dev database, and
-    // two transactions writing the same config rows deadlock rather than fail
-    // cleanly. Serial is not a performance compromise here; it is what makes
-    // the results mean anything.
+    /*
+      Every test runs inside one transaction, and two transactions writing the
+      same config rows block on each other rather than failing cleanly. Serial
+      is not a performance compromise here; it is what makes the results mean
+      anything.
+
+      ⚠️ MEASURED, 16 September 2026, so nobody spends another afternoon on it.
+      Moving the suite off the shared production database to `sideperks-test`
+      removed the contention with live traffic, and the obvious next thought is
+      that files can now run alongside each other. They cannot, and the reason
+      is not the database they are on.
+
+      `pinLadder` and `setConfig` exist because a money test must not assert
+      against whatever was last typed into the admin. They pin by WRITING the
+      same `tiers` and `app_config` rows every file needs. Run two files at
+      once and their transactions queue on those row locks, so the work
+      serialises anyway and the extra workers are pure overhead.
+
+      The numbers, same 8 files, same database: 540s serial, still unfinished
+      at 560s parallel.
+
+      Making this work is not a config change. It needs the fixtures to stop
+      sharing rows, which means either a database per worker or config read
+      through something transaction-local rather than a table.
+    */
     fileParallelism: false,
     sequence: { concurrent: false },
 
