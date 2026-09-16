@@ -39,8 +39,16 @@ begin
   select user_id into v_admin
     from public.user_roles where role = 'super_admin' limit 1;
 
+  /* ⚠️ SKIP RATHER THAN RAISE ON AN EMPTY DATABASE. This seeds catalogue rows
+     that need an owner, and it was written against production where a super
+     admin has always existed. Building a database from the migration history
+     has no users at all, so the raise turned a seeding step into a wall.
+     Nothing downstream depends on these rows: 20260865000000 drops the whole
+     training catalogue again. A database that already ran this keeps what it
+     seeded; a fresh one simply has nothing to own them. */
   if v_admin is null then
-    raise exception 'No super admin to own the training products';
+    raise notice 'No super admin yet, so the training products are not seeded.';
+    return;
   end if;
 
   -- ---------------------------------------------------------------------

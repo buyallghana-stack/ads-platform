@@ -35,6 +35,32 @@ import { Client } from 'pg'
 
 const CONNECTION = process.env.SUPABASE_DB_URL
 
+/**
+ * ⚠️ THE SUITE MAY NOT RUN AGAINST PRODUCTION.
+ *
+ * It did, for two months. The project it was written against was called "dev"
+ * and was later renamed `sideperks-production`; the tests never moved. The
+ * safeguards here are real, every test runs inside a transaction that rolls
+ * back and files run one at a time, but a rollback only covers what goes
+ * through that transaction, and the cost of the one thing that does not is
+ * somebody's balance in an append-only ledger.
+ *
+ * A hard stop rather than a warning, because the failure mode is not
+ * carelessness. It is convenience: the test database is slow or paused, the
+ * old connection string is one line away, and nothing would object.
+ *
+ * `sideperks-test` is built from the same migrations, and its schema is
+ * checked against production by scripts/diff-schema.cjs.
+ */
+const PRODUCTION_REF = 'mjivgeojeejaszcrkbbo'
+
+if (CONNECTION && CONNECTION.includes(PRODUCTION_REF)) {
+  throw new Error(
+    'SUPABASE_DB_URL points at the PRODUCTION database. This suite writes to ' +
+      'every money table it touches. Point it at sideperks-test: see tests/README.md.',
+  )
+}
+
 export const HAS_DB = Boolean(CONNECTION)
 
 /** What a test gets: a connected client already inside a transaction. */

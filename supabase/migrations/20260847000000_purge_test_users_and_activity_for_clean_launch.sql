@@ -17,8 +17,19 @@ declare
 begin
   select id into v_admin_id from auth.users where email = 'admin@email.com';
 
+  /* ⚠️ SKIP RATHER THAN RAISE ON AN EMPTY DATABASE. This was a one-time
+     clearance of test accounts before launch. It has nothing to clear on a
+     database built from the migration history, and raising there turns a
+     historical cleanup into a permanent wall.
+
+     Skipping also avoids repeating its worst side effect. Its delete list
+     includes `fraud_checks`, which is nine SEEDED rules rather than activity,
+     and removing them silently disabled the entire fraud layer on production
+     from August until 16 September (restored by 20260872000000). A fresh
+     database should keep the rules the fraud layer migration seeded. */
   if v_admin_id is null then
-    raise exception 'Admin account admin@email.com not found!' using errcode = 'check_violation';
+    raise notice 'No admin@email.com, so there is nothing to purge here.';
+    return;
   end if;
 
   -- 1. Disable triggers on append-only / protected tables

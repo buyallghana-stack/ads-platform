@@ -27,15 +27,41 @@ string → URI**, and use the **session** pooler on port 5432, not the
 transaction pooler on 6543 — every test runs inside a transaction, which the
 transaction pooler does not hold across statements.
 
+⚠️ The pooler hostname is per project and is not always `aws-0`. The test
+project is on `aws-1-eu-west-3`, and the management API hands back the
+transaction pooler on 6543 rather than the session one, so read the host from
+the string it gives you and change the port yourself.
+
 Put it in `.env.local`. Without it the suite fails loudly on a single guard
 test rather than skipping quietly, because a green run that silently skipped
 the payout tests is worse than a red one.
 
+## Which database
+
+**`sideperks-test` (`yejmkyciynzmqvtnhapf`), never production.**
+
+This used to read "the shared dev project", and it was true when it was
+written. That project was later renamed `sideperks-production` because a live
+database called "dev" is how somebody eventually runs something destructive on
+it, and the rename happened without the tests moving. For two months this
+suite wrote to the live database on every run.
+
+`tests/support/db.ts` now throws if `SUPABASE_DB_URL` names the production
+project, so pointing it back is not something that can happen by accident.
+
+The test project is built from the same migrations, by
+`scripts/replay-migrations.cjs`, and `scripts/diff-schema.cjs` compares the two
+schemas: tables, columns, functions, triggers, enums, RLS and policies. Run
+that diff after any migration, because a test database that quietly differs
+from production turns every green run into evidence about the wrong system.
+
+⚠️ It is a free-plan project, so it **pauses after seven days idle** and needs
+one click in the Supabase dashboard to wake. A paused database looks like a
+connection failure, not a paused project.
+
 ## How they avoid leaving a mess
 
-There is no local Postgres on this machine (no Docker, no Supabase CLI), so
-these run against the shared **dev** project. That makes cleanup the hard
-part, not the tests:
+Cleanup is the hard part, not the tests:
 
 - `points_ledger` is append-only by trigger and refuses `DELETE` to every role
   **including the table owner**.

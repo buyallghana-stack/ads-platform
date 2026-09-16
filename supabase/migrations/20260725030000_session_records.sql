@@ -84,6 +84,15 @@ $$;
  * Rows recorded before this migration have no context and are reported as
  * unknown rather than shown with the misleading server values.
  */
+
+/* ⚠️ DROPPED FIRST, AND ONLY FOR REPLAY. An earlier migration defines this
+   returning (id, created_at, last_seen, user_agent, ip, is_current); this one
+   returns (id, signed_in_at, last_seen, user_agent, ip, country, is_current).
+   `create or replace` cannot change a return type, so building a database from
+   the migration history stops here without the drop. It is a no-op on any
+   database that has already recorded this version. */
+drop function if exists public.get_active_sessions();
+
 create or replace function public.get_active_sessions()
 returns table (
   id           uuid,
