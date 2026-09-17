@@ -154,6 +154,39 @@ app stores as `HUB_INBOUND_SECRETS`.
   Paystack queues nothing. **Make fulfilment idempotent anyway**, because the
   return page and the confirm endpoint race each other by design.
 
+### `domain`: asked for on 17 September 2026, not yet sent
+
+Paystack stamps `"domain": "live"` or `"domain": "test"` on every transaction
+object it returns. The hub stores the whole object and neither app was reading
+the field, which is how the store's Paystack account stayed in **test mode in
+production** from the beginning without either side being able to see it. Six
+SidePerks payments were reported successful over correctly signed requests and
+granted plans. No money moved for any of them.
+
+Nothing malfunctioned. The hub reported what Paystack told it and this app
+believed the hub, and both were right to. What was missing was anyone asking
+**which** Paystack.
+
+So the request, on both payloads above:
+
+```json
+{ "domain": "live | test" }
+```
+
+- On the confirm POST, and on the `GET /payments/{reference}` answer.
+- This app reads it already, at `src/lib/payments/hub/decide.ts`. It looks at
+  the top level and at `data`, `paystack`, `paystack_payload` and
+  `provider_payload`, so wherever it is forwarded it will be found.
+- **Absence is not a refusal.** A payload with no `domain` reads as `unknown`
+  and is fulfilled exactly as it is today. Making absence fatal would refuse
+  every real payment in order to catch a case that cannot yet be seen, so the
+  guard sits armed and idle until the field arrives.
+- When it does arrive saying `test`, nothing is granted. The event is recorded,
+  it is flagged on the admin payments screen as `test_mode`, and the hub is
+  still answered 2xx, because it told the truth and retrying the truth for 24
+  hours does not change it. The one exception is a deliberate rehearsal:
+  `app_config.hub_accept_test_payments`, off by default.
+
 ---
 
 ## Decisions already taken that constrain Part B

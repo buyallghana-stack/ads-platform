@@ -126,6 +126,20 @@ export default async function AdminConfigPage({
           description: t('fields.payoutsEnabled.description'),
           kind: 'toggle',
         },
+        /* Money coming IN, on a screen about money going out, because it is
+           the same question: may this move. The alternative was a group of
+           one, and an operator looking for a payment switch looks here. */
+        {
+          key: 'hub_accept_test_payments',
+          label: t('fields.acceptTestPayments.label'),
+          description: t('fields.acceptTestPayments.description'),
+          warning: t('fields.acceptTestPayments.warning'),
+          /* Red, like the games switch and the earning pause. Turning it on
+             hands out plans nobody paid for, which is the same class of
+             consequence those two carry. */
+          danger: true,
+          kind: 'toggle',
+        },
         {
           key: 'redemption_holding_hours',
           label: t('fields.holdingHours.label'),

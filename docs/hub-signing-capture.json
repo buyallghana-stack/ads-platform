@@ -1,0 +1,33 @@
+{
+  "note": "Captured from SidePerks hubInitialise and hubPaymentStatus on a loopback socket, not hand written. raw_body is the exact string that was signed and sent, before any pretty printing. Verify with HMAC-SHA256 over signing_material.",
+  "produced_by": "tests/money/hub-wire-bytes.test.ts, HUB_CAPTURE=1",
+  "produced_at": "2026-09-17T10:07:05.324Z",
+  "algorithm": "hex HMAC-SHA256(secret, \"<timestamp>.<request_id>.<raw body>\")",
+  "secret_position": 0,
+  "secret_position_means": "The first entry of SidePerks HUB_OUTBOUND_SECRETS, which is your HUB_INBOUND_SECRETS. Newest first, so position 0 is the current one.",
+  "initialize": {
+    "method": "POST",
+    "path": "/api/internal/hub/payments/initialize",
+    "headers": {
+      "x-hub-timestamp": "1789639625",
+      "x-hub-request-id": "f688a9d2-e3f6-4fc3-89a0-258a893aab70",
+      "x-hub-signature": "36cdd9c66b9ec67dc535ae78dddeb8c4ef8dfc16ab8b9e01ba7b878cb3c8373c",
+      "content-type": "application/json"
+    },
+    "raw_body": "{\"external_ref\":\"7c2f8e10-0000-4000-8000-0000000000aa\",\"amount_minor\":52000,\"currency\":\"GHS\",\"customer_email\":\"capture@sideperks.org\",\"return_url\":\"https://sideperks.org/payments/return\"}",
+    "raw_body_bytes": 187,
+    "signing_material": "1789639625.f688a9d2-e3f6-4fc3-89a0-258a893aab70.{\"external_ref\":\"7c2f8e10-0000-4000-8000-0000000000aa\",\"amount_minor\":52000,\"currency\":\"GHS\",\"customer_email\":\"capture@sideperks.org\",\"return_url\":\"https://sideperks.org/payments/return\"}"
+  },
+  "status_read": {
+    "method": "GET",
+    "path": "/api/internal/hub/payments/TS-9F4C2A7B61E8",
+    "headers": {
+      "x-hub-timestamp": "1789639625",
+      "x-hub-request-id": "fd6335a6-a581-4c07-aa3c-3e9834c758e1",
+      "x-hub-signature": "edd451804c5cf895db62f6aeb65b9d7828f532e501df8da77f0de2133024ba3c"
+    },
+    "raw_body": "",
+    "raw_body_bytes": 0,
+    "signing_material": "1789639625.fd6335a6-a581-4c07-aa3c-3e9834c758e1."
+  }
+}

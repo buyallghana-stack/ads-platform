@@ -39,6 +39,10 @@ type Body = {
   amount_minor?: number
   currency?: string
   paid_at?: string
+  /* Paystack stamps `live` or `test` on every transaction object. The hub does
+     not forward it yet, so this is optional and its absence is not a refusal.
+     `paystackMode` reads it out of the whole body, wherever it lands. */
+  domain?: string
 }
 
 export async function POST(request: Request) {
@@ -148,6 +152,21 @@ export async function POST(request: Request) {
     if (outcome.reason === 'mismatch') {
       await finish('mismatch', outcome.detail, outcome.paymentId)
       reportUnexpected(new Error('Hub payment amount mismatch'), 'hub.confirm', {
+        reference: body.reference,
+        detail: outcome.detail,
+      })
+      return NextResponse.json({ ok: true, flagged: true })
+    }
+
+    /*
+      Test money. 2xx for the same reason a mismatch is: the hub reported this
+      accurately and retrying it for 24 hours will not make it real. It is
+      recorded, it shows on the admin payments screen under "needs attention",
+      and no plan was granted.
+    */
+    if (outcome.reason === 'test_mode') {
+      await finish('test_mode', outcome.detail, outcome.paymentId)
+      reportUnexpected(new Error('Hub reported a TEST mode payment'), 'hub.confirm', {
         reference: body.reference,
         detail: outcome.detail,
       })

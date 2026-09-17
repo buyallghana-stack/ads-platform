@@ -32,6 +32,9 @@ const RESULT_TONE: Record<string, 'success' | 'warning' | 'danger' | 'neutral'> 
   failed: 'neutral',
   reversed: 'warning',
   mismatch: 'danger',
+  /* Test money. Nothing was granted and nothing is wrong with the hub, but an
+     admin has to decide what to tell the buyer, so it reads as red. */
+  test_mode: 'danger',
   error: 'danger',
   unknown_reference: 'warning',
   received: 'warning',

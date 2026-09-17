@@ -32,8 +32,18 @@ export type HubStatusResult =
       reference: string
       externalRef: string | null
       status: HubStatus
-      amountMinor: number
-      currency: string
+      /*
+        ⚠️ PASSED THROUGH, NOT CLEANED UP. These used to be
+        `Number(parsed.amount_minor ?? 0)` and `(parsed.currency ?? 'GHS')`,
+        which turned "the hub said nothing" into "the hub said zero cedis" and
+        into "the hub said GHS" before anything downstream could notice the
+        difference. Judging them is `decide.ts`'s job and it needs the absence
+        to survive the journey, so the raw value arrives as it came.
+      */
+      amountMinor: number | string | null
+      currency: string | null
+      /* `live` or `test`, when the hub sends it. It does not yet. */
+      domain: string | null
       paidAt: string | null
     }
   | { ok: false; retryable: boolean; notFound: boolean; message: string }
@@ -189,8 +199,9 @@ export async function hubPaymentStatus(reference: string): Promise<HubStatusResu
     reference?: string
     external_ref?: string | null
     status?: HubStatus
-    amount_minor?: number
-    currency?: string
+    amount_minor?: number | string | null
+    currency?: string | null
+    domain?: string | null
     paid_at?: string | null
   }
   try {
@@ -208,8 +219,9 @@ export async function hubPaymentStatus(reference: string): Promise<HubStatusResu
     reference: parsed.reference,
     externalRef: parsed.external_ref ?? null,
     status: parsed.status,
-    amountMinor: Number(parsed.amount_minor ?? 0),
-    currency: (parsed.currency ?? 'GHS').toUpperCase(),
+    amountMinor: parsed.amount_minor ?? null,
+    currency: parsed.currency ?? null,
+    domain: parsed.domain ?? null,
     paidAt: parsed.paid_at ?? null,
   }
 }

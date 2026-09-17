@@ -333,6 +333,37 @@ describe.skipIf(!HAS_DB)('settings that gate money', () => {
     })
   })
 
+  /*
+    Money coming IN, added 17 September 2026.
+
+    The Tech Store's Paystack account had been in TEST mode in production from
+    the beginning. Six payments were reported successful over correctly signed
+    requests and granted plans against no money at all. The guard that refuses
+    them lives in `src/lib/payments/hub/decide.ts`; this row is the one way to
+    turn it off for a rehearsal.
+
+    It ships OFF, which is the state a stranded setting hides in: a toggle that
+    looks saved and changes nothing is indistinguishable from a toggle that is
+    simply off. So this says the key is real, the admin screen can reach it,
+    and it reads back as a boolean.
+  */
+  it('can let test money grant a plan, for a rehearsal, and take it back', async () => {
+    await withRollback(async (tx) => {
+      const admin = await createAdmin(tx)
+
+      expect(await configValue(tx, 'hub_accept_test_payments')).toBe('false')
+
+      await setConfigAs(tx, admin.id, { hub_accept_test_payments: 'true' })
+      expect(await configValue(tx, 'hub_accept_test_payments')).toBe('true')
+
+      await setConfigAs(tx, admin.id, { hub_accept_test_payments: 'false' })
+      const { rows } = await tx.query<{ v: boolean }>(
+        `select public.config_bool('hub_accept_test_payments') as v`,
+      )
+      expect(rows[0]!.v).toBe(false)
+    })
+  })
+
   it('is the single switch that lets a payout be marked paid', async () => {
     await withRollback(async (tx) => {
       const admin = await createAdmin(tx)

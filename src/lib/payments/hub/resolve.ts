@@ -1,5 +1,7 @@
 import 'server-only'
 
+import { randomUUID } from 'node:crypto'
+
 import { hubPaymentStatus } from '@/lib/payments/hub/client'
 import { applyHubEvent } from '@/lib/payments/hub/fulfil'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -63,13 +65,30 @@ export async function settleFromHub(reference: string): Promise<SettleResult> {
       reference,
       amountMinor: status.amountMinor,
       currency: status.currency,
-      payload: { via: 'return_page', paid_at: status.paidAt },
+      /* `domain` goes in so this path is guarded exactly as the confirm
+         endpoint is. The two race each other by design, and a check that only
+         one of them performs is a check a reload can walk around. */
+      payload: { via: 'return_page', paid_at: status.paidAt, domain: status.domain },
     })
     if (outcome.ok) return { state: 'confirmed' }
-    /* A mismatch is not a success and not a failure the user can fix. Leave
-       it pending on screen: the confirm endpoint has already flagged it, and
-       an admin is the next step, not the buyer. */
-    return { state: outcome.reason === 'mismatch' ? 'pending' : 'pending', unreachable: false }
+
+    /*
+      A mismatch, and test money, are neither a success nor a failure the user
+      can fix. Leave it pending on screen: an admin is the next step, not the
+      buyer.
+
+      ⚠️ AND WRITE IT DOWN HERE, rather than assuming the confirm endpoint
+      already did. That assumption was in the comment this replaces, and it
+      holds only when the hub's POST arrived. When it did not, or has not yet,
+      this path refused a payment and left NO row anywhere: not on the payment,
+      which stays `pending` exactly as an unfinished checkout does, and not in
+      `hub_inbound_events`, which is the only screen that shows a refusal. A
+      guard nobody can see is worth about as much as no guard.
+    */
+    if (outcome.reason === 'mismatch' || outcome.reason === 'test_mode') {
+      await recordRefusal(reference, outcome.reason, outcome.detail, outcome.paymentId)
+    }
+    return { state: 'pending', unreachable: false }
   }
 
   if (status.status === 'reversed') {
@@ -100,4 +119,51 @@ export async function settleFromHub(reference: string): Promise<SettleResult> {
 
   // Still `initialized` at the hub: the user may simply be quicker than the bank.
   return { state: 'pending' }
+}
+
+/**
+ * A refusal this path reached on its own, put where an admin will find it.
+ *
+ * `request_id` is invented, because there was no hub request: nothing was
+ * posted to us, we asked. The column is `not null unique` and exists to stop a
+ * delivery being replayed, and a locally raised row has nothing to replay.
+ *
+ * ONE ROW PER REFERENCE PER VERDICT. The return page polls, and every poll
+ * that lands here reaches the same refusal, so writing unconditionally would
+ * turn one refused payment into a screenful of identical flags and bury the
+ * other ones. A failure to record is swallowed for the same reason the caller
+ * returns `pending`: the buyer is looking at this, and a logging problem must
+ * not become their error message.
+ */
+async function recordRefusal(
+  reference: string,
+  result: 'mismatch' | 'test_mode',
+  detail: string,
+  paymentId: string,
+): Promise<void> {
+  try {
+    const admin = createAdminClient()
+
+    const { data: already } = await admin
+      .from('hub_inbound_events')
+      .select('id')
+      .eq('hub_reference', reference)
+      .eq('result', result)
+      .limit(1)
+      .maybeSingle()
+
+    if (already) return
+
+    await admin.from('hub_inbound_events').insert({
+      request_id: randomUUID(),
+      event: 'payment.success',
+      hub_reference: reference,
+      payment_id: paymentId,
+      payload: { via: 'return_page', raised_here: true } as never,
+      result,
+      detail,
+    })
+  } catch {
+    /* Deliberately silent. See above. */
+  }
 }

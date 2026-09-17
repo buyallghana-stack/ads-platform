@@ -2525,6 +2525,11 @@
           "label": "Retraits ouverts",
           "description": "L'interrupteur principal. Désactivé, les demandes restent possibles mais rien ne peut être approuvé ni envoyé."
         },
+        "acceptTestPayments": {
+          "label": "Accepter les paiements de test",
+          "description": "Désactivé. Un paiement signalé par le hub depuis un compte Paystack en mode test n'accorde rien et est signalé ci-dessous. À activer uniquement pour une répétition avec des clés de test, puis à désactiver.",
+          "warning": "Activé, un paiement où aucun argent n'a bougé accordera un vrai forfait."
+        },
         "holdingHours": {
           "label": "Fenêtre de rétention",
           "description": "Durée d'attente d'une demande avant approbation possible. Le temps que les contrôles anti-fraude suivent."
@@ -3229,6 +3234,7 @@
         "failed": "Échoué",
         "reversed": "Annulé",
         "mismatch": "Montant incohérent",
+        "test_mode": "Argent de test, rien accordé",
         "error": "Application impossible",
         "unknown_reference": "Référence inconnue",
         "received": "Enregistré, puis rien"

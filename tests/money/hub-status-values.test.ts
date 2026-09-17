@@ -25,12 +25,27 @@ vi.mock('server-only', () => ({}))
 const hubPaymentStatus = vi.fn()
 const applyHubEvent = vi.fn()
 const maybeSingle = vi.fn()
+const existingFlag = vi.fn()
+const insertFlag = vi.fn()
 
 vi.mock('@/lib/payments/hub/client', () => ({ hubPaymentStatus }))
 vi.mock('@/lib/payments/hub/fulfil', () => ({ applyHubEvent }))
+
+/* Two tables, two chains. `subscription_payments` is read with one `eq`;
+   `hub_inbound_events` is read with two and then written. Keeping them apart
+   here is what lets the refusal-recording tests at the bottom assert on the
+   insert without the payment lookup answering for it. */
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({
-    from: () => ({ select: () => ({ eq: () => ({ maybeSingle }) }) }),
+    from: (table: string) =>
+      table === 'hub_inbound_events'
+        ? {
+            select: () => ({
+              eq: () => ({ eq: () => ({ limit: () => ({ maybeSingle: existingFlag }) }) }),
+            }),
+            insert: insertFlag,
+          }
+        : { select: () => ({ eq: () => ({ maybeSingle }) }) },
   }),
 }))
 
@@ -57,6 +72,8 @@ const hubSays = (status: string, over: Record<string, unknown> = {}) =>
 beforeEach(() => {
   vi.clearAllMocks()
   applyHubEvent.mockResolvedValue({ ok: true, state: 'confirmed', alreadyDone: false, paymentId: 'p1' })
+  existingFlag.mockResolvedValue({ data: null, error: null })
+  insertFlag.mockResolvedValue({ error: null })
 })
 
 describe('what each hub status does to a payment', () => {
@@ -182,5 +199,66 @@ describe('the set of statuses itself', () => {
        already happened. So the assertion is not "nothing threw", it is that
        only `initialized` is still open when the hub has spoken. */
     expect(open).toEqual(['initialized'])
+  })
+})
+
+/**
+ * A refusal this path reached on its own.
+ *
+ * ⚠️ THE HOLE THIS CLOSED. The comment here used to say the confirm endpoint
+ * had already flagged it, which is true only when the hub's POST arrived. When
+ * it had not, this path refused a payment and wrote nothing anywhere: the row
+ * stayed `pending`, which is the same thing an unfinished checkout looks like,
+ * and `hub_inbound_events` is the only screen that shows a refusal.
+ */
+describe('a refusal raised here, not by the hub', () => {
+  const refused = (reason: 'mismatch' | 'test_mode') => {
+    stillPending()
+    hubSays('success')
+    applyHubEvent.mockResolvedValue({
+      ok: false,
+      reason,
+      paymentId: 'p1',
+      detail: 'why it was refused',
+    })
+  }
+
+  it.each(['mismatch', 'test_mode'] as const)('writes down a %s so an admin can see it', async (reason) => {
+    refused(reason)
+
+    const result = await settleFromHub(REFERENCE)
+
+    expect(result.state).toBe('pending')
+    expect(insertFlag).toHaveBeenCalledWith(
+      expect.objectContaining({ result: reason, hub_reference: REFERENCE, payment_id: 'p1' }),
+    )
+  })
+
+  /* The return page polls. One refused payment must not become a screenful of
+     identical flags burying the other ones. */
+  it('does not write a second row for a verdict already recorded', async () => {
+    refused('test_mode')
+    existingFlag.mockResolvedValue({ data: { id: 'flag-1' }, error: null })
+
+    await settleFromHub(REFERENCE)
+
+    expect(insertFlag).not.toHaveBeenCalled()
+  })
+
+  it('still answers the buyer when the recording itself fails', async () => {
+    refused('mismatch')
+    insertFlag.mockRejectedValue(new Error('the table is gone'))
+
+    /* A logging problem must not become the buyer's error message. */
+    expect(await settleFromHub(REFERENCE)).toMatchObject({ state: 'pending' })
+  })
+
+  it('writes nothing when the payment was fulfilled', async () => {
+    stillPending()
+    hubSays('success')
+
+    await settleFromHub(REFERENCE)
+
+    expect(insertFlag).not.toHaveBeenCalled()
   })
 })

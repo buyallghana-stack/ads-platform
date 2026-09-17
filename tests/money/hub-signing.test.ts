@@ -46,18 +46,53 @@ describe('hub request signing', () => {
     expect(verify()).toMatchObject({ ok: true })
   })
 
-  it('signs over timestamp, id and body together, in that order', () => {
-    /* Pinned deliberately. The hub is live against this exact string, so a
-       refactor that reorders the parts or changes the separator is a
-       production outage, not a style change. */
-    expect(hubSignature(SECRET, 1700000000, '00000000-0000-4000-8000-000000000000', '{"a":1}')).toBe(
-      hubSignature(
-        SECRET,
-        1700000000,
-        '00000000-0000-4000-8000-000000000000',
-        '{"a":1}',
-      ),
+  /*
+    ⚠️ THE DIGESTS BELOW ARE LITERALS, AND THAT IS THE WHOLE POINT.
+
+    This test used to assert that `hubSignature(...)` equalled
+    `hubSignature(...)` with the same four arguments, which is true of every
+    function that has ever been written. It claimed to pin the signing string
+    and pinned nothing: reorder the parts, change the dot to a colon, hash the
+    body twice, and it still passed. Every other test in this file signs with
+    `signHubRequest` and verifies with `verifyHubRequest`, so the entire suite
+    could stay green while this app and the hub agreed on nothing.
+
+    The Tech Store noticed the same thing about their own copy on 17 September
+    2026 and asked for a capture of our bytes. `docs/hub-signing-capture.json`
+    is our half of that exchange. These constants are the other half, computed
+    once, by hand, from the contract in docs/payment-hub-contract.md:
+
+        HMAC-SHA256(secret, "<timestamp>.<request_id>.<raw body>")  as hex
+
+    If one of them fails, the signing string changed and the hub is about to
+    refuse every request this app sends. That is a production outage, not a
+    style change, and this is the test that says so out loud.
+  */
+  const PINNED_ID = '00000000-0000-4000-8000-000000000000'
+
+  it('produces the exact digest the contract specifies, for a body', () => {
+    expect(hubSignature(SECRET, 1700000000, PINNED_ID, '{"a":1}')).toBe(
+      '1ef78d2877983b198123c65c27e0dab6da6dd793bae06df14b70e42187d35f39',
     )
+  })
+
+  it('produces the exact digest the contract specifies, for an empty body', () => {
+    /* The GET path. A body that is absent must sign as the empty string and
+       not as "undefined" or "null", and only a literal can tell those apart. */
+    expect(hubSignature(SECRET, 1700000000, PINNED_ID, '')).toBe(
+      '7f5aacf26e3ec75d142ff9ef6932d2f3e33adaeeec221aaee3f813d06723828d',
+    )
+  })
+
+  it('produces the exact digest the contract specifies, for a real confirm body', () => {
+    const body =
+      '{"event":"payment.success","reference":"TS-9F4C2A7B61E8","amount_minor":52000,"currency":"GHS"}'
+    expect(hubSignature(SECRET, 1700000000, PINNED_ID, body)).toBe(
+      '2be391eafcee2dd90c91557c1bc3681bfc301784b1c05cdbcbbe567eb73eda5d',
+    )
+  })
+
+  it('signs over timestamp, id and body together, in that order', () => {
     const a = hubSignature(SECRET, 1700000000, '00000000-0000-4000-8000-000000000000', '{"a":1}')
     const b = hubSignature(SECRET, 1700000001, '00000000-0000-4000-8000-000000000000', '{"a":1}')
     const c = hubSignature(SECRET, 1700000000, '00000000-0000-4000-8000-000000000001', '{"a":1}')

@@ -2525,6 +2525,11 @@
           "label": "Payouts open",
           "description": "The master switch. Off, users can still request but nothing can be approved or sent."
         },
+        "acceptTestPayments": {
+          "label": "Accept test payments",
+          "description": "Off. A payment the hub reports from a Paystack account in test mode grants nothing and is flagged below. Turn this on only for a rehearsal against test keys, and turn it off again after.",
+          "warning": "On, a payment where no money moved will grant a real plan."
+        },
         "holdingHours": {
           "label": "Holding window",
           "description": "How long a request waits before it can be approved. Time for the fraud checks to catch up."
@@ -3229,6 +3234,7 @@
         "failed": "Failed",
         "reversed": "Reversed",
         "mismatch": "Amount mismatch",
+        "test_mode": "Test money, not granted",
         "error": "Could not apply",
         "unknown_reference": "Unknown reference",
         "received": "Recorded, then nothing"
