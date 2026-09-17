@@ -245,6 +245,22 @@ export function hubSecrets(direction: 'inbound' | 'outbound'): string[] {
 }
 
 /**
+ * Can this app open a plan checkout at all, asked without throwing.
+ *
+ * ⚠️ The upgrade page used to ask `Boolean(PAYSTACK_SECRET_KEY)` instead, which
+ * was true when plans were charged from here and became a lie the day they
+ * moved to the hub. That key now belongs to the VAULT deposit path alone, so
+ * removing it — which is the right thing to do, because a live Paystack
+ * request from this app would carry sideperks.org to the one place nothing may
+ * reveal SidePerks — would have hidden the pay button and the coupon field on
+ * every plan with no error anywhere. The gate has to name the thing the
+ * checkout actually needs.
+ */
+export function hubConfigured(): boolean {
+  return Boolean(serverEnv().TECHSTORE_HUB_URL) && hubSecrets('outbound').length > 0
+}
+
+/**
  * Asserts the hub is configured before a payment is attempted.
  *
  * Money paths do not get to degrade quietly. Without this the first symptom of

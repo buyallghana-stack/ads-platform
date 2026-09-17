@@ -7,6 +7,25 @@ import { clientEnv } from '@/lib/env'
 import { initialiseTransaction } from '@/lib/payments/paystack'
 import { createAdminClient } from '@/lib/supabase/admin'
 
+/**
+ * ⚠️ THE ONE PAYSTACK CALL LEFT IN THIS APP, AND IT MUST STAY OFF IN
+ * PRODUCTION.
+ *
+ * Plans go through the Tech Store hub precisely so that nothing sent to
+ * Paystack can reveal SidePerks. This path predates the hub and does the
+ * opposite: it hands Paystack a `sideperks.org/vault/callback` URL and
+ * metadata naming a vault plan, on the store's own account.
+ *
+ * It was survivable while the shared account was in test mode. Live keys
+ * arrived on 17 September 2026 and the operator's decision was to leave THIS
+ * app keyless: with no `PAYSTACK_SECRET_KEY` the card button is not rendered
+ * (`checkoutEnabled` on the vault page) and a Vault plan is bought with
+ * balance, which is the whole product anyway.
+ *
+ * So do not add the variable back to this project's environment to "fix" a
+ * missing button. Either leave it off, or move this path onto the hub the way
+ * `upgrade/actions.ts` did.
+ */
 export type VaultCheckoutResult =
   | { ok: true; authorizationUrl: string }
   | { ok: false; errorKey?: string; message?: string }

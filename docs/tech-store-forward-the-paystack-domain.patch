@@ -1,0 +1,25 @@
+--- a/src/lib/hub/intents.ts	2026-09-17 20:16:19.079575153 +0000
++++ b/src/lib/hub/intents.ts	2026-09-17 20:16:19.121376251 +0000
+@@ -531,6 +531,10 @@
+   status: Intent["status"];
+   amount_minor: number;
+   currency: string;
++  /** `live` or `test`, straight off the Paystack transaction object. Null on an
++   *  intent that never reached Paystack, which SidePerks reads as `unknown`
++   *  and fulfils normally. */
++  domain: string | null;
+   paid_at: string | null;
+ };
+ 
+@@ -575,6 +579,11 @@
+     status: intent.status,
+     amount_minor: Number(intent.amount_pesewas),
+     currency: intent.currency,
++    /* Read from the ROW, after any verifyAndSettle above has written to it, so
++       the stale-snapshot trap that hub_settle_intent has to work around does
++       not apply on this path. The two halves look like the same change and are
++       not. */
++    domain: (intent.paystack_payload as { domain?: string } | null)?.domain ?? null,
+     paid_at: intent.paid_at,
+   };
+ }

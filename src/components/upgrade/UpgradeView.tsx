@@ -50,7 +50,11 @@ export function UpgradeView({
   baseAdPoints: number
   /** Points to one cedi. */
   pointsPerCurrencyUnit: number
-  /** False until mobile money and crypto checkout are wired up. */
+  /** Whether the Tech Store payment hub is configured. False hides the pay
+   *  button and the coupon field, because a coupon with nothing to buy is a
+   *  form that cannot be submitted. It is NOT a question about a Paystack key:
+   *  this app holds none, and the page asked the wrong one until 17 September
+   *  2026. */
   checkoutEnabled: boolean
   /** From a shared link, `/upgrade?coupon=CODE`. */
   initialCoupon?: string | null

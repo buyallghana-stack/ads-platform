@@ -5,7 +5,7 @@ import { setRequestLocale } from 'next-intl/server'
 import { UpgradeView } from '@/components/upgrade/UpgradeView'
 import { redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
-import { serverEnv } from '@/lib/env'
+import { hubConfigured } from '@/lib/env'
 import { createAdminClient } from '@/lib/supabase/admin'
 import {
   getHeldPlans,
@@ -62,7 +62,7 @@ export default async function UpgradePage({
       freeName={references.freeName}
       baseAdPoints={references.baseAdPoints}
       pointsPerCurrencyUnit={references.pointsPerCurrencyUnit}
-      checkoutEnabled={Boolean(serverEnv().PAYSTACK_SECRET_KEY)}
+      checkoutEnabled={hubConfigured()}
       initialCoupon={(await searchParams).coupon ?? null}
     />
   )
