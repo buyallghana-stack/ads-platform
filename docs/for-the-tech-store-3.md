@@ -45,9 +45,22 @@ payment from before it ran has no row here to find. That is why your six and
 our one do not reconcile, and it is not a delivery failure: nothing was
 refused, nothing was flagged, and we have no `unknown_reference` events at all.
 
-If you want the last word on it, send the six references and we will say which
-ones we ever held. We think the honest answer is that five of them were opened
-against a database that no longer exists.
+**Reconciled against your own intents, so this is not a guess.** Your last
+success, `TS-109922FFA25B`, `external_ref 60f3dabb-ede8-4e73-b372-9ede489fdbea`,
+GHS 85.00 at 2026-09-17 00:33:17, is our one grant, confirmed here at 00:33:44.
+Twenty-seven seconds apart, same reference, same figure. The other five point at
+`external_ref`s this database no longer holds, all dated 16 September, and one
+of them is `live-test-840ca8b8`, which is not a uuid at all and was somebody
+typing.
+
+Worth one line for your side: if your outbox ever re-drives those five, our
+confirm endpoint answers `unknown_reference` and flags them. It grants nothing
+and it will not retry, which is correct, and it is not silence.
+
+While we were in there we also read what you have never had cause to: all six
+of your successes carry `domain: test`, all four abandoned do too, and your six
+failed rows carry no transaction object at all, so `domain` is null on them.
+That last part matters for the change in section 3.
 
 **And the question you could not answer from your side.** These are the exact
 keys of every payload you have ever sent us, read back out of our own storage:
@@ -123,8 +136,35 @@ The ask, on the confirm POST and on the `GET /payments/{reference}` answer:
 { "domain": "live | test" }
 ```
 
-Section 1 already says it is not there today. Adding it is a one line change on
-your side and the only thing standing between this guard and doing its job.
+Section 1 already says it is not there today.
+
+**And we have written it for you, but we are not asking you to take it yet.**
+`docs/tech-store-forward-the-paystack-domain.sql` in our repo replaces
+`hub_settle_intent`, and the note beside it has the TypeScript half for
+`asStatus`. Our owner's call, 17 September: this ships WITH your live keys, not
+before them. Landing it today would stop every plan purchase on our side until
+the keys change, which is the guard working correctly and still the wrong week
+for it.
+
+Two things we found in your function while writing it, and both would have cost
+you the change.
+
+**`v_intent` is the snapshot from before the update.** The notification is
+built from it after the update runs, so on a first settle
+`v_intent.paystack_payload` is still null and the transaction object is in the
+`p_payload` argument. `v_intent.paystack_payload ->> 'domain'` would therefore
+forward `domain: null` on every real payment, and the whole exercise would look
+finished while changing nothing. The line above it already handles this for
+`paid_at` with `coalesce(v_intent.paid_at, v_now)`. Ours mirrors the update the
+same way.
+
+**The signature has to match to the argument, not to the intention.** The live
+function is `(text, public.hub_intent_status, bigint, jsonb,
+public.hub_outbound_event)`. Our first draft wrote `text` where the enums are
+and put the arguments in a friendlier order, which `create or replace` would
+have accepted as a SECOND overload beside the first, leaving the live one
+untouched. We copied your header from `20260916072531` rather than retyping it,
+and we suggest you do the same if you write your own.
 
 ## 4. Your warning about the amount check: ours was broken differently
 
