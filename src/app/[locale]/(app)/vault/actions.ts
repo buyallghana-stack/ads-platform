@@ -4,27 +4,30 @@ import { revalidatePath } from 'next/cache'
 
 import { getSessionUser } from '@/lib/auth/session'
 import { clientEnv } from '@/lib/env'
-import { initialiseTransaction } from '@/lib/payments/paystack'
+import { reportUnexpected } from '@/lib/observability/report'
+import { hubInitialise } from '@/lib/payments/hub/client'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
- * ⚠️ THE ONE PAYSTACK CALL LEFT IN THIS APP, AND IT MUST STAY OFF IN
- * PRODUCTION.
+ * Starting a Vault deposit.
  *
- * Plans go through the Tech Store hub precisely so that nothing sent to
- * Paystack can reveal SidePerks. This path predates the hub and does the
- * opposite: it hands Paystack a `sideperks.org/vault/callback` URL and
- * metadata naming a vault plan, on the store's own account.
+ * ⚠️ THIS PATH USED TO BE THE ONE PAYSTACK CALL LEFT IN THIS APP, AND IT BROKE
+ * THE RULE THE HUB EXISTS TO KEEP. It handed Paystack a
+ * `sideperks.org/vault/callback` URL and metadata naming a vault plan, on the
+ * store's own account, when nothing sent to Paystack may reveal SidePerks. It
+ * was survivable while the shared account was in test mode; the live keys
+ * arrived on 17 September 2026 and it stopped being survivable.
  *
- * It was survivable while the shared account was in test mode. Live keys
- * arrived on 17 September 2026 and the operator's decision was to leave THIS
- * app keyless: with no `PAYSTACK_SECRET_KEY` the card button is not rendered
- * (`checkoutEnabled` on the vault page) and a Vault plan is bought with
- * balance, which is the whole product anyway.
+ * Since 18 September 2026 a deposit goes out exactly as a plan does: the price
+ * comes from `start_vault_payment`, the row's id is the `external_ref`, and the
+ * Tech Store hub answers with the page to send the buyer to. This app holds no
+ * Paystack key and makes no Paystack call.
  *
- * So do not add the variable back to this project's environment to "fix" a
- * missing button. Either leave it off, or move this path onto the hub the way
- * `upgrade/actions.ts` did.
+ * ⚠️ THE RETURN URL IS THE PLAN'S, AND IT HAS TO BE. The hub keeps an allowlist
+ * of return URLs and refuses anything else with a 422, so a Vault deposit
+ * cannot have its own address without the store changing its allowlist first.
+ * `/payments/return` settles either kind and says Vault or plan on the page,
+ * which is why it can be shared.
  */
 export type VaultCheckoutResult =
   | { ok: true; authorizationUrl: string }
@@ -53,21 +56,49 @@ export async function startVaultPaystackCheckout(
     currency_code: string
   }
 
-  const initialised = await initialiseTransaction({
-    email: user.email,
+  /* Asking the hub twice for the same id returns the deposit already running
+     rather than starting a second one, which is what makes a reloaded checkout
+     page harmless. */
+  const initialised = await hubInitialise({
+    externalRef: row.id,
     amountMinor: Number(row.amount_minor),
-    currency: row.currency_code,
-    reference: row.id,
-    callbackUrl: `${clientEnv.NEXT_PUBLIC_SITE_URL}/vault/callback?ref=${row.id}`,
-    metadata: {
-      user_id: user.id,
-      vault_plan_id: planId,
-      payment_id: row.id,
-    },
+    currency: row.currency_code.trim(),
+    customerEmail: user.email,
+    returnUrl: `${clientEnv.NEXT_PUBLIC_SITE_URL}/payments/return`,
   })
 
   if (!initialised.ok) {
-    return { ok: false, message: initialised.message }
+    /* A retryable fault is the hub's or the network's, and the row is left
+       pending so the reconciliation sweep can finish it if the deposit did in
+       fact start. Only a refusal we know is final closes the row. */
+    if (!initialised.retryable) {
+      await admin.rpc('fail_vault_payment', {
+        p_payment_id: row.id,
+        p_reason: initialised.message,
+      })
+    }
+
+    /* ⚠️ The hub's wording does not go to the buyer. Its message for a refused
+       payment is "Could not reach the payment provider", and it says that when
+       Paystack simply would not accept the customer's email. The real text is
+       kept on the payment row and in the error report. */
+    reportUnexpected(new Error(initialised.message), 'vault.checkout', {
+      paymentId: row.id,
+      refused: initialised.refused,
+      retryable: initialised.retryable,
+    })
+    return { ok: false, errorKey: initialised.refused ? 'refused' : 'failed' }
+  }
+
+  /* The hub's reference is stored BEFORE the user leaves, because it is the
+     only thing the return page and the confirm endpoint carry. Losing it here
+     would mean a paid deposit we cannot match to anybody. */
+  const { error: attachError } = await admin.rpc('attach_vault_hub_reference', {
+    p_payment_id: row.id,
+    p_reference: initialised.reference,
+  })
+  if (attachError) {
+    return { ok: false, message: 'Could not start this deposit. Please try again.' }
   }
 
   return { ok: true, authorizationUrl: initialised.authorizationUrl }

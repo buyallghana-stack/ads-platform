@@ -3248,7 +3248,8 @@
       },
       "flags": {
         "title": "Needs attention ({count})",
-        "description": "The hub sent these and this app did not act on them. An unknown reference has no payment behind it at all, so nothing else on this screen will show it. Each one is money that moved at the provider and did not move here."
+        "description": "The hub sent these and this app did not act on them. An unknown reference has no payment behind it at all, so nothing else on this screen will show it. Each one is money that moved at the provider and did not move here.",
+        "vault": "Vault deposit"
       },
       "recheck": {
         "action": "Ask the hub again",
@@ -3538,9 +3539,11 @@
       "balanceSuccess": "Congratulations! Your Vault plan is now active.",
       "orDivider": "OR PAY WITH MOBILE MONEY / CARD",
       "payWithPaystack": "Pay with Mobile Money / Card",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "refused": "We could not start this deposit. Check that the email address on your profile looks right, then try again."
     },
     "paymentResult": {
+      "help": "Something wrong? Get help",
       "success": {
         "title": "Vault Deposit Activated!",
         "body": "Your deposit has been confirmed and your Vault is now active. Daily yields are now accumulating.",

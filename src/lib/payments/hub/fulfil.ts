@@ -27,18 +27,80 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export type HubEvent = 'payment.success' | 'payment.failed' | 'payment.reversed'
 
+/**
+ * What was bought. A hub reference names one row in one of two tables, and
+ * every branch below has to know which, because the RPC that grants a plan is
+ * not the RPC that opens a vault deposit.
+ */
+export type PaymentKind = 'subscription' | 'vault'
+
 export type FulfilOutcome =
-  | { ok: true; state: 'confirmed' | 'failed' | 'reversed'; alreadyDone: boolean; paymentId: string }
+  | {
+      ok: true
+      state: 'confirmed' | 'failed' | 'reversed'
+      alreadyDone: boolean
+      paymentId: string
+      kind: PaymentKind
+    }
   | { ok: false; reason: 'not_found' }
-  | { ok: false; reason: 'mismatch'; paymentId: string; detail: string }
-  | { ok: false; reason: 'test_mode'; paymentId: string; detail: string }
-  | { ok: false; reason: 'error'; message: string; paymentId?: string }
+  | { ok: false; reason: 'mismatch'; paymentId: string; kind: PaymentKind; detail: string }
+  | { ok: false; reason: 'test_mode'; paymentId: string; kind: PaymentKind; detail: string }
+  | { ok: false; reason: 'error'; message: string; paymentId?: string; kind?: PaymentKind }
 
 type PaymentRow = {
   id: string
   status: string
   amount_minor: number | string
   currency_code: string
+}
+
+const COLUMNS = 'id, status, amount_minor, currency_code'
+
+/**
+ * Finds the payment carrying a hub reference, whichever kind it is.
+ *
+ * Subscriptions are asked first because they are almost all of the traffic, so
+ * a vault deposit costs one extra round trip and a plan costs none.
+ *
+ * ⚠️ The two tables cannot collide. Both references come from the hub and both
+ * ids are uuids from separate sequences, and `external_reference` is unique in
+ * each table. A reference that somehow matched both would resolve as a
+ * subscription, which is the safer of the two: a plan is revocable and a vault
+ * deposit pays points out.
+ *
+ * ⚠️ EXPORTED SO THAT THERE IS ONE ANSWER TO "WHICH TABLE". `settleFromHub`
+ * needs the same answer as this file does, and a second copy of the rule is a
+ * second place to forget the Vault the next time a payment kind is added.
+ */
+export async function findHubPayment(
+  admin: ReturnType<typeof createAdminClient>,
+  reference: string,
+): Promise<
+  | { ok: true; kind: PaymentKind; payment: PaymentRow }
+  | { ok: false; reason: 'not_found' }
+  | { ok: false; reason: 'error'; message: string }
+> {
+  const subscription = await admin
+    .from('subscription_payments')
+    .select(COLUMNS)
+    .eq('external_reference', reference)
+    .maybeSingle()
+
+  if (subscription.error) return { ok: false, reason: 'error', message: subscription.error.message }
+  if (subscription.data) {
+    return { ok: true, kind: 'subscription', payment: subscription.data as PaymentRow }
+  }
+
+  const vault = await admin
+    .from('vault_payments')
+    .select(COLUMNS)
+    .eq('external_reference', reference)
+    .maybeSingle()
+
+  if (vault.error) return { ok: false, reason: 'error', message: vault.error.message }
+  if (vault.data) return { ok: true, kind: 'vault', payment: vault.data as PaymentRow }
+
+  return { ok: false, reason: 'not_found' }
 }
 
 /**
@@ -66,15 +128,9 @@ export async function applyHubEvent(input: {
 }): Promise<FulfilOutcome> {
   const admin = createAdminClient()
 
-  const { data, error } = await admin
-    .from('subscription_payments')
-    .select('id, status, amount_minor, currency_code')
-    .eq('external_reference', input.reference)
-    .maybeSingle()
-
-  if (error) return { ok: false, reason: 'error', message: error.message }
-  if (!data) return { ok: false, reason: 'not_found' }
-  const payment = data as PaymentRow
+  const found = await findHubPayment(admin, input.reference)
+  if (!found.ok) return found
+  const { kind, payment } = found
 
   /*
     A success is checked twice before anything is granted: WHOSE money, then
@@ -100,6 +156,7 @@ export async function applyHubEvent(input: {
         ok: false,
         reason: 'test_mode',
         paymentId: payment.id,
+        kind,
         detail: testModeDetail(input.reference),
       }
     }
@@ -112,23 +169,33 @@ export async function applyHubEvent(input: {
     })
 
     if (!verdict.ok) {
-      return { ok: false, reason: 'mismatch', paymentId: payment.id, detail: verdict.detail }
+      return { ok: false, reason: 'mismatch', paymentId: payment.id, kind, detail: verdict.detail }
     }
   }
 
   if (input.event === 'payment.success') {
     if (payment.status === 'confirmed') {
-      return { ok: true, state: 'confirmed', alreadyDone: true, paymentId: payment.id }
+      return { ok: true, state: 'confirmed', alreadyDone: true, paymentId: payment.id, kind }
     }
-    const { error: rpcError } = await admin.rpc('confirm_subscription_payment', {
-      p_payment_id: payment.id,
-      p_reference: input.reference,
-      p_payload: (input.payload ?? {}) as never,
-    })
+    /* Written out per kind rather than looked up by name. The two functions
+       take the same arguments today, and a table of names would hide the day
+       one of them stops doing so. */
+    const { error: rpcError } =
+      kind === 'vault'
+        ? await admin.rpc('confirm_vault_payment', {
+            p_payment_id: payment.id,
+            p_reference: input.reference,
+            p_payload: (input.payload ?? {}) as never,
+          })
+        : await admin.rpc('confirm_subscription_payment', {
+            p_payment_id: payment.id,
+            p_reference: input.reference,
+            p_payload: (input.payload ?? {}) as never,
+          })
     if (rpcError) {
-      return { ok: false, reason: 'error', message: rpcError.message, paymentId: payment.id }
+      return { ok: false, reason: 'error', message: rpcError.message, paymentId: payment.id, kind }
     }
-    return { ok: true, state: 'confirmed', alreadyDone: false, paymentId: payment.id }
+    return { ok: true, state: 'confirmed', alreadyDone: false, paymentId: payment.id, kind }
   }
 
   if (input.event === 'payment.failed') {
@@ -138,16 +205,23 @@ export async function applyHubEvent(input: {
         state: payment.status === 'refunded' ? 'reversed' : 'failed',
         alreadyDone: true,
         paymentId: payment.id,
+        kind,
       }
     }
-    const { error: rpcError } = await admin.rpc('fail_subscription_payment', {
-      p_payment_id: payment.id,
-      p_reason: 'The payment did not complete',
-    })
+    const { error: rpcError } =
+      kind === 'vault'
+        ? await admin.rpc('fail_vault_payment', {
+            p_payment_id: payment.id,
+            p_reason: 'The payment did not complete',
+          })
+        : await admin.rpc('fail_subscription_payment', {
+            p_payment_id: payment.id,
+            p_reason: 'The payment did not complete',
+          })
     if (rpcError) {
-      return { ok: false, reason: 'error', message: rpcError.message, paymentId: payment.id }
+      return { ok: false, reason: 'error', message: rpcError.message, paymentId: payment.id, kind }
     }
-    return { ok: true, state: 'failed', alreadyDone: false, paymentId: payment.id }
+    return { ok: true, state: 'failed', alreadyDone: false, paymentId: payment.id, kind }
   }
 
   /*
@@ -157,16 +231,22 @@ export async function applyHubEvent(input: {
     would pay a referrer for a sale that was refunded.
   */
   if (payment.status === 'refunded') {
-    return { ok: true, state: 'reversed', alreadyDone: true, paymentId: payment.id }
+    return { ok: true, state: 'reversed', alreadyDone: true, paymentId: payment.id, kind }
   }
-  const { error: rpcError } = await admin.rpc('reverse_subscription_payment', {
-    p_payment_id: payment.id,
-    p_reason: 'The payment was reversed at the provider',
-  })
+  const { error: rpcError } =
+    kind === 'vault'
+      ? await admin.rpc('reverse_vault_payment', {
+          p_payment_id: payment.id,
+          p_reason: 'The payment was reversed at the provider',
+        })
+      : await admin.rpc('reverse_subscription_payment', {
+          p_payment_id: payment.id,
+          p_reason: 'The payment was reversed at the provider',
+        })
   if (rpcError) {
-    return { ok: false, reason: 'error', message: rpcError.message, paymentId: payment.id }
+    return { ok: false, reason: 'error', message: rpcError.message, paymentId: payment.id, kind }
   }
-  return { ok: true, state: 'reversed', alreadyDone: false, paymentId: payment.id }
+  return { ok: true, state: 'reversed', alreadyDone: false, paymentId: payment.id, kind }
 }
 
 /**

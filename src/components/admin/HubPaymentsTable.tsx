@@ -115,6 +115,13 @@ export function HubPaymentsTable({
                   <span className="text-[0.8125rem] text-ink-500">
                     {money(flag.amountMinor, flag.currency)}
                   </span>
+                  {/* Only the Vault is called out. A plan is what almost every
+                      flag is, and labelling both would bury the difference. */}
+                  {flag.kind === 'vault' && (
+                    <span className="text-[0.75rem] font-medium text-ink-500">
+                      {t('flags.vault')}
+                    </span>
+                  )}
                   <span className="ml-auto text-[0.75rem] text-ink-400">{when(flag.receivedAt)}</span>
                 </div>
                 {flag.detail && (

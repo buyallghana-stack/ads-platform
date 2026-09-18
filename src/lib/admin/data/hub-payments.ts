@@ -55,6 +55,10 @@ export type HubFlag = {
   detail: string | null
   receivedAt: string
   paymentId: string | null
+  /* Which product the money was for. `admin_list_hub_flags` reads the buyer's
+     name from a different table depending on it, so a flag that shows no person
+     and says `vault` is a row written before migration 232, not a mystery. */
+  kind: string
   person: string | null
 }
 
@@ -108,6 +112,7 @@ export async function getHubFlags(limit = 100): Promise<HubFlag[]> {
     detail: row.detail,
     receivedAt: row.received_at,
     paymentId: row.payment_id,
+    kind: row.payment_kind,
     person: row.person,
   }))
 }

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 
 import { hubSecrets } from '@/lib/env'
 import { reportUnexpected } from '@/lib/observability/report'
-import { type HubEvent, applyHubEvent } from '@/lib/payments/hub/fulfil'
+import { type HubEvent, type PaymentKind, applyHubEvent } from '@/lib/payments/hub/fulfil'
 import {
   HUB_REQUEST_ID_HEADER,
   HUB_SIGNATURE_HEADER,
@@ -117,10 +117,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Could not record the event' }, { status: 500 })
   }
 
-  const finish = async (result: string, detail?: string, paymentId?: string) => {
+  /* `payment_kind` decides which table the admin flags screen reads the buyer's
+     name from, and it defaults to `subscription` in SQL, so a vault deposit
+     settled without it would show as a plan with nobody attached. */
+  const finish = async (
+    result: string,
+    detail?: string,
+    paymentId?: string,
+    kind?: PaymentKind,
+  ) => {
     await admin
       .from('hub_inbound_events')
-      .update({ result, detail: detail ?? null, payment_id: paymentId ?? null })
+      .update({
+        result,
+        detail: detail ?? null,
+        payment_id: paymentId ?? null,
+        ...(kind ? { payment_kind: kind } : {}),
+      })
       .eq('request_id', verified.requestId)
   }
 
@@ -134,7 +147,12 @@ export async function POST(request: Request) {
     })
 
     if (outcome.ok) {
-      await finish(outcome.alreadyDone ? 'already_done' : outcome.state, undefined, outcome.paymentId)
+      await finish(
+        outcome.alreadyDone ? 'already_done' : outcome.state,
+        undefined,
+        outcome.paymentId,
+        outcome.kind,
+      )
       return NextResponse.json({ ok: true })
     }
 
@@ -150,7 +168,7 @@ export async function POST(request: Request) {
     }
 
     if (outcome.reason === 'mismatch') {
-      await finish('mismatch', outcome.detail, outcome.paymentId)
+      await finish('mismatch', outcome.detail, outcome.paymentId, outcome.kind)
       reportUnexpected(new Error('Hub payment amount mismatch'), 'hub.confirm', {
         reference: body.reference,
         detail: outcome.detail,
@@ -165,7 +183,7 @@ export async function POST(request: Request) {
       and no plan was granted.
     */
     if (outcome.reason === 'test_mode') {
-      await finish('test_mode', outcome.detail, outcome.paymentId)
+      await finish('test_mode', outcome.detail, outcome.paymentId, outcome.kind)
       reportUnexpected(new Error('Hub reported a TEST mode payment'), 'hub.confirm', {
         reference: body.reference,
         detail: outcome.detail,
@@ -174,7 +192,7 @@ export async function POST(request: Request) {
     }
 
     // Our fault, and a later attempt may well get past it.
-    await finish('error', outcome.message, outcome.paymentId)
+    await finish('error', outcome.message, outcome.paymentId, outcome.kind)
     reportUnexpected(new Error(outcome.message), 'hub.confirm', { reference: body.reference })
     return NextResponse.json({ error: 'Could not apply the event' }, { status: 500 })
   } catch (error) {

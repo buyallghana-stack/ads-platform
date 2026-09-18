@@ -28,13 +28,23 @@ const maybeSingle = vi.fn()
 const existingFlag = vi.fn()
 const insertFlag = vi.fn()
 
-vi.mock('@/lib/payments/hub/client', () => ({ hubPaymentStatus }))
-vi.mock('@/lib/payments/hub/fulfil', () => ({ applyHubEvent }))
+/* The real lookup is `fulfil.ts`'s, and it is mocked here along with the rest
+   of that module. It reads through the SAME `maybeSingle` the tests already
+   drive, so `stillPending()` and its friends still say what a payment is, and
+   a test that wants a Vault deposit says so by naming the kind. */
+const findHubPayment = vi.fn(async () => {
+  const { data } = (await maybeSingle()) as { data: { status: string } | null }
+  return data
+    ? { ok: true as const, kind: 'subscription' as const, payment: data }
+    : { ok: false as const, reason: 'not_found' as const }
+})
 
-/* Two tables, two chains. `subscription_payments` is read with one `eq`;
-   `hub_inbound_events` is read with two and then written. Keeping them apart
-   here is what lets the refusal-recording tests at the bottom assert on the
-   insert without the payment lookup answering for it. */
+vi.mock('@/lib/payments/hub/client', () => ({ hubPaymentStatus }))
+vi.mock('@/lib/payments/hub/fulfil', () => ({ applyHubEvent, findHubPayment }))
+
+/* `hub_inbound_events` is read with two `eq`s and then written, and nothing
+   else in this file reaches the database. Keeping the chain to itself is what
+   lets the refusal-recording tests at the bottom assert on the insert. */
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({
     from: (table: string) =>
@@ -71,7 +81,13 @@ const hubSays = (status: string, over: Record<string, unknown> = {}) =>
 
 beforeEach(() => {
   vi.clearAllMocks()
-  applyHubEvent.mockResolvedValue({ ok: true, state: 'confirmed', alreadyDone: false, paymentId: 'p1' })
+  applyHubEvent.mockResolvedValue({
+    ok: true,
+    state: 'confirmed',
+    alreadyDone: false,
+    paymentId: 'p1',
+    kind: 'subscription',
+  })
   existingFlag.mockResolvedValue({ data: null, error: null })
   insertFlag.mockResolvedValue({ error: null })
 })
@@ -219,6 +235,7 @@ describe('a refusal raised here, not by the hub', () => {
       ok: false,
       reason,
       paymentId: 'p1',
+      kind: 'subscription',
       detail: 'why it was refused',
     })
   }
@@ -230,7 +247,15 @@ describe('a refusal raised here, not by the hub', () => {
 
     expect(result.state).toBe('pending')
     expect(insertFlag).toHaveBeenCalledWith(
-      expect.objectContaining({ result: reason, hub_reference: REFERENCE, payment_id: 'p1' }),
+      expect.objectContaining({
+        result: reason,
+        hub_reference: REFERENCE,
+        payment_id: 'p1',
+        /* ⚠️ Without this the flag names a vault payment's id in a row that
+           says `subscription`, and the admin screen reads the buyer's name
+           from the wrong table and shows nobody. */
+        payment_kind: 'subscription',
+      }),
     )
   })
 
@@ -260,5 +285,43 @@ describe('a refusal raised here, not by the hub', () => {
     await settleFromHub(REFERENCE)
 
     expect(insertFlag).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * Which product the buyer just paid for.
+ *
+ * The return page shows one set of words for a plan and another for a Vault
+ * deposit, and it has nothing to go on but this. A hardcoded kind here would
+ * tell somebody who locked funds that their plan is active.
+ */
+describe('what settling reports about the kind', () => {
+  it('passes a vault deposit through as one', async () => {
+    findHubPayment.mockResolvedValueOnce({
+      ok: true as const,
+      kind: 'vault' as unknown as 'subscription',
+      payment: { status: 'pending' },
+    })
+    hubSays('success')
+
+    expect(await settleFromHub(REFERENCE)).toMatchObject({ state: 'confirmed', kind: 'vault' })
+  })
+
+  it('reports the kind on a payment that was already settled', async () => {
+    findHubPayment.mockResolvedValueOnce({
+      ok: true as const,
+      kind: 'vault' as unknown as 'subscription',
+      payment: { status: 'confirmed' },
+    })
+
+    expect(await settleFromHub(REFERENCE)).toEqual({ state: 'confirmed', kind: 'vault' })
+    /* Settled is settled: it must not spend a round trip asking the hub. */
+    expect(hubPaymentStatus).not.toHaveBeenCalled()
+  })
+
+  it('has no kind to report for a reference in neither table', async () => {
+    maybeSingle.mockResolvedValue({ data: null })
+
+    expect(await settleFromHub(REFERENCE)).toEqual({ state: 'unknown' })
   })
 })

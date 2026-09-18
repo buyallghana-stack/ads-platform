@@ -4,7 +4,6 @@ import { serverEnv } from '@/lib/env'
 import { reportUnexpected } from '@/lib/observability/report'
 import { confirmPaystackReference } from '@/lib/payments/confirm'
 import { verifyWebhookSignature } from '@/lib/payments/paystack'
-import { confirmVaultPaystackReference } from '@/lib/payments/vault-confirm'
 
 /**
  * Paystack webhook.
@@ -57,24 +56,20 @@ export async function POST(request: Request) {
   }
 
   /*
-    ONE WEBHOOK, TWO KINDS OF PURCHASE.
+    ⚠️ PLANS ONLY, AND ONLY WHILE A KEY EXISTS.
 
-    Paystack posts to a single configured URL, so this route has to serve both
-    businesses: a plan (`subscription_payments`) and a shop order (`orders`).
-    The reference is the row id in one table or the other, and they cannot
-    collide — both are uuids from different tables.
+    This route used to fall through to the Vault when a reference was not a
+    plan. Vault deposits moved onto the Tech Store hub on 18 September 2026 and
+    are settled by `/api/internal/hub/confirm` like everything else, so the
+    fall-through went with them rather than being left as a second way to
+    confirm the same deposit.
 
-    Try the plan first because it is the older and busier path, and fall
-    through on `not_found` only. Any other failure is a real failure of THAT
-    path and must not be retried as the other one: a mismatched amount on a
-    subscription is not an order, it is a problem.
+    Nothing reaches this line in production: SidePerks holds no
+    `PAYSTACK_SECRET_KEY`, so the guard at the top of this handler answers 503
+    and the signature is never even checked.
   */
-  let outcome: { ok: true; alreadyDone: boolean } | { ok: false; reason: string } =
+  const outcome: { ok: true; alreadyDone: boolean } | { ok: false; reason: string } =
     await confirmPaystackReference(event.data.reference)
-
-  if (!outcome.ok && outcome.reason === 'not_found') {
-    outcome = await confirmVaultPaystackReference(event.data.reference)
-  }
 
   /*
     MONEY ARRIVED AND WE DID NOT GRANT IT. Paystack has taken the customer's

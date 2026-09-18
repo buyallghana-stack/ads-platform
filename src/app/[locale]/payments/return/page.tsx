@@ -32,6 +32,13 @@ export const dynamic = 'force-dynamic'
  *
  * The reference in the URL is evidence of nothing. Anyone can type one.
  * `settleFromHub` looks up the row and then ASKS the hub what happened.
+ *
+ * ⚠️ IT SERVES BOTH PRODUCTS. Vault deposits moved onto the hub on 18 September
+ * 2026 and could not be given a return address of their own, because the hub
+ * refuses any URL outside its allowlist with a 422. So the settling is shared
+ * and only the WORDS differ: `settleFromHub` reports which kind of payment the
+ * reference named, and a buyer who locked funds is told about their Vault and
+ * sent back to it, never to the plans page.
  */
 export default async function HubPaymentReturnPage({
   params,
@@ -47,10 +54,13 @@ export default async function HubPaymentReturnPage({
   const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
 
-  const t = await getTranslations('upgrade.result')
-
   const ref = reference ?? trxref ?? null
   const settled = ref ? await settleFromHub(ref) : null
+
+  /* An unknown reference has no kind, and the plan wording is the fallback
+     because a plan is what almost every payment through here is. */
+  const isVault = settled?.kind === 'vault'
+  const t = await getTranslations(isVault ? 'vault.paymentResult' : 'upgrade.result')
 
   /*
     An unknown reference is shown as failed, but a payment we could not reach
@@ -87,7 +97,7 @@ export default async function HubPaymentReturnPage({
           {t(`${state}.body`)}
         </p>
 
-        <Link href="/upgrade" className="mt-7 w-full">
+        <Link href={isVault ? '/vault' : '/upgrade'} className="mt-7 w-full">
           <Button size="lg" fullWidth>
             {t(`${state}.cta`)}
           </Button>

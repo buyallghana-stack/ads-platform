@@ -3,7 +3,7 @@ import 'server-only'
 import { randomUUID } from 'node:crypto'
 
 import { hubPaymentStatus } from '@/lib/payments/hub/client'
-import { applyHubEvent } from '@/lib/payments/hub/fulfil'
+import { type PaymentKind, applyHubEvent, findHubPayment } from '@/lib/payments/hub/fulfil'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
@@ -16,12 +16,20 @@ import { createAdminClient } from '@/lib/supabase/admin'
  * ⚠️ NEVER TRUST THE REDIRECT. The reference arrives in a URL the user can
  * type. It is used to look up a row and then to ASK the hub, and nothing is
  * granted on the strength of the parameter itself.
+ *
+ * Since 2026-09-18 a reference may name a VAULT deposit rather than a plan.
+ * Which it is changes nothing about the settling itself: the hub is asked the
+ * same question and `applyHubEvent` grants the right thing. The caller is told
+ * anyway, because the page the buyer is looking at has to say Vault or plan and
+ * send them back to the right screen.
  */
 
 export type SettleState = 'confirmed' | 'pending' | 'failed' | 'reversed' | 'unknown'
 
 export type SettleResult = {
   state: SettleState
+  /** Which product was paid for. Unknown references have no kind to report. */
+  kind?: PaymentKind
   /** True when the hub could not be reached, so "pending" means "do not know". */
   unreachable?: boolean
 }
@@ -36,19 +44,17 @@ const FROM_ROW: Record<string, SettleState> = {
 export async function settleFromHub(reference: string): Promise<SettleResult> {
   const admin = createAdminClient()
 
-  const { data } = await admin
-    .from('subscription_payments')
-    .select('id, status')
-    .eq('external_reference', reference)
-    .maybeSingle()
-
-  if (!data) return { state: 'unknown' }
+  /* The same lookup fulfilment uses, so a reference resolves to one kind of
+     payment here and cannot resolve to the other one a moment later. */
+  const found = await findHubPayment(admin, reference)
+  if (!found.ok) return { state: 'unknown' }
+  const { kind, payment } = found
 
   /* Already settled: say so without spending a round trip on the hub. This is
      the common case on the return page, because the confirm endpoint usually
      wins the race. */
-  if (data.status !== 'pending') {
-    return { state: FROM_ROW[data.status] ?? 'unknown' }
+  if (payment.status !== 'pending') {
+    return { state: FROM_ROW[payment.status] ?? 'unknown', kind }
   }
 
   const status = await hubPaymentStatus(reference)
@@ -56,7 +62,7 @@ export async function settleFromHub(reference: string): Promise<SettleResult> {
     /* Unreachable is not failed. A payment that really went through must not
        be shown as failed because a network call did not land, so the caller
        is told to keep waiting. */
-    return { state: 'pending', unreachable: !status.notFound }
+    return { state: 'pending', kind, unreachable: !status.notFound }
   }
 
   if (status.status === 'success') {
@@ -70,7 +76,7 @@ export async function settleFromHub(reference: string): Promise<SettleResult> {
          one of them performs is a check a reload can walk around. */
       payload: { via: 'return_page', paid_at: status.paidAt, domain: status.domain },
     })
-    if (outcome.ok) return { state: 'confirmed' }
+    if (outcome.ok) return { state: 'confirmed', kind }
 
     /*
       A mismatch, and test money, are neither a success nor a failure the user
@@ -86,14 +92,14 @@ export async function settleFromHub(reference: string): Promise<SettleResult> {
       guard nobody can see is worth about as much as no guard.
     */
     if (outcome.reason === 'mismatch' || outcome.reason === 'test_mode') {
-      await recordRefusal(reference, outcome.reason, outcome.detail, outcome.paymentId)
+      await recordRefusal(reference, outcome.reason, outcome.detail, outcome.paymentId, outcome.kind)
     }
-    return { state: 'pending', unreachable: false }
+    return { state: 'pending', kind, unreachable: false }
   }
 
   if (status.status === 'reversed') {
     await applyHubEvent({ event: 'payment.reversed', reference, payload: { via: 'return_page' } })
-    return { state: 'reversed' }
+    return { state: 'reversed', kind }
   }
 
   /*
@@ -114,11 +120,11 @@ export async function settleFromHub(reference: string): Promise<SettleResult> {
       reference,
       payload: { via: 'return_page', hub_status: status.status },
     })
-    return { state: 'failed' }
+    return { state: 'failed', kind }
   }
 
   // Still `initialized` at the hub: the user may simply be quicker than the bank.
-  return { state: 'pending' }
+  return { state: 'pending', kind }
 }
 
 /**
@@ -140,6 +146,7 @@ async function recordRefusal(
   result: 'mismatch' | 'test_mode',
   detail: string,
   paymentId: string,
+  kind: PaymentKind,
 ): Promise<void> {
   try {
     const admin = createAdminClient()
@@ -159,6 +166,11 @@ async function recordRefusal(
       event: 'payment.success',
       hub_reference: reference,
       payment_id: paymentId,
+      /* ⚠️ `payment_id` lost its foreign key in migration 232 precisely so a
+         vault deposit could be flagged here. The kind is what tells the admin
+         screen which table to read the buyer's name from, so a row written
+         without it points at the wrong one. */
+      payment_kind: kind,
       payload: { via: 'return_page', raised_here: true } as never,
       result,
       detail,

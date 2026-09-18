@@ -80,7 +80,14 @@ export function VaultView({
     startTransition(async () => {
       const res = await startVaultPaystackCheckout(selectedPlan.id)
       if (!res.ok) {
-        setError(res.message ?? t('depositFailed'))
+        /* `errorKey` is the server naming a case it wants worded a particular
+           way. Anything else falls back to the generic line rather than
+           surfacing a message written for a log. */
+        setError(
+          res.errorKey === 'refused'
+            ? t('checkout.refused')
+            : (res.message ?? t('depositFailed')),
+        )
         setCheckoutMode(null)
         return
       }

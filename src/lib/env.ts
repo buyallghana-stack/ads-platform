@@ -249,12 +249,16 @@ export function hubSecrets(direction: 'inbound' | 'outbound'): string[] {
  *
  * ⚠️ The upgrade page used to ask `Boolean(PAYSTACK_SECRET_KEY)` instead, which
  * was true when plans were charged from here and became a lie the day they
- * moved to the hub. That key now belongs to the VAULT deposit path alone, so
- * removing it — which is the right thing to do, because a live Paystack
- * request from this app would carry sideperks.org to the one place nothing may
- * reveal SidePerks — would have hidden the pay button and the coupon field on
- * every plan with no error anywhere. The gate has to name the thing the
- * checkout actually needs.
+ * moved to the hub: removing that key would have hidden the pay button and the
+ * coupon field on every plan with no error anywhere. The gate has to name the
+ * thing the checkout actually needs.
+ *
+ * The Vault page asked the same stale question until 18 September 2026, when
+ * deposits moved onto the hub as well. `PAYSTACK_SECRET_KEY` now gates nothing
+ * a buyer can see: no checkout reads it, and the only code left that does is
+ * the retired Paystack webhook, which answers 503 without it. This app is
+ * meant to stay keyless, because a live Paystack request from here would carry
+ * sideperks.org to the one place nothing may reveal SidePerks.
  */
 export function hubConfigured(): boolean {
   return Boolean(serverEnv().TECHSTORE_HUB_URL) && hubSecrets('outbound').length > 0

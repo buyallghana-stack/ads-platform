@@ -5,7 +5,7 @@ import { setRequestLocale } from 'next-intl/server'
 import { VaultView } from '@/components/vault/VaultView'
 import { redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
-import { serverEnv } from '@/lib/env'
+import { hubConfigured } from '@/lib/env'
 import {
   getVaultEnabled,
   getVaultPlans,
@@ -48,7 +48,7 @@ export default async function VaultPage({
       investments={investments}
       userBalancePoints={userBalancePoints}
       pointsRate={pointsRate}
-      checkoutEnabled={Boolean(serverEnv().PAYSTACK_SECRET_KEY)}
+      checkoutEnabled={hubConfigured()}
     />
   )
 }

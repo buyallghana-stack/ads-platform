@@ -3248,7 +3248,8 @@
       },
       "flags": {
         "title": "À vérifier ({count})",
-        "description": "Le hub a envoyé ceci et l'application ne l'a pas traité. Une référence inconnue n'a aucun paiement associé, donc rien d'autre sur cet écran ne la montrera. Chaque ligne est de l'argent qui a bougé chez le prestataire et pas ici."
+        "description": "Le hub a envoyé ceci et l'application ne l'a pas traité. Une référence inconnue n'a aucun paiement associé, donc rien d'autre sur cet écran ne la montrera. Chaque ligne est de l'argent qui a bougé chez le prestataire et pas ici.",
+        "vault": "Dépôt Vault"
       },
       "recheck": {
         "action": "Redemander au hub",
@@ -3538,9 +3539,11 @@
       "balanceSuccess": "Félicitations ! Votre plan de coffre est désormais actif.",
       "orDivider": "OU PAYER PAR MOBILE MONEY / CARTE",
       "payWithPaystack": "Payer par Mobile Money / Carte",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "refused": "Nous n'avons pas pu démarrer ce dépôt. Vérifiez que l'adresse e-mail de votre profil est correcte, puis réessayez."
     },
     "paymentResult": {
+      "help": "Un problème ? Obtenir de l'aide",
       "success": {
         "title": "Dépôt dans le Coffre Activé !",
         "body": "Votre dépôt a été confirmé et votre Coffre est maintenant actif. Les rendements quotidiens s'accumulent désormais.",

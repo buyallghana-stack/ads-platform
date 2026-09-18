@@ -1339,6 +1339,7 @@ export type Database = {
           id: string
           payload: Json
           payment_id: string | null
+          payment_kind: string
           received_at: string
           request_id: string
           result: string
@@ -1352,6 +1353,7 @@ export type Database = {
           id?: string
           payload?: Json
           payment_id?: string | null
+          payment_kind?: string
           received_at?: string
           request_id: string
           result: string
@@ -1365,19 +1367,12 @@ export type Database = {
           id?: string
           payload?: Json
           payment_id?: string | null
+          payment_kind?: string
           received_at?: string
           request_id?: string
           result?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "hub_inbound_events_payment_id_fkey"
-            columns: ["payment_id"]
-            isOneToOne: false
-            referencedRelation: "subscription_payments"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -3342,6 +3337,7 @@ export type Database = {
           hub_reference: string
           id: string
           payment_id: string
+          payment_kind: string
           person: string
           received_at: string
           request_id: string
@@ -4148,6 +4144,75 @@ export type Database = {
       confirm_totp_enrollment: {
         Args: { p_user_id: string }
         Returns: undefined
+      }
+      attach_vault_hub_reference: {
+        Args: { p_payment_id: string; p_reference: string }
+        Returns: {
+          amount_minor: number
+          confirmed_at: string | null
+          created_at: string
+          currency_code: string
+          external_reference: string | null
+          failure_reason: string | null
+          id: string
+          method: string
+          plan_id: string
+          provider_payload: Json | null
+          status: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vault_payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      fail_vault_payment: {
+        Args: { p_payment_id: string; p_reason?: string }
+        Returns: {
+          amount_minor: number
+          confirmed_at: string | null
+          created_at: string
+          currency_code: string
+          external_reference: string | null
+          failure_reason: string | null
+          id: string
+          method: string
+          plan_id: string
+          provider_payload: Json | null
+          status: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vault_payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      reverse_vault_payment: {
+        Args: { p_payment_id: string; p_reason?: string }
+        Returns: {
+          amount_minor: number
+          confirmed_at: string | null
+          created_at: string
+          currency_code: string
+          external_reference: string | null
+          failure_reason: string | null
+          id: string
+          method: string
+          plan_id: string
+          provider_payload: Json | null
+          status: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vault_payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       confirm_vault_payment: {
         Args: { p_payload?: Json; p_payment_id: string; p_reference: string }
