@@ -34,7 +34,17 @@ import { createAdminClient } from '@/lib/supabase/admin'
  * `settleFromHub` the return page does, which calls the same idempotent
  * fulfilment the confirm endpoint does. Three entry points, one money path.
  *
- * Guarded by CRON_SECRET, like the other sweeps, because it moves money.
+ * ⚠️ AND IT HAS TO SWEEP BOTH PRODUCTS. Vault deposits moved onto the hub on
+ * 18 September 2026 and this route kept listing plans alone, which made the
+ * Vault the one path with only two of the three entry points: a buyer who
+ * closed the tab AND whose confirm POST never landed would have left a paid
+ * deposit pending for good, because nothing would ever hand its reference to
+ * `settleFromHub`. Everything below the listing is already kind-agnostic, so
+ * the fix is the listing.
+ *
+ * Guarded by CRON_SECRET, like the other sweeps, because it moves money. It is
+ * rung every 15 minutes by `ring_payment_reconciliation()` in pg_cron, not by
+ * vercel.json: this is a Hobby plan, whose two daily cron slots are spent.
  */
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -61,23 +71,54 @@ export async function GET(request: Request) {
   const settleBefore = new Date(now - SETTLE_AFTER_MINUTES * 60_000).toISOString()
   const abandonBefore = new Date(now - ABANDON_AFTER_HOURS * 3_600_000).toISOString()
 
-  const { data: rows, error } = await admin
-    .from('subscription_payments')
-    .select('id, external_reference, created_at')
-    .eq('status', 'pending')
-    .not('external_reference', 'is', null)
-    .lt('created_at', settleBefore)
-    .order('created_at', { ascending: true })
-    .limit(BATCH)
+  /* Both tables, same filter. Asked separately rather than through a view,
+     because the two have different columns and a view would be a third place
+     for "what a stranded payment looks like" to be defined. */
+  const stranded = async (table: 'subscription_payments' | 'vault_payments') =>
+    admin
+      .from(table)
+      .select('id, external_reference, created_at')
+      .eq('status', 'pending')
+      .not('external_reference', 'is', null)
+      .lt('created_at', settleBefore)
+      .order('created_at', { ascending: true })
+      .limit(BATCH)
 
+  const [plans, deposits] = await Promise.all([
+    stranded('subscription_payments'),
+    stranded('vault_payments'),
+  ])
+
+  const error = plans.error ?? deposits.error
   if (error) {
     reportUnexpected(error, 'cron.reconcile-payments.list')
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const counts = { checked: 0, confirmed: 0, failed: 0, reversed: 0, gaveUp: 0, unreachable: 0 }
+  /* Oldest first across both, then the same ceiling as before. A payment that
+     has been stranded longer is the one closer to being closed on our own
+     clock, so it is the one a capped run must not keep missing. */
+  const rows = [
+    ...(plans.data ?? []).map((row) => ({ ...row, kind: 'subscription' as const })),
+    ...(deposits.data ?? []).map((row) => ({ ...row, kind: 'vault' as const })),
+  ]
+    .sort((a, b) => a.created_at.localeCompare(b.created_at))
+    .slice(0, BATCH)
 
-  for (const row of rows ?? []) {
+  const counts = {
+    checked: 0,
+    confirmed: 0,
+    failed: 0,
+    reversed: 0,
+    gaveUp: 0,
+    unreachable: 0,
+    /* Broken out because for the next while the only question anybody has
+       about this sweep is whether it has ever seen a deposit at all. */
+    vaultChecked: 0,
+  }
+
+  for (const row of rows) {
+    if (row.kind === 'vault') counts.vaultChecked += 1
     const reference = row.external_reference
     if (!reference) continue
     counts.checked += 1
