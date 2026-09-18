@@ -210,7 +210,7 @@ export function UpgradeView({
               endsAt={heldInfo?.endsAt ?? null}
               // The middle plan carries the badge: it is the one most people
               // should land on, and an unmarked grid makes everyone hesitate.
-              recommended={!heldInfo && plan.slug === 'silver'}
+              recommended={!heldInfo && !plan.comingSoon && plan.slug === 'silver'}
               previousName={index === 0 ? freeName : plans[index - 1]!.name}
               previousDailyAdCap={
                 index === 0 ? freeDailyAdCap : plans[index - 1]!.dailyAdCap
@@ -218,6 +218,11 @@ export function UpgradeView({
               baseAdPoints={baseAdPoints}
               pointsPerCurrencyUnit={pointsPerCurrencyUnit}
               onChoose={(amountMinor) => {
+                /* An announced plan has no checkout to open. The card does not
+                   call this, and the database refuses the tier outright; this
+                   is the third place the same rule is stated, and it is here
+                   because the sheet is what would ask somebody for money. */
+                if (plan.comingSoon) return
                 /* A code belongs to one plan and one amount. Carrying one over
                    into the next sheet would show a price the till refuses. */
                 setCoupon(null)

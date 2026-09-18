@@ -445,7 +445,15 @@ export type PlanRow = {
   /** The tier every new user starts on. Exactly one plan has it, it must be
    *  free, and it cannot be hidden — all three enforced in the database. */
   isDefault: boolean
-  status: 'live' | 'hidden'
+  /**
+   * Three states, not two.
+   *
+   * `hidden` is out of the ladder entirely. `coming_soon` is IN it, shown to
+   * buyers with a locked button, and refused by the checkout. The difference
+   * matters beyond wording: the bands of the plan below a coming soon one are
+   * still cut against it.
+   */
+  status: 'live' | 'coming_soon' | 'hidden'
   sortOrder: number
   /** Sales, not configuration. */
   active: number

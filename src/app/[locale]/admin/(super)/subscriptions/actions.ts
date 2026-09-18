@@ -53,6 +53,10 @@ const planSchema = z.object({
      it, and `admin_save_plan` distinguishes the two by key presence. */
   bandMaxGhs: z.number().min(0).max(1_000_000).nullable().optional(),
   bandMaxMultiplier: z.number().gt(0).max(1000).nullable().optional(),
+  /* Optional for the same reason the ceilings are: the RPC honours the key
+     when it is present and leaves the flag alone when it is not, so an older
+     caller cannot put an announced plan back on sale by omission. */
+  comingSoon: z.boolean().optional(),
 })
 
 export type PlanInput = z.input<typeof planSchema>
@@ -102,6 +106,41 @@ export async function setPlanVisibility(id: string, live: boolean): Promise<Plan
 
   revalidatePath('/admin/subscriptions')
   revalidatePath('/upgrade')
+
+  return { ok: true, plans: await safePlans() }
+}
+
+/**
+ * Announced, or on sale.
+ *
+ * ⚠️ THIS IS NOT A WAY TO HIDE A PLAN, and the difference is load bearing. A
+ * coming soon plan stays in the ladder, so the plan below it keeps the band
+ * and the rate it has today. Hiding one instead moves both, silently, for
+ * everybody who buys the rung underneath.
+ *
+ * It does nothing to a subscription already paid for: `resolve_user_tier`
+ * reads the tier row, not this flag, so existing holders keep what they bought
+ * until it expires. What stops is new purchases.
+ */
+export async function setPlanComingSoon(id: string, comingSoon: boolean): Promise<PlanResult> {
+  const user = await getSessionUser()
+  if (!user) return { ok: false, message: UNAUTHORISED }
+  if (!z.uuid().safeParse(id).success) return { ok: false, message: GENERIC }
+
+  const admin = createAdminClient()
+  const { error } = await admin.rpc('admin_set_plan_coming_soon', {
+    p_admin_id: user.id,
+    p_plan_id: id,
+    p_coming_soon: comingSoon,
+  })
+
+  if (error) return { ok: false, message: humanise(error.message), plans: await safePlans() }
+
+  revalidatePath('/admin/subscriptions')
+  revalidatePath('/upgrade')
+  // The landing page quotes the ladder, and it must not advertise a rate that
+  // has just stopped being purchasable.
+  revalidatePath('/')
 
   return { ok: true, plans: await safePlans() }
 }

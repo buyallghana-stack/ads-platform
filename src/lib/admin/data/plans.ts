@@ -17,9 +17,9 @@ import type { PlanRow } from '../types'
  * function the payment path validates against, so the screen cannot promise a
  * range the server would refuse.
  *
- * `status` is derived from `is_active` rather than stored. The database has a
- * boolean; the screen has always spoken in live/hidden, and translating in one
- * place keeps the editor and its warnings untouched.
+ * `status` is derived from `is_active` and `coming_soon` rather than stored.
+ * The database has two booleans; the screen speaks in live/coming soon/hidden,
+ * and translating in one place keeps the editor and its warnings untouched.
  */
 
 type PlanRowRaw = {
@@ -40,6 +40,7 @@ type PlanRowRaw = {
   ad_cooldown_seconds: number
   is_default: boolean
   is_active: boolean
+  coming_soon: boolean
   sort_order: number
   active: number
   active_last_month: number
@@ -81,7 +82,10 @@ export async function getPlans(): Promise<PlanRow[]> {
     adPriority: row.ad_priority,
     adCooldownSeconds: row.ad_cooldown_seconds,
     isDefault: row.is_default,
-    status: row.is_active ? 'live' : 'hidden',
+    /* Hidden wins over coming soon: a plan that is not shown at all cannot
+       also be "shown as coming". The database allows both flags at once and
+       the screen has to say one thing. */
+    status: !row.is_active ? 'hidden' : row.coming_soon ? 'coming_soon' : 'live',
     sortOrder: row.sort_order,
     active: row.active,
     activeLastMonth: row.active_last_month,

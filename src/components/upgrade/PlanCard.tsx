@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { Gem, Minus, Plus, Zap } from 'lucide-react'
+import { Gem, Lock, Minus, Plus, Zap } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import type { Plan } from '@/lib/subscriptions/data'
@@ -24,6 +24,26 @@ const NOTICE_KEY = 'sideperks.flexiblePricingNotice'
  *
  * Violet is the plan colour across the product (Home upgrade teaser, Profile
  * promo), so it carries through here rather than each surface inventing one.
+ *
+ * ---- ANNOUNCED, NOT YET ON SALE -----------------------------------------
+ *
+ * A plan the operator has marked coming soon keeps its place and its whole
+ * body: the name, the price range, the ads it allows and what an ad will be
+ * worth. That is the point of showing it at all. What it loses is the parts
+ * that only make sense if you can buy it now.
+ *
+ * The card says so in three ways rather than one, because a single greyed
+ * button reads as broken rather than as deliberate:
+ *   1. a DASHED border, which no other card has. The shape says "not yet
+ *      real" before any word is read.
+ *   2. a violet badge in the same slot the held and popular badges use, so
+ *      the eye finds the status where it already looks.
+ *   3. the button replaced by a locked bar naming what is missing, not a
+ *      disabled control. A disabled button invites clicking and explains
+ *      nothing when the click does nothing.
+ *
+ * ⚠️ AND NONE OF IT IS A RULE. `start_subscription_payment` refuses the tier
+ * outright. This card is the explanation; the database is the enforcement.
  */
 export function PlanCard({
   plan,
@@ -136,6 +156,10 @@ export function PlanCard({
   }
 
   const choose = () => {
+    /* Belt to the server's braces. Nothing here should be able to reach the
+       checkout, and the caller guards too, but a card that can call `onChoose`
+       for a plan nobody may buy is one refactor away from doing it. */
+    if (plan.comingSoon) return
     if (flexible && !touched && !noticeDismissed()) {
       setNoticeOpen(true)
       return
@@ -205,23 +229,33 @@ export function PlanCard({
     <div
       className={cn(
         'relative flex flex-col rounded-(--radius-card) border bg-surface p-5 transition-shadow',
-        held
-          ? 'border-success-500/35 shadow-[0_1px_2px_0_rgb(15_23_42/0.04)]'
-          : recommended
-            ? 'border-violet-600/40 shadow-[0_1px_2px_0_rgb(15_23_42/0.06),0_12px_28px_-16px_rgb(124_58_237/0.45)]'
-            : 'border-ink-200 shadow-[0_1px_2px_0_rgb(15_23_42/0.04)]',
+        plan.comingSoon
+          ? /* Dashed, and no shadow at all. A card that does not lift off the
+               page reads as dormant next to ones that do, which is exactly
+               what this is. */
+            'border-dashed border-violet-600/45 bg-violet-50/20'
+          : held
+            ? 'border-success-500/35 shadow-[0_1px_2px_0_rgb(15_23_42/0.04)]'
+            : recommended
+              ? 'border-violet-600/40 shadow-[0_1px_2px_0_rgb(15_23_42/0.06),0_12px_28px_-16px_rgb(124_58_237/0.45)]'
+              : 'border-ink-200 shadow-[0_1px_2px_0_rgb(15_23_42/0.04)]',
       )}
     >
-      {(held || recommended) && (
+      {/* One badge, one slot. An announced plan is never also "most popular":
+          nobody has bought it. */}
+      {(plan.comingSoon || held || recommended) && (
         <span
           className={cn(
-            'absolute -top-2.5 left-5 rounded-full px-2.5 py-0.5 text-[0.6875rem] font-semibold',
-            held
-              ? 'bg-success-600 text-white'
-              : 'bg-violet-600 text-white',
+            'absolute -top-2.5 left-5 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[0.6875rem] font-semibold',
+            plan.comingSoon
+              ? 'bg-violet-600 text-white'
+              : held
+                ? 'bg-success-600 text-white'
+                : 'bg-violet-600 text-white',
           )}
         >
-          {held ? t('card.held') : t('card.popular')}
+          {plan.comingSoon && <Lock aria-hidden className="size-3" />}
+          {plan.comingSoon ? t('card.comingSoon') : held ? t('card.held') : t('card.popular')}
         </span>
       )}
 
@@ -267,8 +301,13 @@ export function PlanCard({
 
       {/* ---- Choose your amount ------------------------------------------
           Only where there is genuinely a range: the top plan is a single
-          price, and a slider that cannot move is a control that lies. */}
-      {!held && (
+          price, and a slider that cannot move is a control that lies.
+
+          Absent entirely on an announced plan. The amount IS the purchase
+          here, so a live price chooser above a locked button would be asking
+          somebody to decide something that decides nothing. What replaces it
+          is the rate they will get, which is the part worth waiting for. */}
+      {!held && !plan.comingSoon && (
         <div
           className={cn(
             'mt-4 rounded-(--radius-card) p-3.5',
@@ -392,6 +431,41 @@ export function PlanCard({
         </div>
       )}
 
+      {/* ---- What it will pay, for a plan that is only announced ---------
+          The same two figures the chooser shows, worked at the plan's floor,
+          because that is the one price an announced plan can honestly quote.
+          Without this the card is a name and a locked button, which tells
+          somebody nothing about whether to come back for it. */}
+      {plan.comingSoon && !held && (
+        <div className="mt-4 rounded-(--radius-card) border border-dashed border-violet-600/35 bg-violet-50/40 p-3.5">
+          <dl className="grid grid-cols-2 gap-2">
+            <div>
+              <dt className="text-[0.625rem] tracking-[0.04em] text-violet-700/70 uppercase">
+                {t('card.previewPerAd')}
+              </dt>
+              <dd className="text-[0.9375rem] font-semibold text-ink-900 tabular-nums">
+                {format.number(perAdPoints)}
+                <span className="ml-1 text-[0.6875rem] font-medium text-ink-500">
+                  {t('card.points')}
+                </span>
+              </dd>
+              <dd className="text-[0.6875rem] text-ink-500 tabular-nums">{money(perAdMoney)}</dd>
+            </div>
+            <div>
+              <dt className="text-[0.625rem] tracking-[0.04em] text-violet-700/70 uppercase">
+                {t('card.previewPerDay')}
+              </dt>
+              <dd className="text-[0.9375rem] font-semibold text-ink-900 tabular-nums">
+                {money(perDay)}
+              </dd>
+              <dd className="text-[0.6875rem] text-ink-500">
+                {t('card.previewAds', { count: plan.dailyAdCap })}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      )}
+
       {held ? (
         <div className="mt-4 rounded-(--radius-card) border border-success-500/30 bg-success-50/60 p-3.5">
           <div className="flex items-center justify-between gap-2">
@@ -440,6 +514,17 @@ export function PlanCard({
             </p>
           )}
         </div>
+      ) : plan.comingSoon ? (
+        /*
+          NOT a disabled <button>. A disabled control is skipped by screen
+          readers and invites a click that explains nothing, and there is no
+          action here to disable in the first place: this is a statement.
+          So it is a plain element, readable in order, saying what it is.
+        */
+        <p className="mt-4 flex items-center justify-center gap-2 rounded-(--radius-card) border border-dashed border-violet-600/40 bg-violet-50/60 px-4 py-2.5 text-[0.875rem] font-semibold text-violet-700">
+          <Lock aria-hidden className="size-4" />
+          {t('card.lockedCta', { plan: plan.name })}
+        </p>
       ) : (
         <Button variant="primary" fullWidth className="mt-4" onClick={choose}>
           {t('card.choose', { plan: plan.name })}

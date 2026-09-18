@@ -1385,7 +1385,9 @@
       "amountPaid": "Amount paid",
       "adValue": "Ad value",
       "less": "Lower by {step}",
-      "more": "Raise by {step}"
+      "more": "Raise by {step}",
+      "comingSoon": "Coming soon",
+      "lockedCta": "{plan} opens soon"
     },
     "checkout": {
       "title": "{plan} plan",
@@ -2276,7 +2278,8 @@
       "filters": {
         "all": "All",
         "live": "On sale",
-        "hidden": "Hidden"
+        "hidden": "Hidden",
+        "coming_soon": "Coming soon"
       },
       "searchPlaceholder": "Plan name or slug",
       "empty": "No plans match.",
@@ -2309,7 +2312,8 @@
       },
       "status": {
         "live": "On sale",
-        "hidden": "Hidden"
+        "hidden": "Hidden",
+        "coming_soon": "Coming soon"
       },
       "benefits": {
         "none": "Base rate, free allowance",
@@ -2323,7 +2327,10 @@
         "hide": "Take off sale",
         "show": "Put on sale",
         "hideHint": "{count} keep their plan",
-        "delete": "Delete plan"
+        "delete": "Delete plan",
+        "announce": "Mark coming soon",
+        "announceHint": "Stays on the page with a locked button. Nobody can buy it.",
+        "putOnSale": "Put on sale"
       },
       "units": {
         "days": "days",

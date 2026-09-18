@@ -33,6 +33,15 @@ function anonClient() {
 
 export type MarketingPlan = {
   slug: string
+  /**
+   * Announced but not purchasable.
+   *
+   * ⚠️ THESE STAY IN `plans`, because the band of the rung below one of them
+   * is cut against its price and its multiplier. What must not happen is the
+   * front page quoting a rate nobody can buy, so the page filters on this at
+   * the point of DISPLAY rather than the ladder being cut short here.
+   */
+  comingSoon: boolean
   name: string
   description: string | null
   /** Major units (GHS), not minor. 0 for the free tier. */
@@ -111,7 +120,7 @@ export async function getMarketingFigures(): Promise<MarketingFigures> {
     supabase
       .from('tiers')
       .select(
-        'slug, name, description, price_minor, currency_code, billing_period_days, daily_ad_cap, reward_multiplier, redemption_minimum_points, is_default, sort_order, band_max_minor, band_max_multiplier',
+        'slug, name, description, price_minor, currency_code, billing_period_days, daily_ad_cap, reward_multiplier, redemption_minimum_points, is_default, coming_soon, sort_order, band_max_minor, band_max_multiplier',
       )
       .eq('is_active', true)
       .order('sort_order', { ascending: true }),
@@ -197,6 +206,7 @@ export async function getMarketingFigures(): Promise<MarketingFigures> {
 
   const plans: MarketingPlan[] = tiersRes.data.map((t, index) => ({
     slug: t.slug,
+    comingSoon: t.coming_soon,
     name: t.name,
     description: t.description,
     price: t.price_minor / 100,
@@ -258,12 +268,16 @@ export async function getMarketingFigures(): Promise<MarketingFigures> {
       payouts: on('payouts_enabled'),
     },
     free: plans.find((p) => p.isDefault) ?? null,
-    // "Best" is the richest rate on offer, whatever the operator names it —
-    // not a hardcoded 'platinum', so renaming a tier cannot break the page.
-    best: plans.reduce<MarketingPlan | null>(
-      (top, p) => (!top || p.rewardMultiplier > top.rewardMultiplier ? p : top),
-      null,
-    ),
+    /* "Best" is the richest rate ON SALE, whatever the operator names it. Not
+       a hardcoded 'platinum', so renaming a tier cannot break the page, and
+       not merely the richest rate, so announcing the top two rungs does not
+       leave the front page badging one of them as the best buy. */
+    best: plans
+      .filter((p) => !p.comingSoon)
+      .reduce<MarketingPlan | null>(
+        (top, p) => (!top || p.rewardMultiplier > top.rewardMultiplier ? p : top),
+        null,
+      ),
     pointsPerCedi,
     withdrawFrom: minimum,
     freeEarningDays,

@@ -2260,6 +2260,7 @@ export type Database = {
           band_max_minor: number | null
           band_max_multiplier: number | null
           billing_period_days: number
+          coming_soon: boolean
           created_at: string
           currency_code: string
           daily_ad_cap: number
@@ -2283,6 +2284,7 @@ export type Database = {
           band_max_minor?: number | null
           band_max_multiplier?: number | null
           billing_period_days?: number
+          coming_soon?: boolean
           created_at?: string
           currency_code?: string
           daily_ad_cap: number
@@ -2306,6 +2308,7 @@ export type Database = {
           band_max_minor?: number | null
           band_max_multiplier?: number | null
           billing_period_days?: number
+          coming_soon?: boolean
           created_at?: string
           currency_code?: string
           daily_ad_cap?: number
@@ -3404,6 +3407,7 @@ export type Database = {
           daily_ad_cap: number
           description: string
           id: string
+          coming_soon: boolean
           is_active: boolean
           is_default: boolean
           monthly_ghs: number
@@ -3756,6 +3760,10 @@ export type Database = {
           new_value: string
           previous_value: string
         }[]
+      }
+      admin_set_plan_coming_soon: {
+        Args: { p_admin_id: string; p_coming_soon: boolean; p_plan_id: string }
+        Returns: Database["public"]["Tables"]["tiers"]["Row"]
       }
       admin_set_plan_visibility: {
         Args: { p_active: boolean; p_admin_id: string; p_plan_id: string }

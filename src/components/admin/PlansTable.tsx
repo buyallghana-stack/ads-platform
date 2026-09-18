@@ -8,6 +8,7 @@ import {
   X,
   Eye,
   EyeOff,
+  Lock,
   Pencil,
   Plus,
   Trash2,
@@ -19,6 +20,7 @@ import { useTranslations } from 'next-intl'
 import {
   deletePlan,
   savePlan,
+  setPlanComingSoon,
   setPlanVisibility,
 } from '@/app/[locale]/admin/(super)/subscriptions/actions'
 import { Button } from '@/components/ui/Button'
@@ -72,11 +74,25 @@ import { PlanPanel } from './PlanPanel'
  * warning they understand.
  */
 
-type Filter = 'all' | 'live' | 'hidden'
+type Filter = 'all' | 'live' | 'coming_soon' | 'hidden'
 
-const FILTERS: Filter[] = ['all', 'live', 'hidden']
+/* ⚠️ FOUR TABS NOW, WHICH CROSSES THE TOOLBAR'S OWN THRESHOLD. `Toolbar`
+   switches the tab strip to `xl` at more than three, measured on 2026-07-29
+   after a filter sat off the edge of a tablet. It reads the count itself, so
+   nothing is needed here beyond knowing that adding the fourth changed the
+   layout deliberately. */
+const FILTERS: Filter[] = ['all', 'live', 'coming_soon', 'hidden']
 
 const ghs = (n: number) => `GHS ${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+
+/* Violet is the plan colour everywhere in the product, so an announced plan
+   carries it here and on the card a buyer sees. Green stays "on sale" and grey
+   stays "not shown", which is the pair an operator scans this column for. */
+const STATUS_TONE = {
+  live: 'success',
+  coming_soon: 'violet',
+  hidden: 'neutral',
+} as const
 
 /* The top of a band is one pesewa under the next plan (GHS 139.99), which
    rounds UP to the next plan's own price in whole cedis and reads as though
@@ -165,12 +181,31 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
     })
   }
 
-  const setStatus = (id: string, status: PlanRow['status']) => {
+  /*
+    Two flags, one control. `hidden` is `is_active`, `coming_soon` is its own
+    column, and a plan moving between the three states may need both set: going
+    from hidden to live has to clear an announcement the plan was carrying, or
+    it comes back with a locked button and no way to see why.
+  */
+  const setStatus = (p: PlanRow, status: PlanRow['status']) => {
     setError(null)
     startTransition(async () => {
-      const result = await setPlanVisibility(id, status === 'live')
+      if (status === 'coming_soon') {
+        const result = await setPlanComingSoon(p.id, true)
+        if (result.plans) setRows(result.plans)
+        if (!result.ok) setError(result.message)
+        return
+      }
+
+      const result = await setPlanVisibility(p.id, status === 'live')
       if (result.plans) setRows(result.plans)
-      if (!result.ok) setError(result.message)
+      if (!result.ok) return setError(result.message)
+
+      if (status === 'live' && p.status === 'coming_soon') {
+        const cleared = await setPlanComingSoon(p.id, false)
+        if (cleared.plans) setRows(cleared.plans)
+        if (!cleared.ok) setError(cleared.message)
+      }
     })
   }
 
@@ -234,13 +269,37 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
        both, because every new user is put on it and auto-downgraded back to
        it on expiry. Absent rather than disabled, as everywhere else here. */
     if (!p.isDefault) {
+      /* Announce or put on sale. Offered above hiding because it is the
+         reversible, non-destructive one of the two, and because it is the one
+         an operator reaches for while a plan is being prepared. */
+      items.push(
+        p.status === 'coming_soon'
+          ? {
+              key: 'announce',
+              label: t('actions.putOnSale'),
+              icon: <Eye />,
+              separated: true,
+              onSelect: () => !busy && setStatus(p, 'live'),
+            }
+          : {
+              key: 'announce',
+              label: t('actions.announce'),
+              icon: <Lock />,
+              separated: true,
+              hint: t('actions.announceHint'),
+              onSelect: () => !busy && setStatus(p, 'coming_soon'),
+            },
+      )
+
       items.push({
         key: 'visibility',
-        label: p.status === 'live' ? t('actions.hide') : t('actions.show'),
-        icon: p.status === 'live' ? <EyeOff /> : <Eye />,
-        separated: true,
-        hint: p.status === 'live' && p.active > 0 ? t('actions.hideHint', { count: p.active }) : undefined,
-        onSelect: () => !busy && setStatus(p.id, p.status === 'live' ? 'hidden' : 'live'),
+        label: p.status === 'hidden' ? t('actions.show') : t('actions.hide'),
+        icon: p.status === 'hidden' ? <Eye /> : <EyeOff />,
+        hint:
+          p.status !== 'hidden' && p.active > 0
+            ? t('actions.hideHint', { count: p.active })
+            : undefined,
+        onSelect: () => !busy && setStatus(p, p.status === 'hidden' ? 'live' : 'hidden'),
       })
 
       /* Delete appears ONLY when it can actually delete. A plan anybody has
@@ -456,10 +515,7 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
                       {p.slug}
                     </span>
                   </RowOpener>
-                  <StatusDot
-                    tone={p.status === 'live' ? 'success' : 'neutral'}
-                    className="mt-1 text-[0.625rem]"
-                  >
+                  <StatusDot tone={STATUS_TONE[p.status]} className="mt-1 text-[0.625rem]">
                     {t(`status.${p.status}`)}
                   </StatusDot>
                 </td>
@@ -548,7 +604,7 @@ export function PlansTable({ initial }: { initial: PlanRow[] }) {
               <Trouble p={p} card />
 
               <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-ink-200 pt-2.5">
-                <StatusDot tone={p.status === 'live' ? 'success' : 'neutral'}>
+                <StatusDot tone={STATUS_TONE[p.status]}>
                   {t(`status.${p.status}`)}
                 </StatusDot>
                 <span className="text-[0.75rem] text-ink-500">

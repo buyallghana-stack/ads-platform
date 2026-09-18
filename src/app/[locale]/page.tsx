@@ -88,7 +88,16 @@ export default async function LandingPage({
   const freeAds = figures.free?.adsPerDay ?? 1
   const cedis = (amount: number) =>
     `${figures.plans[0]?.currency ?? 'GHS'} ${amount.toFixed(2)}`
-  const paidPlans = figures.plans.filter((p) => !p.isDefault)
+  /*
+    ⚠️ ON SALE ONLY, EVERYWHERE BELOW. The ladder still contains plans the
+    operator has announced but not opened, because the bands of the rungs under
+    them are cut against their prices. The front page is an offer, so it may
+    only quote what somebody can actually buy today: a headline of "up to 13
+    ads a day" taken from an unbuyable plan is an advertisement for something
+    that is not for sale.
+  */
+  const onSale = figures.plans.filter((p) => !p.comingSoon)
+  const paidPlans = onSale.filter((p) => !p.isDefault)
   const cheapestPaid = paidPlans[0]
   const topPaid = paidPlans[paidPlans.length - 1]
 
@@ -101,10 +110,10 @@ export default async function LandingPage({
     4. Active earning days: 50 – 55 days on paid plans
   */
   const minAds = figures.free?.adsPerDay ?? 1
-  const maxAds = figures.plans.reduce((max, p) => Math.max(max, p.adsPerDay), 1)
+  const maxAds = onSale.reduce((max, p) => Math.max(max, p.adsPerDay), 1)
   const adsRange = minAds === maxAds ? `${minAds}` : `${minAds} – ${maxAds}`
 
-  const currency = figures.plans[0]?.currency ?? 'GHS'
+  const currency = onSale[0]?.currency ?? 'GHS'
   const fromGhs = cheapestPaid ? cheapestPaid.perAdFrom.toFixed(2) : '1.13'
   const toGhs = topPaid
     ? (topPaid.perAdTo > topPaid.perAdFrom ? topPaid.perAdTo : topPaid.perAdFrom).toFixed(2)
@@ -112,7 +121,7 @@ export default async function LandingPage({
   const perAdHeadline = `${currency} ${fromGhs} – ${toGhs}`
 
   const minRate = (figures.free?.rewardMultiplier ?? 1).toFixed(1)
-  const maxRate = figures.plans
+  const maxRate = onSale
     .reduce((top, p) => Math.max(top, p.bandMaxMultiplier || p.rewardMultiplier), 1)
     .toFixed(1)
   const rateRange = minRate === maxRate ? `${minRate}×` : `${minRate}× – ${maxRate}×`
@@ -467,7 +476,7 @@ export default async function LandingPage({
             lead={t('plans.lead')}
           />
 
-          {figures.plans.length > 0 && (
+          {paidPlans.length > 0 && (
             <>
               <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {paidPlans.map((plan) => {

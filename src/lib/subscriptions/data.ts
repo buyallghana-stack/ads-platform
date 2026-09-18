@@ -22,6 +22,15 @@ export type Plan = {
   adPriority: number
   sortOrder: number
   /**
+   * Announced, not yet on sale.
+   *
+   * ⚠️ A COMING SOON PLAN IS STILL IN THE LADDER, and it has to be: every
+   * band is cut against the next rung up, so dropping these rows would move
+   * the ceiling and the rate of the plan BELOW them. Filter them when you are
+   * deciding what somebody may buy, never when you are computing a band.
+   */
+  comingSoon: boolean
+  /**
    * The band this plan covers, in minor units — what somebody may choose to
    * pay for it. `bandMaxMinor` equals the price on the top plan, which has
    * nothing above it to interpolate towards.
@@ -109,6 +118,7 @@ export const getPlans = cache(async (): Promise<Plan[]> => {
       referralBonusMultiplier: Number(row.referral_bonus_multiplier),
       adPriority: row.ad_priority,
       sortOrder: row.sort_order,
+      comingSoon: row.coming_soon,
     }
   })
 })
@@ -203,11 +213,18 @@ export const getPlanStanding = cache(async (userId: string): Promise<PlanStandin
   // No purchasable plans configured is not an upsell opportunity either.
   if (plans.length === 0) return 'all'
 
+  /* Only what somebody can actually buy counts. A plan that is merely
+     announced can never be held, so counting it would leave a user who owns
+     every purchasable plan permanently on 'some' and permanently shown an
+     upsell for something nobody can buy. */
+  const onSale = plans.filter((p) => !p.comingSoon)
+  if (onSale.length === 0) return 'all'
+
   const heldIds = new Set(held.map((h) => h.tierId))
-  const owned = plans.filter((p) => heldIds.has(p.id)).length
+  const owned = onSale.filter((p) => heldIds.has(p.id)).length
 
   if (owned === 0) return 'none'
-  return owned >= plans.length ? 'all' : 'some'
+  return owned >= onSale.length ? 'all' : 'some'
 })
 
 /**

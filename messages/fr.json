@@ -1385,7 +1385,9 @@
       "amountPaid": "Montant payé",
       "adValue": "Valeur par annonce",
       "less": "Réduire de {step}",
-      "more": "Augmenter de {step}"
+      "more": "Augmenter de {step}",
+      "comingSoon": "Bientôt disponible",
+      "lockedCta": "{plan} arrive bientôt"
     },
     "checkout": {
       "title": "Forfait {plan}",
@@ -2276,7 +2278,8 @@
       "filters": {
         "all": "Toutes",
         "live": "En vente",
-        "hidden": "Masquée"
+        "hidden": "Masquée",
+        "coming_soon": "Bientôt"
       },
       "searchPlaceholder": "Nom ou identifiant",
       "empty": "Aucune formule ne correspond.",
@@ -2309,7 +2312,8 @@
       },
       "status": {
         "live": "En vente",
-        "hidden": "Masquée"
+        "hidden": "Masquée",
+        "coming_soon": "Bientôt disponible"
       },
       "benefits": {
         "none": "Taux de base, quota gratuit",
@@ -2323,7 +2327,10 @@
         "hide": "Retirer de la vente",
         "show": "Mettre en vente",
         "hideHint": "{count} la conservent",
-        "delete": "Supprimer le forfait"
+        "delete": "Supprimer le forfait",
+        "announce": "Marquer comme à venir",
+        "announceHint": "Reste sur la page avec un bouton verrouillé. Personne ne peut l'acheter.",
+        "putOnSale": "Mettre en vente"
       },
       "units": {
         "days": "jours",

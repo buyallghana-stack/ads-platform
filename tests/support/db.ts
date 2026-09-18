@@ -388,12 +388,12 @@ export async function pinLadder(
        (slug, name, description, price_minor, currency_code, billing_period_days,
         daily_ad_cap, reward_multiplier, redemption_minimum_points,
         referral_bonus_multiplier, ad_priority, ad_cooldown_seconds,
-        weekly_game_plays, is_default, is_active, sort_order,
+        weekly_game_plays, is_default, is_active, coming_soon, sort_order,
         band_max_minor, band_max_multiplier)
      select r.slug, r.name, r.name, r.price_minor, 'GHS', 30,
             r.daily_ad_cap, r.reward_multiplier, 5000,
             1.000, r.sort_order, 0,
-            5, r.price_minor = 0, true, r.sort_order,
+            5, r.price_minor = 0, true, false, r.sort_order,
             r.band_max_minor, r.band_max_multiplier
        from unnest(
               $1::text[], $2::text[], $3::bigint[], $4::int[],
@@ -409,6 +409,15 @@ export async function pinLadder(
        sort_order = excluded.sort_order,
        is_default = excluded.is_default,
        is_active = true,
+       /* ⚠️ RESET, for the same reason is_active is. Migration 233 marked
+          every plan dearer than Gold as coming soon in the real ladder, and
+          start_subscription_payment refuses one of those outright. A fixture
+          that inherited the flag would fail every test that buys the top rung,
+          and would fail it as "that tier is not available" rather than as
+          "your fixture is carrying production's announcements". A test that
+          wants an announced plan says so itself. (No backticks in here: this
+          whole statement is a template literal.) */
+       coming_soon = excluded.coming_soon,
        /* Written even when absent. Platinum carries a real ceiling in
           production, and inheriting it would silently give the fixture a top
           band no test asked for. */
