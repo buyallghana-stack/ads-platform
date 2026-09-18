@@ -104,3 +104,53 @@ hub exists to keep.
   the commission clawback. For a rehearsal that needs test money to be accepted
   on purpose, `app_config.hub_accept_test_payments` is the override, on the
   admin config screen under payout rules. Turn it back off afterwards.
+
+## 5. The Vault, proven the same way (18 September 2026)
+
+Step 3 above said the Vault would either stay off or move onto the hub. It
+moved: commit `286c264`, no Paystack call left in this repository that a buyer
+can reach. What follows is the plan proof repeated for a deposit, and the order
+is not optional.
+
+⚠️ **The migration must reach production BEFORE the code does.** Migration 232
+(`20260880000000_the_vault_pays_through_the_hub.sql`) is applied to
+`sideperks-test` only. Production has none of its three functions, both status
+constraints still narrow, and no `payment_kind` column. Deploying first breaks
+the checkout at `attach_vault_hub_reference`, after the hub has already opened a
+payment at Paystack, and makes `/api/internal/hub/confirm` fail its own event
+row on every settlement.
+
+1. **Check what production actually has.**
+   `cd ~/projects/ads && node scripts/audit-vault-hub-deposit.mjs`
+   Section 0 names the database by project ref, section 1 answers yes or no per
+   function. Read section 0 every time: `SUPABASE_DB_URL` is the TEST project,
+   and mistaking it for production is a mistake this feature has already
+   produced once.
+2. **Apply migration 232 to production.** `scripts/apply-sql.mjs` reads
+   `SUPABASE_DB_URL` and therefore cannot do it. This is a deliberate, operator
+   confirmed step. Re-run the audit afterwards: section 1 must be four yeses and
+   both constraints must list `refunded` and `cancelled`.
+3. **Deploy.** ⚠️ This makes the Vault card button appear in production for the
+   first time. It has been hidden since the live keys arrived, because it was
+   gated on a `PAYSTACK_SECRET_KEY` this app does not hold, and it is now gated
+   on `hubConfigured()`, which is true in all three environments.
+   `vault_enabled` is already `true`.
+4. **One small live deposit**, cheapest plan, real money, a real phone. The
+   buyer is sent to the STORE's Paystack page and comes back to
+   `https://sideperks.org/payments/return`, which is the plan's return URL: the
+   hub allowlists return addresses and the Vault could not be given its own.
+   The page should say Vault, not plan, and its button should go to /vault.
+5. **Read the record back.** `node scripts/audit-vault-hub-deposit.mjs` again.
+   The verdict must be empty, and in particular:
+   - section 4 must print `domain live`. `test` means a key somewhere is still
+     the old one and nothing should have been granted.
+   - section 5 must show exactly one `active` investment with the right maturity
+     date and return.
+   - section 6 must print `kind=vault`. If it says `subscription`, the admin
+     flags screen will read the buyer's name from the wrong table.
+6. **Then the reversal rehearsal**, which is the half no plan test covers. A
+   matured vault has already paid points out, and `reverse_vault_payment` takes
+   back only what is there, never pushes a balance negative, and raises
+   `vault_clawback_short` naming the shortfall.
+   `tests/money/vault-hub-settlement.test.ts` pins all of that against a real
+   database; doing it once with real money is still worth it.
