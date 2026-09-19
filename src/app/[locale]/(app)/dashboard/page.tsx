@@ -226,14 +226,25 @@ export default async function HomePage({
           className="absolute -right-2 -top-8 -z-10 size-32 rounded-full border border-white/10"
         />
 
-        {/* Top-Right Vault Quick Access (Rendered when Vault is enabled OR user holds an active vault deposit) */}
+        {/* The way into the Vault, shown once it is on sale or once this
+            person already has money in one.
+
+            ⚠️ NO `?? 'Vault'` ON THE LABEL. `t()` never returns undefined, so
+            the fallback was dead, and it was dead in the one direction that
+            matters: had it ever fired it would have printed English "Vault"
+            over the French "Coffre" that is sitting in the messages file.
+
+            The transition NAMES its properties, as everything else on this
+            screen does, rather than using `all`. Nothing about how it looks
+            changes: `all` just sweeps up layout properties too, on a pill that
+            scales under a press. */}
         {(vaultEnabled || hasActiveVault) && (
           <Link
             href="/vault"
-            className="group absolute right-3.5 top-3.5 z-10 flex items-center gap-1.5 rounded-full border border-amber-300/50 bg-gradient-to-r from-amber-400 to-amber-500 px-3.5 py-1.5 text-[0.8125rem] font-bold text-amber-950 shadow-[0_4px_12px_rgba(245,158,11,0.35)] transition-all hover:scale-105 hover:from-amber-300 hover:to-amber-400 active:scale-95 sm:right-5 sm:top-5"
+            className="group absolute right-3.5 top-3.5 z-10 flex items-center gap-1.5 rounded-full border border-amber-300/50 bg-gradient-to-r from-amber-400 to-amber-500 px-3.5 py-1.5 text-[0.8125rem] font-bold text-amber-950 shadow-[0_4px_12px_rgba(245,158,11,0.35)] transition-[transform,background-color] hover:scale-105 hover:from-amber-300 hover:to-amber-400 active:scale-95 sm:right-5 sm:top-5"
           >
             <Vault className="size-4 text-amber-950 transition-transform group-hover:rotate-12" />
-            <span>{t('vault') ?? 'Vault'}</span>
+            <span>{t('vault')}</span>
           </Link>
         )}
 

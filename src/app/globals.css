@@ -71,18 +71,25 @@
      dark its front-to-back layering. Use `bg-canvas` / `bg-surface` instead
      of a bare white so a sheet knows how to be dark.                         */
   /*
-     LIGHTENED 2026-08-06. It was #f1f5f9 — the same value as ink-100 — and the
-     operator's verdict was that the grey was not appealing. Two things were
-     wrong with it and only one was the hue:
+     LIGHTENED 2026-08-06 from #f1f5f9 (the same value as ink-100), which the
+     operator found unappealing: a cool slate that fights the brand blue.
+     Correct about the hue, and #f6f8fd fixed it.
 
-       1. it sat mid-tone, so a white card barely separated from the page and
-          every screen read as flat panels on flat grey
-       2. it was a COOL slate, which fights the brand blue rather than seating it
+     DEEPENED AGAIN 2026-09-19, operator: *"the light theme is too white"*.
+     They were right, and the earlier note had the mechanism backwards. It
+     claimed a lighter page makes a white card lift MORE; the opposite is true.
+     At #f6f8fd the page sat 2% off white, so a white card had nothing to lift
+     OFF: the sidebar, the cards and the field behind them were all one sheet,
+     and the 1px border was doing every bit of the separating on its own.
 
-     #f6f8fd is lighter, so white now genuinely lifts off it, and carries a
-     trace of the brand hue so the two belong to the same family. The ink ramp
-     is untouched: this is the page field, not the neutral scale.                */
-  --color-canvas:  #f6f8fd;
+     #edf2fb is about three times that distance from white while staying in the
+     brand's blue family, so the border now draws an edge that the tone already
+     implies. It is DEEPER than the rejected #f1f5f9 and that is not a step
+     back: the rejection was of the cool slate hue, not of the depth, and this
+     leans further into the blue rather than away from it.
+
+     The ink ramp is untouched: this is the page field, not the neutral scale.  */
+  --color-canvas:  #edf2fb;
   --color-surface: #ffffff;
 
   /* Chart series hues (light). Overridden in .dark — every step validated
