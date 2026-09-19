@@ -204,6 +204,111 @@ export type BandCheck = {
   next: Rung | null
 }
 
+/* ------------------------------------------------------------------ */
+/* The whole ladder, read the way a buyer reads it                      */
+/* ------------------------------------------------------------------ */
+
+/** One rung, with the length a sweep needs to price a return. */
+export type LadderStep = Rung & { billingPeriodDays: number }
+
+/** A price a buyer can actually choose, and what it buys them. */
+export type LadderPoint = {
+  label: string
+  priceGhs: number
+  /** Points one ad pays here, rounded the way `credit_ad_points` rounds. */
+  perAd: number
+  /** Everything the plan pays back, over the price. */
+  multiple: number
+  /** Days of watching before the price is earned back. */
+  paybackDays: number
+}
+
+export type LadderFault = {
+  from: LadderPoint
+  to: LadderPoint
+  /** Which promises break between these two prices. */
+  broke: ('perAd' | 'multiple' | 'payback')[]
+}
+
+/**
+ * THE OPERATOR'S RULE, AND THE ONLY PLACE IT IS WRITTEN IN TYPESCRIPT.
+ *
+ * *"The number one rule is that more is equal to better."* Every price a buyer
+ * can choose, read in order across the whole ladder: each band's floor and its
+ * ceiling. At no step up may they get fewer points an ad, a smaller return, or
+ * a longer wait to earn the price back.
+ *
+ * ⚠️ THIS IS NOT `checkBand`, AND BOTH ARE NEEDED. `checkBand` judges ONE rung
+ * against its neighbour, which is what the editor can show beside the plan
+ * being edited. This walks the finished ladder end to end, which is the only
+ * way to see a fault that no single rung owns.
+ *
+ * WHY IT BREAKS, WHEN IT BREAKS. Points an ad is `price / (ads a day x payback
+ * days)`. Across a rung the price per ad slot barely rises (Pearl ends at GHS
+ * 57 a slot and Gold starts at 57.14, which is 0.25%), so a band whose rate
+ * climbs steeply inside itself finishes above the floor of the plan above and
+ * the buyer is punished for upgrading. A ladder proposed on 2026-09-19 broke
+ * this way at all five rungs at once, and every number in it looked reasonable
+ * on its own.
+ *
+ * `scripts/apply-plan-ladder.mjs` runs the same sweep before it writes, in
+ * plain JavaScript because it must work standalone. This is the authority and
+ * the tests pin it; that copy is a refusal-to-write guard, not a second rule.
+ */
+export function ladderPoints(rungs: LadderStep[], baseAdPoints = 100): LadderPoint[] {
+  const points: LadderPoint[] = []
+
+  for (const rung of ladder(rungs)) {
+    const ceilingGhs = rung.ownBandMaxGhs ?? rung.priceGhs
+    const ceilingRate = rung.ownBandMaxMultiplier ?? rung.rewardMultiplier
+    const ends: [string, number, number][] = [
+      ['floor', rung.priceGhs, rung.rewardMultiplier],
+      ['ceiling', ceilingGhs, ceilingRate],
+    ]
+
+    for (const [end, priceGhs, rate] of ends) {
+      /* A band of one price has no ceiling to read; quoting it twice would
+         invent a step that no buyer can take. */
+      if (end === 'ceiling' && ceilingGhs <= rung.priceGhs) continue
+
+      const perAd = Math.max(Math.floor(baseAdPoints * rate), 1)
+      const paid = priceGhs * baseAdPoints
+      points.push({
+        label: `${rung.name} ${end}`,
+        priceGhs,
+        perAd,
+        multiple: (rung.billingPeriodDays * rung.dailyAdCap * perAd) / paid,
+        paybackDays: paid / (rung.dailyAdCap * perAd),
+      })
+    }
+  }
+
+  return points
+}
+
+/** Every step up the ladder where paying more buys less. Empty is the goal. */
+export function ladderFaults(rungs: LadderStep[], baseAdPoints = 100): LadderFault[] {
+  const points = ladderPoints(rungs, baseAdPoints)
+  const faults: LadderFault[] = []
+
+  for (let i = 1; i < points.length; i += 1) {
+    const from = points[i - 1]!
+    const to = points[i]!
+    const broke: LadderFault['broke'] = []
+
+    /* Floating point, not sloppiness: a multiple is a division and two equal
+       ladders differ in the sixteenth decimal. A fault has to be a real one. */
+    if (to.perAd <= from.perAd) broke.push('perAd')
+    if (to.multiple < from.multiple - 1e-9) broke.push('multiple')
+    if (to.paybackDays > from.paybackDays + 1e-9) broke.push('payback')
+
+    if (broke.length) faults.push({ from, to, broke })
+  }
+
+  return faults
+}
+
+
 /**
  * Everything that can be wrong with where this plan sits in the ladder.
  *
