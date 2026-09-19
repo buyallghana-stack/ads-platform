@@ -504,7 +504,8 @@
         "ad": "Annonces",
         "game": "Jeu",
         "task": "Objectif",
-        "vault": "Coffre"
+        "vault": "Coffre",
+        "trial": "Essai gratuit"
       },
       "kindHint": {
         "bonus": "Bonus de parrainage",
@@ -517,6 +518,7 @@
         "ad": "Récompense publicitaire",
         "game": "Gain de jeu",
         "task": "Récompense d'objectif",
+        "trial": "Jours d'essai non utilisés, réglés",
         "vault": "Dépôt / retour de coffre",
         "vault_purchase": "Achat de coffre",
         "vault_claim": "Réclamation de coffre"
@@ -2444,6 +2446,7 @@
         "body": "{points} points sont détenus mais pas encore encaissés. Ce n'est pas encore un coût, donc absent de la colonne bénéfice, mais un bénéfice lu sans cela paraît meilleur qu'il ne l'est."
       },
       "columns": {
+        "vault": "Coffre",
         "month": "Mois",
         "subscriptions": "Formules",
         "advertisers": "Annonceurs",
@@ -2684,6 +2687,10 @@
         "freeEarningDays": {
           "label": "Durée de gain gratuite",
           "description": "Nombre de jours après l'inscription pendant lesquels un compte gratuit peut gagner. Prendre un forfait lève la limite immédiatement. 0 = aucune limite. C'est le plafond de ce que peut rapporter un compte créé pour de la fraude."
+        },
+        "freeWindowBuyout": {
+          "label": "Régler les jours gratuits non utilisés",
+          "description": "Quand quelqu'un achète son premier forfait, créditez-lui les jours d'essai gratuit dont il n'a pas pu profiter. Versé une seule fois par compte, jamais lors d'un renouvellement ou d'un second forfait, et rien du tout une fois la période gratuite terminée. Un jour où il était inscrit sans regarder est une perte pour lui. Le montant suit la période ci-dessus ainsi que le nombre d'annonces et le taux du forfait gratuit."
         }
       }
     },
@@ -3220,6 +3227,10 @@
       }
     },
     "payments": {
+      "kind": {
+        "subscription": "Forfait",
+        "vault": "Coffre"
+      },
       "title": "Paiements",
       "description": "Les achats de forfaits passés par le hub Tech Store, et tout ce qui est arrivé sans être traité.",
       "empty": "Aucun paiement n'est encore passé par le hub.",

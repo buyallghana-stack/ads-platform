@@ -3087,6 +3087,7 @@ export type Database = {
           advertisers_ghs: number
           month: string
           subscriptions_ghs: number
+          vault_ghs: number
           withdrawals_ghs: number
         }[]
       }
@@ -3363,9 +3364,10 @@ export type Database = {
           last_event: string
           last_event_at: string
           last_result: string
+          item_name: string
+          payment_kind: string
           person: string
-          status: Database["public"]["Enums"]["subscription_payment_status"]
-          tier_name: string
+          status: string
           user_id: string
         }[]
       }

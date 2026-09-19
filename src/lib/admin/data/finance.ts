@@ -36,7 +36,11 @@ const trend = (t: TrendRow) => ({
 
 /** The shape `admin_overview_metrics` returns, before numbers are unwrapped. */
 type MetricsJson = {
-  deposits: TrendRow & { subscriptions: number | string; advertisers: number | string }
+  deposits: TrendRow & {
+    subscriptions: number | string
+    advertisers: number | string
+    vault: number | string
+  }
   withdrawals: TrendRow
   profit: TrendRow
   liability: { points: number | string; ghs: number | string }
@@ -60,6 +64,11 @@ export async function getOverviewMetrics(): Promise<OverviewMetrics> {
       ...trend(m.deposits),
       subscriptions: Number(m.deposits.subscriptions),
       advertisers: Number(m.deposits.advertisers),
+      /* Its own line, never folded into the other two. A subscription is
+         revenue; a vault deposit is cash in with a return contracted against
+         it. Counted in the total because it IS money that arrived, split out
+         because they are not the same promise. */
+      vault: Number(m.deposits.vault ?? 0),
     },
     withdrawals: trend(m.withdrawals),
     profit: trend(m.profit),
@@ -83,12 +92,14 @@ export async function getFinanceRows(months = 12): Promise<FinanceRow[]> {
       month: string
       subscriptions_ghs: number | string
       advertisers_ghs: number | string
+      vault_ghs: number | string
       withdrawals_ghs: number | string
     }[]
   ).map((row) => ({
     month: row.month,
     subscriptionsGhs: Number(row.subscriptions_ghs),
     advertisersGhs: Number(row.advertisers_ghs),
+    vaultGhs: Number(row.vault_ghs ?? 0),
     withdrawalsGhs: Number(row.withdrawals_ghs),
   }))
 }

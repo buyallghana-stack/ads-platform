@@ -297,6 +297,18 @@ export async function pinEconomy(
     /** Game plays a week on the FREE plan. Zero in production since the
      *  pricing restructure, which is not a useful default for testing games. */
     freeGamePlays?: number
+    /**
+     * Whether buying a plan settles the unused free trial days.
+     *
+     * ⚠️ OFF unless a test says otherwise, although production has it ON. It
+     * pays `free_earning_days x the free cap x what a free ad pays`, and with
+     * the 50 ads a day pinned above that is 105,000 points landing in the
+     * balance of every fixture user who buys a plan. A test asserting what was
+     * spent on plans read 105,400 where it meant 400. Same reasoning as
+     * `coming_soon` in `pinLadder`: a fixture must not inherit a live
+     * behaviour that rewrites every number it is checking.
+     */
+    freeWindowBuyout?: boolean
   } = {},
 ): Promise<void> {
   const {
@@ -305,6 +317,7 @@ export async function pinEconomy(
     feePercent = 0,
     cooldownSeconds = 0,
     freeGamePlays = 5,
+    freeWindowBuyout = false,
   } = options
 
   await tx.query(
@@ -314,6 +327,7 @@ export async function pinEconomy(
   await setConfig(tx, 'points_per_currency_unit', String(pointsPerCedi))
   await setConfig(tx, 'redemption_fee_percent', String(feePercent))
   await setConfig(tx, 'ad_cooldown_seconds_default', String(cooldownSeconds))
+  await setConfig(tx, 'free_window_buyout_enabled', freeWindowBuyout ? 'true' : 'false')
 }
 
 /**
@@ -442,7 +456,12 @@ export async function pinLadder(
     rungs.map((r) => r.slug),
   ])
 
-  await setConfig(tx, 'points_per_currency_unit', String(pointsPerCedi))
+  /* The free trial buyout goes with it, for the same reason the peg does: a
+     rung's price decides what a plan costs, and this decides what buying one
+     PAYS BACK on the spot. A ladder test pinning prices while production's
+     settlement quietly credits every buyer is a ladder test measuring
+     something else. Off unless a test asks, exactly as in `pinEconomy`. */
+  await setConfig(tx, 'free_window_buyout_enabled', 'false')
 }
 
 /** Sets a config value for the length of the transaction only. */

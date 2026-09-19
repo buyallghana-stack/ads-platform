@@ -26,7 +26,7 @@ export type Trend = { value: number; changePct: number | null }
 
 export type OverviewMetrics = {
   /** Everything that came IN: plan purchases plus advertiser contracts. */
-  deposits: Trend & { subscriptions: number; advertisers: number }
+  deposits: Trend & { subscriptions: number; advertisers: number; vault: number }
   /** Everything paid OUT to users. */
   withdrawals: Trend
   /** deposits − withdrawals. The operator's headline number. */
@@ -539,5 +539,9 @@ export type FinanceRow = {
   month: string
   subscriptionsGhs: number
   advertisersGhs: number
+  /** Vault deposits that settled this month. Its own column since 2026-09-19:
+   *  money in, but with a contracted return against it, so it is counted in
+   *  the total and never blended into subscription revenue. */
+  vaultGhs: number
   withdrawalsGhs: number
 }

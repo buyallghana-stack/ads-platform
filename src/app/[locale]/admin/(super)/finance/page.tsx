@@ -49,11 +49,16 @@ export default async function AdminFinancePage({
     (acc, r) => ({
       subscriptions: acc.subscriptions + r.subscriptionsGhs,
       advertisers: acc.advertisers + r.advertisersGhs,
+      vault: acc.vault + r.vaultGhs,
       withdrawals: acc.withdrawals + r.withdrawalsGhs,
     }),
-    { subscriptions: 0, advertisers: 0, withdrawals: 0 },
+    { subscriptions: 0, advertisers: 0, vault: 0, withdrawals: 0 },
   )
-  const totalIn = totals.subscriptions + totals.advertisers
+  /* Vault money counts IN. It is cash that arrived, and leaving it out was
+     why a settled deposit could not be found in any total on this screen. It
+     keeps its own column rather than being folded into subscriptions, because
+     a deposit carries a return and a subscription does not. */
+  const totalIn = totals.subscriptions + totals.advertisers + totals.vault
   const totalProfit = totalIn - totals.withdrawals
 
   const monthLabel = (iso: string) =>
@@ -101,7 +106,7 @@ export default async function AdminFinancePage({
         <table className="w-full">
           <thead>
             <tr className="border-b border-ink-200">
-              {(['month', 'subscriptions', 'advertisers', 'in', 'out', 'profit'] as const).map(
+              {(['month', 'subscriptions', 'advertisers', 'vault', 'in', 'out', 'profit'] as const).map(
                 (c, i) => (
                   <th
                     key={c}
@@ -118,7 +123,7 @@ export default async function AdminFinancePage({
           </thead>
           <tbody className="divide-y divide-ink-200">
             {rows.map((r) => {
-              const inTotal = r.subscriptionsGhs + r.advertisersGhs
+              const inTotal = r.subscriptionsGhs + r.advertisersGhs + r.vaultGhs
               const profit = inTotal - r.withdrawalsGhs
               return (
                 <tr key={r.month} className="hover:bg-ink-50/60">
@@ -130,6 +135,9 @@ export default async function AdminFinancePage({
                   </td>
                   <td className="px-4 py-3 text-right text-[0.8125rem] text-ink-600 tabular-nums">
                     {ghs(r.advertisersGhs)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-[0.8125rem] text-ink-600 tabular-nums">
+                    {ghs(r.vaultGhs)}
                   </td>
                   <td className="px-4 py-3 text-right text-[0.8125rem] font-medium text-success-700 tabular-nums">
                     {ghs(inTotal)}
@@ -155,6 +163,9 @@ export default async function AdminFinancePage({
               <td className="px-4 py-3 text-right text-[0.8125rem] font-medium text-ink-700 tabular-nums">
                 {ghs(totals.advertisers)}
               </td>
+              <td className="px-4 py-3 text-right text-[0.8125rem] font-medium text-ink-700 tabular-nums">
+                {ghs(totals.vault)}
+              </td>
               <td className="px-4 py-3 text-right text-[0.8125rem] font-semibold text-success-700 tabular-nums">
                 {ghs(totalIn)}
               </td>
@@ -176,7 +187,7 @@ export default async function AdminFinancePage({
         {[...rows]
           .map((r) => ({
             ...r,
-            inTotal: r.subscriptionsGhs + r.advertisersGhs,
+            inTotal: r.subscriptionsGhs + r.advertisersGhs + r.vaultGhs,
           }))
           .map((r) => (
             <li
@@ -196,6 +207,12 @@ export default async function AdminFinancePage({
                   <dt className="text-[0.6875rem] text-ink-400">{t('columns.advertisers')}</dt>
                   <dd className="mt-0.5 text-[0.8125rem] text-ink-700 tabular-nums">
                     {ghs(r.advertisersGhs)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[0.6875rem] text-ink-400">{t('columns.vault')}</dt>
+                  <dd className="mt-0.5 text-[0.8125rem] text-ink-700 tabular-nums">
+                    {ghs(r.vaultGhs)}
                   </dd>
                 </div>
                 <div>

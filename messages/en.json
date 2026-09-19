@@ -504,7 +504,8 @@
         "ad": "Ads",
         "game": "Game",
         "task": "Task",
-        "vault": "Vault"
+        "vault": "Vault",
+        "trial": "Free trial"
       },
       "kindHint": {
         "bonus": "Referral bonus",
@@ -517,6 +518,7 @@
         "ad": "Ad reward",
         "game": "Game prize",
         "task": "Task reward",
+        "trial": "Unused free days, settled",
         "vault": "Vault deposit / return",
         "vault_purchase": "Vault purchase",
         "vault_claim": "Vault claim"
@@ -2444,6 +2446,7 @@
         "body": "{points} points are held but not yet cashed out. This is not a cost yet, so it is not in the profit column, but profit read without it looks better than it is."
       },
       "columns": {
+        "vault": "Vault",
         "month": "Month",
         "subscriptions": "Plans",
         "advertisers": "Advertisers",
@@ -2684,6 +2687,10 @@
         "freeEarningDays": {
           "label": "Free earning window",
           "description": "How many days after signing up a free account can earn. Buying any plan lifts it immediately. 0 means no limit. This is the ceiling on what a farmed account can ever be worth."
+        },
+        "freeWindowBuyout": {
+          "label": "Settle unused free days on upgrade",
+          "description": "When somebody buys their first plan, credit them for the free trial days they never got to use. Paid once per account, never on a renewal or a second plan, and nothing at all once the free window has run out. A day they were signed up for and did not watch is their own loss. The amount follows the window above and the free plan's own ad count and rate."
         }
       }
     },
@@ -3220,6 +3227,10 @@
       }
     },
     "payments": {
+      "kind": {
+        "subscription": "Plan",
+        "vault": "Vault"
+      },
       "title": "Payments",
       "description": "Plan purchases as they came through the Tech Store hub, and anything that arrived and was not acted on.",
       "empty": "No payments have gone through the hub yet.",

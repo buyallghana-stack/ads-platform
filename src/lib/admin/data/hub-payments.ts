@@ -10,6 +10,11 @@ import { createClient } from '@/lib/supabase/server'
  *
  * `getHubPayments` is the ordinary view: who bought what, and did it complete.
  *
+ * Both products, since 2026-09-19. A vault deposit goes through the same hub
+ * and lands in `vault_payments`, and this list read `subscription_payments`
+ * alone, so a settled vault payment could be seen here only if something had
+ * gone wrong with it and it surfaced as a flag.
+ *
  * `getHubFlags` is everything that arrived and was NOT acted on. When the hub
  * reports an amount that disagrees with the order, fulfilment refuses, the
  * event is recorded as `mismatch`, and the hub is told 2xx so it stops
@@ -24,12 +29,20 @@ import { createClient } from '@/lib/supabase/server'
 
 export type HubPaymentStatus = 'pending' | 'confirmed' | 'failed' | 'refunded'
 
+/** Which product the money bought. A vault deposit is a payment too, and
+ *  until 2026-09-19 this screen could not see one at all. */
+export type HubPaymentKind = 'subscription' | 'vault'
+
 export type HubPayment = {
   id: string
+  kind: HubPaymentKind
   userId: string
   person: string
   email: string
-  tierName: string
+  /** The plan bought, or the vault plan deposited into. Named `item` and not
+   *  `tier` because it is now either, and a column called tier holding a vault
+   *  plan is the kind of small lie this screen exists to stop. */
+  itemName: string
   amountMinor: number
   currency: string
   status: HubPaymentStatus
@@ -76,10 +89,17 @@ export async function getHubPayments(limit = 100): Promise<HubPayment[]> {
 
   return (data ?? []).map((row) => ({
     id: row.id,
+    /* ⚠️ TOLERANT OF BOTH SHAPES, ON PURPOSE AND TEMPORARILY. Migration 236
+       renamed `tier_name` to `item_name` and added `payment_kind`. A migration
+       and a deploy are never simultaneous, and whichever goes first there is a
+       window where this code and that function disagree. Reading both means
+       the window is invisible instead of showing an admin a table of blank
+       product names. Safe to simplify once 236 is live everywhere. */
+    kind: ((row as { payment_kind?: string }).payment_kind ?? 'subscription') as HubPaymentKind,
     userId: row.user_id,
     person: row.person ?? 'Deleted user',
     email: row.email ?? '',
-    tierName: row.tier_name,
+    itemName: row.item_name ?? (row as { tier_name?: string }).tier_name ?? '',
     amountMinor: Number(row.amount_minor),
     currency: row.currency_code.trim(),
     status: row.status as HubPaymentStatus,

@@ -106,6 +106,14 @@ export default async function AdminConfigPage({
           min: 0,
           suffix: t('units.days'),
         },
+        /* Directly under the window it settles, because the two only make
+           sense together: this pays for whatever of that window is left. */
+        {
+          key: 'free_window_buyout_enabled',
+          label: t('fields.freeWindowBuyout.label'),
+          description: t('fields.freeWindowBuyout.description'),
+          kind: 'toggle',
+        },
         {
           key: 'reward_pool_ceiling_blocks',
           label: t('fields.poolBlocks.label'),

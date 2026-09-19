@@ -172,7 +172,20 @@ export function HubPaymentsTable({
                 <td className="px-4 py-3">
                   <PersonCell name={p.person} secondary={p.reference} size="md" />
                 </td>
-                <td className="px-4 py-3 text-[0.8125rem] text-ink-700">{p.tierName}</td>
+                <td className="px-4 py-3 text-[0.8125rem] text-ink-700">
+                  <span className="flex items-center gap-2">
+                    {p.itemName}
+                    {/* Named on the row, not inferred from the plan name. A
+                        vault deposit and a plan purchase are both payments and
+                        both reach this screen, and an admin chasing one needs
+                        to know which without recognising every product name. */}
+                    {p.kind === 'vault' && (
+                      <span className="rounded-full bg-amber-50 px-1.5 py-0.5 text-[0.6875rem] font-medium text-amber-600">
+                        {t('kind.vault')}
+                      </span>
+                    )}
+                  </span>
+                </td>
                 <td className="px-4 py-3 text-right text-[0.8125rem] font-medium text-ink-800">
                   {money(p.amountMinor, p.currency)}
                 </td>
@@ -231,7 +244,12 @@ export function HubPaymentsTable({
 
               <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.8125rem] text-ink-600">
                 <span className="font-medium text-ink-800">{money(p.amountMinor, p.currency)}</span>
-                <span>{p.tierName}</span>
+                <span>{p.itemName}</span>
+                {p.kind === 'vault' && (
+                  <span className="rounded-full bg-amber-50 px-1.5 py-0.5 text-[0.6875rem] font-medium text-amber-600">
+                    {t('kind.vault')}
+                  </span>
+                )}
                 <span className="text-[0.75rem] text-ink-400">{when(p.createdAt)}</span>
               </div>
 

@@ -41,6 +41,7 @@ export type TxKind =
   | 'subscription'
   | 'adjustment'
   | 'vault'
+  | 'trial'
 
 export type TxRow = {
   id: string
@@ -88,6 +89,11 @@ const LEDGER_KIND: Record<string, TxKind> = {
   game_prize: 'game',
   // Fourth time. See the note above gift_code.
   task_reward: 'task',
+  // Fifth time this mapping has had to be remembered, and the first where it
+  // was written at the same time as the entry type rather than after somebody
+  // noticed. Settling the unused free trial days reads "Free trial", not
+  // "Account correction".
+  free_window_buyout: 'trial',
   weekly_bonus: 'bonus',
   redemption_request: 'withdrawal',
   redemption_refund: 'refund',

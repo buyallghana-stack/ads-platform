@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 
 import {
+  CalendarClock,
   ChevronDown,
   ChevronRight,
   Coins,
@@ -41,7 +42,7 @@ import { cn } from '@/lib/cn'
  * server-driven pagination arrives with the full history screen.
  */
 
-const KIND_ORDER: TxKind[] = ['ad', 'survey', 'bonus', 'gift', 'game', 'task', 'vault', 'withdrawal', 'refund', 'subscription', 'adjustment']
+const KIND_ORDER: TxKind[] = ['ad', 'survey', 'bonus', 'gift', 'trial', 'game', 'task', 'vault', 'withdrawal', 'refund', 'subscription', 'adjustment']
 
 const KIND_ICON: Record<TxKind, React.ComponentType<{ className?: string }>> = {
   ad: PlayCircle,
@@ -53,6 +54,9 @@ const KIND_ICON: Record<TxKind, React.ComponentType<{ className?: string }>> = {
   gift: Ticket,
   game: Gamepad2,
   task: Target,
+  // Days, because that is what was settled: the free trial ones they bought a
+  // plan before they could use.
+  trial: CalendarClock,
   vault: Vault,
   withdrawal: Smartphone,
   refund: RotateCcw,
@@ -83,6 +87,10 @@ const KIND_CHIP: Record<TxKind, string> = {
   // Orange too: points that arrived without an ad being watched. The shortcut
   // tile on Home is the same hue, so the row matches where it came from.
   gift: 'bg-orange-50 text-orange-600',
+  // Orange for the third time, by the same rule: points that arrived without
+  // an ad being watched. Three chips share the hue now and are told apart by
+  // their glyph, which is the pattern gift already established against bonus.
+  trial: 'bg-orange-50 text-orange-600',
   // Violet, the premium hue — a game win is the one credit that is luck.
   game: 'bg-violet-50 text-violet-600',
   // Teal, the 'something you set up' hue this app already uses for refunds
