@@ -134,7 +134,7 @@
       "titleAccent": "plus vite.",
       "lead": "Chaque formule augmente votre limite quotidienne et ce que vaut une publicité pour vous. Payez le montant de votre choix dans la fourchette : le taux monte avec lui.",
       "bestChip": "Meilleur taux",
-      "period": "{months, plural, one {pour # mois} other {pour # mois}}",
+      "period": "{days, plural, one {pendant # jour} other {pendant # jours}}",
       "rowAds": "Publicités par jour",
       "rowRate": "Par publicité",
       "rowThreshold": "Retrait dès",
@@ -2382,6 +2382,7 @@
         "priceHint": "Le plancher de la plage, pas un prix fixe.",
         "topBand": "Ce forfait se vend sous forme de fourchette",
         "topBandHint": "C'est le forfait le plus élevé : rien au-dessus ne fixe de plafond. Donnez-lui-en un et les acheteurs choisissent leur montant, comme pour les autres.",
+        "bandHint": "Sans plafond, cette tranche s'arrête un pesewa sous le forfait suivant et monte jusqu'au taux de ce forfait. Donnez-lui son propre plafond et elle s'arrête où vous le dites, au taux que vous fixez, en laissant un écart avant le forfait au-dessus.",
         "topBandMax": "Jusqu'à",
         "topBandRate": "Taux au sommet"
       },
@@ -2406,7 +2407,7 @@
         "topLine": "Le forfait le plus élevé se vend exactement à {price}. Aucun forfait au-dessus ne lui fixe de plafond.",
         "perCedi": "À ce plancher, GHS 1 achète +{pct}% de taux de gain. Les forfaits plus élevés achètent délibérément moins par cédi.",
         "neighbour": "Cela déplace aussi {name} : sa plage allait de {from} à {was} et devient {from} à {to}. Tous ceux qui achèteront {name} désormais gagneront au nouveau taux.",
-        "topRangeBody": "Payer le plancher rapporte {from}×, payer {price} rapporte {to}×, et tout montant intermédiaire se place sur la ligne. Le nombre d'annonces par jour reste à {ads} quel que soit le montant."
+        "rangeBody": "Payer le plancher rapporte {from}×, payer {price} rapporte {to}×, et tout montant intermédiaire se place sur la ligne. Le nombre d'annonces par jour reste à {ads} quel que soit le montant."
       },
       "bandWarn": {
         "unbuyable": {
@@ -2415,7 +2416,11 @@
         },
         "earningInversion": {
           "short": "Payer plus rapporterait moins",
-          "body": "{next} se situe au-dessus de ce forfait mais rapporte MOINS : dans cette plage, le taux baisse quand le prix monte, et un acheteur qui pousse le curseur verrait ses gains diminuer. Augmentez {next} ou baissez celui-ci."
+          "body": "{next} se situe au-dessus de ce forfait mais démarre à un taux INFÉRIEUR à celui où cette tranche s'arrête : qui paie le haut de ce forfait gagne plus par publicité que qui paie le plancher de {next}. Augmentez {next}, ou baissez le taux en haut de cette tranche."
+        },
+        "rangeInversion": {
+          "short": "Payer plus dans ce forfait rapporterait moins",
+          "body": "Le taux en haut de cette tranche est inférieur au taux à son plancher : un acheteur qui monte dans son propre forfait verrait ses gains baisser. Augmentez le taux en haut, ou baissez le taux plancher."
         },
         "adsInversion": {
           "short": "Le forfait au-dessus montre moins de publicités",

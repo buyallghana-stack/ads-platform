@@ -255,24 +255,28 @@ export function PlanPanel({
                 `bandWarn.${check.problems.includes('unbuyable') ? 'unbuyable' : check.problems[0]!}.body`,
                 { next: check.next?.name ?? '', name: draft.name || t('panel.newTitle') },
               )
-            : band?.isTop
-              ? draft.ownBandMaxGhs === null
-                ? t('band.topBody', { price: ghs(draft.priceGhs) })
-                : /* A top rung with a ceiling behaves like any other band, but
-                     it climbs towards a number rather than towards a plan —
-                     there is no next plan to name. */
-                  t('band.topRangeBody', {
-                    from: draft.rewardMultiplier,
-                    to: draft.ownBandMaxMultiplier ?? draft.rewardMultiplier,
-                    price: ghs(draft.ownBandMaxGhs),
-                    ads: draft.dailyAdCap,
-                  })
-              : t('band.body', {
+            : /* A CEILING OF ITS OWN COMES FIRST, on any rung. A band that
+                 carries one climbs towards a NUMBER, not towards the plan
+                 above, so naming the next plan here would quote a rate the
+                 database will not pay. This branch used to be reachable only
+                 at the top, which is why the live ladder's middle rungs each
+                 described themselves as sliding towards the plan above while
+                 stopping short of it. */
+              draft.ownBandMaxGhs !== null
+              ? t('band.rangeBody', {
                   from: draft.rewardMultiplier,
-                  to: check.next?.rewardMultiplier ?? draft.rewardMultiplier,
-                  next: check.next?.name ?? '',
+                  to: draft.ownBandMaxMultiplier ?? draft.rewardMultiplier,
+                  price: ghs(draft.ownBandMaxGhs),
                   ads: draft.dailyAdCap,
-                })}
+                })
+              : band?.isTop
+                ? t('band.topBody', { price: ghs(draft.priceGhs) })
+                : t('band.body', {
+                    from: draft.rewardMultiplier,
+                    to: check.next?.rewardMultiplier ?? draft.rewardMultiplier,
+                    next: check.next?.name ?? '',
+                    ads: draft.dailyAdCap,
+                  })}
         </p>
 
         {/* What one cedi buys here. Shown, never judged: the ladder gives less
@@ -299,8 +303,13 @@ export function PlanPanel({
             the line genuinely resolves. An empty band is a PRICE problem —
             rewriting the ads and the rate would leave the plan just as
             unsellable, and a button that does not do what it says is worse
-            than no button. The warning above says exactly what to change. */}
-        {!check.ok && !check.problems.includes('unbuyable') && (
+            than no button. A band that runs backwards inside itself is the
+            same story: `benefitsBetween` returns an ad cap and a floor rate
+            and never touches the ceiling, so it cannot fix that one either.
+            The warning above says exactly what to change. */}
+        {!check.ok &&
+          !check.problems.includes('unbuyable') &&
+          !check.problems.includes('rangeInversion') && (
           <button
             type="button"
             onClick={alignToLine}
@@ -447,16 +456,24 @@ export function PlanPanel({
           </Field>
         </div>
 
-        {/* ---- The top rung's own ceiling -------------------------------
-            Only here, and only at the top. Every other plan's band ends at the
-            plan above it — `plan_band_max_minor` ignores a stored ceiling
-            wherever there is a next rung — so offering the field lower down
-            would be offering a setting the database throws away.
+        {/* ---- A rung's own ceiling --------------------------------------
+            OFFERED ON EVERY PRICED RUNG, not only the top. It was top-only on
+            the reasoning that a middle rung's band ends at the plan above it,
+            so a stored ceiling would be a setting the database throws away.
+            Migration 189 ended that: the ladder gained GAPS, Bronze sells
+            GHS 85 to 105 while Silver starts at 145, and both
+            `plan_band_max_minor` and `plan_multiplier_for_amount` now read a
+            rung's OWN ceiling first wherever it has one.
+
+            `bandFor` and the save path moved with the functions. This panel
+            did not, so five of the six live plans carried a ceiling and a top
+            rate that decided what every buyer earned and that nothing on this
+            screen could edit.
 
             Both or neither, which the table enforces as a constraint: a
             ceiling with no rate to climb towards cannot be priced, and a rate
             with no ceiling is a number nothing reads. */}
-        {band?.isTop && draft.priceGhs > 0 && (
+        {draft.priceGhs > 0 && (
           <div className="mt-3">
             <label className="flex items-start gap-2.5 text-[0.8125rem] text-ink-700">
               <input
@@ -466,13 +483,22 @@ export function PlanPanel({
                 onChange={(e) =>
                   setDraft((d) => ({
                     ...d,
-                    /* Opening it suggests double the floor and the rate that
-                       continues the ladder's own line, so the honest answer is
-                       the one you get by doing nothing. Closing it clears BOTH,
-                       because a half-set pair is refused by the database. */
-                    ownBandMaxGhs: e.target.checked ? d.priceGhs * 2 : null,
+                    /* Opening it suggests the band the database would have
+                       used anyway, so the honest answer is the one you get by
+                       doing nothing. Below the top that is one pesewa under
+                       the next plan, climbing to the next plan's rate, which
+                       is exactly the fallback in `plan_band_max_minor`. At the
+                       top there is no next plan to borrow from, so it stays
+                       double the floor. Closing it clears BOTH, because a
+                       half-set pair is refused by the database. */
+                    ownBandMaxGhs: e.target.checked
+                      ? check.next
+                        ? Math.round((check.next.priceGhs - 0.01) * 100) / 100
+                        : d.priceGhs * 2
+                      : null,
                     ownBandMaxMultiplier: e.target.checked
-                      ? Math.round(d.rewardMultiplier * 1000 * 2 - 1000) / 1000
+                      ? (check.next?.rewardMultiplier ??
+                        Math.round(d.rewardMultiplier * 1000 * 2 - 1000) / 1000)
                       : null,
                   }))
                 }
@@ -480,7 +506,7 @@ export function PlanPanel({
               <span>
                 {t('fields.topBand')}
                 <span className="mt-0.5 block text-[0.75rem] text-ink-500">
-                  {t('fields.topBandHint')}
+                  {band?.isTop ? t('fields.topBandHint') : t('fields.bandHint')}
                 </span>
               </span>
             </label>

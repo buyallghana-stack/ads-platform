@@ -134,7 +134,7 @@
       "titleAccent": "faster.",
       "lead": "Every plan raises your daily limit and what each ad is worth to you. Pay anywhere inside a range and the rate rises with it.",
       "bestChip": "Best rate",
-      "period": "{months, plural, one {for # month} other {for # months}}",
+      "period": "{days, plural, one {for # day} other {for # days}}",
       "rowAds": "Ads a day",
       "rowRate": "Per ad",
       "rowThreshold": "Withdraw from",
@@ -2382,6 +2382,7 @@
         "priceHint": "The floor of the band, not a fixed price.",
         "topBand": "This plan sells as a range",
         "topBandHint": "It is the top plan, so nothing above it sets a ceiling. Give it one and buyers choose what to pay, exactly as they do lower down.",
+        "bandHint": "Without one, this band runs to a pesewa under the next plan and climbs to that plan's rate. Give it a ceiling of its own and it stops where you say, at the rate you say, leaving a gap before the plan above.",
         "topBandMax": "Up to",
         "topBandRate": "Rate at the top"
       },
@@ -2406,7 +2407,7 @@
         "topLine": "The top plan sells at exactly {price}. There is no plan above it to set a ceiling.",
         "perCedi": "At this floor, GHS 1 buys +{pct}% on the earning rate. Plans higher up the ladder deliberately buy less per cedi.",
         "neighbour": "This also moves {name}: its range was {from} to {was} and becomes {from} to {to}. Everyone who buys {name} after this earns at the new rate.",
-        "topRangeBody": "Paying the floor earns {from}×, paying {price} earns {to}×, and anything between lands on the line. Ads a day stay at {ads} whatever they pay."
+        "rangeBody": "Paying the floor earns {from}×, paying {price} earns {to}×, and anything between lands on the line. Ads a day stay at {ads} whatever they pay."
       },
       "bandWarn": {
         "unbuyable": {
@@ -2415,7 +2416,11 @@
         },
         "earningInversion": {
           "short": "Paying more would earn less",
-          "body": "{next} sits above this plan but earns at a LOWER rate, so inside this band the rate falls as the price rises: a buyer moving the slider up would watch their earning go down. Raise {next} or lower this one."
+          "body": "{next} sits above this plan but starts at a LOWER rate than this band ends on, so somebody paying the top of this plan earns more per ad than somebody paying the floor of {next}. Raise {next}, or lower the rate at the top of this band."
+        },
+        "rangeInversion": {
+          "short": "Paying more inside this plan would earn less",
+          "body": "The rate at the top of this band is below the rate at its floor, so a buyer moving up their own plan would watch their earning fall. Raise the rate at the top, or lower the floor rate."
         },
         "adsInversion": {
           "short": "The plan above shows fewer ads",

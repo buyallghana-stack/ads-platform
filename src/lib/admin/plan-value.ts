@@ -185,7 +185,15 @@ export function benefitsBetween(
   }
 }
 
-export type BandProblem = 'unbuyable' | 'earningInversion' | 'adsInversion'
+export type BandProblem =
+  | 'unbuyable'
+  | 'earningInversion'
+  | 'adsInversion'
+  /** The rate at the top of this plan's OWN band sits below its floor rate,
+   *  so the slider runs backwards inside one plan. Distinct from
+   *  `earningInversion`, which is about the plan above: this one names no
+   *  neighbour because no neighbour is involved. */
+  | 'rangeInversion'
 
 export type BandCheck = {
   ok: boolean
@@ -207,24 +215,33 @@ export function checkBand(plan: Rung, plans: Rung[]): BandCheck {
   const next = nextRung(plan, plans)
   const problems: BandProblem[] = []
 
-  if (band && !band.isTop && next) {
-    if (band.empty) problems.push('unbuyable')
-    if (next.rewardMultiplier < plan.rewardMultiplier) problems.push('earningInversion')
+  if (!band) return { ok: true, problems, band, next }
+
+  /* A range that runs backwards cannot be bought, whatever sets its end. Once
+     any rung may carry its own ceiling this is one check, not one per rung. */
+  if (band.empty) problems.push('unbuyable')
+
+  /* THE RATE AT THE TOP OF THIS BAND, which is the number the plan above has
+     to beat.
+
+     Floor against floor was the right comparison while a band ended at the
+     plan above it: the rate ran all the way to that plan's rate, so the two
+     met and neither could overtake the other. A ceiling of its own breaks
+     that. The band stops early, at a number this plan chose, and THAT is the
+     last rate it pays. Bronze at GHS 105 earning 1.80x against Silver's floor
+     of 1.87x is the comparison a buyer actually makes, and comparing Bronze's
+     own floor of 1.45x instead would have called a ladder sound while the
+     plan above it paid less per ad. */
+  const ceilingRate = plan.ownBandMaxMultiplier ?? plan.rewardMultiplier
+
+  if (ceilingRate < plan.rewardMultiplier) problems.push('rangeInversion')
+
+  if (next) {
+    if (next.rewardMultiplier < ceilingRate) problems.push('earningInversion')
     if (next.dailyAdCap < plan.dailyAdCap) problems.push('adsInversion')
   }
 
-  /* The top rung is checked against its OWN ceiling, which is the only thing
-     it has to be wrong about. Same two failures, one rung: a range that runs
-     backwards cannot be bought, and a top rate below the floor rate would mean
-     paying more to earn less inside a single plan. */
-  if (band && band.isTop && plan.ownBandMaxGhs != null) {
-    if (band.empty) problems.push('unbuyable')
-    if (plan.ownBandMaxMultiplier != null && plan.ownBandMaxMultiplier < plan.rewardMultiplier) {
-      problems.push('earningInversion')
-    }
-  }
-
-  return { ok: problems.length === 0, problems, band, next }
+  return { ok: problems.length === 0, problems: [...new Set(problems)], band, next }
 }
 
 /**

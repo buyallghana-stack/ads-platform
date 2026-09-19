@@ -103,21 +103,23 @@ export default async function LandingPage({
 
   /*
     MONEY & PLAN STATS, THE WAY A VISITOR THINKS ABOUT IT (operator spec).
-    All four stats are dynamic ranges read live from active plans in the database:
-    1. Daily ads: 1 (free) up to 13 (highest plan)
-    2. Pay per ad: GHS 1.13 – 4.62 (fits single line)
-    3. Earning rate multiplier: 1.0× – 4.6×
-    4. Active earning days: 50 – 55 days on paid plans
+    All four are ranges read live from the plans ON SALE, so retuning the
+    ladder in the admin moves the front page with it, and so does opening or
+    closing a rung. On 2026-09-19, with Sapphire and Platinum announced but not
+    yet sold, they read: 1 to 7 ads a day, GHS 1.45 to 3.73 an ad, 1.0x to
+    3.7x, 39 to 50 days. The literals below are only what a visitor sees if the
+    database is unreachable, so they track what is ON SALE rather than the
+    whole ladder, and certainly not an older one.
   */
   const minAds = figures.free?.adsPerDay ?? 1
   const maxAds = onSale.reduce((max, p) => Math.max(max, p.adsPerDay), 1)
   const adsRange = minAds === maxAds ? `${minAds}` : `${minAds} – ${maxAds}`
 
   const currency = onSale[0]?.currency ?? 'GHS'
-  const fromGhs = cheapestPaid ? cheapestPaid.perAdFrom.toFixed(2) : '1.13'
+  const fromGhs = cheapestPaid ? cheapestPaid.perAdFrom.toFixed(2) : '1.45'
   const toGhs = topPaid
     ? (topPaid.perAdTo > topPaid.perAdFrom ? topPaid.perAdTo : topPaid.perAdFrom).toFixed(2)
-    : '4.62'
+    : '3.73'
   const perAdHeadline = `${currency} ${fromGhs} – ${toGhs}`
 
   const minRate = (figures.free?.rewardMultiplier ?? 1).toFixed(1)
@@ -127,8 +129,8 @@ export default async function LandingPage({
   const rateRange = minRate === maxRate ? `${minRate}×` : `${minRate}× – ${maxRate}×`
 
   const paidBillingDays = paidPlans.map((p) => p.billingPeriodDays).filter(Boolean)
-  const minDays = paidBillingDays.length > 0 ? Math.min(...paidBillingDays) : 50
-  const maxDays = paidBillingDays.length > 0 ? Math.max(...paidBillingDays) : 55
+  const minDays = paidBillingDays.length > 0 ? Math.min(...paidBillingDays) : 39
+  const maxDays = paidBillingDays.length > 0 ? Math.max(...paidBillingDays) : 50
   const daysRange = minDays === maxDays ? `${minDays} days` : `${minDays} – ${maxDays} days`
 
   /* --- Stat band. Four live figures matching app configuration. ----- */
@@ -514,7 +516,7 @@ export default async function LandingPage({
                         </span>
                       </p>
                       <p className="mt-1.5 text-sm text-ink-500">
-                        {t('plans.period', { months: plan.months })}
+                        {t('plans.period', { days: plan.billingPeriodDays })}
                       </p>
                       {plan.flexible && (
                         <p className="mt-1.5 text-[0.8125rem] leading-snug text-ink-500">

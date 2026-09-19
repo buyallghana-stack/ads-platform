@@ -47,7 +47,13 @@ export type MarketingPlan = {
   /** Major units (GHS), not minor. 0 for the free tier. */
   price: number
   currency: string
-  months: number
+  /* HOW LONG A PLAN RUNS, IN DAYS, AND ONLY IN DAYS. There used to be a
+     `months` here, `round(billing_period_days / 30)`, and the front page was
+     the last screen still quoting it. It was already a lie by rounding and the
+     new ladder made it an obvious one: 39 and 43 day plans both printed "for 1
+     month" while the 46 to 57 day ones printed "for 2 months", so the cheapest
+     two plans read as half the length of the rest. The checkout stopped
+     dividing this for the same reason. */
   billingPeriodDays: number
   adsPerDay: number
   /** 1.5 means +50% points on every ad. What the FLOOR of the band pays. */
@@ -108,7 +114,12 @@ const FALLBACK: MarketingFigures = {
   baseAdPoints: 100,
   free: null,
   best: null,
-  pointsPerCedi: 1000,
+  /* 100, as `points_per_currency_unit` has been since the peg moved on
+     2026-08-04. It was left at the old 1,000 here, and this figure divides
+     every per-ad rate the page prints, so an unreachable database did not
+     degrade the front page: it advertised GHS 0.15 an ad where the ladder pays
+     GHS 1.45. */
+  pointsPerCedi: 100,
   withdrawFrom: 5000,
   freeEarningDays: 21,
 }
@@ -170,9 +181,10 @@ export async function getMarketingFigures(): Promise<MarketingFigures> {
   /*
     THE BAND, DERIVED THE SAME WAY EVERYWHERE.
 
-    `plan_band_max_minor` is the source of truth in SQL: a rung's ceiling is
-    one pesewa below the next rung's price, and the TOP rung uses its own
-    stored `band_max_minor`. The boundary is deliberately not symmetric, so it
+    `plan_band_max_minor` is the source of truth in SQL: a rung uses its OWN
+    stored `band_max_minor` wherever it has one, and falls back to a pesewa
+    below the next rung's price where it does not. Every rung on the live
+    ladder carries its own. The boundary is deliberately not symmetric, so it
     is written out here rather than guessed, and `marketing-bands.test.ts`
     asserts this agrees with the function.
 
@@ -211,8 +223,6 @@ export async function getMarketingFigures(): Promise<MarketingFigures> {
     description: t.description,
     price: t.price_minor / 100,
     currency: t.currency_code,
-    // Every paid plan is sold as a period of months, not days.
-    months: Math.max(1, Math.round(t.billing_period_days / 30)),
     billingPeriodDays: t.billing_period_days,
     adsPerDay: t.daily_ad_cap,
     rewardMultiplier: Number(t.reward_multiplier),
