@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import type { FeedAd } from '@/lib/ads/data'
 
@@ -117,6 +117,13 @@ export function VideoStage({
   const playerRef = useRef<YTPlayer | null>(null)
   /** Whether playback was requested before the player finished loading. */
   const wantPlayingRef = useRef(playing)
+  /*
+    Drawn over the frame once the video finishes — see the curtain in the
+    markup. State rather than a ref because it has to cause a paint, and it
+    cannot live in the parent: by the time a phase change has travelled up and
+    back down, YouTube's end screen has already rendered a frame.
+  */
+  const [ended, setEnded] = useState(false)
 
   /*
     The callbacks are held in refs and read inside the interval rather than
@@ -152,7 +159,14 @@ export function VideoStage({
         playerVars: {
           controls: 0, // no scrubbing — see the note at the top
           disablekb: 1,
+          // Kept for the players that still honour it, but it is NOT what
+          // hides YouTube from the user: YouTube deprecated modestbranding in
+          // 2023 and it is a no-op on current embeds. The inert iframe and the
+          // shield in the markup below are what actually do that job.
           modestbranding: 1,
+          // Annotations and end-of-video cards are YouTube-branded widgets
+          // drawn over the frame, and they are clickable links off this app.
+          iv_load_policy: 3,
           rel: 0,
           playsinline: 1, // iOS must not take over with its fullscreen player
           fs: 0,
@@ -161,6 +175,11 @@ export function VideoStage({
           onReady: () => {
             if (cancelled || !instance) return
             playerRef.current = instance
+            // A reused component moving to the next ad must not open behind
+            // the previous one's curtain. Done here rather than in the effect
+            // body because a fresh player IS the signal, and ENDED cannot fire
+            // before its own onReady.
+            setEnded(false)
             onReadyRef.current(instance.getDuration())
             // The tap that started this may have landed while the API was
             // still loading, so honour it now rather than losing it.
@@ -175,7 +194,10 @@ export function VideoStage({
             }, 250)
           },
           onStateChange: (e) => {
-            if (e.data === YT_ENDED) onEndedRef.current()
+            if (e.data === YT_ENDED) {
+              setEnded(true)
+              onEndedRef.current()
+            }
           },
           // Embedding disabled, video removed, region-blocked. Without this the
           // user sits on a black rectangle until they give up; the parent turns
@@ -217,13 +239,44 @@ export function VideoStage({
   }, [playing])
 
   if (ad.youtubeId) {
-    // The API REPLACES the mount node with its iframe, so the iframe ends up a
-    // child of this wrapper — carrying the API's own width/height attributes.
-    // The child selector is what overrides them; styling the mount node itself
-    // would have no effect once it is gone.
+    /*
+      The API REPLACES the mount node with its iframe, so the iframe ends up a
+      child of this wrapper — carrying the API's own width/height attributes.
+      The child selector is what overrides them; styling the mount node itself
+      would have no effect once it is gone.
+
+      WHY THE EMBED IS INERT
+      An ad has to read as part of this app, not as a YouTube video playing
+      inside it. Everything YouTube puts in front of the user is reached by a
+      pointer event on the iframe: the click that opens youtube.com in a new
+      tab, the hover that slides in the title bar naming the video and channel,
+      the share and watch-later buttons that come with it, and the right-click
+      menu offering "Copy video URL". Taking those events away removes all of
+      them at once, and costs nothing, because playback here is driven entirely
+      through the JS API from the `playing` prop rather than by the user
+      touching the player. `controls: 0` was already keeping them from
+      scrubbing; this keeps them from leaving.
+    */
     return (
-      <div className="relative size-full [&>iframe]:absolute [&>iframe]:inset-0 [&>iframe]:size-full">
+      <div className="relative size-full overflow-hidden [&>iframe]:pointer-events-none [&>iframe]:absolute [&>iframe]:inset-0 [&>iframe]:size-full">
         <div ref={mountRef} className="size-full" />
+
+        {/* Belt and braces over `pointer-events-none`: anything that still
+            reaches the iframe's box lands here instead. It is also what the
+            parent's own overlays sit above, so their z-order is unchanged. */}
+        <div aria-hidden className="absolute inset-0" />
+
+        {/*
+          THE END SCREEN IS THE ONE LEAK A SHIELD CANNOT STOP.
+          `rel: 0` has not removed related videos since 2018 — it only limits
+          them to the same channel — so YouTube draws a grid of its own
+          thumbnails over the final frame. This component stays mounted through
+          the result phase and the parent's result panel is translucent, so
+          without this those thumbnails would show through it. Opaque, and
+          raised in the same tick as the ENDED event, so there is no frame in
+          which the grid is visible.
+        */}
+        {ended && <div aria-hidden className="absolute inset-0 bg-black" />}
       </div>
     )
   }
