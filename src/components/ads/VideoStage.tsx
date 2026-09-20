@@ -122,19 +122,26 @@ export function VideoStage({
   /*
     Whether the curtain in the markup is down over the frame.
 
-    YouTube only shows its own furniture — the logo, the "Watch on YouTube"
-    link, the title, the grid of related videos — when the video is NOT
-    playing. So the rule is simply: if it is not playing, it is covered. That
-    is driven off the player's own state events rather than the `playing` prop,
-    because the prop says what we ASKED for and the event says what YouTube
-    actually did, and the gap between the two is exactly where its branding
-    appears.
+    YouTube only shows its own furniture — the channel avatar, the title, the
+    channel name, its red play button, the "Watch on YouTube" link, the grid of
+    related videos — when the video is NOT playing. So the rule is simply: if
+    it is not playing, it is covered. That is driven off the player's own state
+    events rather than the `playing` prop, because the prop says what we ASKED
+    for and the event says what YouTube actually did, and the gap between the
+    two is exactly where its branding appears.
+
+    STARTS COVERED, AND onReady RE-COVERS. The single worst offender is the
+    state before anybody has pressed anything: an unstarted embed paints the
+    avatar, the title, the channel name and a "Watch on YouTube" link straight
+    onto the poster, and that is the first thing a viewer ever sees. Only
+    PLAYING lifts this, so there is no window — not at mount, not while the API
+    loads, not between ready and the first frame — in which any of it shows.
 
     State rather than a ref because it has to cause a paint, and it cannot live
     in the parent: by the time a phase change has travelled up and back down,
     YouTube has already rendered a frame of its own.
   */
-  const [covered, setCovered] = useState(false)
+  const [covered, setCovered] = useState(true)
 
   /*
     The callbacks are held in refs and read inside the interval rather than
@@ -209,11 +216,12 @@ export function VideoStage({
             if (cancelled || !instance) return
             playerRef.current = instance
             cancelStallTimer()
-            // A reused component moving to the next ad must not open behind
-            // the previous one's curtain. Done here rather than in the effect
-            // body because a fresh player IS the signal, and no state event
-            // can fire before its own onReady.
-            setCovered(false)
+            // A fresh player is showing its unstarted poster, branding and all,
+            // so it must be covered — including when this component is reused
+            // for the next ad and the previous one left the curtain up. Done
+            // here rather than in the effect body because a fresh player IS the
+            // signal, and no state event can fire before its own onReady.
+            setCovered(true)
             onReadyRef.current(instance.getDuration())
             // The tap that started this may have landed while the API was
             // still loading, so honour it now rather than losing it.
@@ -222,9 +230,27 @@ export function VideoStage({
             // getCurrentTime polling is the only position signal the IFrame
             // API offers; 4 Hz is precise enough to land a cue on the intended
             // second and cheap enough for a low-end handset.
+            let lastSeen = -1
             ticker = setInterval(() => {
               const p = playerRef.current
-              if (p) onTimeRef.current(p.getCurrentTime())
+              if (!p) return
+              const at = p.getCurrentTime()
+              /*
+                A moving clock is proof of playback, and proof beats an event we
+                might not have received. Covering the frame is now the default,
+                so a missed PLAYING would leave the cover stuck over a video the
+                viewer can hear but not see — a worse failure than the branding
+                this is all guarding against.
+
+                Gated on having ASKED for playback. Without that, the tick
+                between pauseVideo() and YouTube's PAUSED event would still see
+                the clock advancing, lift the cover, and flash the branded
+                paused frame for a quarter of a second, which is the exact thing
+                a question pause is meant to hide.
+              */
+              if (wantPlayingRef.current && at > lastSeen + 0.01) setCovered(false)
+              lastSeen = at
+              onTimeRef.current(at)
             }, 250)
           },
           onStateChange: (e) => {
@@ -318,21 +344,36 @@ export function VideoStage({
         {/*
           WHAT A SHIELD CANNOT STOP.
           Blocking pointer events keeps the user from reaching YouTube, but the
-          logo, the "Watch on YouTube" link, the title and the end-of-video grid
-          of related videos are all painted INSIDE the iframe, so nothing
-          outside it can hide them. Only covering the frame can.
+          avatar, the title, the channel name, the red play button, the "Watch
+          on YouTube" link and the end-of-video grid of related videos are all
+          painted INSIDE the iframe, so nothing outside it can hide them. Only
+          covering the frame can.
 
-          Two moments need it. A question pauses the video, and a paused embed
-          shows its logo and link. And the final frame is followed by the
-          related-video grid: `rel: 0` has not removed those since 2018, it only
-          limits them to the same channel. This component stays mounted through
-          the result phase and the parent's result panel is translucent, so
-          without this they would show through it.
+          Three moments need it. Before playback, where an unstarted embed shows
+          the lot and it is the first thing a viewer meets. During a question,
+          because a paused embed shows its logo and link. And after the last
+          frame, where the related-video grid appears: `rel: 0` has not removed
+          those since 2018, it only limits them to the same channel. This
+          component stays mounted through the result phase and the parent's
+          result panel is translucent, so without this they would show through
+          it.
 
-          Opaque, and raised in the same tick as the player's own state event,
-          so there is no frame in which any of it is visible.
+          It carries the ad's own still rather than being plain black, so what
+          the viewer meets is a cover image belonging to this app. For a YouTube
+          ad with no uploaded artwork that still comes from YouTube's servers,
+          but it is a frame of the video with no branding drawn on it. `cover`
+          crops the 4:3 still to the player's 16:9 box, which is what trims off
+          the letterbox bars the thumbnail is stored with.
         */}
-        {covered && <div aria-hidden className="absolute inset-0 bg-black" />}
+        {covered && (
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-black bg-cover bg-center"
+            style={
+              ad.thumbnailUrl ? { backgroundImage: `url(${ad.thumbnailUrl})` } : undefined
+            }
+          />
+        )}
       </div>
     )
   }
