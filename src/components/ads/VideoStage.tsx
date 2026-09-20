@@ -86,6 +86,8 @@ function loadYouTubeApi(): Promise<YTNamespace> {
 }
 
 const YT_ENDED = 0
+const YT_PLAYING = 1
+const YT_PAUSED = 2
 
 export function VideoStage({
   ad,
@@ -118,12 +120,21 @@ export function VideoStage({
   /** Whether playback was requested before the player finished loading. */
   const wantPlayingRef = useRef(playing)
   /*
-    Drawn over the frame once the video finishes — see the curtain in the
-    markup. State rather than a ref because it has to cause a paint, and it
-    cannot live in the parent: by the time a phase change has travelled up and
-    back down, YouTube's end screen has already rendered a frame.
+    Whether the curtain in the markup is down over the frame.
+
+    YouTube only shows its own furniture — the logo, the "Watch on YouTube"
+    link, the title, the grid of related videos — when the video is NOT
+    playing. So the rule is simply: if it is not playing, it is covered. That
+    is driven off the player's own state events rather than the `playing` prop,
+    because the prop says what we ASKED for and the event says what YouTube
+    actually did, and the gap between the two is exactly where its branding
+    appears.
+
+    State rather than a ref because it has to cause a paint, and it cannot live
+    in the parent: by the time a phase change has travelled up and back down,
+    YouTube has already rendered a frame of its own.
   */
-  const [ended, setEnded] = useState(false)
+  const [covered, setCovered] = useState(false)
 
   /*
     The callbacks are held in refs and read inside the interval rather than
@@ -148,6 +159,28 @@ export function VideoStage({
     let cancelled = false
     let ticker: ReturnType<typeof setInterval> | null = null
     let instance: YTPlayer | null = null
+
+    /*
+      NOW THAT THE TAP WAITS FOR onReady, onReady NEVER ARRIVING IS A DEAD END.
+      The parent holds its play button disabled until this player is ready, so a
+      YouTube script that never loads — blocked, offline, a connection that has
+      simply given up — would leave the viewer on a spinner with nothing to
+      press. The API reports nothing in that case: no player is ever
+      constructed, so there is no onError either.
+
+      Treating silence as a failure is what gives them a way out: the parent's
+      'unavailable' state says so plainly and offers a button. 20 seconds
+      because this audience is on mobile data and a slow load is not a broken
+      one.
+    */
+    let stalled: ReturnType<typeof setTimeout> | null = setTimeout(() => {
+      stalled = null
+      if (!cancelled && !playerRef.current) onErrorRef.current()
+    }, 20_000)
+    const cancelStallTimer = () => {
+      if (stalled) clearTimeout(stalled)
+      stalled = null
+    }
 
     loadYouTubeApi().then((YT) => {
       if (cancelled || !mountRef.current) return
@@ -175,11 +208,12 @@ export function VideoStage({
           onReady: () => {
             if (cancelled || !instance) return
             playerRef.current = instance
+            cancelStallTimer()
             // A reused component moving to the next ad must not open behind
             // the previous one's curtain. Done here rather than in the effect
-            // body because a fresh player IS the signal, and ENDED cannot fire
-            // before its own onReady.
-            setEnded(false)
+            // body because a fresh player IS the signal, and no state event
+            // can fire before its own onReady.
+            setCovered(false)
             onReadyRef.current(instance.getDuration())
             // The tap that started this may have landed while the API was
             // still loading, so honour it now rather than losing it.
@@ -194,8 +228,22 @@ export function VideoStage({
             }, 250)
           },
           onStateChange: (e) => {
+            /*
+              PAUSED is the one that matters for how native this feels. A
+              question pausing the video is the common case, and a paused
+              YouTube embed draws its logo and a "Watch on YouTube" link over
+              the frame. Covering it is the only way to keep those out: they
+              are painted inside the iframe, so no amount of blocking pointer
+              events can reach them.
+
+              BUFFERING is deliberately not covered. It happens mid-playback on
+              a slow connection, and a curtain that flickered every time the
+              network stuttered would be worse than the spinner it hid.
+            */
+            if (e.data === YT_PLAYING) setCovered(false)
+            if (e.data === YT_PAUSED) setCovered(true)
             if (e.data === YT_ENDED) {
-              setEnded(true)
+              setCovered(true)
               onEndedRef.current()
             }
           },
@@ -209,6 +257,7 @@ export function VideoStage({
 
     return () => {
       cancelled = true
+      cancelStallTimer()
       if (ticker) clearInterval(ticker)
       playerRef.current = null
       // destroy() on a player that never became ready can throw; a failed
@@ -267,16 +316,23 @@ export function VideoStage({
         <div aria-hidden className="absolute inset-0" />
 
         {/*
-          THE END SCREEN IS THE ONE LEAK A SHIELD CANNOT STOP.
-          `rel: 0` has not removed related videos since 2018 — it only limits
-          them to the same channel — so YouTube draws a grid of its own
-          thumbnails over the final frame. This component stays mounted through
+          WHAT A SHIELD CANNOT STOP.
+          Blocking pointer events keeps the user from reaching YouTube, but the
+          logo, the "Watch on YouTube" link, the title and the end-of-video grid
+          of related videos are all painted INSIDE the iframe, so nothing
+          outside it can hide them. Only covering the frame can.
+
+          Two moments need it. A question pauses the video, and a paused embed
+          shows its logo and link. And the final frame is followed by the
+          related-video grid: `rel: 0` has not removed those since 2018, it only
+          limits them to the same channel. This component stays mounted through
           the result phase and the parent's result panel is translucent, so
-          without this those thumbnails would show through it. Opaque, and
-          raised in the same tick as the ENDED event, so there is no frame in
-          which the grid is visible.
+          without this they would show through it.
+
+          Opaque, and raised in the same tick as the player's own state event,
+          so there is no frame in which any of it is visible.
         */}
-        {ended && <div aria-hidden className="absolute inset-0 bg-black" />}
+        {covered && <div aria-hidden className="absolute inset-0 bg-black" />}
       </div>
     )
   }

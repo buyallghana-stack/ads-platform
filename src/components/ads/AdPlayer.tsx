@@ -99,6 +99,20 @@ export function AdPlayer({
 
   const [elapsed, setElapsed] = useState(0)
   const [duration, setDuration] = useState(ad.durationSeconds ?? 0)
+  /*
+    Whether the player can actually be told to play yet.
+
+    THIS IS A MOBILE AUTOPLAY RULE, NOT A COSMETIC ONE. A browser only honours
+    playVideo() inside the gesture that asked for it. Tapping before YouTube has
+    finished loading meant the tap was remembered and replayed from the player's
+    own onReady callback instead, which is not a gesture, so the phone refused
+    it — and because the tap had already moved us past 'intro', the overlay was
+    gone and there was nothing left to tap. The ad simply never started.
+
+    So the tap is not offered until the player is ready, which is what keeps
+    playVideo() inside the gesture.
+  */
+  const [ready, setReady] = useState(false)
   /**
    * Set once the server has ruled, and never cleared except by a retry.
    *
@@ -429,6 +443,7 @@ export function AdPlayer({
     setElapsed(0)
     endedRef.current = false
     setEnded(false)
+    setReady(false)
     setPhaseNow('starting')
     setRunKey((k) => k + 1)
   }
@@ -627,7 +642,10 @@ export function AdPlayer({
               playing={phase === 'playing' && !confirmingClose}
               onTime={handleTime}
               onEnded={handleEnded}
-              onReady={(d) => setDuration((prev) => (d > 0 ? d : prev))}
+              onReady={(d) => {
+                setReady(true)
+                setDuration((prev) => (d > 0 ? d : prev))
+              }}
               // Nothing has been consumed at this point — the attempt is only
               // spent on submission — so the ad simply stays in the feed.
               onError={() => setPhaseNow('unavailable')}
@@ -636,20 +654,30 @@ export function AdPlayer({
             {phase === 'intro' && (
               <button
                 type="button"
+                /* See `ready`: an early tap used to lose the gesture and the ad
+                   never played. The spinner is the honest state — the ad is
+                   loading — rather than a play icon that does nothing. */
+                disabled={!ready}
                 onClick={() => setPhaseNow('playing')}
-                className="absolute inset-0 grid place-items-center bg-black/45 text-white"
+                className="absolute inset-0 grid place-items-center bg-black/45 text-white disabled:cursor-default"
               >
                 <span className="flex flex-col items-center gap-3">
                   <span className="grid size-20 place-items-center rounded-full bg-white/15 ring-1 ring-white/40 backdrop-blur-[2px]">
-                    <Play className="size-8 translate-x-[2px] fill-current" strokeWidth={0} />
+                    {ready ? (
+                      <Play className="size-8 translate-x-[2px] fill-current" strokeWidth={0} />
+                    ) : (
+                      <Loader2 aria-hidden className="size-8 animate-spin" />
+                    )}
                   </span>
-                  <span className="text-[0.875rem] font-semibold">{t('player.tapToPlay')}</span>
-                  {questions.length > 0 && (
+                  <span className="text-[0.875rem] font-semibold">
+                    {ready ? t('player.tapToPlay') : t('player.loading')}
+                  </span>
+                  {ready && questions.length > 0 && (
                     <span className="max-w-[24ch] text-center text-[0.75rem] text-white/70">
                       {t('player.questionsAhead', { count: questions.length })}
                     </span>
                   )}
-                  {questions.length === 0 && (
+                  {ready && questions.length === 0 && (
                     <span className="text-[0.75rem] text-white/70">
                       {t('player.watchOnlyHint')}
                     </span>
