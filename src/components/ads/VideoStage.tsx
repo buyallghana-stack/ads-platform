@@ -331,9 +331,24 @@ export function VideoStage({
       through the JS API from the `playing` prop rather than by the user
       touching the player. `controls: 0` was already keeping them from
       scrubbing; this keeps them from leaving.
+
+      WHY THE IFRAME IS THREE TIMES TOO TALL
+      For the first couple of seconds of playback YouTube fades in its own
+      furniture — the avatar, the title, the channel name and the logo with its
+      link — anchored to the TOP AND BOTTOM EDGES OF THE PLAYER BOX. A curtain
+      cannot help there, because the video is genuinely playing and covering it
+      would hide the advert the viewer is being paid to watch.
+
+      So the player box is made three times the height of what is on screen and
+      pulled up by one whole height, which puts its top and bottom edges one
+      screen-height above and below the visible area, and the furniture with
+      them. Nothing is cropped from the video: YouTube fits the picture to the
+      box's WIDTH and centres it vertically, so a 16:9 video in a box of this
+      shape lands exactly in the middle third, which is precisely the area still
+      visible. The parent already clips with `overflow-hidden`.
     */
     return (
-      <div className="relative size-full overflow-hidden [&>iframe]:pointer-events-none [&>iframe]:absolute [&>iframe]:inset-0 [&>iframe]:size-full">
+      <div className="relative size-full overflow-hidden [&>iframe]:pointer-events-none [&>iframe]:absolute [&>iframe]:left-0 [&>iframe]:top-[-100%] [&>iframe]:h-[300%] [&>iframe]:w-full">
         <div ref={mountRef} className="size-full" />
 
         {/* Belt and braces over `pointer-events-none`: anything that still
