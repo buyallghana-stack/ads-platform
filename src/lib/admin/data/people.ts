@@ -1,6 +1,5 @@
 import 'server-only'
 
-import { avatarPublicUrl } from '@/lib/profile/avatar'
 import { createClient } from '@/lib/supabase/server'
 
 import type { Person } from '../types'
@@ -35,7 +34,6 @@ type PersonRow = {
   name: string
   email: string
   phone: string | null
-  avatar_path: string | null
   joined_at: string
   balance_points: number | string
   tier: string
@@ -60,7 +58,6 @@ function toPerson(row: PersonRow): Person {
     name: row.name,
     email: row.email,
     phone: row.phone,
-    avatarUrl: avatarPublicUrl(row.avatar_path),
     joinedAt: row.joined_at,
     // bigint and numeric arrive as strings over PostgREST once they are large
     // enough. Converted here, once, so nothing downstream does string

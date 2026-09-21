@@ -442,7 +442,7 @@ export function PayoutsTable({
                       label={t('reviewRow', { reference: r.reference, name: r.user.name })}
                       onClick={() => setOpenId(r.id)}
                     >
-                      <PersonCell name={r.user.name} avatarUrl={r.user.avatarUrl} />
+                      <PersonCell name={r.user.name} />
                     </RowOpener>
                     <p className="mt-1 pl-[2.625rem] font-mono text-[0.6875rem] text-ink-400">
                       {r.reference}

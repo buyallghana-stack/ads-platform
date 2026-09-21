@@ -207,7 +207,7 @@ function Panel({
         )
       }
     >
-      <PersonCell name={p.name} secondary={p.email} avatarUrl={p.avatarUrl} size="md" />
+      <PersonCell name={p.name} secondary={p.email} size="md" />
 
       {/* The flag leads when that is what the operator came for. */}
       {p.status !== 'active' && p.flagReason && (

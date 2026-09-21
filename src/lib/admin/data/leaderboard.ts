@@ -1,7 +1,6 @@
 import 'server-only'
 
 import { getSessionUser } from '@/lib/auth/session'
-import { avatarPublicUrl } from '@/lib/profile/avatar'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { type LeaderboardPeriod, type Movement, asMovement } from '@/lib/leaderboard/types'
 
@@ -28,7 +27,6 @@ export type AdminLeaderboardRow = {
   fullName: string
   email: string
   phone: string | null
-  avatarUrl: string | null
   points: number
   previousRank: number | null
   movement: Movement
@@ -57,7 +55,6 @@ export async function getAdminLeaderboard(
     fullName: String(r.full_name ?? ''),
     email: String(r.email ?? ''),
     phone: (r.phone as string | null) ?? null,
-    avatarUrl: avatarPublicUrl(r.avatar_path as string | null),
     points: Number(r.points),
     previousRank: r.previous_rank === null ? null : Number(r.previous_rank),
     movement: asMovement(r.movement),

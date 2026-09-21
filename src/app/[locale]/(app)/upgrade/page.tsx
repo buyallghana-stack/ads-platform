@@ -6,6 +6,7 @@ import { UpgradeView } from '@/components/upgrade/UpgradeView'
 import { redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
 import { hubConfigured } from '@/lib/env'
+import { getPaymentMethodSwitches } from '@/lib/payments/methods'
 import { createAdminClient } from '@/lib/supabase/admin'
 import {
   getHeldPlans,
@@ -44,12 +45,15 @@ export default async function UpgradePage({
   if (!user) redirect({ href: '/login', locale })
 
   const admin = createAdminClient()
-  const [plans, held, benefits, references, { data: earningStatus }] = await Promise.all([
+  const [plans, held, benefits, references, { data: earningStatus }, switches] = await Promise.all([
     getPlans(),
     getHeldPlans(user!.id),
     getResolvedBenefits(user!.id),
     getPlanReferences(),
     admin.rpc('get_user_earning_status', { p_user_id: user!.id }).maybeSingle(),
+    /* Which ways to pay the checkout should LIST. Labels, not gates: the
+       payment page belongs to the hub. See lib/payments/methods.ts. */
+    getPaymentMethodSwitches(),
   ])
 
   return (
@@ -63,6 +67,7 @@ export default async function UpgradePage({
       baseAdPoints={references.baseAdPoints}
       pointsPerCurrencyUnit={references.pointsPerCurrencyUnit}
       checkoutEnabled={hubConfigured()}
+      checkoutMethods={switches.checkout}
       initialCoupon={(await searchParams).coupon ?? null}
     />
   )

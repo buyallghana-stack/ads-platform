@@ -269,7 +269,7 @@ export function AdministratorsBoard({ initial }: { initial: Administrator[] }) {
           const RoleIcon = a.role ? ROLE_ICON[a.role] : ShieldOff
           return (
             <li key={a.id} className="flex items-start gap-3 px-4 py-3.5">
-              <Avatar name={displayName(a)} src={null} className="size-9 shrink-0 text-[0.75rem]" />
+              <Avatar name={displayName(a)} className="size-9 shrink-0 text-[0.75rem]" />
 
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[0.875rem] font-semibold text-ink-900">

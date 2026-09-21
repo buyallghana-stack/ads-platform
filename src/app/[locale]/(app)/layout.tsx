@@ -6,7 +6,6 @@ import { redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser, getViewerUser } from '@/lib/auth/session'
 import { getViewAsSession } from '@/lib/admin/view-as'
 import { ViewAsBanner } from '@/components/app/ViewAsBanner'
-import { avatarPublicUrl } from '@/lib/profile/avatar'
 import { needsLoginChallenge } from '@/lib/security/login-2fa'
 import { getPlanStanding } from '@/lib/subscriptions/data'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -77,8 +76,8 @@ export default async function AppLayout({
     audience is on mobile data — two awaits in a row would add a round trip to
     every page for no reason.
 
-    profile      cached alongside the page's own call, so the Profile tab
-                 wearing the user's photo costs no extra query
+    profile      cached alongside the page's own call, so the "view as"
+                 banner naming the user costs no extra query
     planStanding same rule as the Profile promo: "upgrade" only before they
                  own a plan, "add more" while some are left, and nothing at
                  all once they hold them every one
@@ -87,11 +86,6 @@ export default async function AppLayout({
     getProfile(user!.id),
     getPlanStanding(user!.id),
   ])
-  const navUser = {
-    avatarUrl: avatarPublicUrl(profile?.avatar_path),
-    name: profile?.full_name ?? null,
-  }
-
   return (
     /* The banner sits ABOVE the app shell rather than inside it, so the
        sidebar/content/tab-bar row below is byte-identical to what it was
@@ -101,7 +95,6 @@ export default async function AppLayout({
       {viewing && <ViewAsBanner name={profile?.full_name ?? t('viewAsFallbackName')} />}
       <div className="flex min-h-dvh bg-canvas">
       <Sidebar
-        user={navUser}
         upgradeSlot={
           planStanding === 'all' ? null : (
             <Link
@@ -124,7 +117,7 @@ export default async function AppLayout({
         <main className="flex-1 pb-24 md:pb-0">{children}</main>
       </div>
 
-      <BottomTabBar user={navUser} />
+      <BottomTabBar />
       </div>
     </>
   )

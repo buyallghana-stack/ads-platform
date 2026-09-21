@@ -200,7 +200,6 @@ export function LeaderboardView({
                   )}
                   <Avatar
                     name={row.name}
-                    src={row.avatarUrl}
                     className={cn(
                       'text-[0.875rem]',
                       slot === 1 ? 'size-16 sm:size-20' : 'size-12 sm:size-16',
@@ -335,7 +334,7 @@ function Row({
       <span className="w-7 shrink-0 text-center text-[0.8125rem] font-bold tabular-nums text-ink-400">
         {row.rank}
       </span>
-      <Avatar name={row.name} src={row.avatarUrl} className="size-9 text-[0.6875rem]" />
+      <Avatar name={row.name} className="size-9 text-[0.6875rem]" />
       <span className="min-w-0 flex-1 truncate text-[0.875rem] font-semibold text-ink-900">
         {isMe ? youLabel : row.name}
       </span>

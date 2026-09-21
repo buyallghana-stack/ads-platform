@@ -1,6 +1,5 @@
 import 'server-only'
 
-import { avatarPublicUrl } from '@/lib/profile/avatar'
 import { createClient } from '@/lib/supabase/server'
 import {
   LEADERBOARD_PERIODS,
@@ -40,7 +39,6 @@ type RawRow = {
   rank: number | string
   user_id: string
   display_name: string | null
-  avatar_path: string | null
   points: number | string
   previous_rank: number | string | null
   movement: string | null
@@ -80,7 +78,6 @@ export async function getLeaderboardData(userId: string): Promise<LeaderboardDat
       rank: num(row.rank),
       userId: row.user_id,
       name: row.display_name ?? 'Someone',
-      avatarUrl: avatarPublicUrl(row.avatar_path),
       points: num(row.points),
       previousRank: row.previous_rank === null ? null : num(row.previous_rank),
       movement: asMovement(row.movement),

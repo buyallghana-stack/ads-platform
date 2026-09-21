@@ -1,6 +1,5 @@
 import 'server-only'
 
-import { avatarPublicUrl } from '@/lib/profile/avatar'
 import { createClient } from '@/lib/supabase/server'
 import {
   EMPTY_TOTALS,
@@ -39,7 +38,6 @@ type RawMember = {
   member_id: string
   full_name: string | null
   phone: string | null
-  avatar_path: string | null
   joined_at: string
   top_plan: string | null
   extra_plans: number | string
@@ -85,7 +83,6 @@ export async function getTeamData(userId: string): Promise<TeamData> {
     id: row.member_id,
     name: row.full_name,
     phone: row.phone,
-    avatarUrl: avatarPublicUrl(row.avatar_path),
     joinedAt: row.joined_at,
     /* The function coalesces to the default tier, so this fallback only fires
        if an operator ever deletes the default tier row. A visible word beats

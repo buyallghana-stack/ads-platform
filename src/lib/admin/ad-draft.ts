@@ -78,6 +78,7 @@ export function blankDraft(format: AdFormat, linkDwellSeconds = 10): AdDraft {
     title: '',
     description: '',
     advertiser: '',
+    advertiserLogoPath: null,
     format,
     // Nothing is ever created live. An ad reaches the pool because somebody
     // read it back and chose to publish it.
@@ -377,6 +378,7 @@ export function adDraftPayload(draft: AdDraft): Payload {
       title: draft.title.trim(),
       description: trimmed(draft.description),
       advertiser_name: trimmed(draft.advertiser),
+      advertiser_logo_path: draft.advertiserLogoPath,
       format: draft.format,
       status: draft.status,
       points_reward: draft.points,
@@ -461,6 +463,7 @@ export type RawAd = {
   title: string
   description: string | null
   advertiser_name: string | null
+  advertiser_logo_path: string | null
   format: AdFormat
   status: AdDraft['status']
   points_reward: number
@@ -521,6 +524,7 @@ export function draftFromRaw(raw: RawAd): AdDraft {
     title: raw.title,
     description: raw.description ?? '',
     advertiser: raw.advertiser_name ?? '',
+    advertiserLogoPath: raw.advertiser_logo_path,
     format: raw.format,
     status: raw.status,
     points: Number(raw.points_reward),

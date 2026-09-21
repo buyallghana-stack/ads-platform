@@ -17,6 +17,7 @@ import { hasBranching, nextDueQuestion, visibleQuestions } from '@/lib/ads/visib
 import { cn } from '@/lib/cn'
 
 import { AdCta } from './AdCta'
+import { AdvertiserMark } from './AdvertiserMark'
 import { AdResult } from './AdResult'
 import { LeaveAdDialog, LeaveBar, LeaveFact } from './LeaveAdDialog'
 import { QuestionSheet } from './QuestionSheet'
@@ -568,6 +569,11 @@ export function AdPlayer({
         >
           <X aria-hidden className="size-5" />
         </button>
+
+        {/* The brand, at the moment of most attention. The header already
+            truncates both its lines, so the 32px this costs comes out of a
+            title nobody reads in full on a phone anyway. */}
+        <AdvertiserMark name={ad.advertiser} logoUrl={ad.advertiserLogoUrl} />
 
         <div className="min-w-0 flex-1">
           <p className="truncate text-[0.875rem] font-semibold">{ad.title}</p>

@@ -415,6 +415,7 @@ export type Database = {
       ads: {
         Row: {
           advertiser_id: string | null
+          advertiser_logo_path: string | null
           advertiser_name: string | null
           article_body: string | null
           completions_count: number
@@ -442,6 +443,7 @@ export type Database = {
         }
         Insert: {
           advertiser_id?: string | null
+          advertiser_logo_path?: string | null
           advertiser_name?: string | null
           article_body?: string | null
           completions_count?: number
@@ -469,6 +471,7 @@ export type Database = {
         }
         Update: {
           advertiser_id?: string | null
+          advertiser_logo_path?: string | null
           advertiser_name?: string | null
           article_body?: string | null
           completions_count?: number
@@ -4578,6 +4581,7 @@ export type Database = {
           p_user_id: string
         }
         Returns: {
+          advertiser_logo_path: string
           advertiser_name: string
           article_body: string
           attempts_remaining: number

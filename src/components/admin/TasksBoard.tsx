@@ -20,16 +20,15 @@ import { TASK_METRICS, type TaskMetric } from '@/lib/tasks/types'
  * thousands at once. `eligible_now` counts exactly those people and the panel
  * multiplies it by the reward, before the save rather than after.
  *
- * Metrics that are their own answer (`has_2fa`, `has_avatar`,
- * `has_withdrawal_pin`, `account_created`) have no meaningful target, so the
- * target field disappears for them and the value is pinned to 1. Offering a
- * "set your PIN 5 times" box would be offering nonsense.
+ * Metrics that are their own answer (`has_2fa`, `has_withdrawal_pin`,
+ * `account_created`) have no meaningful target, so the target field
+ * disappears for them and the value is pinned to 1. Offering a "set your PIN
+ * 5 times" box would be offering nonsense.
  */
 
 const ONE_SHOT_METRICS: TaskMetric[] = [
   'account_created',
   'has_2fa',
-  'has_avatar',
   'has_withdrawal_pin',
 ]
 

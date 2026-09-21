@@ -15,7 +15,7 @@
   "landing": {
     "meta": {
       "title": "SidePerks: get paid for watching ads and taking surveys",
-      "description": "Watch short video ads and answer quick surveys on your phone. Points are pegged to the cedi and you withdraw to Mobile Money or crypto. Start on the free plan."
+      "description": "Watch short video ads and answer quick surveys on your phone. Points are pegged to the cedi and you withdraw straight to your own payout account. Start on the free plan."
     },
     "nav": {
       "primary": "Main",
@@ -123,7 +123,7 @@
           "cedis": "Balance shown in GHS first, points underneath",
           "statement": "A full statement of every point in and out",
           "chart": "Earnings and ads watched over the last 30 days",
-          "withdraw": "Withdraw to your own Mobile Money or crypto account"
+          "withdraw": "Withdraw to a payout account you set up yourself"
         },
         "shotAlt": "The SidePerks home screen showing a balance in Ghana cedis, the daily ad count and lifetime earnings"
       }
@@ -190,7 +190,7 @@
         },
         "accounts": {
           "title": "Your accounts only",
-          "body": "Withdrawals go to Mobile Money or crypto accounts you set up yourself, and changing one starts a 48-hour cool-off."
+          "body": "Withdrawals go to a payout account you set up yourself, and changing one starts a 48-hour cool-off."
         },
         "peg": {
           "title": "Pegged to the cedi",
@@ -222,7 +222,7 @@
         },
         "withdraw": {
           "q": "When can I withdraw?",
-          "a": "Once your balance passes {threshold} points. It is the same threshold for everybody, whatever plan you hold. Withdrawals go to your own Mobile Money or crypto account, and you can follow every request through the app until it is paid."
+          "a": "Once your balance passes {threshold} points. It is the same threshold for everybody, whatever plan you hold. Withdrawals go to a payout account you set up yourself, and you can follow every request through the app until it is paid."
         },
         "questions": {
           "q": "Do I have to answer questions?",
@@ -230,7 +230,8 @@
         },
         "methods": {
           "q": "How do I get paid?",
-          "a": "To a Mobile Money account (MTN, Telecel or AirtelTigo) or to a crypto wallet in USDT. You choose which and set it up yourself in your profile, and withdrawals can only ever go to an account saved on your own profile."
+          "a": "To a Mobile Money account (MTN, Telecel or AirtelTigo) or to a crypto wallet in USDT. You choose which and set it up yourself in your profile, and withdrawals can only ever go to an account saved on your own profile.",
+          "aMomoOnly": "To a Mobile Money account (MTN, Telecel or AirtelTigo). You set it up yourself in your profile, and withdrawals can only ever go to an account saved on your own profile."
         },
         "devices": {
           "q": "Will it work on my phone?",
@@ -286,7 +287,7 @@
       "badge": "Made for Ghana",
       "headline1": "Watch ads.",
       "headline2": "Get rewarded.",
-      "body": "Short videos, one quick question, real points. Turn your spare minutes into mobile money or crypto.",
+      "body": "Short videos, one quick question, real points. Turn your spare minutes into mobile money.",
       "mockup": {
         "tier": "Member since 2026",
         "balance": "Points balance",
@@ -949,7 +950,7 @@
       "personal": "Personal information",
       "personalHint": "Name and phone number",
       "payout": "Payout accounts",
-      "payoutHint": "Mobile Money and crypto wallets",
+      "payoutHint": "Where your withdrawals go",
       "pin": "Withdrawal PIN",
       "pinHint": "Required to confirm every payout"
     },
@@ -1026,7 +1027,9 @@
       "notSignedIn": "Please sign in again.",
       "generic": "Could not save. Please try again."
     },
-    "backToWithdrawal": "Back to your withdrawal"
+    "backToWithdrawal": "Back to your withdrawal",
+    "paused": "This method is paused. You cannot withdraw to it at the moment, and what is saved here stays on your profile.",
+    "allPaused": "No withdrawal method is open at the moment. Check back soon, or ask support."
   },
   "pin": {
     "title": "Withdrawal PIN",
@@ -1877,6 +1880,8 @@
         "advertiser": "Advertiser",
         "advertiserHint": "A label for reporting. There is no advertiser account behind it.",
         "advertiserPlaceholder": "MTN Ghana",
+        "advertiserLogo": "Advertiser logo",
+        "advertiserLogoHint": "Shown on the card and in the player. Leave it empty and the first letter of the name is used instead. Any size: it is squared and shrunk before it uploads.",
         "description": "Description",
         "descriptionHint": "One line under the title on the card. Optional.",
         "descriptionPlaceholder": "What the viewer is about to watch",
@@ -2489,6 +2494,10 @@
           "title": "Payout rules",
           "description": "When money is allowed to leave, and how long it waits first."
         },
+        "methods": {
+          "title": "Payment methods",
+          "description": "Which rails are open. These decide whether a payment or a withdrawal can happen at all."
+        },
         "rate": {
           "title": "Points and plans",
           "description": "What a point is worth, and how plan benefits combine."
@@ -2539,6 +2548,24 @@
         "payoutsEnabled": {
           "label": "Payouts open",
           "description": "The master switch. Off, users can still request but nothing can be approved or sent."
+        },
+        "momoPayouts": {
+          "label": "Mobile Money withdrawals",
+          "description": "Whether users can save a Mobile Money account and withdraw to it.",
+          "warning": "Off hides it from the payout and withdrawal screens and refuses new requests. Payouts already in the queue are unaffected and must still be paid."
+        },
+        "cryptoPayouts": {
+          "label": "Crypto withdrawals",
+          "description": "Whether users can save a crypto wallet and withdraw to it.",
+          "warning": "Off hides it from the payout and withdrawal screens and refuses new requests. Payouts already in the queue are unaffected and must still be paid."
+        },
+        "checkoutMomo": {
+          "label": "Checkout lists Mobile Money",
+          "description": "A label only. It changes what the upgrade screen tells a buyer to expect, not what the payment page will accept."
+        },
+        "checkoutCard": {
+          "label": "Checkout lists card or bank",
+          "description": "A label only. It changes what the upgrade screen tells a buyer to expect, not what the payment page will accept."
         },
         "acceptTestPayments": {
           "label": "Accept test payments",

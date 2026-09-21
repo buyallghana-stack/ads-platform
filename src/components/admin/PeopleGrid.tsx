@@ -147,7 +147,7 @@ export function PeopleGrid({
             >
               <div className="flex items-start justify-between gap-2">
                 <RowOpener rounded label={t('reviewRow', { name: p.name })} onClick={() => onOpen(p)}>
-                  <PersonCell name={p.name} secondary={p.email} avatarUrl={p.avatarUrl} size="md" />
+                  <PersonCell name={p.name} secondary={p.email} size="md" />
                 </RowOpener>
                 {/* The card carries its own ⋯, exactly as the operator's
                     reference does. z-10 keeps it above the stretched opener. */}

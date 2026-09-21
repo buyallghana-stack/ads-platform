@@ -15,7 +15,7 @@
   "landing": {
     "meta": {
       "title": "SidePerks : soyez payé pour regarder des pubs et répondre à des sondages",
-      "description": "Regardez de courtes publicités et répondez à des sondages depuis votre téléphone. Les points sont indexés sur le cédi et vous retirez vers Mobile Money ou crypto. Commencez avec le forfait gratuit."
+      "description": "Regardez de courtes vidéos publicitaires et répondez à des sondages rapides sur votre téléphone. Les points sont indexés sur le cedi et vous retirez directement vers votre propre compte de paiement. Commencez avec le plan gratuit."
     },
     "nav": {
       "primary": "Principal",
@@ -123,7 +123,7 @@
           "cedis": "Le solde affiché d'abord en GHS, les points en dessous",
           "statement": "Un relevé complet de chaque point entré et sorti",
           "chart": "Gains et publicités regardées sur les 30 derniers jours",
-          "withdraw": "Retrait vers votre propre compte Mobile Money ou crypto"
+          "withdraw": "Retirez vers un compte de paiement que vous configurez vous-même"
         },
         "shotAlt": "L'écran d'accueil SidePerks montrant un solde en cedis, le compteur du jour et les gains cumulés"
       }
@@ -190,7 +190,7 @@
         },
         "accounts": {
           "title": "Vos comptes uniquement",
-          "body": "Les retraits vont vers des comptes Mobile Money ou crypto que vous avez vous-même enregistrés, et toute modification déclenche un délai de 48 heures."
+          "body": "Les retraits vont vers un compte de paiement que vous configurez vous-même, et en changer déclenche un délai de sécurité de 48 heures."
         },
         "peg": {
           "title": "Indexé sur le cedi",
@@ -222,7 +222,7 @@
         },
         "withdraw": {
           "q": "Quand puis-je retirer ?",
-          "a": "Dès que votre solde dépasse {threshold} points. Le seuil est le même pour tout le monde, quel que soit votre forfait. Les retraits partent vers votre propre compte Mobile Money ou crypto, et vous suivez chaque demande dans l’application jusqu’au paiement."
+          "a": "Dès que votre solde dépasse {threshold} points. Le seuil est le même pour tout le monde, quel que soit votre forfait. Les retraits partent vers un compte de paiement que vous configurez vous-même, et vous suivez chaque demande dans l’application jusqu’au paiement."
         },
         "questions": {
           "q": "Suis-je obligé de répondre aux questions ?",
@@ -230,7 +230,8 @@
         },
         "methods": {
           "q": "Comment suis-je payé ?",
-          "a": "Vers un compte Mobile Money (MTN, Telecel ou AirtelTigo) ou vers un portefeuille crypto en USDT. Vous choisissez et l'enregistrez vous-même dans votre profil, et un retrait ne peut aller que vers un compte enregistré sur votre propre profil."
+          "a": "Vers un compte Mobile Money (MTN, Telecel ou AirtelTigo) ou vers un portefeuille crypto en USDT. Vous choisissez et l'enregistrez vous-même dans votre profil, et un retrait ne peut aller que vers un compte enregistré sur votre propre profil.",
+          "aMomoOnly": "Vers un compte Mobile Money (MTN, Telecel ou AirtelTigo). Vous le configurez vous-même dans votre profil, et les retraits ne peuvent aller que vers un compte enregistré sur votre propre profil."
         },
         "devices": {
           "q": "Est-ce que ça marchera sur mon téléphone ?",
@@ -286,7 +287,7 @@
       "badge": "Conçu pour le Ghana",
       "headline1": "Regardez des pubs.",
       "headline2": "Soyez récompensé.",
-      "body": "Des vidéos courtes, une question rapide, de vrais points. Transformez vos minutes libres en mobile money ou en crypto.",
+      "body": "De courtes vidéos, une question rapide, de vrais points. Transformez vos minutes libres en mobile money.",
       "mockup": {
         "tier": "Membre depuis 2026",
         "balance": "Solde de points",
@@ -949,7 +950,7 @@
       "personal": "Informations personnelles",
       "personalHint": "Nom et numéro de téléphone",
       "payout": "Comptes de paiement",
-      "payoutHint": "Mobile Money et portefeuilles crypto",
+      "payoutHint": "Où vont vos retraits",
       "pin": "Code PIN de retrait",
       "pinHint": "Requis pour confirmer chaque paiement"
     },
@@ -1026,7 +1027,9 @@
       "notSignedIn": "Veuillez vous reconnecter.",
       "generic": "Enregistrement impossible. Veuillez réessayer."
     },
-    "backToWithdrawal": "Retour à votre retrait"
+    "backToWithdrawal": "Retour à votre retrait",
+    "paused": "Ce moyen est en pause. Vous ne pouvez pas y retirer pour le moment, et ce qui est enregistré ici reste sur votre profil.",
+    "allPaused": "Aucun moyen de retrait n'est ouvert pour le moment. Revenez bientôt ou contactez le support."
   },
   "pin": {
     "title": "Code PIN de retrait",
@@ -1877,6 +1880,8 @@
         "advertiser": "Annonceur",
         "advertiserHint": "Une étiquette pour les rapports. Aucun compte annonceur derrière.",
         "advertiserPlaceholder": "MTN Ghana",
+        "advertiserLogo": "Logo de l'annonceur",
+        "advertiserLogoHint": "Affiché sur la carte et dans le lecteur. Laissez vide et la première lettre du nom est utilisée. Toute taille convient : l'image est recadrée en carré et réduite avant l'envoi.",
         "description": "Description",
         "descriptionHint": "Une ligne sous le titre, sur la carte. Facultatif.",
         "descriptionPlaceholder": "Ce que la personne va regarder",
@@ -2489,6 +2494,10 @@
           "title": "Règles de retrait",
           "description": "Quand l'argent peut sortir, et combien de temps il attend d'abord."
         },
+        "methods": {
+          "title": "Moyens de paiement",
+          "description": "Les canaux ouverts. Ils décident si un paiement ou un retrait est possible."
+        },
         "rate": {
           "title": "Points et formules",
           "description": "Ce que vaut un point, et comment les avantages se combinent."
@@ -2539,6 +2548,24 @@
         "payoutsEnabled": {
           "label": "Retraits ouverts",
           "description": "L'interrupteur principal. Désactivé, les demandes restent possibles mais rien ne peut être approuvé ni envoyé."
+        },
+        "momoPayouts": {
+          "label": "Retraits Mobile Money",
+          "description": "Si les utilisateurs peuvent enregistrer un compte Mobile Money et y retirer.",
+          "warning": "Désactivé, ce moyen disparaît des écrans de retrait et les nouvelles demandes sont refusées. Les retraits déjà en file restent dus et doivent être payés."
+        },
+        "cryptoPayouts": {
+          "label": "Retraits en crypto",
+          "description": "Si les utilisateurs peuvent enregistrer un portefeuille crypto et y retirer.",
+          "warning": "Désactivé, ce moyen disparaît des écrans de retrait et les nouvelles demandes sont refusées. Les retraits déjà en file restent dus et doivent être payés."
+        },
+        "checkoutMomo": {
+          "label": "Paiement : afficher Mobile Money",
+          "description": "Un libellé seulement. Cela change ce que l'écran d'abonnement annonce à l'acheteur, pas ce que la page de paiement accepte."
+        },
+        "checkoutCard": {
+          "label": "Paiement : afficher carte ou banque",
+          "description": "Un libellé seulement. Cela change ce que l'écran d'abonnement annonce à l'acheteur, pas ce que la page de paiement accepte."
         },
         "acceptTestPayments": {
           "label": "Accepter les paiements de test",

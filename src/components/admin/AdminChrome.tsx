@@ -217,19 +217,21 @@ export function StatusDot({
 }
 
 /**
- * Identity cell: avatar, name, secondary line. Used by the table rows and the
- * people cards alike (both references show the same two-line person block),
- * so the two views of a person never drift apart.
+ * Identity cell: initials, name, secondary line. Used by the table rows and
+ * the people cards alike (both references show the same two-line person
+ * block), so the two views of a person never drift apart.
+ *
+ * No photograph since 2026-09-21: profile pictures were withdrawn, and these
+ * three tables were the screens that paid for them, one image download per
+ * row. See components/profile/Avatar.tsx.
  */
 export function PersonCell({
   name,
   secondary,
-  avatarUrl,
   size = 'sm',
 }: {
   name: string
   secondary?: string
-  avatarUrl?: string | null
   size?: 'sm' | 'md'
 }) {
   const initials = name
@@ -242,28 +244,16 @@ export function PersonCell({
 
   return (
     <div className="flex min-w-0 items-center gap-2.5">
-      {avatarUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={avatarUrl}
-          alt=""
-          className={cn(
-            'shrink-0 rounded-full bg-ink-100 object-cover',
-            size === 'md' ? 'size-10' : 'size-8',
-          )}
-        />
-      ) : (
-        <span
-          aria-hidden
-          className={cn(
-            'grid shrink-0 place-items-center rounded-full font-semibold text-white',
-            'bg-brand-600 bg-gradient-to-br from-brand-600 to-(--color-brand-accent)',
-            size === 'md' ? 'size-10 text-[0.8125rem]' : 'size-8 text-[0.6875rem]',
-          )}
-        >
-          {initials || '·'}
-        </span>
-      )}
+      <span
+        aria-hidden
+        className={cn(
+          'grid shrink-0 place-items-center rounded-full font-semibold text-white',
+          'bg-brand-600 bg-gradient-to-br from-brand-600 to-(--color-brand-accent)',
+          size === 'md' ? 'size-10 text-[0.8125rem]' : 'size-8 text-[0.6875rem]',
+        )}
+      >
+        {initials || '·'}
+      </span>
       <div className="min-w-0">
         <p
           className={cn(

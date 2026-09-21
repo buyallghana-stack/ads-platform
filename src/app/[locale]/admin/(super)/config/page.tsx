@@ -123,6 +123,53 @@ export default async function AdminConfigPage({
         },
       ],
     },
+    /*
+      WHICH RAILS ARE OPEN, before how much comes off them.
+
+      Its own group rather than four more toggles in `payouts`, because the
+      question is different in kind: everything below decides what a payout
+      COSTS, and these decide whether it can happen at all. An operator
+      closing crypto for the month should not have to read past a holding
+      period and a fee to find the switch.
+
+      The two `checkout_lists_*` fields are labels and are worded as labels.
+      Nothing in this app calls Paystack, the hub owns the payment page, and
+      an operator who believed this stopped card payments would be wrong in
+      the expensive direction.
+    */
+    {
+      key: 'methods',
+      title: t('groups.methods.title'),
+      description: t('groups.methods.description'),
+      fields: [
+        {
+          key: 'payout_method_mobile_money_enabled',
+          label: t('fields.momoPayouts.label'),
+          description: t('fields.momoPayouts.description'),
+          warning: t('fields.momoPayouts.warning'),
+          kind: 'toggle',
+        },
+        {
+          key: 'payout_method_crypto_enabled',
+          label: t('fields.cryptoPayouts.label'),
+          description: t('fields.cryptoPayouts.description'),
+          warning: t('fields.cryptoPayouts.warning'),
+          kind: 'toggle',
+        },
+        {
+          key: 'checkout_lists_mobile_money',
+          label: t('fields.checkoutMomo.label'),
+          description: t('fields.checkoutMomo.description'),
+          kind: 'toggle',
+        },
+        {
+          key: 'checkout_lists_card',
+          label: t('fields.checkoutCard.label'),
+          description: t('fields.checkoutCard.description'),
+          kind: 'toggle',
+        },
+      ],
+    },
     {
       key: 'payouts',
       title: t('groups.payouts.title'),

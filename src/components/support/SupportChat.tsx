@@ -80,7 +80,7 @@ export function SupportChat({
   now: number
   /** Where they came from — recorded with the first message they send. */
   about?: string
-  user: { name: string; avatarUrl: string | null }
+  user: { name: string }
 }) {
   const t = useTranslations('support')
   const format = useFormatter()
@@ -213,7 +213,7 @@ export function SupportChat({
                         answer looking like three separate people. */}
                     <div className="shrink-0">
                       {mine ? (
-                        <Avatar name={user.name} src={user.avatarUrl} className="size-8" />
+                        <Avatar name={user.name} className="size-8" />
                       ) : (
                         /* The app icon itself, in the white tile it is always
                            given. Support is SidePerks talking, not a person

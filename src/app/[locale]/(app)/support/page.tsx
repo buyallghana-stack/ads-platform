@@ -4,7 +4,6 @@ import { setRequestLocale } from 'next-intl/server'
 
 import { SupportChat } from '@/components/support/SupportChat'
 import { getProfile, getViewerUser } from '@/lib/auth/session'
-import { avatarPublicUrl } from '@/lib/profile/avatar'
 import { getSupportThread } from '@/lib/support/data'
 
 import { markSupportRead } from './actions'
@@ -55,7 +54,6 @@ export default async function SupportPage({
       about={about}
       user={{
         name: profile?.full_name ?? '',
-        avatarUrl: avatarPublicUrl(profile?.avatar_path ?? null),
       }}
     />
   )

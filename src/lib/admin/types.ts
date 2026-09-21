@@ -73,7 +73,6 @@ export type PayoutRequest = {
   user: {
     name: string
     email: string
-    avatarUrl: string | null
     joinedAt: string
     /** How many payouts this person has already been paid, and for how much. */
     paidBefore: number
@@ -189,7 +188,6 @@ export type Person = {
   name: string
   email: string
   phone: string | null
-  avatarUrl: string | null
   joinedAt: string
   balancePoints: number
   tier: string
@@ -352,6 +350,14 @@ export type AdDraft = {
   title: string
   description: string
   advertiser: string
+  /**
+   * Object key in the `ad-media` bucket for the advertiser's logo, or null to
+   * draw their initial. Keyed on the AD rather than on the advertiser
+   * contract: the label a viewer sees is `ads.advertiser_name`, the editor has
+   * no advertiser picker, and on production every ad has `advertiser_id`
+   * null. See migration 238.
+   */
+  advertiserLogoPath: string | null
   format: AdFormat
   status: AdStatus
   points: number

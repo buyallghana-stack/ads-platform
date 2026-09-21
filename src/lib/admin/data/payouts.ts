@@ -1,6 +1,5 @@
 import 'server-only'
 
-import { avatarPublicUrl } from '@/lib/profile/avatar'
 import { createClient } from '@/lib/supabase/server'
 
 import type { PayoutRequest, PayoutStatus } from '../types'
@@ -34,7 +33,6 @@ type QueueRow = {
   user_id: string
   user_name: string
   user_email: string
-  user_avatar_path: string | null
   user_joined_at: string
   paid_before: number
   paid_before_ghs: number | string
@@ -116,7 +114,6 @@ function toRequest(row: QueueRow, now: number): PayoutRequest {
     user: {
       name: row.user_name,
       email: row.user_email,
-      avatarUrl: avatarPublicUrl(row.user_avatar_path),
       joinedAt: row.user_joined_at,
       paidBefore: row.paid_before,
       paidBeforeGhs: Number(row.paid_before_ghs),

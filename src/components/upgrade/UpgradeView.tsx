@@ -36,6 +36,7 @@ export function UpgradeView({
   baseAdPoints,
   pointsPerCurrencyUnit,
   checkoutEnabled,
+  checkoutMethods,
   initialCoupon,
 }: {
   plans: Plan[]
@@ -56,6 +57,16 @@ export function UpgradeView({
    *  this app holds none, and the page asked the wrong one until 17 September
    *  2026. */
   checkoutEnabled: boolean
+  /**
+   * Which ways to pay the checkout lists, from the admin's payment settings.
+   *
+   * ⚠️ THESE ARE LABELS, NOT GATES. Nothing in this app talks to Paystack;
+   * the hub owns the payment page and its own dashboard decides which
+   * channels it accepts. Switching one off here stops us ADVERTISING it, and
+   * the admin field says so in as many words, because a switch an operator
+   * believes stops card payments and does not is worse than no switch.
+   */
+  checkoutMethods: { mobileMoney: boolean; card: boolean }
   /** From a shared link, `/upgrade?coupon=CODE`. */
   initialCoupon?: string | null
 }) {
@@ -71,6 +82,14 @@ export function UpgradeView({
      discount left over from the last sheet would be a price the database
      refuses at the till. */
   const [coupon, setCoupon] = useState<AppliedCoupon | null>(null)
+
+  /* What the sheet says a buyer can pay with. Empty is a real answer: if the
+     operator has switched both off, the checkout promises nothing rather than
+     naming a rail nobody at this end has agreed to. */
+  const methods = [
+    checkoutMethods.mobileMoney && { icon: Smartphone, label: t('checkout.momo') },
+    checkoutMethods.card && { icon: Wallet, label: t('checkout.card') },
+  ].filter((m): m is { icon: typeof Smartphone; label: string } => Boolean(m))
 
   /*
     Hands off to Paystack's hosted page. A full document navigation, not the
@@ -323,14 +342,13 @@ export function UpgradeView({
               />
             )}
 
-            <p className="mt-4 text-[0.75rem] font-semibold tracking-[0.04em] text-ink-500 uppercase">
-              {t('checkout.payWith')}
-            </p>
+            {methods.length > 0 && (
+              <p className="mt-4 text-[0.75rem] font-semibold tracking-[0.04em] text-ink-500 uppercase">
+                {t('checkout.payWith')}
+              </p>
+            )}
             <div className="mt-2 flex flex-col gap-2">
-              {[
-                { icon: Smartphone, label: t('checkout.momo') },
-                { icon: Wallet, label: t('checkout.card') },
-              ].map(({ icon: Icon, label }) => (
+              {methods.map(({ icon: Icon, label }) => (
                 <div
                   key={label}
                   className={cn(

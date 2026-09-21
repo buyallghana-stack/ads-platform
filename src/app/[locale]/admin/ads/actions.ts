@@ -64,6 +64,7 @@ const draftSchema = z.object({
   title: z.string(),
   description: z.string(),
   advertiser: z.string(),
+  advertiserLogoPath: z.string().nullable(),
   format: z.enum(['video', 'survey', 'link']),
   status: z.enum(['draft', 'active', 'paused', 'exhausted', 'archived']),
   points: z.number().int(),
@@ -150,7 +151,7 @@ export async function saveAd(input: AdDraft): Promise<SaveAdResult> {
     ? (
         await admin
           .from('ads')
-          .select('storage_path, thumbnail_path')
+          .select('storage_path, thumbnail_path, advertiser_logo_path')
           .eq('id', draft.id)
           .maybeSingle()
       ).data
@@ -216,7 +217,7 @@ export async function deleteAd(adId: string): Promise<DeleteAdResult> {
 
   const { data: media } = await admin
     .from('ads')
-    .select('storage_path, thumbnail_path')
+    .select('storage_path, thumbnail_path, advertiser_logo_path')
     .eq('id', adId)
     .maybeSingle()
 
@@ -232,7 +233,7 @@ export async function deleteAd(adId: string): Promise<DeleteAdResult> {
   // Only a real delete frees the files. An archived ad keeps its media,
   // because the record has to stay explicable.
   if (outcome === 'deleted') {
-    await removeMedia([media?.storage_path, media?.thumbnail_path])
+    await removeMedia([media?.storage_path, media?.thumbnail_path, media?.advertiser_logo_path])
   }
 
   revalidatePath('/admin/ads')
@@ -250,7 +251,11 @@ export async function deleteAd(adId: string): Promise<DeleteAdResult> {
  * nothing. That bug is already in this repo's history once.
  */
 async function removeOrphans(
-  previous: { storage_path: string | null; thumbnail_path: string | null } | null,
+  previous: {
+    storage_path: string | null
+    thumbnail_path: string | null
+    advertiser_logo_path: string | null
+  } | null,
   draft: AdDraft,
 ) {
   if (!previous) return
@@ -261,6 +266,12 @@ async function removeOrphans(
   }
   if (previous.thumbnail_path && previous.thumbnail_path !== draft.thumbnailPath) {
     gone.push(previous.thumbnail_path)
+  }
+  if (
+    previous.advertiser_logo_path &&
+    previous.advertiser_logo_path !== draft.advertiserLogoPath
+  ) {
+    gone.push(previous.advertiser_logo_path)
   }
 
   await removeMedia(gone)

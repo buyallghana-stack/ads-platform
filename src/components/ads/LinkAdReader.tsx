@@ -12,6 +12,7 @@ import type { FeedAd } from '@/lib/ads/data'
 import { cn } from '@/lib/cn'
 
 import { AdDisclosure } from './AdDisclosure'
+import { AdvertiserMark } from './AdvertiserMark'
 import { AdResult } from './AdResult'
 import { LeaveAdDialog, LeaveBar, LeaveFact } from './LeaveAdDialog'
 
@@ -196,6 +197,8 @@ export function LinkAdReader({
         >
           <X aria-hidden className="size-5" />
         </button>
+
+        <AdvertiserMark name={ad.advertiser} logoUrl={ad.advertiserLogoUrl} />
 
         <div className="min-w-0 flex-1">
           <p className="truncate text-[0.875rem] font-semibold">{ad.title}</p>

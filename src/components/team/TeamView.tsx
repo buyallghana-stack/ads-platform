@@ -197,7 +197,6 @@ export function TeamView({ data }: { data: TeamData }) {
                       </span>
                       <Avatar
                         name={member.name}
-                        src={member.avatarUrl}
                         className="size-8 text-[0.6875rem]"
                       />
                       <div className="min-w-0 flex-1">
@@ -278,7 +277,6 @@ export function TeamView({ data }: { data: TeamData }) {
                             <div className="flex items-center gap-2.5">
                               <Avatar
                                 name={member.name}
-                                src={member.avatarUrl}
                                 className="size-8 text-[0.6875rem]"
                               />
                               <div className="min-w-0">

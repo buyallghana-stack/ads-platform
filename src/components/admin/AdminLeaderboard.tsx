@@ -109,7 +109,6 @@ export async function AdminLeaderboard({
                         <span className="flex items-center gap-2.5">
                           <Avatar
                             name={row.fullName}
-                            src={row.avatarUrl}
                             className="size-8 text-[0.625rem]"
                           />
                           <span className="font-semibold text-ink-900">{row.fullName}</span>
@@ -152,7 +151,7 @@ export async function AdminLeaderboard({
                     <span className="w-6 shrink-0 text-center text-[0.875rem] font-bold tabular-nums text-ink-400">
                       {row.rank}
                     </span>
-                    <Avatar name={row.fullName} src={row.avatarUrl} className="size-9 text-[0.6875rem]" />
+                    <Avatar name={row.fullName} className="size-9 text-[0.6875rem]" />
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-2">
                         <span className="truncate text-[0.875rem] font-semibold text-ink-900">

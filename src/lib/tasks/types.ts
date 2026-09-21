@@ -15,7 +15,11 @@ export const TASK_METRICS = [
   'gift_codes_redeemed',
   'withdrawals_made',
   'has_2fa',
-  'has_avatar',
+  /* `has_avatar` is deliberately absent. The enum value still exists in the
+     database and `task_metric_value` still has a branch for it, but profile
+     photos were withdrawn on 2026-09-21, so a task set against it could never
+     be finished by anybody. Leaving it in this list would let an operator
+     create a reward nobody can claim. */
   'has_withdrawal_pin',
 ] as const
 

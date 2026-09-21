@@ -33,6 +33,7 @@ import { PhoneFrame } from '@/components/marketing/PhoneFrame'
 import { Button } from '@/components/ui/Button'
 import { Link } from '@/i18n/navigation'
 import { getMarketingFigures } from '@/lib/marketing/plans'
+import { getPaymentMethodSwitches } from '@/lib/payments/methods'
 
 /**
  * SidePerks landing page. Replaces the redirect that used to send every
@@ -82,7 +83,10 @@ export default async function LandingPage({
 
   const t = await getTranslations('landing')
   const format = await getFormatter()
-  const figures = await getMarketingFigures()
+  const [figures, switches] = await Promise.all([
+    getMarketingFigures(),
+    getPaymentMethodSwitches(),
+  ])
 
   const num = (n: number) => format.number(n)
   const freeAds = figures.free?.adsPerDay ?? 1
@@ -158,9 +162,22 @@ export default async function LandingPage({
     { icon: <BadgeCheck />, tone: 'brand' as const, key: 'oneAccount' },
   ]
 
+  /*
+    "What can I withdraw to?" is the one answer on this page that names the
+    rails, so it is the one that must not promise a rail the operator has
+    switched off. Everything else on the landing page says "a payout account
+    you set up yourself", which stays true whichever way the switches sit and
+    does not need a variant per combination.
+
+    This page is statically generated and revalidated hourly (see the header),
+    so switching crypto on in the admin reaches this sentence within the hour,
+    exactly as a change to a plan price does.
+  */
+  const methodsKey = switches.payout.crypto ? 'faq.items.methods.a' : 'faq.items.methods.aMomoOnly'
+
   const faqItems = ['free', 'worth', 'withdraw', 'questions', 'methods', 'devices'].map((k) => ({
     q: t(`faq.items.${k}.q`),
-    a: t(`faq.items.${k}.a`, {
+    a: t((k === 'methods' ? methodsKey : `faq.items.${k}.a`) as 'faq.items.methods.a', {
       freeAds: num(freeAds),
       points: num(figures.pointsPerCedi),
       // One threshold for every plan since 2026-08-01, and the free plan now

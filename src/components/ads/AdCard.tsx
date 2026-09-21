@@ -7,6 +7,7 @@ import type { FeedAd } from '@/lib/ads/data'
 import { cn } from '@/lib/cn'
 
 import { AdCover } from './AdCover'
+import { AdvertiserMark } from './AdvertiserMark'
 
 /**
  * One ad in the feed.
@@ -26,23 +27,6 @@ import { AdCover } from './AdCover'
  * erode that. Format is signalled by icon and by what the metadata says, which
  * is enough.
  */
-
-/** Advertiser initial in a tinted tile — the "who posted this" affordance. */
-function AdvertiserMark({ name }: { name: string | null }) {
-  const letter = (name ?? '·').trim().charAt(0).toUpperCase() || '·'
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        'grid size-8 shrink-0 place-items-center rounded-[0.625rem]',
-        'bg-brand-600 bg-gradient-to-br from-brand-600 to-(--color-brand-accent)',
-        'text-[0.8125rem] font-bold text-white',
-      )}
-    >
-      {letter}
-    </span>
-  )
-}
 
 function formatDuration(seconds: number | null): string | null {
   if (!seconds || seconds <= 0) return null
@@ -228,7 +212,7 @@ export function AdCard({
 
         {/* ---- Meta row --------------------------------------------------- */}
         <div className="flex shrink-0 items-start gap-2.5 px-3 py-3">
-          <AdvertiserMark name={ad.advertiser} />
+          <AdvertiserMark name={ad.advertiser} logoUrl={ad.advertiserLogoUrl} />
 
           <div className="min-w-0 flex-1">
             {/* Two lines, not one: a real advertiser's headline rarely fits in a

@@ -27,7 +27,7 @@ import { CHOOSABLE_STATUSES, type AdDraft, type AdStatus, type TierOption } from
 import { cn } from '@/lib/cn'
 
 import { AdCallToAction } from './AdCallToAction'
-import { AdMedia } from './AdMedia'
+import { AdMedia, UploadField } from './AdMedia'
 import { AdQuestions } from './AdQuestions'
 import { StatusDot } from './AdminChrome'
 import {
@@ -239,6 +239,27 @@ export function AdEditor({
                   className={inputClass(false)}
                 />
               </Field>
+
+              {/*
+                Directly under the name, because it labels the same thing.
+                Leaving it empty is a real answer: the card draws the first
+                letter of the name on the same gradient tile it always has,
+                which is what every ad looked like before today.
+
+                The file is squared and shrunk to 96px in the browser before
+                it is sent. See UploadField.
+              */}
+              <UploadField
+                label={t('advertiserLogo')}
+                hint={t('advertiserLogoHint')}
+                accept="image/jpeg,image/png,image/webp"
+                path={draft.advertiserLogoPath}
+                folder="logo"
+                image
+                squarePx={96}
+                onUploaded={(advertiserLogoPath) => set({ advertiserLogoPath })}
+                onClear={() => set({ advertiserLogoPath: null })}
+              />
 
               <Field label={t('description')} hint={t('descriptionHint')}>
                 <textarea

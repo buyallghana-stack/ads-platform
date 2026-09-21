@@ -5,6 +5,7 @@ import { setRequestLocale } from 'next-intl/server'
 import { WithdrawWizard, type WithdrawAccount } from '@/components/withdraw/WithdrawWizard'
 import { redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
+import { getPaymentMethodSwitches } from '@/lib/payments/methods'
 import { getCryptoQuote } from '@/lib/pricing/quote'
 import { getResolvedBenefits } from '@/lib/subscriptions/data'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -49,7 +50,7 @@ export default async function WithdrawPage({
   const supabase = await createClient()
   const admin = createAdminClient()
 
-  const [{ data: status }, benefits, { data: configRows }, detailsRes] = await Promise.all([
+  const [{ data: status }, benefits, { data: configRows }, detailsRes, switches] = await Promise.all([
     admin.rpc('get_user_earning_status', { p_user_id: user!.id }).maybeSingle(),
     /*
       The user's RESOLVED tier, not the default one.
@@ -81,16 +82,27 @@ export default async function WithdrawPage({
         'method, msisdn, account_name, wallet_address, provider:payout_providers(name), coin:payout_coins(code), network:payout_coin_networks(name)',
       )
       .eq('user_id', user!.id),
+    /* Which rails are open. `request_redemption` refuses a closed one on its
+       own, so this is about not OFFERING a withdrawal that cannot be filed. */
+    getPaymentMethodSwitches(),
   ])
 
   /* The coin the user would actually be paid in, kept separately because the
      account's title is display text ("USDT · TRC20") and pricing needs the
      code. Null when they have no crypto account, which is also when no quote
      is needed. */
-  const cryptoCoin =
-    (detailsRes.data ?? []).find((r) => r.method === 'crypto' && r.coin)?.coin?.code ?? null
+  const cryptoCoin = !switches.payout.crypto
+    ? null
+    : ((detailsRes.data ?? []).find((r) => r.method === 'crypto' && r.coin)?.coin?.code ?? null)
+
+  const enabled = { mobile_money: switches.payout.mobileMoney, crypto: switches.payout.crypto }
 
   const accounts: WithdrawAccount[] = (detailsRes.data ?? []).flatMap((r): WithdrawAccount[] => {
+    /* A saved destination on a closed rail is not an option today. It stays on
+       the profile, where it is explained; here it would be a choice that dies
+       four steps later, after the PIN. */
+    if (!enabled[r.method]) return []
+
     if (r.method === 'mobile_money' && r.provider) {
       return [
         {

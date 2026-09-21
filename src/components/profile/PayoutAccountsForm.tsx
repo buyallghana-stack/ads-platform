@@ -49,6 +49,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 export function PayoutAccountsForm({
   momoSaved,
   cryptoSaved,
+  momoEnabled,
+  cryptoEnabled,
   providers,
   coins,
   networks,
@@ -56,6 +58,18 @@ export function PayoutAccountsForm({
 }: {
   momoSaved: MomoSaved | null
   cryptoSaved: CryptoSaved | null
+  /**
+   * Whether the operator is accepting this rail right now.
+   *
+   * A switched-off method with nothing saved is not drawn: the database
+   * refuses `set_payout_details` for it, so the form would only be a way to
+   * reach an error. One that is switched off with an account ALREADY saved
+   * is still drawn, read only, with a line saying it is paused. Hiding it
+   * would make somebody's own wallet address vanish off their profile with
+   * no explanation, which reads as lost data rather than as a decision.
+   */
+  momoEnabled: boolean
+  cryptoEnabled: boolean
   providers: Provider[]
   coins: Coin[]
   networks: Network[]
@@ -175,12 +189,19 @@ export function PayoutAccountsForm({
       )}
 
       <div className="mt-5 flex flex-col gap-4">
-        {/* ---- Mobile Money ------------------------------------------------ */}
+        {/*
+          A rail is drawn when it is open, or when it is closed but the user
+          has an account on it. Neither, and the card is simply absent: see
+          the prop comment above for why that is not the same as hiding data.
+        */}
+        {(momoEnabled || momoSaved) && (
+        /* ---- Mobile Money ------------------------------------------------ */
         <MethodCard
           icon={<Smartphone />}
           tone="brand"
           title={t('momo.title')}
           isOpen={editing === 'momo'}
+          paused={momoEnabled ? undefined : t('paused')}
           saved={
             momoSaved && (
               <>
@@ -233,13 +254,16 @@ export function PayoutAccountsForm({
             </div>
           )}
         </MethodCard>
+        )}
 
-        {/* ---- Crypto ------------------------------------------------------ */}
+        {(cryptoEnabled || cryptoSaved) && (
+        /* ---- Crypto ------------------------------------------------------ */
         <MethodCard
           icon={<Coins />}
           tone="teal"
           title={t('crypto.title')}
           isOpen={editing === 'crypto'}
+          paused={cryptoEnabled ? undefined : t('paused')}
           saved={
             cryptoSaved && (
               <>
@@ -304,6 +328,15 @@ export function PayoutAccountsForm({
             </div>
           )}
         </MethodCard>
+        )}
+
+        {/* Every rail closed. Saying so beats an empty page, which reads as a
+            screen that failed to load. */}
+        {!momoEnabled && !cryptoEnabled && !momoSaved && !cryptoSaved && (
+          <p className="rounded-(--radius-card) border border-ink-200 bg-surface px-4 py-5 text-center text-[0.8125rem] leading-relaxed text-ink-500">
+            {t('allPaused')}
+          </p>
+        )}
       </div>
     </div>
   )
@@ -315,6 +348,7 @@ function MethodCard({
   title,
   saved,
   isOpen,
+  paused,
   onEdit,
   editLabel,
   children,
@@ -324,6 +358,9 @@ function MethodCard({
   title: string
   saved: React.ReactNode
   isOpen: boolean
+  /** Set when the rail is switched off. The card still shows what is saved,
+   *  and the way to change it goes away rather than failing on save. */
+  paused?: string
   onEdit: () => void
   editLabel: string
   children: React.ReactNode
@@ -343,12 +380,17 @@ function MethodCard({
           <p className="text-[0.8125rem] font-medium text-ink-500">{title}</p>
           {!isOpen && saved && <div className="mt-0.5">{saved}</div>}
         </div>
-        {!isOpen && (
+        {!isOpen && !paused && (
           <Button variant="secondary" size="sm" leadingIcon={saved ? <Pencil /> : <Plus />} onClick={onEdit}>
             {editLabel}
           </Button>
         )}
       </div>
+      {paused && (
+        <p className="border-t border-ink-100 bg-canvas px-4 py-2.5 text-[0.75rem] leading-relaxed text-ink-500">
+          {paused}
+        </p>
+      )}
       {isOpen && <div className="border-t border-ink-100 px-4 py-4">{children}</div>}
     </section>
   )

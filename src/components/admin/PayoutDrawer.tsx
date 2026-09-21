@@ -359,12 +359,7 @@ function Panel({
 
       {/* ---- Who ------------------------------------------------- */}
       <Section label={t('drawer.requester')}>
-        <PersonCell
-          name={r.user.name}
-          secondary={r.user.email}
-          avatarUrl={r.user.avatarUrl}
-          size="md"
-        />
+        <PersonCell name={r.user.name} secondary={r.user.email} size="md" />
         <div className="mt-3">
           <PanelFacts>
             <Fact

@@ -27,6 +27,13 @@ export type FeedAd = {
   title: string
   description: string | null
   advertiser: string | null
+  /**
+   * The advertiser's logo, resolved to a public URL, or null when the card
+   * should draw their initial instead. The initial stays the fallback rather
+   * than becoming an error state: an ad keyed in without a logo has to look
+   * deliberate.
+   */
+  advertiserLogoUrl: string | null
   format: AdFormat
   /** Points this user will actually be paid — base reward x their tier
    *  multiplier, floored exactly as the crediting function does it. */
@@ -153,6 +160,7 @@ export async function getAdsData(userId: string): Promise<AdsData> {
     title: r.title,
     description: r.description,
     advertiser: r.advertiser_name,
+    advertiserLogoUrl: adMediaUrl(r.advertiser_logo_path),
     format: r.format,
     points: Number(r.points_award),
     videoUrl: r.video_source === 'upload' ? adMediaUrl(r.storage_path) : null,

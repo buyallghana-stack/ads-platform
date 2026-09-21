@@ -4,7 +4,6 @@ import { Gem, House, PlayCircle, UserRound, Users } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Logo } from '@/components/brand/Logo'
-import { Avatar } from '@/components/profile/Avatar'
 import { Link, usePathname } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
 
@@ -42,43 +41,18 @@ function useActive() {
   return (href: string) => pathname === href || pathname.startsWith(href + '/')
 }
 
-/**
- * The user's own face is a better Profile affordance than a generic figure —
- * it is how every app the audience already uses marks "you". So once a photo
- * is set, the Profile tab wears it; without one we keep the outline icon
- * (initials at 20px would be cramped, and the icon is the honest empty state).
+/*
+ * THE PROFILE TAB IS AN ICON AGAIN.
  *
- * The active photo gets a ring, because the thicker-stroke trick the icons use
- * to read as "on" does nothing to a photograph.
+ * It used to wear the user's own photo once they had set one, which is how
+ * every app this audience uses marks "you". Profile pictures were withdrawn
+ * on 2026-09-21, so the branch that drew one has gone rather than being left
+ * to test a field nothing sets. Initials at 20 pixels would be cramped, and
+ * the outline figure was always what an account without a photo showed.
  */
-function ProfileGlyph({
-  avatarUrl,
-  name,
-  active,
-  className,
-}: {
-  avatarUrl: string | null
-  name: string | null
-  active: boolean
-  className: string
-}) {
-  if (!avatarUrl) {
-    return <UserRound aria-hidden className={className} strokeWidth={active ? 2.4 : 2} />
-  }
-  return (
-    <Avatar
-      name={name}
-      src={avatarUrl}
-      className={cn(className, active && 'ring-2 ring-brand-600')}
-    />
-  )
-}
-
-/** What the nav needs to know about the signed-in user. */
-export type NavUser = { avatarUrl: string | null; name: string | null }
 
 /** Fixed bottom tab bar. Rendered on every app screen below md. */
-export function BottomTabBar({ user }: { user?: NavUser }) {
+export function BottomTabBar() {
   const t = useTranslations('nav')
   const isActive = useActive()
 
@@ -106,22 +80,13 @@ export function BottomTabBar({ user }: { user?: NavUser }) {
                   active ? 'text-brand-600' : 'text-ink-500 active:text-ink-700',
                 )}
               >
-                {key === 'profile' ? (
-                  <ProfileGlyph
-                    avatarUrl={user?.avatarUrl ?? null}
-                    name={user?.name ?? null}
-                    active={active}
-                    className="size-5"
-                  />
-                ) : (
-                  <Icon
-                    aria-hidden
-                    className="size-5"
-                    // Filled-feel weight on the active tab without a second
-                    // icon set: thicker stroke reads as "on" at this size.
-                    strokeWidth={active ? 2.4 : 2}
-                  />
-                )}
+                <Icon
+                  aria-hidden
+                  className="size-5"
+                  // Filled-feel weight on the active tab without a second
+                  // icon set: thicker stroke reads as "on" at this size.
+                  strokeWidth={active ? 2.4 : 2}
+                />
                 {t(key)}
               </Link>
             </li>
@@ -139,11 +104,9 @@ export function BottomTabBar({ user }: { user?: NavUser }) {
  *  (operator direction 2026-07-24: that chrome is Home-only). */
 export function Sidebar({
   upgradeSlot,
-  user,
 }: {
   /** Upgrade teaser card, pinned to the bottom like the references. */
   upgradeSlot?: React.ReactNode
-  user?: NavUser
 }) {
   const t = useTranslations('nav')
   const isActive = useActive()
@@ -171,16 +134,7 @@ export function Sidebar({
                       : 'text-ink-600 hover:bg-ink-100 hover:text-ink-900',
                   )}
                 >
-                  {key === 'profile' ? (
-                    <ProfileGlyph
-                      avatarUrl={user?.avatarUrl ?? null}
-                      name={user?.name ?? null}
-                      active={active}
-                        className="size-4.5"
-                    />
-                  ) : (
-                    <Icon aria-hidden className="size-4.5" strokeWidth={active ? 2.2 : 2} />
-                  )}
+                  <Icon aria-hidden className="size-4.5" strokeWidth={active ? 2.2 : 2} />
                   {t(key)}
                 </Link>
               </li>

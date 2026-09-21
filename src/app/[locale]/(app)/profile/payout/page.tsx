@@ -5,6 +5,7 @@ import { setRequestLocale } from 'next-intl/server'
 import { PayoutAccountsForm } from '@/components/profile/PayoutAccountsForm'
 import { redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
+import { getPaymentMethodSwitches } from '@/lib/payments/methods'
 import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
@@ -51,7 +52,11 @@ export default async function PayoutPage({
   if (!user) redirect({ href: '/login', locale })
 
   const supabase = await createClient()
-  const [detailsRes, providersRes, coinsRes, networksRes] = await Promise.all([
+  const [switches, detailsRes, providersRes, coinsRes, networksRes] = await Promise.all([
+    /* Which rails are open. A method the operator has switched off is not
+       drawn at all: `set_payout_details` refuses it anyway, so offering the
+       form would be offering a save that cannot succeed. */
+    getPaymentMethodSwitches(),
     supabase
       .from('user_payout_details')
       .select(
@@ -98,6 +103,8 @@ export default async function PayoutPage({
     <PayoutAccountsForm
       momoSaved={momoSaved}
       cryptoSaved={cryptoSaved}
+      momoEnabled={switches.payout.mobileMoney}
+      cryptoEnabled={switches.payout.crypto}
       providers={providersRes.data ?? []}
       coins={coinsRes.data ?? []}
       networks={networksRes.data ?? []}

@@ -31,19 +31,3 @@ export async function updatePersonalInfo(input: PersonalInput): Promise<Personal
   if (error) return { ok: false, message: error.message }
   return { ok: true }
 }
-
-/** Persist (or clear) the avatar path after a browser-side upload. */
-export async function setAvatarPath(path: string | null): Promise<PersonalResult> {
-  const user = await getSessionUser()
-  if (!user) return { ok: false, errorKey: 'notSignedIn' }
-
-  // Defence in depth: only a path inside the user's own folder, or null.
-  if (path !== null && !path.startsWith(`${user.id}/`)) {
-    return { ok: false, errorKey: 'invalidPath' }
-  }
-
-  const supabase = await createClient()
-  const { error } = await supabase.from('profiles').update({ avatar_path: path }).eq('id', user.id)
-  if (error) return { ok: false, message: error.message }
-  return { ok: true }
-}

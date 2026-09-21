@@ -1,36 +1,44 @@
 /**
- * Shrink a chosen photo to what an avatar actually needs, in the browser,
+ * Shrink a chosen picture to what it is actually drawn at, in the browser,
  * before a byte of it is uploaded.
  *
- * WHY IN THE BROWSER. The operator's own profile picture was a 1.26 MB PNG,
- * and every screen that shows a list of people — the leaderboard, the team,
- * the admin's people grid — downloads one of these per row. On a Ghanaian
- * mobile connection that is the difference between a list and a wait.
- * Compressing here means the slow upload never happens either: the person
- * sending the photo is on the same connection as the people who will fetch it.
+ * WHY IN THE BROWSER. The person choosing the file is on the same connection
+ * as everybody who will later download it. A 1.26 MB PNG (the size of the
+ * operator's own profile photo, which is where this module started) costs the
+ * uploader a slow upload and then costs every viewer the download, on a
+ * Ghanaian mobile connection, once per card on the screen. Resizing here
+ * means neither happens.
  *
- * THE NUMBERS, AND WHERE THEY COME FROM. The largest an avatar is ever drawn
- * is 96 CSS pixels (the profile page); everywhere else is 40 or less. At a 3×
- * device pixel ratio that is 288 real pixels, so 320 is the first round number
- * that cannot look soft. WebP at 0.82 puts a 320px portrait at roughly 15–25 KB
- * — two orders of magnitude off where we were.
+ * WHAT IT IS USED FOR NOW. Advertiser logos on the ad cards. Profile photos
+ * were withdrawn on 2026-09-21 and everybody is drawn as their initials, so
+ * the avatar path this was written for is gone; the code moved here rather
+ * than being deleted with it because the problem it solves is the same one an
+ * advertiser logo has, and it had already been debugged against real phones.
  *
- * IT NEVER BLOCKS A SAVE. Every failure path returns the original file rather
+ * IT NEVER BLOCKS A SAVE. Every failure path returns the ORIGINAL file rather
  * than throwing: an old browser that cannot decode into a canvas should still
- * be able to set a profile picture. The caller keeps a size limit for that
- * case, and the bucket has its own ceiling, so "compression did not happen"
+ * be able to set a logo. The caller keeps its own size limit for that case,
+ * and the bucket has a ceiling of its own, so "compression did not happen"
  * can never mean "anything at all was uploaded".
  */
 
-/** The longest edge we keep. See the note above for why 320 and not 96. */
-const TARGET_PX = 320
-
-/** Good enough to stop at. Anything under this is already a rounding error on
- *  a page that loads a dozen of them. */
-const MAX_BYTES = 60 * 1024
+export type SquareOptions = {
+  /**
+   * The longest edge to keep, in real pixels.
+   *
+   * Work it out from the largest the picture is ever DRAWN, times a device
+   * pixel ratio of 3: an advertiser logo is 32 CSS pixels on the player, so
+   * 96 is the first round number that cannot look soft.
+   */
+  targetPx: number
+  /** Good enough to stop at. Below this, more compression buys nothing. */
+  maxBytes: number
+  /** Base name for the produced file. The extension is added here. */
+  name: string
+}
 
 /** Tried in order, stopping at the first that fits. Starting low would make
- *  every photo worse to save bytes nobody notices. */
+ *  every picture worse to save bytes nobody notices. */
 const QUALITY_STEPS = [0.82, 0.72, 0.62, 0.5]
 
 type Loaded = {
@@ -40,7 +48,15 @@ type Loaded = {
   release: () => void
 }
 
-export async function compressAvatar(file: File): Promise<File> {
+/**
+ * A centred square, resized and re-encoded.
+ *
+ * Cropped here rather than left to `object-cover` in CSS: the mark is drawn
+ * in a square or a circle, so the sides of a landscape picture are never
+ * seen, and uploading them is paying to transfer pixels that are guaranteed
+ * to be thrown away.
+ */
+export async function compressSquareImage(file: File, options: SquareOptions): Promise<File> {
   let source: Loaded
   try {
     source = await loadImage(file)
@@ -51,16 +67,10 @@ export async function compressAvatar(file: File): Promise<File> {
   try {
     if (!source.width || !source.height) return file
 
-    /*
-      A CENTRED SQUARE, cropped here rather than left to `object-cover` in CSS.
-      Every avatar is drawn in a circle, so the sides of a landscape photo are
-      never seen — uploading them is paying to transfer pixels that are
-      guaranteed to be thrown away.
-    */
     const side = Math.min(source.width, source.height)
     // Never upscale: a 64px picture stays 64px rather than being blown up to
-    // 320 and re-encoded, which only adds bytes and blur.
-    const size = Math.min(TARGET_PX, side)
+    // the target and re-encoded, which only adds bytes and blur.
+    const size = Math.min(options.targetPx, side)
 
     const canvas = document.createElement('canvas')
     canvas.width = size
@@ -97,7 +107,7 @@ export async function compressAvatar(file: File): Promise<File> {
     }
 
     for (const quality of QUALITY_STEPS.slice(1)) {
-      if (blob && blob.size <= MAX_BYTES) break
+      if (blob && blob.size <= options.maxBytes) break
       const next = await toBlob(canvas, type, quality)
       if (next) blob = next
     }
@@ -107,7 +117,7 @@ export async function compressAvatar(file: File): Promise<File> {
     // actually smaller — the point is bytes on the wire, not the format.
     if (blob.size >= file.size) return file
 
-    return new File([blob], `avatar.${type === 'image/webp' ? 'webp' : 'jpg'}`, { type })
+    return new File([blob], `${options.name}.${type === 'image/webp' ? 'webp' : 'jpg'}`, { type })
   } catch {
     return file
   } finally {

@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import { youtubeId } from '@/lib/admin/ad-draft'
 import type { AdDraft } from '@/lib/admin/types'
 import { adMediaUrl } from '@/lib/ads/media'
+import { compressSquareImage } from '@/lib/images/compress-square'
 import { cn } from '@/lib/cn'
 import { createClient } from '@/lib/supabase/client'
 
@@ -38,6 +39,18 @@ import { Field, FieldSet, inputClass, Segmented } from './FormBits'
  */
 
 const MAX_BYTES = 100 * 1024 * 1024
+
+/**
+ * What an advertiser logo is allowed to be by the time it is uploaded.
+ *
+ * 96 real pixels because it is drawn at 32 CSS pixels and a phone's device
+ * pixel ratio is 3. The byte ceiling is the belt to that braces: the browser
+ * resizes first, and this catches the case where it could not (an old Android
+ * that cannot decode into a canvas hands the original back untouched, by
+ * design, because a logo nobody can upload is worse than a large one).
+ */
+const LOGO_PX = 96
+const LOGO_MAX_BYTES = 200 * 1024
 
 export function AdMedia({
   draft,
@@ -153,13 +166,14 @@ function YoutubeField({
 
 /* ------------------------------------------------------------------ */
 
-function UploadField({
+export function UploadField({
   label,
   hint,
   accept,
   path,
   folder,
   image,
+  squarePx,
   onUploaded,
   onClear,
 }: {
@@ -167,9 +181,18 @@ function UploadField({
   hint: string
   accept: string
   path: string | null
-  /** Prefix inside the bucket, so videos and stills stay separable. */
-  folder: 'video' | 'thumb'
+  /** Prefix inside the bucket, so videos, stills and logos stay separable. */
+  folder: 'video' | 'thumb' | 'logo'
   image?: boolean
+  /**
+   * Resize to a square of this many pixels in the browser before uploading.
+   *
+   * Only the logo asks for it. A thumbnail is drawn full width on a card and
+   * cropping it square would throw away the picture; a logo is drawn in a
+   * 32px box and shipping a 1 MB PNG to every viewer for it would be paying
+   * to transfer pixels nobody can see.
+   */
+  squarePx?: number
   onUploaded: (path: string, meta?: { duration: number | null }) => void
   onClear: () => void
 }) {
@@ -181,24 +204,49 @@ function UploadField({
 
   const url = adMediaUrl(path)
 
-  const choose = async (file: File | undefined) => {
-    if (!file) return
+  const choose = async (chosen: File | undefined) => {
+    if (!chosen) return
     setProblem(null)
 
-    if (file.size > MAX_BYTES) {
+    if (chosen.size > MAX_BYTES) {
       setProblem(t('errors.fileTooBig'))
       return
     }
 
     setBusy(true)
     try {
-      const duration = image ? null : await readDuration(file)
+      const duration = image ? null : await readDuration(chosen)
+
+      /* Resized BEFORE the upload, not after. The operator choosing the file
+         is on the same connection as everybody who will later download it, so
+         the slow upload never happens either. Returns the original when the
+         browser cannot decode it, which is why the ceiling below is checked
+         on what came back rather than on what went in. */
+      const file = squarePx
+        ? await compressSquareImage(chosen, {
+            targetPx: squarePx,
+            maxBytes: LOGO_MAX_BYTES,
+            name: folder,
+          })
+        : chosen
+
+      if (squarePx && file.size > LOGO_MAX_BYTES) {
+        setProblem(t('errors.fileTooBig'))
+        return
+      }
+
       const extension = (file.name.split('.').pop() ?? 'bin').toLowerCase().slice(0, 5)
       const key = `${folder}/${crypto.randomUUID()}.${extension}`
 
       const supabase = createClient()
       const { error } = await supabase.storage.from('ad-media').upload(key, file, {
         contentType: file.type,
+        /* A year. These objects are keyed by a fresh UUID on every upload, so
+           a cached one can never be stale: replacing a logo produces a new
+           URL and the old object is deleted by the save action. Without it
+           Supabase serves an hour, and every viewer re-fetches every logo in
+           the feed once an hour for nothing. */
+        cacheControl: '31536000',
         upsert: false,
       })
 

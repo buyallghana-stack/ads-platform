@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import { ArrowLeft } from 'lucide-react'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
-import { AvatarUploader } from '@/components/profile/AvatarUploader'
 import { Card } from '@/components/ui/Card'
 import { Link, redirect } from '@/i18n/navigation'
 import { getProfile, getViewerUser } from '@/lib/auth/session'
@@ -18,9 +17,12 @@ export const metadata: Metadata = {
 
 /**
  * Personal information — a Profile sub-screen in the established settings
- * language: the editable avatar up top (camera badge -> upload), then name and
- * phone, which the user may change as often as they like. Email is shown but
- * managed under Security.
+ * language: name and phone, which the user may change as often as they like.
+ * Email is shown but managed under Security.
+ *
+ * The editable avatar that used to sit at the top of this card is gone
+ * (operator decision, 2026-09-21). Everybody is drawn as their initials now,
+ * here and on every list. See components/profile/Avatar.tsx.
  */
 export default async function PersonalInfoPage({
   params,
@@ -71,14 +73,6 @@ export default async function PersonalInfoPage({
       </header>
 
       <Card className="animate-rise mt-4 px-5 py-6 sm:px-6">
-        <div className="mb-6 flex justify-center">
-          <AvatarUploader
-            userId={user!.id}
-            name={profile?.full_name ?? null}
-            initialPath={profile?.avatar_path ?? null}
-          />
-        </div>
-
         <PersonalInfoForm
           defaultName={profile?.full_name ?? ''}
           momoPhone={momoPhone}

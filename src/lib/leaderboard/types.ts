@@ -18,7 +18,6 @@ export type LeaderboardRow = {
   userId: string
   /** First name + last initial. The full name is not fetched at all. */
   name: string
-  avatarUrl: string | null
   points: number
   previousRank: number | null
   movement: Movement

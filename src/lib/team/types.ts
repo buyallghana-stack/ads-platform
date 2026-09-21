@@ -32,7 +32,6 @@ export type TeamMember = {
   /** Null when they never gave one, or when the operator has switched the
    *  column off with `team_shows_member_phone`. */
   phone: string | null
-  avatarUrl: string | null
   joinedAt: string
   /** The highest plan they hold right now. Never null: no plans means the
    *  default tier, which is a standing rather than an absence. */

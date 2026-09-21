@@ -28,7 +28,6 @@ import { SettingsGroup, SettingsRow } from '@/components/profile/SettingsRow'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { Link, redirect } from '@/i18n/navigation'
 import { getProfile, getViewerUser } from '@/lib/auth/session'
-import { avatarPublicUrl } from '@/lib/profile/avatar'
 import { getCommunities } from '@/lib/communities/data'
 import { getTwoFactorStatus } from '@/lib/security/two-factor-data'
 import { isAdminUser } from '@/lib/auth/landing'
@@ -83,11 +82,7 @@ export default async function ProfilePage({
         style={{ '--rise-delay': '0.05s' } as React.CSSProperties}
         className="animate-rise flex items-center gap-3.5 rounded-(--radius-card) border border-ink-200 bg-surface p-4 shadow-[0_1px_2px_0_rgb(15_23_42/0.04)]"
       >
-        <Avatar
-          name={fullName}
-          src={avatarPublicUrl(profile?.avatar_path)}
-          className="size-12 text-[0.9375rem]"
-        />
+        <Avatar name={fullName} className="size-12 text-[0.9375rem]" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-[0.9375rem] font-semibold text-ink-900">
             {profile?.full_name ?? t('noName')}
