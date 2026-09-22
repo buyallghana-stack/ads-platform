@@ -57,6 +57,28 @@ type RawStanding = {
    a string would be a silly way to break a scoreboard. */
 const num = (value: number | string | null | undefined): number => Number(value ?? 0)
 
+/**
+ * Master switch, read the same way `getVaultEnabled` reads `vault_enabled`:
+ * a direct select against `app_config`, which RLS allows because the row is
+ * `is_public`. Off means the shortcut tile disables itself (QuickLinks) and
+ * the route shows "unavailable" instead of calling `get_leaderboard` /
+ * `get_leaderboard_standing`, which now refuse server-side regardless — this
+ * is what stops that refusal reaching the user as an empty "be the first"
+ * board.
+ */
+export async function getLeaderboardEnabled(): Promise<boolean> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('app_config')
+    .select('value')
+    .eq('key', 'leaderboard_enabled')
+    .maybeSingle()
+
+  // Defaulting to enabled on a failed read matches today's behaviour before
+  // this switch existed; the operator flips it explicitly to turn it off.
+  return data?.value !== 'false'
+}
+
 export async function getLeaderboardData(userId: string): Promise<LeaderboardData> {
   const supabase = await createClient()
 
