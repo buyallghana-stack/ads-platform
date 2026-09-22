@@ -28,6 +28,7 @@ import { getProfile, getViewerUser } from '@/lib/auth/session'
 import { pickDisplayName } from '@/lib/dashboard/display-name'
 import { getHomeData } from '@/lib/dashboard/home-data'
 import { getGameStatus } from '@/lib/games/data'
+import { getLeaderboardEnabled } from '@/lib/leaderboard/data'
 import { getNotifications, getUnreadCount } from '@/lib/notifications/data'
 import { getTasks } from '@/lib/tasks/data'
 import { getVaultEnabled, getUserHasActiveVault } from '@/lib/vault/data'
@@ -72,6 +73,7 @@ export default async function HomePage({
     notifications,
     unreadCount,
     gameStatus,
+    leaderboardEnabled,
     vaultEnabled,
     hasActiveVault,
     tasks,
@@ -88,6 +90,8 @@ export default async function HomePage({
       getUnreadCount('ads'),
       // Cheap game status read; drives whether the Games tile is live and remaining plays.
       getGameStatus(),
+      // Drives whether the Leaderboard tile is tappable. See QuickLinks.
+      getLeaderboardEnabled(),
       getVaultEnabled(),
       getUserHasActiveVault(user!.id),
       getTasks(),
@@ -345,7 +349,9 @@ export default async function HomePage({
       </Link>
 
       {/* Shortcuts, directly under the balance so they are the first thing a
-          thumb reaches. Three are disabled until their features exist. */}
+          thumb reaches. Games is disabled until it exists; Leaderboard can be
+          paused by the operator via `leaderboard_enabled` even though it's
+          shipped. */}
       <QuickLinks
         labels={{
           games: t('quick.games'),
@@ -356,6 +362,7 @@ export default async function HomePage({
         soonLabel={t('quick.soon')}
         navLabel={t('quick.label')}
         gamesEnabled={gamesEnabled}
+        leaderboardEnabled={leaderboardEnabled}
         hasUnplayedGames={hasUnplayedGames}
         hasUnclaimedTasks={hasUnclaimedTasks}
       />

@@ -3361,7 +3361,8 @@
     "titleMoney": "Earnings board",
     "subtitleMoney": "Every cedi counts. Where do you stand?",
     "emptyMoney": "Nobody has earned commission in this period yet.",
-    "onlyPodiumMoney": "Only the top places have earnings so far."
+    "onlyPodiumMoney": "Only the top places have earnings so far.",
+    "unavailable": "Leaderboard is currently unavailable. It will be displayed soon."
   },
   "games": {
     "title": "Games",

@@ -62,7 +62,12 @@ const TONE_ON: Record<Tone, string> = {
 
 /* Games are built but gated: `games_enabled` is off until the licensing
    question around paying for chances at a random prize is settled, so the
-   tile follows the switch rather than being hard-coded live. */
+   tile follows the switch rather than being hard-coded live.
+
+   Leaderboard follows the same shape as of `leaderboard_enabled`: the
+   operator can take it down temporarily (abuse, a recount, whatever) without
+   a deploy. `ready: true` here is just the tile's starting point — it is
+   overridden below exactly like `games` is. */
 const ITEMS: Item[] = [
   { key: 'games', href: '/games', icon: <Gamepad2 />, ready: false, tone: 'violet' },
   { key: 'leaderboard', href: '/leaderboard', icon: <Trophy />, ready: true, tone: 'orange' },
@@ -122,12 +127,17 @@ export function QuickLinks({
   soonLabel,
   navLabel,
   gamesEnabled = false,
+  leaderboardEnabled = true,
   hasUnplayedGames = false,
   hasUnclaimedTasks = false,
 }: {
   labels: Record<Item['key'], string>
   /** Drives the Games tile. See the note on ITEMS. */
   gamesEnabled?: boolean
+  /** Drives the Leaderboard tile. Defaults on, unlike Games, because the
+   *  leaderboard is a shipped feature the operator can pause — not one
+   *  waiting on a launch decision. */
+  leaderboardEnabled?: boolean
   /** Whether user has unplayed free spins/games remaining. */
   hasUnplayedGames?: boolean
   /** Whether user has completed tasks ready to claim. */
@@ -145,7 +155,12 @@ export function QuickLinks({
       className="animate-rise grid grid-cols-4 gap-1 rounded-(--radius-panel) border border-ink-200 bg-surface p-1.5 sm:gap-2 sm:p-2"
     >
       {ITEMS.map((raw) => {
-        const item = raw.key === 'games' ? { ...raw, ready: gamesEnabled } : raw
+        const item =
+          raw.key === 'games'
+            ? { ...raw, ready: gamesEnabled }
+            : raw.key === 'leaderboard'
+              ? { ...raw, ready: leaderboardEnabled }
+              : raw
         const hasDot =
           (item.key === 'games' && hasUnplayedGames) ||
           (item.key === 'tasks' && hasUnclaimedTasks)

@@ -3361,7 +3361,8 @@
     "titleMoney": "Classement des gains",
     "subtitleMoney": "Chaque cedi compte. Où vous situez-vous ?",
     "emptyMoney": "Personne n’a encore gagné de commission sur cette période.",
-    "onlyPodiumMoney": "Seules les premières places ont des gains pour l’instant."
+    "onlyPodiumMoney": "Seules les premières places ont des gains pour l’instant.",
+    "unavailable": "Le classement est actuellement indisponible. Il sera affiché bientôt."
   },
   "games": {
     "title": "Jeux",
