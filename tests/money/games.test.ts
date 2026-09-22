@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest'
 import {
   HAS_DB,
   type Tx,
+  actAs,
+  actAsAdmin,
   balanceOf,
   createAdmin,
   createUser,
@@ -211,6 +213,76 @@ describe.skipIf(!HAS_DB)('games', () => {
       expect((await play(tx, user.id, 'mystery_box')).outcome).toBe('ok')
       // The free tier's single play is gone — the wheel does not get its own.
       expect((await play(tx, user.id, 'spin_wheel')).outcome).toBe('no_plays_left')
+    })
+  })
+
+  /*
+    ── THE STATUS ANSWERS FOR ITS SUBJECT, NOT FOR WHOEVER IS ASKING ─────────
+
+    Reported 2026-09-22: an admin opened a FREE account through "view as user"
+    and the games screen offered three plays. The free plan grants none. The
+    admin then played their own three and the free account's three went with
+    them, because there was only ever one number on the screen — the admin's.
+
+    `get_game_status()` took no user id and resolved its subject from
+    `auth.uid()`, which under "view as user" stays the admin for the whole
+    session by design. Any SECURITY DEFINER read shaped that way is unviewable
+    by construction: it cannot answer for anybody but the caller, so it answers
+    for the admin and looks entirely plausible while doing it.
+  */
+  it('tells an admin what the user they are viewing has, not what they have', async () => {
+    await withRollback(async (tx) => {
+      // Production's free plan: no plays at all. The whole point of the report.
+      await pinEconomy(tx, { freeGamePlays: 0 })
+      await enable(tx)
+
+      const user = await createUser(tx, { name: 'Free Account' })
+      const admin = await createAdmin(tx)
+      await grantPlan(tx, admin.id, 'gold')
+
+      const status = async (subject: string) => {
+        const { rows } = await tx.query(
+          `select allowance, remaining from public.game_status_for($1)`,
+          [subject],
+        )
+        return rows[0] as { allowance: number; remaining: number }
+      }
+
+      const { rows: plays } = await tx.query(
+        `select weekly_game_plays as n from public.tiers where slug = 'gold'`,
+      )
+      const gold = plays[0]!.n as number
+
+      await actAsAdmin(tx, admin.id)
+
+      // What the admin holds, asked about the admin.
+      expect((await status(admin.id)).allowance).toBe(gold)
+      // And the free account, which holds nothing, asked in the same breath.
+      expect((await status(user.id)).allowance).toBe(0)
+      expect((await status(user.id)).remaining).toBe(0)
+    })
+  })
+
+  it('will not tell one user about another user\'s plays', async () => {
+    await withRollback(async (tx) => {
+      await pinEconomy(tx, { freeGamePlays: 2 })
+      await enable(tx)
+
+      const nosy = await createUser(tx, { name: 'Nosy' })
+      const other = await createUser(tx, { name: 'Other' })
+
+      await actAs(tx, nosy.id)
+      // Their own is fine.
+      const { rows } = await tx.query(
+        `select allowance from public.game_status_for($1)`,
+        [nosy.id],
+      )
+      expect(rows[0]!.allowance).toBe(2)
+
+      const message = await expectRejection(tx, () =>
+        tx.query(`select * from public.game_status_for($1)`, [other.id]),
+      )
+      expect(message).toMatch(/not allowed/i)
     })
   })
 

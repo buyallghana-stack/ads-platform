@@ -7,6 +7,8 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { MysteryBox } from '@/components/games/MysteryBox'
 import { SpinWheel } from '@/components/games/SpinWheel'
 import { Link, redirect } from '@/i18n/navigation'
+import { getViewAsSession } from '@/lib/admin/view-as'
+import { getViewerUser } from '@/lib/auth/session'
 import { getGameBoard, getGameStatus } from '@/lib/games/data'
 import { GAME_SLUGS } from '@/lib/games/types'
 
@@ -42,7 +44,18 @@ export default async function Page({
   const kind = GAME_SLUGS[game]
   if (!kind) notFound()
 
-  const status = await getGameStatus()
+  const user = await getViewerUser()
+  if (!user) redirect({ href: '/login', locale })
+
+  /* A board is the one screen in this group that only makes sense for the
+     person holding the plays. Under "view as user" the middleware refuses
+     every POST, so `playGame` would 403 on the first tap — and the play it
+     was refusing would have spent the ADMIN's allowance, not the user's,
+     because writes always run as the real signed-in account. Send the admin
+     to the hub, where the number they came to check is the honest one. */
+  if (await getViewAsSession()) redirect({ href: '/games', locale })
+
+  const status = await getGameStatus(user!.id)
   if (!status.enabled) notFound()
   /* A plan that grants no plays cannot open a board by URL either. The game
      screen's only word for it is "You have used all your plays this week",

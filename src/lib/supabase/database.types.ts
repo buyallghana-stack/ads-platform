@@ -4554,6 +4554,17 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      game_status_for: {
+        Args: { p_user_id: string }
+        Returns: {
+          allowance: number
+          enabled: boolean
+          remaining: number
+          used: number
+          week_ends_at: string
+          week_start: string
+        }[]
+      }
       game_week_start: { Args: never; Returns: string }
       generate_certificate_code: { Args: never; Returns: string }
       generate_gift_code: { Args: never; Returns: string }

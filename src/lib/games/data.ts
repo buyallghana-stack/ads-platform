@@ -6,13 +6,18 @@ import type { GameFace, GameKind, GameStatus } from '@/lib/games/types'
 /**
  * Data for the game screens.
  *
- * Read through the USER's client. `get_game_status` and `get_game_board` are
- * SECURITY DEFINER and granted to `authenticated` because they answer for the
- * caller themselves — the status takes no user id at all, and the board
- * returns labels, points and colours with the WEIGHTS deliberately left
- * behind. `play_game` is the opposite: revoked from every client role and
- * called through the service client from a server action, because it is the
- * one that mints points.
+ * Read through the USER's client. `game_status_for` and `get_game_board` are
+ * SECURITY DEFINER and granted to `authenticated`: the status carries its own
+ * "you, or staff asking about anybody" check, and the board returns labels,
+ * points and colours with the WEIGHTS deliberately left behind. `play_game` is
+ * the opposite: revoked from every client role and called through the service
+ * client from a server action, because it is the one that mints points.
+ *
+ * ⚠️ THE STATUS TAKES THE USER AS AN ARGUMENT, AND THE CALLER MUST PASS THE
+ * VIEWER. It used to answer for `auth.uid()`, which under "view as user" is
+ * the ADMIN — so a free account with no plays at all displayed the admin's
+ * three, and the admin spending them emptied what looked like the user's.
+ * Pass `getViewerUser()`, the same id every other screen in the group renders.
  */
 
 type RawStatus = {
@@ -31,9 +36,9 @@ type RawFace = {
   colour: string
 }
 
-export async function getGameStatus(): Promise<GameStatus> {
+export async function getGameStatus(userId: string): Promise<GameStatus> {
   const supabase = await createClient()
-  const { data } = await supabase.rpc('get_game_status')
+  const { data } = await supabase.rpc('game_status_for', { p_user_id: userId })
   const row = ((data ?? []) as RawStatus[])[0]
 
   /* Defaulting to DISABLED when the read fails is deliberate: the switch is

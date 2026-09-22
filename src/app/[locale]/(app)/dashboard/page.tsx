@@ -89,7 +89,7 @@ export default async function HomePage({
       getNotifications('ads', 30),
       getUnreadCount('ads'),
       // Cheap game status read; drives whether the Games tile is live and remaining plays.
-      getGameStatus(),
+      getGameStatus(user!.id),
       // Drives whether the Leaderboard tile is tappable. See QuickLinks.
       getLeaderboardEnabled(),
       getVaultEnabled(),
