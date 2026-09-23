@@ -2525,6 +2525,10 @@
         "leaderboard": {
           "title": "Leaderboard and gift codes",
           "description": "What the public board counts and shows, and how hard a gift code is to guess at."
+        },
+        "maintenance": {
+          "title": "Maintenance",
+          "description": "Close the member app while work is going on."
         }
       },
       "fields": {
@@ -2722,6 +2726,11 @@
         "freeWindowBuyout": {
           "label": "Settle unused free days on upgrade",
           "description": "When somebody buys their first plan, credit them for the free trial days they never got to use. Paid once per account, never on a renewal or a second plan, and nothing at all once the free window has run out. A day they were signed up for and did not watch is their own loss. The amount follows the window above and the free plan's own ad count and rate."
+        },
+        "maintenanceEnabled": {
+          "label": "Close the member app",
+          "description": "Members see a maintenance screen instead of the app. Staff always pass, and so do the addresses on the allow list.",
+          "warning": "This shuts every member out of earning, watching and withdrawing. The admin stays open so you can switch it back off."
         }
       }
     },
@@ -3748,5 +3757,10 @@
     },
     "replay": "Show me around again",
     "later": "Do it later"
+  },
+  "maintenance": {
+    "title": "We are working on SidePerks",
+    "body": "The app is closed for a short while so we can finish some changes. Nothing you have earned is affected.",
+    "balance": "Your balance, your statement and your payout details are all exactly where you left them, and they will be here when we open again."
   }
 }

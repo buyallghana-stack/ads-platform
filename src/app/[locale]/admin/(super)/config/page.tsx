@@ -451,6 +451,27 @@ export default async function AdminConfigPage({
       ],
     },
     {
+      /* ⚠️ The switch that closes the member app, put where an operator can
+         reach it from a phone. Staff always pass it and the admin area is
+         never closed by it, which is what makes it reversible: a maintenance
+         mode that locks out the person who turned it on is a database job to
+         undo. The allow list of non-staff addresses is a second key and this
+         screen has no free-text field, so it is set from a migration. */
+      key: 'maintenance',
+      title: t('groups.maintenance.title'),
+      description: t('groups.maintenance.description'),
+      fields: [
+        {
+          key: 'maintenance_enabled',
+          label: t('fields.maintenanceEnabled.label'),
+          description: t('fields.maintenanceEnabled.description'),
+          warning: t('fields.maintenanceEnabled.warning'),
+          danger: true,
+          kind: 'toggle',
+        },
+      ],
+    },
+    {
       /* Added 2026-07-30. These keys existed in `app_config` from the day the
          games shipped, and `admin_set_config` would have accepted them — but
          this screen renders a HAND-WRITTEN field list, not every row in the

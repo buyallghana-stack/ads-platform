@@ -4,8 +4,10 @@ import { BottomTabBar, Sidebar } from '@/components/app/AppNav'
 import { Link } from '@/i18n/navigation'
 import { redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser, getViewerUser } from '@/lib/auth/session'
+import { MaintenanceScreen } from '@/components/app/MaintenanceScreen'
 import { Onboarding } from '@/components/onboarding/Onboarding'
 import { getViewAsSession } from '@/lib/admin/view-as'
+import { getMaintenance } from '@/lib/maintenance/data'
 import { getOnboardingState, getUpgradeOffer } from '@/lib/onboarding/data'
 import { ViewAsBanner } from '@/components/app/ViewAsBanner'
 import { needsLoginChallenge } from '@/lib/security/login-2fa'
@@ -70,6 +72,23 @@ export default async function AppLayout({
   const viewing = await getViewAsSession()
   const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
+
+  /*
+    ⚠️ CHECKED BEFORE ANY OF THE SCREEN'S OWN DATA IS FETCHED. Doing it after
+    would spend a member's mobile data building a dashboard nobody is going to
+    see, and would let a slow read on a closed app look like a broken one.
+
+    It uses the SIGNED IN account, never `getViewerUser()`: a super admin
+    looking at somebody through "view as user" is staff, and shutting them out
+    of the tool they use to see what members are seeing would be exactly
+    backwards.
+
+    The admin area has its own layout and is untouched, which is what makes the
+    switch reversible from a phone.
+  */
+  if ((await getMaintenance({ id: signedIn!.id, email: signedIn!.email })).closed) {
+    return <MaintenanceScreen />
+  }
 
   const t = await getTranslations('nav')
 

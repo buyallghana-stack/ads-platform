@@ -2525,6 +2525,10 @@
         "leaderboard": {
           "title": "Classement et codes cadeaux",
           "description": "Ce que le classement public compte et affiche, et la difficulté à deviner un code cadeau."
+        },
+        "maintenance": {
+          "title": "Maintenance",
+          "description": "Fermer l'application des membres pendant les travaux."
         }
       },
       "fields": {
@@ -2722,6 +2726,11 @@
         "freeWindowBuyout": {
           "label": "Régler les jours gratuits non utilisés",
           "description": "Quand quelqu'un achète son premier forfait, créditez-lui les jours d'essai gratuit dont il n'a pas pu profiter. Versé une seule fois par compte, jamais lors d'un renouvellement ou d'un second forfait, et rien du tout une fois la période gratuite terminée. Un jour où il était inscrit sans regarder est une perte pour lui. Le montant suit la période ci-dessus ainsi que le nombre d'annonces et le taux du forfait gratuit."
+        },
+        "maintenanceEnabled": {
+          "label": "Fermer l'application des membres",
+          "description": "Les membres voient un écran de maintenance à la place de l'application. Le personnel passe toujours, ainsi que les adresses autorisées.",
+          "warning": "Cela empêche tous les membres de gagner, de regarder et de retirer. L'administration reste ouverte pour pouvoir désactiver."
         }
       }
     },
@@ -3748,5 +3757,10 @@
     },
     "replay": "Refaire la visite",
     "later": "Plus tard"
+  },
+  "maintenance": {
+    "title": "Nous travaillons sur SidePerks",
+    "body": "L'application est fermée un court moment, le temps de terminer des modifications. Rien de ce que vous avez gagné n'est touché.",
+    "balance": "Votre solde, votre relevé et vos coordonnées de retrait sont exactement où vous les avez laissés, et ils seront là à la réouverture."
   }
 }
