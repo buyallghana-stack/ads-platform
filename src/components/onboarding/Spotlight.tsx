@@ -119,6 +119,7 @@ export function Spotlight({
       return null
     })()
 
+    const position = () => (scroller ? scroller.scrollTop : window.scrollY)
     const nudge = (delta: number) => {
       if (scroller) scroller.scrollTop += delta
       else window.scrollBy(0, delta)
@@ -170,6 +171,8 @@ export function Spotlight({
     let raf = 0
     let last = ''
     let frames = 0
+    /** Consecutive nudges that moved nothing, so the page has no travel left. */
+    let stalled = 0
 
     const tick = () => {
       frames += 1
@@ -179,13 +182,29 @@ export function Spotlight({
         const r = target.getBoundingClientRect()
 
         /*
-          ⚠️ IT NEVER STOPS CORRECTING. Settling once and trusting it is what
-          failed: anything that moves the page afterwards, a late revalidate
-          most of all, left the target off screen for good. The tolerance keeps
-          it from twitching on a page that is already right.
+          It keeps correcting, because anything that moves the page afterwards
+          (a late revalidate most of all) would otherwise leave the target off
+          screen for good.
+
+          ⚠️ BUT IT GIVES UP WHEN SCROLLING ACHIEVES NOTHING, AND THAT MATTERS
+          MORE THAN THE CORRECTION. When a target cannot reach its place
+          because the page is already at the end of its travel, the delta never
+          shrinks, so this asked the browser to scroll on EVERY FRAME, for ever.
+          Sixty pointless scrolls a second is a phone that stops responding to
+          taps: reported as a laggy card and as being stuck on step 2, which
+          was not a stuck step at all but a Next button whose tap never landed.
+
+          So a nudge that does not move the page is counted, and after a few in
+          a row the loop stops asking. It starts asking again the moment the
+          target really does move, which is what keeps the recovery working.
         */
         const delta = r.top - wantedTop(r.height)
-        if (Math.abs(delta) > 3) nudge(delta)
+        if (Math.abs(delta) > 3 && stalled < 4) {
+          const was = position()
+          nudge(delta)
+          if (Math.abs(position() - was) < 1) stalled += 1
+          else stalled = 0
+        }
         if (frames > 6) setSettled(true)
 
         const box = {
@@ -196,6 +215,9 @@ export function Spotlight({
         }
         const key = `${Math.round(box.top)},${Math.round(box.left)},${Math.round(box.width)},${Math.round(box.height)},${window.innerWidth},${window.innerHeight}`
         if (key !== last) {
+          /* The target moved on its own, so whatever pinned the page has let
+             go. Let the loop try again. */
+          if (last !== '' && last !== 'gone') stalled = 0
           last = key
           setMeasured({ anchor, box })
           setViewport({ w: window.innerWidth, h: window.innerHeight })

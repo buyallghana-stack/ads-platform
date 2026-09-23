@@ -62,7 +62,34 @@ export function Onboarding({
      server round trip and the revalidate finish. */
   const [dismissed, setDismissed] = useState(false)
 
-  const step = describe(state.currentStep)
+  /*
+    ── THE TAP LANDS NOW, THE SERVER CATCHES UP ──────────────────────────────
+
+    ⚠️ Advancing is a round trip: an RPC, a revalidate of the whole app shell,
+    and a refresh. On a Ghanaian mobile connection that is seconds, and for all
+    of them the card sat there with a disabled button. Reported as laggy and
+    unresponsive, and as being stuck on a step.
+
+    So a pressed step is remembered here immediately and the walkthrough moves
+    on at once. The server is still the authority: when its state arrives, any
+    step it agrees has been walked drops out of this list, and anything it
+    disagrees about comes back. Nothing here can tick a checklist row, because
+    that is read from the real tables and never from this.
+  */
+  const [pressed, setPressed] = useState<string[]>([])
+
+  /* Anything the server has caught up on is dropped here at render rather than
+     in an effect: there is nothing to synchronise, only a list to read past,
+     and a setState in an effect is a cascading render for no reason. */
+  const awaitingServer = pressed.filter(
+    (key) => !state.steps.some((s) => s.key === key && s.walked),
+  )
+
+  const current =
+    state.steps.find((s) => !s.walked && !awaitingServer.includes(s.key))?.key ??
+    state.currentStep
+
+  const step = describe(current)
   const active = state.enabled && !state.skipped && !state.completed && !dismissed
 
   /*
@@ -90,14 +117,16 @@ export function Onboarding({
     the count then runs ahead of where the member actually is. The label has to
     describe the walk, so it counts the step's place in the list.
   */
-  const index = Math.max(
-    state.steps.findIndex((s) => s.key === state.currentStep) + 1,
-    1,
-  )
+  const index = Math.max(state.steps.findIndex((s) => s.key === current) + 1, 1)
 
   const advance = (key: string) => {
+    /* Moves the walkthrough on this frame. The write follows. */
+    setPressed((prev) => (prev.includes(key) ? prev : [...prev, key]))
     start(async () => {
-      await markOnboardingStep(key as Parameters<typeof markOnboardingStep>[0])
+      const result = await markOnboardingStep(key as Parameters<typeof markOnboardingStep>[0])
+      /* It did not save, so put the member back where they were rather than
+         letting them walk on from a step the server never recorded. */
+      if (!result.ok) setPressed((prev) => prev.filter((k) => k !== key))
       router.refresh()
     })
   }

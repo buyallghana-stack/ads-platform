@@ -348,6 +348,11 @@ try {
   /* ⚠️ The bar sat over the account-name field and the Save button, so the
      member could not see what they were typing or reach the control that
      finishes the step. It must step aside when a field takes focus. */
+  /* The payout screen opens on an "Add" button, not on the form, so a check
+     that looked for an input found none and skipped in silence. Open it. */
+  await page.getByRole('button', { name: /^\s*\+?\s*add/i }).first().click().catch(() => {})
+  await page.waitForTimeout(1200)
+
   const field = page.locator('input:visible').first()
   if (await field.count()) {
     const before = await page.evaluate(() => {
@@ -363,6 +368,7 @@ try {
       return { gone: r.top >= window.innerHeight - 4, top: Math.round(r.top), vh: window.innerHeight }
     })
     check('the task bar clears the form while typing', after.gone, JSON.stringify({ before, after }))
+    await page.screenshot({ path: `${SHOTS}/06b-payout-typing.png` })
     await page.keyboard.press('Escape').catch(() => {})
   }
   await seeSteps(done, 'pin-task')
@@ -394,10 +400,17 @@ try {
 
   /* ---- 10. the plans ------------------------------------------------------- */
   await seeSteps([...done, 'games', 'community', 'invite'], 'plans-carousel')
-  const cards = await page.getByRole('button', { name: /^choose /i }).count()
-  check('every plan on sale has a card', cards === 4, `${cards} cards`)
-  const cardNames = await page.getByRole('button', { name: /^choose /i }).allTextContents()
-  check('the free plan is not a card', !cardNames.some((n) => /free/i.test(n)), cardNames.join(', '))
+  /* Every plan visible at once, which a carousel could not promise. */
+  const planRows = await page.evaluate(() =>
+    [...document.querySelectorAll('button[aria-pressed]')]
+      .map((b) => {
+        const r = b.getBoundingClientRect()
+        return { text: (b.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 40), onScreen: r.top >= 0 && r.bottom <= window.innerHeight }
+      }),
+  )
+  check('every plan on sale is a row', planRows.length === 4, `${planRows.length} rows`)
+  check('every plan is visible without swiping', planRows.every((r) => r.onScreen), JSON.stringify(planRows.map((r) => r.text)))
+  check('the free plan is not offered', !planRows.some((r) => /free/i.test(r.text)), planRows.map((r) => r.text).join(' | '))
   const referral = await page.getByText(/referral bonus/i).first().isVisible().catch(() => false)
   check('no referral bonus is claimed', !referral)
 

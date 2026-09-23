@@ -6,7 +6,7 @@ import { ArrowRight } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import { Coins } from '@/components/onboarding/art/Coins'
-import { PlanCarousel } from '@/components/onboarding/PlanCarousel'
+import { PlanPicker } from '@/components/onboarding/PlanPicker'
 import { Logo } from '@/components/brand/Logo'
 import { Button } from '@/components/ui/Button'
 import type { UpgradeOffer } from '@/lib/onboarding/data'
@@ -248,14 +248,10 @@ export function UpgradeSheet({
       </div>
 
       <div className="mt-6">
-        <PlanCarousel
-          plans={offer.plans}
-          freeDailyGhs={offer.freeDailyGhs}
-          onChoose={onChoose}
-        />
+        <PlanPicker plans={offer.plans} freeDailyGhs={offer.freeDailyGhs} onChoose={onChoose} />
       </div>
 
-      <p className="mt-5 text-center text-[0.75rem] leading-relaxed text-white/40">
+      <p className="mt-4 text-center text-[0.6875rem] leading-relaxed text-white/35">
         {t('caveat')}
       </p>
 
