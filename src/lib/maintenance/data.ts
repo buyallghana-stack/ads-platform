@@ -1,49 +1,31 @@
 import 'server-only'
 
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 
 /**
- * Whether the member app is closed, and whether this person may still use it.
+ * Whether the member app is closed to the person making this request.
  *
- * ⚠️ READ WITH THE SERVICE CLIENT. `app_config`'s select policy is
- * `is_public OR is_admin()`, and both of these keys are private on purpose: an
- * allow list of addresses is not something to hand to every browser that loads
- * the page. Read through the user's client they come back null, which would
- * read as "maintenance off" and quietly do nothing.
+ * ⚠️ THE WHOLE DECISION IS ONE DATABASE CALL, AND THAT IS THE POINT. The first
+ * version assembled it here: read two config rows, read a role, compare an
+ * email. Every part of it worked when run from a script against production,
+ * and in the deployed app it shut everybody out, staff and the allow-listed
+ * test account included. Two rounds of testing against a runtime with no logs
+ * I can read got no closer to which half was failing.
  *
- * ⚠️ IT FAILS OPEN, DELIBERATELY. If the read itself fails the app stays
- * usable. The alternative is a database hiccup locking every member out of a
- * working product, which is a far worse outcome than a maintenance window that
- * starts a minute late.
+ * `maintenance_closed_for_me()` can be asked from a SQL prompt and answers the
+ * same way every time. It is SECURITY DEFINER, so it reads the two private
+ * config keys itself rather than needing them handed over, and it answers about
+ * the CALLER, so this is read through the USER's client and no service key
+ * goes near it.
+ *
+ * ⚠️ IT FAILS OPEN, in both places. A read that errors leaves the app usable:
+ * a hiccup locking every member out of a working product is far worse than a
+ * maintenance window that starts a minute late.
  */
-export async function getMaintenance(user: {
-  id: string
-  email?: string | null
-}): Promise<{ closed: boolean }> {
-  const admin = createAdminClient()
+export async function isMaintenanceClosed(): Promise<boolean> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('maintenance_closed_for_me')
 
-  const [{ data: config }, { data: role }] = await Promise.all([
-    admin.from('app_config').select('key, value').in('key', ['maintenance_enabled', 'maintenance_allow_emails']),
-    admin.from('user_roles').select('role').eq('user_id', user.id).maybeSingle(),
-  ])
-
-  const enabled =
-    config?.find((row) => row.key === 'maintenance_enabled')?.value === 'true'
-  if (!enabled) return { closed: false }
-
-  /* Staff always pass. Without this the switch could only ever be turned off
-     by somebody with database access, because the admin area is reached
-     through the same sign-in. */
-  const STAFF = ['super_admin', 'admin', 'support', 'ads_manager']
-  if (role?.role && STAFF.includes(role.role)) return { closed: false }
-
-  const allowed = (config?.find((row) => row.key === 'maintenance_allow_emails')?.value ?? '')
-    .split(',')
-    .map((entry) => entry.trim().toLowerCase())
-    .filter(Boolean)
-
-  const email = (user.email ?? '').trim().toLowerCase()
-  if (email && allowed.includes(email)) return { closed: false }
-
-  return { closed: true }
+  if (error) return false
+  return data === true
 }

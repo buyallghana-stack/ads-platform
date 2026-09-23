@@ -7,7 +7,7 @@ import { getProfile, getSessionUser, getViewerUser } from '@/lib/auth/session'
 import { MaintenanceScreen } from '@/components/app/MaintenanceScreen'
 import { Onboarding } from '@/components/onboarding/Onboarding'
 import { getViewAsSession } from '@/lib/admin/view-as'
-import { getMaintenance } from '@/lib/maintenance/data'
+import { isMaintenanceClosed } from '@/lib/maintenance/data'
 import { getOnboardingState, getUpgradeOffer } from '@/lib/onboarding/data'
 import { ViewAsBanner } from '@/components/app/ViewAsBanner'
 import { needsLoginChallenge } from '@/lib/security/login-2fa'
@@ -86,7 +86,7 @@ export default async function AppLayout({
     The admin area has its own layout and is untouched, which is what makes the
     switch reversible from a phone.
   */
-  if ((await getMaintenance({ id: signedIn!.id, email: signedIn!.email })).closed) {
+  if (await isMaintenanceClosed()) {
     return <MaintenanceScreen />
   }
 

@@ -4908,6 +4908,7 @@ export type Database = {
         Args: { p_period: string }
         Returns: Record<string, unknown>
       }
+      maintenance_closed_for_me: { Args: never; Returns: boolean }
       mark_onboarding_step: { Args: { p_step: string }; Returns: Json }
       mark_all_notifications_read: { Args: never; Returns: undefined }
       mark_notification_read: { Args: { p_id: string }; Returns: undefined }
