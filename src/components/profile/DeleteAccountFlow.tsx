@@ -161,7 +161,7 @@ export function DeleteAccountFlow({ needsCode }: { needsCode: boolean }) {
 
       {/* 2 — password ----------------------------------------------------- */}
       {step === 'password' && (
-        <form onSubmit={submitPassword} className="animate-rise mt-8 flex flex-col">
+        <form method="post" onSubmit={submitPassword} className="animate-rise mt-8 flex flex-col">
           <h2 className="text-[1.0625rem] font-semibold text-ink-900">{t('password.title')}</h2>
           <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-ink-500">
             {t('password.body')}
@@ -243,7 +243,7 @@ export function DeleteAccountFlow({ needsCode }: { needsCode: boolean }) {
 
       {/* 4 — type the phrase ---------------------------------------------- */}
       {step === 'phrase' && (
-        <form onSubmit={submitPhrase} className="animate-rise mt-8 flex flex-col">
+        <form method="post" onSubmit={submitPhrase} className="animate-rise mt-8 flex flex-col">
           <h2 className="text-[1.0625rem] font-semibold text-ink-900">{t('phrase.title')}</h2>
           <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-ink-500">
             {t.rich('phrase.body', {

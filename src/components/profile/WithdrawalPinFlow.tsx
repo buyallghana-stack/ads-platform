@@ -159,6 +159,7 @@ export function WithdrawalPinFlow({ hasPin }: { hasPin: boolean }) {
       {/* Password step (reset) ------------------------------------------- */}
       {step === 'password' && (
         <form
+          method="post"
           className="animate-rise mt-8 flex flex-col items-center"
           onSubmit={(e) => { e.preventDefault(); if (password) setStep('new') }}
         >

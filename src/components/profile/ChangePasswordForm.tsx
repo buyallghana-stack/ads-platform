@@ -110,7 +110,7 @@ export function ChangePasswordForm({ needsCode }: { needsCode: boolean }) {
         </div>
       </header>
 
-      <form onSubmit={submit} className="animate-rise mt-6 flex flex-col gap-4">
+      <form method="post" onSubmit={submit} className="animate-rise mt-6 flex flex-col gap-4">
         <PasswordField
           label={t('password.current')}
           value={current}

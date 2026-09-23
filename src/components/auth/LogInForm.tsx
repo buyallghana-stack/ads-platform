@@ -276,7 +276,16 @@ export function LogInForm() {
         </div>
       )}
 
-      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-3.5">
+      {/* ⚠️ `method="post"` ON A FORM THAT NEVER POSTS. `onSubmit` handles this
+          and calls `preventDefault`, so the method is never used... until
+          JavaScript has not hydrated yet, or it throws. A form element with no method
+          defaults to GET, and a native GET submit puts every field IN THE URL:
+          observed on the live site as
+          /login?email=...&password=...  which then lands in browser history,
+          in the Referer header of the next request, and in the server logs.
+          One attribute is the difference between a failed sign-in and a
+          credential in a log file. */}
+      <form method="post" onSubmit={onSubmit} noValidate className="flex flex-col gap-3.5">
         <TextField
           label={t('email')}
           type="email"

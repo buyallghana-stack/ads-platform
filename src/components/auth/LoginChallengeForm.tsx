@@ -79,6 +79,7 @@ export function LoginChallengeForm() {
 
       {useBackup ? (
         <form
+          method="post"
           className="mt-7"
           onSubmit={(e) => {
             e.preventDefault()

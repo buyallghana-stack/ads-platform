@@ -70,7 +70,7 @@ export function ForgotPasswordForm() {
     <div>
       <FormHeader icon={<KeyRound />} title={t('title')} subtitle={t('subtitle')} />
 
-      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-3.5">
+      <form method="post" onSubmit={onSubmit} noValidate className="flex flex-col gap-3.5">
         <TextField
           label="Email address"
           type="email"

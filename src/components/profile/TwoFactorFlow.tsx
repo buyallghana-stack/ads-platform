@@ -388,6 +388,7 @@ export function TwoFactorFlow({
 
           {usePassword ? (
             <form
+              method="post"
               className="mt-5 w-full"
               onSubmit={(e) => { e.preventDefault(); turnOff() }}
             >

@@ -122,7 +122,7 @@ export function ChangeEmailForm({
         </div>
       </header>
 
-      <form onSubmit={submit} className="animate-rise mt-6 flex flex-col gap-4">
+      <form method="post" onSubmit={submit} className="animate-rise mt-6 flex flex-col gap-4">
         {/* Text, not a disabled input: a long address clips inside an input
             and cannot be scrolled or selected. See ReadOnlyField. */}
         <ReadOnlyField
