@@ -256,7 +256,22 @@ export function Spotlight({
           to prevent was sixty nudges a second; eight is not that.
         */
         if (Math.abs(delta) > 3) {
-          if (stalled < 4) {
+          /*
+            ⚠️ A WHOLE SCREEN AWAY IS NOT A NUDGE, IT IS A JUMP. When the
+            browser restores a scroll position on navigation the target can be
+            a thousand pixels off, and creeping toward it by increments is both
+            slow and fragile: one failed attempt while the page is still
+            settling and the guard pauses with the target still nowhere.
+
+            `scrollIntoView` is the browser's own job and it works whatever
+            the scroll container turns out to be, which the walked-ancestor
+            guess does not. It is used for the jump, and the nudges then do the
+            fine correction that puts the target in the space above the card.
+          */
+          if (Math.abs(delta) > window.innerHeight * 0.6) {
+            target.scrollIntoView({ block: 'center', behavior: 'instant' as ScrollBehavior })
+            stalled = 0
+          } else if (stalled < 4) {
             if (nudge(delta)) stalled = 0
             else stalled += 1
           } else if (frames % 30 === 0) {
