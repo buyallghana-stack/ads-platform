@@ -100,6 +100,10 @@ export default async function PayoutPage({
     : null
 
   return (
+    /* Wrapped only to carry the walkthrough's anchor. The form itself is
+       shared with the withdraw flow, so the attribute does not belong on
+       it: it would light up in a place the walkthrough never visits. */
+    <div data-tour="payout-form">
     <PayoutAccountsForm
       momoSaved={momoSaved}
       cryptoSaved={cryptoSaved}
@@ -110,5 +114,6 @@ export default async function PayoutPage({
       networks={networksRes.data ?? []}
       returnTo={returnTo}
     />
+    </div>
   )
 }

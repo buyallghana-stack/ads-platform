@@ -570,7 +570,8 @@
     "breakdown": {
       "title": "Earnings breakdown",
       "hint": "Every cedi you have earned, and where it came from"
-    }
+    },
+    "withdrawLocked": "Set up payout"
   },
   "nav": {
     "label": "Main navigation",
@@ -969,7 +970,9 @@
     },
     "preferences": {
       "appearance": "Appearance",
-      "language": "Language"
+      "language": "Language",
+      "walkthrough": "App walkthrough",
+      "walkthroughHint": "Run the guided tour of the app again"
     },
     "support": {
       "help": "Help & Support",
@@ -1495,7 +1498,8 @@
         "training": "Training",
         "communities": "Communities",
         "vault": "Vault",
-        "payments": "Payments"
+        "payments": "Payments",
+        "onboarding": "Onboarding"
       },
       "viewUserApp": "View user app"
     },
@@ -3307,6 +3311,33 @@
         "done": "The hub says this is {state}.",
         "unreachable": "The hub could not be reached. Nothing was changed."
       }
+    },
+    "onboarding": {
+      "title": "Onboarding",
+      "description": "The walkthrough a new member is taken through, in order.",
+      "switchHint": "Turn the whole walkthrough on or off with <settings>onboarding_enabled on the settings screen</settings>. This page decides what is in it and what order it runs in.",
+      "derived": "Ticks when the member really does it",
+      "shown": "Ticks when the member has been shown it",
+      "on": "On",
+      "off": "Off",
+      "save": "Save order",
+      "saved": "Saved",
+      "saveFailed": "Could not save. Try again.",
+      "hint": "A step turned off disappears for everybody who has not reached it yet.",
+      "moveUp": "Move {step} earlier",
+      "moveDown": "Move {step} later",
+      "steps": {
+        "balance": "See your balance",
+        "statement": "Read your statement",
+        "first_ad": "Watch your first ad",
+        "celebrate": "Collect your first points",
+        "upgrade": "Look at the plans",
+        "payout": "Add a payout account",
+        "pin": "Set a withdrawal PIN",
+        "games": "Find the other ways to earn",
+        "community": "Join the community",
+        "invite": "Share your invite link"
+      }
     }
   },
   "giftCode": {
@@ -3611,5 +3642,110 @@
         "cta": "Try Again"
       }
     }
+  },
+  "onboarding": {
+    "progress": "Step {index} of {total}",
+    "next": "Next",
+    "skip": "Skip",
+    "waiting": "Waiting for you",
+    "welcome": {
+      "title": "Welcome to SidePerks",
+      "body": "You get paid for your attention. Let us show you around in under a minute.",
+      "points": {
+        "watch": "Watch a short ad or answer a survey. Every one tells you what it pays before you open it.",
+        "earn": "Points land the second you finish. 100 points is GHS 1, and that rate is locked in when you earn them.",
+        "withdraw": "Take it out to Mobile Money from GHS 50, to an account you set up yourself."
+      },
+      "cta": "Show me around",
+      "skip": "I will find my own way"
+    },
+    "celebrate": {
+      "eyebrow": "You have earned",
+      "points": "{points} points",
+      "title": "That is real money",
+      "body": "It is in your balance already, and it is listed in your statement. Nothing about it expires and nothing reprices it.",
+      "cta": "What next?"
+    },
+    "upgrade": {
+      "title": "That was your free ad for today",
+      "lead": "Free gives you one ad a day. {plan} gives you {cap}, and each one pays more.",
+      "perDay": "{amount} a day",
+      "free": {
+        "name": "Free plan",
+        "detail": "1 ad a day, for {days} days"
+      },
+      "plan": {
+        "name": "{plan}, from {price}",
+        "detail": "{cap} ads a day, for {days} days"
+      },
+      "total": "Pay {price} once and the plan runs for {days} days. Watched in full, that is {total}.",
+      "caveat": "If you watch every ad, every day. Pay more inside the band and each ad is worth more to you.",
+      "cta": "See {plan}, from {price}",
+      "decline": "Not now, keep me on Free"
+    },
+    "steps": {
+      "balance": {
+        "title": "This is your balance",
+        "body": "In cedis first, points underneath. It moves the moment you finish an ad."
+      },
+      "statement": {
+        "title": "Every point in and out",
+        "body": "Your statement lists what you earned, when, and what it was worth. Nothing happens to your balance that is not written here."
+      },
+      "first_ad": {
+        "title": "Open this one",
+        "body": "It tells you what it pays before it starts. Watch it through, answer the question, and the points are yours.",
+        "blockedTitle": "Nothing to watch yet",
+        "blockedBody": "There are no ads available to you right now. Come back later and this is where they will be."
+      },
+      "payout": {
+        "title": "Where your money goes",
+        "body": "Add the Mobile Money number you want to be paid on. Withdrawals can only ever go to an account saved here, on your own profile."
+      },
+      "pin": {
+        "title": "Lock your withdrawals",
+        "body": "A four digit PIN, separate from your password, asked for every time money moves. Set it now and you never have to think about it again."
+      },
+      "games": {
+        "title": "More ways to earn",
+        "body": "Games, tasks, the leaderboard and gift codes. Your plan decides how many game plays you get each week."
+      },
+      "community": {
+        "title": "Join the community",
+        "body": "Announcements, help from other members and the first word on anything new. It is the fastest way to get an answer."
+      },
+      "invite": {
+        "title": "Bring your circle",
+        "body": "Your invite link is here. You earn when the people who join through it start watching, not just when they sign up."
+      },
+      "celebrate": {
+        "title": "",
+        "body": ""
+      },
+      "upgrade": {
+        "title": "",
+        "body": ""
+      }
+    },
+    "checklist": {
+      "title": "Set up your earning",
+      "progress": "{done} of {total} done",
+      "hide": "Hide",
+      "show": "Show",
+      "go": "Go",
+      "steps": {
+        "balance": "See your balance",
+        "statement": "Read your statement",
+        "first_ad": "Watch your first ad",
+        "celebrate": "Collect your first points",
+        "upgrade": "Look at the plans",
+        "payout": "Add a payout account",
+        "pin": "Set a withdrawal PIN",
+        "games": "Find the other ways to earn",
+        "community": "Join the community",
+        "invite": "Share your invite link"
+      }
+    },
+    "replay": "Show me around again"
   }
 }

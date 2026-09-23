@@ -4,7 +4,9 @@ import { BottomTabBar, Sidebar } from '@/components/app/AppNav'
 import { Link } from '@/i18n/navigation'
 import { redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser, getViewerUser } from '@/lib/auth/session'
+import { Onboarding } from '@/components/onboarding/Onboarding'
 import { getViewAsSession } from '@/lib/admin/view-as'
+import { getOnboardingState, getUpgradePitch } from '@/lib/onboarding/data'
 import { ViewAsBanner } from '@/components/app/ViewAsBanner'
 import { needsLoginChallenge } from '@/lib/security/login-2fa'
 import { getPlanStanding } from '@/lib/subscriptions/data'
@@ -82,10 +84,17 @@ export default async function AppLayout({
                  own a plan, "add more" while some are left, and nothing at
                  all once they hold them every one
   */
-  const [profile, planStanding] = await Promise.all([
+  const [profile, planStanding, onboarding] = await Promise.all([
     getProfile(user!.id),
     getPlanStanding(user!.id),
+    getOnboardingState(user!.id),
   ])
+
+  /* Only fetched when the offer is actually the next thing to show. It reads
+     the whole plan table, and paying for that on every signed-in screen for a
+     member who finished the walkthrough weeks ago would be a round trip on
+     mobile data for nothing. */
+  const pitch = onboarding.currentStep === 'upgrade' ? await getUpgradePitch() : null
   return (
     /* The banner sits ABOVE the app shell rather than inside it, so the
        sidebar/content/tab-bar row below is byte-identical to what it was
@@ -93,6 +102,14 @@ export default async function AppLayout({
        layout changes when nobody is viewing. */
     <>
       {viewing && <ViewAsBanner name={profile?.full_name ?? t('viewAsFallbackName')} />}
+      {/* The walkthrough is mounted ONCE, here, so a step can point at
+          something on any screen and survive the navigation between them.
+          ⚠️ Never while a super admin is looking: the overlay would block
+          their read-only look at somebody's account, and the steps it walks
+          through are the member's to finish. */}
+      {!viewing && (
+        <Onboarding state={onboarding} pitch={pitch} pointsPerCedi={onboarding.pointsPerCedi} />
+      )}
       <div className="flex min-h-dvh bg-canvas">
       <Sidebar
         upgradeSlot={

@@ -31,5 +31,10 @@ export default async function PinPage({
   const admin = createAdminClient()
   const { data: hasPin } = await admin.rpc('has_withdrawal_pin', { p_user_id: user!.id })
 
-  return <WithdrawalPinFlow hasPin={hasPin ?? false} />
+  return (
+    /* Wrapped only to carry the walkthrough's anchor. */
+    <div data-tour="pin-form">
+      <WithdrawalPinFlow hasPin={hasPin ?? false} />
+    </div>
+  )
 }

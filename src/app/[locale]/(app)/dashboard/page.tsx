@@ -5,6 +5,7 @@ import {
   ArrowUpRight,
   ChartColumnBig,
   ChevronRight,
+  Lock,
   PlayCircle,
   Sparkles,
   TrendingUp,
@@ -16,6 +17,7 @@ import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/serve
 import { Logo } from '@/components/brand/Logo'
 import { PerformanceChart } from '@/components/dashboard/PerformanceChart'
 import { QuickLinks } from '@/components/dashboard/QuickLinks'
+import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist'
 import { ReferralCard } from '@/components/dashboard/ReferralCard'
 import { TransactionHistory } from '@/components/dashboard/TransactionHistory'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
@@ -28,6 +30,7 @@ import { getProfile, getViewerUser } from '@/lib/auth/session'
 import { pickDisplayName } from '@/lib/dashboard/display-name'
 import { getHomeData } from '@/lib/dashboard/home-data'
 import { getGameStatus } from '@/lib/games/data'
+import { getOnboardingState } from '@/lib/onboarding/data'
 import { getLeaderboardEnabled } from '@/lib/leaderboard/data'
 import { getNotifications, getUnreadCount } from '@/lib/notifications/data'
 import { getTasks } from '@/lib/tasks/data'
@@ -73,6 +76,8 @@ export default async function HomePage({
     notifications,
     unreadCount,
     gameStatus,
+    onboarding,
+    { data: payoutAccount },
     leaderboardEnabled,
     vaultEnabled,
     hasActiveVault,
@@ -90,6 +95,11 @@ export default async function HomePage({
       getUnreadCount('ads'),
       // Cheap game status read; drives whether the Games tile is live and remaining plays.
       getGameStatus(user!.id),
+      getOnboardingState(user!.id),
+      /* Whether they can actually be paid. Read on its own rather than off the
+         walkthrough's state, because the lock below must still be correct when
+         the walkthrough is switched off entirely. */
+      admin.from('user_payout_details').select('user_id').eq('user_id', user!.id).limit(1).maybeSingle(),
       // Drives whether the Leaderboard tile is tappable. See QuickLinks.
       getLeaderboardEnabled(),
       getVaultEnabled(),
@@ -103,6 +113,7 @@ export default async function HomePage({
     ])
   const now = serverNow()
 
+  const canWithdraw = Boolean(payoutAccount)
   const gamesEnabled = gameStatus.enabled
   const hasUnplayedGames = gameStatus.enabled && gameStatus.remaining > 0
   const hasUnclaimedTasks = tasks.some((t) => t.claimable && !t.claimedAt)
@@ -199,6 +210,7 @@ export default async function HomePage({
       {/* ------------------------------------------------------------------ */}
       <section
         aria-label={t('balance')}
+        data-tour="balance"
         style={{ '--rise-delay': '0.06s' } as React.CSSProperties}
         /* `bg-brand-600` UNDER the gradient, and it is load-bearing. A
            Tailwind v4 gradient is assembled from `@property` variables, which
@@ -306,13 +318,26 @@ export default async function HomePage({
               </Button>
             </Link>
           )}
-          <Link href="/withdraw">
+          {/*
+            ── SOFT LOCK, NEVER A CLOSED DOOR ────────────────────────────────
+
+            With no payout destination saved, Withdraw cannot succeed: the
+            screen would take them through a balance they cannot move and
+            refuse at the end. So the button stays exactly where it was, wears
+            a padlock, and goes to the place that unlocks it, carrying
+            `from=withdraw` so the form returns them here afterwards.
+
+            It is NOT hidden. A member who paid for a plan and cannot find the
+            withdraw button assumes the money is gone, which is the single
+            worst thing this app can imply.
+          */}
+          <Link href={canWithdraw ? '/withdraw' : '/profile/payout?from=withdraw'}>
             <Button
               size="md"
               className="border-white/30 bg-white/10 text-white shadow-none hover:border-white/60 hover:bg-white/15 hover:text-white active:bg-white/20"
-              leadingIcon={<ArrowUpRight />}
+              leadingIcon={canWithdraw ? <ArrowUpRight /> : <Lock />}
             >
-              {t('withdrawCta')}
+              {canWithdraw ? t('withdrawCta') : t('withdrawLocked')}
             </Button>
           </Link>
         </div>
@@ -348,11 +373,17 @@ export default async function HomePage({
         <ChevronRight aria-hidden className="size-4 shrink-0 text-ink-400" />
       </Link>
 
+      {/* The walkthrough's checklist, above everything optional. It removes
+          itself once every step is done, so it costs a finished member
+          nothing. */}
+      <OnboardingChecklist state={onboarding} />
+
       {/* Shortcuts, directly under the balance so they are the first thing a
           thumb reaches. Games is disabled until it exists; Leaderboard can be
           paused by the operator via `leaderboard_enabled` even though it's
           shipped. */}
       <QuickLinks
+        anchor="quick-links"
         labels={{
           games: t('quick.games'),
           leaderboard: t('quick.leaderboard'),
@@ -491,6 +522,7 @@ export default async function HomePage({
       <Card
         style={{ '--rise-delay': '0.24s' } as React.CSSProperties}
         className="animate-rise"
+        data-tour="statement"
       >
         <CardHeader title={t('history.title')} description={t('history.description')} />
         <TransactionHistory rows={feed} />

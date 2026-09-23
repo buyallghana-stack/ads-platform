@@ -11,6 +11,7 @@ import {
   ClipboardCheck,
   ClipboardList,
   Flag,
+  Footprints,
   Gauge,
   Gamepad2,
   Gift,
@@ -136,6 +137,10 @@ const GROUPS: NavGroup[] = [
       { key: 'games', href: '/admin/games', Icon: Gamepad2 },
       // Also content the operator authors: a task is a goal they write.
       { key: 'tasks', href: '/admin/tasks', Icon: Target },
+      /* The first-run walkthrough. Content rather than system: it is a script
+         the operator writes for a new member, and its master switch lives with
+         the other switches on the settings screen. */
+      { key: 'onboarding', href: '/admin/onboarding', Icon: Footprints },
     ],
   },
   {

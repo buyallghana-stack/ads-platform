@@ -64,7 +64,7 @@ export function CommunityLinks({
   if (communities.length === 0) return null
 
   return (
-    <section>
+    <section data-tour="communities">
       <h2 className="mb-2 px-1 text-[0.6875rem] font-semibold tracking-[0.06em] text-ink-400 uppercase">
         {title}
       </h2>

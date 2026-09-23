@@ -570,7 +570,8 @@
     "breakdown": {
       "title": "Détail des gains",
       "hint": "Chaque cedi gagné, et d'où il vient"
-    }
+    },
+    "withdrawLocked": "Configurer le retrait"
   },
   "nav": {
     "label": "Navigation principale",
@@ -969,7 +970,9 @@
     },
     "preferences": {
       "appearance": "Apparence",
-      "language": "Langue"
+      "language": "Langue",
+      "walkthrough": "Visite guidée",
+      "walkthroughHint": "Relancer la visite guidée de l'application"
     },
     "support": {
       "help": "Aide et assistance",
@@ -1495,7 +1498,8 @@
         "training": "Formation",
         "communities": "Communautés",
         "vault": "Coffre",
-        "payments": "Paiements"
+        "payments": "Paiements",
+        "onboarding": "Accueil des membres"
       },
       "viewUserApp": "Voir l’app utilisateur"
     },
@@ -3307,6 +3311,33 @@
         "done": "Le hub indique : {state}.",
         "unreachable": "Le hub est injoignable. Rien n'a été modifié."
       }
+    },
+    "onboarding": {
+      "title": "Accueil des membres",
+      "description": "Le parcours guidé proposé à un nouveau membre, dans l'ordre.",
+      "switchHint": "Activez ou désactivez tout le parcours avec <settings>onboarding_enabled sur l'écran des réglages</settings>. Cette page décide de son contenu et de son ordre.",
+      "derived": "Validée quand le membre le fait vraiment",
+      "shown": "Validée quand le membre l'a vue",
+      "on": "Activée",
+      "off": "Désactivée",
+      "save": "Enregistrer l'ordre",
+      "saved": "Enregistré",
+      "saveFailed": "Enregistrement impossible. Réessayez.",
+      "hint": "Une étape désactivée disparaît pour tous ceux qui ne l'ont pas encore atteinte.",
+      "moveUp": "Déplacer {step} plus tôt",
+      "moveDown": "Déplacer {step} plus tard",
+      "steps": {
+        "balance": "Voir votre solde",
+        "statement": "Lire votre relevé",
+        "first_ad": "Regarder votre première publicité",
+        "celebrate": "Encaisser vos premiers points",
+        "upgrade": "Regarder les plans",
+        "payout": "Ajouter un compte de retrait",
+        "pin": "Définir un code de retrait",
+        "games": "Découvrir les autres façons de gagner",
+        "community": "Rejoindre la communauté",
+        "invite": "Partager votre lien d'invitation"
+      }
     }
   },
   "giftCode": {
@@ -3611,5 +3642,110 @@
         "cta": "Réessayer"
       }
     }
+  },
+  "onboarding": {
+    "progress": "Étape {index} sur {total}",
+    "next": "Suivant",
+    "skip": "Passer",
+    "waiting": "À vous de jouer",
+    "welcome": {
+      "title": "Bienvenue sur SidePerks",
+      "body": "Votre attention est payée. Laissez-nous vous montrer en moins d'une minute.",
+      "points": {
+        "watch": "Regardez une courte publicité ou répondez à un sondage. Chacun indique ce qu'il rapporte avant que vous l'ouvriez.",
+        "earn": "Les points arrivent dès que vous terminez. 100 points valent 1 GHS, et ce taux est fixé au moment où vous les gagnez.",
+        "withdraw": "Retirez vers Mobile Money à partir de 50 GHS, sur un compte que vous enregistrez vous-même."
+      },
+      "cta": "Faites-moi visiter",
+      "skip": "Je me débrouille"
+    },
+    "celebrate": {
+      "eyebrow": "Vous avez gagné",
+      "points": "{points} points",
+      "title": "C'est de l'argent réel",
+      "body": "Il est déjà dans votre solde et figure dans votre relevé. Rien n'expire et rien ne le réévalue.",
+      "cta": "Et ensuite ?"
+    },
+    "upgrade": {
+      "title": "C'était votre publicité gratuite du jour",
+      "lead": "Le plan gratuit donne une publicité par jour. {plan} en donne {cap}, et chacune rapporte davantage.",
+      "perDay": "{amount} par jour",
+      "free": {
+        "name": "Plan gratuit",
+        "detail": "1 publicité par jour, pendant {days} jours"
+      },
+      "plan": {
+        "name": "{plan}, à partir de {price}",
+        "detail": "{cap} publicités par jour, pendant {days} jours"
+      },
+      "total": "Payez {price} une fois et le plan dure {days} jours. Regardées en entier, cela fait {total}.",
+      "caveat": "Si vous regardez toutes les publicités, chaque jour. Payez plus dans la fourchette et chaque publicité vous rapporte plus.",
+      "cta": "Voir {plan}, à partir de {price}",
+      "decline": "Pas maintenant, je reste en gratuit"
+    },
+    "steps": {
+      "balance": {
+        "title": "Voici votre solde",
+        "body": "En cedis d'abord, en points en dessous. Il bouge dès que vous terminez une publicité."
+      },
+      "statement": {
+        "title": "Chaque point, à l'entrée et à la sortie",
+        "body": "Votre relevé indique ce que vous avez gagné, quand, et ce que cela valait. Rien n'arrive à votre solde sans être écrit ici."
+      },
+      "first_ad": {
+        "title": "Ouvrez celle-ci",
+        "body": "Elle indique ce qu'elle rapporte avant de commencer. Regardez-la en entier, répondez à la question, et les points sont à vous.",
+        "blockedTitle": "Rien à regarder pour l'instant",
+        "blockedBody": "Aucune publicité ne vous est proposée en ce moment. Revenez plus tard : elles apparaîtront ici."
+      },
+      "payout": {
+        "title": "Où va votre argent",
+        "body": "Ajoutez le numéro Mobile Money sur lequel vous voulez être payé. Un retrait ne peut aller que vers un compte enregistré ici, sur votre propre profil."
+      },
+      "pin": {
+        "title": "Protégez vos retraits",
+        "body": "Un code à quatre chiffres, distinct de votre mot de passe, demandé chaque fois que de l'argent bouge. Réglez-le maintenant et n'y pensez plus."
+      },
+      "games": {
+        "title": "D'autres façons de gagner",
+        "body": "Jeux, tâches, classement et codes cadeaux. Votre plan décide du nombre de parties par semaine."
+      },
+      "community": {
+        "title": "Rejoignez la communauté",
+        "body": "Annonces, entraide entre membres et les nouveautés en avant-première. C'est le moyen le plus rapide d'obtenir une réponse."
+      },
+      "invite": {
+        "title": "Amenez votre entourage",
+        "body": "Votre lien d'invitation est ici. Vous gagnez quand les personnes qui s'inscrivent par ce lien commencent à regarder, pas seulement à l'inscription."
+      },
+      "celebrate": {
+        "title": "",
+        "body": ""
+      },
+      "upgrade": {
+        "title": "",
+        "body": ""
+      }
+    },
+    "checklist": {
+      "title": "Préparez vos gains",
+      "progress": "{done} sur {total} effectués",
+      "hide": "Masquer",
+      "show": "Afficher",
+      "go": "Aller",
+      "steps": {
+        "balance": "Voir votre solde",
+        "statement": "Lire votre relevé",
+        "first_ad": "Regarder votre première publicité",
+        "celebrate": "Encaisser vos premiers points",
+        "upgrade": "Regarder les plans",
+        "payout": "Ajouter un compte de retrait",
+        "pin": "Définir un code de retrait",
+        "games": "Découvrir les autres façons de gagner",
+        "community": "Rejoindre la communauté",
+        "invite": "Partager votre lien d'invitation"
+      }
+    },
+    "replay": "Refaire la visite"
   }
 }

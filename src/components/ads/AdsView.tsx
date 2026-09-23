@@ -402,7 +402,10 @@ export function AdsView({ data }: { data: AdsData }) {
             {/* Only the ads the allowance actually covers are offered. Showing
                 a card that would be refused on submit is a broken promise. */}
             {list.slice(0, count).map((ad, i) => (
-              <li key={ad.id}>
+              /* The first card carries the walkthrough's anchor: a new member
+                 is told to open THIS one, and the spotlight cuts its hole
+                 around it. */
+              <li key={ad.id} data-tour={i === 0 ? 'ad-card' : undefined}>
                 <AdCard
                   ad={ad}
                   onOpen={setPlaying}

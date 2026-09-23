@@ -3485,6 +3485,15 @@ export type Database = {
           target: number
         }[]
       }
+      admin_list_onboarding_steps: {
+        Args: { p_admin_id: string }
+        Returns: {
+          is_derived: boolean
+          is_enabled: boolean
+          key: string
+          sort_order: number
+        }[]
+      }
       admin_list_tier_game_plays: {
         Args: { p_admin_id: string }
         Returns: {
@@ -3685,6 +3694,10 @@ export type Database = {
           p_game: Database["public"]["Enums"]["game_kind"]
           p_prizes: Json
         }
+        Returns: number
+      }
+      admin_save_onboarding_steps: {
+        Args: { p_admin_id: string; p_steps: Json }
         Returns: number
       }
       admin_save_plan: {
@@ -4722,6 +4735,7 @@ export type Database = {
           week_start: string
         }[]
       }
+      get_onboarding_state: { Args: { p_user_id: string }; Returns: Json }
       get_leaderboard: {
         Args: { p_limit?: number; p_period?: string }
         Returns: {
@@ -4894,6 +4908,7 @@ export type Database = {
         Args: { p_period: string }
         Returns: Record<string, unknown>
       }
+      mark_onboarding_step: { Args: { p_step: string }; Returns: Json }
       mark_all_notifications_read: { Args: never; Returns: undefined }
       mark_notification_read: { Args: { p_id: string }; Returns: undefined }
       mark_redemption_failed: {
@@ -5330,6 +5345,7 @@ export type Database = {
         Args: { p_new_pin: string; p_user_id: string }
         Returns: undefined
       }
+      replay_onboarding: { Args: never; Returns: Json }
       resolve_user_tier: {
         Args: { p_user_id: string }
         Returns: {
@@ -5501,6 +5517,7 @@ export type Database = {
         Args: { p_current_pin?: string; p_new_pin: string; p_user_id: string }
         Returns: undefined
       }
+      skip_onboarding: { Args: never; Returns: Json }
       start_subscription_payment: {
         Args: {
           p_amount_minor?: number

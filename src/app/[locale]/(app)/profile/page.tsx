@@ -6,6 +6,7 @@ import {
   Gauge,
   Gem,
   KeyRound,
+  Footprints,
   Languages,
   ListChecks,
   Lock,
@@ -21,6 +22,7 @@ import {
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { LogOutButton } from '@/components/app/LogOutButton'
+import { ReplayWalkthroughButton } from '@/components/onboarding/ReplayWalkthroughButton'
 import { Avatar } from '@/components/profile/Avatar'
 import { LanguageToggle } from '@/components/profile/LanguageToggle'
 import { CommunityLinks } from '@/components/profile/CommunityLinks'
@@ -176,6 +178,16 @@ export default async function ProfilePage({
             tone="brand"
             label={t('preferences.language')}
             trailing={<LanguageToggle />}
+          />
+          {/* A preference rather than help: it is the member choosing to be
+              shown around again, and it sits with the other two things on this
+              screen that change how the app behaves for them. */}
+          <SettingsRow
+            icon={<Footprints />}
+            tone="teal"
+            label={t('preferences.walkthrough')}
+            description={t('preferences.walkthroughHint')}
+            trailing={<ReplayWalkthroughButton />}
           />
         </SettingsGroup>
 

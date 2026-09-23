@@ -123,6 +123,7 @@ function Tile({
 }
 
 export function QuickLinks({
+  anchor,
   labels,
   soonLabel,
   navLabel,
@@ -131,6 +132,8 @@ export function QuickLinks({
   hasUnplayedGames = false,
   hasUnclaimedTasks = false,
 }: {
+  /** `data-tour` value, so the first-run walkthrough can point at this row. */
+  anchor?: string
   labels: Record<Item['key'], string>
   /** Drives the Games tile. See the note on ITEMS. */
   gamesEnabled?: boolean
@@ -151,6 +154,7 @@ export function QuickLinks({
   return (
     <nav
       aria-label={navLabel}
+      data-tour={anchor}
       style={{ '--rise-delay': '0.08s' } as React.CSSProperties}
       className="animate-rise grid grid-cols-4 gap-1 rounded-(--radius-panel) border border-ink-200 bg-surface p-1.5 sm:gap-2 sm:p-2"
     >
