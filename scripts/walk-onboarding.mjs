@@ -94,12 +94,24 @@ const shoot = async (page, name, { expectAction = true } = {}) => {
       hunting for the button. A spotlight locks the page and puts the target in
       the space above the card; nothing should move but the step.
     */
-    const scroll = await page.evaluate(() => ({
-      locked: getComputedStyle(document.body).overflow === 'hidden',
-      scrollable: document.documentElement.scrollHeight > window.innerHeight + 4,
-    }))
     if (locked.includes(name)) {
-      check(`${file}: the page is locked while the step shows`, scroll.locked, JSON.stringify(scroll))
+      /*
+        ⚠️ TESTED AS BEHAVIOUR, NOT AS A CSS PROPERTY. This used to assert
+        `body { overflow: hidden }`, which is both the wrong question and the
+        mechanism that broke the walkthrough on a real phone: it can clamp the
+        scroll to zero and it blocks the tour's own corrections. What a member
+        actually needs is that scrolling does not move the page, so that is
+        what gets asked, with a real wheel gesture.
+      */
+      const before = await page.evaluate(() => window.scrollY)
+      await page.mouse.wheel(0, 500)
+      await page.waitForTimeout(600)
+      const scroll = await page.evaluate(() => ({ y: window.scrollY }))
+      check(
+        `${file}: scrolling does not move the page`,
+        Math.abs(scroll.y - before) < 8,
+        JSON.stringify({ before, after: scroll.y }),
+      )
 
       /*
         ⚠️ AND THE HOLE MUST SIT ON ITS TARGET. It drifted by about 60px on the
