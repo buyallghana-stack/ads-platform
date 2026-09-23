@@ -68,12 +68,16 @@ export function Onboarding({
   /*
     Walk them to the screen the step lives on.
 
-    Guarded on `active` and on the route actually differing, because a push to
-    the page you are already on is a re-render, and a re-render that re-runs
-    this effect is a loop that pins the app.
+    ⚠️ A SHEET STEP NEVER NAVIGATES, AND THIS IS NOT A TIDINESS RULE. The offer
+    used to carry `route: '/ads'`, so the moment its "See Bronze" link reached
+    /upgrade this effect saw a mismatch and threw the member straight back. The
+    plans were unreachable and the button read as dead. A sheet covers the
+    whole viewport, so whatever is behind it is irrelevant; anything that
+    leaves the walkthrough ends the step on its way out instead.
   */
   useEffect(() => {
     if (!active || !state.started || !step) return
+    if (step.kind === 'sheet') return
     if (pathname === step.route) return
     router.push(step.route)
   }, [active, state.started, step, pathname, router])
@@ -127,7 +131,21 @@ export function Onboarding({
       advance('upgrade')
       return null
     }
-    return <UpgradeSheet pitch={pitch} onDecline={() => advance('upgrade')} />
+    return (
+      <UpgradeSheet
+        pitch={pitch}
+        /* Finish the step FIRST, then go. Navigating while `upgrade` is still
+           the current step is what made the button look dead. */
+        onAccept={() =>
+          start(async () => {
+            await markOnboardingStep('upgrade')
+            router.push('/upgrade')
+            router.refresh()
+          })
+        }
+        onDecline={() => advance('upgrade')}
+      />
+    )
   }
 
   /*

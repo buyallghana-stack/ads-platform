@@ -3666,9 +3666,9 @@
       "cta": "What next?"
     },
     "upgrade": {
-      "title": "That was your free ad for today",
-      "lead": "Free gives you one ad a day. {plan} gives you {cap}, and each one pays more.",
-      "perDay": "{amount} a day",
+      "title": "Watch more, earn faster",
+      "lead": "You have seen what the app does. Free gives you one ad a day; {plan} gives you {cap}, and each one pays more.",
+      "perDay": "a day",
       "free": {
         "name": "Free plan",
         "detail": "1 ad a day, for {days} days"
@@ -3680,7 +3680,8 @@
       "total": "Pay {price} once and the plan runs for {days} days. Watched in full, that is {total}.",
       "caveat": "If you watch every ad, every day. Pay more inside the band and each ad is worth more to you.",
       "cta": "See {plan}, from {price}",
-      "decline": "Not now, keep me on Free"
+      "decline": "Not now, keep me on Free",
+      "eyebrow": "Now that you have seen it all"
     },
     "steps": {
       "balance": {
@@ -3736,7 +3737,7 @@
         "balance": "See your balance",
         "statement": "Read your statement",
         "first_ad": "Watch your first ad",
-        "celebrate": "Collect your first points",
+        "celebrate": "Earn your first points",
         "upgrade": "Look at the plans",
         "payout": "Add a payout account",
         "pin": "Set a withdrawal PIN",

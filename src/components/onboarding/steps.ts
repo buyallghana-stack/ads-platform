@@ -40,7 +40,6 @@ export const STEPS: Record<OnboardingStepKey, StepDescriptor> = {
   first_ad: { key: 'first_ad', kind: 'task', route: '/ads' },
 
   celebrate: { key: 'celebrate', kind: 'sheet', route: '/ads' },
-  upgrade: { key: 'upgrade', kind: 'sheet', route: '/ads' },
 
   payout: { key: 'payout', kind: 'task', route: '/profile/payout' },
   pin: { key: 'pin', kind: 'task', route: '/profile/pin' },
@@ -48,6 +47,10 @@ export const STEPS: Record<OnboardingStepKey, StepDescriptor> = {
   games: { key: 'games', kind: 'spotlight', route: '/dashboard', anchor: 'quick-links', place: 'above' },
   community: { key: 'community', kind: 'spotlight', route: '/profile', anchor: 'communities', place: 'above' },
   invite: { key: 'invite', kind: 'spotlight', route: '/team', anchor: 'invite', place: 'below' },
+
+  /* Last (operator, 2026-09-23). `route` is unused on a sheet and is left as
+     the screen it sends people to, for readability only. */
+  upgrade: { key: 'upgrade', kind: 'sheet', route: '/upgrade' },
 }
 
 /** Every step, in the order the database gave, filtered to ones we can render. */

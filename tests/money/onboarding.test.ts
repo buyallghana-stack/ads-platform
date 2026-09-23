@@ -65,17 +65,19 @@ describe.skipIf(!HAS_DB)('onboarding walkthrough', () => {
       expect(s.doneCount).toBe(0)
       expect(s.completed).toBe(false)
       // The whole ladder is offered, in the operator's order.
+      /* The offer is LAST (operator, 2026-09-23): the plans are shown once
+         the member has seen the whole product. */
       expect(s.steps.map((x) => x.key)).toEqual([
         'balance',
         'statement',
         'first_ad',
         'celebrate',
-        'upgrade',
         'payout',
         'pin',
         'games',
         'community',
         'invite',
+        'upgrade',
       ])
     })
   })
@@ -224,6 +226,52 @@ describe.skipIf(!HAS_DB)('onboarding walkthrough', () => {
       expect(done(s, 'balance')).toBe(false)
       expect(done(s, 'pin')).toBe(true)
       expect(s.currentStep).toBe('balance')
+    })
+  })
+
+  /*
+    ── REPORTED ON A REAL ACCOUNT ────────────────────────────────────────────
+
+    A member watched their first ad and then skipped the walkthrough, and the
+    checklist went on telling them to "collect your first points" while the
+    points were already in their balance. `celebrate` was a "has been shown"
+    step, so skipping the sheet left it unticked for ever.
+
+    The congratulation is a MOMENT, not a task: watching the first ad IS
+    collecting the first points. The general rule it broke is worth keeping in
+    mind for any step added later: a step may only be satisfied by having been
+    SHOWN if a member who never sees it genuinely has not done the thing.
+  */
+  it('counts the first points as earned by the ad, not by seeing the congratulation', async () => {
+    await withRollback(async (tx) => {
+      await setConfig(tx, 'onboarding_enabled', 'true')
+      const user = await createUser(tx, { name: 'Dereick' })
+      await actAs(tx, user.id)
+
+      /* Its own ad. The test database carries none, and reading "the first ad
+         you find" made this test pass by finding nothing and asserting
+         nothing, which is worse than no test. */
+      const { rows } = await tx.query<{ id: string }>(
+        `insert into public.ads (title, format, status, points_reward, video_source,
+                                 youtube_video_id, duration_seconds, min_watch_seconds, weight)
+         values ('Onboarding fixture', 'video', 'active', 100, 'youtube', 'dQw4w9WgXcQ', 30, 0, 100)
+         returning id`,
+      )
+      const adId = rows[0]!.id
+
+      await tx.query(
+        `insert into public.user_ad_state (user_id, ad_id, status, completed_at)
+         values ($1, $2, 'completed', now())
+         on conflict (user_id, ad_id) do update
+           set status = 'completed', completed_at = now()`,
+        [user.id, adId],
+      )
+      await tx.query(`select public.skip_onboarding()`)
+
+      const s = await state(tx, user.id)
+      expect(done(s, 'first_ad')).toBe(true)
+      // The one that was wrong.
+      expect(done(s, 'celebrate')).toBe(true)
     })
   })
 

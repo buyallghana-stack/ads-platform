@@ -3666,9 +3666,9 @@
       "cta": "Et ensuite ?"
     },
     "upgrade": {
-      "title": "C'était votre publicité gratuite du jour",
-      "lead": "Le plan gratuit donne une publicité par jour. {plan} en donne {cap}, et chacune rapporte davantage.",
-      "perDay": "{amount} par jour",
+      "title": "Regardez plus, gagnez plus vite",
+      "lead": "Vous avez vu ce que fait l'application. Le plan gratuit donne une publicité par jour ; {plan} en donne {cap}, et chacune rapporte davantage.",
+      "perDay": "par jour",
       "free": {
         "name": "Plan gratuit",
         "detail": "1 publicité par jour, pendant {days} jours"
@@ -3680,7 +3680,8 @@
       "total": "Payez {price} une fois et le plan dure {days} jours. Regardées en entier, cela fait {total}.",
       "caveat": "Si vous regardez toutes les publicités, chaque jour. Payez plus dans la fourchette et chaque publicité vous rapporte plus.",
       "cta": "Voir {plan}, à partir de {price}",
-      "decline": "Pas maintenant, je reste en gratuit"
+      "decline": "Pas maintenant, je reste en gratuit",
+      "eyebrow": "Maintenant que vous avez tout vu"
     },
     "steps": {
       "balance": {
@@ -3736,7 +3737,7 @@
         "balance": "Voir votre solde",
         "statement": "Lire votre relevé",
         "first_ad": "Regarder votre première publicité",
-        "celebrate": "Encaisser vos premiers points",
+        "celebrate": "Gagner vos premiers points",
         "upgrade": "Regarder les plans",
         "payout": "Ajouter un compte de retrait",
         "pin": "Définir un code de retrait",
