@@ -31,18 +31,26 @@ import type { UpgradePlan } from '@/lib/onboarding/data'
 /**
  * A colour per plan.
  *
+ * ⚠️ DEEP, NOT PASTEL, AND THE REASON IS MEASURED. The first set was
+ * #FDBA74 / #A5B4FC / #F9A8D4 / #FDE047, and white text on those runs at 1.32
+ * to 1.99 against a 4.5 minimum: unreadable, and as a set they read as a
+ * child's palette rather than as a ladder somebody pays GHS 400 to climb.
+ *
+ * These are metal and gem tones at a depth that carries white text: 6.75,
+ * 7.58, 6.97 and 5.05 respectively. They also stay distinguishable from one
+ * another at a glance, which a row of near-black brands would not.
+ *
  * Kept here rather than on the tier row on purpose: an operator renaming a
- * plan or adding one should never be able to produce an unreadable card. Every
- * head takes INK text, so each colour only has to be distinct, not legible
- * against white, and a plan with no entry falls back to the brand.
+ * plan or adding one should never be able to produce an unreadable card, and
+ * a plan with no entry falls back to the brand.
  */
 const HEADS: Record<string, string> = {
-  bronze: '#FDBA74',
-  silver: '#A5B4FC',
-  pearl: '#F9A8D4',
-  gold: '#FDE047',
+  bronze: '#8A4B22',
+  silver: '#475569',
+  pearl: '#6B4E7D',
+  gold: '#8A6A18',
 }
-const HEAD_FALLBACK = '#93C2FD'
+const HEAD_FALLBACK = '#0052C9'
 
 export function PlanCarousel({
   plans,
@@ -131,15 +139,15 @@ export function PlanCarousel({
                   the operator's flyer, which is the shape they asked for. */}
               <div className="px-5 pb-5 pt-4" style={{ background: head }}>
                 <div className="flex items-start justify-between gap-3">
-                  <h3 className="text-[1.375rem] font-bold tracking-[-0.01em] text-ink-900">
+                  <h3 className="text-[1.375rem] font-bold tracking-[-0.01em] text-white">
                     {plan.name}
                   </h3>
-                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-ink-900/15 p-2 text-ink-900">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white/20 p-2 text-white">
                     <Mark />
                   </span>
                 </div>
 
-                <p className="mt-1.5 min-h-[2.5rem] text-[0.8125rem] leading-snug text-ink-900/70">
+                <p className="mt-1.5 min-h-[2.5rem] text-[0.8125rem] leading-snug text-white/75">
                   {plan.description}
                 </p>
 
@@ -159,7 +167,7 @@ export function PlanCarousel({
                     <li key={line} className="flex items-start gap-2.5">
                       <span
                         aria-hidden
-                        className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full text-ink-900"
+                        className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full text-white"
                         style={{ background: head }}
                       >
                         <Check className="size-2.5" strokeWidth={4} />

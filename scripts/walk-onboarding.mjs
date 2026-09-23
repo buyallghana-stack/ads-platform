@@ -127,8 +127,29 @@ const shoot = async (page, name, { expectAction = true } = {}) => {
         return tall
           ? { ok: dTop < 8 && topVisible, tall, dTop: Math.round(dTop), top: Math.round(t.top) }
           : { ok: dTop < 8 && dBottom < 8, dTop: Math.round(dTop), dBottom: Math.round(dBottom) }
-      }, name === 'invite-team' ? 'invite' : name === 'games' ? 'quick-links' : name)
+      }, { 'invite-team': 'invite', games: 'quick-links', community: 'communities' }[name] ?? name)
       check(`${file}: the cutout sits on its target`, aligned.ok, JSON.stringify(aligned))
+
+      /*
+        ⚠️ AND THE CARD MUST NOT SIT ON THE THING IT IS POINTING AT. Reported
+        on the community step: the row was lit and the card covered it, so the
+        link the step was asking for could not be tapped. Lighting something
+        you have just made unreachable is worse than not lighting it.
+      */
+      const clear = await page.evaluate(() => {
+        const dialog = document.querySelector('[role="dialog"]')
+        const ring = dialog?.querySelector('svg path + path')
+        const card = dialog?.querySelector('div:not([class*="fixed inset-0"]) > div[class*="rounded-"]')
+        const panel = [...(dialog?.querySelectorAll('div') ?? [])].find((d) =>
+          /fixed inset-x-0/.test(d.className),
+        )
+        if (!ring || !panel) return { ok: false, why: 'ring or card missing' }
+        const r = ring.getBoundingClientRect()
+        const c = panel.getBoundingClientRect()
+        const overlap = Math.max(0, Math.min(r.bottom, c.bottom) - Math.max(r.top, c.top))
+        return { ok: overlap < 2, overlap: Math.round(overlap) }
+      })
+      check(`${file}: the card does not cover the target`, clear.ok, JSON.stringify(clear))
     }
   }
   console.log(`  shot ${file}.png`)

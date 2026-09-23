@@ -240,6 +240,21 @@ export function Spotlight({
     )
   }
 
+  /*
+    ⚠️ THE CARD MOVES OUT OF THE WAY WHEN IT WOULD COVER ITS OWN TARGET.
+
+    Reported on the community step: the row was lit correctly and the card sat
+    right on top of it, so the one thing the step was asking the member to tap
+    could not be reached.
+
+    The scroll normally lifts the target clear, but it cannot when the page has
+    no more room to give: the community block is near the end of the Profile
+    screen, so there is nothing left to scroll. When that happens the card goes
+    to the TOP instead, which is what every tour does rather than insisting on
+    one side.
+  */
+  const cardAtTop = box.top + box.height > vh - CARD_ZONE
+
   const hole = roundedRect(box, RADIUS)
   const screen = `M0,0H${vw}V${vh}H0Z`
 
@@ -276,7 +291,13 @@ export function Spotlight({
         hole is what points; the card only has to be readable and reachable,
         and a thumb is already at the bottom of the phone.
       */}
-      <div className="fixed inset-x-0 bottom-0 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+      <div
+        className={
+          cardAtTop
+            ? 'fixed inset-x-0 top-0 px-4 pt-[calc(env(safe-area-inset-top)+1rem)]'
+            : 'fixed inset-x-0 bottom-0 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]'
+        }
+      >
         <div className="mx-auto w-full max-w-md rounded-(--radius-panel) border border-ink-200 bg-surface p-4 shadow-[0_16px_48px_-12px_rgb(15_23_42/0.45)]">
         <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-brand-700">
           {t('progress', { index, total })}
