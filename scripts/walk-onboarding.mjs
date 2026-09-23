@@ -183,6 +183,35 @@ const shoot = async (page, name, { expectAction = true } = {}) => {
       }, { 'invite-team': 'invite', games: 'quick-links', community: 'communities' }[name] ?? name)
       check(`${file}: the target is on screen`, visible.ok, JSON.stringify(visible))
 
+      if (!visible.ok) {
+        /* Say what is actually scrolling, rather than guessing at it again. */
+        const why = await page.evaluate((a) => {
+          const el = document.querySelector(`[data-tour="${a}"]`)
+          if (!el) return { why: 'target missing' }
+          const chain = []
+          let node = el.parentElement
+          while (node && chain.length < 8) {
+            const cs = getComputedStyle(node)
+            chain.push({
+              tag: node.tagName.toLowerCase(),
+              cls: (node.className || '').toString().slice(0, 40),
+              overflowY: cs.overflowY,
+              scrollTop: node.scrollTop,
+              scrolls: node.scrollHeight > node.clientHeight,
+            })
+            node = node.parentElement
+          }
+          return {
+            windowY: window.scrollY,
+            docTop: document.documentElement.scrollTop,
+            bodyTop: document.body.scrollTop,
+            scrollingElement: document.scrollingElement?.tagName?.toLowerCase(),
+            chain,
+          }
+        }, { 'invite-team': 'invite', games: 'quick-links', community: 'communities' }[name] ?? name)
+        console.log('  DIAGNOSTIC ' + file + ': ' + JSON.stringify(why))
+      }
+
       /*
         ⚠️ AND IT RECOVERS IF SOMETHING MOVES THE PAGE AFTERWARDS.
 

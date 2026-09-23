@@ -215,7 +215,7 @@ export function Spotlight({
         second, which is still far faster than anything a page does on its own
         and costs almost nothing.
       */
-      if (frames > 45 && frames % 10 !== 0) {
+      if (frames > 45 && frames % 10 !== 0 && frames % 30 !== 0) {
         raf = requestAnimationFrame(tick)
         return
       }
@@ -243,9 +243,25 @@ export function Spotlight({
           target really does move, which is what keeps the recovery working.
         */
         const delta = r.top - wantedTop(r.height)
-        if (Math.abs(delta) > 3 && stalled < 4) {
-          if (nudge(delta)) stalled = 0
-          else stalled += 1
+        /*
+          ⚠️ GIVING UP HAS TO BE TEMPORARY, NOT PERMANENT. A page that is still
+          laying out cannot scroll to where it will eventually be able to
+          scroll, so four failed nudges in a row is a perfectly ordinary thing
+          to happen a few hundred milliseconds after a navigation. Treating it
+          as final left the balance card a thousand pixels above the viewport,
+          intermittently, depending on how fast the dashboard had settled.
+
+          So four failures pause the attempts rather than end them, and the
+          pause lifts about half a second later. The thrash this guard exists
+          to prevent was sixty nudges a second; eight is not that.
+        */
+        if (Math.abs(delta) > 3) {
+          if (stalled < 4) {
+            if (nudge(delta)) stalled = 0
+            else stalled += 1
+          } else if (frames % 30 === 0) {
+            stalled = 0
+          }
         }
         if (frames > 6) setSettled(true)
 
