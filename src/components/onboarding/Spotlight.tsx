@@ -91,63 +91,85 @@ export function Spotlight({
   useEffect(() => {
     const find = () => document.querySelector<HTMLElement>(`[data-tour="${anchor}"]`)
 
-    /*
-      ── PUT THE TARGET WHERE IT CAN BE SEEN, THEN FREEZE THE PAGE ───────────
-
-      `scrollIntoView({ block: 'center' })` centres the element in the VIEWPORT,
-      and the card sits over the bottom of it, so a centred target lands half
-      behind the card. Worse, the page stayed scrollable, so the invite step
-      opened with its card and its bubble both below the fold and the member
-      had to go hunting for the button.
-
-      The target is placed in the middle of the space ABOVE the card instead,
-      and then the page is locked. Once a step is showing, the only thing that
-      moves is the step.
-    */
-    const el = find()
-    if (el) {
-      const rect = el.getBoundingClientRect()
+    /** Where the target should sit: centred in the space the card leaves. */
+    const wantedTop = (height: number) => {
       const safeHeight = Math.max(window.innerHeight - CARD_ZONE - TOP_GUTTER, 120)
-      /*
-        ⚠️ A TALL TARGET IS ALIGNED TO THE TOP, NOT CENTRED. Centring assumes
-        the whole thing fits. The statement is a full panel taller than the
-        space above the card, and centring it pushed its heading off the top of
-        the screen: the member saw a lit search box and a lit table, with the
-        title the step was talking about nowhere on screen.
-
-        Anything that fits is still centred, which looks deliberate. Anything
-        that does not starts at the top, because the beginning of a thing is
-        the part worth showing.
-      */
-      const wanted =
-        rect.height >= safeHeight
-          ? TOP_GUTTER
-          : TOP_GUTTER + (safeHeight - rect.height) / 2
-      const delta = rect.top - wanted
-      /* Instant. A smooth scroll is still travelling when the first
-         measurement runs, and the hole gets pinned where the element was. */
-      if (Math.abs(delta) > 4) window.scrollBy({ top: delta, behavior: 'instant' as ScrollBehavior })
+      /* A target taller than the space starts at the top, because the
+         beginning of a thing is the part worth showing. Anything that fits is
+         centred, which looks deliberate. */
+      return height >= safeHeight ? TOP_GUTTER : TOP_GUTTER + (safeHeight - height) / 2
     }
-    document.body.style.overflow = 'hidden'
+
+    /**
+     * The element that actually scrolls.
+     *
+     * ⚠️ NOT ALWAYS THE WINDOW. `window.scrollBy` silently does nothing when
+     * the page scrolls inside a container, and a positioning step that
+     * silently does nothing is exactly how this failed: the target stayed
+     * below the fold, so nothing was lit and the card flipped to the top of an
+     * apparently broken screen.
+     */
+    const scroller = (() => {
+      let node = find()?.parentElement ?? null
+      while (node) {
+        const style = getComputedStyle(node)
+        if (/(auto|scroll)/.test(style.overflowY) && node.scrollHeight > node.clientHeight) return node
+        node = node.parentElement
+      }
+      return null
+    })()
+
+    const nudge = (delta: number) => {
+      if (scroller) scroller.scrollTop += delta
+      else window.scrollBy(0, delta)
+    }
 
     /*
-      ⚠️ THE HOLE FOLLOWS ITS TARGET EVERY FRAME, rather than being measured
-      once and trusted. Measuring on a timer and listening for scroll looked
-      sufficient and was not: locking the page is itself a layout change, so
-      the measurement taken just before it ended up a constant 70 to 100px off
-      on any step far enough down the page, and the cutout framed the card
-      BELOW the one being described.
+      ⚠️ POSITIONING KEEPS CORRECTING UNTIL IT LANDS, AND THE PAGE IS ONLY
+      LOCKED ONCE IT HAS.
 
-      A rect read per frame is a handful of microseconds and it cannot go
-      stale. State is only touched when the box actually moves, so a still
-      page costs one read and no renders.
+      Both were single shots before, run synchronously in this effect, and on a
+      real phone neither held: the dashboard was still settling (the checklist
+      expands, the hero paints) so the one scroll went to a stale position, and
+      locking the page immediately afterwards meant nothing could correct it.
+      The member got a dimmed screen with nothing lit on it and a card at the
+      top, twice, and reported the walkthrough as broken from step seven on.
+
+      So the loop owns both jobs: it nudges the target toward its place every
+      frame until it is within tolerance for a few frames running, then locks.
+      The cap stops it fighting a page that genuinely cannot scroll any
+      further, which is the community step near the end of Profile.
     */
     let raf = 0
     let last = ''
+    let steady = 0
+    let frames = 0
+    let locked = false
+
     const tick = () => {
+      frames += 1
       const target = find()
+
       if (target) {
         const r = target.getBoundingClientRect()
+
+        if (!locked) {
+          const delta = r.top - wantedTop(r.height)
+          if (Math.abs(delta) > 2 && frames < 90) {
+            nudge(delta)
+            steady = 0
+          } else {
+            steady += 1
+          }
+          /* Three still frames, or we have tried long enough. Either way the
+             page stops moving from here. */
+          if (steady >= 3 || frames >= 90) {
+            document.body.style.overflow = 'hidden'
+            locked = true
+            setSettled(true)
+          }
+        }
+
         const box = {
           top: r.top - PAD,
           left: r.left - PAD,
@@ -160,21 +182,24 @@ export function Spotlight({
           setMeasured({ anchor, box })
           setViewport({ w: window.innerWidth, h: window.innerHeight })
         }
-      } else if (last !== 'gone') {
-        last = 'gone'
-        setMeasured(null)
+      } else {
+        if (!locked && frames > 30) {
+          document.body.style.overflow = 'hidden'
+          locked = true
+          setSettled(true)
+        }
+        if (last !== 'gone') {
+          last = 'gone'
+          setMeasured(null)
+        }
       }
+
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
 
-    /* A missing anchor is only really missing once the page has had a moment
-       to render it; before that the fallback card would flash. */
-    const settle = window.setTimeout(() => setSettled(true), 250)
-
     return () => {
       cancelAnimationFrame(raf)
-      window.clearTimeout(settle)
       /* ⚠️ ALWAYS RESTORED. Leaving `overflow: hidden` behind after the last
          step hands somebody an app they cannot scroll, with nothing on screen
          to explain why. */
@@ -274,9 +299,18 @@ export function Spotlight({
           fill="rgb(15 23 42 / 0.5)"
           style={{ pointerEvents: 'auto' }}
         />
-        {/* A hairline on the cutout, so the lit element has an edge rather than
-            fading into whatever is behind it. */}
-        <path d={hole} fill="none" stroke="rgb(255 255 255 / 0.9)" strokeWidth="1.5" />
+        {/*
+          The edge of the cutout.
+
+          ⚠️ TWO STROKES, AND THE SOFT ONE IS FOR DARK MODE. A 50% scrim over a
+          light app is obvious; over the dark theme it is grey on grey, and the
+          lit element barely separates from the dimmed one. The wide, faint
+          stroke reads as a glow around the target on a dark canvas and is
+          invisible on a light one, which is exactly the right behaviour from a
+          single pair of paths.
+        */}
+        <path d={hole} fill="none" stroke="rgb(255 255 255 / 0.22)" strokeWidth="10" />
+        <path d={hole} fill="none" stroke="rgb(255 255 255 / 0.95)" strokeWidth="2" />
       </svg>
 
       {/*

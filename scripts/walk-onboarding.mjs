@@ -150,6 +150,26 @@ const shoot = async (page, name, { expectAction = true } = {}) => {
         return { ok: overlap < 2, overlap: Math.round(overlap) }
       })
       check(`${file}: the card does not cover the target`, clear.ok, JSON.stringify(clear))
+
+      /*
+        ⚠️ AND THE TARGET HAS TO BE ON SCREEN AT ALL. Reported from a real
+        phone: steps 7 and 9 showed a dimmed page with NOTHING lit, because the
+        one positioning scroll ran before the dashboard had settled and the
+        page was then locked so nothing could correct it. The member read the
+        whole walkthrough as broken from step seven on.
+      */
+      const visible = await page.evaluate((a) => {
+        const el = document.querySelector(`[data-tour="${a}"]`)
+        if (!el) return { ok: false, why: 'target missing' }
+        const r = el.getBoundingClientRect()
+        return {
+          ok: r.top >= 0 && r.bottom <= window.innerHeight && r.height > 0,
+          top: Math.round(r.top),
+          bottom: Math.round(r.bottom),
+          vh: window.innerHeight,
+        }
+      }, { 'invite-team': 'invite', games: 'quick-links', community: 'communities' }[name] ?? name)
+      check(`${file}: the target is on screen`, visible.ok, JSON.stringify(visible))
     }
   }
   console.log(`  shot ${file}.png`)
@@ -186,11 +206,21 @@ try {
   console.log(`created ${EMAIL}`)
 
   browser = await chromium.launch()
+  /*
+    The operator's own phone: a tall viewport in DARK MODE. Both matter. The
+    height decides how far down the fold a target sits, and the dark theme is
+    where a 50% scrim separates least, so it is the harder of the two cases and
+    the one the faults were reported from.
+  */
   const page = await browser.newPage({
-    viewport: { width: 390, height: 844 },
+    viewport: {
+      width: Number(process.env.VW ?? 430),
+      height: Number(process.env.VH ?? 932),
+    },
     deviceScaleFactor: 2,
     isMobile: true,
     hasTouch: true,
+    colorScheme: process.env.SCHEME === 'light' ? 'light' : 'dark',
   })
 
   await page.goto(`${BASE}/en/login`, { waitUntil: 'domcontentloaded' })
