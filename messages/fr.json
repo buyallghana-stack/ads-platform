@@ -543,7 +543,7 @@
     },
     "referral": {
       "title": "Invitez et gagnez",
-      "hint": "Partagez votre lien. Vous gagnez un bonus quand un ami s'inscrit et commence à regarder.",
+      "hint": "Partagez votre lien. Quand une personne inscrite par ce lien achète un plan, vous touchez une commission dessus.",
       "copy": "Copier le lien",
       "share": "Partager",
       "copiedDone": "Copié",

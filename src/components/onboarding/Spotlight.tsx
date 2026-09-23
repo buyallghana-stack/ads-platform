@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { ArrowRight } from 'lucide-react'
@@ -16,6 +16,10 @@ const PAD = 10
 /** Corner radius of the cutout. Matched to the app's own cards, not to a
  *  library default, so the hole reads as part of the interface. */
 const RADIUS = 14
+/** Height reserved at the bottom for the bubble, so nothing hides behind it. */
+const CARD_ZONE = 260
+/** Space kept clear at the top, so a target never sits under the app header. */
+const TOP_GUTTER = 72
 
 /** A rounded rectangle, as an SVG path. */
 function roundedRect({ top, left, width, height }: Box, r: number) {
@@ -57,7 +61,6 @@ function roundedRect({ top, left, width, height }: Box, r: number) {
  */
 export function Spotlight({
   anchor,
-  place = 'below',
   title,
   body,
   index,
@@ -67,7 +70,6 @@ export function Spotlight({
   onSkip,
 }: {
   anchor: string
-  place?: 'above' | 'below'
   title: string
   body: string
   index: number
@@ -86,46 +88,99 @@ export function Spotlight({
   /** The first measurement has run, so a missing anchor is really missing. */
   const [settled, setSettled] = useState(false)
 
-  const measure = useCallback(() => {
-    setViewport({ w: window.innerWidth, h: window.innerHeight })
-    const el = document.querySelector<HTMLElement>(`[data-tour="${anchor}"]`)
-    if (!el) {
-      setMeasured(null)
-      return
-    }
-    const r = el.getBoundingClientRect()
-    setMeasured({
-      anchor,
-      box: {
-        top: r.top - PAD,
-        left: r.left - PAD,
-        width: r.width + PAD * 2,
-        height: r.height + PAD * 2,
-      },
-    })
-  }, [anchor])
-
   useEffect(() => {
-    document.querySelector<HTMLElement>(`[data-tour="${anchor}"]`)?.scrollIntoView({
-      block: 'center',
-      behavior: 'smooth',
-    })
+    const find = () => document.querySelector<HTMLElement>(`[data-tour="${anchor}"]`)
 
-    /* Measure AFTER the scroll settles. Measuring during it pins the hole
-       where the element was and leaves the member looking at a lit rectangle
-       with nothing in it. */
-    const settle = window.setTimeout(() => {
-      measure()
-      setSettled(true)
-    }, 380)
-    window.addEventListener('resize', measure)
-    window.addEventListener('scroll', measure, true)
-    return () => {
-      window.clearTimeout(settle)
-      window.removeEventListener('resize', measure)
-      window.removeEventListener('scroll', measure, true)
+    /*
+      ── PUT THE TARGET WHERE IT CAN BE SEEN, THEN FREEZE THE PAGE ───────────
+
+      `scrollIntoView({ block: 'center' })` centres the element in the VIEWPORT,
+      and the card sits over the bottom of it, so a centred target lands half
+      behind the card. Worse, the page stayed scrollable, so the invite step
+      opened with its card and its bubble both below the fold and the member
+      had to go hunting for the button.
+
+      The target is placed in the middle of the space ABOVE the card instead,
+      and then the page is locked. Once a step is showing, the only thing that
+      moves is the step.
+    */
+    const el = find()
+    if (el) {
+      const rect = el.getBoundingClientRect()
+      const safeHeight = Math.max(window.innerHeight - CARD_ZONE - TOP_GUTTER, 120)
+      /*
+        ⚠️ A TALL TARGET IS ALIGNED TO THE TOP, NOT CENTRED. Centring assumes
+        the whole thing fits. The statement is a full panel taller than the
+        space above the card, and centring it pushed its heading off the top of
+        the screen: the member saw a lit search box and a lit table, with the
+        title the step was talking about nowhere on screen.
+
+        Anything that fits is still centred, which looks deliberate. Anything
+        that does not starts at the top, because the beginning of a thing is
+        the part worth showing.
+      */
+      const wanted =
+        rect.height >= safeHeight
+          ? TOP_GUTTER
+          : TOP_GUTTER + (safeHeight - rect.height) / 2
+      const delta = rect.top - wanted
+      /* Instant. A smooth scroll is still travelling when the first
+         measurement runs, and the hole gets pinned where the element was. */
+      if (Math.abs(delta) > 4) window.scrollBy({ top: delta, behavior: 'instant' as ScrollBehavior })
     }
-  }, [anchor, measure])
+    document.body.style.overflow = 'hidden'
+
+    /*
+      ⚠️ THE HOLE FOLLOWS ITS TARGET EVERY FRAME, rather than being measured
+      once and trusted. Measuring on a timer and listening for scroll looked
+      sufficient and was not: locking the page is itself a layout change, so
+      the measurement taken just before it ended up a constant 70 to 100px off
+      on any step far enough down the page, and the cutout framed the card
+      BELOW the one being described.
+
+      A rect read per frame is a handful of microseconds and it cannot go
+      stale. State is only touched when the box actually moves, so a still
+      page costs one read and no renders.
+    */
+    let raf = 0
+    let last = ''
+    const tick = () => {
+      const target = find()
+      if (target) {
+        const r = target.getBoundingClientRect()
+        const box = {
+          top: r.top - PAD,
+          left: r.left - PAD,
+          width: r.width + PAD * 2,
+          height: r.height + PAD * 2,
+        }
+        const key = `${Math.round(box.top)},${Math.round(box.left)},${Math.round(box.width)},${Math.round(box.height)},${window.innerWidth},${window.innerHeight}`
+        if (key !== last) {
+          last = key
+          setMeasured({ anchor, box })
+          setViewport({ w: window.innerWidth, h: window.innerHeight })
+        }
+      } else if (last !== 'gone') {
+        last = 'gone'
+        setMeasured(null)
+      }
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+
+    /* A missing anchor is only really missing once the page has had a moment
+       to render it; before that the fallback card would flash. */
+    const settle = window.setTimeout(() => setSettled(true), 250)
+
+    return () => {
+      cancelAnimationFrame(raf)
+      window.clearTimeout(settle)
+      /* ⚠️ ALWAYS RESTORED. Leaving `overflow: hidden` behind after the last
+         step hands somebody an app they cannot scroll, with nothing on screen
+         to explain why. */
+      document.body.style.overflow = ''
+    }
+  }, [anchor])
 
   // Portals only after mount; see `useMounted`.
   if (!mounted) return null
@@ -185,9 +240,6 @@ export function Spotlight({
     )
   }
 
-  const spaceBelow = vh - (box.top + box.height)
-  const showBelow = place === 'below' ? spaceBelow > 240 : spaceBelow > vh - box.top
-
   const hole = roundedRect(box, RADIUS)
   const screen = `M0,0H${vw}V${vh}H0Z`
 
@@ -212,14 +264,20 @@ export function Spotlight({
         <path d={hole} fill="none" stroke="rgb(255 255 255 / 0.9)" strokeWidth="1.5" />
       </svg>
 
-      <div
-        className="fixed w-[min(21rem,calc(100vw-2rem))] rounded-(--radius-panel) border border-ink-200 bg-surface p-4 shadow-[0_16px_48px_-12px_rgb(15_23_42/0.45)]"
-        style={{
-          top: showBelow ? box.top + box.height + 14 : undefined,
-          bottom: showBelow ? undefined : Math.max(vh - box.top + 14, 16),
-          left: Math.min(Math.max(box.left, 16), Math.max(vw - 352, 16)),
-        }}
-      >
+      {/*
+        ⚠️ ONE PLACE, EVERY STEP. The bubble used to be positioned beside its
+        anchor, above or below depending on the room, which meant it moved
+        around the screen from step to step and, when the anchor sat low, ended
+        up off the bottom entirely.
+
+        It is a sheet at the bottom now, in the same place every time. The page
+        is locked and the target has been scrolled into the space above it, so
+        both are on screen together and there is nothing to go looking for. The
+        hole is what points; the card only has to be readable and reachable,
+        and a thumb is already at the bottom of the phone.
+      */}
+      <div className="fixed inset-x-0 bottom-0 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+        <div className="mx-auto w-full max-w-md rounded-(--radius-panel) border border-ink-200 bg-surface p-4 shadow-[0_16px_48px_-12px_rgb(15_23_42/0.45)]">
         <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-brand-700">
           {t('progress', { index, total })}
         </p>
@@ -233,6 +291,7 @@ export function Spotlight({
           <Button size="sm" onClick={onNext} loading={busy} trailingIcon={<ArrowRight />}>
             {t('next')}
           </Button>
+        </div>
         </div>
       </div>
     </div>,

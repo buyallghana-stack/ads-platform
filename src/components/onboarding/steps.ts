@@ -27,13 +27,11 @@ export type StepDescriptor = {
   route: string
   /** The `data-tour` value to cut the hole around. `spotlight` only. */
   anchor?: string
-  /** Which side of the anchor the bubble prefers, space permitting. */
-  place?: 'above' | 'below'
 }
 
 export const STEPS: Record<OnboardingStepKey, StepDescriptor> = {
-  balance: { key: 'balance', kind: 'spotlight', route: '/dashboard', anchor: 'balance', place: 'below' },
-  statement: { key: 'statement', kind: 'spotlight', route: '/dashboard', anchor: 'statement', place: 'above' },
+  balance: { key: 'balance', kind: 'spotlight', route: '/dashboard', anchor: 'balance' },
+  statement: { key: 'statement', kind: 'spotlight', route: '/dashboard', anchor: 'statement' },
 
   /* The activation moment, and the reason the task bar exists: the member
      needs the whole ads screen, including the surveys tab and the player. */
@@ -44,13 +42,13 @@ export const STEPS: Record<OnboardingStepKey, StepDescriptor> = {
   payout: { key: 'payout', kind: 'task', route: '/profile/payout' },
   pin: { key: 'pin', kind: 'task', route: '/profile/pin' },
 
-  games: { key: 'games', kind: 'spotlight', route: '/dashboard', anchor: 'quick-links', place: 'above' },
-  community: { key: 'community', kind: 'spotlight', route: '/profile', anchor: 'communities', place: 'above' },
+  games: { key: 'games', kind: 'spotlight', route: '/dashboard', anchor: 'quick-links' },
+  community: { key: 'community', kind: 'spotlight', route: '/profile', anchor: 'communities' },
   /* ⚠️ Home, not /team. `ReferralCard` renders on BOTH, so pointing the step at
      the Team tab meant the spotlight found the card on Home and framed it
      there while the driver was still navigating away: a visible jump, for a
      screen that shows the same card. */
-  invite: { key: 'invite', kind: 'spotlight', route: '/dashboard', anchor: 'invite', place: 'above' },
+  invite: { key: 'invite', kind: 'spotlight', route: '/dashboard', anchor: 'invite' },
 
   /* Last (operator, 2026-09-23). `route` is unused on a sheet and is left as
      the screen it sends people to, for readability only. */

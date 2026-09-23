@@ -192,7 +192,6 @@ export function Onboarding({
   return (
     <Spotlight
       anchor={step.anchor!}
-      place={step.place}
       title={t(`steps.${step.key}.title`)}
       body={t(`steps.${step.key}.body`)}
       index={index}

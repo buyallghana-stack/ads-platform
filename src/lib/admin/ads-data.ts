@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { adMediaUrl } from '@/lib/ads/data'
+import { adThumbnailUrl } from '@/lib/ads/media'
 import { getSessionUser } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
@@ -83,7 +83,12 @@ export async function getAdsScreenData(): Promise<AdsScreenData> {
     videoSource: row.video_source,
     durationSeconds: row.duration_seconds,
     minWatchSeconds: row.min_watch_seconds,
-    thumbnailUrl: adMediaUrl(row.thumbnail_path),
+    /* The same resolver the feed uses, so the admin list shows an ad exactly
+       as a member will see it. Reading `adMediaUrl` alone here meant a survey
+       with no artwork looked blank in the admin while carrying its format
+       cover in the app, which is the sort of quiet disagreement that has an
+       operator uploading a thumbnail nobody needed. */
+    thumbnailUrl: adThumbnailUrl(row),
     weight: row.weight,
     startsAt: row.starts_at,
     endsAt: row.ends_at,

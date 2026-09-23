@@ -56,6 +56,11 @@ let browser = null
 let userId = null
 let shotNo = 0
 
+/* The spotlight steps: the ones that dim the screen and therefore must freeze
+   it. A task step deliberately does neither, because the member needs the real
+   screen to do the real thing. */
+const locked = ['balance', 'statement', 'games', 'community', 'invite-team']
+
 await db.connect()
 
 /** Photograph, and prove the step offers a way forward while we are here. */
@@ -82,6 +87,49 @@ const shoot = async (page, name, { expectAction = true } = {}) => {
       })
     })
     check(`${file}: a way forward is on screen`, reachable)
+
+    /*
+      ⚠️ AND THE PAGE MUST BE FROZEN UNDER IT. The referral step opened with
+      its card and its bubble both below the fold, so the member had to go
+      hunting for the button. A spotlight locks the page and puts the target in
+      the space above the card; nothing should move but the step.
+    */
+    const scroll = await page.evaluate(() => ({
+      locked: getComputedStyle(document.body).overflow === 'hidden',
+      scrollable: document.documentElement.scrollHeight > window.innerHeight + 4,
+    }))
+    if (locked.includes(name)) {
+      check(`${file}: the page is locked while the step shows`, scroll.locked, JSON.stringify(scroll))
+
+      /*
+        ⚠️ AND THE HOLE MUST SIT ON ITS TARGET. It drifted by about 60px on the
+        invite step, straddling the card below it, because the measurement ran
+        before locking the page settled the layout. A cutout that points at the
+        wrong thing is worse than no cutout: it tells the member to look at
+        something that is not there.
+      */
+      const aligned = await page.evaluate((a) => {
+        const el = document.querySelector(`[data-tour="${a}"]`)
+        /* Scoped to the overlay. `svg path + path` on its own matches the
+           second path of the first lucide icon on the page, which measures
+           something entirely unrelated and fails for the wrong reason. */
+        const ring = document.querySelector('[role="dialog"] svg path + path')
+        if (!el || !ring) return { ok: false, why: 'target or ring missing' }
+        const t = el.getBoundingClientRect()
+        const r = ring.getBoundingClientRect()
+        const dTop = Math.abs(r.top - (t.top - 10))
+        const dBottom = Math.abs(r.bottom - (t.bottom + 10))
+        /* A target taller than the visible zone cannot be framed entirely, so
+           what matters is that its TOP is on screen and the hole starts there:
+           the beginning of the thing the step is describing. */
+        const tall = t.height > window.innerHeight - 260 - 72
+        const topVisible = t.top >= 0 && t.top < window.innerHeight - 260
+        return tall
+          ? { ok: dTop < 8 && topVisible, tall, dTop: Math.round(dTop), top: Math.round(t.top) }
+          : { ok: dTop < 8 && dBottom < 8, dTop: Math.round(dTop), dBottom: Math.round(dBottom) }
+      }, name === 'invite-team' ? 'invite' : name === 'games' ? 'quick-links' : name)
+      check(`${file}: the cutout sits on its target`, aligned.ok, JSON.stringify(aligned))
+    }
   }
   console.log(`  shot ${file}.png`)
 }
