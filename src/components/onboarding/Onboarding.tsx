@@ -55,7 +55,23 @@ export function Onboarding({
   const t = useTranslations('onboarding')
   const router = useRouter()
   const pathname = usePathname()
-  const [pending, start] = useTransition()
+  /*
+    ⚠️ `pending` DELIBERATELY DOES NOT REACH A BUTTON, and this was the bug the
+    operator kept hitting. `useTransition` stays pending for the WHOLE round
+    trip: the RPC, the revalidate of the app shell, and the refresh. On a
+    Ghanaian mobile connection that is seconds.
+
+    The optimistic advance meant the next step appeared at once, and then its
+    Next button was handed that same pending flag, so it rendered DISABLED with
+    a spinner for those seconds. Pressing it did nothing. Reported as an
+    unresponsive, laggy card and as being stuck on step 2, and the optimism
+    made it worse rather than better, because now you could see the step you
+    were not allowed to leave.
+
+    The walkthrough has already moved on by the time the write lands, so there
+    is nothing for a member to wait for and nothing to disable.
+  */
+  const [, start] = useTransition()
 
   /* Locks the overlay out for the rest of this page's life the moment a skip
      is submitted, so the member is not looking at a dimmed screen while the
@@ -205,7 +221,6 @@ export function Onboarding({
         body={stuck ? t('steps.first_ad.blockedBody') : t(`steps.${step.key}.body`)}
         index={index}
         total={state.total}
-        busy={pending}
         /* ⚠️ ALWAYS OFFERED, on every task step. It used to appear only when
            the ad pool was empty, so the only way past "add a payout account"
            was Skip, and Skip ends the whole walkthrough. "Not right now" is an
@@ -225,7 +240,6 @@ export function Onboarding({
       body={t(`steps.${step.key}.body`)}
       index={index}
       total={state.total}
-      busy={pending}
       onNext={() => advance(step.key)}
       onSkip={stop}
     />

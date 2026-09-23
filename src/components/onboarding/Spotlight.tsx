@@ -165,8 +165,20 @@ export function Spotlight({
       if (keys.has(e.key)) e.preventDefault()
     }
     window.addEventListener('wheel', swallow, { passive: false })
-    window.addEventListener('touchmove', swallow, { passive: false })
     window.addEventListener('keydown', swallowKey)
+
+    /*
+      ⚠️ NO GLOBAL `touchmove` HANDLER. A non-passive touchmove listener on the
+      window makes the browser wait for JavaScript before it can act on ANY
+      touch, which adds latency to every tap on the page, not just to
+      scrolling. On a cheap phone that is the difference between a button that
+      responds and one that does not.
+
+      The dimmed area carries `touch-action: none` instead (see the svg below),
+      which the compositor honours without consulting us at all. Touches inside
+      the hole are untouched by it, which is the point: that is the one element
+      the member is being asked to use.
+    */
 
     let raf = 0
     let last = ''
@@ -176,6 +188,20 @@ export function Spotlight({
 
     const tick = () => {
       frames += 1
+
+      /*
+        ⚠️ MEASURED EVERY FRAME ONLY WHILE IT IS MOVING. `getBoundingClientRect`
+        forces a synchronous layout, and doing that sixty times a second for
+        the whole life of a step is a phone that feels slow at everything, taps
+        included. Once the target has settled this drops to roughly six times a
+        second, which is still far faster than anything a page does on its own
+        and costs almost nothing.
+      */
+      if (frames > 45 && frames % 10 !== 0) {
+        raf = requestAnimationFrame(tick)
+        return
+      }
+
       const target = find()
 
       if (target) {
@@ -240,7 +266,6 @@ export function Spotlight({
          hands somebody an app they cannot scroll, with nothing on screen to
          explain why. */
       window.removeEventListener('wheel', swallow)
-      window.removeEventListener('touchmove', swallow)
       window.removeEventListener('keydown', swallowKey)
       /* Belt and braces: an older build may have left this set. */
       document.body.style.overflow = ''
@@ -328,7 +353,7 @@ export function Spotlight({
       <svg
         aria-hidden
         className="fixed inset-0 h-full w-full"
-        style={{ pointerEvents: 'none' }}
+        style={{ pointerEvents: 'none', touchAction: 'none' }}
       >
         {/* `pointer-events: auto` on the PATH, not the svg. The hole is unpainted,
             so it is not part of the path's hit area and a tap there lands on the

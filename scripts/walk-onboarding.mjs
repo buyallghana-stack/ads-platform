@@ -286,6 +286,25 @@ try {
   check('the welcome sheet advances on a click', advanced)
 
   /*
+    ── TWO PRESSES IN A ROW, WITHOUT WAITING ─────────────────────────────────
+
+    ⚠️ THE OPERATOR'S "STUCK ON STEP 2", REPRODUCED. Advancing is a round trip,
+    and `useTransition` stays pending for all of it. The optimistic advance
+    showed the next step at once and then handed its Next button that same
+    pending flag, so it rendered DISABLED with a spinner for seconds. The step
+    was never stuck; the button was.
+
+    So this presses Next and, 400ms later, demands the next step's button be
+    ready to press again. That is the interval a real thumb works at.
+  */
+  const nextButton = () => page.getByRole('button', { name: /^next$/i }).first()
+  await nextButton().click({ timeout: 10_000 }).catch(() => {})
+  await page.waitForTimeout(400)
+  const ready = await nextButton().isEnabled().catch(() => false)
+  const label = await page.getByText(/step \d+ of/i).first().textContent().catch(() => '')
+  check('the next step can be pressed straight away', ready, `${label ?? ''} enabled=${ready}`)
+
+  /*
     From here the steps are driven from the database rather than by clicking.
 
     ⚠️ NOT BECAUSE CLICKING IS UNTESTED, but because each advance is a server
