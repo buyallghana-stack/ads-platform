@@ -170,6 +170,12 @@ const shoot = async (page, name, { expectAction = true } = {}) => {
         page was then locked so nothing could correct it. The member read the
         whole walkthrough as broken from step seven on.
       */
+      const onStep = await page.evaluate(() => {
+        const label = [...document.querySelectorAll('p')]
+          .map((n) => n.textContent ?? '')
+          .find((t) => /step \d+ of/i.test(t))
+        return label ?? ''
+      })
       const visible = await page.evaluate((a) => {
         const el = document.querySelector(`[data-tour="${a}"]`)
         if (!el) return { ok: false, why: 'target missing' }
@@ -181,7 +187,7 @@ const shoot = async (page, name, { expectAction = true } = {}) => {
           vh: window.innerHeight,
         }
       }, { 'invite-team': 'invite', games: 'quick-links', community: 'communities' }[name] ?? name)
-      check(`${file}: the target is on screen`, visible.ok, JSON.stringify(visible))
+      check(`${file}: the target is on screen`, visible.ok, `${onStep} ${JSON.stringify(visible)}`)
 
       if (!visible.ok) {
         /* Say what is actually scrolling, rather than guessing at it again. */
@@ -201,12 +207,17 @@ const shoot = async (page, name, { expectAction = true } = {}) => {
             })
             node = node.parentElement
           }
+          const label = [...document.querySelectorAll('p')]
+            .map((n) => n.textContent ?? '')
+            .find((t) => /step \d+ of/i.test(t))
           return {
             windowY: window.scrollY,
-            docTop: document.documentElement.scrollTop,
-            bodyTop: document.body.scrollTop,
-            scrollingElement: document.scrollingElement?.tagName?.toLowerCase(),
-            chain,
+            maxY: Math.round(document.documentElement.scrollHeight - window.innerHeight),
+            dialog: Boolean(document.querySelector('[role="dialog"]')),
+            step: label ?? '(no step label)',
+            url: location.pathname,
+            bodyOverflow: document.body.style.overflow || '(none)',
+            chain: chain.slice(0, 3),
           }
         }, { 'invite-team': 'invite', games: 'quick-links', community: 'communities' }[name] ?? name)
         console.log('  DIAGNOSTIC ' + file + ': ' + JSON.stringify(why))
@@ -339,6 +350,19 @@ try {
     ready && before !== after,
     `${before ?? ''} -> ${after ?? ''} enabled=${ready}`,
   )
+
+  /*
+    ⚠️ LET THOSE PRESSES LAND BEFORE SEEDING ANYTHING.
+
+    The presses above are optimistic by design: the walkthrough moves at once
+    and the write follows. Resetting `seen_steps` while one is still in flight
+    means the write lands AFTER the reset and puts a step back, so the next
+    screenshot is taken on a different step from the one it is named after.
+    That produced three failures blaming the balance step for a spotlight that
+    was correctly framing the statement, and cost a long time chasing a bug in
+    the app that was a race in this script.
+  */
+  await page.waitForTimeout(3000)
 
   /*
     From here the steps are driven from the database rather than by clicking.
