@@ -3666,22 +3666,23 @@
       "cta": "What next?"
     },
     "upgrade": {
+      "eyebrow": "Now that you have seen it all",
       "title": "Watch more, earn faster",
-      "lead": "You have seen what the app does. Free gives you one ad a day; {plan} gives you {cap}, and each one pays more.",
-      "perDay": "a day",
-      "free": {
-        "name": "Free plan",
-        "detail": "1 ad a day, for {days} days"
-      },
-      "plan": {
-        "name": "{plan}, from {price}",
-        "detail": "{cap} ads a day, for {days} days"
-      },
-      "total": "Pay {price} once and the plan runs for {days} days. Watched in full, that is {total}.",
-      "caveat": "If you watch every ad, every day. Pay more inside the band and each ad is worth more to you.",
-      "cta": "See {plan}, from {price}",
+      "lead": "Every plan raises how many ads you may watch a day and what each one pays you. Swipe to compare.",
+      "includes": "Includes",
+      "band": "{from} to {to}",
+      "choose": "Choose {plan}",
       "decline": "Not now, keep me on Free",
-      "eyebrow": "Now that you have seen it all"
+      "caveat": "Daily figures assume every ad in your cap is watched. Pay anywhere inside a band and the rate rises with what you paid.",
+      "vsFree": "You are on Free today, which pays {amount} a day.",
+      "feature": {
+        "earn": "{from} to {to} a day",
+        "ads": "{count, plural, one {# ad a day} other {# ads a day}}",
+        "points": "{from} to {to} points an ad",
+        "games": "{count, plural, =0 {No game plays} one {# game play a week} other {# game plays a week}}",
+        "term": "Runs for {days} days",
+        "referral": "+{percent}% referral bonus"
+      }
     },
     "steps": {
       "balance": {

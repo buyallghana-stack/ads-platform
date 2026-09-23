@@ -6,7 +6,7 @@ import { redirect } from '@/i18n/navigation'
 import { getProfile, getSessionUser, getViewerUser } from '@/lib/auth/session'
 import { Onboarding } from '@/components/onboarding/Onboarding'
 import { getViewAsSession } from '@/lib/admin/view-as'
-import { getOnboardingState, getUpgradePitch } from '@/lib/onboarding/data'
+import { getOnboardingState, getUpgradeOffer } from '@/lib/onboarding/data'
 import { ViewAsBanner } from '@/components/app/ViewAsBanner'
 import { needsLoginChallenge } from '@/lib/security/login-2fa'
 import { getPlanStanding } from '@/lib/subscriptions/data'
@@ -94,7 +94,7 @@ export default async function AppLayout({
      the whole plan table, and paying for that on every signed-in screen for a
      member who finished the walkthrough weeks ago would be a round trip on
      mobile data for nothing. */
-  const pitch = onboarding.currentStep === 'upgrade' ? await getUpgradePitch() : null
+  const offer = onboarding.currentStep === 'upgrade' ? await getUpgradeOffer() : null
   return (
     /* The banner sits ABOVE the app shell rather than inside it, so the
        sidebar/content/tab-bar row below is byte-identical to what it was
@@ -108,7 +108,7 @@ export default async function AppLayout({
           their read-only look at somebody's account, and the steps it walks
           through are the member's to finish. */}
       {!viewing && (
-        <Onboarding state={onboarding} pitch={pitch} pointsPerCedi={onboarding.pointsPerCedi} />
+        <Onboarding state={onboarding} offer={offer} pointsPerCedi={onboarding.pointsPerCedi} />
       )}
       <div className="flex min-h-dvh bg-canvas">
       <Sidebar

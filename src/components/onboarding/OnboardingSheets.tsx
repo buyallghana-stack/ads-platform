@@ -2,12 +2,14 @@
 
 import type { ReactNode } from 'react'
 
-import { ArrowRight, Check } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
+import { Coins } from '@/components/onboarding/art/Coins'
+import { PlanCarousel } from '@/components/onboarding/PlanCarousel'
 import { Logo } from '@/components/brand/Logo'
 import { Button } from '@/components/ui/Button'
-import type { UpgradePitch } from '@/lib/onboarding/data'
+import type { UpgradeOffer } from '@/lib/onboarding/data'
 
 /**
  * The three moments worth the whole screen: the welcome, the congratulation
@@ -146,12 +148,13 @@ export function Celebration({
 
   return (
     <Screen label={t('title')} background={FIELD_SUCCESS}>
-      <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
-        <span aria-hidden className="grid size-16 place-items-center rounded-full bg-white/15 text-white">
-          <Check className="size-8" strokeWidth={3} />
-        </span>
+      <div className="flex flex-1 flex-col items-center justify-center py-8 text-center">
+        {/* The coins, not a tick. A tick says "form submitted"; this screen is
+            about money arriving, and the picture should say the same thing the
+            number underneath it does. */}
+        <Coins className="h-[8.5rem] w-auto" />
 
-        <p className="mt-7 text-[0.75rem] font-semibold uppercase tracking-[0.14em] text-white/70">
+        <p className="mt-6 text-[0.75rem] font-semibold uppercase tracking-[0.14em] text-white/70">
           {t('eyebrow')}
         </p>
         <p className="mt-2 text-[3.5rem] font-bold leading-none tracking-[-0.03em] tabular-nums text-white">
@@ -202,92 +205,61 @@ export function Celebration({
  * dead. Anything here that leaves the walkthrough has to end the step on its
  * way out.
  */
+/**
+ * The offer: the plans on sale, as cards you swipe through.
+ *
+ * ⚠️ IT IS THE LAST STEP (operator, 2026-09-23). It used to sit fourth, right
+ * behind the congratulation, on the argument that the moment of the first cedi
+ * is the moment of most willingness. The operator's call is that the plans are
+ * shown once the member has seen the whole product, and that is what ships.
+ *
+ * ⚠️ EVERY FIGURE IS READ LIVE FROM THE LADDER, and the qualifying line under
+ * the carousel is not optional: a daily figure is what the plan pays IF every
+ * ad is watched. Printing it bare is a promise the product does not make, and
+ * the first member who watches half of them is a refund request with a
+ * screenshot attached.
+ *
+ * ⚠️ CHOOSING A PLAN FINISHES THE STEP BEFORE IT NAVIGATES. An early version
+ * linked straight to /upgrade while `upgrade` was still the current step, and
+ * the driver threw the member back the instant they arrived: the plans were
+ * unreachable and the button read as dead.
+ */
 export function UpgradeSheet({
-  pitch,
-  onAccept,
+  offer,
+  onChoose,
   onDecline,
 }: {
-  pitch: UpgradePitch
-  onAccept: () => void
+  offer: UpgradeOffer
+  onChoose: (slug: string) => void
   onDecline: () => void
 }) {
   const t = useTranslations('onboarding.upgrade')
-  const format = useFormatter()
-  const money = (n: number) =>
-    format.number(n, { style: 'currency', currency: 'GHS', maximumFractionDigits: 2 })
-  /* Plan prices are whole cedis on every rung of the ladder, and "GHS 85.00"
-     wrapped the plan name onto a second line at 360px. Decimals that are
-     always .00 buy nothing and cost a line. */
-  const price = (n: number) =>
-    format.number(n, {
-      style: 'currency',
-      currency: 'GHS',
-      maximumFractionDigits: Number.isInteger(n) ? 0 : 2,
-    })
 
   return (
     <Screen label={t('title')} background={FIELD_INK}>
-      <div className="pt-4">
+      <div className="pt-2">
         <p className="text-[0.75rem] font-semibold uppercase tracking-[0.14em] text-brand-400">
           {t('eyebrow')}
         </p>
-        <h1 className="mt-3 text-[1.75rem] font-bold leading-[1.15] tracking-[-0.02em] text-white">
+        <h1 className="mt-2.5 text-[1.75rem] font-bold leading-[1.15] tracking-[-0.02em] text-white">
           {t('title')}
         </h1>
-        <p className="mt-3 text-[0.9375rem] leading-relaxed text-white/70">
-          {t('lead', { cap: pitch.dailyAdCap, plan: pitch.name })}
-        </p>
+        <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-white/70">{t('lead')}</p>
       </div>
 
-      {/* The comparison is the argument: two rows, one shape, so the only
-          thing that moves between them is the number. */}
-      <div className="mt-8 flex flex-col gap-2.5">
-        <div className="flex items-center justify-between gap-4 rounded-(--radius-card) border border-white/10 bg-white/5 px-4 py-3.5">
-          <div className="min-w-0">
-            <p className="text-[0.875rem] font-semibold text-white/70">{t('free.name')}</p>
-            <p className="mt-0.5 text-[0.8125rem] text-white/45">
-              {t('free.detail', { days: pitch.freeDays })}
-            </p>
-          </div>
-          <p className="shrink-0 text-right">
-            <span className="block text-[1rem] font-bold tabular-nums text-white/70">
-              {money(pitch.freeDailyGhs)}
-            </span>
-            <span className="block text-[0.75rem] text-white/40">{t('perDay')}</span>
-          </p>
-        </div>
-
-        <div className="flex items-center justify-between gap-4 rounded-(--radius-card) border border-brand-400/50 bg-brand-600/20 px-4 py-3.5">
-          <div className="min-w-0">
-            <p className="text-[0.875rem] font-semibold text-white">
-              {t('plan.name', { plan: pitch.name, price: price(pitch.priceGhs) })}
-            </p>
-            <p className="mt-0.5 text-[0.8125rem] text-white/60">
-              {t('plan.detail', { cap: pitch.dailyAdCap, days: pitch.termDays })}
-            </p>
-          </div>
-          <p className="shrink-0 text-right">
-            <span className="block text-[1.25rem] font-bold tabular-nums text-brand-400">
-              {money(pitch.dailyGhs)}
-            </span>
-            <span className="block text-[0.75rem] text-white/50">{t('perDay')}</span>
-          </p>
-        </div>
+      <div className="mt-6">
+        <PlanCarousel
+          plans={offer.plans}
+          freeDailyGhs={offer.freeDailyGhs}
+          onChoose={onChoose}
+        />
       </div>
 
-      <p className="mt-6 text-[0.9375rem] leading-relaxed text-white/85">
-        {t('total', {
-          price: price(pitch.priceGhs),
-          days: pitch.termDays,
-          total: money(pitch.termGhs),
-        })}
+      <p className="mt-5 text-center text-[0.75rem] leading-relaxed text-white/40">
+        {t('caveat')}
       </p>
-      <p className="mt-2 text-[0.75rem] leading-relaxed text-white/45">{t('caveat')}</p>
 
       <Actions>
-        <Button size="lg" fullWidth onClick={onAccept} trailingIcon={<ArrowRight />}>
-          {t('cta', { plan: pitch.name, price: price(pitch.priceGhs) })}
-        </Button>
         <Button variant="ghost" size="md" fullWidth onClick={onDecline} className={QUIET_ON_FIELD}>
           {t('decline')}
         </Button>

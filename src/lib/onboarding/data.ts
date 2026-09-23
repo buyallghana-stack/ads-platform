@@ -42,85 +42,116 @@ export async function getOnboardingState(userId: string): Promise<OnboardingStat
   }
 }
 
-export type UpgradePitch = {
+export type UpgradePlan = {
   slug: string
   name: string
-  /** The band's floor, in cedis. The cheapest way in. */
-  priceGhs: number
+  /** What the plan is for, in the operator's own words from the plans table. */
+  description: string
+  /** The band: the least you may pay, and the most. */
+  priceFromGhs: number
+  priceToGhs: number
   dailyAdCap: number
-  pointsPerAd: number
-  /** What a full day of watching pays, in cedis. */
-  dailyGhs: number
+  /** Points one ad pays, at the band's floor and at its ceiling. */
+  pointsFrom: number
+  pointsTo: number
+  /** A full day of watching, in cedis, across the band. */
+  dailyFromGhs: number
+  dailyToGhs: number
   termDays: number
-  /** Everything the term pays if they watch every ad, every day. */
-  termGhs: number
-  /** The free plan, for the comparison the pitch is built on. */
+  weeklyGamePlays: number
+  /** The referral bonus, as a percentage over the base. 1.10 reads as +10%. */
+  referralBonusPercent: number
+}
+
+export type UpgradeOffer = {
+  plans: UpgradePlan[]
+  /** The free plan, for the one comparison line the offer opens with. */
   freeDailyGhs: number
   freeDays: number
 }
 
+/*
+  `base_ad_points` is a PRIVATE config key: the user client reads it back as
+  null and every figure here would quietly become zero. It is 100 and has been
+  since the peg was set, and `scripts/apply-plan-ladder.mjs` makes the same
+  assumption for the same reason. If it ever moves, both move together.
+*/
+const BASE_AD_POINTS = 100
+
 /**
- * The numbers behind the upgrade sheet, read live.
+ * The plans the offer shows, read live.
  *
- * ⚠️ NOT HARDCODED, AND NOT COPIED INTO THE TRANSLATION FILES. The operator
- * retunes the ladder from the admin, and a pitch quoting last month's rate
- * would be a promise the product then fails to keep on the very first day of a
- * member's plan. The one place this may come from is `tiers`.
+ * ⚠️ NOT HARDCODED, AND NOT IN THE TRANSLATION FILES. The operator retunes
+ * this ladder from the admin, and an offer quoting last month's rate is a
+ * promise the product breaks on day one of the plan it just sold.
  *
- * It offers the CHEAPEST rung on sale, at its floor. The sheet appears seconds
- * after somebody earned one cedi, so the number beside it has to be the
- * smallest true one; leading with Gold at GHS 400 reads as a different product
- * than the one they just used.
+ * ⚠️ THE FREE PLAN IS NOT A CARD (operator, 2026-09-23). Everybody seeing this
+ * screen is already on it, so a card for it is a card offering them what they
+ * have. It survives only as the one comparison line above the carousel.
+ *
+ * Announced plans are left out too: `coming_soon` cannot be bought, and a card
+ * that leads to a checkout refusing the sale is worse than no card.
  */
-export async function getUpgradePitch(): Promise<UpgradePitch | null> {
+export async function getUpgradeOffer(): Promise<UpgradeOffer | null> {
   const supabase = await createClient()
 
   const [{ data: tiers }, { data: config }] = await Promise.all([
     supabase
       .from('tiers')
-      .select('slug, name, price_minor, reward_multiplier, daily_ad_cap, billing_period_days, is_default, is_active, coming_soon')
+      .select(
+        'slug, name, description, price_minor, band_max_minor, reward_multiplier, band_max_multiplier, daily_ad_cap, billing_period_days, weekly_game_plays, referral_bonus_multiplier, is_default, is_active, coming_soon',
+      )
       .eq('is_active', true)
       .order('sort_order'),
-    supabase.from('app_config').select('key, value').in('key', ['points_per_currency_unit', 'free_earning_days']),
+    supabase
+      .from('app_config')
+      .select('key, value')
+      .in('key', ['points_per_currency_unit', 'free_earning_days']),
   ])
 
   if (!tiers?.length) return null
 
-  const value = (key: string, fallback: number) =>
+  const setting = (key: string, fallback: number) =>
     Number(config?.find((c) => c.key === key)?.value ?? fallback) || fallback
 
-  const perCedi = value('points_per_currency_unit', 100)
-  const freeDays = value('free_earning_days', 21)
-
-  const free = tiers.find((t) => t.is_default)
-  /* Announced is not on sale. Pitching a `coming_soon` rung would send them to
-     a card they cannot buy, which turns the best moment in the funnel into a
-     dead end. */
-  const cheapest = tiers.find((t) => !t.is_default && !t.coming_soon)
-  if (!cheapest) return null
+  const perCedi = setting('points_per_currency_unit', 100)
+  const freeDays = setting('free_earning_days', 21)
 
   const { pointsPerAd } = await import('@/lib/subscriptions/pricing')
-  const perAd = pointsPerAd(BASE_AD_POINTS, Number(cheapest.reward_multiplier))
-  const dailyGhs = (cheapest.daily_ad_cap * perAd) / perCedi
+  const free = tiers.find((t) => t.is_default)
+
+  const plans = tiers
+    .filter((t) => !t.is_default && !t.coming_soon)
+    .map((t) => {
+      const floorRate = Number(t.reward_multiplier)
+      const ceilRate = Number(t.band_max_multiplier ?? t.reward_multiplier)
+      const pointsFrom = pointsPerAd(BASE_AD_POINTS, floorRate)
+      const pointsTo = pointsPerAd(BASE_AD_POINTS, ceilRate)
+
+      return {
+        slug: t.slug,
+        name: t.name,
+        description: t.description ?? '',
+        priceFromGhs: Number(t.price_minor) / 100,
+        priceToGhs: Number(t.band_max_minor ?? t.price_minor) / 100,
+        dailyAdCap: t.daily_ad_cap,
+        pointsFrom,
+        pointsTo,
+        dailyFromGhs: (t.daily_ad_cap * pointsFrom) / perCedi,
+        dailyToGhs: (t.daily_ad_cap * pointsTo) / perCedi,
+        termDays: t.billing_period_days,
+        weeklyGamePlays: t.weekly_game_plays,
+        referralBonusPercent: Math.round((Number(t.referral_bonus_multiplier) - 1) * 100),
+      }
+    })
+
+  if (plans.length === 0) return null
 
   return {
-    slug: cheapest.slug,
-    name: cheapest.name,
-    priceGhs: Number(cheapest.price_minor) / 100,
-    dailyAdCap: cheapest.daily_ad_cap,
-    pointsPerAd: perAd,
-    dailyGhs,
-    termDays: cheapest.billing_period_days,
-    termGhs: dailyGhs * cheapest.billing_period_days,
-    freeDailyGhs: free ? (free.daily_ad_cap * pointsPerAd(BASE_AD_POINTS, Number(free.reward_multiplier))) / perCedi : 0,
+    plans,
+    freeDailyGhs: free
+      ? (free.daily_ad_cap * pointsPerAd(BASE_AD_POINTS, Number(free.reward_multiplier))) / perCedi
+      : 0,
     freeDays,
   }
 }
-
-/*
-  `base_ad_points` is a PRIVATE config key, so the user client reads it back as
-  null and the pitch would quietly quote zero. It is 100 and has been since the
-  peg was set; the ladder script makes the same assumption and for the same
-  reason. If it ever moves, both move together.
-*/
-const BASE_AD_POINTS = 100

@@ -8,7 +8,7 @@ import { TaskBar } from '@/components/onboarding/TaskBar'
 import { describe } from '@/components/onboarding/steps'
 import { usePathname, useRouter } from '@/i18n/navigation'
 import { markOnboardingStep, skipOnboarding } from '@/lib/onboarding/actions'
-import type { UpgradePitch } from '@/lib/onboarding/data'
+import type { UpgradeOffer } from '@/lib/onboarding/data'
 import type { OnboardingState } from '@/lib/onboarding/types'
 import { useTranslations } from 'next-intl'
 
@@ -45,11 +45,11 @@ import { useTranslations } from 'next-intl'
  */
 export function Onboarding({
   state,
-  pitch,
+  offer,
   pointsPerCedi,
 }: {
   state: OnboardingState
-  pitch: UpgradePitch | null
+  offer: UpgradeOffer | null
   pointsPerCedi: number
 }) {
   const t = useTranslations('onboarding')
@@ -127,19 +127,21 @@ export function Onboarding({
     /* No sellable plan configured, so there is nothing to offer. Step past it
        rather than showing an empty sheet; the member should never see the
        consequence of an operator's plan table being mid-edit. */
-    if (!pitch) {
+    if (!offer) {
       advance('upgrade')
       return null
     }
     return (
       <UpgradeSheet
-        pitch={pitch}
+        offer={offer}
         /* Finish the step FIRST, then go. Navigating while `upgrade` is still
-           the current step is what made the button look dead. */
-        onAccept={() =>
+           the current step is what made the button look dead. The chosen plan
+           rides along so the Upgrade screen opens on it rather than at the top
+           of a list they have just scrolled through. */
+        onChoose={(slug) =>
           start(async () => {
             await markOnboardingStep('upgrade')
-            router.push('/upgrade')
+            router.push(`/upgrade?plan=${slug}`)
             router.refresh()
           })
         }
