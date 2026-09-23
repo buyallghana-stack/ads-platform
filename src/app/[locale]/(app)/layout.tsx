@@ -86,7 +86,7 @@ export default async function AppLayout({
     The admin area has its own layout and is untouched, which is what makes the
     switch reversible from a phone.
   */
-  if (await isMaintenanceClosed()) {
+  if (await isMaintenanceClosed(signedIn!.id)) {
     return <MaintenanceScreen />
   }
 
