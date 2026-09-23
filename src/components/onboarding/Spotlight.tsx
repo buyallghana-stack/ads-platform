@@ -119,10 +119,28 @@ export function Spotlight({
       return null
     })()
 
-    const position = () => (scroller ? scroller.scrollTop : window.scrollY)
+    /**
+     * Move the page so the target travels by `delta`, and report whether it
+     * actually did.
+     *
+     * ⚠️ THE DETECTED SCROLLER IS A GUESS, AND A WRONG GUESS USED TO BE FATAL.
+     * Scrolling a container that does not contain the target moves nothing,
+     * the stall counter then fills up, and the loop gives up with the target
+     * 1200px off screen. So the guess is checked against the only thing that
+     * matters, the target's own position, and the window is tried when it was
+     * wrong.
+     */
     const nudge = (delta: number) => {
-      if (scroller) scroller.scrollTop += delta
-      else window.scrollBy(0, delta)
+      const topOf = () => find()?.getBoundingClientRect().top ?? null
+      const before = topOf()
+
+      if (scroller) {
+        scroller.scrollTop += delta
+        if (before !== null && Math.abs((topOf() ?? before) - before) > 1) return true
+      }
+
+      window.scrollBy(0, delta)
+      return before !== null && Math.abs((topOf() ?? before) - before) > 1
     }
 
     /*
@@ -226,10 +244,8 @@ export function Spotlight({
         */
         const delta = r.top - wantedTop(r.height)
         if (Math.abs(delta) > 3 && stalled < 4) {
-          const was = position()
-          nudge(delta)
-          if (Math.abs(position() - was) < 1) stalled += 1
-          else stalled = 0
+          if (nudge(delta)) stalled = 0
+          else stalled += 1
         }
         if (frames > 6) setSettled(true)
 
