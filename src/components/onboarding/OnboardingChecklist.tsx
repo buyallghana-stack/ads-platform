@@ -6,6 +6,7 @@ import { Check, ChevronDown, ChevronUp } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { STEPS } from '@/components/onboarding/steps'
+import { Button } from '@/components/ui/Button'
 import { Link } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
 import type { OnboardingState } from '@/lib/onboarding/types'
@@ -115,11 +116,10 @@ export function OnboardingChecklist({ state }: { state: OnboardingState }) {
                 </div>
 
                 {!s.done && descriptor && (
-                  <Link
-                    href={descriptor.route}
-                    className="shrink-0 rounded-(--radius-control) bg-brand-600 px-3 py-1.5 text-[0.75rem] font-semibold text-white transition-colors hover:bg-brand-700"
-                  >
-                    {t('checklist.go')}
+                  <Link href={descriptor.route} className="shrink-0">
+                    <Button size="sm" variant={isNext ? 'primary' : 'secondary'}>
+                      {t('checklist.go')}
+                    </Button>
                   </Link>
                 )}
               </li>

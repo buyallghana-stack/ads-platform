@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import { ArrowRight, PartyPopper, Sparkles, TrendingUp } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
+import { Button } from '@/components/ui/Button'
 import { Link } from '@/i18n/navigation'
 import type { UpgradePitch } from '@/lib/onboarding/data'
 
@@ -23,7 +24,7 @@ function Sheet({ children, label }: { children: ReactNode; label: string }) {
       role="dialog"
       aria-modal="true"
       aria-label={label}
-      className="fixed inset-0 z-100 flex items-end justify-center bg-ink-900/80 p-4 sm:items-center"
+      className="fixed inset-0 z-100 flex items-end justify-center bg-ink-900/55 p-4 sm:items-center"
     >
       <div className="animate-rise w-full max-w-md overflow-hidden rounded-(--radius-panel) border border-ink-200 bg-surface shadow-[0_24px_64px_-16px_rgb(15_23_42/0.55)]">
         {children}
@@ -61,21 +62,14 @@ export function WelcomeSheet({ onStart, onSkip }: { onStart: () => void; onSkip:
           ))}
         </ul>
 
-        <button
-          type="button"
-          onClick={onStart}
-          className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-(--radius-control) bg-brand-600 text-[0.875rem] font-semibold text-white transition-colors hover:bg-brand-700"
-        >
-          {t('cta')}
-          <ArrowRight aria-hidden className="size-4" />
-        </button>
-        <button
-          type="button"
-          onClick={onSkip}
-          className="mt-2 h-9 w-full text-[0.75rem] font-medium text-ink-400 hover:text-ink-600"
-        >
-          {t('skip')}
-        </button>
+        <div className="mt-5 flex flex-col gap-2">
+          <Button size="lg" fullWidth onClick={onStart} trailingIcon={<ArrowRight />}>
+            {t('cta')}
+          </Button>
+          <Button variant="ghost" size="sm" fullWidth onClick={onSkip}>
+            {t('skip')}
+          </Button>
+        </div>
       </div>
     </Sheet>
   )
@@ -120,14 +114,15 @@ export function Celebration({
         <h2 className="text-[1.0625rem] font-bold leading-snug text-ink-900">{t('title')}</h2>
         <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-ink-600">{t('body')}</p>
 
-        <button
-          type="button"
+        <Button
+          size="lg"
+          fullWidth
+          className="mt-5"
           onClick={onNext}
-          className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-(--radius-control) bg-brand-600 text-[0.875rem] font-semibold text-white transition-colors hover:bg-brand-700"
+          trailingIcon={<ArrowRight />}
         >
           {t('cta')}
-          <ArrowRight aria-hidden className="size-4" />
-        </button>
+        </Button>
       </div>
     </Sheet>
   )
@@ -206,20 +201,19 @@ export function UpgradeSheet({
         </p>
         <p className="mt-1 text-[0.6875rem] leading-relaxed text-ink-400">{t('caveat')}</p>
 
-        <Link
-          href="/upgrade"
-          className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-(--radius-control) bg-brand-600 text-[0.875rem] font-semibold text-white transition-colors hover:bg-brand-700"
-        >
-          {t('cta', { plan: pitch.name, price: money(pitch.priceGhs) })}
-          <ArrowRight aria-hidden className="size-4" />
-        </Link>
-        <button
-          type="button"
-          onClick={onDecline}
-          className="mt-2 h-9 w-full text-[0.75rem] font-medium text-ink-400 hover:text-ink-600"
-        >
-          {t('decline')}
-        </button>
+        <div className="mt-4 flex flex-col gap-2">
+          {/* Link wrapping Button, the way the dashboard's own calls to action
+              are built, so this CTA is the same object as the buy button on the
+              Upgrade screen rather than a look-alike. */}
+          <Link href="/upgrade" className="block">
+            <Button size="lg" fullWidth trailingIcon={<ArrowRight />}>
+              {t('cta', { plan: pitch.name, price: money(pitch.priceGhs) })}
+            </Button>
+          </Link>
+          <Button variant="ghost" size="sm" fullWidth onClick={onDecline}>
+            {t('decline')}
+          </Button>
+        </div>
       </div>
     </Sheet>
   )

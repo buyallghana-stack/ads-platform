@@ -12,35 +12,38 @@ import type { OnboardingStepKey } from '@/lib/onboarding/types'
 
 export type StepDescriptor = {
   key: OnboardingStepKey
-  /** A hole cut around a real element, or a sheet that owns the screen. */
-  kind: 'spotlight' | 'sheet'
+  /**
+   * `spotlight` dims the screen and cuts a hole. `task` dims nothing and
+   * blocks nothing. `sheet` owns the screen.
+   *
+   * ⚠️ AN ACTION IS NEVER A SPOTLIGHT. A hole the size of one element cannot
+   * hold a whole flow: watching an ad needs the tabs, the other cards and the
+   * player; saving a payout account needs a form. Pointing a shade at one card
+   * and waiting made those steps impossible to finish and the app look frozen.
+   * If the step ends by the member DOING something, it is a `task`.
+   */
+  kind: 'spotlight' | 'task' | 'sheet'
   /** Where the member has to be standing. The driver takes them there. */
   route: string
-  /** The `data-tour` value to cut the hole around. */
+  /** The `data-tour` value to cut the hole around. `spotlight` only. */
   anchor?: string
   /** Which side of the anchor the bubble prefers, space permitting. */
   place?: 'above' | 'below'
-  /**
-   * The step ends when the member DOES the thing rather than when they press
-   * Next: the bubble drops its button and waits for the derived state to flip.
-   */
-  waits?: boolean
 }
 
 export const STEPS: Record<OnboardingStepKey, StepDescriptor> = {
   balance: { key: 'balance', kind: 'spotlight', route: '/dashboard', anchor: 'balance', place: 'below' },
   statement: { key: 'statement', kind: 'spotlight', route: '/dashboard', anchor: 'statement', place: 'above' },
 
-  /* The activation moment. It waits, because "watched an ad" is the one thing
-     in this sequence that cannot be faked by pressing Next, and the whole
-     conversion sequence after it is built on it having really happened. */
-  first_ad: { key: 'first_ad', kind: 'spotlight', route: '/ads', anchor: 'ad-card', place: 'below', waits: true },
+  /* The activation moment, and the reason the task bar exists: the member
+     needs the whole ads screen, including the surveys tab and the player. */
+  first_ad: { key: 'first_ad', kind: 'task', route: '/ads' },
 
   celebrate: { key: 'celebrate', kind: 'sheet', route: '/ads' },
   upgrade: { key: 'upgrade', kind: 'sheet', route: '/ads' },
 
-  payout: { key: 'payout', kind: 'spotlight', route: '/profile/payout', anchor: 'payout-form', place: 'below', waits: true },
-  pin: { key: 'pin', kind: 'spotlight', route: '/profile/pin', anchor: 'pin-form', place: 'below', waits: true },
+  payout: { key: 'payout', kind: 'task', route: '/profile/payout' },
+  pin: { key: 'pin', kind: 'task', route: '/profile/pin' },
 
   games: { key: 'games', kind: 'spotlight', route: '/dashboard', anchor: 'quick-links', place: 'above' },
   community: { key: 'community', kind: 'spotlight', route: '/profile', anchor: 'communities', place: 'above' },

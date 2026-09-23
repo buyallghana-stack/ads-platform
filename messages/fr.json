@@ -3647,7 +3647,6 @@
     "progress": "Étape {index} sur {total}",
     "next": "Suivant",
     "skip": "Passer",
-    "waiting": "À vous de jouer",
     "welcome": {
       "title": "Bienvenue sur SidePerks",
       "body": "Votre attention est payée. Laissez-nous vous montrer en moins d'une minute.",
@@ -3693,18 +3692,18 @@
         "body": "Votre relevé indique ce que vous avez gagné, quand, et ce que cela valait. Rien n'arrive à votre solde sans être écrit ici."
       },
       "first_ad": {
-        "title": "Ouvrez celle-ci",
-        "body": "Elle indique ce qu'elle rapporte avant de commencer. Regardez-la en entier, répondez à la question, et les points sont à vous.",
+        "title": "Regardez une publicité pour continuer",
+        "body": "Les vidéos et les sondages sont dans des onglets séparés. Choisissez ce que vous voulez, regardez jusqu'au bout, et les points arrivent tout seuls.",
         "blockedTitle": "Rien à regarder pour l'instant",
         "blockedBody": "Aucune publicité ne vous est proposée en ce moment. Revenez plus tard : elles apparaîtront ici."
       },
       "payout": {
-        "title": "Où va votre argent",
-        "body": "Ajoutez le numéro Mobile Money sur lequel vous voulez être payé. Un retrait ne peut aller que vers un compte enregistré ici, sur votre propre profil."
+        "title": "Indiquez où vous voulez être payé",
+        "body": "Votre numéro Mobile Money. Un retrait ne peut aller que vers un compte enregistré sur votre profil : c'est la seule chose entre vous et votre solde."
       },
       "pin": {
-        "title": "Protégez vos retraits",
-        "body": "Un code à quatre chiffres, distinct de votre mot de passe, demandé chaque fois que de l'argent bouge. Réglez-le maintenant et n'y pensez plus."
+        "title": "Définissez votre code de retrait",
+        "body": "Quatre chiffres, distincts de votre mot de passe, demandés chaque fois que de l'argent bouge. À régler une fois, puis oublié."
       },
       "games": {
         "title": "D'autres façons de gagner",
@@ -3746,6 +3745,7 @@
         "invite": "Partager votre lien d'invitation"
       }
     },
-    "replay": "Refaire la visite"
+    "replay": "Refaire la visite",
+    "later": "Plus tard"
   }
 }

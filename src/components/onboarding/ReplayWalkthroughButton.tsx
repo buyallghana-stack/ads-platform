@@ -5,6 +5,7 @@ import { useTransition } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { Button } from '@/components/ui/Button'
 import { useRouter } from '@/i18n/navigation'
 import { replayOnboarding } from '@/lib/onboarding/actions'
 
@@ -22,9 +23,11 @@ export function ReplayWalkthroughButton() {
   const [pending, start] = useTransition()
 
   return (
-    <button
-      type="button"
-      disabled={pending}
+    <Button
+      variant="secondary"
+      size="sm"
+      loading={pending}
+      leadingIcon={<RotateCcw />}
       onClick={() =>
         start(async () => {
           await replayOnboarding()
@@ -35,10 +38,8 @@ export function ReplayWalkthroughButton() {
           router.refresh()
         })
       }
-      className="inline-flex items-center gap-1.5 rounded-(--radius-control) bg-ink-100 px-3 py-1.5 text-[0.75rem] font-semibold text-ink-700 transition-colors hover:bg-ink-200 disabled:opacity-60"
     >
-      <RotateCcw aria-hidden className="size-3.5" />
       {t('replay')}
-    </button>
+    </Button>
   )
 }

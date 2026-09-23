@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from 'react'
 
 import { Celebration, UpgradeSheet, WelcomeSheet } from '@/components/onboarding/OnboardingSheets'
 import { Spotlight } from '@/components/onboarding/Spotlight'
+import { TaskBar } from '@/components/onboarding/TaskBar'
 import { describe } from '@/components/onboarding/steps'
 import { usePathname, useRouter } from '@/i18n/navigation'
 import { markOnboardingStep, skipOnboarding } from '@/lib/onboarding/actions'
@@ -15,11 +16,26 @@ import { useTranslations } from 'next-intl'
  * The walkthrough driver. Mounted once, in the (app) layout, so a step can
  * point at something on any screen and survive the navigation between them.
  *
- * SEQUENTIAL MEANS SEQUENTIAL. The shades take every tap outside the lit
- * element, so there is no wandering off mid-flow, and the driver walks the
- * member to the step's screen rather than asking them to find it. The one way
- * out is the skip, which is always on the bubble: a walkthrough with no exit
- * is a trap, and the members who would have skipped it uninstall instead.
+ * SEQUENTIAL, BUT NOT THE SAME WAY FOR EVERY STEP. The driver walks the member
+ * to the screen a step lives on, and the step decides how firmly it holds
+ * them:
+ *
+ *   spotlight  explaining something. The screen dims, one element is lit, and
+ *              taps outside it are absorbed. Nothing is being asked for, so
+ *              there is nothing to get in the way of.
+ *   task       asking for something. Dims nothing, blocks nothing. The member
+ *              needs the whole screen to watch an ad or fill in a form, and
+ *              the bar clears itself when the database says it is done.
+ *   sheet      a moment worth the whole screen: the welcome, the
+ *              congratulation, the offer.
+ *
+ * ⚠️ THE ORIGINAL BUILD USED A SPOTLIGHT FOR EVERYTHING, and it made the
+ * action steps impossible to finish: the shade around one ad card swallowed
+ * taps on the surveys tab, on every other card and on the player itself, so
+ * the step waited for ever and the app read as frozen.
+ *
+ * Skip is on every one of them. A walkthrough with no exit is a trap, and the
+ * members who would have skipped it uninstall instead.
  *
  * ⚠️ THE STATE IS THE SERVER'S, AND IT IS RE-READ, NOT ADVANCED LOCALLY. Each
  * action returns through `revalidatePath`, so the next render carries the new
@@ -115,23 +131,38 @@ export function Onboarding({
   }
 
   /*
-    A waiting step ends when the thing is true, so the bubble has no Next.
-    `first_ad` is the exception to the exception: when nothing is servable the
-    member cannot finish it however long they wait, so the button comes back
-    and moves them on.
+    An ACTION step. Nothing is dimmed and nothing is blocked: the member needs
+    the real screen to do the real thing, and the bar goes away on its own when
+    the database says it is done.
+
+    `first_ad` is the one step nobody can finish by trying harder, so when the
+    pool is empty the bar says so and offers a way past. The other two are
+    always finishable, so they only offer Skip.
   */
-  const stuck = step.key === 'first_ad' && state.firstAdBlocked
-  const waits = Boolean(step.waits) && !stuck
+  if (step.kind === 'task') {
+    const stuck = step.key === 'first_ad' && state.firstAdBlocked
+    return (
+      <TaskBar
+        title={stuck ? t('steps.first_ad.blockedTitle') : t(`steps.${step.key}.title`)}
+        body={stuck ? t('steps.first_ad.blockedBody') : t(`steps.${step.key}.body`)}
+        index={index}
+        total={state.total}
+        busy={pending}
+        onNext={stuck ? () => advance(step.key) : undefined}
+        onSkip={stop}
+      />
+    )
+  }
 
   return (
     <Spotlight
       anchor={step.anchor!}
       place={step.place}
-      title={stuck ? t('steps.first_ad.blockedTitle') : t(`steps.${step.key}.title`)}
-      body={stuck ? t('steps.first_ad.blockedBody') : t(`steps.${step.key}.body`)}
-      waiting={waits || pending}
+      title={t(`steps.${step.key}.title`)}
+      body={t(`steps.${step.key}.body`)}
       index={index}
       total={state.total}
+      busy={pending}
       onNext={() => advance(step.key)}
       onSkip={stop}
     />

@@ -3647,7 +3647,6 @@
     "progress": "Step {index} of {total}",
     "next": "Next",
     "skip": "Skip",
-    "waiting": "Waiting for you",
     "welcome": {
       "title": "Welcome to SidePerks",
       "body": "You get paid for your attention. Let us show you around in under a minute.",
@@ -3693,18 +3692,18 @@
         "body": "Your statement lists what you earned, when, and what it was worth. Nothing happens to your balance that is not written here."
       },
       "first_ad": {
-        "title": "Open this one",
-        "body": "It tells you what it pays before it starts. Watch it through, answer the question, and the points are yours.",
+        "title": "Watch any ad to continue",
+        "body": "Videos and surveys are in separate tabs. Pick anything you like, watch it through, and the points land on their own.",
         "blockedTitle": "Nothing to watch yet",
         "blockedBody": "There are no ads available to you right now. Come back later and this is where they will be."
       },
       "payout": {
-        "title": "Where your money goes",
-        "body": "Add the Mobile Money number you want to be paid on. Withdrawals can only ever go to an account saved here, on your own profile."
+        "title": "Add where you want to be paid",
+        "body": "Your Mobile Money number. Withdrawals can only ever go to an account saved on your own profile, so this is the one thing standing between you and your balance."
       },
       "pin": {
-        "title": "Lock your withdrawals",
-        "body": "A four digit PIN, separate from your password, asked for every time money moves. Set it now and you never have to think about it again."
+        "title": "Set your withdrawal PIN",
+        "body": "Four digits, separate from your password, asked for every time money moves. Set it once and you never think about it again."
       },
       "games": {
         "title": "More ways to earn",
@@ -3746,6 +3745,7 @@
         "invite": "Share your invite link"
       }
     },
-    "replay": "Show me around again"
+    "replay": "Show me around again",
+    "later": "Do it later"
   }
 }
