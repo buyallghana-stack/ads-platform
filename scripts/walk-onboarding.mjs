@@ -223,7 +223,16 @@ try {
     colorScheme: process.env.SCHEME === 'light' ? 'light' : 'dark',
   })
 
-  await page.goto(`${BASE}/en/login`, { waitUntil: 'domcontentloaded' })
+  await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' })
+  /*
+    ⚠️ WAIT FOR HYDRATION BEFORE TOUCHING THE FORM. Filling and submitting
+    first made the browser do a NATIVE submit, which is how the missing
+    `method="post"` was found: the credentials went into the URL. The form is
+    only wired up once React has attached, and the page going quiet is the
+    fastest honest signal for that.
+  */
+  await page.waitForLoadState('networkidle').catch(() => {})
+  await page.waitForTimeout(1200)
   await page.getByLabel(/email/i).fill(EMAIL)
   await page.locator('input[type="password"]').fill(PASSWORD)
   await page.getByRole('button', { name: /log in/i }).click()
@@ -231,6 +240,9 @@ try {
      page does not reliably fire on a dev server mid-compile. Commit is enough:
      the URL is what decides the sign-in worked. */
   await page.waitForURL(/\/dashboard/, { timeout: 90_000, waitUntil: 'commit' })
+  /* A URL carrying a password means the native submit happened again, which is
+     a finding, not a flake. Fail loudly rather than carry on. */
+  if (/password=/.test(page.url())) throw new Error('login submitted natively: ' + page.url())
   await page.waitForTimeout(4000)
 
   /* ---- 1. the welcome, and one real click through it ----------------------- */
