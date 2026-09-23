@@ -27,6 +27,22 @@ import { createClient } from '@/lib/supabase/server'
  * provides everywhere is navigation: a bottom tab bar on mobile, a slim
  * sidebar (nav + upgrade teaser) on md+.
  */
+/*
+  ⚠️ EVERY SIGNED-IN SCREEN IS PER-PERSON, AND MUST NEVER BE CACHED AS A PAGE.
+
+  The maintenance screen made this visible. The decision is correct in the
+  database (asked over PostgREST as the member it concerns, it answers
+  correctly every time) and was still wrong in the browser for everybody: an
+  ordinary member was shut out, the answer was rendered into this layout, and
+  the RESPONSE was then served to staff and to the allow-listed test account.
+
+  Nothing here should ever have been shareable between two people: it renders a
+  balance, a name and a walkthrough position. Saying so explicitly costs one
+  line and removes a whole class of leak, of which showing the wrong
+  maintenance state is the most harmless example anybody could hope for.
+*/
+export const dynamic = 'force-dynamic'
+
 export default async function AppLayout({
   children,
   params,
