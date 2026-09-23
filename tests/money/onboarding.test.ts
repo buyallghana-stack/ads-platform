@@ -333,6 +333,45 @@ describe.skipIf(!HAS_DB)('onboarding walkthrough', () => {
     })
   })
 
+  /*
+    ⚠️ PRESSING "SHOW ME AROUND" MUST NOT SPEND STEP ONE. The welcome sheet had
+    no way to record that somebody had begun other than to mark a step, so it
+    marked `balance`: the row appeared, which is what it wanted, and step one
+    was consumed, which it did not. A real member pressed the button and landed
+    on step TWO, never having been shown their own balance. It went unnoticed
+    because the screenshot script seeded the row directly and never pressed it.
+  */
+  it('begins the walkthrough without spending the first step', async () => {
+    await withRollback(async (tx) => {
+      await setConfig(tx, 'onboarding_enabled', 'true')
+      const user = await createUser(tx, { name: 'Show Me Around' })
+      await actAs(tx, user.id)
+
+      await tx.query(`select public.start_onboarding()`)
+      const s = await state(tx, user.id)
+
+      expect(s.started).toBe(true)
+      expect(s.currentStep).toBe('balance')
+      expect(s.doneCount).toBe(0)
+    })
+  })
+
+  it('does not reset progress if the start is recorded twice', async () => {
+    await withRollback(async (tx) => {
+      await setConfig(tx, 'onboarding_enabled', 'true')
+      const user = await createUser(tx, { name: 'Twice' })
+      await actAs(tx, user.id)
+
+      await tx.query(`select public.start_onboarding()`)
+      await tx.query(`select public.mark_onboarding_step('balance')`)
+      await tx.query(`select public.start_onboarding()`)
+
+      const s = await state(tx, user.id)
+      expect(done(s, 'balance')).toBe(true)
+      expect(s.currentStep).toBe('statement')
+    })
+  })
+
   it('refuses a step nobody has heard of', async () => {
     await withRollback(async (tx) => {
       await setConfig(tx, 'onboarding_enabled', 'true')

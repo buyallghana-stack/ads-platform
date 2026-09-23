@@ -7,7 +7,7 @@ import { Spotlight } from '@/components/onboarding/Spotlight'
 import { TaskBar } from '@/components/onboarding/TaskBar'
 import { describe } from '@/components/onboarding/steps'
 import { usePathname, useRouter } from '@/i18n/navigation'
-import { markOnboardingStep, skipOnboarding } from '@/lib/onboarding/actions'
+import { markOnboardingStep, skipOnboarding, startOnboarding } from '@/lib/onboarding/actions'
 import type { UpgradeOffer } from '@/lib/onboarding/data'
 import type { OnboardingState } from '@/lib/onboarding/types'
 import { useTranslations } from 'next-intl'
@@ -93,6 +93,9 @@ export function Onboarding({
     that is read from the real tables and never from this.
   */
   const [pressed, setPressed] = useState<string[]>([])
+  /* Optimistic too: the sheet closes the moment it is pressed rather than
+     after the round trip that records the start. */
+  const [started, setStarted] = useState(false)
 
   /* Anything the server has caught up on is dropped here at render rather than
      in an effect: there is nothing to synchronise, only a list to read past,
@@ -156,10 +159,17 @@ export function Onboarding({
   }
 
   /* Never started: the welcome sheet, once. */
-  if (!state.started) {
+  if (!state.started && !started) {
     return (
       <WelcomeSheet
-        onStart={() => advance('balance')}
+        /* Records that they have begun, WITHOUT spending the first step. */
+        onStart={() => {
+          setStarted(true)
+          start(async () => {
+            await startOnboarding()
+            router.refresh()
+          })
+        }}
         onSkip={stop}
       />
     )

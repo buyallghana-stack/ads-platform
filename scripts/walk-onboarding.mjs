@@ -298,11 +298,18 @@ try {
     ready to press again. That is the interval a real thumb works at.
   */
   const nextButton = () => page.getByRole('button', { name: /^next$/i }).first()
+  const before = await page.getByText(/step \d+ of/i).first().textContent().catch(() => '')
   await nextButton().click({ timeout: 10_000 }).catch(() => {})
   await page.waitForTimeout(400)
+  const after = await page.getByText(/step \d+ of/i).first().textContent().catch(() => '')
+  /* Steps 1 and 2 are both spotlights, so both carry Next. Step 3 is the ad
+     task, which deliberately has no Next at all, so the check stops here. */
   const ready = await nextButton().isEnabled().catch(() => false)
-  const label = await page.getByText(/step \d+ of/i).first().textContent().catch(() => '')
-  check('the next step can be pressed straight away', ready, `${label ?? ''} enabled=${ready}`)
+  check(
+    'the next step can be pressed straight away',
+    ready && before !== after,
+    `${before ?? ''} -> ${after ?? ''} enabled=${ready}`,
+  )
 
   /*
     From here the steps are driven from the database rather than by clicking.

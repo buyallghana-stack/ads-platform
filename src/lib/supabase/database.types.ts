@@ -5518,6 +5518,7 @@ export type Database = {
         Returns: undefined
       }
       skip_onboarding: { Args: never; Returns: Json }
+      start_onboarding: { Args: never; Returns: Json }
       start_subscription_payment: {
         Args: {
           p_amount_minor?: number
