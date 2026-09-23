@@ -402,7 +402,9 @@ try {
   await seeSteps([...done, 'games', 'community', 'invite'], 'plans-carousel')
   /* Every plan visible at once, which a carousel could not promise. */
   const planRows = await page.evaluate(() =>
-    [...document.querySelectorAll('button[aria-pressed]')]
+    /* Scoped to the sheet: the dashboard behind it has its own toggles
+       ("7 days", "30 days") that also carry aria-pressed. */
+    [...document.querySelectorAll('[role="dialog"] button[aria-pressed]')]
       .map((b) => {
         const r = b.getBoundingClientRect()
         return { text: (b.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 40), onScreen: r.top >= 0 && r.bottom <= window.innerHeight }
