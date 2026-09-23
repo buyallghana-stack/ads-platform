@@ -140,11 +140,36 @@ export function Spotlight({
       The cap stops it fighting a page that genuinely cannot scroll any
       further, which is the community step near the end of Profile.
     */
+    /*
+      ── THE LOCK IS EVENT BASED, NOT `overflow: hidden` ─────────────────────
+
+      ⚠️ `document.body.style.overflow = 'hidden'` was the obvious lock and it
+      was the bug. On a mobile browser it can clamp the scroll position back to
+      zero the moment it is applied, which put the page at the top with the
+      target far below the fold. It also blocks the walkthrough's OWN
+      corrections, so once it was on, nothing could pull the page back.
+
+      On the operator's phone, over LTE, `router.refresh()` after advancing a
+      step landed AFTER the loop had settled and locked, reset the scroll, and
+      left a dimmed screen with nothing lit on it. It passed here every time
+      because a headless run finishes the refresh before the loop settles.
+
+      Blocking the input events instead stops the member scrolling while
+      leaving programmatic scrolling to us, and it never moves the page by
+      itself.
+    */
+    const swallow = (e: Event) => e.preventDefault()
+    const keys = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '])
+    const swallowKey = (e: KeyboardEvent) => {
+      if (keys.has(e.key)) e.preventDefault()
+    }
+    window.addEventListener('wheel', swallow, { passive: false })
+    window.addEventListener('touchmove', swallow, { passive: false })
+    window.addEventListener('keydown', swallowKey)
+
     let raf = 0
     let last = ''
-    let steady = 0
     let frames = 0
-    let locked = false
 
     const tick = () => {
       frames += 1
@@ -153,22 +178,15 @@ export function Spotlight({
       if (target) {
         const r = target.getBoundingClientRect()
 
-        if (!locked) {
-          const delta = r.top - wantedTop(r.height)
-          if (Math.abs(delta) > 2 && frames < 90) {
-            nudge(delta)
-            steady = 0
-          } else {
-            steady += 1
-          }
-          /* Three still frames, or we have tried long enough. Either way the
-             page stops moving from here. */
-          if (steady >= 3 || frames >= 90) {
-            document.body.style.overflow = 'hidden'
-            locked = true
-            setSettled(true)
-          }
-        }
+        /*
+          ⚠️ IT NEVER STOPS CORRECTING. Settling once and trusting it is what
+          failed: anything that moves the page afterwards, a late revalidate
+          most of all, left the target off screen for good. The tolerance keeps
+          it from twitching on a page that is already right.
+        */
+        const delta = r.top - wantedTop(r.height)
+        if (Math.abs(delta) > 3) nudge(delta)
+        if (frames > 6) setSettled(true)
 
         const box = {
           top: r.top - PAD,
@@ -183,11 +201,7 @@ export function Spotlight({
           setViewport({ w: window.innerWidth, h: window.innerHeight })
         }
       } else {
-        if (!locked && frames > 30) {
-          document.body.style.overflow = 'hidden'
-          locked = true
-          setSettled(true)
-        }
+        if (frames > 30) setSettled(true)
         if (last !== 'gone') {
           last = 'gone'
           setMeasured(null)
@@ -200,9 +214,13 @@ export function Spotlight({
 
     return () => {
       cancelAnimationFrame(raf)
-      /* ⚠️ ALWAYS RESTORED. Leaving `overflow: hidden` behind after the last
-         step hands somebody an app they cannot scroll, with nothing on screen
-         to explain why. */
+      /* ⚠️ ALWAYS RELEASED. Leaving these listeners behind after the last step
+         hands somebody an app they cannot scroll, with nothing on screen to
+         explain why. */
+      window.removeEventListener('wheel', swallow)
+      window.removeEventListener('touchmove', swallow)
+      window.removeEventListener('keydown', swallowKey)
+      /* Belt and braces: an older build may have left this set. */
       document.body.style.overflow = ''
     }
   }, [anchor])

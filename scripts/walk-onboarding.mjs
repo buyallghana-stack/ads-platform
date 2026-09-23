@@ -170,6 +170,27 @@ const shoot = async (page, name, { expectAction = true } = {}) => {
         }
       }, { 'invite-team': 'invite', games: 'quick-links', community: 'communities' }[name] ?? name)
       check(`${file}: the target is on screen`, visible.ok, JSON.stringify(visible))
+
+      /*
+        ⚠️ AND IT RECOVERS IF SOMETHING MOVES THE PAGE AFTERWARDS.
+
+        This is the operator's failure, reproduced. A headless run finishes the
+        revalidate before the positioning loop settles, so it always passed
+        here; on a real phone over LTE the refresh landed later, reset the
+        scroll, and the old build had already locked and stopped correcting.
+        The result was a dimmed screen with nothing lit on it.
+
+        Shoving the page to the top is the same insult, delivered on purpose.
+      */
+      await page.evaluate(() => window.scrollTo(0, 0))
+      await page.waitForTimeout(900)
+      const recovered = await page.evaluate((a) => {
+        const el = document.querySelector(`[data-tour="${a}"]`)
+        if (!el) return { ok: false, why: 'target missing' }
+        const r = el.getBoundingClientRect()
+        return { ok: r.top >= 0 && r.bottom <= window.innerHeight, top: Math.round(r.top) }
+      }, { 'invite-team': 'invite', games: 'quick-links', community: 'communities' }[name] ?? name)
+      check(`${file}: recovers when the page is thrown to the top`, recovered.ok, JSON.stringify(recovered))
     }
   }
   console.log(`  shot ${file}.png`)
@@ -311,6 +332,27 @@ try {
   const done = ['balance', 'statement', 'celebrate']
   void done
   await seeSteps(done, 'payout-task')
+
+  /* ⚠️ The bar sat over the account-name field and the Save button, so the
+     member could not see what they were typing or reach the control that
+     finishes the step. It must step aside when a field takes focus. */
+  const field = page.locator('input:visible').first()
+  if (await field.count()) {
+    const before = await page.evaluate(() => {
+      const bar = document.querySelector('[role="status"]')
+      return bar ? Math.round(bar.getBoundingClientRect().top) : null
+    })
+    await field.click().catch(() => {})
+    await page.waitForTimeout(700)
+    const after = await page.evaluate(() => {
+      const bar = document.querySelector('[role="status"]')
+      if (!bar) return { gone: true }
+      const r = bar.getBoundingClientRect()
+      return { gone: r.top >= window.innerHeight - 4, top: Math.round(r.top), vh: window.innerHeight }
+    })
+    check('the task bar clears the form while typing', after.gone, JSON.stringify({ before, after }))
+    await page.keyboard.press('Escape').catch(() => {})
+  }
   await seeSteps(done, 'pin-task')
 
   /* The payout and PIN steps are satisfied by the real thing existing. */
