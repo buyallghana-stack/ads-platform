@@ -32,10 +32,5 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
 
   const data = await getTeamData(user.id)
 
-  return (
-    /* Wrapped only to carry the walkthrough's anchor. */
-    <div data-tour="invite">
-      <TeamView data={data} />
-    </div>
-  )
+  return <TeamView data={data} />
 }

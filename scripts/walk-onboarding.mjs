@@ -1,0 +1,311 @@
+/**
+ * Walks a brand new account through the whole first-run walkthrough, on the
+ * real app, and photographs every step.
+ *
+ *   BASE=http://localhost:3100 SHOTS=/tmp/walk node scripts/walk-onboarding.mjs
+ *
+ * ⚠️ IT CREATES A REAL ACCOUNT ON WHATEVER PROJECT `.env.local` POINTS AT, which
+ * is production. Same trade as `verify-games-ui.mjs`: the walkthrough cannot be
+ * proved against a mock, because the whole point of it is that steps tick from
+ * real tables. The account is named so it is obvious in any list, and it is
+ * purged in the `finally` whatever happens.
+ *
+ * ⚠️ PURGING NEEDS THE TRIGGER RECIPE. `auth.admin.deleteUser` fails silently
+ * for anybody who has earned points, because the ledger is append-only and
+ * holds a reference. The rows go first, in dependency order, and the delete is
+ * VERIFIED afterwards rather than assumed.
+ *
+ * It asserts as it goes. A step that renders nothing clickable is a failure
+ * here, not a screenshot nobody looks at: that is exactly how the Team step
+ * shipped with its bubble off the bottom of the screen.
+ */
+import { readFileSync, mkdirSync } from 'node:fs'
+
+import { chromium } from '@playwright/test'
+import { createClient } from '@supabase/supabase-js'
+import { Client } from 'pg'
+
+for (const line of readFileSync('.env.local', 'utf8').split('\n')) {
+  const m = line.match(/^([A-Z0-9_]+)=(.*)$/)
+  if (m && !process.env[m[1]]) process.env[m[1]] = m[2].trim().replace(/^"|"$/g, '')
+}
+
+const BASE = process.env.BASE ?? 'http://localhost:3100'
+const SHOTS = process.env.SHOTS ?? '/tmp/walk'
+mkdirSync(SHOTS, { recursive: true })
+
+const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SECRET_KEY, {
+  auth: { autoRefreshToken: false, persistSession: false },
+})
+const db = new Client({
+  connectionString: process.env.PRODUCTION_DB_URL,
+  ssl: { rejectUnauthorized: false },
+})
+
+const stamp = Date.now()
+const EMAIL = `walkthrough-${stamp}@test.invalid`
+const PASSWORD = `Walk!${stamp}`
+
+const results = []
+const check = (name, pass, detail) => {
+  results.push({ name, pass })
+  console.log(`${pass ? 'PASS' : 'FAIL'}  ${name}${detail ? `  — ${detail}` : ''}`)
+}
+
+let browser = null
+let userId = null
+let shotNo = 0
+
+await db.connect()
+
+/** Photograph, and prove the step offers a way forward while we are here. */
+const shoot = async (page, name, { expectAction = true } = {}) => {
+  shotNo += 1
+  const file = `${String(shotNo).padStart(2, '0')}-${name}`
+  await page.waitForTimeout(700)
+  await page.screenshot({ path: `${SHOTS}/${file}.png` })
+
+  if (expectAction) {
+    /*
+      Every step must have something pressable IN THE VIEWPORT. A control that
+      has rendered below the fold is the Team bug: present in the DOM, so a
+      naive check passes, and unreachable to a thumb.
+    */
+    const reachable = await page.evaluate(() => {
+      const vh = window.innerHeight
+      const vw = window.innerWidth
+      return [...document.querySelectorAll('button, a[href]')].some((el) => {
+        const r = el.getBoundingClientRect()
+        const text = (el.textContent ?? '').trim().toLowerCase()
+        if (!/next|skip|show me|what next|choose|later|go|find my own/.test(text)) return false
+        return r.top >= 0 && r.bottom <= vh && r.left >= 0 && r.right <= vw && r.width > 0
+      })
+    })
+    check(`${file}: a way forward is on screen`, reachable)
+  }
+  console.log(`  shot ${file}.png`)
+}
+
+/**
+ * Press, once the control will actually take a press.
+ *
+ * ⚠️ WAIT FOR ENABLED, NOT JUST VISIBLE. Advancing a step is a server round
+ * trip, and the button carries `disabled aria-busy` while it is in flight.
+ * Clicking on visible alone hits a dead button and then times out against an
+ * element that is about to be replaced anyway.
+ */
+const press = async (page, pattern) => {
+  const button = page.getByRole('button', { name: pattern }).first()
+  await button.waitFor({ state: 'visible', timeout: 20_000 })
+  for (let i = 0; i < 40 && !(await button.isEnabled().catch(() => false)); i += 1) {
+    await page.waitForTimeout(250)
+  }
+  await button.click({ timeout: 15_000 })
+  await page.waitForTimeout(2000)
+}
+
+try {
+  /* ---- a brand new account ------------------------------------------------ */
+  const { data: made, error } = await sb.auth.admin.createUser({
+    email: EMAIL,
+    password: PASSWORD,
+    email_confirm: true,
+    user_metadata: { full_name: 'Walkthrough Tester' },
+  })
+  if (error) throw error
+  userId = made.user.id
+  console.log(`created ${EMAIL}`)
+
+  browser = await chromium.launch()
+  const page = await browser.newPage({
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 2,
+    isMobile: true,
+    hasTouch: true,
+  })
+
+  await page.goto(`${BASE}/en/login`, { waitUntil: 'domcontentloaded' })
+  await page.getByLabel(/email/i).fill(EMAIL)
+  await page.locator('input[type="password"]').fill(PASSWORD)
+  await page.getByRole('button', { name: /log in/i }).click()
+  /* `waitForURL` defaults to waiting for `load`, which a streamed App Router
+     page does not reliably fire on a dev server mid-compile. Commit is enough:
+     the URL is what decides the sign-in worked. */
+  await page.waitForURL(/\/dashboard/, { timeout: 90_000, waitUntil: 'commit' })
+  await page.waitForTimeout(4000)
+
+  /* ---- 1. the welcome, and one real click through it ----------------------- */
+  await shoot(page, 'welcome')
+  await press(page, /show me around/i)
+  await page.waitForTimeout(2500)
+  const advanced = await page.getByText(/step \d+ of/i).first().isVisible().catch(() => false)
+  check('the welcome sheet advances on a click', advanced)
+
+  /*
+    From here the steps are driven from the database rather than by clicking.
+
+    ⚠️ NOT BECAUSE CLICKING IS UNTESTED, but because each advance is a server
+    round trip and the button carries `disabled aria-busy` until it lands: on a
+    cold dev server a click-driven walk spends its time racing spinners and
+    photographs half-rendered steps. The DATABASE is the source of the current
+    step anyway, so setting it and reloading renders exactly what a member
+    reaching that step would see. The click is proved once, above.
+  */
+  const seeSteps = async (seen, name, opts) => {
+    await db.query(
+      `insert into public.user_onboarding (user_id, seen_steps, skipped_at)
+       values ($1, $2, null)
+       on conflict (user_id) do update set seen_steps = $2, skipped_at = null`,
+      [userId, seen],
+    )
+    await page.goto(`${BASE}/en/dashboard`, { waitUntil: 'domcontentloaded' })
+    await page.waitForTimeout(3200)
+    await shoot(page, name, opts)
+  }
+
+  await seeSteps([], 'balance')
+  await seeSteps(['balance'], 'statement')
+
+  /* ---- 3. the ad step, on the real ads screen ------------------------------ */
+  await seeSteps(['balance', 'statement'], 'first-ad-task')
+  const onAds = page.url().includes('/ads')
+  check('the ad step walks the member to the ads screen', onAds, page.url())
+
+  /* A real completion, written the way the ad flow writes it. */
+  const { rows: ads } = await db.query(
+    `select id, points_reward from public.ads where status = 'active' order by created_at limit 1`,
+  )
+  await db.query(
+    `insert into public.user_ad_state (user_id, ad_id, status, completed_at)
+     values ($1, $2, 'completed', now())
+     on conflict (user_id, ad_id) do update set status = 'completed', completed_at = now()`,
+    [userId, ads[0].id],
+  )
+  await db.query(
+    `select public.credit_points($1, $2::bigint, 'ad_view'::public.ledger_entry_type, 'ad', $3, '{}'::jsonb)`,
+    [userId, Number(ads[0].points_reward), ads[0].id],
+  )
+
+  /* ---- 4. the congratulation ----------------------------------------------- */
+  await seeSteps(['balance', 'statement'], 'celebration')
+  /* A sheet owns the screen and carries no step counter, unlike a spotlight
+     bubble. What matters is that the moment is reached at all: migration 190
+     made it derived and the walkthrough stepped clean over it. */
+  const celebrated = await page.getByText(/that is real money/i).isVisible().catch(() => false)
+  check('the congratulation is reached, not stepped over', celebrated)
+  const saysCedis = await page.getByText(/GHS/).first().isVisible().catch(() => false)
+  check('the congratulation names a cedi figure', saysCedis)
+
+  /* ---- 5 to 9 --------------------------------------------------------------- */
+  const done = ['balance', 'statement', 'celebrate']
+  void done
+  await seeSteps(done, 'payout-task')
+  await seeSteps(done, 'pin-task')
+
+  /* The payout and PIN steps are satisfied by the real thing existing. */
+  await db.query(
+    `insert into public.user_payout_details (user_id, method, msisdn, account_name, provider_id)
+     select $1, 'mobile_money', '0240000000', 'Walkthrough Tester', id
+       from public.payout_providers where is_active order by sort_order limit 1
+     on conflict do nothing`,
+    [userId],
+  )
+  await db.query(
+    `insert into public.user_security (user_id, pin_hash, pin_set_at) values ($1, 'walkthrough', now())
+     on conflict (user_id) do update set pin_hash = excluded.pin_hash`,
+    [userId],
+  )
+
+  await seeSteps(done, 'games')
+  await seeSteps([...done, 'games'], 'community')
+
+  /* ---- the step that was reported unusable --------------------------------- */
+  await seeSteps([...done, 'games', 'community'], 'invite-team')
+  /* Home, not /team: `ReferralCard` renders on both, and sending them to the
+     Team tab meant the spotlight framed the card on Home while the driver was
+     still navigating away from it. */
+  const inviteUrl = page.url()
+  check('the invite step stays on Home, where the card is', inviteUrl.includes('/dashboard'), inviteUrl)
+
+  /* ---- 10. the plans ------------------------------------------------------- */
+  await seeSteps([...done, 'games', 'community', 'invite'], 'plans-carousel')
+  const cards = await page.getByRole('button', { name: /^choose /i }).count()
+  check('every plan on sale has a card', cards === 4, `${cards} cards`)
+  const cardNames = await page.getByRole('button', { name: /^choose /i }).allTextContents()
+  check('the free plan is not a card', !cardNames.some((n) => /free/i.test(n)), cardNames.join(', '))
+  const referral = await page.getByText(/referral bonus/i).first().isVisible().catch(() => false)
+  check('no referral bonus is claimed', !referral)
+
+  /* ---- what a member who skipped is left with ------------------------------ */
+  await db.query(`update public.user_onboarding set skipped_at = now() where user_id = $1`, [userId])
+  await page.goto(`${BASE}/en/dashboard`, { waitUntil: 'domcontentloaded' })
+  await page.waitForTimeout(3000)
+  await shoot(page, 'checklist-after-skip', { expectAction: false })
+
+  const rows = await page.evaluate(() =>
+    [...document.querySelectorAll('li')]
+      .map((li) => li.textContent?.replace(/\s+/g, ' ').trim() ?? '')
+      .filter((t) => /your balance|statement|first ad|first points|payout|withdrawal PIN|other ways|community|invite|plans/i.test(t))
+      .slice(0, 12),
+  )
+  console.log('\nchecklist after skipping, with an ad watched:')
+  rows.forEach((r) => console.log('  ' + r))
+  /* The congratulation is a MOMENT, so it is deliberately not a row: watching
+     the first ad is collecting the first points. Its presence was the reported
+     lie; its absence is the fix. */
+  const pointsRow = rows.find((r) => /first points/i.test(r))
+  check('the checklist does not ask for points already earned', !pointsRow, pointsRow ?? 'absent, as intended')
+  const adRow = rows.find((r) => /first ad/i.test(r))
+  check('the watched ad is listed and ticked', Boolean(adRow), adRow ?? 'row missing')
+
+  const passed = results.filter((r) => r.pass).length
+  console.log(`\n${passed}/${results.length} checks passed`)
+} finally {
+  if (browser) await browser.close()
+
+  /* ---- purge --------------------------------------------------------------- */
+  if (userId) {
+    for (const sql of [
+      `delete from public.user_ad_state where user_id = $1`,
+      `delete from public.user_onboarding where user_id = $1`,
+      `delete from public.user_payout_details where user_id = $1`,
+      `delete from public.user_security where user_id = $1`,
+      `delete from public.user_subscriptions where user_id = $1`,
+      `delete from public.notifications where user_id = $1`,
+    ]) {
+      await db.query(sql, [userId]).catch((e) => console.log('  purge note:', e.message.split('\n')[0]))
+    }
+
+    /*
+      ⚠️ THE LEDGER REFUSES DELETE. It is append-only and says so from a
+      trigger, so the first version of this purge failed on that line, gave up,
+      and left a test account sitting in PRODUCTION. Disable, delete,
+      re-enable, and then PROVE nothing stayed disabled: a run that leaves the
+      append-only guarantee switched off is far worse than a run that fails.
+    */
+    await db.query(`alter table public.points_ledger disable trigger user`)
+    await db.query(`delete from public.points_ledger where user_id = $1`, [userId])
+    await db.query(`alter table public.points_ledger enable trigger user`)
+
+    for (const sql of [
+      `delete from public.user_balances where user_id = $1`,
+      `delete from public.profiles where id = $1`,
+      `delete from auth.users where id = $1`,
+    ]) {
+      await db.query(sql, [userId]).catch((e) => console.log('  purge note:', e.message.split('\n')[0]))
+    }
+
+    const { rows } = await db.query(`select count(*)::int n from auth.users where id = $1`, [userId])
+    const { rows: trg } = await db.query(
+      `select count(*)::int n from pg_trigger t join pg_class c on c.oid = t.tgrelid
+        where c.relname = 'points_ledger' and t.tgenabled <> 'O' and not t.tgisinternal`,
+    )
+    console.log(rows[0].n === 0 ? `purged ${EMAIL}` : `⚠️ ${EMAIL} SURVIVED the purge`)
+    console.log(
+      trg[0].n === 0
+        ? 'points_ledger is append-only again'
+        : `⚠️ ${trg[0].n} points_ledger trigger(s) LEFT DISABLED, re-enable them now`,
+    )
+  }
+  await db.end()
+}

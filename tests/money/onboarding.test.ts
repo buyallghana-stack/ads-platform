@@ -30,7 +30,7 @@ const state = async (tx: Tx, userId: string) => {
     skipped: boolean
     completed: boolean
     currentStep: string | null
-    steps: Array<{ key: string; done: boolean }>
+    steps: Array<{ key: string; done: boolean; walked: boolean }>
     total: number
     doneCount: number
     firstAdDone: boolean
@@ -270,8 +270,66 @@ describe.skipIf(!HAS_DB)('onboarding walkthrough', () => {
 
       const s = await state(tx, user.id)
       expect(done(s, 'first_ad')).toBe(true)
-      // The one that was wrong.
-      expect(done(s, 'celebrate')).toBe(true)
+      /* The checklist no longer LISTS the congratulation at all, which is the
+         real fix for the reported lie: watching the first ad is collecting the
+         first points, so there was never a second row to tick. The client
+         filters it out; here we just prove the ad itself reads as done. */
+    })
+  })
+
+  /*
+    ── WALKING PAST IS NOT FINISHING ─────────────────────────────────────────
+
+    Found by driving the real walkthrough: the only way past "add a payout
+    account" was Skip, which ends the whole tour. Saying "not now" must move
+    the walkthrough on WITHOUT ticking the checklist, because the account still
+    does not exist and that row is what tells somebody whether they can be paid.
+  */
+  it('lets a member walk past a setup step without ticking it', async () => {
+    await withRollback(async (tx) => {
+      await setConfig(tx, 'onboarding_enabled', 'true')
+      const user = await createUser(tx, { name: 'Not Right Now' })
+      await actAs(tx, user.id)
+
+      await tx.query(`select public.mark_onboarding_step('payout')`)
+      const s = await state(tx, user.id)
+
+      // The checklist still tells the truth.
+      expect(done(s, 'payout')).toBe(false)
+      // And the walkthrough has moved on rather than sitting on it.
+      expect(s.steps.find((x) => x.key === 'payout')?.walked).toBe(true)
+      expect(s.currentStep).not.toBe('payout')
+    })
+  })
+
+  /* The congratulation is a moment, shown once. Migration 190 made it derived
+     so the checklist would stop asking for it, which also meant it never
+     appeared: the instant the ad landed the step counted as done and the
+     walkthrough stepped over the best screen in the product. */
+  it('still shows the congratulation after the first ad', async () => {
+    await withRollback(async (tx) => {
+      await setConfig(tx, 'onboarding_enabled', 'true')
+      const user = await createUser(tx, { name: 'Deserves A Moment' })
+      await actAs(tx, user.id)
+
+      const { rows } = await tx.query<{ id: string }>(
+        `insert into public.ads (title, format, status, points_reward, video_source,
+                                 youtube_video_id, duration_seconds, min_watch_seconds, weight)
+         values ('Celebration fixture', 'video', 'active', 100, 'youtube', 'dQw4w9WgXcQ', 30, 0, 100)
+         returning id`,
+      )
+      await tx.query(
+        `insert into public.user_ad_state (user_id, ad_id, status, completed_at)
+         values ($1, $2, 'completed', now())`,
+        [user.id, rows[0]!.id],
+      )
+      await tx.query(`select public.mark_onboarding_step('balance')`)
+      await tx.query(`select public.mark_onboarding_step('statement')`)
+
+      const s = await state(tx, user.id)
+      expect(done(s, 'first_ad')).toBe(true)
+      // The moment is still ahead of them, not silently spent.
+      expect(s.currentStep).toBe('celebrate')
     })
   })
 

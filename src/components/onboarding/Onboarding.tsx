@@ -84,7 +84,16 @@ export function Onboarding({
 
   if (!active) return null
 
-  const index = state.doneCount + 1
+  /*
+    ⚠️ THE POSITION, NOT THE DONE COUNT. "Step 5 of 10" was showing on the
+    fourth screen, because a derived step ticks the moment its fact is true and
+    the count then runs ahead of where the member actually is. The label has to
+    describe the walk, so it counts the step's place in the list.
+  */
+  const index = Math.max(
+    state.steps.findIndex((s) => s.key === state.currentStep) + 1,
+    1,
+  )
 
   const advance = (key: string) => {
     start(async () => {
@@ -168,7 +177,13 @@ export function Onboarding({
         index={index}
         total={state.total}
         busy={pending}
-        onNext={stuck ? () => advance(step.key) : undefined}
+        /* ⚠️ ALWAYS OFFERED, on every task step. It used to appear only when
+           the ad pool was empty, so the only way past "add a payout account"
+           was Skip, and Skip ends the whole walkthrough. "Not right now" is an
+           ordinary thing to want and it should not cost the remaining five
+           steps. Saying not now moves the walkthrough on; it does NOT tick the
+           checklist, because the account still does not exist. */
+        onNext={() => advance(step.key)}
         onSkip={stop}
       />
     )

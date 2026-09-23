@@ -31,7 +31,14 @@ export type OnboardingState = {
   skipped: boolean
   completed: boolean
   currentStep: OnboardingStepKey | null
-  steps: Array<{ key: OnboardingStepKey; done: boolean }>
+  /**
+   * `done` is the thing being TRUE, which is what the checklist ticks.
+   * `walked` is the walkthrough having gone past it, which happens either
+   * because they did it or because they said not now. Keeping them apart is
+   * what lets somebody finish the tour without being told they have a payout
+   * account they do not have.
+   */
+  steps: Array<{ key: OnboardingStepKey; done: boolean; walked: boolean }>
   total: number
   doneCount: number
   firstAdDone: boolean

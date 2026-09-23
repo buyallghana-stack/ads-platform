@@ -46,7 +46,11 @@ export const STEPS: Record<OnboardingStepKey, StepDescriptor> = {
 
   games: { key: 'games', kind: 'spotlight', route: '/dashboard', anchor: 'quick-links', place: 'above' },
   community: { key: 'community', kind: 'spotlight', route: '/profile', anchor: 'communities', place: 'above' },
-  invite: { key: 'invite', kind: 'spotlight', route: '/team', anchor: 'invite', place: 'below' },
+  /* ⚠️ Home, not /team. `ReferralCard` renders on BOTH, so pointing the step at
+     the Team tab meant the spotlight found the card on Home and framed it
+     there while the driver was still navigating away: a visible jump, for a
+     screen that shows the same card. */
+  invite: { key: 'invite', kind: 'spotlight', route: '/dashboard', anchor: 'invite', place: 'above' },
 
   /* Last (operator, 2026-09-23). `route` is unused on a sheet and is left as
      the screen it sends people to, for readability only. */

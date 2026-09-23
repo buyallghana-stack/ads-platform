@@ -92,7 +92,15 @@ export function ReferralCard({ code }: { code: string | null }) {
   }
 
   return (
-    <div className="rounded-(--radius-card) border border-orange-500/25 bg-orange-50 p-4 shadow-[0_1px_2px_0_rgb(15_23_42/0.04)]">
+    /* ⚠️ The walkthrough's `invite` step frames THIS card. It used to be put on
+       a wrapper around the whole Team screen, which made the cutout taller
+       than the viewport and pushed the bubble, with its Next and Skip, off the
+       bottom of the screen: the step could not be dismissed. An anchor must
+       always be a single component, never a page. */
+    <div
+      data-tour="invite"
+      className="rounded-(--radius-card) border border-orange-500/25 bg-orange-50 p-4 shadow-[0_1px_2px_0_rgb(15_23_42/0.04)]"
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 text-[0.8125rem] font-medium text-orange-700">

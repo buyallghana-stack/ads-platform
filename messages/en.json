@@ -3680,8 +3680,7 @@
         "ads": "{count, plural, one {# ad a day} other {# ads a day}}",
         "points": "{from} to {to} points an ad",
         "games": "{count, plural, =0 {No game plays} one {# game play a week} other {# game plays a week}}",
-        "term": "Runs for {days} days",
-        "referral": "+{percent}% referral bonus"
+        "term": "Runs for {days} days"
       }
     },
     "steps": {
@@ -3717,7 +3716,7 @@
       },
       "invite": {
         "title": "Bring your circle",
-        "body": "Your invite link is here. You earn when the people who join through it start watching, not just when they sign up."
+        "body": "Your invite link is here. When somebody who joined through it buys a plan, you earn a commission on it."
       },
       "celebrate": {
         "title": "",

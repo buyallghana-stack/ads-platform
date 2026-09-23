@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 
 import { useTranslations } from 'next-intl'
 
+import { useMounted } from '@/components/onboarding/use-mounted'
 import { Button } from '@/components/ui/Button'
 
 /**
@@ -45,8 +46,10 @@ export function TaskBar({
   onSkip: () => void
 }) {
   const t = useTranslations('onboarding')
+  const mounted = useMounted()
 
-  if (typeof document === 'undefined') return null
+  // Portals only after mount; see `useMounted`.
+  if (!mounted) return null
 
   return createPortal(
     <div

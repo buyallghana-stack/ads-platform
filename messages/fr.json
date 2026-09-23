@@ -3680,8 +3680,7 @@
         "ads": "{count, plural, one {# publicité par jour} other {# publicités par jour}}",
         "points": "{from} à {to} points par publicité",
         "games": "{count, plural, =0 {Aucune partie} one {# partie par semaine} other {# parties par semaine}}",
-        "term": "Dure {days} jours",
-        "referral": "+{percent} % de bonus de parrainage"
+        "term": "Dure {days} jours"
       }
     },
     "steps": {
@@ -3717,7 +3716,7 @@
       },
       "invite": {
         "title": "Amenez votre entourage",
-        "body": "Votre lien d'invitation est ici. Vous gagnez quand les personnes qui s'inscrivent par ce lien commencent à regarder, pas seulement à l'inscription."
+        "body": "Votre lien d'invitation est ici. Quand une personne inscrite par ce lien achète un plan, vous touchez une commission dessus."
       },
       "celebrate": {
         "title": "",

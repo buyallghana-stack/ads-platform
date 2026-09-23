@@ -32,8 +32,18 @@ export function OnboardingChecklist({ state }: { state: OnboardingState }) {
      itself is the reward for finishing it. */
   if (!state.enabled || state.completed || state.steps.length === 0) return null
 
-  const percent = Math.round((state.doneCount / Math.max(state.total, 1)) * 100)
-  const next = state.steps.find((s) => !s.done)
+  /*
+    ⚠️ THE CONGRATULATION IS NOT A CHECKLIST ROW. Watching the first ad IS
+    collecting the first points: there is no second thing to do, and listing it
+    meant a member who watched an ad and skipped the tour was told to go and
+    collect points already sitting in their balance. It is a moment the
+    walkthrough shows once, not a task, so the list leaves it out and counts
+    only the rows it actually shows.
+  */
+  const rows = state.steps.filter((s) => s.key !== 'celebrate')
+  const doneCount = rows.filter((s) => s.done).length
+  const percent = Math.round((doneCount / Math.max(rows.length, 1)) * 100)
+  const next = rows.find((s) => !s.done)
 
   return (
     <section
@@ -49,7 +59,7 @@ export function OnboardingChecklist({ state }: { state: OnboardingState }) {
             {t('checklist.title')}
           </h2>
           <p className="mt-0.5 text-[0.75rem] text-ink-500">
-            {t('checklist.progress', { done: state.doneCount, total: state.total })}
+            {t('checklist.progress', { done: doneCount, total: rows.length })}
           </p>
         </div>
 
@@ -76,7 +86,7 @@ export function OnboardingChecklist({ state }: { state: OnboardingState }) {
 
       {open && (
         <ul className="divide-y divide-ink-100">
-          {state.steps.map((s) => {
+          {rows.map((s) => {
             const descriptor = STEPS[s.key]
             const isNext = next?.key === s.key
 

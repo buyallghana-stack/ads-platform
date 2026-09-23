@@ -105,8 +105,22 @@ export function PlanCarousel({
             t('feature.points', { from: plan.pointsFrom, to: plan.pointsTo }),
             t('feature.games', { count: plan.weeklyGamePlays }),
             t('feature.term', { days: plan.termDays }),
-            t('feature.referral', { percent: plan.referralBonusPercent }),
           ]
+
+          /*
+            ⚠️ NO REFERRAL LINE. `tiers.referral_bonus_multiplier` runs 1.10 to
+            1.50 across the ladder, which looks like a per-plan benefit and is
+            not one: it multiplies `referral_signup_bonus_points` and
+            `referral_activation_bonus_points`, and BOTH ARE ZERO in
+            production, at both levels, with no referral entry ever written to
+            the ledger. "+50% referral bonus" was 50% of nothing.
+
+            The referral money that IS real is the purchase commission, and it
+            is a flat 10% on level one and 7% on level two for every plan, so
+            it is not a reason to pick one plan over another either. If the
+            signup and activation bonuses are ever funded, this becomes a true
+            per-plan line and can come back.
+          */
 
           return (
             <article
