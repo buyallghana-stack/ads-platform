@@ -11,18 +11,21 @@
  * puts the operator's name on the audit trail and runs the same "a ladder has
  * to climb" check the screen runs.
  *
- * THE LADDER. Operator, 2026-09-24: keep 5 members = GHS 50 and make the rest
- * rise "relatively". Chosen from three shapes: the reward PER MEMBER rises
- * smoothly from GHS 10 at 5 members to GHS 25 at 1,200 (x1.096 a rung),
- * rounded to tidy totals. It replaces the brief's first ladder, which paid
- * GHS 250 a member at the top: about three times what a Bronze member pays,
- * so the top rungs paid out more than the team brought in.
+ * THE LADDER. Operator, 2026-09-24: keep 5 members = GHS 50, make 1,200
+ * members GHS 360,000, and let the rungs between "meet" both ends. So the
+ * reward PER MEMBER grows by the same factor at every rung (x1.406), from
+ * GHS 10 at 5 members to GHS 300 at 1,200, rounded to tidy totals. Two
+ * earlier ladders (top GHS 300,000 with lurching jumps, then GHS 30,000)
+ * were replaced the same day.
  *
- * ⚠️ BOTTOM UP. `admin_save_task` refuses any save that leaves the ladder not
- * climbing. Every new total sits between the new total below it and the OLD
- * total above it, so saving from the bottom keeps the ladder valid at every
- * intermediate state. The simulation below proves that before anything is
- * written, rather than trusting it.
+ * ⚠️ From about 400 members a rung pays more per member than one Bronze plan
+ * (GHS 85). The operator was told; the top rungs rely on members renewing.
+ *
+ * ⚠️ ORDER. `admin_save_task` refuses any save that leaves the ladder not
+ * climbing. Raising totals is safe TOP DOWN, lowering them BOTTOM UP; a mixed
+ * change may need either. The script tries both orders against the live
+ * figures and uses the first that stays valid at every intermediate state,
+ * so the order is proved before anything is written rather than assumed.
  *
  * Totals only. What each rung PAYS is always total minus what the person has
  * already been paid, worked out at claim time, so this never needs to know
@@ -52,16 +55,16 @@ const apply = process.argv.includes('--apply')
 /* --- the ladder: members -> TOTAL in cedis ------------------------------- */
 const LADDER = [
   [5, 50],
-  [10, 110],
-  [15, 180],
-  [40, 530],
-  [80, 1_150],
-  [150, 2_370],
-  [250, 4_340],
-  [400, 7_600],
-  [600, 12_500],
-  [850, 19_400],
-  [1_200, 30_000],
+  [10, 140],
+  [15, 300],
+  [40, 1_100],
+  [80, 3_100],
+  [150, 8_200],
+  [250, 19_000],
+  [400, 43_000],
+  [600, 92_000],
+  [850, 180_000],
+  [1_200, 360_000],
 ]
 
 const fail = (message) => {
@@ -116,15 +119,20 @@ for (const [members, ghs] of LADDER) {
   previous = ghs
 }
 
-/* --- prove bottom up never breaks the climb ------------------------------ */
-const state = new Map(rungs.map((r) => [Number(r.target), Number(r.reward_points)]))
-for (const [members, ghs] of LADDER) {
-  state.set(members, ghs * peg)
-  const totals = [...state.entries()].sort((a, b) => a[0] - b[0]).map(([, p]) => p)
-  if (totals.some((p, i) => i > 0 && p <= totals[i - 1])) {
-    fail(`Saving rung ${members} bottom up would leave the ladder not climbing.`)
+/* --- pick a save order that never breaks the climb --------------------- */
+function orderIsSafe(order) {
+  const state = new Map(rungs.map((r) => [Number(r.target), Number(r.reward_points)]))
+  for (const [members, ghs] of order) {
+    state.set(members, ghs * peg)
+    const totals = [...state.entries()].sort((a, b) => a[0] - b[0]).map(([, p]) => p)
+    if (totals.some((p, i) => i > 0 && p <= totals[i - 1])) return false
   }
+  return true
 }
+const topDown = [...LADDER].reverse()
+const order = orderIsSafe(topDown) ? topDown : orderIsSafe(LADDER) ? LADDER : null
+if (!order) fail('Neither top down nor bottom up keeps the ladder climbing at every step.')
+const direction = order === topDown ? 'top of the ladder first' : 'bottom of the ladder first'
 
 if (!apply) {
   console.log('\nCheck only. Nothing was written. Re-run with --apply to save.')
@@ -141,8 +149,8 @@ const { data: admins, error: roleError } = await db
 if (roleError || !admins?.length) fail(`No super admin to act as: ${roleError?.message ?? 'none found'}`)
 const adminId = admins[0].user_id
 
-console.log(`\nsaving as super admin ${adminId}, bottom of the ladder first`)
-for (const [members, ghs] of LADDER) {
+console.log(`\nsaving as super admin ${adminId}, ${direction}`)
+for (const [members, ghs] of order) {
   const r = byTarget.get(members)
   const points = ghs * peg
   if (Number(r.reward_points) === points) {
