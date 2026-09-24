@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { TasksView } from '@/components/tasks/TasksView'
 import { getViewerUser } from '@/lib/auth/session'
 import { getTasks } from '@/lib/tasks/data'
+import { getTeamMilestones } from '@/lib/tasks/milestones'
 
 export async function generateMetadata({
   params,
@@ -30,7 +31,9 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   const user = await getViewerUser()
   if (!user) return null
 
-  const tasks = await getTasks()
+  /* The milestone read takes the VIEWED user's id, so the admin's "view as"
+     shows that person's ladder and not the admin's. */
+  const [tasks, milestones] = await Promise.all([getTasks(), getTeamMilestones(user.id)])
 
-  return <TasksView tasks={tasks} />
+  return <TasksView tasks={tasks} milestones={milestones} />
 }

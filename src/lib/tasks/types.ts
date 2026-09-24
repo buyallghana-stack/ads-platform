@@ -10,6 +10,7 @@ export const TASK_METRICS = [
   'surveys_completed',
   'points_earned',
   'referrals_purchased',
+  'team_members',
   'vault_deposits_made',
   'games_played',
   'gift_codes_redeemed',
@@ -52,3 +53,45 @@ export type ClaimResult =
       ok: false
       reason: 'not_found' | 'not_finished' | 'already_claimed' | 'account_disabled' | 'not_signed_in' | 'error'
     }
+
+/**
+ * Team milestones: tasks on the `team_members` metric with `cumulative` set.
+ * Every money figure is in POINTS, with the peg beside it, so the screen does
+ * the one conversion every other screen does.
+ */
+export type MilestoneRung = {
+  id: string
+  name: string
+  target: number
+  /** The TOTAL a person holds at this rung. */
+  totalPoints: number
+  /** What reaching it adds on top of the rung below. */
+  stepPoints: number
+  claimedAt: string | null
+  /** What was actually paid for it, which differs from `stepPoints` only if
+   *  the ladder was re-priced. */
+  paidPoints: number | null
+}
+
+export type MilestonePayout = {
+  target: number
+  name: string
+  membersAtClaim: number
+  previousTotalPoints: number
+  milestoneTotalPoints: number
+  paidPoints: number
+  claimedAt: string
+}
+
+export type TeamMilestones = {
+  teamMembers: number
+  pointsPerUnit: number
+  paidPoints: number
+  current: { target: number; totalPoints: number } | null
+  next: { target: number; totalPoints: number; needed: number; payoutPoints: number } | null
+  /** A reached rung not yet claimed; the id the Claim button sends. */
+  claimableTaskId: string | null
+  claimablePoints: number
+  rungs: MilestoneRung[]
+  history: MilestonePayout[]
+}

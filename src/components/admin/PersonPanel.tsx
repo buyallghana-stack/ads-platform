@@ -7,6 +7,7 @@ import { useFormatter, useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/Button'
 import type { Person } from '@/lib/admin/types'
+import type { TeamMilestones } from '@/lib/tasks/types'
 import { cn } from '@/lib/cn'
 
 import { PersonCell, StatusDot } from './AdminChrome'
@@ -45,6 +46,7 @@ export function PersonPanel({
   now,
   onClose,
   onDecide,
+  milestones = null,
   thread = null,
   threadLoading = false,
   threadBusy = false,
@@ -56,6 +58,9 @@ export function PersonPanel({
   now: number
   onClose: () => void
   onDecide: (id: string, action: PersonAction, reason: string) => void
+  /** The team milestone ladder; null while loading or for staff who may
+   *  not read it, and then the section is simply absent. */
+  milestones?: TeamMilestones | null
   /** Messages only: the open conversation and its handlers. Null everywhere
    *  else, which is what keeps this panel one component across three screens. */
   thread?: AdminSupportThread | null
@@ -80,6 +85,7 @@ export function PersonPanel({
       now={now}
       onClose={onClose}
       onDecide={onDecide}
+      milestones={milestones}
       thread={thread}
       threadLoading={threadLoading}
       threadBusy={threadBusy}
@@ -95,6 +101,7 @@ function Panel({
   now,
   onClose,
   onDecide,
+  milestones,
   thread,
   threadLoading,
   threadBusy,
@@ -106,6 +113,7 @@ function Panel({
   now: number
   onClose: () => void
   onDecide: (id: string, action: PersonAction, reason: string) => void
+  milestones: TeamMilestones | null
   thread: AdminSupportThread | null
   threadLoading: boolean
   threadBusy: boolean
@@ -337,6 +345,10 @@ function Panel({
         </PanelFacts>
       </PanelSection>
 
+      {milestones && milestones.rungs.length > 0 && (
+        <MilestonesSection data={milestones} date={date} />
+      )}
+
       <PanelSection label={t('panel.contact')}>
         <PanelFacts>
           <Fact label={t('panel.email')} value={p.email} />
@@ -419,5 +431,79 @@ function ConfirmStep({
         </Button>
       </div>
     </div>
+  )
+}
+
+/**
+ * Team milestones for one account: where they stand and every payout.
+ *
+ * "Highest reached" comes from the payouts, not the live count, because the
+ * count follows ACTIVE plans and can fall below a rung that was already paid.
+ * A reached rung the member has not claimed yet is shown as waiting: it is
+ * money owed, and support is asked about it.
+ */
+function MilestonesSection({
+  data,
+  date,
+}: {
+  data: TeamMilestones
+  date: (iso: string) => string
+}) {
+  const t = useTranslations('admin.people.panel.milestones')
+  const ghs = (points: number) =>
+    `GHS ${(points / data.pointsPerUnit).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+  const highest = data.history.reduce((top, row) => Math.max(top, row.target), 0)
+
+  return (
+    <PanelSection label={t('title')}>
+      <PanelFacts>
+        <Fact label={t('teamSize')} value={data.teamMembers.toLocaleString()} />
+        <Fact
+          label={t('current')}
+          value={data.current ? t('members', { count: data.current.target }) : t('none')}
+        />
+        <Fact label={t('highest')} value={highest > 0 ? t('members', { count: highest }) : t('none')} />
+        <Fact label={t('total')} value={ghs(data.paidPoints)} />
+        <Fact
+          label={t('next')}
+          value={
+            data.next
+              ? t('nextValue', { count: data.next.target, needed: data.next.needed, payout: ghs(data.next.payoutPoints) })
+              : t('none')
+          }
+        />
+        {data.claimablePoints > 0 && (
+          <Fact label={t('waiting')} value={ghs(data.claimablePoints)} />
+        )}
+      </PanelFacts>
+
+      {data.history.length > 0 && (
+        <ul className="mt-3 divide-y divide-ink-100 rounded-(--radius-input) border border-ink-200">
+          {data.history.map((row) => (
+            <li key={`${row.target}-${row.claimedAt}`} className="flex items-start justify-between gap-3 px-3 py-2">
+              <div className="min-w-0">
+                <p className="text-[0.8125rem] font-medium text-ink-900">
+                  {t('members', { count: row.target })}
+                </p>
+                <p className="text-[0.6875rem] text-ink-500">
+                  {t('historyLine', {
+                    date: date(row.claimedAt),
+                    from: ghs(row.previousTotalPoints),
+                    to: ghs(row.milestoneTotalPoints),
+                    atClaim: row.membersAtClaim,
+                  })}
+                </p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-[0.8125rem] font-semibold tabular-nums text-success-700">
+                  +{ghs(row.paidPoints)}
+                </p>
+                <p className="text-[0.6875rem] text-ink-400">{t('paid')}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </PanelSection>
   )
 }

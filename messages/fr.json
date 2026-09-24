@@ -1697,7 +1697,21 @@
         "phone": "Téléphone",
         "conversation": "Conversation",
         "planPaid": "Forfait {tier} · paie GHS {ghs} · gagne à {rate}×",
-        "viewAs": "Voir comme l'utilisateur"
+        "viewAs": "Voir comme l'utilisateur",
+        "milestones": {
+          "title": "Paliers d'équipe",
+          "teamSize": "Membres d'équipe qualifiés",
+          "current": "Palier actuel",
+          "highest": "Palier le plus élevé payé",
+          "total": "Récompenses de paliers payées",
+          "next": "Prochain palier",
+          "nextValue": "{count} membres : encore {needed}, rapporte {payout}",
+          "waiting": "Atteint, en attente de réclamation",
+          "none": "Aucun",
+          "members": "{count, plural, one {# membre} other {# membres}}",
+          "historyLine": "{date} à {atClaim} membres, total de {from} à {to}",
+          "paid": "Versé au solde"
+        }
       },
       "confirm": {
         "flag": "Signaler {name}. La personne continue de gagner, mais chacun de ses retraits passe d'abord en révision.",
@@ -3080,7 +3094,10 @@
         "reward": "Récompense (points)",
         "icon": "Icône",
         "iconHint": "N importe quel émoji, touchez-en un ci-dessous ou utilisez votre clavier",
-        "useEmoji": "Utiliser {emoji}"
+        "useEmoji": "Utiliser {emoji}",
+        "rewardTotal": "Total à ce palier (points)",
+        "cumulative": "Palier d'équipe",
+        "cumulativeHint": "La récompense devient le TOTAL qu'une personne détient à ce palier. La réclamation ne verse que la différence avec ce qui a déjà été payé sur la même échelle, et chaque palier ne paie qu'une fois."
       },
       "errors": {
         "code": "Le code doit contenir des minuscules, chiffres et tirets bas, au moins 3 caractères.",
@@ -3099,8 +3116,12 @@
         "has_avatar": "Photo de profil définie",
         "has_withdrawal_pin": "Code de retrait défini",
         "referrals_purchased": "Filleuls ayant acheté un forfait",
-        "vault_deposits_made": "Dépôts dans le coffre-fort effectués"
-      }
+        "vault_deposits_made": "Dépôts dans le coffre-fort effectués",
+        "team_members": "Membres d'équipe avec un forfait payant actif (deux niveaux)"
+      },
+      "milestone": "Palier",
+      "totalPoints": "Total {points}",
+      "costMilestone": "{people} personnes ont atteint ce palier sans le réclamer. Chacune reçoit ce total moins ce qu'elle a déjà, donc au plus {points} points."
     },
     "communities": {
       "title": "Communautés",
@@ -3476,6 +3497,25 @@
       "account_disabled": "Votre compte est en cours d'examen et ne peut pas réclamer de récompenses.",
       "not_signed_in": "Veuillez vous connecter et réessayer.",
       "error": "Une erreur s'est produite. Veuillez réessayer."
+    },
+    "milestones": {
+      "title": "Paliers d'équipe",
+      "subtitle": "Agrandissez votre équipe et recevez une récompense en espèces à chaque palier. Un membre compte tant qu'il a un forfait payant actif, et les personnes invitées par vos filleuls comptent aussi.",
+      "members": "Membres de l'équipe",
+      "current": "Palier actuel",
+      "earned": "Récompenses de paliers gagnées",
+      "nextPayout": "Prochain versement",
+      "none": "Aucun pour l'instant",
+      "membersCount": "{count, plural, one {# membre} other {# membres}}",
+      "toNext": "Encore {needed} pour atteindre {target} membres (total à ce palier : {total})",
+      "top": "Vous avez atteint le palier le plus élevé. Bravo.",
+      "ready": "{amount} à réclamer",
+      "claim": "Réclamer",
+      "claimed": "Réclamé ! {amount} ajouté à votre solde.",
+      "ladder": "Tous les paliers",
+      "rungTotal": "Total à ce palier : {total}",
+      "history": "Versements des paliers",
+      "historyLine": "{date} : le total est passé de {from} à {to}"
     }
   },
   "viewAs": {

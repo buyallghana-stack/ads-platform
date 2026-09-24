@@ -24,6 +24,9 @@ export type AdminTask = {
   icon: string
   sortOrder: number
   isActive: boolean
+  /** A team milestone rung: rewardPoints is the TOTAL at this rung and a
+   *  claim pays the difference from what the person already has. */
+  cumulative: boolean
   claimedCount: number
   pointsPaid: number
   eligibleNow: number
@@ -51,6 +54,7 @@ export async function getAdminTasks(): Promise<AdminTask[]> {
     icon: String(r.icon ?? 'Target'),
     sortOrder: Number(r.sort_order ?? 0),
     isActive: Boolean(r.is_active),
+    cumulative: Boolean(r.cumulative),
     claimedCount: Number(r.claimed_count ?? 0),
     pointsPaid: Number(r.points_paid ?? 0),
     eligibleNow: Number(r.eligible_now ?? 0),

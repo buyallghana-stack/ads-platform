@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 
 import { AlertTriangle, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { decidePerson } from '@/app/[locale]/admin/(super)/users/actions'
+import { decidePerson, loadTeamMilestones } from '@/app/[locale]/admin/(super)/users/actions'
 import {
   loadSupportThread,
   replyToSupport,
@@ -13,6 +13,7 @@ import {
 } from '@/app/[locale]/admin/messages/actions'
 import type { AdminSupportThread } from '@/lib/admin/data/support'
 import type { Person } from '@/lib/admin/types'
+import type { TeamMilestones } from '@/lib/tasks/types'
 
 import { PeopleGrid, type PeopleMode } from './PeopleGrid'
 import { PersonPanel } from './PersonPanel'
@@ -71,8 +72,20 @@ export function PeopleBoard({
   const [threadLoading, setThreadLoading] = useState(false)
   const [threadBusy, startThreadWork] = useTransition()
 
+  /* The open person's team milestones. Cleared on every open, and a reply
+     that lands after a different person was opened is dropped, so one
+     account's ladder can never be shown under another's name. */
+  const [milestones, setMilestones] = useState<TeamMilestones | null>(null)
+  const openRef = useRef<string | null>(null)
+
   const openPerson = (person: Person) => {
     setOpenId(person.id)
+    openRef.current = person.id
+    setMilestones(null)
+    startTransition(async () => {
+      const ladder = await loadTeamMilestones(person.id)
+      if (openRef.current === person.id) setMilestones(ladder)
+    })
     if (mode !== 'messages') return
 
     setThread(null)
@@ -171,9 +184,12 @@ export function PeopleBoard({
         now={serverNow}
         onClose={() => {
           setOpenId(null)
+          openRef.current = null
           setThread(null)
+          setMilestones(null)
         }}
         onDecide={decide}
+        milestones={milestones}
         thread={thread}
         threadLoading={threadLoading}
         threadBusy={threadBusy}

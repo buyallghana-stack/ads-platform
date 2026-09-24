@@ -10,6 +10,9 @@ import { getPeople, type PeopleScope } from '@/lib/admin/data/people'
 import type { Person } from '@/lib/admin/types'
 import { getSessionUser } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { actingSuperAdminId } from '@/lib/admin/roles'
+import { parseTeamMilestones } from '@/lib/tasks/milestones'
+import type { TeamMilestones } from '@/lib/tasks/types'
 
 /**
  * What an operator does TO an account: flag it, clear it, disable it, let it
@@ -180,4 +183,31 @@ export async function viewAsUser(userId: string): Promise<{ ok: boolean; message
   })
 
   return { ok: true }
+}
+
+/**
+ * One person's team milestone ladder, for the person panel.
+ *
+ * Read-only, and null rather than an error when it cannot be read: the panel
+ * is also opened from Messages by support staff, who are not super admins,
+ * and `admin_team_milestones` asserts a super admin. A missing section is the
+ * right outcome for them, not a red banner over the conversation they came
+ * to answer.
+ */
+export async function loadTeamMilestones(userId: string): Promise<TeamMilestones | null> {
+  const adminId = await actingSuperAdminId()
+  if (!adminId) return null
+
+  const parsed = z.uuid().safeParse(userId)
+  if (!parsed.success) return null
+
+  const { data, error } = await createAdminClient().rpc('admin_team_milestones', {
+    p_admin_id: adminId,
+    p_user_id: parsed.data,
+  })
+  if (error) {
+    reportUnexpected(error, 'admin.people.milestones')
+    return null
+  }
+  return parseTeamMilestones(data)
 }

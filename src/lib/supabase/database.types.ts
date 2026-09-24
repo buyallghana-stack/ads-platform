@@ -2180,6 +2180,8 @@ export type Database = {
         Row: {
           claimed_at: string
           id: string
+          milestone_total_points: number | null
+          previous_total_points: number | null
           progress_at_claim: number
           reward_points: number
           task_id: string
@@ -2188,6 +2190,8 @@ export type Database = {
         Insert: {
           claimed_at?: string
           id?: string
+          milestone_total_points?: number | null
+          previous_total_points?: number | null
           progress_at_claim: number
           reward_points: number
           task_id: string
@@ -2196,6 +2200,8 @@ export type Database = {
         Update: {
           claimed_at?: string
           id?: string
+          milestone_total_points?: number | null
+          previous_total_points?: number | null
           progress_at_claim?: number
           reward_points?: number
           task_id?: string
@@ -2215,6 +2221,7 @@ export type Database = {
         Row: {
           code: string
           created_at: string
+          cumulative: boolean
           description: string
           icon: string
           id: string
@@ -2229,6 +2236,7 @@ export type Database = {
         Insert: {
           code: string
           created_at?: string
+          cumulative?: boolean
           description: string
           icon?: string
           id?: string
@@ -2243,6 +2251,7 @@ export type Database = {
         Update: {
           code?: string
           created_at?: string
+          cumulative?: boolean
           description?: string
           icon?: string
           id?: string
@@ -3467,11 +3476,16 @@ export type Database = {
           user_name: string
         }[]
       }
+      admin_team_milestones: {
+        Args: { p_admin_id: string; p_user_id: string }
+        Returns: Json
+      }
       admin_list_tasks: {
         Args: { p_admin_id: string }
         Returns: {
           claimed_count: number
           code: string
+          cumulative: boolean
           description: string
           eligible_now: number
           icon: string
@@ -5603,6 +5617,7 @@ export type Database = {
           discount_minor: number
         }[]
       }
+      team_milestones: { Args: { p_user_id: string }; Returns: Json }
       team_member_ids: {
         Args: { p_user_id: string }
         Returns: {
@@ -5775,6 +5790,7 @@ export type Database = {
         | "has_withdrawal_pin"
         | "referrals_purchased"
         | "vault_deposits_made"
+        | "team_members"
       user_ad_status: "in_progress" | "completed" | "failed_locked"
       vendor_status: "active" | "archived"
       video_source: "upload" | "youtube"
@@ -6049,6 +6065,7 @@ export const Constants = {
         "has_withdrawal_pin",
         "referrals_purchased",
         "vault_deposits_made",
+        "team_members",
       ],
       user_ad_status: ["in_progress", "completed", "failed_locked"],
       vendor_status: ["active", "archived"],

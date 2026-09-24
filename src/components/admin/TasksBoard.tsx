@@ -52,6 +52,7 @@ const blank = (): TaskInput => ({
   icon: '🎯',
   sort_order: 0,
   is_active: true,
+  cumulative: false,
 })
 
 const toInput = (task: AdminTask): TaskInput => ({
@@ -65,6 +66,7 @@ const toInput = (task: AdminTask): TaskInput => ({
   icon: task.icon,
   sort_order: task.sortOrder,
   is_active: task.isActive,
+  cumulative: task.cumulative,
 })
 
 export function TasksBoard({ tasks }: { tasks: AdminTask[] }) {
@@ -200,7 +202,7 @@ export function TasksBoard({ tasks }: { tasks: AdminTask[] }) {
               <Num label={t('field.target')} value={draft.target} onChange={(v) => patch({ target: v })} />
             )}
             <Num
-              label={t('field.reward')}
+              label={draft.cumulative ? t('field.rewardTotal') : t('field.reward')}
               value={draft.reward_points}
               onChange={(v) => patch({ reward_points: v })}
             />
@@ -216,6 +218,21 @@ export function TasksBoard({ tasks }: { tasks: AdminTask[] }) {
               <span className="text-[0.75rem] text-ink-400">{t('field.iconHint')}</span>
             </label>
           </div>
+
+          {/* A milestone rung changes what the reward MEANS, so it is spelled
+              out beside the switch rather than left to the label. */}
+          <label className="mt-3 flex items-start gap-2.5">
+            <input
+              type="checkbox"
+              checked={draft.cumulative}
+              onChange={(e) => patch({ cumulative: e.target.checked })}
+              className="mt-0.5 size-4 accent-brand-600"
+            />
+            <span>
+              <span className="block text-[0.8125rem] font-medium text-ink-700">{t('field.cumulative')}</span>
+              <span className="block text-[0.75rem] text-ink-400">{t('field.cumulativeHint')}</span>
+            </span>
+          </label>
 
           {/* One tap for the common ones; the field above takes anything. */}
           <div className="mt-2 flex flex-wrap gap-1.5">
@@ -247,7 +264,7 @@ export function TasksBoard({ tasks }: { tasks: AdminTask[] }) {
                   : 'border-ink-200 bg-ink-50 text-ink-600',
               )}
             >
-              {t('cost', {
+              {t(draft.cumulative ? 'costMilestone' : 'cost', {
                 people: format.number(editing.eligibleNow),
                 points: format.number(editing.eligibleNow * draft.reward_points),
               })}
@@ -284,6 +301,11 @@ export function TasksBoard({ tasks }: { tasks: AdminTask[] }) {
                     {task.icon?.trim() || '🎯'}
                   </span>
                   {task.name}
+                  {task.cumulative && (
+                    <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[0.6875rem] font-semibold text-brand-700">
+                      {t('milestone')}
+                    </span>
+                  )}
                   {!task.isActive && (
                     <span className="rounded-full bg-ink-100 px-2 py-0.5 text-[0.6875rem] font-semibold text-ink-500">
                       {t('archived')}
@@ -300,7 +322,9 @@ export function TasksBoard({ tasks }: { tasks: AdminTask[] }) {
               <div className="flex shrink-0 items-center gap-4 text-right">
                 <div>
                   <p className="text-[0.875rem] font-bold tabular-nums text-success-700">
-                    +{format.number(task.rewardPoints)}
+                    {task.cumulative
+                      ? t('totalPoints', { points: format.number(task.rewardPoints) })
+                      : `+${format.number(task.rewardPoints)}`}
                   </p>
                   <p className="text-[0.6875rem] tabular-nums text-ink-400">
                     {t('claimedBy', { count: task.claimedCount })}

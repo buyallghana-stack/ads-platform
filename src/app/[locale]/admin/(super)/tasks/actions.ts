@@ -23,6 +23,8 @@ export type TaskInput = {
   icon: string
   sort_order: number
   is_active: boolean
+  /** Milestone rung: reward_points is the rung's TOTAL, not what it pays. */
+  cumulative: boolean
 }
 
 export async function saveTask(task: TaskInput): Promise<TaskResult> {

@@ -8,7 +8,9 @@ import { useFormatter, useTranslations } from 'next-intl'
 import { claimTask } from '@/app/[locale]/(app)/tasks/actions'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/cn'
-import { isOneShot, type UserTask } from '@/lib/tasks/types'
+import { isOneShot, type TeamMilestones as Milestones, type UserTask } from '@/lib/tasks/types'
+
+import { TeamMilestones } from './TeamMilestones'
 
 /**
  * Tasks.
@@ -36,7 +38,14 @@ import { isOneShot, type UserTask } from '@/lib/tasks/types'
    Anything empty falls back rather than rendering a gap. */
 const FALLBACK_EMOJI = '🎯'
 
-export function TasksView({ tasks }: { tasks: UserTask[] }) {
+export function TasksView({
+  tasks,
+  milestones = null,
+}: {
+  tasks: UserTask[]
+  /** The team milestone ladder, drawn above the ordinary tasks. */
+  milestones?: Milestones | null
+}) {
   const t = useTranslations('tasks')
   const format = useFormatter()
 
@@ -85,6 +94,8 @@ export function TasksView({ tasks }: { tasks: UserTask[] }) {
         <p className="mt-1 text-[0.875rem] text-ink-500">{t('subtitle')}</p>
       </header>
 
+      {milestones && <TeamMilestones data={milestones} />}
+
       {/* The summary earns its place only when there is something to collect. */}
       {claimable > 0 && (
         <div
@@ -119,7 +130,7 @@ export function TasksView({ tasks }: { tasks: UserTask[] }) {
         </p>
       )}
 
-      {rows.length === 0 ? (
+      {rows.length === 0 && milestones?.rungs.length ? null : rows.length === 0 ? (
         <p className="mt-10 rounded-(--radius-panel) border border-dashed border-ink-200 px-6 py-12 text-center text-[0.875rem] text-ink-500">
           {t('empty')}
         </p>

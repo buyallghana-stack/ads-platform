@@ -1697,7 +1697,21 @@
         "phone": "Phone",
         "conversation": "Conversation",
         "planPaid": "On the {tier} plan · paying GHS {ghs} · earning at {rate}×",
-        "viewAs": "View as user"
+        "viewAs": "View as user",
+        "milestones": {
+          "title": "Team milestones",
+          "teamSize": "Qualifying team members",
+          "current": "Current milestone",
+          "highest": "Highest milestone paid",
+          "total": "Milestone rewards paid",
+          "next": "Next milestone",
+          "nextValue": "{count} members: {needed} to go, pays {payout}",
+          "waiting": "Reached, waiting to be claimed",
+          "none": "None",
+          "members": "{count, plural, one {# member} other {# members}}",
+          "historyLine": "{date} at {atClaim} members, total {from} to {to}",
+          "paid": "Paid to balance"
+        }
       },
       "confirm": {
         "flag": "Flag {name}. They keep earning, but every payout of theirs stops for review first.",
@@ -3080,7 +3094,10 @@
         "reward": "Reward (points)",
         "icon": "Icon",
         "iconHint": "Any emoji: tap one below or use your keyboard",
-        "useEmoji": "Use {emoji}"
+        "useEmoji": "Use {emoji}",
+        "rewardTotal": "Total at this milestone (points)",
+        "cumulative": "Team milestone rung",
+        "cumulativeHint": "The reward becomes the TOTAL a person holds at this rung. Claiming pays only the difference from what they have already been paid on the same ladder, and each rung pays once."
       },
       "errors": {
         "code": "The code must be lowercase letters, numbers and underscores, at least 3 characters.",
@@ -3099,8 +3116,12 @@
         "has_avatar": "Profile picture set",
         "has_withdrawal_pin": "Withdrawal PIN set",
         "referrals_purchased": "Referrals who bought a plan",
-        "vault_deposits_made": "Vault deposits made"
-      }
+        "vault_deposits_made": "Vault deposits made",
+        "team_members": "Team members on an active paid plan (both levels)"
+      },
+      "milestone": "Milestone",
+      "totalPoints": "Total {points}",
+      "costMilestone": "{people} people have reached this milestone and not claimed it. Each is paid this total minus what they already hold, so at most {points} points."
     },
     "communities": {
       "title": "Communities",
@@ -3476,6 +3497,25 @@
       "account_disabled": "Your account is under review and cannot claim rewards right now.",
       "not_signed_in": "Please log in and try again.",
       "error": "Something went wrong. Please try again."
+    },
+    "milestones": {
+      "title": "Team milestones",
+      "subtitle": "Grow your team and collect a cash reward at every milestone. Members count while they hold an active paid plan, and people your invites bring in count too.",
+      "members": "Team members",
+      "current": "Current milestone",
+      "earned": "Milestone rewards earned",
+      "nextPayout": "Next payout",
+      "none": "None yet",
+      "membersCount": "{count, plural, one {# member} other {# members}}",
+      "toNext": "{needed} more to reach {target} members (total at that milestone: {total})",
+      "top": "You have reached the top milestone. Well done.",
+      "ready": "{amount} is ready to claim",
+      "claim": "Claim",
+      "claimed": "Claimed! {amount} added to your balance.",
+      "ladder": "All milestones",
+      "rungTotal": "Total at this milestone: {total}",
+      "history": "Milestone payouts",
+      "historyLine": "{date}: total went from {from} to {to}"
     }
   },
   "viewAs": {
