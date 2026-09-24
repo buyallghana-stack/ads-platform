@@ -9,14 +9,15 @@ import { STEPS } from '@/components/onboarding/steps'
 import { Button } from '@/components/ui/Button'
 import { Link } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
-import type { OnboardingState } from '@/lib/onboarding/types'
+import { showsChecklist, type OnboardingState } from '@/lib/onboarding/types'
 
 /**
  * The checklist on Home.
  *
- * The spotlight runs once; this is what brings somebody back. It survives a
- * skip on purpose: a member who closed the walkthrough still has no payout
- * account, and this is the only thing left that says so.
+ * It lives only as long as a walkthrough is running. A skip hides it until
+ * the member replays the walkthrough from Profile, and the end of any run,
+ * finished or skipped, hides it again. See `showsChecklist` for why that
+ * reversed the first build.
  *
  * ⚠️ IT READS THE SAME DERIVED STATE AS THE WALKTHROUGH, so a row is ticked
  * because the thing is true rather than because a bubble was dismissed. That
@@ -28,9 +29,9 @@ export function OnboardingChecklist({ state }: { state: OnboardingState }) {
   const t = useTranslations('onboarding')
   const [open, setOpen] = useState(true)
 
-  /* Finished, off, or never started: nothing to nag about. The card removing
+  /* Off, not started, skipped, or over: nothing to show. The card removing
      itself is the reward for finishing it. */
-  if (!state.enabled || state.completed || state.steps.length === 0) return null
+  if (!showsChecklist(state)) return null
 
   /*
     ⚠️ THE CONGRATULATION IS NOT A CHECKLIST ROW. Watching the first ad IS

@@ -71,3 +71,20 @@ export const ONBOARDING_OFF: OnboardingState = {
   adPoints: 0,
   pointsPerCedi: 100,
 }
+
+/**
+ * Whether Home shows the "Set up your earning" checklist.
+ *
+ * ONLY WHILE A WALKTHROUGH IS RUNNING (operator, 2026-09-24). Skipping hides
+ * it until the member chooses "Show me around again" in Profile, and the end
+ * of any run, finished or skipped, the first or a replay, hides it again.
+ *
+ * This reverses the first build, where the checklist deliberately outlived a
+ * skip as the one thing left saying "you have no payout account". The
+ * operator's call: somebody who said "I will find my own way" should not be
+ * followed around by a list of what they have not done. The replay button is
+ * the way back, and `replay_onboarding` clears the skip, which is what lets
+ * the list return for that run.
+ */
+export const showsChecklist = (state: OnboardingState): boolean =>
+  state.enabled && state.started && !state.skipped && !state.completed && state.steps.length > 0

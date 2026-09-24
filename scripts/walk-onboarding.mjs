@@ -495,27 +495,27 @@ try {
   const referral = await page.getByText(/referral bonus/i).first().isVisible().catch(() => false)
   check('no referral bonus is claimed', !referral)
 
-  /* ---- what a member who skipped is left with ------------------------------ */
+  /* ---- what a member who skipped is left with ------------------------------
+     Operator, 2026-09-24: NOTHING. The checklist lives only while a walkthrough
+     is running, and comes back only when they replay it from Profile. It used
+     to outlive a skip on purpose; see `showsChecklist`. */
   await db.query(`update public.user_onboarding set skipped_at = now() where user_id = $1`, [userId])
   await page.goto(`${BASE}/en/dashboard`, { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(3000)
-  await shoot(page, 'checklist-after-skip', { expectAction: false })
+  await shoot(page, 'no-checklist-after-skip', { expectAction: false })
 
-  const rows = await page.evaluate(() =>
-    [...document.querySelectorAll('li')]
-      .map((li) => li.textContent?.replace(/\s+/g, ' ').trim() ?? '')
-      .filter((t) => /your balance|statement|first ad|first points|payout|withdrawal PIN|other ways|community|invite|plans/i.test(t))
-      .slice(0, 12),
+  const checklistAfterSkip = await page.getByText('Set up your earning').first().isVisible().catch(() => false)
+  check('a skip leaves no checklist on Home', !checklistAfterSkip)
+
+  /* Replaying brings it back for that run, because replay clears the skip. */
+  await db.query(
+    `update public.user_onboarding set skipped_at = null, seen_steps = '{}' where user_id = $1`,
+    [userId],
   )
-  console.log('\nchecklist after skipping, with an ad watched:')
-  rows.forEach((r) => console.log('  ' + r))
-  /* The congratulation is a MOMENT, so it is deliberately not a row: watching
-     the first ad is collecting the first points. Its presence was the reported
-     lie; its absence is the fix. */
-  const pointsRow = rows.find((r) => /first points/i.test(r))
-  check('the checklist does not ask for points already earned', !pointsRow, pointsRow ?? 'absent, as intended')
-  const adRow = rows.find((r) => /first ad/i.test(r))
-  check('the watched ad is listed and ticked', Boolean(adRow), adRow ?? 'row missing')
+  await page.goto(`${BASE}/en/dashboard`, { waitUntil: 'domcontentloaded' })
+  await page.waitForTimeout(3000)
+  const checklistOnReplay = await page.getByText('Set up your earning').first().isVisible().catch(() => false)
+  check('a replay brings the checklist back while it runs', checklistOnReplay)
 
   const passed = results.filter((r) => r.pass).length
   console.log(`\n${passed}/${results.length} checks passed`)
