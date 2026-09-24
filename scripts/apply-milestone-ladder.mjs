@@ -12,11 +12,11 @@
  * to climb" check the screen runs.
  *
  * THE LADDER. Operator, 2026-09-24: keep 5 members = GHS 50, make 1,200
- * members GHS 360,000, and let the rungs between "meet" both ends. So the
- * reward PER MEMBER grows by the same factor at every rung (x1.406), from
- * GHS 10 at 5 members to GHS 300 at 1,200, rounded to tidy totals. Two
- * earlier ladders (top GHS 300,000 with lurching jumps, then GHS 30,000)
- * were replaced the same day.
+ * members GHS 330,000, and let the rungs between "meet" both ends. So the
+ * reward PER MEMBER grows by the same factor at every rung (x1.393), from
+ * GHS 10 at 5 members to GHS 275 at 1,200, rounded to tidy totals. Three
+ * earlier ladders (top GHS 300,000 with lurching jumps, then GHS 30,000,
+ * then GHS 360,000) were replaced the same day.
  *
  * ⚠️ From about 400 members a rung pays more per member than one Bronze plan
  * (GHS 85). The operator was told; the top rungs rely on members renewing.
@@ -56,15 +56,15 @@ const apply = process.argv.includes('--apply')
 const LADDER = [
   [5, 50],
   [10, 140],
-  [15, 300],
+  [15, 290],
   [40, 1_100],
-  [80, 3_100],
-  [150, 8_200],
-  [250, 19_000],
-  [400, 43_000],
-  [600, 92_000],
-  [850, 180_000],
-  [1_200, 360_000],
+  [80, 3_000],
+  [150, 7_900],
+  [250, 18_000],
+  [400, 41_000],
+  [600, 85_000],
+  [850, 170_000],
+  [1_200, 330_000],
 ]
 
 const fail = (message) => {
