@@ -882,7 +882,7 @@
       "value": "Value",
       "fee": "Fee",
       "feeFree": "Free",
-      "holdNote": "Withdrawals are reviewed for security and typically complete within 72 hours.",
+      "holdNote": "Withdrawals are reviewed for security and typically complete within 24 hours.",
       "edit": "Edit",
       "confirm": "Confirm",
       "youReceive": "You receive",

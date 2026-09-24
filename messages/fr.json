@@ -882,7 +882,7 @@
       "value": "Valeur",
       "fee": "Frais",
       "feeFree": "Gratuit",
-      "holdNote": "Les retraits sont vérifiés par sécurité et aboutissent généralement sous 72 heures.",
+      "holdNote": "Les retraits sont vérifiés par sécurité et aboutissent généralement sous 24 heures.",
       "edit": "Modifier",
       "confirm": "Confirmer",
       "youReceive": "Vous recevez",
