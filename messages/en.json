@@ -3376,6 +3376,7 @@
     "label": "Gift code",
     "placeholder": "ABCD EFGH JKMN",
     "hint": "{entered} of {total} characters",
+    "noPaste": "Pasting is turned off. Type the code one character at a time.",
     "submit": "Redeem code",
     "success": {
       "title": "Code redeemed",
