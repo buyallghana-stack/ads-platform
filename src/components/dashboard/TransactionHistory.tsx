@@ -257,8 +257,8 @@ export function TransactionHistory({ rows }: { rows: TxRow[] }) {
                 ? t('kindHint.vault_purchase')
                 : t('kindHint.vault_claim')
               : r.method
-                ? r.method in METHOD_ICON
-                  ? t(`method.${r.method as 'mobile_money' | 'crypto' | 'korapay'}`)
+                ? r.method in METHOD_ICON || r.method === 'balance'
+                  ? t(`method.${r.method as 'mobile_money' | 'crypto' | 'korapay' | 'balance'}`)
                   : r.method
                 : t(`kindHint.${r.kind}`)}
           </p>

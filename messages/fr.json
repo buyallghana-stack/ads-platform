@@ -527,7 +527,8 @@
       "method": {
         "mobile_money": "Mobile Money",
         "crypto": "Crypto",
-        "korapay": "Korapay"
+        "korapay": "Korapay",
+        "balance": "Solde du compte"
       },
       "runCount": "{n} aujourd’hui",
       "collapse": "Réduire",
@@ -1412,7 +1413,20 @@
       "pay": "Payer {amount}",
       "failed": "Impossible de démarrer ce paiement. Veuillez réessayer.",
       "refused": "Nous n'avons pas pu démarrer ce paiement. Vérifiez que l'adresse e-mail de votre profil est correcte, puis réessayez.",
-      "stillFullPlan": "Votre formule reste {plan} en entier. Le code réduit le prix, pas ce que vous obtenez."
+      "stillFullPlan": "Votre formule reste {plan} en entier. Le code réduit le prix, pas ce que vous obtenez.",
+      "yourBalance": "Votre solde",
+      "points": "{points} pts",
+      "deductionNote": "Payer avec votre solde déduit {points} pts et démarre le forfait immédiatement.",
+      "insufficientNote": "Il vous manque {needed} pts ({amount}) pour payer avec votre solde.",
+      "payWithBalance": "Payer {amount} avec le solde",
+      "balanceSuccess": "Votre forfait {plan} est actif. Il a été payé avec votre solde.",
+      "topupHint": "Votre solde ne suffit pas à lui seul. Touchez ci-dessous pour voir ce qu’il reste à payer ({amount}).",
+      "topupTitle": "Votre solde ne suffit pas",
+      "topupFromBalance": "Payé avec votre solde",
+      "topupRemaining": "Reste à payer avec Paystack",
+      "topupExplain": "Votre solde est mis de côté maintenant. Payez le reste avec Paystack et le forfait démarre dès que le paiement est fait. Si vous ne terminez pas le paiement, votre solde vous est rendu automatiquement à la clôture du paiement, ce qui peut prendre jusqu’à deux jours.",
+      "topupPay": "Payer {amount} avec Paystack",
+      "topupCancel": "Retour"
     },
     "result": {
       "help": "Un problème ? Obtenir de l'aide",

@@ -527,7 +527,8 @@
       "method": {
         "mobile_money": "Mobile Money",
         "crypto": "Crypto",
-        "korapay": "Korapay"
+        "korapay": "Korapay",
+        "balance": "Account balance"
       },
       "runCount": "{n} today",
       "collapse": "Show less",
@@ -1412,7 +1413,20 @@
       "pay": "Pay {amount}",
       "failed": "Could not start this payment. Please try again.",
       "refused": "We could not start this payment. Check that the email address on your profile looks right, then try again.",
-      "stillFullPlan": "Your plan is still {plan} in full. The code takes money off the price, not off what you get."
+      "stillFullPlan": "Your plan is still {plan} in full. The code takes money off the price, not off what you get.",
+      "yourBalance": "Your balance",
+      "points": "{points} pts",
+      "deductionNote": "Paying from your balance deducts {points} pts and starts the plan straight away.",
+      "insufficientNote": "You need {needed} more pts ({amount}) to pay from your balance.",
+      "payWithBalance": "Pay {amount} from balance",
+      "balanceSuccess": "Your {plan} plan is active. It was paid from your balance.",
+      "topupHint": "Your balance is not enough on its own. Tap below to see what is left to pay ({amount}).",
+      "topupTitle": "Your balance is not enough",
+      "topupFromBalance": "Paid from your balance",
+      "topupRemaining": "Left to pay with Paystack",
+      "topupExplain": "Your balance is set aside now. Pay the rest with Paystack and the plan starts as soon as the payment is done. If you do not finish paying, your balance comes back automatically once the payment is closed, which can take up to two days.",
+      "topupPay": "Pay {amount} with Paystack",
+      "topupCancel": "Go back"
     },
     "result": {
       "help": "Something wrong? Get help",

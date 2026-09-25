@@ -2,13 +2,19 @@
 
 import { useEffect, useState, useTransition } from 'react'
 
-import { AlertCircle, Gem, Layers, Smartphone, Wallet, X } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Gem, Layers, Smartphone, Wallet, X } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
-import { previewPlanCoupon, startPaystackCheckout } from '@/app/[locale]/(app)/upgrade/actions'
+import {
+  previewPlanCoupon,
+  purchasePlanWithBalance,
+  startPaystackCheckout,
+  startPlanTopupCheckout,
+} from '@/app/[locale]/(app)/upgrade/actions'
 import { CouponField, type AppliedCoupon } from '@/components/checkout/CouponField'
 import { PlanCard } from '@/components/upgrade/PlanCard'
 import { Button } from '@/components/ui/Button'
+import { useRouter } from '@/i18n/navigation'
 import type { HeldPlan, Plan, ResolvedBenefits } from '@/lib/subscriptions/data'
 import { cn } from '@/lib/cn'
 
@@ -37,6 +43,8 @@ export function UpgradeView({
   pointsPerCurrencyUnit,
   checkoutEnabled,
   checkoutMethods,
+  balancePurchaseEnabled,
+  balancePoints,
   initialCoupon,
 }: {
   plans: Plan[]
@@ -67,6 +75,11 @@ export function UpgradeView({
    * believes stops card payments and does not is worse than no switch.
    */
   checkoutMethods: { mobileMoney: boolean; card: boolean }
+  /** Whether a plan may be bought from the account balance
+   *  (`plan_balance_purchase_enabled`). The SQL refuses it when off as well. */
+  balancePurchaseEnabled: boolean
+  /** The buyer's points balance, for the "pay from balance" card. */
+  balancePoints: number
   /** From a shared link, `/upgrade?coupon=CODE`. */
   initialCoupon?: string | null
 }) {
@@ -77,6 +90,13 @@ export function UpgradeView({
   const [selected, setSelected] = useState<{ plan: Plan; amountMinor: number } | null>(null)
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  /* Which button started the transition, so only that one says it is busy. */
+  const [paying, setPaying] = useState<'paystack' | 'balance' | 'topup' | null>(null)
+  /* Open when "pay from balance" was pressed with too little balance: the
+     sheet then says what is left and offers Paystack for it. */
+  const [topupPrompt, setTopupPrompt] = useState(false)
+  const [bought, setBought] = useState<string | null>(null)
+  const router = useRouter()
   /* The applied coupon, if any. Cleared whenever the sheet opens on a
      different plan or a different amount: a code names ONE plan, and a
      discount left over from the last sheet would be a price the database
@@ -97,6 +117,7 @@ export function UpgradeView({
   */
   const pay = (plan: Plan, amountMinor: number) => {
     setError(null)
+    setPaying('paystack')
     startTransition(async () => {
       /* The AMOUNT sent is the one they chose inside the band, never the
          discounted figure: the coupon comes off in SQL, so a tampered request
@@ -107,6 +128,53 @@ export function UpgradeView({
            way. Anything else falls back to the generic line rather than
            surfacing a message written for a log. */
         setError(res.errorKey === 'refused' ? t('checkout.refused') : t('checkout.failed'))
+        setPaying(null)
+        return
+      }
+      window.location.assign(res.authorizationUrl)
+    })
+  }
+
+  /*
+    Paying from the balance never leaves the app: the points are debited and
+    the plan granted in one database transaction, then the page refreshes so
+    the held plans and the balance both show the result.
+  */
+  const payFromBalance = (plan: Plan, amountMinor: number) => {
+    setError(null)
+    setPaying('balance')
+    startTransition(async () => {
+      const res = await purchasePlanWithBalance(plan.id, amountMinor, coupon?.code)
+      setPaying(null)
+      if (!res.ok) {
+        setError(res.message || t('checkout.failed'))
+        return
+      }
+      setSelected(null)
+      setBought(t('checkout.balanceSuccess', { plan: plan.name }))
+      router.refresh()
+    })
+  }
+
+  /*
+    Part from the balance, the rest through Paystack. The split shown in the
+    prompt is an estimate of the one `start_plan_topup_payment` computes; the
+    database decides, and sets the balance part aside before the buyer leaves.
+  */
+  const payTopup = (plan: Plan, amountMinor: number) => {
+    setError(null)
+    setPaying('topup')
+    startTransition(async () => {
+      const res = await startPlanTopupCheckout(plan.id, amountMinor, coupon?.code)
+      if (!res.ok) {
+        setError(
+          res.errorKey === 'refused'
+            ? t('checkout.refused')
+            : res.errorKey
+              ? t('checkout.failed')
+              : res.message || t('checkout.failed'),
+        )
+        setPaying(null)
         return
       }
       window.location.assign(res.authorizationUrl)
@@ -130,6 +198,16 @@ export function UpgradeView({
         <h1 className="text-lg font-semibold tracking-[-0.02em] text-ink-900">{t('title')}</h1>
         <p className="mt-0.5 text-[0.8125rem] text-ink-500">{t('subtitle')}</p>
       </header>
+
+      {bought && (
+        <p
+          role="status"
+          className="mt-4 flex items-center gap-2 rounded-(--radius-card) border border-success-500/30 bg-success-50 px-4 py-3 text-[0.8125rem] font-medium text-success-700"
+        >
+          <CheckCircle2 aria-hidden className="size-4 shrink-0" />
+          {bought}
+        </p>
+      )}
 
       {/* What the user has right now ------------------------------------- */}
       <div
@@ -245,6 +323,8 @@ export function UpgradeView({
                 /* A code belongs to one plan and one amount. Carrying one over
                    into the next sheet would show a price the till refuses. */
                 setCoupon(null)
+                setTopupPrompt(false)
+                setError(null)
                 setSelected({ plan, amountMinor })
               }}
             />
@@ -331,7 +411,7 @@ export function UpgradeView({
               </p>
             )}
 
-            {checkoutEnabled && (
+            {(checkoutEnabled || balancePurchaseEnabled) && (
               <CouponField
                 currency={selected.plan.currencyCode}
                 initialCode={initialCoupon}
@@ -341,6 +421,142 @@ export function UpgradeView({
                 preview={(value) => previewPlanCoupon(selected.plan.id, selected.amountMinor, value)}
               />
             )}
+
+            {/* Paying from the balance. The points figure mirrors the SQL in
+                `purchase_plan_with_balance` (charged amount x points per cedi,
+                rounded), so what this card promises is what gets debited; the
+                database still checks the balance itself. */}
+            {balancePurchaseEnabled &&
+              (() => {
+                const chargedMinor = coupon?.chargedMinor ?? selected.amountMinor
+                const costPoints = Math.round((chargedMinor * pointsPerCurrencyUnit) / 100)
+                const enough = balancePoints >= costPoints
+                /* Mirrors the SQL: whole pesewas the balance covers, the rest
+                   is what Paystack is asked for. */
+                const coveredMinor = Math.min(
+                  chargedMinor,
+                  Math.floor((balancePoints * 100) / pointsPerCurrencyUnit),
+                )
+                const remainingMinor = chargedMinor - coveredMinor
+                const canTopUp = !enough && coveredMinor > 0 && checkoutEnabled
+                const money = (minor: number) =>
+                  format.number(minor / 100, {
+                    style: 'currency',
+                    currency: selected.plan.currencyCode,
+                    minimumFractionDigits: 2,
+                  })
+                return (
+                  <div
+                    className={cn(
+                      'mt-4 rounded-(--radius-card) border p-3.5 text-xs',
+                      enough
+                        ? 'border-success-500/30 bg-success-50'
+                        : 'border-warning-500/25 bg-warning-50',
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-1.5 font-medium text-ink-700">
+                        <Wallet
+                          aria-hidden
+                          className={cn('size-4 shrink-0', enough ? 'text-success-600' : 'text-warning-600')}
+                        />
+                        {t('checkout.yourBalance')}
+                      </span>
+                      <span className="font-semibold text-ink-900 tabular-nums">
+                        {money(Math.floor((balancePoints * 100) / pointsPerCurrencyUnit))}
+                        <span className="ml-1 text-[0.6875rem] font-normal text-ink-500">
+                          ({t('checkout.points', { points: format.number(balancePoints) })})
+                        </span>
+                      </span>
+                    </div>
+
+                    {topupPrompt && canTopUp ? (
+                      /* The prompt: what the balance covers, what is left, and
+                         where the rest will be paid. */
+                      <div role="alertdialog" aria-live="polite" className="mt-2.5">
+                        <p className="text-[0.8125rem] font-semibold text-warning-700">
+                          {t('checkout.topupTitle')}
+                        </p>
+                        <dl className="mt-2 flex flex-col gap-1 text-[0.75rem] text-ink-700">
+                          <div className="flex justify-between gap-2">
+                            <dt>{t('checkout.topupFromBalance')}</dt>
+                            <dd className="font-medium tabular-nums">{money(coveredMinor)}</dd>
+                          </div>
+                          <div className="flex justify-between gap-2">
+                            <dt>{t('checkout.topupRemaining')}</dt>
+                            <dd className="font-semibold text-ink-900 tabular-nums">
+                              {money(remainingMinor)}
+                            </dd>
+                          </div>
+                        </dl>
+                        <p className="mt-2 text-[0.75rem] leading-relaxed text-ink-600">
+                          {t('checkout.topupExplain')}
+                        </p>
+                        <Button
+                          size="lg"
+                          fullWidth
+                          className="mt-3"
+                          disabled={pending}
+                          loading={pending && paying === 'topup'}
+                          onClick={() => payTopup(selected.plan, selected.amountMinor)}
+                        >
+                          {t('checkout.topupPay', { amount: money(remainingMinor) })}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          fullWidth
+                          className="mt-1.5"
+                          disabled={pending}
+                          onClick={() => setTopupPrompt(false)}
+                        >
+                          {t('checkout.topupCancel')}
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <p
+                          className={cn(
+                            'mt-1.5 text-[0.75rem] leading-relaxed',
+                            enough ? 'text-ink-600' : 'font-medium text-warning-700',
+                          )}
+                        >
+                          {enough
+                            ? t('checkout.deductionNote', { points: format.number(costPoints) })
+                            : canTopUp
+                              ? t('checkout.topupHint', { amount: money(remainingMinor) })
+                              : t('checkout.insufficientNote', {
+                                  needed: format.number(Math.max(0, costPoints - balancePoints)),
+                                  amount: money(remainingMinor),
+                                })}
+                        </p>
+                        <Button
+                          size="lg"
+                          fullWidth
+                          variant={checkoutEnabled ? 'secondary' : 'primary'}
+                          className="mt-3"
+                          disabled={(!enough && !canTopUp) || pending}
+                          loading={pending && paying === 'balance'}
+                          leadingIcon={<Wallet />}
+                          onClick={() =>
+                            enough
+                              ? payFromBalance(selected.plan, selected.amountMinor)
+                              : setTopupPrompt(true)
+                          }
+                        >
+                          {t('checkout.payWithBalance', {
+                            amount: format.number(chargedMinor / 100, {
+                              style: 'currency',
+                              currency: selected.plan.currencyCode,
+                              maximumFractionDigits: coupon ? 2 : 0,
+                            }),
+                          })}
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )
+              })()}
 
             {methods.length > 0 && (
               <p className="mt-4 text-[0.75rem] font-semibold tracking-[0.04em] text-ink-500 uppercase">
@@ -364,7 +580,7 @@ export function UpgradeView({
               ))}
             </div>
 
-            {!checkoutEnabled && (
+            {!checkoutEnabled && !balancePurchaseEnabled && (
               <div
                 className={cn(
                   'mt-4 rounded-(--radius-card) border px-4 py-3',
@@ -388,7 +604,8 @@ export function UpgradeView({
                 size="lg"
                 fullWidth
                 className="mt-4"
-                loading={pending}
+                loading={pending && paying === 'paystack'}
+                disabled={pending}
                 onClick={() => pay(selected.plan, selected.amountMinor)}
               >
                 {t('checkout.pay', {

@@ -100,6 +100,10 @@ const LEDGER_KIND: Record<string, TxKind> = {
   admin_adjustment: 'adjustment',
   vault_deposit: 'vault',
   vault_payout: 'vault',
+  // Filtered out of the feed query (the plan row stands for it), mapped anyway
+  // so that if it ever does arrive it reads as a plan, not a correction.
+  plan_purchase: 'subscription',
+  plan_purchase_release: 'refund',
 }
 
 export type DailyPoint = {
@@ -130,6 +134,14 @@ export async function getHomeData(userId: string): Promise<HomeData> {
         'id, entry_type, amount, balance_after, points_per_currency_unit, reference_type, reference_id, created_at',
       )
       .eq('user_id', userId)
+      /* A plan bought from the balance is shown once, as the plan row from
+         `subscription_payments` below, exactly like a plan bought through
+         Paystack (operator, 2026-09-25). Its points debit is left out here
+         so the same purchase is not listed twice. A part-balance hold that
+         was handed back (`plan_purchase_release`) is hidden with it: the
+         payment it belonged to never became a plan, so neither half is a
+         purchase the buyer made. */
+      .not('entry_type', 'in', '(plan_purchase,plan_purchase_release)')
       .order('created_at', { ascending: false })
       .limit(FEED_LIMIT),
     // Separate query: the feed page may not reach 30 days back, and the
@@ -159,7 +171,7 @@ export async function getHomeData(userId: string): Promise<HomeData> {
     */
     supabase
       .from('subscription_payments')
-      .select('id, method, status, amount_minor, currency_code, created_at')
+      .select('id, method, status, amount_minor, balance_minor, currency_code, created_at')
       .eq('user_id', userId)
       .in('status', ['confirmed', 'refunded'])
       .order('created_at', { ascending: false })
@@ -233,7 +245,10 @@ export async function getHomeData(userId: string): Promise<HomeData> {
         method: s.method,
         points: null,
         balanceAfter: null,
-        ghs: s.amount_minor / 100,
+        /* The whole price. A plan part paid from the balance carries only the
+           cash part in `amount_minor`, and its points hold is kept out of the
+           ledger rows above, so this one row is the purchase (migration 240). */
+        ghs: (s.amount_minor + (s.balance_minor ?? 0)) / 100,
         at: s.created_at,
         direction: 'out',
         status: s.status === 'failed' ? 'failed' : 'settled',

@@ -1,5 +1,7 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
+
 import { getSessionUser } from '@/lib/auth/session'
 import { clientEnv } from '@/lib/env'
 import { reportUnexpected } from '@/lib/observability/report'
@@ -60,12 +62,51 @@ export async function startPaystackCheckout(
     return { ok: false, message: error?.message ?? 'Could not start this payment.' }
   }
 
-  const row = payment as unknown as {
-    id: string
-    amount_minor: number
-    currency_code: string
+  return handToHub(admin, user.email, payment as unknown as PaymentRow)
+}
+
+/**
+ * Part from the balance, the rest through Paystack.
+ *
+ * For a buyer whose balance does not reach the price. `start_plan_topup_payment`
+ * sets the balance part aside and leaves only the remainder on the payment row,
+ * so what the hub is asked to charge is exactly what is left. The points come
+ * back on their own (a trigger, migration 240) if that payment fails or is
+ * reversed, and the plan is granted by the usual confirmation when it succeeds.
+ */
+export async function startPlanTopupCheckout(
+  tierId: string,
+  amountMinor?: number,
+  couponCode?: string,
+): Promise<CheckoutResult> {
+  const user = await getSessionUser()
+  if (!user?.email) return { ok: false, errorKey: 'notSignedIn' }
+
+  const admin = createAdminClient()
+
+  const { data: payment, error } = await admin.rpc('start_plan_topup_payment', {
+    p_user_id: user.id,
+    p_tier_id: tierId,
+    p_amount_minor: Number.isFinite(amountMinor) ? amountMinor : undefined,
+    p_coupon_code: couponCode?.trim() || undefined,
+  })
+
+  if (error || !payment) {
+    return { ok: false, message: error?.message ?? 'Could not start this payment.' }
   }
 
+  return handToHub(admin, user.email, payment as unknown as PaymentRow)
+}
+
+type PaymentRow = { id: string; amount_minor: number; currency_code: string }
+
+/** Everything after the payment row exists: the same for a full Paystack
+ *  purchase and for the remainder of a part-balance one. */
+async function handToHub(
+  admin: ReturnType<typeof createAdminClient>,
+  customerEmail: string,
+  row: PaymentRow,
+): Promise<CheckoutResult> {
   /*
     The payment row's id is what the hub is told as `external_ref`, so its
     answer always names the exact row it refers to. Asking twice for the same
@@ -76,14 +117,15 @@ export async function startPaystackCheckout(
     externalRef: row.id,
     amountMinor: Number(row.amount_minor),
     currency: row.currency_code.trim(),
-    customerEmail: user.email,
+    customerEmail,
     returnUrl: `${clientEnv.NEXT_PUBLIC_SITE_URL}/payments/return`,
   })
 
   if (!initialised.ok) {
     /* A retryable fault is the hub's or the network's, and the row is left
        pending so the reconciliation sweep can finish it if the payment did in
-       fact start. Only a refusal we know is final marks the row failed. */
+       fact start. Only a refusal we know is final marks the row failed, and
+       for a part-balance payment that also returns the points it held. */
     if (!initialised.retryable) {
       await admin
         .from('subscription_payments')
@@ -122,6 +164,46 @@ export async function startPaystackCheckout(
   }
 
   return { ok: true, authorizationUrl: initialised.authorizationUrl }
+}
+
+/**
+ * Buying a plan with the account balance instead of Paystack.
+ *
+ * Same inputs as the Paystack checkout and the same distrust of them: the
+ * amount and coupon are re-checked in SQL by `start_subscription_payment`,
+ * which `purchase_plan_with_balance` calls, and the plan is granted by the same
+ * `confirm_subscription_payment` a card payment ends in. The points debit, the
+ * payment row and the plan are one transaction, so a short balance leaves
+ * nothing behind. See migration 239.
+ *
+ * The SQL raises carry sentences written for the buyer (short balance, plan
+ * cap, disabled account), so they are passed through as the Vault's are.
+ */
+export type BalancePurchaseResult = { ok: true } | { ok: false; message: string }
+
+export async function purchasePlanWithBalance(
+  tierId: string,
+  amountMinor?: number,
+  couponCode?: string,
+): Promise<BalancePurchaseResult> {
+  const user = await getSessionUser()
+  if (!user) return { ok: false, message: 'You must be signed in to buy a plan.' }
+
+  const admin = createAdminClient()
+  const { error } = await admin.rpc('purchase_plan_with_balance', {
+    p_user_id: user.id,
+    p_tier_id: tierId,
+    p_amount_minor: Number.isFinite(amountMinor) ? amountMinor : undefined,
+    p_coupon_code: couponCode?.trim() || undefined,
+  })
+
+  if (error) {
+    return { ok: false, message: error.message }
+  }
+
+  revalidatePath('/[locale]/(app)/upgrade', 'page')
+  revalidatePath('/[locale]/(app)/dashboard', 'page')
+  return { ok: true }
 }
 
 /**

@@ -14,6 +14,7 @@ import {
   getPlans,
   getResolvedBenefits,
 } from '@/lib/subscriptions/data'
+import { getUserPointsBalance } from '@/lib/vault/data'
 
 export const metadata: Metadata = {
   title: 'Upgrade',
@@ -45,7 +46,16 @@ export default async function UpgradePage({
   if (!user) redirect({ href: '/login', locale })
 
   const admin = createAdminClient()
-  const [plans, held, benefits, references, { data: earningStatus }, switches] = await Promise.all([
+  const [
+    plans,
+    held,
+    benefits,
+    references,
+    { data: earningStatus },
+    switches,
+    balancePoints,
+    { data: balanceSwitch },
+  ] = await Promise.all([
     getPlans(),
     getHeldPlans(user!.id),
     getResolvedBenefits(user!.id),
@@ -54,6 +64,15 @@ export default async function UpgradePage({
     /* Which ways to pay the checkout should LIST. Labels, not gates: the
        payment page belongs to the hub. See lib/payments/methods.ts. */
     getPaymentMethodSwitches(),
+    getUserPointsBalance(user!.id),
+    /* Private config, so read with the service client: through the user's
+       token the row comes back missing and the option would silently vanish.
+       The SQL refuses a balance purchase on its own when this is off. */
+    admin
+      .from('app_config')
+      .select('value')
+      .eq('key', 'plan_balance_purchase_enabled')
+      .maybeSingle(),
   ])
 
   return (
@@ -68,6 +87,8 @@ export default async function UpgradePage({
       pointsPerCurrencyUnit={references.pointsPerCurrencyUnit}
       checkoutEnabled={hubConfigured()}
       checkoutMethods={switches.checkout}
+      balancePurchaseEnabled={balanceSwitch?.value === 'true'}
+      balancePoints={balancePoints}
       initialCoupon={(await searchParams).coupon ?? null}
     />
   )

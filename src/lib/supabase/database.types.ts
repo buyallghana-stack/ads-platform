@@ -1997,6 +1997,9 @@ export type Database = {
       subscription_payments: {
         Row: {
           amount_minor: number
+          balance_held: boolean
+          balance_minor: number | null
+          balance_points: number | null
           confirmed_at: string | null
           created_at: string
           currency_code: string
@@ -2013,6 +2016,9 @@ export type Database = {
         }
         Insert: {
           amount_minor: number
+          balance_held?: boolean
+          balance_minor?: number | null
+          balance_points?: number | null
           confirmed_at?: string | null
           created_at?: string
           currency_code?: string
@@ -2029,6 +2035,9 @@ export type Database = {
         }
         Update: {
           amount_minor?: number
+          balance_held?: boolean
+          balance_minor?: number | null
+          balance_points?: number | null
           confirmed_at?: string | null
           created_at?: string
           currency_code?: string
@@ -5151,6 +5160,33 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      purchase_plan_with_balance: {
+        Args: {
+          p_amount_minor?: number
+          p_coupon_code?: string
+          p_tier_id: string
+          p_user_id: string
+        }
+        Returns: {
+          amount_minor: number | null
+          cancelled_at: string | null
+          created_at: string
+          current_period_end: string
+          grace_ends_at: string | null
+          id: string
+          started_at: string
+          status: Database["public"]["Enums"]["subscription_status"]
+          tier_id: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "user_subscriptions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       purchase_vault_with_balance: {
         Args: { p_plan_id: string; p_user_id?: string }
         Returns: {
@@ -5534,6 +5570,36 @@ export type Database = {
       }
       skip_onboarding: { Args: never; Returns: Json }
       start_onboarding: { Args: never; Returns: Json }
+      start_plan_topup_payment: {
+        Args: {
+          p_amount_minor?: number
+          p_coupon_code?: string
+          p_tier_id: string
+          p_user_id: string
+        }
+        Returns: {
+          amount_minor: number
+          confirmed_at: string | null
+          created_at: string
+          currency_code: string
+          external_reference: string | null
+          failure_reason: string | null
+          id: string
+          list_minor: number | null
+          method: Database["public"]["Enums"]["subscription_payment_method"]
+          period_days: number
+          provider_payload: Json
+          status: Database["public"]["Enums"]["subscription_payment_status"]
+          tier_id: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "subscription_payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       start_subscription_payment: {
         Args: {
           p_amount_minor?: number
@@ -5742,6 +5808,8 @@ export type Database = {
         | "vault_payout"
         | "vault_deposit"
         | "weekly_bonus"
+        | "plan_purchase"
+        | "plan_purchase_release"
       notification_business: "ads" | "affiliate" | "both"
       notification_type:
         | "announcement"
@@ -5766,7 +5834,11 @@ export type Database = {
         | "disputed"
       referral_status: "pending" | "activated" | "rejected"
       risk_level: "low" | "medium" | "high" | "critical"
-      subscription_payment_method: "korapay" | "crypto" | "paystack"
+      subscription_payment_method:
+        | "korapay"
+        | "crypto"
+        | "paystack"
+        | "balance"
       subscription_payment_status:
         | "pending"
         | "confirmed"
@@ -6019,6 +6091,8 @@ export const Constants = {
         "vault_payout",
         "vault_deposit",
         "weekly_bonus",
+        "plan_purchase",
+        "plan_purchase_release",
       ],
       notification_business: ["ads", "affiliate", "both"],
       notification_type: ["announcement", "payout", "flag", "support", "vault"],
@@ -6040,7 +6114,7 @@ export const Constants = {
       ],
       referral_status: ["pending", "activated", "rejected"],
       risk_level: ["low", "medium", "high", "critical"],
-      subscription_payment_method: ["korapay", "crypto", "paystack"],
+      subscription_payment_method: ["korapay", "crypto", "paystack", "balance"],
       subscription_payment_status: [
         "pending",
         "confirmed",
