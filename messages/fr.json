@@ -1424,9 +1424,13 @@
       "topupTitle": "Votre solde ne suffit pas",
       "topupFromBalance": "Payé avec votre solde",
       "topupRemaining": "Reste à payer avec Paystack",
-      "topupExplain": "Votre solde est mis de côté maintenant. Payez le reste avec Paystack et le forfait démarre dès que le paiement est fait. Si vous ne terminez pas le paiement, votre solde vous est rendu automatiquement à la clôture du paiement, ce qui peut prendre jusqu’à deux jours.",
+      "topupExplain": "Votre solde est mis de côté maintenant. Payez le reste avec Paystack et le forfait démarre dès que le paiement est fait. Si vous changez d’avis, vous pouvez annuler depuis cette page et récupérer votre solde immédiatement.",
       "topupPay": "Payer {amount} avec Paystack",
-      "topupCancel": "Retour"
+      "topupCancel": "Retour",
+      "holdNotice": "{amount} de votre solde est mis de côté pour un paiement que vous n’avez pas terminé. Si vous l’avez annulé sur Paystack, vous pouvez récupérer votre solde maintenant.",
+      "holdCancel": "L’annuler et me rendre mon solde",
+      "holdReleased": "Votre solde vous a été rendu. Le paiement inachevé a été annulé.",
+      "holdWasPaid": "Ce paiement avait abouti, votre forfait est donc actif."
     },
     "result": {
       "help": "Un problème ? Obtenir de l'aide",

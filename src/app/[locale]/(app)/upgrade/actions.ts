@@ -6,6 +6,7 @@ import { getSessionUser } from '@/lib/auth/session'
 import { clientEnv } from '@/lib/env'
 import { reportUnexpected } from '@/lib/observability/report'
 import { hubInitialise } from '@/lib/payments/hub/client'
+import { releaseAllTopupHolds, releaseTopupHold } from '@/lib/payments/topup-hold'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
@@ -82,6 +83,11 @@ export async function startPlanTopupCheckout(
   const user = await getSessionUser()
   if (!user?.email) return { ok: false, errorKey: 'notSignedIn' }
 
+  /* A buyer who cancelled on Paystack and tries again would otherwise find
+     their balance still held by the first attempt, and be told it is empty. */
+  const cleared = await clearHolds(user.id)
+  if (cleared) return { ok: false, message: cleared }
+
   const admin = createAdminClient()
 
   const { data: payment, error } = await admin.rpc('start_plan_topup_payment', {
@@ -99,6 +105,45 @@ export async function startPlanTopupCheckout(
 }
 
 type PaymentRow = { id: string; amount_minor: number; currency_code: string }
+
+const HUB_UNREACHABLE =
+  'We could not check your unfinished payment just now. Please try again in a moment.'
+
+/** Null when every held part-balance payment was closed or found paid. */
+async function clearHolds(userId: string): Promise<string | null> {
+  try {
+    await releaseAllTopupHolds(userId)
+    return null
+  } catch (error) {
+    reportUnexpected(error, 'upgrade.releaseHolds', { userId })
+    return HUB_UNREACHABLE
+  }
+}
+
+/**
+ * Cancelling an unfinished part-balance payment and getting the balance back.
+ *
+ * The hub is asked first: if the payment did go through, the plan is granted
+ * and the buyer is told so, rather than being handed back points they spent.
+ */
+export type CancelHoldResult =
+  | { ok: true; outcome: 'released' | 'paid' | 'not_held' }
+  | { ok: false; message: string }
+
+export async function cancelTopupHold(paymentId: string): Promise<CancelHoldResult> {
+  const user = await getSessionUser()
+  if (!user) return { ok: false, message: 'You must be signed in.' }
+
+  try {
+    const outcome = await releaseTopupHold(user.id, paymentId)
+    revalidatePath('/[locale]/(app)/upgrade', 'page')
+    revalidatePath('/[locale]/(app)/dashboard', 'page')
+    return { ok: true, outcome }
+  } catch (error) {
+    reportUnexpected(error, 'upgrade.cancelHold', { paymentId })
+    return { ok: false, message: HUB_UNREACHABLE }
+  }
+}
 
 /** Everything after the payment row exists: the same for a full Paystack
  *  purchase and for the remainder of a part-balance one. */
@@ -188,6 +233,11 @@ export async function purchasePlanWithBalance(
 ): Promise<BalancePurchaseResult> {
   const user = await getSessionUser()
   if (!user) return { ok: false, message: 'You must be signed in to buy a plan.' }
+
+  /* Balance still set aside by an unfinished part-balance checkout is the
+     buyer's, and this purchase may need it. See lib/payments/topup-hold.ts. */
+  const cleared = await clearHolds(user.id)
+  if (cleared) return { ok: false, message: cleared }
 
   const admin = createAdminClient()
   const { error } = await admin.rpc('purchase_plan_with_balance', {

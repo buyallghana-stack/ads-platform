@@ -1424,9 +1424,13 @@
       "topupTitle": "Your balance is not enough",
       "topupFromBalance": "Paid from your balance",
       "topupRemaining": "Left to pay with Paystack",
-      "topupExplain": "Your balance is set aside now. Pay the rest with Paystack and the plan starts as soon as the payment is done. If you do not finish paying, your balance comes back automatically once the payment is closed, which can take up to two days.",
+      "topupExplain": "Your balance is set aside now. Pay the rest with Paystack and the plan starts as soon as the payment is done. If you change your mind, you can cancel from this page and get your balance back straight away.",
       "topupPay": "Pay {amount} with Paystack",
-      "topupCancel": "Go back"
+      "topupCancel": "Go back",
+      "holdNotice": "{amount} of your balance is set aside for a payment you have not finished. If you cancelled it on Paystack, you can get your balance back now.",
+      "holdCancel": "Cancel it and return my balance",
+      "holdReleased": "Your balance is back. The unfinished payment was cancelled.",
+      "holdWasPaid": "That payment had gone through, so your plan is now active."
     },
     "result": {
       "help": "Something wrong? Get help",

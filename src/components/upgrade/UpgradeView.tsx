@@ -6,6 +6,7 @@ import { AlertCircle, CheckCircle2, Gem, Layers, Smartphone, Wallet, X } from 'l
 import { useFormatter, useTranslations } from 'next-intl'
 
 import {
+  cancelTopupHold,
   previewPlanCoupon,
   purchasePlanWithBalance,
   startPaystackCheckout,
@@ -15,6 +16,7 @@ import { CouponField, type AppliedCoupon } from '@/components/checkout/CouponFie
 import { PlanCard } from '@/components/upgrade/PlanCard'
 import { Button } from '@/components/ui/Button'
 import { useRouter } from '@/i18n/navigation'
+import type { HeldTopup } from '@/lib/payments/topup-hold'
 import type { HeldPlan, Plan, ResolvedBenefits } from '@/lib/subscriptions/data'
 import { cn } from '@/lib/cn'
 
@@ -45,6 +47,7 @@ export function UpgradeView({
   checkoutMethods,
   balancePurchaseEnabled,
   balancePoints,
+  heldTopups = [],
   initialCoupon,
 }: {
   plans: Plan[]
@@ -80,6 +83,8 @@ export function UpgradeView({
   balancePurchaseEnabled: boolean
   /** The buyer's points balance, for the "pay from balance" card. */
   balancePoints: number
+  /** Unfinished part-balance checkouts still holding some of the balance. */
+  heldTopups?: HeldTopup[]
   /** From a shared link, `/upgrade?coupon=CODE`. */
   initialCoupon?: string | null
 }) {
@@ -181,6 +186,24 @@ export function UpgradeView({
     })
   }
 
+  /* Closing an unfinished part-balance payment. The server asks the hub first,
+     so "paid" is a real answer: the plan went through after all. */
+  const [releasing, setReleasing] = useState<string | null>(null)
+  const releaseHold = (paymentId: string) => {
+    setError(null)
+    setReleasing(paymentId)
+    startTransition(async () => {
+      const res = await cancelTopupHold(paymentId)
+      setReleasing(null)
+      if (!res.ok) {
+        setError(res.message)
+        return
+      }
+      setBought(res.outcome === 'paid' ? t('checkout.holdWasPaid') : t('checkout.holdReleased'))
+      router.refresh()
+    })
+  }
+
   const heldByTier = new Map(held.map((h) => [h.tierId, h]))
   const heldCount = held.length
 
@@ -198,6 +221,40 @@ export function UpgradeView({
         <h1 className="text-lg font-semibold tracking-[-0.02em] text-ink-900">{t('title')}</h1>
         <p className="mt-0.5 text-[0.8125rem] text-ink-500">{t('subtitle')}</p>
       </header>
+
+      {heldTopups.map((held) => (
+        <div
+          key={held.id}
+          className="mt-4 rounded-(--radius-card) border border-warning-500/25 bg-warning-50 px-4 py-3"
+        >
+          <p className="flex items-start gap-2 text-[0.8125rem] leading-relaxed text-warning-700">
+            <Wallet aria-hidden className="mt-0.5 size-4 shrink-0" />
+            {t('checkout.holdNotice', {
+              amount: format.number(held.balanceMinor / 100, {
+                style: 'currency',
+                currency: held.currencyCode,
+                minimumFractionDigits: 2,
+              }),
+            })}
+          </p>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="mt-2.5"
+            disabled={pending}
+            loading={releasing === held.id}
+            onClick={() => releaseHold(held.id)}
+          >
+            {t('checkout.holdCancel')}
+          </Button>
+        </div>
+      ))}
+
+      {!selected && error && (
+        <p role="alert" className="mt-3 text-[0.8125rem] font-medium text-danger-600">
+          {error}
+        </p>
+      )}
 
       {bought && (
         <p

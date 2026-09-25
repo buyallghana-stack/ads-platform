@@ -14,6 +14,7 @@ import {
   getPlans,
   getResolvedBenefits,
 } from '@/lib/subscriptions/data'
+import { getHeldTopups } from '@/lib/payments/topup-hold'
 import { getUserPointsBalance } from '@/lib/vault/data'
 
 export const metadata: Metadata = {
@@ -55,6 +56,7 @@ export default async function UpgradePage({
     switches,
     balancePoints,
     { data: balanceSwitch },
+    heldTopups,
   ] = await Promise.all([
     getPlans(),
     getHeldPlans(user!.id),
@@ -73,6 +75,9 @@ export default async function UpgradePage({
       .select('value')
       .eq('key', 'plan_balance_purchase_enabled')
       .maybeSingle(),
+    /* Balance set aside by an unfinished part-balance checkout, so the page
+       can say where it went and offer it back. */
+    getHeldTopups(user!.id),
   ])
 
   return (
@@ -89,6 +94,7 @@ export default async function UpgradePage({
       checkoutMethods={switches.checkout}
       balancePurchaseEnabled={balanceSwitch?.value === 'true'}
       balancePoints={balancePoints}
+      heldTopups={heldTopups}
       initialCoupon={(await searchParams).coupon ?? null}
     />
   )
