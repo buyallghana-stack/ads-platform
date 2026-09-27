@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { PageHeader } from '@/components/admin/AdminChrome'
 import { HubPaymentsTable } from '@/components/admin/HubPaymentsTable'
 import { getHubFlags, getHubPayments } from '@/lib/admin/data/hub-payments'
+import { serverNow } from '@/lib/server-now'
 
 export const metadata: Metadata = {
   title: 'Admin · Payments',
@@ -35,13 +36,17 @@ export default async function AdminPaymentsPage({
   const t = await getTranslations('admin.payments')
 
   /* Both reads at once. They are independent, and a flagged event may have no
-     payment behind it at all. */
-  const [payments, flags] = await Promise.all([getHubPayments(), getHubFlags()])
+     payment behind it at all. 500 is the function's own ceiling: the screen
+     filters and sorts in the browser, so a cut over the newest 100 alone
+     would quietly answer a different question than the one asked. */
+  const [payments, flags] = await Promise.all([getHubPayments(500), getHubFlags()])
 
   return (
     <>
       <PageHeader title={t('title')} description={t('description')} />
-      <HubPaymentsTable payments={payments} flags={flags} />
+      {/* One clock for "last 7 days", decided on the server so both sides of
+          hydration agree. */}
+      <HubPaymentsTable payments={payments} flags={flags} serverNow={serverNow()} />
     </>
   )
 }

@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { PageHeader } from '@/components/admin/AdminChrome'
 import { PeopleBoard } from '@/components/admin/PeopleBoard'
 import { getPeople } from '@/lib/admin/data/people'
+import { serverNow } from '@/lib/server-now'
 
 export const metadata: Metadata = { title: 'Admin · Users', robots: { index: false, follow: false } }
 
@@ -18,9 +19,7 @@ export default async function AdminUsersPage({ params }: { params: Promise<{ loc
   return (
     <>
       <PageHeader title={t('title')} description={t('description')} />
-      {/* Date.now() in a Server Component is the repo's deliberate pattern for
-          handing a stable clock to a client component — see payouts/page.tsx. */}
-      <PeopleBoard people={people} serverNow={Date.now()} mode="users" />
+      <PeopleBoard people={people} serverNow={serverNow()} mode="users" />
     </>
   )
 }

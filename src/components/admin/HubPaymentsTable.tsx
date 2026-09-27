@@ -1,14 +1,22 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import { recheckWithHub } from '@/app/[locale]/admin/(super)/payments/actions'
-import { EmptyState, TableShell, Th } from '@/components/admin/AdminTable'
+import {
+  EmptyState,
+  FilterBar,
+  FilterSelect,
+  TableShell,
+  Th,
+  Toolbar,
+  type Tab,
+} from '@/components/admin/AdminTable'
 import { PersonCell, StatusPill } from '@/components/admin/AdminChrome'
-import type { HubFlag, HubPayment } from '@/lib/admin/data/hub-payments'
+import type { HubFlag, HubPayment, HubPaymentStatus } from '@/lib/admin/data/hub-payments'
 import { cn } from '@/lib/cn'
 
 /**
@@ -47,18 +55,109 @@ const STATUS_TONE: Record<string, 'success' | 'warning' | 'danger' | 'neutral'> 
   refunded: 'danger',
 }
 
+const STATUSES: HubPaymentStatus[] = ['confirmed', 'pending', 'failed', 'refunded']
+
+const PERIODS = ['any', 'day', 'week', 'month'] as const
+type Period = (typeof PERIODS)[number]
+const PERIOD_MS: Record<Exclude<Period, 'any'>, number> = {
+  day: 86_400_000,
+  week: 7 * 86_400_000,
+  month: 30 * 86_400_000,
+}
+
+const SORTS = ['newest', 'oldest', 'amountHigh', 'amountLow', 'lastEvent'] as const
+type Sort = (typeof SORTS)[number]
+const COMPARE: Record<Sort, (a: HubPayment, b: HubPayment) => number> = {
+  newest: (a, b) => b.createdAt.localeCompare(a.createdAt),
+  oldest: (a, b) => a.createdAt.localeCompare(b.createdAt),
+  amountHigh: (a, b) => b.amountMinor - a.amountMinor,
+  amountLow: (a, b) => a.amountMinor - b.amountMinor,
+  /* A payment the hub has never answered sinks: "what moved last" is the
+     question, and silence did not move. */
+  lastEvent: (a, b) => (b.lastEventAt ?? '').localeCompare(a.lastEventAt ?? ''),
+}
+
 export function HubPaymentsTable({
   payments,
   flags,
+  serverNow,
 }: {
   payments: HubPayment[]
   flags: HubFlag[]
+  serverNow: number
 }) {
   const t = useTranslations('admin.payments')
   const format = useFormatter()
   const [pending, startTransition] = useTransition()
   const [busy, setBusy] = useState<string | null>(null)
   const [note, setNote] = useState<string | null>(null)
+
+  /* ---- Narrowing ------------------------------------------------------
+     Status is the tab, because "did it go through" is what this screen is
+     for. Product, plan, period and sort stack on top of it. The flagged list
+     above is deliberately untouched by all of it: a filter that could hide
+     money that moved at the provider is a filter that will, one day. */
+  const [status, setStatus] = useState<'all' | HubPaymentStatus>('all')
+  const [query, setQuery] = useState('')
+  const [product, setProduct] = useState<'any' | HubPayment['kind']>('any')
+  const [item, setItem] = useState('any')
+  const [period, setPeriod] = useState<Period>('any')
+  const [sort, setSort] = useState<Sort>('newest')
+
+  const items = useMemo(
+    () =>
+      [...new Set(payments.filter((p) => product === 'any' || p.kind === product).map((p) => p.itemName))]
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b)),
+    [payments, product],
+  )
+
+  /* Everything except the status, so each tab's count says what picking it
+     would show under the cuts already made. */
+  const cut = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    return payments.filter(
+      (p) =>
+        (product === 'any' || p.kind === product) &&
+        (item === 'any' || p.itemName === item) &&
+        (period === 'any' || serverNow - new Date(p.createdAt).getTime() < PERIOD_MS[period]) &&
+        (!q || [p.person, p.email, p.reference, p.itemName].join(' ').toLowerCase().includes(q)),
+    )
+  }, [payments, product, item, period, query, serverNow])
+
+  const visible = useMemo(
+    () => cut.filter((p) => status === 'all' || p.status === status).sort(COMPARE[sort]),
+    [cut, status, sort],
+  )
+
+  const tabs: Tab<'all' | HubPaymentStatus>[] = [
+    { key: 'all', label: t('filters.all'), count: cut.length },
+    ...STATUSES.map((key) => ({
+      key,
+      label: t(`status.${key}`),
+      count: cut.filter((p) => p.status === key).length,
+    })),
+  ]
+
+  const narrowed =
+    status !== 'all' ||
+    query !== '' ||
+    product !== 'any' ||
+    item !== 'any' ||
+    period !== 'any' ||
+    sort !== 'newest'
+  const resetFilters = () => {
+    setStatus('all')
+    setQuery('')
+    setProduct('any')
+    setItem('any')
+    setPeriod('any')
+    setSort('newest')
+  }
+
+  /* Paid money only. Summing pending or failed rows into a total an admin
+     reads at a glance would overstate what came in. */
+  const paidMinor = visible.filter((p) => p.status === 'confirmed').reduce((sum, p) => sum + p.amountMinor, 0)
 
   const money = (minor: number | null, currency: string | null) =>
     minor === null ? '—' : `${currency ?? 'GHS'} ${(minor / 100).toFixed(2)}`
@@ -150,8 +249,73 @@ export function HubPaymentsTable({
 
       {payments.length === 0 && <EmptyState>{t('empty')}</EmptyState>}
 
-      {/* ---- Payments, lg and up --------------------------------------- */}
       {payments.length > 0 && (
+        <div>
+          <Toolbar
+            tabs={tabs}
+            active={status}
+            onSelect={setStatus}
+            tabsLabel={t('filters.label')}
+            query={query}
+            onQuery={setQuery}
+            searchPlaceholder={t('filters.search')}
+          />
+          <FilterBar
+            summary={t('filters.showing', {
+              shown: visible.length,
+              total: payments.length,
+              paid: money(paidMinor, visible[0]?.currency ?? 'GHS'),
+            })}
+            onReset={narrowed ? resetFilters : undefined}
+            resetLabel={t('filters.reset')}
+          >
+            <FilterSelect
+              label={t('filters.product')}
+              value={product}
+              onChange={(value) => {
+                setProduct(value)
+                setItem('any')
+              }}
+              options={[
+                { key: 'any', label: t('filters.anyProduct') },
+                { key: 'subscription', label: t('kind.subscription') },
+                { key: 'vault', label: t('kind.vault') },
+              ]}
+            />
+            <FilterSelect
+              label={t('columns.plan')}
+              value={item}
+              onChange={setItem}
+              options={[
+                { key: 'any', label: t('filters.anyPlan') },
+                ...items.map((name) => ({ key: name, label: name })),
+              ]}
+            />
+            <FilterSelect
+              label={t('filters.period')}
+              value={period}
+              onChange={setPeriod}
+              options={PERIODS.map((key) => ({
+                key,
+                label: t(`filters.periods.${key}`),
+              }))}
+            />
+            <FilterSelect
+              label={t('filters.sort')}
+              value={sort}
+              onChange={setSort}
+              options={SORTS.map((key) => ({
+                key,
+                label: t(`filters.sorts.${key}`),
+              }))}
+            />
+          </FilterBar>
+          {visible.length === 0 && <EmptyState>{t('filters.none')}</EmptyState>}
+        </div>
+      )}
+
+      {/* ---- Payments, lg and up --------------------------------------- */}
+      {visible.length > 0 && (
         <TableShell>
           <thead>
             <tr className="border-b border-ink-200">
@@ -167,7 +331,7 @@ export function HubPaymentsTable({
             </tr>
           </thead>
           <tbody>
-            {payments.map((p) => (
+            {visible.map((p) => (
               <tr key={p.id} className="border-b border-ink-100 last:border-0">
                 <td className="px-4 py-3">
                   <PersonCell name={p.person} secondary={p.reference} size="md" />
@@ -231,9 +395,9 @@ export function HubPaymentsTable({
       )}
 
       {/* ---- Payments, below lg ---------------------------------------- */}
-      {payments.length > 0 && (
+      {visible.length > 0 && (
         <ul className="flex flex-col gap-2 lg:hidden">
-          {payments.map((p) => (
+          {visible.map((p) => (
             <li key={p.id} className="rounded-(--radius-card) border border-ink-200 bg-surface p-3.5">
               <div className="flex items-start justify-between gap-3">
                 <PersonCell name={p.person} secondary={p.reference} size="md" />

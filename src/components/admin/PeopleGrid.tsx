@@ -10,7 +10,7 @@ import type { Person } from '@/lib/admin/types'
 import { cn } from '@/lib/cn'
 
 import { PersonCell, StatusDot } from './AdminChrome'
-import { EmptyState, RowOpener, Toolbar, type Tab } from './AdminTable'
+import { EmptyState, FilterBar, FilterSelect, RowOpener, Toolbar, type Tab } from './AdminTable'
 import { PERSON_RULES, personActions, type PersonAction } from './person-actions'
 
 /**
@@ -33,6 +33,41 @@ import { PERSON_RULES, personActions, type PersonAction } from './person-actions
  */
 
 export type PeopleMode = 'users' | 'flagged' | 'messages'
+
+/* `attention` is the order the server already sends (disabled, then flagged,
+   then newest), so it costs nothing and stays the default. */
+const SORTS = [
+  'attention',
+  'newest',
+  'oldest',
+  'lastActive',
+  'balance',
+  'lifetime',
+  'ads',
+  'referrals',
+  'paidOut',
+  'name',
+] as const
+type Sort = (typeof SORTS)[number]
+
+const ACTIVITY = ['any', 'day', 'week', 'idle30'] as const
+type Activity = (typeof ACTIVITY)[number]
+
+const DAY = 86_400_000
+
+/** Largest first for every figure, because "who has the most" is the
+ *  question; oldest-first is its own option rather than a direction toggle. */
+const COMPARE: Record<Exclude<Sort, 'attention'>, (a: Person, b: Person) => number> = {
+  newest: (a, b) => b.joinedAt.localeCompare(a.joinedAt),
+  oldest: (a, b) => a.joinedAt.localeCompare(b.joinedAt),
+  lastActive: (a, b) => b.lastActiveAt.localeCompare(a.lastActiveAt),
+  balance: (a, b) => b.balancePoints - a.balancePoints,
+  lifetime: (a, b) => b.lifetimePoints - a.lifetimePoints,
+  ads: (a, b) => b.adsWatched - a.adsWatched,
+  referrals: (a, b) => b.referrals - a.referrals,
+  paidOut: (a, b) => b.paidOutGhs - a.paidOutGhs,
+  name: (a, b) => a.name.localeCompare(b.name),
+}
 
 export function PeopleGrid({
   people,
@@ -59,6 +94,20 @@ export function PeopleGrid({
   const [query, setQuery] = useState('')
   const [tab, setTab] = useState<'all' | 'new' | 'flagged' | 'unread'>('all')
 
+  /* Messages is a conversation list and keeps the server's "whoever spoke
+     last" order; plan and activity cuts are for the account screens. */
+  const filterable = mode !== 'messages'
+  const [plan, setPlan] = useState('any')
+  const [activity, setActivity] = useState<Activity>('any')
+  const [sort, setSort] = useState<Sort>('attention')
+
+  /* The plans actually present, so the list never offers a plan with no one
+     on it and picks up a new rung without a code change. */
+  const plans = useMemo(
+    () => [...new Set(people.map((p) => p.tier))].sort((a, b) => a.localeCompare(b)),
+    [people],
+  )
+
   const tabs = useMemo(() => {
     if (mode === 'messages') return ['all', 'unread'] as const
     if (mode === 'flagged') return ['all', 'flagged'] as const
@@ -78,7 +127,7 @@ export function PeopleGrid({
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase()
     const isNew = (p: Person) => serverNow - new Date(p.joinedAt).getTime() < 7 * 86_400_000
-    return people
+    const base = people
       .filter((p) => {
         if (tab === 'new') return isNew(p)
         if (tab === 'flagged') return p.status === 'flagged' || p.status === 'disabled'
@@ -86,12 +135,37 @@ export function PeopleGrid({
         return true
       })
       .filter((p) => !q || [p.name, p.email, p.phone ?? ''].join(' ').toLowerCase().includes(q))
-  }, [people, tab, query, serverNow])
+
+    if (!filterable) return base
+
+    const idle = (p: Person) => serverNow - new Date(p.lastActiveAt).getTime()
+    const cut = base
+      .filter((p) => plan === 'any' || p.tier === plan)
+      .filter((p) => {
+        if (activity === 'day') return idle(p) < DAY
+        if (activity === 'week') return idle(p) < 7 * DAY
+        if (activity === 'idle30') return idle(p) >= 30 * DAY
+        return true
+      })
+    return sort === 'attention' ? cut : [...cut].sort(COMPARE[sort])
+  }, [people, tab, query, serverNow, filterable, plan, activity, sort])
+
+  const narrowed = plan !== 'any' || activity !== 'any' || sort !== 'attention'
+  const resetFilters = () => {
+    setPlan('any')
+    setActivity('any')
+    setSort('attention')
+  }
 
   /** The card's menu: review first, then the decisions, destructive last. */
   const menuFor = (p: Person): MenuItem[] => {
     const items: MenuItem[] = [
-      { key: 'open', label: t('actions.review'), icon: <PanelRight />, onSelect: () => onOpen(p) },
+      {
+        key: 'open',
+        label: t('actions.review'),
+        icon: <PanelRight />,
+        onSelect: () => onOpen(p),
+      },
     ]
     personActions(p).forEach((a, i) => {
       const rule = PERSON_RULES[a]
@@ -129,6 +203,49 @@ export function PeopleGrid({
         onQuery={setQuery}
         searchPlaceholder={t('searchPlaceholder')}
       />
+
+      {filterable && (
+        <FilterBar
+          summary={
+            narrowed
+              ? t('filters.showing', {
+                  shown: visible.length,
+                  total: people.length,
+                })
+              : undefined
+          }
+          onReset={narrowed ? resetFilters : undefined}
+          resetLabel={t('filters.reset')}
+        >
+          <FilterSelect
+            label={t('filters.plan')}
+            value={plan}
+            onChange={setPlan}
+            options={[
+              { key: 'any', label: t('filters.anyPlan') },
+              ...plans.map((name) => ({ key: name, label: name })),
+            ]}
+          />
+          <FilterSelect
+            label={t('filters.activity')}
+            value={activity}
+            onChange={setActivity}
+            options={ACTIVITY.map((key) => ({
+              key,
+              label: t(`filters.activityOptions.${key}`),
+            }))}
+          />
+          <FilterSelect
+            label={t('filters.sort')}
+            value={sort}
+            onChange={setSort}
+            options={SORTS.map((key) => ({
+              key,
+              label: t(`filters.sortOptions.${key}`),
+            }))}
+          />
+        </FilterBar>
+      )}
 
       {visible.length === 0 ? (
         <EmptyState>{t('empty')}</EmptyState>

@@ -1741,6 +1741,32 @@
         },
         "reasonHint": "Written for whoever picks this up next, including you in a month.",
         "cancel": "Cancel"
+      },
+      "filters": {
+        "plan": "Plan",
+        "anyPlan": "All plans",
+        "activity": "Last active",
+        "activityOptions": {
+          "any": "Any time",
+          "day": "Last 24 hours",
+          "week": "Last 7 days",
+          "idle30": "Inactive 30+ days"
+        },
+        "sort": "Sort by",
+        "sortOptions": {
+          "attention": "Needs attention first",
+          "newest": "Newest members",
+          "oldest": "Oldest members",
+          "lastActive": "Recently active",
+          "balance": "Balance, highest",
+          "lifetime": "Earned all time, highest",
+          "ads": "Ads watched, most",
+          "referrals": "Referrals, most",
+          "paidOut": "Paid out, highest",
+          "name": "Name, A to Z"
+        },
+        "showing": "{shown} of {total}",
+        "reset": "Clear filters"
       }
     },
     "users": {
@@ -3358,6 +3384,32 @@
         "rowLabel": "Ask the hub again about {reference}",
         "done": "The hub says this is {state}.",
         "unreachable": "The hub could not be reached. Nothing was changed."
+      },
+      "filters": {
+        "label": "Filter payments",
+        "all": "All",
+        "search": "Search buyer, reference or plan",
+        "product": "Product",
+        "anyProduct": "All products",
+        "anyPlan": "All plans",
+        "period": "Started",
+        "periods": {
+          "any": "Any time",
+          "day": "Last 24 hours",
+          "week": "Last 7 days",
+          "month": "Last 30 days"
+        },
+        "sort": "Sort by",
+        "sorts": {
+          "newest": "Newest first",
+          "oldest": "Oldest first",
+          "amountHigh": "Amount, highest",
+          "amountLow": "Amount, lowest",
+          "lastEvent": "Latest hub reply"
+        },
+        "showing": "{shown} of {total} · {paid} paid",
+        "reset": "Clear filters",
+        "none": "No payments match these filters."
       }
     },
     "onboarding": {

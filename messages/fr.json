@@ -1741,6 +1741,32 @@
         },
         "reasonHint": "Écrit pour la personne qui reprendra le dossier, y compris vous dans un mois.",
         "cancel": "Annuler"
+      },
+      "filters": {
+        "plan": "Forfait",
+        "anyPlan": "Tous les forfaits",
+        "activity": "Dernière activité",
+        "activityOptions": {
+          "any": "Toutes dates",
+          "day": "Dernières 24 heures",
+          "week": "7 derniers jours",
+          "idle30": "Inactifs depuis 30 jours ou plus"
+        },
+        "sort": "Trier par",
+        "sortOptions": {
+          "attention": "À traiter en premier",
+          "newest": "Inscrits récemment",
+          "oldest": "Inscrits les plus anciens",
+          "lastActive": "Actifs récemment",
+          "balance": "Solde, décroissant",
+          "lifetime": "Gains totaux, décroissant",
+          "ads": "Publicités vues, décroissant",
+          "referrals": "Parrainages, décroissant",
+          "paidOut": "Déjà versé, décroissant",
+          "name": "Nom, de A à Z"
+        },
+        "showing": "{shown} sur {total}",
+        "reset": "Effacer les filtres"
       }
     },
     "users": {
@@ -3358,6 +3384,32 @@
         "rowLabel": "Redemander au hub pour {reference}",
         "done": "Le hub indique : {state}.",
         "unreachable": "Le hub est injoignable. Rien n'a été modifié."
+      },
+      "filters": {
+        "label": "Filtrer les paiements",
+        "all": "Tous",
+        "search": "Rechercher acheteur, référence ou forfait",
+        "product": "Produit",
+        "anyProduct": "Tous les produits",
+        "anyPlan": "Tous les forfaits",
+        "period": "Démarré",
+        "periods": {
+          "any": "Toutes dates",
+          "day": "Dernières 24 heures",
+          "week": "7 derniers jours",
+          "month": "30 derniers jours"
+        },
+        "sort": "Trier par",
+        "sorts": {
+          "newest": "Plus récents",
+          "oldest": "Plus anciens",
+          "amountHigh": "Montant, décroissant",
+          "amountLow": "Montant, croissant",
+          "lastEvent": "Dernier retour du hub"
+        },
+        "showing": "{shown} sur {total} · {paid} payés",
+        "reset": "Effacer les filtres",
+        "none": "Aucun paiement ne correspond à ces filtres."
       }
     },
     "onboarding": {

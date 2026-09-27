@@ -293,6 +293,88 @@ export function Toolbar<T extends string>({
 }
 
 /* ------------------------------------------------------------------ */
+/* Filters + sort                                                      */
+/* ------------------------------------------------------------------ */
+
+export type Choice<T extends string> = { key: T; label: string }
+
+/**
+ * The row of narrowing controls under the Toolbar: plan, period, sort.
+ *
+ * Separate from the tabs on purpose. A tab is the ONE question a screen is
+ * organised around (which status), and it carries a count. These are the
+ * secondary cuts an operator stacks on top of it, so they read as quieter
+ * labelled selects rather than a second strip of tabs competing with the
+ * first.
+ *
+ * Two to a row on a phone, where four selects in one line would be 80px
+ * each and truncated to nothing; a wrapping row from `sm`. The reset link
+ * only exists while something is narrowed, and it states how many rows the
+ * cut left, so an operator never mistakes a filtered list for the whole one.
+ */
+export function FilterBar({
+  children,
+  summary,
+  onReset,
+  resetLabel,
+}: {
+  children: React.ReactNode
+  /** "12 of 340". Left to the caller when to show it. */
+  summary?: string
+  onReset?: () => void
+  resetLabel?: string
+}) {
+  return (
+    <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-end">{children}</div>
+      {(summary || onReset) && (
+        <div className="flex items-center gap-3 text-[0.75rem] sm:pb-2">
+          {summary && <span className="text-ink-500 tabular-nums">{summary}</span>}
+          {onReset && (
+            <button
+              type="button"
+              onClick={onReset}
+              className="font-medium text-brand-700 underline-offset-2 hover:underline"
+            >
+              {resetLabel}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function FilterSelect<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string
+  value: T
+  options: Choice<T>[]
+  onChange: (value: T) => void
+}) {
+  return (
+    <label className="flex min-w-0 flex-col gap-1 sm:w-44">
+      <span className="text-[0.6875rem] font-medium text-ink-500">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value as T)}
+        className="h-9 w-full min-w-0 rounded-(--radius-input) border border-ink-200 bg-surface px-2.5 text-[0.8125rem] text-ink-900 focus:border-brand-600 focus:outline-none pointer-coarse:h-10 pointer-coarse:text-base"
+      >
+        {options.map((o) => (
+          <option key={o.key} value={o.key}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
+/* ------------------------------------------------------------------ */
 /* Table                                                               */
 /* ------------------------------------------------------------------ */
 
