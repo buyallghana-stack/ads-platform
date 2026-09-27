@@ -3,6 +3,7 @@ import 'server-only'
 import { getSessionUser } from '@/lib/auth/session'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { type LeaderboardPeriod, type Movement, asMovement } from '@/lib/leaderboard/types'
+import { contactLine } from '@/lib/auth/phone'
 
 /**
  * The admin's copy of the leaderboard.
@@ -53,7 +54,7 @@ export async function getAdminLeaderboard(
     userId: String(r.user_id),
     displayName: String(r.display_name ?? ''),
     fullName: String(r.full_name ?? ''),
-    email: String(r.email ?? ''),
+    email: contactLine(String(r.email ?? ''), (r.phone as string | null) ?? null),
     phone: (r.phone as string | null) ?? null,
     points: Number(r.points),
     previousRank: r.previous_rank === null ? null : Number(r.previous_rank),

@@ -1,45 +1,15 @@
-import type { Metadata } from 'next'
+import { setRequestLocale } from 'next-intl/server'
 
-import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { redirect } from '@/i18n/navigation'
 
-import { AuthLayout } from '@/components/auth/AuthLayout'
-import { VerifyFlow } from '@/components/auth/VerifyFlow'
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}): Promise<Metadata> {
+/**
+ * The old "check your email" screen. Signup no longer sends an email (the SMS
+ * code is the verification, since 2026-09-27), so anybody arriving here from
+ * an old link or bookmark goes to the phone screen, which sends them to sign
+ * in first if they have no session.
+ */
+export default async function VerifyPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
-  const t = await getTranslations({ locale, namespace: 'auth.verify.checkEmail' })
-  return { title: t('title') }
-}
-
-export default async function VerifyPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ locale: string }>
-  searchParams: Promise<{ email?: string; error?: string }>
-}) {
-  const { locale } = await params
-  const { email, error } = await searchParams
   setRequestLocale(locale)
-
-  /*
-    The address comes through the URL so a refresh does not strand someone
-    mid-verification. It is display-only: verification happens when the
-    emailed link is redeemed at /auth/confirm, against a token this page never
-    sees, so editing the parameter achieves nothing (§2.4).
-
-    `error` is set by /auth/confirm when a link fails, so someone bounced back
-    here is told why instead of staring at the same screen.
-  */
-  const linkError = error === 'expired' || error === 'link' ? error : undefined
-
-  return (
-    <AuthLayout compact>
-      <VerifyFlow email={email ?? 'your email address'} linkError={linkError} />
-    </AuthLayout>
-  )
+  redirect({ href: '/verify-phone', locale })
 }

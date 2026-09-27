@@ -6,21 +6,23 @@ import { ArrowLeft, Check, Lock } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { changePassword } from '@/app/[locale]/(app)/profile/credentials/actions'
+import { SmsCodeStep } from '@/components/auth/SmsCodeStep'
 import { Button } from '@/components/ui/Button'
 import { CodeInput } from '@/components/ui/CodeInput'
 import { PasswordField } from '@/components/ui/PasswordField'
 import { useRouter } from '@/i18n/navigation'
 
 /**
- * Change password. Requires the current one — holding the session is not
- * proof, since an unlocked phone holds it too — plus an authenticator code
- * when 2FA is on.
+ * Change password. Requires the current one (holding the session is not
+ * proof, since an unlocked phone holds it too), an authenticator code when 2FA
+ * is on, and since 2026-09-27 a code texted to the verified phone. The first
+ * press checks the rest and sends the text; the second makes the change.
  *
  * The code is asked for on the same screen rather than a second step: the user
  * already has their phone in hand for the app, and a page transition between
  * typing a password and typing a code is where people abandon.
  */
-export function ChangePasswordForm({ needsCode }: { needsCode: boolean }) {
+export function ChangePasswordForm({ needsCode, phone }: { needsCode: boolean; phone: string }) {
   const t = useTranslations('credentials')
   const tf = useTranslations('twoFactor')
   const router = useRouter()
@@ -32,6 +34,10 @@ export function ChangePasswordForm({ needsCode }: { needsCode: boolean }) {
   const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
+  const [smsSent, setSmsSent] = useState(false)
+  const [sms, setSms] = useState('')
+  const [smsError, setSmsError] = useState<string | null>(null)
+  const [resendSeconds, setResendSeconds] = useState(60)
 
   const errText = (r: {
     errorKey?: string
@@ -50,26 +56,53 @@ export function ChangePasswordForm({ needsCode }: { needsCode: boolean }) {
         ? tf('errors.wrongCodeAttempts', { attempts: r.attemptsLeft })
         : tf('errors.wrongCode')
     }
-    if (r.errorKey) return t(`errors.${r.errorKey}` as 'errors.generic')
+    if (r.errorKey) {
+      const minutes = r.retryAfter
+        ? Math.max(1, Math.ceil((new Date(r.retryAfter).getTime() - Date.now()) / 60000))
+        : 1
+      return t(`errors.${r.errorKey}` as 'errors.generic', { minutes, attempts: r.attemptsLeft ?? 0 })
+    }
     return r.message ?? t('errors.generic')
   }
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const attempt = async (withSms: string | undefined) =>
+    changePassword({
+      currentPassword: current,
+      newPassword: next,
+      confirmPassword: confirm,
+      code: code || undefined,
+      smsCode: withSms,
+    })
+
+  const submit = (e?: React.FormEvent, typed?: string) => {
+    e?.preventDefault()
     setError(null)
+    setSmsError(null)
     startTransition(async () => {
-      const res = await changePassword({
-        currentPassword: current,
-        newPassword: next,
-        confirmPassword: confirm,
-        code: code || undefined,
-      })
+      const res = await attempt(smsSent ? (typed ?? sms) : undefined)
       if (!res.ok) {
+        if (res.smsField) {
+          setSms('')
+          return setSmsError(errText(res))
+        }
         setCode('')
         return setError(errText(res))
       }
+      if (res.smsSent) {
+        setSmsSent(true)
+        setResendSeconds(res.resendSeconds ?? 60)
+        return
+      }
       setDone(true)
     })
+  }
+
+  /** "Send again" repeats the first press: every check, then a fresh text. */
+  const resend = async (): Promise<number | null> => {
+    const res = await attempt(undefined)
+    if (res.ok && res.smsSent) return res.resendSeconds ?? 60
+    if (!res.ok) setSmsError(errText(res))
+    return null
   }
 
   if (done) {
@@ -117,6 +150,7 @@ export function ChangePasswordForm({ needsCode }: { needsCode: boolean }) {
           onChange={(e) => {
             setCurrent(e.target.value)
             setError(null)
+            setSmsSent(false)
           }}
           showChecklist={false}
           autoComplete="current-password"
@@ -129,6 +163,7 @@ export function ChangePasswordForm({ needsCode }: { needsCode: boolean }) {
           onChange={(e) => {
             setNext(e.target.value)
             setError(null)
+            setSmsSent(false)
           }}
           autoComplete="new-password"
           required
@@ -169,6 +204,25 @@ export function ChangePasswordForm({ needsCode }: { needsCode: boolean }) {
           </div>
         )}
 
+        {smsSent && (
+          <div className="rounded-(--radius-card) border border-ink-200 bg-surface p-4">
+            <p className="mb-2 text-[0.8125rem] font-medium text-ink-900">{t('sms.title')}</p>
+            <SmsCodeStep
+              phone={phone}
+              value={sms}
+              onChange={(v) => {
+                setSms(v)
+                setSmsError(null)
+              }}
+              onComplete={(v) => submit(undefined, v)}
+              onResend={resend}
+              resendSeconds={resendSeconds}
+              error={smsError}
+              disabled={pending}
+            />
+          </div>
+        )}
+
         {error && (
           <p role="alert" className="text-[0.8125rem] font-medium text-danger-600">
             {error}
@@ -180,9 +234,15 @@ export function ChangePasswordForm({ needsCode }: { needsCode: boolean }) {
           size="lg"
           fullWidth
           loading={pending}
-          disabled={!current || !next || !confirm || (needsCode && code.length < 6)}
+          disabled={
+            !current ||
+            !next ||
+            !confirm ||
+            (needsCode && code.length < 6) ||
+            (smsSent && sms.length < 6)
+          }
         >
-          {t('password.cta')}
+          {smsSent ? t('password.cta') : t('sms.send')}
         </Button>
       </form>
     </div>

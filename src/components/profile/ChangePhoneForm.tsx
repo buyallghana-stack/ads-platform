@@ -2,10 +2,11 @@
 
 import { useState, useTransition } from 'react'
 
-import { ArrowLeft, Lock, Mail, MailCheck } from 'lucide-react'
+import { ArrowLeft, Check, Lock, Phone } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
-import { changeEmail } from '@/app/[locale]/(app)/profile/credentials/actions'
+import { changePhone } from '@/app/[locale]/(app)/profile/credentials/actions'
+import { SmsCodeStep } from '@/components/auth/SmsCodeStep'
 import { Button } from '@/components/ui/Button'
 import { CodeInput } from '@/components/ui/CodeInput'
 import { PasswordField } from '@/components/ui/PasswordField'
@@ -14,34 +15,27 @@ import { TextField } from '@/components/ui/TextField'
 import { useRouter } from '@/i18n/navigation'
 
 /**
- * Change the sign-in email.
+ * Change the sign-in phone.
  *
- * Identity is proved by the current password plus, when 2FA is on, an
- * authenticator code — never an emailed code (operator direction 2026-07-25).
- *
- * The address does not switch on submit: Supabase sends a confirmation link to
- * the NEW inbox and the change lands when it is opened. That is not identity
- * verification, it is ownership — without it a mistyped address would move
- * sign-in to a mailbox the user cannot open. The success screen says so
- * plainly, because "nothing appears to have changed" is otherwise alarming.
+ * Current password (and an authenticator code when 2FA is on) prove it is the
+ * owner. The first press texts a code to the NEW number; typing it back proves
+ * the number is theirs and makes the change. The old number is told.
  */
-export function ChangeEmailForm({
-  currentEmail,
-  needsCode,
-}: {
-  currentEmail: string
-  needsCode: boolean
-}) {
+export function ChangePhoneForm({ currentPhone, needsCode }: { currentPhone: string; needsCode: boolean }) {
   const t = useTranslations('credentials')
   const tf = useTranslations('twoFactor')
   const router = useRouter()
   const [pending, startTransition] = useTransition()
 
-  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [sent, setSent] = useState(false)
+  const [smsSent, setSmsSent] = useState(false)
+  const [sms, setSms] = useState('')
+  const [smsError, setSmsError] = useState<string | null>(null)
+  const [resendSeconds, setResendSeconds] = useState(60)
+  const [done, setDone] = useState(false)
 
   const errText = (r: {
     errorKey?: string
@@ -49,51 +43,65 @@ export function ChangeEmailForm({
     retryAfter?: string
     attemptsLeft?: number
   }): string => {
-    if (r.errorKey === 'locked') {
-      const minutes = r.retryAfter
-        ? Math.max(1, Math.ceil((new Date(r.retryAfter).getTime() - Date.now()) / 60000))
-        : 15
-      return tf('errors.locked', { minutes })
-    }
+    const minutes = r.retryAfter
+      ? Math.max(1, Math.ceil((new Date(r.retryAfter).getTime() - Date.now()) / 60000))
+      : 15
+    if (r.errorKey === 'locked') return tf('errors.locked', { minutes })
     if (r.errorKey === 'wrongCode') {
       return typeof r.attemptsLeft === 'number'
         ? tf('errors.wrongCodeAttempts', { attempts: r.attemptsLeft })
         : tf('errors.wrongCode')
     }
-    if (r.errorKey) return t(`errors.${r.errorKey}` as 'errors.generic')
+    if (r.errorKey) {
+      return t(`errors.${r.errorKey}` as 'errors.generic', { minutes, attempts: r.attemptsLeft ?? 0 })
+    }
     return r.message ?? t('errors.generic')
   }
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const attempt = (withSms: string | undefined) =>
+    changePhone({ newPhone: phone, currentPassword: password, code: code || undefined, smsCode: withSms })
+
+  const submit = (e?: React.FormEvent, typed?: string) => {
+    e?.preventDefault()
     setError(null)
+    setSmsError(null)
     startTransition(async () => {
-      const res = await changeEmail({
-        newEmail: email,
-        currentPassword: password,
-        code: code || undefined,
-      })
+      const res = await attempt(smsSent ? (typed ?? sms) : undefined)
       if (!res.ok) {
+        if (res.smsField) {
+          setSms('')
+          return setSmsError(errText(res))
+        }
         setCode('')
         return setError(errText(res))
       }
-      setSent(true)
+      if (res.smsSent) {
+        setSmsSent(true)
+        setResendSeconds(res.resendSeconds ?? 60)
+        return
+      }
+      setDone(true)
+      router.refresh()
     })
   }
 
-  if (sent) {
+  const resend = async (): Promise<number | null> => {
+    const res = await attempt(undefined)
+    if (res.ok && res.smsSent) return res.resendSeconds ?? 60
+    if (!res.ok) setSmsError(errText(res))
+    return null
+  }
+
+  if (done) {
     return (
       <div className="mx-auto w-full max-w-md px-4 py-5 sm:px-6 md:py-7">
         <div className="animate-rise mt-10 flex flex-col items-center text-center">
-          <span className="grid size-16 place-items-center rounded-full bg-brand-50 text-brand-600">
-            <MailCheck aria-hidden className="size-8" />
+          <span className="grid size-16 place-items-center rounded-full bg-success-50 text-success-600">
+            <Check aria-hidden className="size-8" strokeWidth={2.5} />
           </span>
-          <h2 className="mt-4 text-[1.25rem] font-semibold text-ink-900">{t('email.sentTitle')}</h2>
+          <h2 className="mt-4 text-[1.25rem] font-semibold text-ink-900">{t('phone.doneTitle')}</h2>
           <p className="mt-1.5 max-w-[34ch] text-[0.8125rem] leading-relaxed text-ink-500">
-            {t('email.sentBody', { email })}
-          </p>
-          <p className="mt-3 max-w-[34ch] text-[0.75rem] leading-relaxed text-ink-400">
-            {t('email.sentNote')}
+            {t('phone.doneBody')}
           </p>
           <Button size="lg" fullWidth className="mt-7" onClick={() => router.push('/profile')}>
             {t('backToProfile')}
@@ -115,39 +123,32 @@ export function ChangeEmailForm({
           <ArrowLeft aria-hidden className="size-4.5" />
         </button>
         <div>
-          <h1 className="text-lg font-semibold tracking-[-0.02em] text-ink-900">
-            {t('email.title')}
-          </h1>
-          <p className="text-[0.8125rem] text-ink-500">{t('email.subtitle')}</p>
+          <h1 className="text-lg font-semibold tracking-[-0.02em] text-ink-900">{t('phone.title')}</h1>
+          <p className="text-[0.8125rem] text-ink-500">{t('phone.subtitle')}</p>
         </div>
       </header>
 
       <form method="post" onSubmit={submit} className="animate-rise mt-6 flex flex-col gap-4">
-        {/* Text, not a disabled input: a long address clips inside an input
-            and cannot be scrolled or selected. See ReadOnlyField. */}
-        <ReadOnlyField
-          label={t('email.current')}
-          value={currentEmail}
-          leadingIcon={<Mail />}
-        />
+        <ReadOnlyField label={t('phone.current')} value={currentPhone} leadingIcon={<Phone />} />
 
         <TextField
-          label={t('email.new')}
-          type="email"
-          value={email}
+          label={t('phone.new')}
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel-national"
+          placeholder="024 123 4567"
+          value={phone}
           onChange={(e) => {
-            setEmail(e.target.value)
+            setPhone(e.target.value)
             setError(null)
+            setSmsSent(false)
           }}
-          leadingIcon={<Mail />}
-          inputMode="email"
-          autoComplete="email"
-          placeholder={t('email.newPlaceholder')}
+          leadingIcon={<Phone />}
           required
         />
 
         <PasswordField
-          label={t('email.password')}
+          label={t('phone.password')}
           value={password}
           onChange={(e) => {
             setPassword(e.target.value)
@@ -181,6 +182,25 @@ export function ChangeEmailForm({
           </div>
         )}
 
+        {smsSent && (
+          <div className="rounded-(--radius-card) border border-ink-200 bg-surface p-4">
+            <p className="mb-2 text-[0.8125rem] font-medium text-ink-900">{t('sms.titleNew')}</p>
+            <SmsCodeStep
+              phone={phone}
+              value={sms}
+              onChange={(v) => {
+                setSms(v)
+                setSmsError(null)
+              }}
+              onComplete={(v) => submit(undefined, v)}
+              onResend={resend}
+              resendSeconds={resendSeconds}
+              error={smsError}
+              disabled={pending}
+            />
+          </div>
+        )}
+
         {error && (
           <p role="alert" className="text-[0.8125rem] font-medium text-danger-600">
             {error}
@@ -192,9 +212,9 @@ export function ChangeEmailForm({
           size="lg"
           fullWidth
           loading={pending}
-          disabled={!email || !password || (needsCode && code.length < 6)}
+          disabled={!phone || !password || (needsCode && code.length < 6) || (smsSent && sms.length < 6)}
         >
-          {t('email.cta')}
+          {smsSent ? t('phone.cta') : t('sms.send')}
         </Button>
       </form>
     </div>

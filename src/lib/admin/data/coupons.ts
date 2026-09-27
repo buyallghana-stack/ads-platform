@@ -2,6 +2,7 @@ import 'server-only'
 
 import { actingSuperAdminId } from '@/lib/admin/roles'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { contactLine } from '@/lib/auth/phone'
 
 /**
  * Coupon codes for the admin screen.
@@ -104,7 +105,7 @@ export async function getCouponRedemptions(couponId: string): Promise<CouponRede
   return (data as Array<Record<string, unknown>>).map((r) => ({
     id: String(r.id),
     person: (r.person as string | null) ?? null,
-    email: String(r.email),
+    email: contactLine(String(r.email)),
     listMinor: Number(r.list_minor),
     discountMinor: Number(r.discount_minor),
     chargedMinor: Number(r.charged_minor),

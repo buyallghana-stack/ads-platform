@@ -3,6 +3,7 @@ import 'server-only'
 import { createClient } from '@/lib/supabase/server'
 
 import type { Person } from '../types'
+import { contactLine } from '@/lib/auth/phone'
 
 /**
  * The accounts behind Users and Flagged, for real. Nothing here comes from
@@ -56,7 +57,7 @@ function toPerson(row: PersonRow): Person {
   return {
     id: row.id,
     name: row.name,
-    email: row.email,
+    email: contactLine(row.email, row.phone),
     phone: row.phone,
     joinedAt: row.joined_at,
     // bigint and numeric arrive as strings over PostgREST once they are large

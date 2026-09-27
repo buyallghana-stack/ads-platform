@@ -18,6 +18,11 @@ import { createClient } from '@/lib/supabase/server'
  * middleware would rewrite /auth/confirm to /en/auth/confirm, which is not a
  * route, and every confirmation email in circulation would 404.
  *
+ * Since 2026-09-27 (phone sign-in) the only email that should still arrive is
+ * the LEGACY password reset for an account that never proved a phone, plus
+ * staff invitations. The other types are kept working for links already in
+ * people's inboxes.
+ *
  * The three types that reach here:
  *   signup        first-time address confirmation
  *   email_change  a changed address proving itself before the change takes
@@ -39,8 +44,10 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type') as EmailOtpType | null
   const next = safeNext(searchParams.get('next'))
 
+  /* A dead link is almost always an old reset mail, so the answer is the
+     place to ask for a fresh reset. The reason is kept on the URL for logs. */
   const fail = (reason: 'link' | 'expired') =>
-    NextResponse.redirect(`${origin}/verify?error=${reason}`)
+    NextResponse.redirect(`${origin}/forgot-password?error=${reason}`)
 
   // A link that arrives without its token is a mail client that mangled it, or
   // somebody guessing the URL. Same answer either way.

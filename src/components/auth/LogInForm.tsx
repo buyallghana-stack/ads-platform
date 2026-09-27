@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { CalendarClock, Clock, LogIn, LogOut, Mail, UserRound } from 'lucide-react'
+import { CalendarClock, Clock, LogIn, LogOut, Mail, Phone, UserRound } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 import { Controller, useForm } from 'react-hook-form'
 
@@ -14,14 +14,24 @@ import { PasswordField } from '@/components/ui/PasswordField'
 import { TextField } from '@/components/ui/TextField'
 import {
   confirmLoginAndCancelDeletionAction,
+  legacyLogInAction,
   logInAction,
   stayLoggedOutAction,
 } from '@/app/[locale]/(auth)/actions'
 import { deviceFingerprint, warmFingerprint } from '@/lib/fraud/fingerprint'
 import { Link, useRouter } from '@/i18n/navigation'
-import { logInSchema, type LogInInput } from '@/lib/validation/auth'
+import { legacyLogInSchema, logInSchema } from '@/lib/validation/auth'
 import { useAuthErrorMessage } from '@/lib/useAuthErrorMessage'
 
+type LogInValues = { phone: string; email: string; password: string; rememberMe?: boolean }
+
+/**
+ * Sign in with a phone number (since 2026-09-27).
+ *
+ * The email mode is a way home for accounts made before phone sign-in that
+ * have not proved a number yet. The server refuses it for everyone else, and
+ * the (app) layout sends whoever uses it straight to /verify-phone.
+ */
 export function LogInForm() {
   const t = useTranslations('auth.logIn')
   const tError = useTranslations('auth.errors')
@@ -36,9 +46,11 @@ export function LogInForm() {
     effectiveAt?: string
   } | null>(null)
   const [pendingCredentials, setPendingCredentials] = useState<{
-    email: string
+    phone?: string
+    email?: string
     password: string
   } | null>(null)
+  const [mode, setMode] = useState<'phone' | 'email'>('phone')
   const [actionLoading, setActionLoading] = useState<'cancel' | 'stay' | null>(null)
 
   const {
@@ -47,10 +59,12 @@ export function LogInForm() {
     control,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<LogInInput>({
-    resolver: zodResolver(logInSchema),
+    clearErrors,
+  } = useForm<LogInValues>({
+    // Read on every render, so switching mode switches the rules.
+    resolver: zodResolver(mode === 'phone' ? logInSchema : legacyLogInSchema) as never,
     mode: 'onTouched',
-    defaultValues: { email: '', password: '', rememberMe: true },
+    defaultValues: { phone: '', email: '', password: '', rememberMe: true },
   })
 
   const password = watch('password') ?? ''
@@ -65,15 +79,19 @@ export function LogInForm() {
     setFormError(null)
     setNoticeMessage(null)
 
-    const result = await logInAction({
-      email: values.email,
-      password: values.password,
-      fingerprint: await deviceFingerprint(),
-    })
+    const fingerprint = await deviceFingerprint()
+    const result =
+      mode === 'phone'
+        ? await logInAction({ phone: values.phone, password: values.password, fingerprint })
+        : await legacyLogInAction({ email: values.email, password: values.password, fingerprint })
 
     if (result.ok) {
       if (result.deletionPending) {
-        setPendingCredentials({ email: values.email, password: values.password })
+        setPendingCredentials(
+          mode === 'phone'
+            ? { phone: values.phone, password: values.password }
+            : { email: values.email, password: values.password },
+        )
         setDeletionInfo({
           requestedAt: result.requestedAt,
           effectiveAt: result.effectiveAt,
@@ -102,12 +120,8 @@ export function LogInForm() {
       return
     }
 
-    // An unverified account is not a failed login — send them to finish
-    // verifying rather than showing an error they cannot act on.
-    if (result.errorKey === 'emailNotVerified') {
-      router.push(`/verify?email=${encodeURIComponent(values.email)}`)
-      return
-    }
+    // This account has moved to phone sign-in: put them on the right form.
+    if (result.errorKey === 'usePhoneToSignIn') setMode('phone')
 
     setFormError(result.message ?? msg(result.errorKey) ?? tError('generic'))
   })
@@ -138,8 +152,7 @@ export function LogInForm() {
       setFormError(null)
       setActionLoading('cancel')
       const res = await confirmLoginAndCancelDeletionAction({
-        email: pendingCredentials.email,
-        password: pendingCredentials.password,
+        ...pendingCredentials,
         fingerprint: await deviceFingerprint(),
       })
       if (res.ok) {
@@ -286,16 +299,32 @@ export function LogInForm() {
           One attribute is the difference between a failed sign-in and a
           credential in a log file. */}
       <form method="post" onSubmit={onSubmit} noValidate className="flex flex-col gap-3.5">
-        <TextField
-          label={t('email')}
-          type="email"
-          inputMode="email"
-          placeholder="you@example.com"
-          autoComplete="email"
-          leadingIcon={<Mail />}
-          error={msg(errors.email?.message)}
-          {...register('email')}
-        />
+        {mode === 'phone' ? (
+          <TextField
+            key="phone"
+            label={t('phone')}
+            type="tel"
+            inputMode="tel"
+            placeholder="024 123 4567"
+            autoComplete="tel-national"
+            leadingIcon={<Phone />}
+            error={msg(errors.phone?.message)}
+            {...register('phone')}
+          />
+        ) : (
+          <TextField
+            key="email"
+            label={t('email')}
+            type="email"
+            inputMode="email"
+            placeholder="you@example.com"
+            autoComplete="email"
+            leadingIcon={<Mail />}
+            hint={t('emailHint')}
+            error={msg(errors.email?.message)}
+            {...register('email')}
+          />
+        )}
 
         <Controller
           control={control}
@@ -346,7 +375,19 @@ export function LogInForm() {
         </Button>
       </form>
 
-      <p className="mt-5 text-center text-[0.8125rem] text-ink-500">
+      <button
+        type="button"
+        onClick={() => {
+          setMode((m) => (m === 'phone' ? 'email' : 'phone'))
+          setFormError(null)
+          clearErrors()
+        }}
+        className="mt-4 w-full text-center text-[0.8125rem] font-medium text-ink-500 hover:text-brand-700"
+      >
+        {mode === 'phone' ? t('useEmail') : t('usePhone')}
+      </button>
+
+      <p className="mt-4 text-center text-[0.8125rem] text-ink-500">
         {t('noAccount')}{' '}
         <Link href="/signup" className="font-medium text-ink-900 hover:text-brand-700">
           {t('signUp')}

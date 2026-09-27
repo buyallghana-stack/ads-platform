@@ -298,8 +298,8 @@
     },
     "signUp": {
       "title": "Create your account",
-      "subtitle": "Join free and start earning points today.",
-      "submit": "Create account",
+      "subtitle": "Join free with your phone number and start earning points today.",
+      "submit": "Send my code",
       "haveAccount": "Already have an account?",
       "logIn": "Log in",
       "fullName": "Full name",
@@ -308,7 +308,7 @@
       "emailPlaceholder": "you@example.com",
       "phone": "Phone number",
       "phonePlaceholder": "024 123 4567",
-      "phoneHint": "Used to keep accounts secure. We will not call you.",
+      "phoneHint": "You sign in with this number. We text you a code to confirm it.",
       "password": "Password",
       "passwordPlaceholder": "Create a strong password",
       "referralCode": "Referral code",
@@ -316,7 +316,11 @@
       "terms": "I agree to the <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
       "ghanaOnly": "Available in Ghana only.",
       "referralApplied": "Applied from your invite link.",
-      "checking": "Checking…"
+      "checking": "Checking…",
+      "codeTitle": "Enter your code",
+      "codeSubtitle": "One last step and your account is ready.",
+      "codeSubmit": "Create account",
+      "editDetails": "Edit my details"
     },
     "logIn": {
       "title": "Welcome back 👋",
@@ -341,7 +345,11 @@
         "cancelAndLogin": "Log In & Cancel Deletion",
         "stayLoggedOut": "Stay Logged Out",
         "loggedOutNotice": "Your account remains scheduled for deletion. You have been signed out."
-      }
+      },
+      "phone": "Phone number",
+      "emailHint": "Only for accounts made before phone sign-in. You will confirm a phone number next.",
+      "useEmail": "Signed up with an email before? Use it once",
+      "usePhone": "Sign in with your phone number instead"
     },
     "verify": {
       "checkEmail": {
@@ -359,11 +367,26 @@
     },
     "forgotPassword": {
       "title": "Reset your password",
-      "subtitle": "Enter your email and we will send you a reset link.",
-      "submit": "Send reset link",
+      "subtitle": "Enter the phone number you sign in with and we will text you a code.",
+      "submit": "Send code",
       "sentTitle": "Check your email",
       "sentSubtitle": "If an account exists for <em>{email}</em>, a reset link is on its way.",
-      "backToLogin": "Back to log in"
+      "backToLogin": "Back to log in",
+      "phone": "Phone number",
+      "codeTitle": "Choose a new password",
+      "codeSubtitle": "If an account uses this number, a code is on its way. Enter it with your new password.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "resetSubmit": "Reset password",
+      "doneTitle": "Password updated",
+      "doneSubtitle": "You have been signed out everywhere. Log in with your new password.",
+      "logIn": "Log in",
+      "useEmail": "Account from before phone sign-in? Reset by email",
+      "usePhone": "Reset with my phone number instead",
+      "emailTitle": "Reset by email",
+      "emailSubtitle": "Only for accounts that have not confirmed a phone number yet. Everyone else resets by SMS.",
+      "email": "Email address",
+      "emailSubmit": "Send reset link"
     },
     "resetPassword": {
       "title": "Choose a new password",
@@ -403,20 +426,48 @@
       "referralInvalid": "Referral codes are 8 characters, letters and numbers",
       "codeRequired": "Enter the 6-digit code",
       "codeInvalid": "That code is not correct. Check it and try again.",
-      "codeExpired": "That code has expired. Request a new one.",
+      "codeExpired": "That code has expired or was replaced. Ask for a new one.",
       "generic": "Something went wrong. Please try again.",
       "network": "We could not reach the server. Check your connection and try again.",
       "emailTaken": "An account with this email already exists. Log in instead.",
       "referralNotFound": "That referral code does not exist",
-      "invalidCredentials": "That email or password is not correct",
+      "invalidCredentials": "That phone number or password is not correct",
       "emailNotVerified": "Please verify your email address first",
-      "identityBlocked": "This email address or phone number cannot be used to open an account.",
+      "identityBlocked": "This phone number cannot be used to open an account.",
       "botCheckFailed": "We could not confirm you are a person. Refresh the page and try again. If you use an ad blocker or a VPN, turn it off for this page.",
       "emailSendLimit": "We could not send your confirmation email just now. Please try again in a few minutes.",
       "botCheckRetry": "The security check needs doing again. It has been reset just below. Please press Create account once more.",
       "emailSendFailed": "We could not send a confirmation email to that address just now. This is on our side. Please try again in a few minutes.",
       "resetLinkExpired": "This reset link has expired or has already been used. Request a new one and open it in the same browser.",
-      "passwordSameAsOld": "That is already your password. Choose a different one."
+      "passwordSameAsOld": "That is already your password. Choose a different one.",
+      "phoneTaken": "An account already uses this phone number. Log in instead.",
+      "codeCooldown": "Please wait {minutes, plural, one {a minute} other {# minutes}} before asking for another code.",
+      "codeLimit": "Too many codes sent to this number. Try again in {minutes, plural, one {a minute} other {# minutes}}.",
+      "smsFailed": "We could not send the text just now. This is on our side. Please try again in a few minutes.",
+      "codeInvalidAttempts": "That code is not correct. {attempts, plural, one {One try left} other {# tries left}}.",
+      "codeLocked": "Too many wrong tries. Ask for a new code.",
+      "invalidEmailCredentials": "That email or password is not correct",
+      "usePhoneToSignIn": "This account now signs in with its phone number. Use that instead.",
+      "signOutInstead": "Sign out"
+    },
+    "smsCode": {
+      "sentTo": "We texted a 6-digit code to <em>{phone}</em>.",
+      "label": "SMS code",
+      "digit": "Digit {position} of 6",
+      "notArrived": "No text yet?",
+      "resendIn": "Send again in {seconds}s",
+      "sending": "Sending…",
+      "resend": "Send a new code",
+      "resent": "A new code is on its way."
+    },
+    "verifyPhone": {
+      "title": "Confirm your phone number",
+      "subtitle": "You now sign in with your phone, and security codes come by SMS. Confirm your number once to carry on.",
+      "phone": "Phone number",
+      "phoneHint": "Must be a Ghanaian number you can receive texts on.",
+      "send": "Text me a code",
+      "confirm": "Confirm number",
+      "changeNumber": "Use a different number"
     }
   },
   "legal": {
@@ -967,7 +1018,8 @@
       "sessionsHint": "See where you're signed in, sign out other devices",
       "twoFactorOn": "On",
       "twoFactorOff": "Off",
-      "backupCodesLeft": "{count, plural, =0 {None left} other {# left}}"
+      "backupCodesLeft": "{count, plural, =0 {None left} other {# left}}",
+      "phone": "Change phone number"
     },
     "preferences": {
       "appearance": "Appearance",
@@ -1107,7 +1159,9 @@
       "phoneHint": "Taken automatically from your Mobile Money payout account.",
       "noMomoPhone": "No Mobile Money payout account added yet",
       "email": "Email",
-      "emailHint": "Your email is managed under Security."
+      "emailHint": "Your email is managed under Security.",
+      "signInPhone": "Sign-in phone",
+      "signInPhoneHint": "Change it in Security. A code confirms the new number."
     },
     "avatar": {
       "change": "Change profile picture",
@@ -1266,7 +1320,34 @@
       "emailTaken": "That address cannot be used.",
       "codeRequired": "Enter the code from your authenticator app.",
       "notSignedIn": "Please sign in again.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "phoneRequired": "Enter the new phone number.",
+      "phoneInvalid": "Enter a 10-digit Ghanaian number starting 02 or 05.",
+      "samePhone": "That is already your phone number.",
+      "phoneTaken": "That number cannot be used.",
+      "noVerifiedPhone": "Confirm your phone number first.",
+      "smsFailed": "We could not send the text just now. Please try again in a few minutes.",
+      "smsCooldown": "Please wait {minutes, plural, one {a minute} other {# minutes}} before asking for another code.",
+      "smsLimit": "Too many codes sent. Try again in {minutes, plural, one {a minute} other {# minutes}}.",
+      "smsRequired": "Enter the 6-digit code from the text.",
+      "smsWrong": "That code is not correct. {attempts, plural, one {One try left} other {# tries left}}.",
+      "smsLocked": "Too many wrong tries. Ask for a new code.",
+      "smsExpired": "That code has expired. Ask for a new one."
+    },
+    "phone": {
+      "title": "Change phone number",
+      "subtitle": "This is the number you sign in with.",
+      "current": "Current number",
+      "new": "New number",
+      "password": "Current password",
+      "cta": "Change number",
+      "doneTitle": "Number changed",
+      "doneBody": "Sign in with your new number from now on. We told your old number about the change."
+    },
+    "sms": {
+      "title": "Code sent by SMS",
+      "titleNew": "Code sent to your new number",
+      "send": "Text me a code"
     }
   },
   "deleteAccount": {

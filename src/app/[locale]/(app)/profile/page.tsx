@@ -10,7 +10,7 @@ import {
   Languages,
   ListChecks,
   Lock,
-  Mail,
+  Phone,
   MonitorSmartphone,
   Palette,
   ShieldCheck,
@@ -29,6 +29,7 @@ import { CommunityLinks } from '@/components/profile/CommunityLinks'
 import { SettingsGroup, SettingsRow } from '@/components/profile/SettingsRow'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { Link, redirect } from '@/i18n/navigation'
+import { formatPhone, visibleEmail } from '@/lib/auth/phone'
 import { getProfile, getViewerUser } from '@/lib/auth/session'
 import { getCommunities } from '@/lib/communities/data'
 import { getTwoFactorStatus } from '@/lib/security/two-factor-data'
@@ -70,7 +71,9 @@ export default async function ProfilePage({
   const planStanding = await getPlanStanding(user!.id)
   const communities = await getCommunities('ads')
   const isAdmin = await isAdminUser(user!.id)
-  const fullName = profile?.full_name ?? user!.email ?? ''
+  // The sign-in is the phone since 2026-09-27; a generated email never shows.
+  const signInPhone = profile?.phone ? formatPhone(profile.phone) : null
+  const fullName = profile?.full_name ?? signInPhone ?? visibleEmail(user!.email) ?? ''
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 py-5 sm:px-6 md:py-7">
@@ -89,7 +92,9 @@ export default async function ProfilePage({
           <p className="truncate text-[0.9375rem] font-semibold text-ink-900">
             {profile?.full_name ?? t('noName')}
           </p>
-          <p className="truncate text-[0.8125rem] text-ink-500">{user!.email}</p>
+          <p className="truncate text-[0.8125rem] text-ink-500">
+            {signInPhone ?? visibleEmail(user!.email)}
+          </p>
         </div>
       </div>
 
@@ -161,7 +166,7 @@ export default async function ProfilePage({
           <SettingsRow href="/profile/2fa" icon={<ShieldCheck />} tone="success" label={t('security.twoFactor')} description={t('security.twoFactorHint')} value={twoFactor.enabled ? t('security.twoFactorOn') : t('security.twoFactorOff')} />
           <SettingsRow href="/profile/backup-codes" icon={<ListChecks />} tone="success" label={t('security.backupCodes')} description={t('security.backupCodesHint')} value={twoFactor.enabled ? t('security.backupCodesLeft', { count: twoFactor.backupCodesRemaining }) : undefined} />
           <SettingsRow href="/profile/password" icon={<Lock />} tone="brand" label={t('security.password')} />
-          <SettingsRow href="/profile/email" icon={<Mail />} tone="brand" label={t('security.email')} value={user!.email} />
+          <SettingsRow href="/profile/phone" icon={<Phone />} tone="brand" label={t('security.phone')} value={signInPhone ?? undefined} />
           <SettingsRow href="/profile/sessions" icon={<MonitorSmartphone />} tone="neutral" label={t('security.sessions')} description={t('security.sessionsHint')} />
         </SettingsGroup>
 

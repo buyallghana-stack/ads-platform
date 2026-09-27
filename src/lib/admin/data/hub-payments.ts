@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { createClient } from '@/lib/supabase/server'
+import { contactLine } from '@/lib/auth/phone'
 
 /**
  * What the payment hub has done to this app's money.
@@ -98,7 +99,7 @@ export async function getHubPayments(limit = 100): Promise<HubPayment[]> {
     kind: ((row as { payment_kind?: string }).payment_kind ?? 'subscription') as HubPaymentKind,
     userId: row.user_id,
     person: row.person ?? 'Deleted user',
-    email: row.email ?? '',
+    email: contactLine(row.email),
     itemName: row.item_name ?? (row as { tier_name?: string }).tier_name ?? '',
     amountMinor: Number(row.amount_minor),
     currency: row.currency_code.trim(),

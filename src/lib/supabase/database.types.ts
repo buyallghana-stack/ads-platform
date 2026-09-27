@@ -1619,6 +1619,45 @@ export type Database = {
         }
         Relationships: []
       }
+      phone_otps: {
+        Row: {
+          attempts: number
+          code_hash: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          ip: unknown
+          phone: string
+          purpose: string
+          user_id: string | null
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          ip?: unknown
+          phone: string
+          purpose: string
+          user_id?: string | null
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip?: unknown
+          phone?: string
+          purpose?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_path: string | null
@@ -1636,6 +1675,7 @@ export type Database = {
           id: string
           legal_name: string | null
           phone: string | null
+          phone_verified_at: string | null
           referral_code: string
           referred_by: string | null
           signup_country: string | null
@@ -1657,6 +1697,7 @@ export type Database = {
           id: string
           legal_name?: string | null
           phone?: string | null
+          phone_verified_at?: string | null
           referral_code: string
           referred_by?: string | null
           signup_country?: string | null
@@ -1678,6 +1719,7 @@ export type Database = {
           id?: string
           legal_name?: string | null
           phone?: string | null
+          phone_verified_at?: string | null
           referral_code?: string
           referred_by?: string | null
           signup_country?: string | null
@@ -2889,6 +2931,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      account_for_email: {
+        Args: { p_email: string }
+        Returns: { phone_verified: boolean; user_id: string }[]
+      }
+      account_for_phone: {
+        Args: { p_phone: string }
+        Returns: { email: string; user_id: string }[]
+      }
+      otp_check: {
+        Args: { p_code_hash: string; p_phone: string; p_purpose: string; p_user_id?: string }
+        Returns: Json
+      }
+      otp_issue: {
+        Args: { p_code_hash: string; p_ip?: unknown; p_phone: string; p_purpose: string; p_user_id?: string }
+        Returns: Json
+      }
+      revoke_all_sessions: { Args: { p_user_id: string }; Returns: number }
       ad_occasion_ref: {
         Args: { p_ad_id: string; p_occasion: number }
         Returns: string

@@ -3,6 +3,7 @@ import 'server-only'
 import { createClient } from '@/lib/supabase/server'
 
 import type { PayoutRequest, PayoutStatus } from '../types'
+import { contactLine } from '@/lib/auth/phone'
 
 /**
  * The payout queue, for real. Nothing here comes from preview.ts.
@@ -113,7 +114,7 @@ function toRequest(row: QueueRow, now: number): PayoutRequest {
     reference: row.reference,
     user: {
       name: row.user_name,
-      email: row.user_email,
+      email: contactLine(row.user_email),
       joinedAt: row.user_joined_at,
       paidBefore: row.paid_before,
       paidBeforeGhs: Number(row.paid_before_ghs),

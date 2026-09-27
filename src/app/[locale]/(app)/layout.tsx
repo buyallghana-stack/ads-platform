@@ -11,6 +11,7 @@ import { isMaintenanceClosed } from '@/lib/maintenance/data'
 import { getOnboardingState, getUpgradeOffer } from '@/lib/onboarding/data'
 import { ViewAsBanner } from '@/components/app/ViewAsBanner'
 import { needsLoginChallenge } from '@/lib/security/login-2fa'
+import { needsPhoneVerification } from '@/lib/auth/phone-gate'
 import { getPlanStanding } from '@/lib/subscriptions/data'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
@@ -79,6 +80,14 @@ export default async function AppLayout({
     and asking for the target's second factor is both impossible and meaningless.
   */
   if (await needsLoginChallenge(signedIn!.id)) redirect({ href: '/verify-2fa', locale })
+
+  /*
+    Then the phone. Every account must prove one by SMS before it goes further
+    (operator direction 2026-09-27), and that includes the ones made before
+    phone sign-in existed. Checked for the SIGNED-IN account, for the same
+    reason as the second factor above.
+  */
+  if (await needsPhoneVerification(signedIn!.id)) redirect({ href: '/verify-phone', locale })
 
   /*
     From here down the layout renders the VIEWED account, which is the

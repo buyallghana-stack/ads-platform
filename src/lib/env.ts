@@ -97,6 +97,16 @@ const serverSchema = z.object({
    */
   HUB_OUTBOUND_SECRETS: z.string().optional(),
   HUB_INBOUND_SECRETS: z.string().optional(),
+
+  /**
+   * mNotify ("BMS") SMS gateway, which carries every sign-in and password
+   * code. The key comes from https://app.bms.africa/settings/developer; the
+   * sender ID must be registered and approved there first (at most 11
+   * characters), or every message is refused. Optional so the app boots
+   * without it; see `src/lib/sms/mnotify.ts` for what happens then.
+   */
+  MNOTIFY_API_KEY: z.string().optional(),
+  MNOTIFY_SENDER_ID: z.string().max(11).optional(),
 })
 
 /**
@@ -154,6 +164,8 @@ export function serverEnv(): z.infer<typeof serverSchema> {
     TECHSTORE_HUB_URL: process.env.TECHSTORE_HUB_URL || undefined,
     HUB_OUTBOUND_SECRETS: process.env.HUB_OUTBOUND_SECRETS || undefined,
     HUB_INBOUND_SECRETS: process.env.HUB_INBOUND_SECRETS || undefined,
+    MNOTIFY_API_KEY: process.env.MNOTIFY_API_KEY || undefined,
+    MNOTIFY_SENDER_ID: process.env.MNOTIFY_SENDER_ID || undefined,
   })
 
   if (!parsed.success) {

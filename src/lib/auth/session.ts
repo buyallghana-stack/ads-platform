@@ -62,6 +62,8 @@ export type Profile = {
   full_name: string | null
   referral_code: string | null
   phone: string | null
+  /** Set once the owner proved `phone` by SMS; see `needsPhoneVerification`. */
+  phone_verified_at: string | null
 }
 
 /** The profile fields every signed-in surface reuses. One cached query. */
@@ -69,7 +71,7 @@ export const getProfile = cache(async (userId: string): Promise<Profile | null> 
   const supabase = await createClient()
   const { data } = await supabase
     .from('profiles')
-    .select('full_name, referral_code, phone')
+    .select('full_name, referral_code, phone, phone_verified_at')
     .eq('id', userId)
     .maybeSingle()
   return data

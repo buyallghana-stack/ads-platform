@@ -298,8 +298,8 @@
     },
     "signUp": {
       "title": "Créez votre compte",
-      "subtitle": "Inscrivez-vous gratuitement et commencez à gagner des points dès aujourd'hui.",
-      "submit": "Créer un compte",
+      "subtitle": "Inscrivez-vous gratuitement avec votre numéro de téléphone et commencez à gagner des points dès aujourd'hui.",
+      "submit": "Envoyer mon code",
       "haveAccount": "Vous avez déjà un compte ?",
       "logIn": "Se connecter",
       "fullName": "Nom complet",
@@ -308,7 +308,7 @@
       "emailPlaceholder": "vous@exemple.com",
       "phone": "Numéro de téléphone",
       "phonePlaceholder": "024 123 4567",
-      "phoneHint": "Utilisé pour sécuriser les comptes. Nous ne vous appellerons pas.",
+      "phoneHint": "Vous vous connectez avec ce numéro. Nous vous envoyons un code par SMS pour le confirmer.",
       "password": "Mot de passe",
       "passwordPlaceholder": "Créez un mot de passe fort",
       "referralCode": "Code de parrainage",
@@ -316,7 +316,11 @@
       "terms": "J'accepte les <terms>conditions d'utilisation</terms> et la <privacy>politique de confidentialité</privacy>.",
       "ghanaOnly": "Disponible au Ghana uniquement.",
       "referralApplied": "Appliqué depuis votre lien d'invitation.",
-      "checking": "Vérification…"
+      "checking": "Vérification…",
+      "codeTitle": "Saisissez votre code",
+      "codeSubtitle": "Une dernière étape et votre compte est prêt.",
+      "codeSubmit": "Créer mon compte",
+      "editDetails": "Modifier mes informations"
     },
     "logIn": {
       "title": "Bon retour 👋",
@@ -341,7 +345,11 @@
         "cancelAndLogin": "Se connecter et annuler la suppression",
         "stayLoggedOut": "Rester déconnecté",
         "loggedOutNotice": "Votre compte reste programmé pour suppression. Vous avez été déconnecté."
-      }
+      },
+      "phone": "Numéro de téléphone",
+      "emailHint": "Uniquement pour les comptes créés avant la connexion par téléphone. Vous confirmerez ensuite un numéro.",
+      "useEmail": "Inscrit avec un e-mail auparavant ? Utilisez-le une dernière fois",
+      "usePhone": "Se connecter avec mon numéro de téléphone"
     },
     "verify": {
       "checkEmail": {
@@ -359,11 +367,26 @@
     },
     "forgotPassword": {
       "title": "Réinitialiser votre mot de passe",
-      "subtitle": "Saisissez votre e-mail et nous vous enverrons un lien de réinitialisation.",
-      "submit": "Envoyer le lien",
+      "subtitle": "Saisissez le numéro avec lequel vous vous connectez et nous vous enverrons un code par SMS.",
+      "submit": "Envoyer le code",
       "sentTitle": "Vérifiez vos e-mails",
       "sentSubtitle": "Si un compte existe pour <em>{email}</em>, un lien de réinitialisation est en route.",
-      "backToLogin": "Retour à la connexion"
+      "backToLogin": "Retour à la connexion",
+      "phone": "Numéro de téléphone",
+      "codeTitle": "Choisissez un nouveau mot de passe",
+      "codeSubtitle": "Si un compte utilise ce numéro, un code est en route. Saisissez-le avec votre nouveau mot de passe.",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le nouveau mot de passe",
+      "resetSubmit": "Réinitialiser le mot de passe",
+      "doneTitle": "Mot de passe mis à jour",
+      "doneSubtitle": "Vous avez été déconnecté partout. Connectez-vous avec votre nouveau mot de passe.",
+      "logIn": "Se connecter",
+      "useEmail": "Compte créé avant la connexion par téléphone ? Réinitialiser par e-mail",
+      "usePhone": "Réinitialiser avec mon numéro de téléphone",
+      "emailTitle": "Réinitialiser par e-mail",
+      "emailSubtitle": "Uniquement pour les comptes qui n'ont pas encore confirmé de numéro. Tous les autres passent par SMS.",
+      "email": "Adresse e-mail",
+      "emailSubmit": "Envoyer le lien"
     },
     "resetPassword": {
       "title": "Choisissez un nouveau mot de passe",
@@ -403,20 +426,48 @@
       "referralInvalid": "Les codes de parrainage comportent 8 caractères alphanumériques",
       "codeRequired": "Saisissez le code à 6 chiffres",
       "codeInvalid": "Ce code est incorrect. Vérifiez-le et réessayez.",
-      "codeExpired": "Ce code a expiré. Demandez-en un nouveau.",
+      "codeExpired": "Ce code a expiré ou a été remplacé. Demandez-en un nouveau.",
       "generic": "Une erreur est survenue. Veuillez réessayer.",
       "network": "Serveur injoignable. Vérifiez votre connexion et réessayez.",
       "emailTaken": "Un compte existe déjà avec cet e-mail. Connectez-vous.",
       "referralNotFound": "Ce code de parrainage n'existe pas",
-      "invalidCredentials": "Cet e-mail ou ce mot de passe n'est pas correct",
+      "invalidCredentials": "Numéro de téléphone ou mot de passe incorrect",
       "emailNotVerified": "Veuillez d'abord vérifier votre adresse e-mail",
-      "identityBlocked": "Cette adresse e-mail ou ce numéro de téléphone ne peut pas servir à créer un compte.",
+      "identityBlocked": "Ce numéro de téléphone ne peut pas servir à ouvrir un compte.",
       "botCheckFailed": "Nous n'avons pas pu confirmer que vous êtes une personne. Actualisez la page et réessayez, si vous utilisez un bloqueur de publicités ou un VPN, désactivez-le pour cette page.",
       "emailSendLimit": "Nous n'avons pas pu envoyer votre e-mail de confirmation pour le moment. Veuillez réessayer dans quelques minutes.",
       "botCheckRetry": "La vérification de sécurité doit être refaite. Elle vient d'être réinitialisée ci-dessous. Appuyez de nouveau sur Créer un compte.",
       "emailSendFailed": "Nous n'avons pas pu envoyer d'e-mail de confirmation à cette adresse pour le moment. Le problème vient de nous. Veuillez réessayer dans quelques minutes.",
       "resetLinkExpired": "Ce lien de réinitialisation a expiré ou a déjà été utilisé. Demandez-en un nouveau et ouvrez-le dans le même navigateur.",
-      "passwordSameAsOld": "C'est déjà votre mot de passe. Choisissez-en un autre."
+      "passwordSameAsOld": "C'est déjà votre mot de passe. Choisissez-en un autre.",
+      "phoneTaken": "Un compte utilise déjà ce numéro. Connectez-vous plutôt.",
+      "codeCooldown": "Patientez {minutes, plural, one {une minute} other {# minutes}} avant de demander un autre code.",
+      "codeLimit": "Trop de codes envoyés à ce numéro. Réessayez dans {minutes, plural, one {une minute} other {# minutes}}.",
+      "smsFailed": "Nous n'avons pas pu envoyer le SMS. Le problème vient de nous. Réessayez dans quelques minutes.",
+      "codeInvalidAttempts": "Ce code n'est pas correct. {attempts, plural, one {Encore un essai} other {Encore # essais}}.",
+      "codeLocked": "Trop d’essais incorrects. Demandez un nouveau code.",
+      "invalidEmailCredentials": "E-mail ou mot de passe incorrect",
+      "usePhoneToSignIn": "Ce compte se connecte désormais avec son numéro de téléphone. Utilisez-le.",
+      "signOutInstead": "Se déconnecter"
+    },
+    "smsCode": {
+      "sentTo": "Nous avons envoyé un code à 6 chiffres au <em>{phone}</em>.",
+      "label": "Code SMS",
+      "digit": "Chiffre {position} sur 6",
+      "notArrived": "Pas encore de SMS ?",
+      "resendIn": "Renvoyer dans {seconds} s",
+      "sending": "Envoi…",
+      "resend": "Envoyer un nouveau code",
+      "resent": "Un nouveau code est en route."
+    },
+    "verifyPhone": {
+      "title": "Confirmez votre numéro de téléphone",
+      "subtitle": "Vous vous connectez désormais avec votre téléphone, et les codes de sécurité arrivent par SMS. Confirmez votre numéro une fois pour continuer.",
+      "phone": "Numéro de téléphone",
+      "phoneHint": "Un numéro ghanéen qui peut recevoir des SMS.",
+      "send": "M'envoyer un code",
+      "confirm": "Confirmer le numéro",
+      "changeNumber": "Utiliser un autre numéro"
     }
   },
   "legal": {
@@ -967,7 +1018,8 @@
       "sessionsHint": "Voyez où vous êtes connecté, déconnectez d'autres appareils",
       "twoFactorOn": "Activée",
       "twoFactorOff": "Désactivée",
-      "backupCodesLeft": "{count, plural, =0 {Aucun restant} other {# restants}}"
+      "backupCodesLeft": "{count, plural, =0 {Aucun restant} other {# restants}}",
+      "phone": "Changer de numéro"
     },
     "preferences": {
       "appearance": "Apparence",
@@ -1107,7 +1159,9 @@
       "phoneHint": "Récupéré automatiquement depuis votre compte Mobile Money.",
       "noMomoPhone": "Aucun compte Mobile Money ajouté pour le moment",
       "email": "E-mail",
-      "emailHint": "Votre e-mail est géré dans Sécurité."
+      "emailHint": "Votre e-mail est géré dans Sécurité.",
+      "signInPhone": "Téléphone de connexion",
+      "signInPhoneHint": "Modifiable dans Sécurité. Un code confirme le nouveau numéro."
     },
     "avatar": {
       "change": "Changer la photo de profil",
@@ -1266,7 +1320,34 @@
       "emailTaken": "Cette adresse ne peut pas être utilisée.",
       "codeRequired": "Saisissez le code de votre application d'authentification.",
       "notSignedIn": "Veuillez vous reconnecter.",
-      "generic": "Une erreur s'est produite. Veuillez réessayer."
+      "generic": "Une erreur s'est produite. Veuillez réessayer.",
+      "phoneRequired": "Saisissez le nouveau numéro.",
+      "phoneInvalid": "Saisissez un numéro ghanéen à 10 chiffres commençant par 02 ou 05.",
+      "samePhone": "C’est déjà votre numéro.",
+      "phoneTaken": "Ce numéro ne peut pas être utilisé.",
+      "noVerifiedPhone": "Confirmez d'abord votre numéro de téléphone.",
+      "smsFailed": "Nous n'avons pas pu envoyer le SMS. Réessayez dans quelques minutes.",
+      "smsCooldown": "Patientez {minutes, plural, one {une minute} other {# minutes}} avant de demander un autre code.",
+      "smsLimit": "Trop de codes envoyés. Réessayez dans {minutes, plural, one {une minute} other {# minutes}}.",
+      "smsRequired": "Saisissez le code à 6 chiffres du SMS.",
+      "smsWrong": "Ce code n'est pas correct. {attempts, plural, one {Encore un essai} other {Encore # essais}}.",
+      "smsLocked": "Trop d’essais incorrects. Demandez un nouveau code.",
+      "smsExpired": "Ce code a expiré. Demandez-en un nouveau."
+    },
+    "phone": {
+      "title": "Changer de numéro",
+      "subtitle": "Le numéro avec lequel vous vous connectez.",
+      "current": "Numéro actuel",
+      "new": "Nouveau numéro",
+      "password": "Mot de passe actuel",
+      "cta": "Changer de numéro",
+      "doneTitle": "Numéro changé",
+      "doneBody": "Connectez-vous désormais avec votre nouveau numéro. Nous avons prévenu l'ancien."
+    },
+    "sms": {
+      "title": "Code envoyé par SMS",
+      "titleNew": "Code envoyé à votre nouveau numéro",
+      "send": "M'envoyer un code"
     }
   },
   "deleteAccount": {

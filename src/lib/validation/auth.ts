@@ -30,11 +30,17 @@ import { isPasswordAcceptable } from '@/lib/password'
  */
 const GHANA_PHONE = /^(?:\+233|0)[25]\d{8}$/
 
-const phone = z
+export const phone = z
   .string()
   .min(1, 'phoneRequired')
   .transform((v) => v.replace(/[\s-]/g, ''))
   .refine((v) => GHANA_PHONE.test(v), 'phoneInvalid')
+
+/** A six-digit SMS code, as typed (spaces tolerated). */
+export const smsCode = z
+  .string()
+  .transform((v) => v.replace(/\s/g, ''))
+  .refine((v) => /^\d{6}$/.test(v), 'codeRequired')
 
 const email = z.string().min(1, 'emailRequired').pipe(z.email('emailInvalid'))
 
@@ -49,8 +55,11 @@ export const signUpSchema = z.object({
     .min(1, 'fullNameRequired')
     .transform((v) => v.trim())
     .refine((v) => v.length >= 2, 'fullNameTooShort'),
-  email,
-  phone: phone.optional().or(z.literal('')),
+  /*
+    The phone IS the account since 2026-09-27: it is what a member signs in
+    with and where every code goes. Email is no longer asked for.
+  */
+  phone,
   password,
   // Optional, but must be well-formed when present. The alphabet matches
   // generate_referral_code() in migration 001: Crockford-style, no I/L/O/U.
@@ -76,8 +85,13 @@ export const signUpSchema = z.object({
   turnstileToken: z.string().max(4096).optional(),
 })
 
+/*
+  Sign in by phone. The email variant below exists only for accounts made
+  before phone sign-in that have not proved a number yet; the server refuses it
+  for everyone else.
+*/
 export const logInSchema = z.object({
-  email,
+  phone,
   password: z.string().min(1, 'passwordRequired'),
   rememberMe: z.boolean().optional(),
   /** See the note on signUpSchema. Recorded against the sign-in signal so a
@@ -86,7 +100,18 @@ export const logInSchema = z.object({
   fingerprint: z.string().trim().max(128).optional(),
 })
 
-export const forgotPasswordSchema = z.object({ email })
+export const legacyLogInSchema = z.object({
+  email,
+  password: z.string().min(1, 'passwordRequired'),
+  fingerprint: z.string().trim().max(128).optional(),
+})
+
+export const signUpCodeSchema = z.object({ code: smsCode })
+
+export const forgotPasswordSchema = z.object({ phone })
+
+/** Legacy: reset by email, for an account that has no verified phone yet. */
+export const forgotPasswordEmailSchema = z.object({ email })
 
 export const resetPasswordSchema = z
   .object({
@@ -100,5 +125,6 @@ export const resetPasswordSchema = z
 
 export type SignUpInput = z.input<typeof signUpSchema>
 export type LogInInput = z.input<typeof logInSchema>
+export type LegacyLogInInput = z.input<typeof legacyLogInSchema>
 export type ForgotPasswordInput = z.input<typeof forgotPasswordSchema>
 export type ResetPasswordInput = z.input<typeof resetPasswordSchema>

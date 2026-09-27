@@ -2,6 +2,7 @@
 
 import { createClient as createStatelessClient } from '@supabase/supabase-js'
 
+import { formatPhone, isSyntheticEmail } from '@/lib/auth/phone'
 import { getSessionUser } from '@/lib/auth/session'
 import { clientEnv } from '@/lib/env'
 import { markLoginVerified } from '@/lib/security/login-2fa'
@@ -60,7 +61,11 @@ export async function beginEnrollment(): Promise<
     })
     if (error) return { ok: false, message: error.message }
 
-    const qr = await qrDataUri(otpauthUri(secret, user.email))
+    /* The label the authenticator app shows. A phone-only account's email is
+       a generated one nobody would recognise, so it shows the phone. */
+    const { data: profile } = await admin.from('profiles').select('phone').eq('id', user.id).maybeSingle()
+    const label = isSyntheticEmail(user.email) && profile?.phone ? formatPhone(profile.phone) : user.email
+    const qr = await qrDataUri(otpauthUri(secret, label))
     return { ok: true, qr, secret }
   } catch (e) {
     return { ok: false, message: e instanceof Error ? e.message : 'Enrolment failed' }

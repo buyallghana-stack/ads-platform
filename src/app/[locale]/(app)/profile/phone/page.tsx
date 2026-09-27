@@ -2,18 +2,19 @@ import type { Metadata } from 'next'
 
 import { setRequestLocale } from 'next-intl/server'
 
-import { ChangePasswordForm } from '@/components/profile/ChangePasswordForm'
+import { ChangePhoneForm } from '@/components/profile/ChangePhoneForm'
 import { redirect } from '@/i18n/navigation'
+import { formatPhone } from '@/lib/auth/phone'
 import { getProfile, getViewerUser } from '@/lib/auth/session'
 import { isTwoFactorEnabled } from '@/lib/security/login-2fa'
 
 export const metadata: Metadata = {
-  title: 'Change password',
+  title: 'Change phone number',
   robots: { index: false, follow: false },
 }
 
-/** Change password: current password, an SMS code, and an authenticator code when 2FA is on. */
-export default async function ChangePasswordPage({
+/** Change the sign-in phone. Proved by a code texted to the new number. */
+export default async function ChangePhonePage({
   params,
 }: {
   params: Promise<{ locale: string }>
@@ -25,5 +26,11 @@ export default async function ChangePasswordPage({
   if (!user) redirect({ href: '/login', locale })
 
   const [needsCode, profile] = await Promise.all([isTwoFactorEnabled(user!.id), getProfile(user!.id)])
-  return <ChangePasswordForm needsCode={needsCode} phone={profile?.phone ?? ''} />
+
+  return (
+    <ChangePhoneForm
+      currentPhone={profile?.phone ? formatPhone(profile.phone) : ''}
+      needsCode={needsCode}
+    />
+  )
 }

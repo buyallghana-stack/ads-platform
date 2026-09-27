@@ -22,12 +22,13 @@ export function PersonalInfoForm({
   defaultName,
   momoPhone,
   providerName,
-  email,
+  signInPhone,
 }: {
   defaultName: string
   momoPhone: string | null
   providerName?: string | null
-  email: string
+  /** The verified phone they sign in with, formatted. */
+  signInPhone: string
 }) {
   const t = useTranslations('personal')
   const router = useRouter()
@@ -79,13 +80,13 @@ export function PersonalInfoForm({
         hint={t('fields.phoneHint')}
       />
 
-      {/* Same reason as the change-email screen: a disabled input clips a
-          long address with no way to read the rest. */}
+      {/* Read-only here: the sign-in phone changes on its own screen, after a
+          code texted to the new number. */}
       <ReadOnlyField
-        label={t('fields.email')}
-        value={email}
-        leadingIcon={<span className="text-[0.9rem]">@</span>}
-        hint={t('fields.emailHint')}
+        label={t('fields.signInPhone')}
+        value={signInPhone}
+        leadingIcon={<Phone />}
+        hint={t('fields.signInPhoneHint')}
       />
 
       {error && (

@@ -3,6 +3,7 @@ import { setRequestLocale } from 'next-intl/server'
 import { AdminRail, AdminSidebar } from '@/components/admin/AdminNav'
 import { AdminTopBar } from '@/components/admin/AdminChrome'
 import { redirect } from '@/i18n/navigation'
+import { needsPhoneVerification } from '@/lib/auth/phone-gate'
 import { getProfile, getSessionUser } from '@/lib/auth/session'
 import { countPayoutsAwaitingDecision } from '@/lib/admin/data/payouts'
 import { countFlaggedAccounts, countUnreadSupport } from '@/lib/admin/data/people'
@@ -42,6 +43,10 @@ export default async function AdminLayout({
   // An enrolled account must clear its second factor before anything else,
   // and an admin approving payouts is exactly who that is for.
   if (await needsLoginChallenge(user!.id)) redirect({ href: '/verify-2fa', locale })
+
+  // Staff sign in by phone like everybody else; until proved, email stays
+  // open to them, so the admin area is held behind the same screen.
+  if (await needsPhoneVerification(user!.id)) redirect({ href: '/verify-phone', locale })
 
   const supabase = await createClient()
   const { data: isAdmin } = await supabase.rpc('is_admin')

@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 
 import { Card } from '@/components/ui/Card'
 import { Link, redirect } from '@/i18n/navigation'
+import { formatPhone } from '@/lib/auth/phone'
 import { getProfile, getViewerUser } from '@/lib/auth/session'
 import { createClient } from '@/lib/supabase/server'
 
@@ -77,7 +78,7 @@ export default async function PersonalInfoPage({
           defaultName={profile?.full_name ?? ''}
           momoPhone={momoPhone}
           providerName={providerName}
-          email={user!.email ?? ''}
+          signInPhone={profile?.phone ? formatPhone(profile.phone) : ''}
         />
       </Card>
     </div>

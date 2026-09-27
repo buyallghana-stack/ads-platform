@@ -10,13 +10,17 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { clientEnv } from '@/lib/env'
 import { landingFor } from '@/lib/auth/landing'
-import { getSessionUser } from '@/lib/auth/session'
+import { checkOtp, issueOtp, type OtpCheckResult, type OtpIssueResult } from '@/lib/auth/otp'
+import { normalisePhone, syntheticEmail } from '@/lib/auth/phone'
 import { getOrigin, getRequestContext } from '@/lib/request-context'
 import {
+  forgotPasswordEmailSchema,
   forgotPasswordSchema,
+  legacyLogInSchema,
   logInSchema,
   resetPasswordSchema,
   signUpSchema,
+  smsCode,
 } from '@/lib/validation/auth'
 
 /**
@@ -38,97 +42,124 @@ export type ActionResult =
       requestedAt?: string
       effectiveAt?: string
     }
-  | { ok: false; errorKey: string; message?: string; field?: string; redirectTo?: string }
+  | {
+      ok: false
+      errorKey: string
+      message?: string
+      field?: string
+      redirectTo?: string
+      /** When another code may be asked for (cooldown and hourly cap). */
+      retryAfter?: string
+      /** Tries left on the current code. */
+      attemptsLeft?: number
+    }
+
+/** Returned when a code went out; the screen starts its resend countdown. */
+export type CodeSent = { ok: true; codeSent: true; resendSeconds: number }
 
 /** A raw message from a check that already produced human copy. */
 const literal = (message: string): ActionResult => ({ ok: false, errorKey: '', message })
 
-export async function signUpAction(formData: {
+/** The two OTP outcomes, as the translation keys every code screen shares. */
+function issueError(r: Exclude<OtpIssueResult, { ok: true }>): ActionResult {
+  if (r.reason === 'smsFailed') return { ok: false, errorKey: 'smsFailed' }
+  return {
+    ok: false,
+    errorKey: r.reason === 'cooldown' ? 'codeCooldown' : 'codeLimit',
+    retryAfter: r.retryAfter,
+  }
+}
+
+function checkError(r: Exclude<OtpCheckResult, { ok: true }>): ActionResult {
+  if (r.reason === 'wrong') {
+    return { ok: false, errorKey: 'codeInvalid', field: 'code', attemptsLeft: r.attemptsLeft }
+  }
+  return { ok: false, errorKey: r.reason === 'locked' ? 'codeLocked' : 'codeExpired', field: 'code' }
+}
+
+/** The account a verified phone signs in to, or null. */
+async function accountForPhone(phone: string) {
+  const { data } = await createAdminClient().rpc('account_for_phone', { p_phone: phone })
+  return data?.[0] ?? null
+}
+
+type SignUpFields = {
   fullName: string
-  email: string
-  phone?: string
+  phone: string
   password: string
   referralCode?: string
   acceptTerms: boolean
-  /** Device fingerprint from the browser. Optional — see signUpSchema. */
+  /** Device fingerprint from the browser. Optional; see signUpSchema. */
   fingerprint?: string
   /** Turnstile token. Only checked when the operator has set keys. */
   turnstileToken?: string
-}): Promise<ActionResult> {
+}
+
+/**
+ * Everything that must be true before a number is sent a signup code, and
+ * again before the account is made. Returns the parsed form and the referrer.
+ */
+async function vetSignUp(
+  formData: SignUpFields,
+  opts: { botCheck: boolean },
+): Promise<
+  | { ok: true; data: ReturnType<typeof signUpSchema.parse>; phone: string; referrerId: string | null }
+  | { ok: false; result: ActionResult }
+> {
   const parsed = signUpSchema.safeParse(formData)
   if (!parsed.success) {
     const first = parsed.error.issues[0]
-    return { ok: false, errorKey: first.message, field: String(first.path[0] ?? '') }
+    return { ok: false, result: { ok: false, errorKey: first.message, field: String(first.path[0] ?? '') } }
   }
   const data = parsed.data
+  const phone = normalisePhone(data.phone)
 
-  const { ip, userAgent, country } = await getRequestContext()
+  const { ip } = await getRequestContext()
   const admin = createAdminClient()
 
   /*
-    The bot check goes FIRST, before any database work and before the account
-    exists — the whole point of it is to stop automated registration cheaply,
-    and doing it after two round trips concedes most of that.
-
-    A no-op unless the operator has set Turnstile keys; see `turnstile.ts`.
+    The bot check goes FIRST, before any database work and before an SMS goes
+    anywhere. It matters more now than it did for email: every code costs
+    money, and a form that texts any number it is given is what SMS-pumping
+    fraud looks for. Only on the step that sends a code; the second step is
+    already gated by the code itself.
   */
-  const bot = await verifyTurnstile(data.turnstileToken)
-  if (!bot.ok) {
-    /*
-      LOGGED, because the first production report of this was undiagnosable:
-      the operator saw "we could not confirm you are a person" while the widget
-      beside it read Success, and nothing recorded which of Cloudflare's error
-      codes came back. Codes only — no token, no address.
-    */
-    console.error('[turnstile] refused:', bot.reason)
-
-    /*
-      NO `field` HERE, and it is not a detail. The form routes a field-tagged
-      error to that input with `setError`, and the bot check is not an input —
-      so tagging it sent the message to a control that does not exist and the
-      form silently did nothing when somebody pressed Create account. Caught in
-      testing with the challenge script blocked, which is exactly how a real
-      person meets this: an ad blocker, a dead network, a proxy.
-    */
-    return { ok: false, errorKey: bot.retry ? 'botCheckRetry' : 'botCheckFailed' }
+  if (opts.botCheck) {
+    const bot = await verifyTurnstile(data.turnstileToken)
+    if (!bot.ok) {
+      // Codes only, never the token. See the note in git history (2026-07-29).
+      console.error('[turnstile] refused:', bot.reason)
+      /* NO `field`: the bot check is not an input, and a field-tagged error
+         sent the message to a control that does not exist. */
+      return { ok: false, result: { ok: false, errorKey: bot.retry ? 'botCheckRetry' : 'botCheckFailed' } }
+    }
   }
 
-  /*
-    Blocking fraud checks run BEFORE the account exists. Otherwise every
-    blocked attempt leaves an orphaned auth user behind and the person is told
-    their account was created and then that they are blocked.
-  */
+  /* Blocking fraud checks run BEFORE the account exists, so a blocked attempt
+     leaves nothing behind. The email checks inside see a generated address on
+     our own domain and stay quiet; the IP checks are what speak. */
   const { data: precheck, error: precheckError } = await admin.rpc('precheck_signup_fraud', {
-    p_email: data.email,
+    p_email: 'signup@members.sideperks.org',
     p_ip: ip ?? undefined,
   })
-  if (precheckError) return { ok: false, errorKey: 'generic' }
+  if (precheckError) return { ok: false, result: { ok: false, errorKey: 'generic' } }
   if (precheck && precheck.allowed === false) {
-    return literal(precheck.block_reason ?? 'Signup is not available.')
+    return { ok: false, result: literal(precheck.block_reason ?? 'Signup is not available.') }
   }
 
-  // Supabase deliberately returns a vague error for an existing email. On our
-  // own signup form the honest message is better — see the note in migration
-  // 023 on why this is acceptable here and not on password reset.
-  const { data: taken } = await admin.rpc('email_is_registered', { p_email: data.email })
-  if (taken) return { ok: false, errorKey: 'emailTaken', field: 'email' }
+  // One account per verified number. Saying so on our own signup form is the
+  // honest message, as it was for email (see migration 023).
+  if (await accountForPhone(phone)) {
+    return { ok: false, result: { ok: false, errorKey: 'phoneTaken', field: 'phone' } }
+  }
 
-  /*
-    A deleted account's email and phone may never come back (operator spec
-    2026-07-25). Checked against hashes, so nothing here reveals WHO left —
-    and the message stays generic for the same reason.
-  */
-  const { data: blocked } = await admin.rpc('is_identity_blocked', {
-    p_email: data.email,
-    p_phone: data.phone || '',
-  })
-  if (blocked) return { ok: false, errorKey: 'identityBlocked', field: 'email' }
+  /* A deleted account's phone may never come back (operator spec
+     2026-07-25). Checked against hashes, and the message stays generic. */
+  const { data: blocked } = await admin.rpc('is_identity_blocked', { p_email: '', p_phone: phone })
+  if (blocked) return { ok: false, result: { ok: false, errorKey: 'identityBlocked', field: 'phone' } }
 
-  /*
-    Referral code validated before the account is created. Creating a user and
-    then failing on a mistyped code would leave them with an account and no
-    referral, and no obvious way to fix it.
-  */
+  /* Referral code validated before the account is created: failing on a
+     mistyped code after the fact would leave an account with no referral. */
   let referrerId: string | null = null
   if (data.referralCode) {
     const { data: referrer } = await admin
@@ -138,86 +169,102 @@ export async function signUpAction(formData: {
       .maybeSingle()
 
     if (!referrer || referrer.disabled_at) {
-      return { ok: false, errorKey: 'referralNotFound', field: 'referralCode' }
+      return { ok: false, result: { ok: false, errorKey: 'referralNotFound', field: 'referralCode' } }
     }
     referrerId = referrer.id
   }
 
-  const supabase = await createClient()
-  const origin = await getOrigin()
-  const { data: signUp, error: signUpError } = await supabase.auth.signUp({
-    email: data.email,
+  return { ok: true, data, phone, referrerId }
+}
+
+/**
+ * Signup, step 1: check the form and text a code to the number.
+ *
+ * The account is NOT made yet. Making it first and verifying after would let
+ * anybody park an unproved account on somebody else's number. Calling this
+ * again is how "send another code" works, with a fresh bot-check token.
+ */
+export async function startSignUpAction(formData: SignUpFields): Promise<ActionResult | CodeSent> {
+  const vetted = await vetSignUp(formData, { botCheck: true })
+  if (!vetted.ok) return vetted.result
+
+  const issued = await issueOtp({ purpose: 'signup', phone: vetted.phone })
+  if (!issued.ok) return issueError(issued)
+  return { ok: true, codeSent: true, resendSeconds: issued.resendSeconds }
+}
+
+/**
+ * Signup, step 2: the code proves the number, and the account is made.
+ *
+ * The password arrives again with the code rather than being held on the
+ * server between steps. It never touches a table of ours.
+ */
+export async function completeSignUpAction(
+  formData: SignUpFields & { code: string },
+): Promise<ActionResult> {
+  const code = smsCode.safeParse(formData.code)
+  if (!code.success) return { ok: false, errorKey: 'codeRequired', field: 'code' }
+
+  const vetted = await vetSignUp(formData, { botCheck: false })
+  if (!vetted.ok) return vetted.result
+  const { data, phone, referrerId } = vetted
+
+  const checked = await checkOtp({ purpose: 'signup', phone, code: code.data })
+  if (!checked.ok) return checkError(checked)
+
+  const { ip, userAgent, country } = await getRequestContext()
+  const admin = createAdminClient()
+  const email = syntheticEmail()
+
+  /*
+    Made by the admin API, confirmed, because there is no inbox to confirm:
+    the SMS code above was the verification. The metadata is read by
+    `handle_new_user` (migration 001), which writes the profile in the same
+    transaction as the auth user.
+  */
+  const { data: created, error: createError } = await admin.auth.admin.createUser({
+    email,
     password: data.password,
-    options: {
-      /*
-        Where the link in the confirmation email points. Without it Supabase
-        falls back to the project's Site URL — which is a single fixed value,
-        still set to localhost, and would have emailed every real user a link
-        to their own machine.
-      */
-      emailRedirectTo: `${origin}/auth/confirm?next=/dashboard`,
-      // Read by the handle_new_user trigger (migration 001) to populate the
-      // profile in the same transaction as the auth user.
-      data: {
-        full_name: data.fullName,
-        phone: data.phone || null,
-        signup_country: country ?? 'GH',
-      },
+    email_confirm: true,
+    user_metadata: {
+      full_name: data.fullName,
+      phone,
+      signup_country: country ?? 'GH',
     },
   })
 
-  if (signUpError || !signUp.user) {
-    /*
-      Supabase's built-in mailer allows only a few messages an hour, and a
-      signup whose confirmation email cannot be sent fails whole — GoTrue rolls
-      the account back, so there is nothing half-created to recover. Verified
-      while testing this file: three attempts, three 429s, and no rows left in
-      auth.users afterwards.
-
-      It gets its own message because the raw one ("email rate limit exceeded")
-      tells a person nothing about the only move they have, which is to wait.
-      Until Resend is wired this is a real launch-day failure mode, not a
-      theoretical one.
-    */
-    if (signUpError?.code === 'over_email_send_rate_limit' || signUpError?.status === 429) {
-      return { ok: false, errorKey: 'emailSendLimit' }
+  if (createError || !created.user) {
+    if (createError?.code === 'weak_password') {
+      return { ok: false, errorKey: 'passwordTooWeak', field: 'password' }
     }
-
-    /*
-      THE MAIL SERVER REFUSED THE ADDRESS. Seen in production on 2026-07-29:
-      Resend's test sender answers 550 for every recipient except the account
-      owner, GoTrue turns that into a 500, and the account is rolled back. The
-      person did nothing wrong and there is nothing they can do about it, so
-      they are told that rather than blamed.
-    */
-    if (signUpError?.status === 500 || /send email|smtp|550/i.test(signUpError?.message ?? '')) {
-      reportUnexpected(signUpError, 'signup.mail-send')
-      return { ok: false, errorKey: 'emailSendFailed' }
-    }
-
-    /*
-      NEVER SURFACE A MESSAGE THAT IS NOT A SENTENCE. The 500 above arrived as
-      the string "{}" — an empty JSON body — and went straight into the red
-      banner at the top of the signup form, which is what the operator saw.
-      Anything that looks like serialised data is dropped for the generic copy.
-    */
-    const raw = signUpError?.message?.trim()
-    const usable = raw && !/^[[{]/.test(raw) && raw.length > 3 ? raw : undefined
-    if (!usable) reportUnexpected(signUpError, 'signup.unusable-error', { raw: raw ?? null })
-    return { ok: false, errorKey: 'generic', message: usable }
+    reportUnexpected(createError, 'signup.create-user')
+    return { ok: false, errorKey: 'generic' }
   }
 
-  const userId = signUp.user.id
+  const userId = created.user.id
 
-  // Signing up may issue a session immediately (when email confirmation is
-  // off); record its device context if so.
-  await recordSessionContext(signUp.session?.access_token, userId)
+  /* The proof, recorded. The partial unique index settles a race between two
+     signups that proved the same number in the same second: the loser's
+     account is removed rather than left holding an unverified duplicate. */
+  const { error: verifyError } = await admin
+    .from('profiles')
+    .update({ phone, phone_verified_at: new Date().toISOString() })
+    .eq('id', userId)
+  if (verifyError) {
+    await admin.auth.admin.deleteUser(userId)
+    if (verifyError.code === '23505') return { ok: false, errorKey: 'phoneTaken', field: 'phone' }
+    reportUnexpected(verifyError, 'signup.mark-phone-verified')
+    return { ok: false, errorKey: 'generic' }
+  }
+
+  const supabase = await createClient()
+  const { data: signedIn } = await supabase.auth.signInWithPassword({ email, password: data.password })
+  await recordSessionContext(signedIn.session?.access_token, userId)
 
   /*
-    Everything below is best-effort. The account exists and the user is
-    waiting; failing their signup because a fraud signal could not be recorded
-    would be the wrong trade. Failures are swallowed deliberately and the
-    account still lands in the review queue on its next signal.
+    Everything below is best-effort. The account exists and the person is
+    waiting; no fraud signal is worth failing a signup over. Still reported,
+    so the fraud layer cannot look calm while seeing nothing.
   */
   try {
     await admin.rpc('record_auth_signal', {
@@ -231,14 +278,10 @@ export async function signUpAction(formData: {
 
     await admin.rpc('evaluate_signup_fraud', {
       p_user_id: userId,
-      p_email: data.email,
-      p_phone: data.phone,
+      p_email: email,
+      p_phone: phone,
       p_ip: ip ?? undefined,
-      // Wired 2026-07-29. This argument has existed since the fraud layer was
-      // built and was passed `undefined` the whole time, which left
-      // `device_multi_account` (weight 30) and `self_referral_suspected` (35)
-      // unable to fire at all — the two highest-weighted device checks on a
-      // platform whose main fraud is one person running many accounts.
+      // `device_multi_account` (30) and `self_referral_suspected` (35) need this.
       p_fingerprint: data.fingerprint || undefined,
     })
 
@@ -247,48 +290,27 @@ export async function signUpAction(formData: {
         p_referee_id: userId,
         p_code: data.referralCode,
         p_ip: ip ?? undefined,
-        // Referrer and referee on one device is self-referral, and it is
-        // exactly what a referral bonus invites. This is the argument that
-        // lets `apply_referral_code` see it.
         p_fingerprint: data.fingerprint || undefined,
       })
     }
   } catch (error) {
-    /*
-      Still swallowed — the account exists and the person is waiting, and no
-      fraud signal is worth failing a signup over. But silently losing them on
-      every signup would leave the fraud layer looking calm while seeing
-      nothing, so it is reported even though it is not surfaced.
-    */
     reportUnexpected(error, 'signup.fraud-signals')
   }
 
-  /*
-    Where to send them depends on the project's "Confirm email" setting, which
-    is Supabase config rather than something this code controls:
-
-      confirmation ON  — signUp returns no session, an email goes out, and the
-                         account cannot earn until verified (§6.1).
-      confirmation OFF — signUp returns a session immediately and /verify would
-                         be a dead end asking for a code that was never sent.
-
-    Reading the returned session rather than assuming means flipping that
-    setting never breaks the flow, in either direction.
-  */
-  const isConfirmed = Boolean(signUp.session)
-
-  return {
-    ok: true,
-    redirectTo: isConfirmed
-      ? '/dashboard'
-      : `/verify?email=${encodeURIComponent(data.email)}`,
-  }
+  return { ok: true, redirectTo: signedIn.session ? '/dashboard' : '/login' }
 }
 
+/**
+ * Sign in with a phone number and password.
+ *
+ * The phone is resolved to the account's email identity and the rest is the
+ * ordinary password sign-in. An unknown number and a wrong password get the
+ * same answer, so this is not a way to test which numbers have accounts.
+ */
 export async function logInAction(formData: {
-  email: string
+  phone: string
   password: string
-  /** Device fingerprint from the browser. Optional — see signUpSchema. */
+  /** Device fingerprint from the browser. Optional; see signUpSchema. */
   fingerprint?: string
 }): Promise<ActionResult> {
   const parsed = logInSchema.safeParse(formData)
@@ -297,6 +319,41 @@ export async function logInAction(formData: {
     return { ok: false, errorKey: first.message, field: String(first.path[0] ?? '') }
   }
 
+  const account = await accountForPhone(normalisePhone(parsed.data.phone))
+  if (!account) return { ok: false, errorKey: 'invalidCredentials' }
+
+  return signInWithPassword(
+    { email: account.email, password: parsed.data.password, fingerprint: parsed.data.fingerprint },
+    { legacy: false },
+  )
+}
+
+/**
+ * Sign in with an email, for accounts made before phone sign-in.
+ *
+ * Only while the account has not proved a phone. Once it has, the email route
+ * is closed for it (operator direction 2026-09-27: email is deprecated for
+ * auth), and the refusal comes AFTER the password check, so it tells nothing
+ * to somebody who does not already know the password.
+ */
+export async function legacyLogInAction(formData: {
+  email: string
+  password: string
+  fingerprint?: string
+}): Promise<ActionResult> {
+  const parsed = legacyLogInSchema.safeParse(formData)
+  if (!parsed.success) {
+    const first = parsed.error.issues[0]
+    return { ok: false, errorKey: first.message, field: String(first.path[0] ?? '') }
+  }
+  return signInWithPassword(parsed.data, { legacy: true })
+}
+
+async function signInWithPassword(
+  parsed: { email: string; password: string; fingerprint?: string },
+  opts: { legacy: boolean },
+): Promise<ActionResult> {
+
   // First, verify credentials with a stateless client WITHOUT creating any session cookies yet.
   const stateless = createStatelessClient(
     clientEnv.NEXT_PUBLIC_SUPABASE_URL,
@@ -304,27 +361,24 @@ export async function logInAction(formData: {
     { auth: { persistSession: false, autoRefreshToken: false } },
   )
   const { data: authData, error: authError } = await stateless.auth.signInWithPassword({
-    email: parsed.data.email,
-    password: parsed.data.password,
+    email: parsed.email,
+    password: parsed.password,
   })
 
   if (authError || !authData.user) {
-    if (authError?.message?.toLowerCase().includes('not confirmed')) {
-      return {
-        ok: false,
-        errorKey: 'emailNotVerified',
-        redirectTo: `/verify?email=${encodeURIComponent(parsed.data.email)}`,
-      } as ActionResult
-    }
-    return { ok: false, errorKey: 'invalidCredentials' }
+    return { ok: false, errorKey: opts.legacy ? 'invalidEmailCredentials' : 'invalidCredentials' }
   }
 
   // Check if account deletion has been requested and is currently pending.
   const { data: profile } = await createAdminClient()
     .from('profiles')
-    .select('deletion_requested_at, deletion_effective_at, deleted_at')
+    .select('deletion_requested_at, deletion_effective_at, deleted_at, phone_verified_at')
     .eq('id', authData.user.id)
     .maybeSingle()
+
+  if (opts.legacy && profile?.phone_verified_at) {
+    return { ok: false, errorKey: 'usePhoneToSignIn' }
+  }
 
   if (profile?.deletion_requested_at && !profile.deleted_at) {
     // Return deletion pending metadata. NO session cookie is set on the browser,
@@ -340,8 +394,8 @@ export async function logInAction(formData: {
   // Account does not have pending deletion: establish full session with cookies.
   const supabase = await createClient()
   const { data: session, error } = await supabase.auth.signInWithPassword({
-    email: parsed.data.email,
-    password: parsed.data.password,
+    email: parsed.email,
+    password: parsed.password,
   })
 
   if (error || !session.user) {
@@ -361,7 +415,7 @@ export async function logInAction(formData: {
         p_ip: ip ?? undefined,
         p_user_agent: userAgent ?? undefined,
         p_country: country ?? undefined,
-        p_fingerprint: parsed.data.fingerprint || undefined,
+        p_fingerprint: parsed.fingerprint || undefined,
       })
     } catch {
       // A missing login signal must never block a login.
@@ -382,18 +436,28 @@ export async function logInAction(formData: {
  * Confirms sign-in, establishes the session, and cancels the pending account deletion request.
  */
 export async function confirmLoginAndCancelDeletionAction(formData: {
-  email: string
+  /** The phone they signed in with, or the email for a legacy sign-in. */
+  phone?: string
+  email?: string
   password: string
   fingerprint?: string
 }): Promise<ActionResult> {
-  const parsed = logInSchema.safeParse(formData)
-  if (!parsed.success) {
-    return { ok: false, errorKey: 'invalidCredentials' }
+  let email: string | null = null
+  if (formData.phone) {
+    const parsed = logInSchema.safeParse(formData)
+    if (!parsed.success) return { ok: false, errorKey: 'invalidCredentials' }
+    email = (await accountForPhone(normalisePhone(parsed.data.phone)))?.email ?? null
+  } else {
+    const parsed = legacyLogInSchema.safeParse(formData)
+    if (!parsed.success) return { ok: false, errorKey: 'invalidCredentials' }
+    email = parsed.data.email
   }
+  if (!email) return { ok: false, errorKey: 'invalidCredentials' }
+  const parsed = { data: { password: formData.password, fingerprint: formData.fingerprint } }
 
   const supabase = await createClient()
   const { data: session, error } = await supabase.auth.signInWithPassword({
-    email: parsed.data.email,
+    email,
     password: parsed.data.password,
   })
 
@@ -455,49 +519,101 @@ export async function stayLoggedOutAction(): Promise<ActionResult> {
 }
 
 /**
- * Send the confirmation email again.
+ * Forgotten password, step 1: text a code to the account's phone.
  *
- * The only action /verify offers now. Verification itself happens when the
- * person clicks the link, which lands on /auth/confirm — there is no code to
- * type and therefore nothing to get wrong, mistype, or phish out of somebody
- * over the phone.
- *
- * Supabase rate-limits this server-side; the screen's countdown is a courtesy
- * on top, not the control.
+ * ALWAYS reports success whether or not the number has an account, so this is
+ * not a membership oracle; the copy says "if an account uses this number".
+ * Cooldown and hourly cap are swallowed for the same reason (they only exist
+ * for numbers that have accounts). The screen's own countdown covers them.
  */
-export async function resendConfirmationAction(email: string): Promise<ActionResult> {
-  const supabase = await createClient()
-  const origin = await getOrigin()
+export async function requestPasswordResetAction(formData: {
+  phone: string
+}): Promise<ActionResult | CodeSent> {
+  const parsed = forgotPasswordSchema.safeParse(formData)
+  if (!parsed.success) return { ok: false, errorKey: parsed.error.issues[0].message, field: 'phone' }
 
-  const { error } = await supabase.auth.resend({
-    type: 'signup',
-    email,
-    options: { emailRedirectTo: `${origin}/auth/confirm?next=/dashboard` },
+  const phone = normalisePhone(parsed.data.phone)
+  const account = await accountForPhone(phone)
+  if (account) {
+    const issued = await issueOtp({ purpose: 'reset_password', phone, userId: account.user_id })
+    // A gateway failure is ours, not theirs, and saying so is worth more than
+    // the sliver it reveals; everything else stays silent.
+    if (!issued.ok && issued.reason === 'smsFailed') return issueError(issued)
+  }
+  return { ok: true, codeSent: true, resendSeconds: 60 }
+}
+
+/**
+ * Forgotten password, step 2: the code, and the new password.
+ *
+ * No session is involved: the code IS the authorisation, it is bound to this
+ * account and this purpose, and it dies on use or after five wrong tries.
+ * Every session the account has is ended afterwards, because a reset is what
+ * somebody does when they think the account is not theirs any more.
+ */
+export async function resetPasswordWithCodeAction(formData: {
+  phone: string
+  code: string
+  password: string
+  confirmPassword: string
+}): Promise<ActionResult> {
+  const phoneParsed = forgotPasswordSchema.safeParse(formData)
+  if (!phoneParsed.success) return { ok: false, errorKey: phoneParsed.error.issues[0].message, field: 'phone' }
+  const code = smsCode.safeParse(formData.code)
+  if (!code.success) return { ok: false, errorKey: 'codeRequired', field: 'code' }
+  const parsed = resetPasswordSchema.safeParse(formData)
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0]
+    return { ok: false, errorKey: issue.message, field: String(issue.path[0] ?? 'password') }
+  }
+
+  const phone = normalisePhone(phoneParsed.data.phone)
+  const account = await accountForPhone(phone)
+  // Same answer as a wrong code: nothing here may say whether the number is known.
+  if (!account) return { ok: false, errorKey: 'codeExpired', field: 'code' }
+
+  const checked = await checkOtp({
+    purpose: 'reset_password',
+    phone,
+    userId: account.user_id,
+    code: code.data,
   })
+  if (!checked.ok) return checkError(checked)
 
-  if (error) return { ok: false, errorKey: 'generic', message: error.message }
+  const admin = createAdminClient()
+  const { error } = await admin.auth.admin.updateUserById(account.user_id, {
+    password: parsed.data.password,
+  })
+  if (error) {
+    if (error.code === 'weak_password') return { ok: false, errorKey: 'passwordTooWeak', field: 'password' }
+    reportUnexpected(error, 'auth.reset-password-by-code', { code: error.code ?? null })
+    return { ok: false, errorKey: 'generic' }
+  }
+
+  const { error: revokeError } = await admin.rpc('revoke_all_sessions', { p_user_id: account.user_id })
+  if (revokeError) reportUnexpected(revokeError, 'auth.reset-password-by-code.revoke-sessions')
+
   return { ok: true }
 }
 
-export async function forgotPasswordAction(formData: { email: string }): Promise<ActionResult> {
-  const parsed = forgotPasswordSchema.safeParse(formData)
+/**
+ * LEGACY: reset by email link, for an account made before phone sign-in that
+ * has not proved a phone yet. Without this, such a member who forgot their
+ * password would have no way back in at all. Once the account has a verified
+ * phone no mail is sent, silently, so this also reveals nothing.
+ */
+export async function forgotPasswordByEmailAction(formData: { email: string }): Promise<ActionResult> {
+  const parsed = forgotPasswordEmailSchema.safeParse(formData)
   if (!parsed.success) {
     return { ok: false, errorKey: parsed.error.issues[0].message, field: 'email' }
   }
 
+  const { data } = await createAdminClient().rpc('account_for_email', { p_email: parsed.data.email })
+  const account = data?.[0]
+  if (!account || account.phone_verified) return { ok: true }
+
   const supabase = await createClient()
-  /*
-    The result is deliberately ignored. Reporting whether the address exists
-    would turn this form into a membership oracle, and unlike signup there is
-    no action the person could take to learn the same fact. Always reports
-    success; the copy says "if an account exists".
-  */
   const origin = await getOrigin()
-  /*
-    The reset mail is a link as well, and it needs somewhere to go: without a
-    redirectTo it lands on the Site URL with the token attached, which is not
-    the reset form and cannot complete the reset.
-  */
   await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: `${origin}/auth/confirm?next=/reset-password`,
   })
@@ -505,7 +621,7 @@ export async function forgotPasswordAction(formData: { email: string }): Promise
 }
 
 /**
- * The second half of a password reset: actually setting the new password.
+ * LEGACY: the second half of a reset by email link, setting the new password.
  *
  * This did not exist. `ResetPasswordForm` waited 400ms and then displayed the
  * generic error unconditionally — a placeholder left behind when the auth

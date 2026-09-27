@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Lock, Mail, Ticket, UserRound, UserRoundPlus } from 'lucide-react'
+import { ArrowLeft, Lock, Phone, Ticket, UserRound, UserRoundPlus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Controller, useForm } from 'react-hook-form'
 
@@ -12,20 +12,33 @@ import { Button } from '@/components/ui/Button'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { PasswordField } from '@/components/ui/PasswordField'
 import { TextField } from '@/components/ui/TextField'
-import { signUpAction } from '@/app/[locale]/(auth)/actions'
+import { completeSignUpAction, startSignUpAction } from '@/app/[locale]/(auth)/actions'
+import { SmsCodeStep, useCodeErrorMessage } from '@/components/auth/SmsCodeStep'
 import { TurnstileWidget } from '@/components/auth/TurnstileWidget'
 import { deviceFingerprint, warmFingerprint } from '@/lib/fraud/fingerprint'
 import { Link, useRouter } from '@/i18n/navigation'
 import { useAuthErrorMessage } from '@/lib/useAuthErrorMessage'
 import { signUpSchema, type SignUpInput } from '@/lib/validation/auth'
 
+/**
+ * Signup in two steps. The form, then the code texted to the number. The
+ * account is only made once the code comes back, so nobody can park an
+ * unproved account on somebody else's phone. The form values stay in this
+ * component between the steps; nothing is held on the server.
+ */
 export function SignUpForm() {
   const t = useTranslations('auth.signUp')
-  const tError = useTranslations('auth.errors')
   const tCommon = useTranslations('common')
 
   const router = useRouter()
   const msg = useAuthErrorMessage()
+  const codeMsg = useCodeErrorMessage()
+
+  const [step, setStep] = useState<'form' | 'code'>('form')
+  const [code, setCode] = useState('')
+  const [codeError, setCodeError] = useState<string | null>(null)
+  const [resendSeconds, setResendSeconds] = useState(60)
+  const [completing, setCompleting] = useState(false)
 
   const [formError, setFormError] = useState<string | null>(null)
   // True when the referral code arrived via an invite link (?ref=) or a
@@ -39,6 +52,7 @@ export function SignUpForm() {
     watch,
     setError,
     setValue,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
@@ -47,7 +61,6 @@ export function SignUpForm() {
     mode: 'onTouched',
     defaultValues: {
       fullName: '',
-      email: '',
       phone: '',
       password: '',
       referralCode: '',
@@ -140,48 +153,120 @@ export function SignUpForm() {
      for as long as waiting is honest. */
   const awaitingCheck = botCheckOn && !turnstileToken && stalledAt !== turnstileReset
 
-  const onSubmit = handleSubmit(async (values) => {
-    setFormError(null)
+  const fields = async (values: SignUpInput) => ({
+    fullName: values.fullName,
+    phone: values.phone,
+    password: values.password,
+    referralCode: values.referralCode || undefined,
+    acceptTerms: true,
+    /* Awaited rather than fired alongside, because the signal is worth
+       nothing if it arrives after the account. It cannot hang the form:
+       `deviceFingerprint` resolves to undefined on its own timeout. */
+    fingerprint: await deviceFingerprint(),
+    turnstileToken: turnstileToken ?? undefined,
+  })
 
-    const result = await signUpAction({
-      fullName: values.fullName,
-      email: values.email,
-      phone: values.phone,
-      password: values.password,
-      referralCode: values.referralCode || undefined,
-      acceptTerms: true,
-      /* Awaited rather than fired alongside, because the signal is worth
-         nothing if it arrives after the account. It cannot hang the form —
-         `deviceFingerprint` resolves to undefined on its own timeout. */
-      fingerprint: await deviceFingerprint(),
-      turnstileToken: turnstileToken ?? undefined,
-    })
-
-    if (result.ok) {
-      router.push(result.redirectTo ?? '/verify')
-      return
-    }
-
+  /** Step 1, and also "send another code": the same checks, a fresh bot token. */
+  const requestCode = async (values: SignUpInput): Promise<number | null> => {
+    const result = await startSignUpAction(await fields(values))
     /* The attempt reached the server, so the token it carried is spent
-       whatever went wrong. Ask for a new one now, before they press the
-       button again. */
+       whatever happened. Ask for a new one now, before the next press. */
     setTurnstileToken(undefined)
     setTurnstileReset((n) => n + 1)
-
-    // Field-specific problems belong on the field; everything else goes to the
-    // banner. A "referral code does not exist" shown at the top of the form
-    // leaves people hunting for which input is wrong.
+    if (result.ok) return 'codeSent' in result ? result.resendSeconds : 60
+    if (step === 'code' && !result.field) {
+      setCodeError(codeMsg(result))
+      return null
+    }
+    setStep('form')
+    // Field problems belong on the field, so nobody hunts for which input is
+    // wrong; the rest goes to the banner. Some checks (a fraud block) return
+    // copy the server already phrased.
     if (result.field) {
-      setError(result.field as keyof SignUpInput, {
-        message: result.errorKey || 'generic',
-      })
+      setError(result.field as keyof SignUpInput, { message: result.errorKey || 'generic' })
+    } else {
+      setFormError(result.message ?? codeMsg(result))
+    }
+    return null
+  }
+
+  const complete = async (value: string) => {
+    setCompleting(true)
+    setCodeError(null)
+    const result = await completeSignUpAction({ ...(await fields(getValues())), code: value })
+    if (result.ok) {
+      router.replace(result.redirectTo ?? '/dashboard')
+      router.refresh()
       return
     }
+    setCompleting(false)
+    setCode('')
+    if (result.field && result.field !== 'code') {
+      setStep('form')
+      setError(result.field as keyof SignUpInput, { message: result.errorKey || 'generic' })
+      return
+    }
+    setCodeError(codeMsg(result))
+  }
 
-    // Some checks return copy the server already phrased — a fraud block
-    // explains itself better than a generic key could.
-    setFormError(result.message ?? msg(result.errorKey) ?? tError('generic'))
+  const onSubmit = handleSubmit(async (values) => {
+    setFormError(null)
+    const next = await requestCode(values)
+    if (next !== null) {
+      setResendSeconds(next)
+      setCode('')
+      setCodeError(null)
+      setStep('code')
+    }
   })
+
+  if (step === 'code') {
+    return (
+      <div>
+        <FormHeader icon={<Phone />} title={t('codeTitle')} subtitle={t('codeSubtitle')} />
+        <form
+          method="post"
+          onSubmit={(e) => {
+            e.preventDefault()
+            void complete(code)
+          }}
+          noValidate
+          className="flex flex-col gap-4"
+        >
+          <SmsCodeStep
+            phone={getValues('phone')}
+            value={code}
+            onChange={(v) => {
+              setCode(v)
+              setCodeError(null)
+            }}
+            onComplete={(v) => void complete(v)}
+            onResend={() => requestCode(getValues())}
+            resendSeconds={resendSeconds}
+            error={codeError}
+            disabled={completing}
+          />
+          {/* A resend is a new text to a number, so it passes the bot check again. */}
+          <TurnstileWidget
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+            onToken={setTurnstileToken}
+            resetSignal={turnstileReset}
+          />
+          <Button type="submit" size="lg" fullWidth loading={completing} disabled={code.length < 6}>
+            {t('codeSubmit')}
+          </Button>
+          <button
+            type="button"
+            onClick={() => setStep('form')}
+            className="inline-flex items-center justify-center gap-1.5 text-[0.8125rem] font-medium text-ink-500 hover:text-brand-700"
+          >
+            <ArrowLeft aria-hidden className="size-3.5" />
+            {t('editDetails')}
+          </button>
+        </form>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -207,14 +292,15 @@ export function SignUpForm() {
         />
 
         <TextField
-          label={t('email')}
-          type="email"
-          inputMode="email"
-          placeholder={t('emailPlaceholder')}
-          autoComplete="email"
-          leadingIcon={<Mail />}
-          error={msg(errors.email?.message)}
-          {...register('email')}
+          label={t('phone')}
+          type="tel"
+          inputMode="tel"
+          placeholder={t('phonePlaceholder')}
+          autoComplete="tel-national"
+          leadingIcon={<Phone />}
+          hint={t('phoneHint')}
+          error={msg(errors.phone?.message)}
+          {...register('phone')}
         />
 
         <Controller
