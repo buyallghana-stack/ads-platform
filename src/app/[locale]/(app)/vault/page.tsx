@@ -5,7 +5,7 @@ import { setRequestLocale } from 'next-intl/server'
 import { VaultView } from '@/components/vault/VaultView'
 import { redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
-import { hubConfigured } from '@/lib/env'
+import { getManualPaymentConfig, paystackCheckoutEnabled } from '@/lib/payments/manual'
 import {
   getVaultEnabled,
   getVaultPlans,
@@ -33,12 +33,14 @@ export default async function VaultPage({
     return null
   }
 
-  const [vaultEnabled, plans, investments, userBalancePoints, pointsRate] = await Promise.all([
+  const [vaultEnabled, plans, investments, userBalancePoints, pointsRate, paystackOn, manual] = await Promise.all([
     getVaultEnabled(),
     getVaultPlans(),
     getUserVaultInvestments(user.id),
     getUserPointsBalance(user.id),
     getPointsPerCurrencyUnit(),
+    paystackCheckoutEnabled(),
+    getManualPaymentConfig(),
   ])
 
   return (
@@ -48,7 +50,8 @@ export default async function VaultPage({
       investments={investments}
       userBalancePoints={userBalancePoints}
       pointsRate={pointsRate}
-      checkoutEnabled={hubConfigured()}
+      checkoutEnabled={paystackOn}
+      manualEnabled={manual.enabled}
     />
   )
 }

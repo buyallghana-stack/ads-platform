@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 
 /**
- * Where a buyer who chose manual mobile money is told where to send it, and
+ * Where a Vault depositor who chose manual mobile money is told where to send it, and
  * says they have. Read by id AND owner: an id in a URL proves nothing.
  */
 export default async function ManualPaymentPage({
@@ -32,8 +32,8 @@ export default async function ManualPaymentPage({
 
   const [{ data }, config] = await Promise.all([
     createAdminClient()
-      .from('subscription_payments')
-      .select('id, status, amount_minor, balance_minor, currency_code, manual_reference, manual_claimed_at, tiers(name)')
+      .from('vault_payments')
+      .select('id, status, amount_minor, balance_minor, currency_code, manual_reference, manual_claimed_at, vault_plans(name)')
       .eq('id', id)
       .eq('user_id', user!.id)
       .maybeSingle(),
@@ -48,18 +48,19 @@ export default async function ManualPaymentPage({
     currency_code: string
     manual_reference: string | null
     manual_claimed_at: string | null
-    tiers: { name: string } | null
+    vault_plans: { name: string } | null
   } | null
-  if (!row || !row.manual_reference) redirect({ href: '/upgrade', locale })
+  if (!row || !row.manual_reference) redirect({ href: '/vault', locale })
 
   return (
     <ManualPaymentView
-      kind="plan"
+      kind="vault"
       balanceMinor={Number(row!.balance_minor ?? 0)}
-      totalMinor={row!.amount_minor + Number(row!.balance_minor ?? 0)}
+      totalMinor={row!.amount_minor}
       paymentId={row!.id}
-      planName={row!.tiers?.name ?? ''}
-      amountMinor={row!.amount_minor}
+      planName={row!.vault_plans?.name ?? ''}
+      // A Vault row holds the FULL deposit; the cash is the rest.
+      amountMinor={row!.amount_minor - Number(row!.balance_minor ?? 0)}
       currency={row!.currency_code}
       reference={row!.manual_reference!}
       state={

@@ -70,36 +70,43 @@ async function superAdmin(): Promise<string | null> {
   return error ? null : user.id
 }
 
-export async function confirmManualPayment(paymentId: string): Promise<ManualDecision> {
+export async function confirmManualPayment(kind: 'plan' | 'vault', paymentId: string): Promise<ManualDecision> {
   const adminId = await superAdmin()
   if (!adminId) return { ok: false, message: 'Not an administrator.' }
   const admin = createAdminClient()
+  const table = kind === 'vault' ? 'vault_payments' : 'subscription_payments'
 
-  const { data: row } = await admin
-    .from('subscription_payments')
-    .select('id, manual_reference')
-    .eq('id', paymentId)
-    .maybeSingle()
+  const { data: row } = await admin.from(table).select('id, manual_reference').eq('id', paymentId).maybeSingle()
   const reference = (row as unknown as { manual_reference: string | null } | null)?.manual_reference
   if (!row || !reference) return { ok: false, message: 'That is not a manual payment.' }
 
-  const { error } = await admin.rpc('confirm_subscription_payment', {
+  const args = {
     p_payment_id: paymentId,
     p_reference: reference,
     p_payload: { manual: true, confirmed_by: adminId } as never,
-  })
+  }
+  const { error } =
+    kind === 'vault'
+      ? await admin.rpc('confirm_vault_payment', args)
+      : await admin.rpc('confirm_subscription_payment', args)
   if (error) return { ok: false, message: error.message }
   revalidatePath('/admin/payments')
   return { ok: true }
 }
 
-export async function rejectManualPayment(paymentId: string): Promise<ManualDecision> {
+/**
+ * Declining closes the row. Any points taken from the buyer's balance come
+ * back through the hold triggers (trg_plan_balance_hold, trg_vault_balance_hold).
+ */
+export async function rejectManualPayment(kind: 'plan' | 'vault', paymentId: string): Promise<ManualDecision> {
   const adminId = await superAdmin()
   if (!adminId) return { ok: false, message: 'Not an administrator.' }
-  const { error } = await createAdminClient().rpc('fail_subscription_payment', {
-    p_payment_id: paymentId,
-    p_reason: `Manual payment rejected by an administrator (${adminId})`,
-  })
+  const admin = createAdminClient()
+  const reason = `Manual payment rejected by an administrator (${adminId})`
+  const { error } =
+    kind === 'vault'
+      ? await admin.rpc('fail_vault_payment', { p_payment_id: paymentId, p_reason: reason })
+      : await admin.rpc('fail_subscription_payment', { p_payment_id: paymentId, p_reason: reason })
   if (error) return { ok: false, message: error.message }
   revalidatePath('/admin/payments')
   return { ok: true }

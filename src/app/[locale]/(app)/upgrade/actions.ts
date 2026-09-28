@@ -321,11 +321,39 @@ export async function previewPlanCoupon(
 --------------------------------------------------------------------------- */
 
 export type ManualStartResult = { ok: true; paymentId: string } | { ok: false; message: string }
+export type ManualKind = 'plan' | 'vault'
 
+const MANUAL_TABLE = { plan: 'subscription_payments', vault: 'vault_payments' } as const
+
+/** The short code a buyer and the operator can both quote. Unique column:
+ *  on the one-in-a-billion clash, draw again. */
+async function assignManualReference(kind: ManualKind, id: string): Promise<boolean> {
+  const admin = createAdminClient()
+  for (let i = 0; i < 3; i++) {
+    const { error } = await admin
+      .from(MANUAL_TABLE[kind])
+      .update({ manual_reference: newManualReference() } as never)
+      .eq('id', id)
+    if (!error) return true
+    if (error.code !== '23505') {
+      reportUnexpected(error, 'manual.reference')
+      return false
+    }
+  }
+  return false
+}
+
+/**
+ * A plan paid by mobile money sent by hand, in full or (useBalance) part from
+ * the balance with the rest sent by hand. The part-balance path is migration
+ * 240's `start_plan_topup_payment` marked manual: the points are taken now and
+ * come back on their own if the operator declines.
+ */
 export async function startManualCheckout(
   tierId: string,
   amountMinor?: number,
   couponCode?: string,
+  useBalance = false,
 ): Promise<ManualStartResult> {
   const user = await getSessionUser()
   if (!user) return { ok: false, message: 'Please sign in again.' }
@@ -334,29 +362,43 @@ export async function startManualCheckout(
   }
 
   const admin = createAdminClient()
-  const { data: payment, error } = await admin.rpc('start_subscription_payment', {
+  const args = {
     p_user_id: user.id,
     p_tier_id: tierId,
-    p_method: 'manual' as never,
     p_amount_minor: Number.isFinite(amountMinor) ? amountMinor : undefined,
     p_coupon_code: couponCode?.trim() || undefined,
-  })
+  }
+  const { data: payment, error } = useBalance
+    ? await admin.rpc('start_manual_plan_topup' as never, args as never)
+    : await admin.rpc('start_subscription_payment', { ...args, p_method: 'manual' as never })
   if (error || !payment) return { ok: false, message: error?.message ?? 'Could not start this payment.' }
 
   const id = (payment as unknown as { id: string }).id
-  // A unique column: on the one-in-a-billion clash, draw again.
-  for (let i = 0; i < 3; i++) {
-    const { error: refError } = await admin
-      .from('subscription_payments')
-      .update({ manual_reference: newManualReference() } as never)
-      .eq('id', id)
-    if (!refError) return { ok: true, paymentId: id }
-    if (refError.code !== '23505') {
-      reportUnexpected(refError, 'upgrade.manual-reference')
-      break
-    }
-  }
+  if (await assignManualReference('plan', id)) return { ok: true, paymentId: id }
+  // No code means the operator cannot match it: close it, which also returns any points.
+  await admin.rpc('fail_subscription_payment', { p_payment_id: id, p_reason: 'Could not start' })
   return { ok: false, message: 'Could not start this payment.' }
+}
+
+/** The Vault's twin: full deposit by hand, or part from the balance. */
+export async function startManualVaultCheckout(planId: string, useBalance = false): Promise<ManualStartResult> {
+  const user = await getSessionUser()
+  if (!user) return { ok: false, message: 'Please sign in again.' }
+  if (!(await getManualPaymentConfig()).enabled) {
+    return { ok: false, message: 'Manual payment is not available right now.' }
+  }
+  const admin = createAdminClient()
+  const { data: payment, error } = await admin.rpc('start_manual_vault_payment' as never, {
+    p_user_id: user.id,
+    p_plan_id: planId,
+    p_use_balance: useBalance,
+  } as never)
+  if (error || !payment) return { ok: false, message: (error as { message?: string } | null)?.message ?? 'Could not start this deposit.' }
+
+  const id = (payment as unknown as { id: string }).id
+  if (await assignManualReference('vault', id)) return { ok: true, paymentId: id }
+  await admin.rpc('fail_vault_payment', { p_payment_id: id, p_reason: 'Could not start' })
+  return { ok: false, message: 'Could not start this deposit.' }
 }
 
 const PROOF_TYPES: Record<string, string> = { 'image/webp': 'webp', 'image/jpeg': 'jpg', 'image/png': 'png' }
@@ -371,6 +413,7 @@ export async function claimManualPayment(form: FormData): Promise<{ ok: true } |
   const user = await getSessionUser()
   if (!user) return { ok: false, message: 'Please sign in again.' }
 
+  const kind: ManualKind = form.get('kind') === 'vault' ? 'vault' : 'plan'
   const paymentId = String(form.get('paymentId') ?? '')
   const senderPhone = String(form.get('senderPhone') ?? '').replace(/[^0-9+]/g, '').slice(0, 16)
   const proof = form.get('proof')
@@ -383,10 +426,11 @@ export async function claimManualPayment(form: FormData): Promise<{ ok: true } |
   if (proof.size > PROOF_MAX_BYTES) return { ok: false, message: 'That picture is too large. Try a plain screenshot.' }
 
   const admin = createAdminClient()
+  const table = MANUAL_TABLE[kind]
 
   // The owner, a manual row, still pending: anything else is not theirs to claim.
   const { data: row } = await admin
-    .from('subscription_payments')
+    .from(table)
     .select('id')
     .eq('id', paymentId)
     .eq('user_id', user.id)
@@ -395,17 +439,17 @@ export async function claimManualPayment(form: FormData): Promise<{ ok: true } |
     .maybeSingle()
   if (!row) return { ok: false, message: 'This payment can no longer be updated.' }
 
-  const path = `${user.id}/${paymentId}-${Date.now()}.${ext}`
+  const path = `${user.id}/${kind}-${paymentId}-${Date.now()}.${ext}`
   const { error: uploadError } = await admin.storage
     .from('payment-proofs')
     .upload(path, proof, { contentType: proof.type, upsert: false })
   if (uploadError) {
-    reportUnexpected(uploadError, 'upgrade.manual-proof-upload')
+    reportUnexpected(uploadError, 'manual.proof-upload')
     return { ok: false, message: 'Could not upload the screenshot. Please try again.' }
   }
 
   const { error } = await admin
-    .from('subscription_payments')
+    .from(table)
     .update({
       manual_sender_phone: senderPhone,
       manual_proof_path: path,
@@ -414,22 +458,29 @@ export async function claimManualPayment(form: FormData): Promise<{ ok: true } |
     .eq('id', paymentId)
     .eq('status', 'pending')
   if (error) {
-    reportUnexpected(error, 'upgrade.manual-claim')
+    reportUnexpected(error, 'manual.claim')
     return { ok: false, message: 'Could not save this. Please try again.' }
   }
 
-  after(() => alertManualPaymentClaimed(paymentId))
-  revalidatePath('/upgrade')
+  after(() => alertManualPaymentClaimed(kind, paymentId))
+  revalidatePath(kind === 'vault' ? '/vault' : '/upgrade')
   return { ok: true }
 }
 
-export async function cancelManualPayment(paymentId: string): Promise<{ ok: true } | { ok: false; message: string }> {
+/**
+ * The buyer backing out before saying they sent anything. Closing the row is
+ * what returns any points taken from the balance (the hold triggers). Once
+ * they have said they sent money, only the operator decides.
+ */
+export async function cancelManualPayment(
+  kind: ManualKind,
+  paymentId: string,
+): Promise<{ ok: true } | { ok: false; message: string }> {
   const user = await getSessionUser()
   if (!user) return { ok: false, message: 'Please sign in again.' }
   const admin = createAdminClient()
-  // Only an unclaimed one: once the buyer says they sent money, a person decides.
   const { data } = await admin
-    .from('subscription_payments')
+    .from(MANUAL_TABLE[kind])
     .select('id')
     .eq('id', paymentId)
     .eq('user_id', user.id)
@@ -438,11 +489,12 @@ export async function cancelManualPayment(paymentId: string): Promise<{ ok: true
     .is('manual_claimed_at' as never, null)
     .maybeSingle()
   if (!data) return { ok: false, message: 'This payment can no longer be cancelled.' }
-  const { error } = await admin.rpc('fail_subscription_payment', {
-    p_payment_id: paymentId,
-    p_reason: 'Cancelled by the buyer before sending',
-  })
+  const reason = 'Cancelled by the buyer before sending'
+  const { error } =
+    kind === 'vault'
+      ? await admin.rpc('fail_vault_payment', { p_payment_id: paymentId, p_reason: reason })
+      : await admin.rpc('fail_subscription_payment', { p_payment_id: paymentId, p_reason: reason })
   if (error) return { ok: false, message: 'Could not cancel this payment.' }
-  revalidatePath('/upgrade')
+  revalidatePath(kind === 'vault' ? '/vault' : '/upgrade')
   return { ok: true }
 }

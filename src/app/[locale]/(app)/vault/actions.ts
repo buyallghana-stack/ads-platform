@@ -7,6 +7,7 @@ import { clientEnv } from '@/lib/env'
 import { reportUnexpected } from '@/lib/observability/report'
 import { hubInitialise } from '@/lib/payments/hub/client'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { paystackCheckoutEnabled } from '@/lib/payments/manual'
 
 /**
  * Starting a Vault deposit.
@@ -36,6 +37,8 @@ export type VaultCheckoutResult =
 export async function startVaultPaystackCheckout(
   planId: string,
 ): Promise<VaultCheckoutResult> {
+  // Switched off by the operator (2026-09-28, the fees): refuse, not just hide.
+  if (!(await paystackCheckoutEnabled())) return { ok: false, errorKey: 'paystackOff' }
   const user = await getSessionUser()
   if (!user?.email) return { ok: false, errorKey: 'notSignedIn' }
 

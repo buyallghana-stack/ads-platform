@@ -38,17 +38,19 @@ function Card({ row }: { row: ManualPaymentRow }) {
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState<'confirmed' | 'rejected' | null>(null)
 
-  const amount = format.number(row.amountMinor / 100, {
-    style: 'currency',
-    currency: row.currency,
-    minimumFractionDigits: row.amountMinor % 100 ? 2 : 0,
-  })
+  const money = (minor: number) =>
+    format.number(minor / 100, {
+      style: 'currency',
+      currency: row.currency,
+      minimumFractionDigits: minor % 100 ? 2 : 0,
+    })
+  const amount = money(row.cashMinor)
 
   const decide = (kind: 'confirm' | 'reject') => {
     if (armed !== kind) return setArmed(kind)
     setError(null)
     startTransition(async () => {
-      const res = kind === 'confirm' ? await confirmManualPayment(row.id) : await rejectManualPayment(row.id)
+      const res = kind === 'confirm' ? await confirmManualPayment(row.kind, row.id) : await rejectManualPayment(row.kind, row.id)
       if (!res.ok) return setError(res.message)
       setDone(kind === 'confirm' ? 'confirmed' : 'rejected')
     })
@@ -80,9 +82,14 @@ function Card({ row }: { row: ManualPaymentRow }) {
           <p className="text-[0.75rem] font-medium text-ink-500 tabular-nums">{row.reference}</p>
         </div>
         <p className="text-[0.8125rem] text-ink-700">
-          {row.planName} · {row.buyerName || t('unnamed')}
+          {row.kind === 'vault' ? t('vault') : t('plan')}: {row.planName} · {row.buyerName || t('unnamed')}
           {row.buyerPhone ? ` · ${row.buyerPhone}` : ''}
         </p>
+        {row.balanceMinor > 0 && (
+          <p className="mt-1 text-[0.75rem] font-medium text-ink-700">
+            {t('balancePart', { balance: money(row.balanceMinor), total: money(row.cashMinor + row.balanceMinor) })}
+          </p>
+        )}
         <dl className="mt-1.5 space-y-0.5 text-[0.75rem] text-ink-600">
           <div>
             <dt className="inline text-ink-500">{t('sentFrom')} </dt>

@@ -1439,6 +1439,8 @@
     "manual": {
       "title": "Envoyez votre paiement",
       "subtitle": "Forfait {plan}, payé par mobile money",
+      "subtitleVault": "{plan}, déposé par mobile money",
+      "balancePart": "{balance} est déjà pris sur votre solde, sur {total} au total.",
       "sendExactly": "Envoyez exactement",
       "number": "Numéro",
       "accountName": "Nom sur le numéro",
@@ -1459,9 +1461,10 @@
       "sent": "Je l'ai envoyé",
       "cancel": "Annuler, je n'ai rien envoyé",
       "backToPlans": "Retour aux forfaits",
+      "backToVault": "Retour au Coffre",
       "waiting": {
         "title": "Nous vérifions votre paiement",
-        "body": "Votre paiement de {amount} pour {plan} est en cours de vérification. Votre forfait démarre dès qu'il est confirmé. Votre code de paiement est {reference}."
+        "body": "Votre paiement de {amount} pour {plan} est en cours de vérification. Il démarre dès qu'il est confirmé. Votre code de paiement est {reference}."
       },
       "confirmed": {
         "title": "Votre forfait est actif",
@@ -1469,7 +1472,7 @@
       },
       "closed": {
         "title": "Ce paiement n'a pas été accepté",
-        "body": "Nous n'avons pas pu faire correspondre ce paiement. Si vous avez bien envoyé {amount}, contactez le support avec votre code {reference}."
+        "body": "Nous n'avons pas pu faire correspondre ce paiement. Le solde utilisé vous a été rendu. Si vous avez bien envoyé {amount}, contactez le support avec votre code {reference}."
       }
     },
     "title": "Passer à un forfait",
@@ -1517,6 +1520,8 @@
       "lockedCta": "{plan} arrive bientôt"
     },
     "checkout": {
+      "topupPayManual": "Envoyer les {amount} restants par mobile money",
+      "topupExplainManual": "Votre solde est mis de côté. Envoyez le reste par mobile money et votre forfait démarre dès que nous le confirmons. Si nous ne retrouvons pas votre paiement, votre solde vous est rendu.",
       "payManually": "Envoyer {amount} par mobile money",
       "title": "Forfait {plan}",
       "subtitle": "Un seul paiement, {days, plural, one {# jour} other {# jours}} d'avantages.",
@@ -3452,6 +3457,9 @@
     },
     "payments": {
       "manual": {
+        "plan": "Forfait",
+        "vault": "Coffre",
+        "balancePart": "Plus {balance} pris sur son solde ({total} au total). Refuser le lui rend.",
         "title": "Paiements manuels en attente ({count})",
         "description": "Acheteurs qui ont payé en envoyant du mobile money à la main. Vérifiez que l'argent est arrivé sur votre téléphone, puis confirmez pour lancer leur forfait.",
         "proofAlt": "Capture d'écran du paiement",
@@ -3864,6 +3872,8 @@
       "alreadyActiveBtn": "Déjà Actif dans le Coffre"
     },
     "checkout": {
+      "splitManual": "Utiliser GHS {balance} de mon solde, envoyer GHS {rest}",
+      "payManually": "Envoyer GHS {amount} par mobile money",
       "title": "Bloquer des fonds dans {plan}",
       "subtitle": "Période de blocage de {days} jours avec rendement quotidien garanti.",
       "close": "Fermer",

@@ -26,6 +26,7 @@ import {
   purchaseVaultWithBalanceAction,
   startVaultPaystackCheckout,
 } from '@/app/[locale]/(app)/vault/actions'
+import { startManualVaultCheckout } from '@/app/[locale]/(app)/upgrade/actions'
 import { Button } from '@/components/ui/Button'
 import { Link, useRouter } from '@/i18n/navigation'
 import { cn } from '@/lib/cn'
@@ -38,6 +39,7 @@ export function VaultView({
   userBalancePoints = 0,
   pointsRate = 100,
   checkoutEnabled,
+  manualEnabled = false,
 }: {
   vaultEnabled: boolean
   plans: VaultPlan[]
@@ -45,6 +47,8 @@ export function VaultView({
   userBalancePoints?: number
   pointsRate?: number
   checkoutEnabled: boolean
+  /** Deposit by sending mobile money by hand; the operator confirms it. */
+  manualEnabled?: boolean
 }) {
   const t = useTranslations('vault')
   const format = useFormatter()
@@ -52,7 +56,7 @@ export function VaultView({
 
   const [selectedPlan, setSelectedPlan] = useState<VaultPlan | null>(null)
   const [claimingId, setClaimingId] = useState<string | null>(null)
-  const [checkoutMode, setCheckoutMode] = useState<'paystack' | 'balance' | null>(null)
+  const [checkoutMode, setCheckoutMode] = useState<'paystack' | 'balance' | 'manual' | 'split' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -111,6 +115,23 @@ export function VaultView({
       setCheckoutMode(null)
       setSuccessMessage(t('checkout.balanceSuccess'))
       router.refresh()
+    })
+  }
+
+  /* By hand, in full or part from the balance. The points for a part are
+     taken now and come back if the operator declines. */
+  const handleManual = (useBalance: boolean) => {
+    if (!selectedPlan) return
+    setError(null)
+    setCheckoutMode(useBalance ? 'split' : 'manual')
+    startTransition(async () => {
+      const res = await startManualVaultCheckout(selectedPlan.id, useBalance)
+      if (!res.ok) {
+        setError(res.message ?? t('depositFailed'))
+        setCheckoutMode(null)
+        return
+      }
+      router.push(`/vault/manual/${res.paymentId}`)
     })
   }
 
@@ -520,6 +541,10 @@ export function VaultView({
         const hasEnoughBalance = userBalancePoints >= pricePoints
         const missingPoints = Math.max(0, pricePoints - userBalancePoints)
         const missingGhs = (missingPoints / pointsRate).toFixed(2)
+        // What the balance can cover in whole pesewas, as the SQL works it out.
+        const coveredMinor = Math.floor((userBalancePoints * 100) / pointsRate)
+        const canSplit = manualEnabled && !hasEnoughBalance && coveredMinor > 0
+        const restGhs = (selectedPlan.priceMinor - coveredMinor) / 100
         const totalMaturityGhs = (selectedPlan.priceMinor + selectedPlan.priceMinor * (selectedPlan.dailyReturnPercent / 100) * selectedPlan.periodDays) / 100
 
         return (
@@ -634,6 +659,39 @@ export function VaultView({
                         amount: format.number(priceGhs, { minimumFractionDigits: 2 }),
                       })}
                 </Button>
+
+                {/* Part from the balance, the rest sent by hand */}
+                {canSplit && (
+                  <Button
+                    size="lg"
+                    fullWidth
+                    disabled={isPending}
+                    loading={isPending && checkoutMode === 'split'}
+                    onClick={() => handleManual(true)}
+                    leadingIcon={<Wallet className="size-4" />}
+                  >
+                    {t('checkout.splitManual', {
+                      balance: format.number(coveredMinor / 100, { minimumFractionDigits: 2 }),
+                      rest: format.number(restGhs, { minimumFractionDigits: 2 }),
+                    })}
+                  </Button>
+                )}
+
+                {/* The whole deposit sent by hand */}
+                {manualEnabled && (
+                  <Button
+                    size="lg"
+                    variant="secondary"
+                    fullWidth
+                    disabled={isPending}
+                    loading={isPending && checkoutMode === 'manual'}
+                    onClick={() => handleManual(false)}
+                  >
+                    {t('checkout.payManually', {
+                      amount: format.number(priceGhs, { minimumFractionDigits: 2 }),
+                    })}
+                  </Button>
+                )}
 
                 {/* Method 2: Paystack Checkout */}
                 {checkoutEnabled && (

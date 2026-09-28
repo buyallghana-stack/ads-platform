@@ -191,6 +191,20 @@ export function UpgradeView({
   const payTopup = (plan: Plan, amountMinor: number) => {
     setError(null)
     setPaying('topup')
+    /* With Paystack off, the rest is sent by hand: the same hold, marked
+       manual, and the operator's decline gives the points back. */
+    if (!checkoutEnabled) {
+      startTransition(async () => {
+        const res = await startManualCheckout(plan.id, amountMinor, coupon?.code, true)
+        if (!res.ok) {
+          setError(res.message || t('checkout.failed'))
+          setPaying(null)
+          return
+        }
+        router.push(`/upgrade/manual/${res.paymentId}`)
+      })
+      return
+    }
     startTransition(async () => {
       const res = await startPlanTopupCheckout(plan.id, amountMinor, coupon?.code)
       if (!res.ok) {
@@ -517,7 +531,7 @@ export function UpgradeView({
                   Math.floor((balancePoints * 100) / pointsPerCurrencyUnit),
                 )
                 const remainingMinor = chargedMinor - coveredMinor
-                const canTopUp = !enough && coveredMinor > 0 && checkoutEnabled
+                const canTopUp = !enough && coveredMinor > 0 && (checkoutEnabled || manualEnabled)
                 const money = (minor: number) =>
                   format.number(minor / 100, {
                     style: 'currency',
@@ -569,7 +583,7 @@ export function UpgradeView({
                           </div>
                         </dl>
                         <p className="mt-2 text-[0.75rem] leading-relaxed text-ink-600">
-                          {t('checkout.topupExplain')}
+                          {checkoutEnabled ? t('checkout.topupExplain') : t('checkout.topupExplainManual')}
                         </p>
                         <Button
                           size="lg"
@@ -579,7 +593,9 @@ export function UpgradeView({
                           loading={pending && paying === 'topup'}
                           onClick={() => payTopup(selected.plan, selected.amountMinor)}
                         >
-                          {t('checkout.topupPay', { amount: money(remainingMinor) })}
+                          {checkoutEnabled
+                            ? t('checkout.topupPay', { amount: money(remainingMinor) })
+                            : t('checkout.topupPayManual', { amount: money(remainingMinor) })}
                         </Button>
                         <Button
                           variant="ghost"

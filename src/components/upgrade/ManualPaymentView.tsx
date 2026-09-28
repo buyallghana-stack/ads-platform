@@ -19,6 +19,11 @@ type State = 'send' | 'waiting' | 'confirmed' | 'closed'
  * sent it". The operator confirms from Admin > Payments.
  */
 export function ManualPaymentView(props: {
+  kind: 'plan' | 'vault'
+  /** Taken from the balance already, shown so the buyer sees the whole sum. */
+  balanceMinor: number
+  /** The whole price: cash plus the balance part. */
+  totalMinor: number
   paymentId: string
   planName: string
   amountMinor: number
@@ -38,11 +43,15 @@ export function ManualPaymentView(props: {
   const [proof, setProof] = useState<File | null>(null)
   const [preparing, setPreparing] = useState(false)
 
-  const amount = format.number(props.amountMinor / 100, {
-    style: 'currency',
-    currency: props.currency,
-    minimumFractionDigits: props.amountMinor % 100 ? 2 : 0,
-  })
+  const money = (minor: number) =>
+    format.number(minor / 100, {
+      style: 'currency',
+      currency: props.currency,
+      minimumFractionDigits: minor % 100 ? 2 : 0,
+    })
+  /** `amountMinor` is always the CASH to send; the page works that out. */
+  const amount = money(props.amountMinor)
+  const backHref = props.kind === 'vault' ? '/vault' : '/upgrade'
 
   if (props.state !== 'send') {
     const tone = {
@@ -62,9 +71,9 @@ export function ManualPaymentView(props: {
           <p className="mt-1.5 max-w-[36ch] text-[0.8125rem] leading-relaxed text-ink-500">
             {t(`${props.state}.body`, { plan: props.planName, amount, reference: props.reference })}
           </p>
-          <Link href="/upgrade" className="mt-7 w-full">
+          <Link href={backHref} className="mt-7 w-full">
             <Button size="lg" fullWidth>
-              {t('backToPlans')}
+              {props.kind === 'vault' ? t('backToVault') : t('backToPlans')}
             </Button>
           </Link>
         </div>
@@ -95,6 +104,7 @@ export function ManualPaymentView(props: {
     setError(null)
     if (!proof) return setError(t('proofRequired'))
     const form = new FormData()
+    form.set('kind', props.kind)
     form.set('paymentId', props.paymentId)
     form.set('senderPhone', senderPhone)
     form.set('proof', proof)
@@ -108,9 +118,9 @@ export function ManualPaymentView(props: {
   const cancel = () => {
     setError(null)
     startTransition(async () => {
-      const res = await cancelManualPayment(props.paymentId)
+      const res = await cancelManualPayment(props.kind, props.paymentId)
       if (!res.ok) return setError(res.message)
-      router.push('/upgrade')
+      router.push(backHref)
     })
   }
 
@@ -122,7 +132,9 @@ export function ManualPaymentView(props: {
         </span>
         <div>
           <h1 className="text-[1.125rem] font-semibold tracking-[-0.02em] text-ink-900">{t('title')}</h1>
-          <p className="text-[0.8125rem] text-ink-500">{t('subtitle', { plan: props.planName })}</p>
+          <p className="text-[0.8125rem] text-ink-500">
+            {t(props.kind === 'vault' ? 'subtitleVault' : 'subtitle', { plan: props.planName })}
+          </p>
         </div>
       </div>
 
@@ -132,6 +144,12 @@ export function ManualPaymentView(props: {
           <p className="text-[1.75rem] font-semibold tracking-[-0.02em] text-ink-900 tabular-nums">{amount}</p>
           <CopyButton value={(props.amountMinor / 100).toFixed(props.amountMinor % 100 ? 2 : 0)} label={t('copy')} copied={t('copied')} />
         </div>
+
+        {props.balanceMinor > 0 && (
+          <p className="mt-1 text-[0.75rem] text-ink-500">
+            {t('balancePart', { balance: money(props.balanceMinor), total: money(props.totalMinor) })}
+          </p>
+        )}
 
         <dl className="mt-3 divide-y divide-ink-100 border-t border-ink-100">
           <Row label={t('number')} value={props.number} copy={{ label: t('copy'), copied: t('copied') }} mono />

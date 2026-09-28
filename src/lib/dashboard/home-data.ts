@@ -142,6 +142,10 @@ export async function getHomeData(userId: string): Promise<HomeData> {
          payment it belonged to never became a plan, so neither half is a
          purchase the buyer made. */
       .not('entry_type', 'in', '(plan_purchase,plan_purchase_release)')
+      /* The same for a Vault deposit part paid from the balance and sent by
+         hand (2026-09-28): its hold and any return are keyed to the payment,
+         and the deposit is listed once, whole, from `vault_payments` below. */
+      .or('reference_type.is.null,reference_type.not.in.(vault_payment,vault_payment_late)')
       .order('created_at', { ascending: false })
       .limit(FEED_LIMIT),
     // Separate query: the feed page may not reach 30 days back, and the
@@ -180,7 +184,8 @@ export async function getHomeData(userId: string): Promise<HomeData> {
       .from('vault_payments')
       .select('id, method, status, amount_minor, currency_code, created_at')
       .eq('user_id', userId)
-      .eq('method', 'paystack')
+      // Not `balance`: a full-balance deposit is its own ledger row above.
+      .in('method', ['paystack', 'manual'])
       .eq('status', 'confirmed')
       .order('created_at', { ascending: false })
       .limit(20),

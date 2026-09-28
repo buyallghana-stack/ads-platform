@@ -1439,6 +1439,8 @@
     "manual": {
       "title": "Send your payment",
       "subtitle": "{plan} plan, paid by mobile money",
+      "subtitleVault": "{plan}, deposited by mobile money",
+      "balancePart": "{balance} is already taken from your balance, out of {total} in all.",
       "sendExactly": "Send exactly",
       "number": "Number",
       "accountName": "Name on the number",
@@ -1459,9 +1461,10 @@
       "sent": "I have sent it",
       "cancel": "Cancel, I have not sent anything",
       "backToPlans": "Back to plans",
+      "backToVault": "Back to the Vault",
       "waiting": {
         "title": "We are checking your payment",
-        "body": "Your {amount} for {plan} is being checked. Your plan starts as soon as it is confirmed. Your payment code is {reference}."
+        "body": "Your {amount} for {plan} is being checked. It starts as soon as it is confirmed. Your payment code is {reference}."
       },
       "confirmed": {
         "title": "Your plan is active",
@@ -1469,7 +1472,7 @@
       },
       "closed": {
         "title": "This payment was not accepted",
-        "body": "We could not match this payment. If you did send {amount}, contact support with your code {reference}."
+        "body": "We could not match this payment. Any balance you used has been returned. If you did send {amount}, contact support with your code {reference}."
       }
     },
     "title": "Upgrade",
@@ -1517,6 +1520,8 @@
       "lockedCta": "{plan} opens soon"
     },
     "checkout": {
+      "topupPayManual": "Send the other {amount} by mobile money",
+      "topupExplainManual": "Your balance is set aside now. Send the rest by mobile money and your plan starts once we confirm it. If we cannot match your payment, your balance comes back.",
       "payManually": "Send {amount} by mobile money",
       "title": "{plan} plan",
       "subtitle": "One payment, {days, plural, one {# day} other {# days}} of benefits.",
@@ -3452,6 +3457,9 @@
     },
     "payments": {
       "manual": {
+        "plan": "Plan",
+        "vault": "Vault",
+        "balancePart": "Plus {balance} from their balance ({total} in all). Rejecting returns it.",
         "title": "Manual payments waiting ({count})",
         "description": "Buyers who paid by sending mobile money by hand. Check the money arrived on your phone, then confirm to start their plan.",
         "proofAlt": "Screenshot of the payment",
@@ -3864,6 +3872,8 @@
       "alreadyActiveBtn": "Already Active in Vault"
     },
     "checkout": {
+      "splitManual": "Use GHS {balance} from my balance, send GHS {rest}",
+      "payManually": "Send GHS {amount} by mobile money",
       "title": "Lock funds in {plan}",
       "subtitle": "{days}-day lock period with guaranteed daily yield.",
       "close": "Close",

@@ -43,6 +43,10 @@ export async function getHeldTopups(userId: string): Promise<HeldTopup[]> {
     .eq('user_id', userId)
     .eq('status', 'pending')
     .eq('balance_held', true)
+    /* Paystack holds only. A MANUAL part-balance payment is decided by the
+       operator (and has its own cancel on its payment page); releasing it from
+       here could hand back points for money that is already on its way. */
+    .is('manual_reference' as never, null)
     .order('created_at', { ascending: false })
 
   return (data ?? []).map((row) => ({
