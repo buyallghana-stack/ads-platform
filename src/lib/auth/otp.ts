@@ -57,7 +57,10 @@ export async function issueOtp(input: {
   const { data, error } = await admin.rpc('otp_issue', {
     p_purpose: input.purpose,
     p_phone: input.phone,
-    p_user_id: input.userId ?? undefined,
+    // null, NEVER undefined: supabase-js drops an undefined argument, and
+    // PostgREST then looks for an overload without p_user_id, finds none, and
+    // every SIGNUP code failed (2026-09-28). p_user_id has no default.
+    p_user_id: (input.userId ?? null) as string,
     p_code_hash: hashCode(input.purpose, input.phone, code),
     p_ip: ip ?? undefined,
   })
@@ -104,7 +107,10 @@ export async function checkOtp(input: {
   const { data, error } = await createAdminClient().rpc('otp_check', {
     p_purpose: input.purpose,
     p_phone: input.phone,
-    p_user_id: input.userId ?? undefined,
+    // null, NEVER undefined: supabase-js drops an undefined argument, and
+    // PostgREST then looks for an overload without p_user_id, finds none, and
+    // every SIGNUP code failed (2026-09-28). p_user_id has no default.
+    p_user_id: (input.userId ?? null) as string,
     p_code_hash: hashCode(input.purpose, input.phone, code),
   })
   if (error) throw error
