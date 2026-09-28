@@ -18,7 +18,7 @@ export async function alertManualPaymentClaimed(paymentId: string): Promise<void
       admin.from('app_config').select('value').eq('key', 'payment_alert_phones').maybeSingle(),
       admin
         .from('subscription_payments')
-        .select('amount_minor, currency_code, manual_reference, manual_sender_name, manual_sender_phone, tiers(name)')
+        .select('amount_minor, currency_code, manual_reference, manual_sender_phone, tiers(name)')
         .eq('id', paymentId)
         .maybeSingle(),
     ])
@@ -33,7 +33,6 @@ export async function alertManualPaymentClaimed(paymentId: string): Promise<void
       amount_minor: number
       currency_code: string
       manual_reference: string
-      manual_sender_name: string
       manual_sender_phone: string
       tiers: { name: string } | null
     }
@@ -47,7 +46,7 @@ export async function alertManualPaymentClaimed(paymentId: string): Promise<void
       '',
       `Plan: ${row.tiers?.name ?? 'Plan'}`,
       `Amount: ${amount}`,
-      `From: ${row.manual_sender_name} (${row.manual_sender_phone})`,
+      `From: ${row.manual_sender_phone}`,
       `Reference: ${row.manual_reference}`,
     ].join('\n')
 

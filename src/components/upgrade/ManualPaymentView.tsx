@@ -35,7 +35,6 @@ export function ManualPaymentView(props: {
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [senderPhone, setSenderPhone] = useState('')
-  const [senderName, setSenderName] = useState('')
   const [proof, setProof] = useState<File | null>(null)
   const [preparing, setPreparing] = useState(false)
 
@@ -98,7 +97,6 @@ export function ManualPaymentView(props: {
     const form = new FormData()
     form.set('paymentId', props.paymentId)
     form.set('senderPhone', senderPhone)
-    form.set('senderName', senderName)
     form.set('proof', proof)
     startTransition(async () => {
       const res = await claimManualPayment(form)
@@ -157,13 +155,6 @@ export function ManualPaymentView(props: {
           placeholder="024 123 4567"
           value={senderPhone}
           onChange={(e) => setSenderPhone(e.target.value)}
-        />
-        <TextField
-          label={t('senderName')}
-          autoComplete="name"
-          value={senderName}
-          onChange={(e) => setSenderName(e.target.value)}
-          hint={t('senderNameHint')}
         />
         <div>
           <p className="text-[0.8125rem] font-medium text-ink-800">{t('proof')}</p>

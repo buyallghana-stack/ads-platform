@@ -87,7 +87,7 @@ function Card({ row }: { row: ManualPaymentRow }) {
           <div>
             <dt className="inline text-ink-500">{t('sentFrom')} </dt>
             <dd className="inline font-medium">
-              {row.senderName ? `${row.senderName} (${row.senderPhone})` : t('notClaimed')}
+              {row.claimedAt ? row.senderPhone : t('notClaimed')}
             </dd>
           </div>
           <div>

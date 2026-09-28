@@ -373,10 +373,8 @@ export async function claimManualPayment(form: FormData): Promise<{ ok: true } |
 
   const paymentId = String(form.get('paymentId') ?? '')
   const senderPhone = String(form.get('senderPhone') ?? '').replace(/[^0-9+]/g, '').slice(0, 16)
-  const senderName = String(form.get('senderName') ?? '').trim().slice(0, 80)
   const proof = form.get('proof')
   if (senderPhone.length < 9) return { ok: false, message: 'Enter the number you sent the money from.' }
-  if (senderName.length < 2) return { ok: false, message: 'Enter the name on that number.' }
   if (!(proof instanceof File) || proof.size === 0) {
     return { ok: false, message: 'Add a screenshot of the payment confirmation.' }
   }
@@ -410,7 +408,6 @@ export async function claimManualPayment(form: FormData): Promise<{ ok: true } |
     .from('subscription_payments')
     .update({
       manual_sender_phone: senderPhone,
-      manual_sender_name: senderName,
       manual_proof_path: path,
       manual_claimed_at: new Date().toISOString(),
     } as never)
