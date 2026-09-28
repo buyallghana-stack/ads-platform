@@ -58,7 +58,7 @@ export default async function Page({
   const status = await getGameStatus(user!.id)
   if (!status.enabled) notFound()
   /* A plan that grants no plays cannot open a board by URL either. The game
-     screen's only word for it is "You have used all your plays this week",
+     screen's only word for it is "You have used all your plays for today",
      which is the same false renewal promise the hub used to make. The hub is
      where the honest answer now lives, so send them there. */
   if (status.allowance === 0) redirect({ href: '/games', locale })

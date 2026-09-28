@@ -79,7 +79,7 @@ export function PrizeReveal({
             {t('reveal.again', { count: remaining })}
           </Button>
         ) : (
-          /* No plays left is not a failure — it is the end of the week's
+          /* No plays left is not a failure — it is the end of the day's
              allowance, and the honest next step is the plan that grants more. */
           <>
             <p className={cn('text-[0.8125rem] text-ink-500')}>{t('reveal.spent')}</p>

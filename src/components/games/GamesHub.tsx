@@ -141,7 +141,7 @@ export async function GamesHub({
         </div>
 
         {/* No fairness note here. It ends "unused plays do not carry over to
-            next week", which is about managing an allowance somebody does not
+            the next day", which is about managing an allowance somebody does not
             have — and the sentence they need to read on this screen is the one
             about the upgrade. */}
       </div>
@@ -166,10 +166,9 @@ export async function GamesHub({
           </p>
           <p className="mt-0.5 text-[0.75rem] text-ink-500">
             {t('resetsOn', {
-              date: format.dateTime(new Date(status.weekEndsAt), {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'short',
+              time: format.dateTime(new Date(status.resetsAt), {
+                hour: 'numeric',
+                minute: '2-digit',
               }),
             })}
           </p>

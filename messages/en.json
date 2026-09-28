@@ -143,7 +143,7 @@
         "body": "{ads} a day for your first {days} days, and you can withdraw from {threshold} points.",
         "cta": "Start free"
       },
-      "stacking": "Plans stack for ads. Every plan you hold adds its own daily ad limit, and its ads are paid at its own rate, best first. So holding Bronze and Gold gives you Gold's 7 ads at Gold's rate and then Bronze's 3 at Bronze's rate. Weekly game plays are the exception: they follow your best plan rather than adding up. You can hold each plan once.",
+      "stacking": "Plans stack for ads. Every plan you hold adds its own daily ad limit, and its ads are paid at its own rate, best first. So holding Bronze and Gold gives you Gold's 7 ads at Gold's rate and then Bronze's 3 at Bronze's rate. Game plays add up too: every plan you hold adds its own daily plays. You can hold each plan once.",
       "range": "{from} to {to}",
       "rangeHint": "Pay anything in that range. The more you pay, the more each ad is worth to you.",
       "rateRange": "+{from}% to +{to}%",
@@ -260,12 +260,12 @@
     "extras": {
       "eyebrow": "More than watching",
       "title": "Small wins,",
-      "titleAccent": "all week.",
+      "titleAccent": "every day.",
       "lead": "The parts people come back for.",
       "items": {
         "games": {
           "title": "Spin the wheel, open the box",
-          "body": "Every paid plan comes with game plays every week. Whatever you land on is yours, credited straight away."
+          "body": "Every paid plan comes with game plays every day. Whatever you land on is yours, credited straight away."
         },
         "leaderboard": {
           "title": "The leaderboard",
@@ -1356,7 +1356,7 @@
   "upgrade": {
     "title": "Upgrade",
     "subtitle": "Raise your daily limit and earn at a better rate.",
-    "stacking": "Plans stack for ads. Every plan you hold adds its own daily ad limit, and its ads are paid at its own rate, best first. So holding Bronze and Gold gives you Gold's 7 ads at Gold's rate and then Bronze's 3 at Bronze's rate. Weekly game plays are the exception: they follow your best plan rather than adding up. You can hold each plan once.",
+    "stacking": "Plans stack for ads. Every plan you hold adds its own daily ad limit, and its ads are paid at its own rate, best first. So holding Bronze and Gold gives you Gold's 7 ads at Gold's rate and then Bronze's 3 at Bronze's rate. Game plays add up too: every plan you hold adds its own daily plays. You can hold each plan once.",
     "footnote": "Each plan runs for the period shown on its card. Prices are one-off for that period. Nothing renews automatically.",
     "current": {
       "free": "You're on the Free plan",
@@ -2744,13 +2744,13 @@
         },
         "gameCombineMode": {
           "label": "Plays for stacked plans",
-          "description": "How weekly plays combine when somebody holds several plans.",
-          "highest": "Highest plan only (Platinum gives 5)",
-          "sumBonus": "Add the bonuses, like ad caps (all four gives 11)"
+          "description": "How daily plays combine when somebody holds several plans.",
+          "highest": "Highest plan only",
+          "sumBonus": "Add them up, like ad caps (Bronze and Silver give 3)"
         },
         "gameGap": {
           "label": "Minimum gap between plays",
-          "description": "Stops a double tap or a stuck button spending two plays on one intention. Not a fraud control. The weekly allowance is that."
+          "description": "Stops a double tap or a stuck button spending two plays on one intention. Not a fraud control. The daily allowance is that."
         },
         "leaderboardRanks": {
           "label": "Places shown on the leaderboard",
@@ -3105,10 +3105,10 @@
         "mustPay": "Outcome {slot} pays nothing. Every box and every segment must award points or an extra play."
       },
       "plans": {
-        "title": "Plays per week, by plan",
-        "hint": "One shared pool across both games. A user holding several plans gets the highest of them, not the total. Change that with game_plays_combine_mode in Platform settings.",
+        "title": "Plays per day, by plan",
+        "hint": "One shared pool across both games. Plays arrive every day at midnight and do not carry over. A user holding several plans gets the plays of each of them added together, unless game_plays_combine_mode in Platform settings says highest plan only.",
         "free": "Free",
-        "playsFor": "Weekly plays for {plan}"
+        "playsFor": "Daily plays for {plan}"
       }
     },
     "tasks": {
@@ -3498,22 +3498,22 @@
   },
   "games": {
     "title": "Games",
-    "subtitle": "Use your weekly plays. Every outcome pays something.",
-    "playsLeft": "{count, plural, =0 {No plays left this week} one {# play left this week} other {# plays left this week}}",
-    "resetsOn": "New plays on {date}",
-    "fairness": "Every result is drawn on our servers the moment you play, from odds set by SidePerks. Unused plays do not carry over to next week.",
+    "subtitle": "Use your plays for today. Every outcome pays something.",
+    "playsLeft": "{count, plural, =0 {No plays left today} one {# play left today} other {# plays left today}}",
+    "resetsOn": "New plays every day at {time}",
+    "fairness": "Every result is drawn on our servers the moment you play, from odds set by SidePerks. Unused plays do not carry over to the next day.",
     "box": {
       "name": "Mystery Box",
       "tagline": "Pick a box, keep what is inside",
       "prompt": "Pick any box.",
-      "noPlays": "You have used all your plays this week.",
+      "noPlays": "You have used all your plays for today.",
       "boxNumber": "Box {number}"
     },
     "wheel": {
       "name": "Spin the Wheel",
       "tagline": "One spin, twelve prizes",
       "prompt": "Give it a spin.",
-      "noPlays": "You have used all your plays this week.",
+      "noPlays": "You have used all your plays for today.",
       "spin": "Spin",
       "spinning": "Spinning…",
       "label": "Prize wheel"
@@ -3523,13 +3523,13 @@
       "points": "points",
       "extraPlays": "{count, plural, one {+# extra play} other {+# extra plays}}",
       "again": "Play again ({count} left)",
-      "spent": "That was your last play this week.",
+      "spent": "That was your last play for today.",
       "upgrade": "Get more plays",
       "backToGames": "Back to games"
     },
     "errors": {
       "games_disabled": "Games are not available right now.",
-      "no_plays_left": "You have no plays left this week. New plays arrive on Monday.",
+      "no_plays_left": "You have no plays left today. New plays arrive tomorrow.",
       "too_soon": "One moment: try that again in a second.",
       "account_disabled": "Your account is under review and cannot play right now.",
       "no_prizes_configured": "This game is not ready yet. Please try later.",
@@ -3540,13 +3540,13 @@
       "plan": {
         "subtitle": "Games come with a paid plan.",
         "title": "Your plan gives you 0 game plays",
-        "body": "You are on the Free plan, which does not include any game plays, so no new plays arrive on Monday. Every paid plan comes with plays every week, and the higher the plan the more you get.",
+        "body": "You are on the Free plan, which does not include any game plays, so no new plays arrive tomorrow. Every paid plan comes with plays every day, and the higher the plan the more you get.",
         "cta": "Upgrade to play"
       },
       "programme": {
         "subtitle": "Games come with a training programme.",
         "title": "Your programme gives you 0 game plays",
-        "body": "Game plays come with a training programme, and yours does not include any, so no new plays arrive on Monday. Take a programme to start playing for cash prizes.",
+        "body": "Game plays come with a training programme, and yours does not include any, so no new plays arrive tomorrow. Take a programme to start playing for cash prizes.",
         "cta": "See programmes"
       }
     }
@@ -3796,7 +3796,7 @@
       "feature": {
         "ads": "{count, plural, one {# ad a day} other {# ads a day}}",
         "points": "{from} to {to} points an ad",
-        "games": "{count, plural, =0 {No game plays} one {# game play a week} other {# game plays a week}}",
+        "games": "{count, plural, =0 {No game plays} one {# game play a day} other {# game plays a day}}",
         "term": "Runs for {days} days"
       },
       "bestRate": "Best rate",
@@ -3828,7 +3828,7 @@
       },
       "games": {
         "title": "More ways to earn",
-        "body": "Games, tasks, the leaderboard and gift codes. Your plan decides how many game plays you get each week."
+        "body": "Games, tasks, the leaderboard and gift codes. Your plan decides how many game plays you get each day."
       },
       "community": {
         "title": "Join the community",

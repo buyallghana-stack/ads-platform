@@ -45,7 +45,7 @@ export async function getGameStatus(userId: string): Promise<GameStatus> {
      off for a legal reason, so the failure mode has to be "no game", never
      "game". */
   if (!row) {
-    return { enabled: false, allowance: 0, used: 0, remaining: 0, weekEndsAt: new Date().toISOString() }
+    return { enabled: false, allowance: 0, used: 0, remaining: 0, resetsAt: new Date().toISOString() }
   }
 
   return {
@@ -53,7 +53,7 @@ export async function getGameStatus(userId: string): Promise<GameStatus> {
     allowance: Number(row.allowance ?? 0),
     used: Number(row.used ?? 0),
     remaining: Number(row.remaining ?? 0),
-    weekEndsAt: row.week_ends_at,
+    resetsAt: row.week_ends_at,
   }
 }
 

@@ -143,11 +143,11 @@ describe.skipIf(!HAS_DB)('games', () => {
     })
   })
 
-  /* The free tier grants one play a week. The second attempt is the whole
+  /* The free tier is pinned to one play a day. The second attempt is the whole
      allowance mechanic in one assertion. */
-  it('spends the weekly allowance and then refuses', async () => {
+  it('spends the daily allowance and then refuses', async () => {
     await withRollback(async (tx) => {
-      /* One play a week, because that is the number this test asserts. The
+      /* One play a day, because that is the number this test asserts. The
          free plan grants zero in production since the pricing restructure,
          and a test that inherits it can only ever prove that zero is zero. */
       await pinEconomy(tx, { freeGamePlays: 1 })
@@ -163,8 +163,9 @@ describe.skipIf(!HAS_DB)('games', () => {
     })
   })
 
-  /* The operator's choice: plays are the ONE benefit that does not stack. */
-  it('gives a stacked user the highest plan, not the total', async () => {
+  /* Both combine modes. Production runs `sum_bonus` (plays stack, operator
+     2026-09-22); `highest` is the fallback when the setting is absent. */
+  it('gives a stacked user the highest plan, or the total under sum_bonus', async () => {
     await withRollback(async (tx) => {
       await pinEconomy(tx, { freeGamePlays: 1 })
       const user = await createUser(tx, { name: 'Big Spender' })
@@ -338,7 +339,7 @@ describe.skipIf(!HAS_DB)('games', () => {
       await pinEconomy(tx)
       const user = await createUser(tx, { name: 'Capped Out' })
       // Somebody else exhausted the stock earlier today. Spending it with
-      // `user` would also spend their weekly play, and the test would prove
+      // `user` would also spend their daily play, and the test would prove
       // nothing about caps.
       const earlier = await createUser(tx, { name: 'Earlier Winner' })
       await enable(tx)
@@ -420,24 +421,88 @@ describe.skipIf(!HAS_DB)('games', () => {
     })
   })
 
-  it('keeps a play out of last week', async () => {
+  /*
+    OPERATOR, 2026-09-28: plays are DAILY. Yesterday's play is in the same
+    calendar week as today's on six days out of seven, so this is the test that
+    would have stayed red under the weekly count.
+  */
+  it('keeps yesterday\'s play out of today', async () => {
     await withRollback(async (tx) => {
-      await pinEconomy(tx)
-      const user = await createUser(tx, { name: 'Last Week' })
+      await pinEconomy(tx, { freeGamePlays: 1 })
+      const user = await createUser(tx, { name: 'Yesterday' })
       await enable(tx)
       await setBoard(tx, 'mystery_box', [{ slot: 1, points: 60, weight: 1 }])
 
-      // A play from a previous week must not count against this week's one.
       await tx.query(
         `insert into public.game_plays
            (user_id, game, prize_id, slot, points_awarded, extra_plays_awarded, roll, weight_total, week_start, created_at)
          select $1, 'mystery_box', id, 1, 60, 0, 0, 1,
-                public.game_week_start() - 7, now() - interval '8 days'
+                public.game_week_start(), public.game_day_start() - interval '1 minute'
            from public.game_prizes where game = 'mystery_box' and slot = 1`,
         [user.id],
       )
 
       expect((await play(tx, user.id)).outcome).toBe('ok')
+      // And today's one play is now spent.
+      expect((await play(tx, user.id)).outcome).toBe('no_plays_left')
+    })
+  })
+
+  /* An extra play won yesterday was yesterday's to spend. */
+  it('does not carry a won extra play into the next day', async () => {
+    await withRollback(async (tx) => {
+      await pinEconomy(tx, { freeGamePlays: 1 })
+      const user = await createUser(tx, { name: 'Old Bonus' })
+      await enable(tx)
+      await setBoard(tx, 'mystery_box', [{ slot: 1, points: 60, weight: 1, extra: 3 }])
+
+      await tx.query(
+        `insert into public.game_plays
+           (user_id, game, prize_id, slot, points_awarded, extra_plays_awarded, roll, weight_total, week_start, created_at)
+         select $1, 'mystery_box', id, 1, 60, 3, 0, 1,
+                public.game_week_start(), public.game_day_start() - interval '1 minute'
+           from public.game_prizes where game = 'mystery_box' and slot = 1`,
+        [user.id],
+      )
+
+      const { rows } = await tx.query(`select public.user_weekly_play_allowance($1) as n`, [user.id])
+      // The plan's one play, and none of yesterday's three.
+      expect(Number(rows[0]!.n)).toBe(1)
+    })
+  })
+
+  /*
+    Plays moved to a daily clock; the prize caps did NOT. A weekly cap spent on
+    Monday must still hold on Wednesday, or the one brake on prize liability
+    quietly becomes seven times looser.
+  */
+  it('still counts a weekly prize cap across the whole week', async () => {
+    await withRollback(async (tx) => {
+      await pinEconomy(tx)
+      const user = await createUser(tx, { name: 'Midweek' })
+      const earlier = await createUser(tx, { name: 'Start Of Week' })
+      await enable(tx)
+      await setBoard(tx, 'mystery_box', [
+        { slot: 1, points: 10, weight: 1, label: 'Small' },
+        { slot: 2, points: 9_999, weight: 1_000_000, label: 'Jackpot' },
+      ])
+      await tx.query(
+        `update public.game_prizes set weekly_cap = 1
+          where game = 'mystery_box' and slot = 2`,
+      )
+      // The first second of the week: today on a Monday, earlier on any other day.
+      await tx.query(
+        `insert into public.game_plays
+           (user_id, game, prize_id, slot, points_awarded, extra_plays_awarded, roll, weight_total, week_start, created_at)
+         select $1, 'mystery_box', id, 2, 9999, 0, 0, 1,
+                public.game_week_start(), date_trunc('week', now()) + interval '1 second'
+           from public.game_prizes where game = 'mystery_box' and slot = 2`,
+        [earlier.id],
+      )
+
+      const result = await play(tx, user.id)
+      expect(result.outcome).toBe('ok')
+      expect(result.label).toBe('Small')
     })
   })
 

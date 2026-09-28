@@ -248,7 +248,7 @@ try {
 
   const adminText = await admin.locator('body').innerText()
   check('the editor shows what a play costs', /cost per play/i.test(adminText), 'RTP figure present')
-  check('the editor shows plays per plan', /plays per week/i.test(adminText), 'plan panel present')
+  check('the editor shows plays per plan', /plays per day/i.test(adminText), 'plan panel present')
   const chanceCells = await admin.getByText(/%$/).count()
   check('per-outcome odds are shown', chanceCells >= 12, `${chanceCells} percentages`)
   await shoot(admin, 'games-admin-desktop')

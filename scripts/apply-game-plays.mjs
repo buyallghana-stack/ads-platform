@@ -1,5 +1,5 @@
 /**
- * Retune the weekly game plays per plan, and let them stack.
+ * Set the DAILY game plays per plan, and let them stack.
  *
  *   node scripts/apply-game-plays.mjs           check only, writes nothing
  *   node scripts/apply-game-plays.mjs --apply   save it
@@ -12,38 +12,31 @@
  * the admin panel calls — so the setting has exactly one way in and one audit
  * trail.
  *
- * OPERATOR, 2026-09-22: PLAYS NOW STACK. `game_plays_combine_mode` moves from
- * `highest` to `sum_bonus`, so a member holding several plans gets each plan's
- * plays added on top of the free allowance, the way ad caps already do. This
- * reverses the 2026-07-30 decision, which was taken when plays were meant to
- * be the one benefit that did NOT stack.
+ * OPERATOR, 2026-09-28: PLAYS ARE DAILY, AND THE LADDER IS A COUNT. The free
+ * plan grants 0 a day, the cheapest paid plan 1, the next 2, and so on up the
+ * price order. The ladder is DERIVED from the plans as they stand rather than
+ * listed here, so a plan added, removed or re-priced in the admin gets its
+ * place on the next run instead of being skipped by a stale list. (The daily
+ * clock itself is migration 20260903000000; `tiers.weekly_game_plays` now means
+ * plays a day.)
  *
- * THE LADDER BELOW IS ALREADY WHAT PRODUCTION HOLDS, and it is restated here
- * rather than left implicit for two reasons. The migration files still say
- * Pearl grants 2 and Platinum 4, which the operator has since corrected in the
- * admin — so a reader checking the repository gets the wrong answer, and a
- * fresh database replayed from migrations would come up with a ladder that
- * stacks to something else entirely. And `sum_bonus` is what makes each rung's
- * number matter on its own: under `highest` only the largest was ever read, so
- * a rung set wrong was invisible.
+ * OPERATOR, 2026-09-22: PLAYS STACK. `game_plays_combine_mode` is `sum_bonus`,
+ * so a member holding several plans gets each plan's plays added on top of the
+ * free allowance, the way ad caps already do.
  *
  * THE RULE IT ENFORCES. Read every plan in price order: paying more must buy
- * MORE plays, never the same number. This is the games half of the rule
- * `apply-plan-ladder.mjs` enforces for points an ad.
+ * MORE plays, never the same number. Two plans at the same price would break
+ * it, and the run refuses rather than guess which comes first.
  *
  * ORDER MATTERS, AND IT IS LADDER FIRST, MODE LAST. While the mode is still
- * `highest` a half-finished run can only ever RAISE somebody's allowance,
- * because every number here is at or above the one it replaces. Flipping the
- * mode first would apply stacking to a ladder that is still half old.
+ * `highest` a half-finished run can only ever RAISE somebody's allowance.
+ * Flipping the mode first would apply stacking to a ladder that is still half
+ * old.
  *
- * ⚠️ THIS COSTS PRIZE MONEY, AND THE GAMES ARE LIVE. Under `highest` the most
- * anybody could draw was the best single plan — four a week, because
- * everything dearer than Gold is `coming_soon` and cannot be bought. Under
- * `sum_bonus` a member holding all four plans on sale draws TEN. Every face
- * pays something (operator rule 4, there are no losing outcomes), so the prize
- * liability per stacked member goes up 2.5x. The prize table's daily and
- * weekly caps are the only thing bounding it; read them on the admin games
- * screen alongside this.
+ * ⚠️ THIS COSTS PRIZE MONEY. Every face pays something (operator rule 4), and
+ * a member holding the four plans on sale (1+2+3+4) now draws TEN A DAY. The
+ * prize table's daily and weekly caps are the only thing bounding it; read
+ * them on the admin games screen alongside this.
  *
  * ⚠️ SUM_BONUS ADDS UP THE ROWS IT IS GIVEN. `user_target_tiers` returns one
  * row per live subscription, so two live subscriptions to the SAME plan would
@@ -71,18 +64,10 @@ const db = createClient(url, secret, { auth: { persistSession: false } })
 const apply = process.argv.includes('--apply')
 
 /* --- the ladder ----------------------------------------------------------
- * Plays a week, by plan. The free plan is not listed: it grants none and that
- * is deliberate — the hub shows an upgrade rather than a game to an account
- * with an allowance of zero.
+ * Plays a day. Free is 0; every paid plan, cheapest first, is one more than
+ * the plan below it. Built from the database once the plans are read.
  */
-const PLAYS = [
-  { slug: 'bronze', plays: 1 },
-  { slug: 'silver', plays: 2 },
-  { slug: 'pearl', plays: 3 },
-  { slug: 'gold', plays: 4 },
-  { slug: 'sapphire', plays: 5 },
-  { slug: 'platinum', plays: 6 },
-]
+const FREE_PLAYS = 0
 
 const MODE = 'sum_bonus'
 
@@ -157,7 +142,18 @@ const gamesOn = configRows?.find((c) => c.key === 'games_enabled')?.value === 't
 
 const free = rows.find((r) => r.is_default)
 const freePlays = free?.weekly_game_plays ?? 0
-const paid = rows.filter((r) => !r.is_default && r.is_active)
+const paid = rows
+  .filter((r) => !r.is_default && r.is_active)
+  .sort((a, b) => a.price_minor - b.price_minor)
+
+const samePrice = paid.filter((r, i) => i > 0 && r.price_minor === paid[i - 1].price_minor)
+if (samePrice.length) {
+  console.error('Two plans share a price, so there is no order to count up in: ' +
+    samePrice.map((r) => r.slug).join(', '))
+  process.exit(1)
+}
+
+const PLAYS = paid.map((r, i) => ({ slug: r.slug, plays: FREE_PLAYS + i + 1 }))
 const sellable = paid.filter((r) => !r.coming_soon).map((r) => r.slug)
 
 console.log(`project ${url}`)
@@ -181,7 +177,8 @@ if (missing.length) {
 }
 
 table('NOW', before, mode, freePlays, sellable)
-table('PROPOSED', after, MODE, freePlays, sellable)
+table('PROPOSED', after, MODE, FREE_PLAYS, sellable)
+if (freePlays !== FREE_PLAYS) console.log(`\nfree plan: ${freePlays} a day -> ${FREE_PLAYS} a day`)
 
 console.log('\nmore money must buy more plays, at every step:')
 const faults = faultsIn(after)
@@ -194,9 +191,9 @@ console.log('  clean at all ' + (after.length - 1) + ' steps')
 
 /* What this actually costs, stated in plays rather than left to be discovered
    once the games are on. */
-const wasTop = Math.max(freePlays, ...before.filter((r) => sellable.includes(r.slug)).map((r) => r.plays))
-const nowTop = stacked(after, MODE, freePlays).filter((t) => sellable.includes(t.slug)).pop()?.total ?? freePlays
-console.log(`\nmost plays a paying member can hold: ${wasTop} a week -> ${nowTop} a week`)
+const wasTop = stacked(before, mode, freePlays).filter((t) => sellable.includes(t.slug)).pop()?.total ?? freePlays
+const nowTop = stacked(after, MODE, FREE_PLAYS).filter((t) => sellable.includes(t.slug)).pop()?.total ?? freePlays
+console.log(`\nmost plays a paying member can hold: ${wasTop} a day -> ${nowTop} a day`)
 console.log('  every face pays something, so that is the per-member prize liability multiplier')
 
 if (!apply) {
@@ -221,6 +218,21 @@ const adminId = admins[0].user_id
 
 console.log(`\nsaving as super admin ${adminId}, top of the ladder first`)
 
+/* The free plan first: it is the base `sum_bonus` counts from, and 0 can only
+   ever lower what a free account draws. */
+if (free && freePlays !== FREE_PLAYS) {
+  const { error } = await db.rpc('admin_set_tier_game_plays', {
+    p_admin_id: adminId,
+    p_tier_id: free.id,
+    p_plays: FREE_PLAYS,
+  })
+  if (error) {
+    console.error(`  ${free.slug}: FAILED ${error.message}`)
+    process.exit(1)
+  }
+  console.log(`  ${free.slug}: ${FREE_PLAYS} a day`)
+}
+
 for (const want of [...PLAYS].reverse()) {
   const row = paid.find((p) => p.slug === want.slug)
   const { error } = await db.rpc('admin_set_tier_game_plays', {
@@ -233,7 +245,7 @@ for (const want of [...PLAYS].reverse()) {
     console.error('  Stopping here. The mode is untouched, so nothing stacks on a half-saved ladder.')
     process.exit(1)
   }
-  console.log(`  ${want.slug}: ${want.plays} a week`)
+  console.log(`  ${want.slug}: ${want.plays} a day`)
 }
 
 /* LAST, and only once every rung is right. */
@@ -268,6 +280,6 @@ console.log('\nread back from the database:')
 for (const r of saved.filter((s) => PLAYS.some((p) => p.slug === s.slug))) {
   const want = PLAYS.find((p) => p.slug === r.slug)
   const ok = r.weekly_game_plays === want.plays
-  console.log(`  ${r.slug.padEnd(11)} ${String(r.weekly_game_plays).padStart(2)} a week  ${ok ? '' : 'MISMATCH, wanted ' + want.plays}`)
+  console.log(`  ${r.slug.padEnd(11)} ${String(r.weekly_game_plays).padStart(2)} a day  ${ok ? '' : 'MISMATCH, wanted ' + want.plays}`)
 }
 console.log(`  combine mode ${savedMode?.value}${savedMode?.value === MODE ? '' : '  MISMATCH, wanted ' + MODE}`)

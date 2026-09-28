@@ -43,8 +43,8 @@ export type GameStatus = {
   allowance: number
   used: number
   remaining: number
-  /** ISO. When unused plays are forfeited — next Monday, 00:00 UTC. */
-  weekEndsAt: string
+  /** ISO. When unused plays are forfeited: tomorrow, 00:00 UTC (midnight in Ghana). */
+  resetsAt: string
 }
 
 export type PlayResult =
@@ -101,6 +101,6 @@ export type GameSkin = {
   formatWedge: (value: number) => string
   /** The games hub this game belongs to. */
   hubHref: string
-  /** Where more plays come from when the week's allowance is spent. */
+  /** Where more plays come from when the day's allowance is spent. */
   moreHref: string
 }
