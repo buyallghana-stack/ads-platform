@@ -18,9 +18,8 @@ import { cn } from '@/lib/cn'
  *
  *   - the field uppercases as you type, because half of Ghana's phones will
  *     autocapitalise the first character and nothing else;
- *   - pasting is refused (operator, 2026-09-24): a code has to be typed, one
- *     character at a time, so a code shared in a group is not simply won by
- *     whoever pastes fastest;
+ *   - pasted text is stripped of spaces and dashes, because people paste
+ *     "ABCD EFGH JKMN" out of a message;
  *   - `autoCapitalize`/`autoCorrect`/`spellCheck` are all off — a keyboard
  *     that "corrects" a code turns a valid one invalid;
  *   - the input is `inputMode="text"` and not numeric, since the alphabet is
@@ -43,7 +42,6 @@ export function GiftCodeForm() {
   const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [won, setWon] = useState<number | null>(null)
-  const [pasteBlocked, setPasteBlocked] = useState(false)
   const [pending, startTransition] = useTransition()
 
   const clean = (raw: string) => raw.toUpperCase().replace(ALLOWED, '').slice(0, LENGTH)
@@ -146,29 +144,12 @@ export function GiftCodeForm() {
         <input
           id="gift-code"
           value={code}
-          onChange={(e) => {
-            // One character per change. A phone keyboard's clipboard chip
-            // inserts the whole code without firing `paste`, so blocking the
-            // event alone would not stop it; a jump of more than one
-            // character is refused whatever caused it. Deleting is free.
-            const next = clean(e.target.value)
-            if (next.length > code.length + 1) {
-              setPasteBlocked(true)
-              return
-            }
-            setPasteBlocked(false)
-            setCode(next)
-          }}
+          onChange={(e) => setCode(clean(e.target.value))}
           onPaste={(e) => {
-            // Operator, 2026-09-24: codes must be TYPED. A code copied out of
-            // a group chat is redeemed by whoever pastes fastest, which
-            // undermines a campaign that hands codes out one by one.
+            // Let the paste through the same cleaner, so "ABCD-EFGH-JKMN"
+            // becomes a valid entry instead of a rejected one.
             e.preventDefault()
-            setPasteBlocked(true)
-          }}
-          onDrop={(e) => {
-            e.preventDefault()
-            setPasteBlocked(true)
+            setCode(clean(e.clipboardData.getData('text')))
           }}
           inputMode="text"
           autoCapitalize="characters"
@@ -188,15 +169,8 @@ export function GiftCodeForm() {
               : 'border-ink-200 focus:border-brand-600 focus:shadow-brand-600/12',
           )}
         />
-        <p
-          id="gift-code-hint"
-          aria-live="polite"
-          className={cn(
-            'mt-1.5 text-center text-[0.75rem] tabular-nums',
-            pasteBlocked ? 'text-danger-700' : 'text-ink-400',
-          )}
-        >
-          {pasteBlocked ? t('noPaste') : t('hint', { entered: code.length, total: LENGTH })}
+        <p id="gift-code-hint" className="mt-1.5 text-center text-[0.75rem] tabular-nums text-ink-400">
+          {t('hint', { entered: code.length, total: LENGTH })}
         </p>
 
         <Button type="submit" size="lg" fullWidth loading={pending} disabled={!complete} className="mt-4">

@@ -3590,7 +3590,6 @@
     "label": "Code cadeau",
     "placeholder": "ABCD EFGH JKMN",
     "hint": "{entered} caractères sur {total}",
-    "noPaste": "Le collage est désactivé. Tapez le code caractère par caractère.",
     "submit": "Utiliser le code",
     "success": {
       "title": "Code utilisé",
