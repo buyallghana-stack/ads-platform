@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { LogOut, Phone, Smartphone } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 import { FormHeader } from '@/components/auth/FormHeader'
 import { SmsCodeStep, useCodeErrorMessage } from '@/components/auth/SmsCodeStep'
@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/TextField'
 import { logOutAction } from '@/app/[locale]/(auth)/actions'
 import { confirmPhoneAction, sendPhoneCodeAction } from '@/app/[locale]/(auth)/verify-phone/actions'
-import { useRouter } from '@/i18n/navigation'
+import { getPathname, useRouter } from '@/i18n/navigation'
 
 /**
  * "Confirm your phone number": the screen every account without a verified
@@ -23,6 +23,9 @@ export function VerifyPhoneForm({ defaultPhone }: { defaultPhone: string }) {
   const tError = useTranslations('auth.errors')
   const errText = useCodeErrorMessage()
   const router = useRouter()
+  const locale = useLocale()
+  // One confirm at a time: six digits auto-submit, and Continue can fire again.
+  const confirming = useRef(false)
 
   const [phone, setPhone] = useState(defaultPhone)
   const [step, setStep] = useState<'phone' | 'code'>('phone')
@@ -62,14 +65,23 @@ export function VerifyPhoneForm({ defaultPhone }: { defaultPhone: string }) {
   }
 
   const confirm = async (value: string) => {
+    if (confirming.current) return
+    confirming.current = true
     setBusy(true)
     setError(null)
     const res = await confirmPhoneAction({ phone, code: value })
     if (res.ok) {
-      router.replace(res.redirectTo ?? '/dashboard')
-      router.refresh()
+      /*
+       * A full page load, not router.replace + refresh. After a correct code
+       * the client transition out of /verify-phone stalled on production
+       * (2026-09-28): the phone was already marked verified, but Continue span
+       * forever until the tab was closed and reopened. Reopening is a full
+       * load, so that is what this does. It happens once per account.
+       */
+      window.location.replace(getPathname({ href: res.redirectTo ?? '/dashboard', locale }))
       return
     }
+    confirming.current = false
     setBusy(false)
     setCode('')
     if (res.field === 'phone') {
