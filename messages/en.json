@@ -1436,6 +1436,44 @@
     }
   },
   "upgrade": {
+    "manual": {
+      "title": "Send your payment",
+      "subtitle": "{plan} plan, paid by mobile money",
+      "sendExactly": "Send exactly",
+      "number": "Number",
+      "accountName": "Name on the number",
+      "network": "Network",
+      "copy": "Copy",
+      "copied": "Copied",
+      "step1": "Send {amount} to {number} from your mobile money.",
+      "step2": "Check the name shown before you confirm. It should match the one above.",
+      "step3": "Take a screenshot of the confirmation, then fill in the form below.",
+      "senderPhone": "Number you sent from",
+      "senderName": "Name on that number",
+      "senderNameHint": "As your network shows it, so we can find your payment.",
+      "proof": "Screenshot of the payment",
+      "proofPick": "Tap to add the screenshot",
+      "proofPreparing": "Preparing the picture...",
+      "proofReady": "Screenshot ready ({kb} KB). Tap to change it.",
+      "proofHint": "The confirmation message or the transaction screen, showing the amount.",
+      "proofRequired": "Add a screenshot of the payment confirmation.",
+      "proofTooLarge": "That picture is too large. Try a plain screenshot.",
+      "sent": "I have sent it",
+      "cancel": "Cancel, I have not sent anything",
+      "backToPlans": "Back to plans",
+      "waiting": {
+        "title": "We are checking your payment",
+        "body": "Your {amount} for {plan} is being checked. Your plan starts as soon as it is confirmed. Your payment code is {reference}."
+      },
+      "confirmed": {
+        "title": "Your plan is active",
+        "body": "Your {amount} payment was confirmed and {plan} is now active."
+      },
+      "closed": {
+        "title": "This payment was not accepted",
+        "body": "We could not match this payment. If you did send {amount}, contact support with your code {reference}."
+      }
+    },
     "title": "Upgrade",
     "subtitle": "Raise your daily limit and earn at a better rate.",
     "stacking": "Plans stack for ads. Every plan you hold adds its own daily ad limit, and its ads are paid at its own rate, best first. So holding Bronze and Gold gives you Gold's 7 ads at Gold's rate and then Bronze's 3 at Bronze's rate. Game plays add up too: every plan you hold adds its own daily plays. You can hold each plan once.",
@@ -1481,6 +1519,7 @@
       "lockedCta": "{plan} opens soon"
     },
     "checkout": {
+      "payManually": "Send {amount} by mobile money",
       "title": "{plan} plan",
       "subtitle": "One payment, {days, plural, one {# day} other {# days}} of benefits.",
       "total": "Total to pay",
@@ -3414,6 +3453,22 @@
       }
     },
     "payments": {
+      "manual": {
+        "title": "Manual payments waiting ({count})",
+        "description": "Buyers who paid by sending mobile money by hand. Check the money arrived on your phone, then confirm to start their plan.",
+        "proofAlt": "Screenshot of the payment",
+        "noProof": "No screenshot yet",
+        "unnamed": "No name",
+        "sentFrom": "Sent from:",
+        "notClaimed": "Not marked as sent yet",
+        "when": "When:",
+        "confirm": "Confirm",
+        "confirmSure": "Yes, {amount} arrived",
+        "reject": "Reject",
+        "rejectSure": "Yes, reject it",
+        "confirmed": "Confirmed. The plan is active.",
+        "rejected": "Rejected."
+      },
       "kind": {
         "subscription": "Plan",
         "vault": "Vault"

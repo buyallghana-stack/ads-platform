@@ -5,7 +5,7 @@ import { setRequestLocale } from 'next-intl/server'
 import { UpgradeView } from '@/components/upgrade/UpgradeView'
 import { redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
-import { hubConfigured } from '@/lib/env'
+import { getManualPaymentConfig, paystackCheckoutEnabled } from '@/lib/payments/manual'
 import { getPaymentMethodSwitches } from '@/lib/payments/methods'
 import { createAdminClient } from '@/lib/supabase/admin'
 import {
@@ -57,6 +57,8 @@ export default async function UpgradePage({
     balancePoints,
     { data: balanceSwitch },
     heldTopups,
+    paystackOn,
+    manual,
   ] = await Promise.all([
     getPlans(),
     getHeldPlans(user!.id),
@@ -78,6 +80,8 @@ export default async function UpgradePage({
     /* Balance set aside by an unfinished part-balance checkout, so the page
        can say where it went and offer it back. */
     getHeldTopups(user!.id),
+    paystackCheckoutEnabled(),
+    getManualPaymentConfig(),
   ])
 
   return (
@@ -90,7 +94,8 @@ export default async function UpgradePage({
       freeName={references.freeName}
       baseAdPoints={references.baseAdPoints}
       pointsPerCurrencyUnit={references.pointsPerCurrencyUnit}
-      checkoutEnabled={hubConfigured()}
+      checkoutEnabled={paystackOn}
+      manualEnabled={manual.enabled}
       checkoutMethods={switches.checkout}
       balancePurchaseEnabled={balanceSwitch?.value === 'true'}
       balancePoints={balancePoints}

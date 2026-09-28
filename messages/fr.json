@@ -1436,6 +1436,44 @@
     }
   },
   "upgrade": {
+    "manual": {
+      "title": "Envoyez votre paiement",
+      "subtitle": "Forfait {plan}, payé par mobile money",
+      "sendExactly": "Envoyez exactement",
+      "number": "Numéro",
+      "accountName": "Nom sur le numéro",
+      "network": "Réseau",
+      "copy": "Copier",
+      "copied": "Copié",
+      "step1": "Envoyez {amount} au {number} depuis votre mobile money.",
+      "step2": "Vérifiez le nom affiché avant de confirmer. Il doit correspondre à celui ci-dessus.",
+      "step3": "Faites une capture d'écran de la confirmation, puis remplissez le formulaire ci-dessous.",
+      "senderPhone": "Numéro d'envoi",
+      "senderName": "Nom sur ce numéro",
+      "senderNameHint": "Tel que votre réseau l'affiche, pour retrouver votre paiement.",
+      "proof": "Capture d'écran du paiement",
+      "proofPick": "Touchez pour ajouter la capture",
+      "proofPreparing": "Préparation de l'image...",
+      "proofReady": "Capture prête ({kb} Ko). Touchez pour la changer.",
+      "proofHint": "Le message de confirmation ou l'écran de la transaction, avec le montant.",
+      "proofRequired": "Ajoutez une capture d'écran de la confirmation du paiement.",
+      "proofTooLarge": "Cette image est trop lourde. Essayez une simple capture d'écran.",
+      "sent": "Je l'ai envoyé",
+      "cancel": "Annuler, je n'ai rien envoyé",
+      "backToPlans": "Retour aux forfaits",
+      "waiting": {
+        "title": "Nous vérifions votre paiement",
+        "body": "Votre paiement de {amount} pour {plan} est en cours de vérification. Votre forfait démarre dès qu'il est confirmé. Votre code de paiement est {reference}."
+      },
+      "confirmed": {
+        "title": "Votre forfait est actif",
+        "body": "Votre paiement de {amount} a été confirmé et {plan} est maintenant actif."
+      },
+      "closed": {
+        "title": "Ce paiement n'a pas été accepté",
+        "body": "Nous n'avons pas pu faire correspondre ce paiement. Si vous avez bien envoyé {amount}, contactez le support avec votre code {reference}."
+      }
+    },
     "title": "Passer à un forfait",
     "subtitle": "Augmentez votre limite quotidienne et gagnez à un meilleur taux.",
     "stacking": "Les forfaits se cumulent pour les pubs. Chaque forfait ajoute sa propre limite quotidienne, et ses pubs sont payées à son propre taux, le meilleur d'abord. Détenir Bronze et Or donne donc les 7 pubs d'Or au taux d'Or, puis les 3 de Bronze au taux de Bronze. Les parties de jeu s'additionnent aussi : chaque forfait détenu ajoute ses propres parties quotidiennes. Chaque forfait ne peut être détenu qu'une fois.",
@@ -1481,6 +1519,7 @@
       "lockedCta": "{plan} arrive bientôt"
     },
     "checkout": {
+      "payManually": "Envoyer {amount} par mobile money",
       "title": "Forfait {plan}",
       "subtitle": "Un seul paiement, {days, plural, one {# jour} other {# jours}} d'avantages.",
       "total": "Total à payer",
@@ -3414,6 +3453,22 @@
       }
     },
     "payments": {
+      "manual": {
+        "title": "Paiements manuels en attente ({count})",
+        "description": "Acheteurs qui ont payé en envoyant du mobile money à la main. Vérifiez que l'argent est arrivé sur votre téléphone, puis confirmez pour lancer leur forfait.",
+        "proofAlt": "Capture d'écran du paiement",
+        "noProof": "Pas encore de capture",
+        "unnamed": "Sans nom",
+        "sentFrom": "Envoyé depuis :",
+        "notClaimed": "Pas encore marqué comme envoyé",
+        "when": "Quand :",
+        "confirm": "Confirmer",
+        "confirmSure": "Oui, {amount} est arrivé",
+        "reject": "Refuser",
+        "rejectSure": "Oui, refuser",
+        "confirmed": "Confirmé. Le forfait est actif.",
+        "rejected": "Refusé."
+      },
       "kind": {
         "subscription": "Forfait",
         "vault": "Coffre"

@@ -1,11 +1,14 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { after } from 'next/server'
 
 import { getSessionUser } from '@/lib/auth/session'
 import { clientEnv } from '@/lib/env'
 import { reportUnexpected } from '@/lib/observability/report'
+import { alertManualPaymentClaimed } from '@/lib/sms/payment-alert'
 import { hubInitialise } from '@/lib/payments/hub/client'
+import { getManualPaymentConfig, newManualReference, paystackCheckoutEnabled } from '@/lib/payments/manual'
 import { releaseAllTopupHolds, releaseTopupHold } from '@/lib/payments/topup-hold'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -40,6 +43,8 @@ export async function startPaystackCheckout(
   amountMinor?: number,
   couponCode?: string,
 ): Promise<CheckoutResult> {
+  // Switched off by the operator (2026-09-28, the fees): refuse, not just hide.
+  if (!(await paystackCheckoutEnabled())) return { ok: false, errorKey: 'paystackOff' }
   const user = await getSessionUser()
   if (!user?.email) return { ok: false, errorKey: 'notSignedIn' }
 
@@ -80,6 +85,8 @@ export async function startPlanTopupCheckout(
   amountMinor?: number,
   couponCode?: string,
 ): Promise<CheckoutResult> {
+  // Switched off by the operator (2026-09-28, the fees): refuse, not just hide.
+  if (!(await paystackCheckoutEnabled())) return { ok: false, errorKey: 'paystackOff' }
   const user = await getSessionUser()
   if (!user?.email) return { ok: false, errorKey: 'notSignedIn' }
 
@@ -301,4 +308,144 @@ export async function previewPlanCoupon(
     discountMinor: Number(row.discount_minor),
     chargedMinor: Number(row.charged_minor),
   }
+}
+
+/* ---------------------------------------------------------------------------
+   Manual mobile money (operator direction 2026-09-28)
+
+   The buyer sends the price by hand to the operator's number, then says so.
+   The row is opened by the same `start_subscription_payment` as Paystack, so
+   the band, the coupon and every refusal are the same, and it is granted by
+   the same `confirm_subscription_payment`, from the admin. See migration
+   20260906000000.
+--------------------------------------------------------------------------- */
+
+export type ManualStartResult = { ok: true; paymentId: string } | { ok: false; message: string }
+
+export async function startManualCheckout(
+  tierId: string,
+  amountMinor?: number,
+  couponCode?: string,
+): Promise<ManualStartResult> {
+  const user = await getSessionUser()
+  if (!user) return { ok: false, message: 'Please sign in again.' }
+  if (!(await getManualPaymentConfig()).enabled) {
+    return { ok: false, message: 'Manual payment is not available right now.' }
+  }
+
+  const admin = createAdminClient()
+  const { data: payment, error } = await admin.rpc('start_subscription_payment', {
+    p_user_id: user.id,
+    p_tier_id: tierId,
+    p_method: 'manual' as never,
+    p_amount_minor: Number.isFinite(amountMinor) ? amountMinor : undefined,
+    p_coupon_code: couponCode?.trim() || undefined,
+  })
+  if (error || !payment) return { ok: false, message: error?.message ?? 'Could not start this payment.' }
+
+  const id = (payment as unknown as { id: string }).id
+  // A unique column: on the one-in-a-billion clash, draw again.
+  for (let i = 0; i < 3; i++) {
+    const { error: refError } = await admin
+      .from('subscription_payments')
+      .update({ manual_reference: newManualReference() } as never)
+      .eq('id', id)
+    if (!refError) return { ok: true, paymentId: id }
+    if (refError.code !== '23505') {
+      reportUnexpected(refError, 'upgrade.manual-reference')
+      break
+    }
+  }
+  return { ok: false, message: 'Could not start this payment.' }
+}
+
+const PROOF_TYPES: Record<string, string> = { 'image/webp': 'webp', 'image/jpeg': 'jpg', 'image/png': 'png' }
+const PROOF_MAX_BYTES = 950_000
+
+/**
+ * "I have sent it", with a screenshot of the transfer as the proof. The file
+ * arrives already shrunk by the browser (compressFittedImage); the size and
+ * type are checked again here because the browser is not the boundary.
+ */
+export async function claimManualPayment(form: FormData): Promise<{ ok: true } | { ok: false; message: string }> {
+  const user = await getSessionUser()
+  if (!user) return { ok: false, message: 'Please sign in again.' }
+
+  const paymentId = String(form.get('paymentId') ?? '')
+  const senderPhone = String(form.get('senderPhone') ?? '').replace(/[^0-9+]/g, '').slice(0, 16)
+  const senderName = String(form.get('senderName') ?? '').trim().slice(0, 80)
+  const proof = form.get('proof')
+  if (senderPhone.length < 9) return { ok: false, message: 'Enter the number you sent the money from.' }
+  if (senderName.length < 2) return { ok: false, message: 'Enter the name on that number.' }
+  if (!(proof instanceof File) || proof.size === 0) {
+    return { ok: false, message: 'Add a screenshot of the payment confirmation.' }
+  }
+  const ext = PROOF_TYPES[proof.type]
+  if (!ext) return { ok: false, message: 'The screenshot must be a picture (JPG, PNG or WebP).' }
+  if (proof.size > PROOF_MAX_BYTES) return { ok: false, message: 'That picture is too large. Try a plain screenshot.' }
+
+  const admin = createAdminClient()
+
+  // The owner, a manual row, still pending: anything else is not theirs to claim.
+  const { data: row } = await admin
+    .from('subscription_payments')
+    .select('id')
+    .eq('id', paymentId)
+    .eq('user_id', user.id)
+    .eq('status', 'pending')
+    .not('manual_reference' as never, 'is', null)
+    .maybeSingle()
+  if (!row) return { ok: false, message: 'This payment can no longer be updated.' }
+
+  const path = `${user.id}/${paymentId}-${Date.now()}.${ext}`
+  const { error: uploadError } = await admin.storage
+    .from('payment-proofs')
+    .upload(path, proof, { contentType: proof.type, upsert: false })
+  if (uploadError) {
+    reportUnexpected(uploadError, 'upgrade.manual-proof-upload')
+    return { ok: false, message: 'Could not upload the screenshot. Please try again.' }
+  }
+
+  const { error } = await admin
+    .from('subscription_payments')
+    .update({
+      manual_sender_phone: senderPhone,
+      manual_sender_name: senderName,
+      manual_proof_path: path,
+      manual_claimed_at: new Date().toISOString(),
+    } as never)
+    .eq('id', paymentId)
+    .eq('status', 'pending')
+  if (error) {
+    reportUnexpected(error, 'upgrade.manual-claim')
+    return { ok: false, message: 'Could not save this. Please try again.' }
+  }
+
+  after(() => alertManualPaymentClaimed(paymentId))
+  revalidatePath('/upgrade')
+  return { ok: true }
+}
+
+export async function cancelManualPayment(paymentId: string): Promise<{ ok: true } | { ok: false; message: string }> {
+  const user = await getSessionUser()
+  if (!user) return { ok: false, message: 'Please sign in again.' }
+  const admin = createAdminClient()
+  // Only an unclaimed one: once the buyer says they sent money, a person decides.
+  const { data } = await admin
+    .from('subscription_payments')
+    .select('id')
+    .eq('id', paymentId)
+    .eq('user_id', user.id)
+    .eq('status', 'pending')
+    .not('manual_reference' as never, 'is', null)
+    .is('manual_claimed_at' as never, null)
+    .maybeSingle()
+  if (!data) return { ok: false, message: 'This payment can no longer be cancelled.' }
+  const { error } = await admin.rpc('fail_subscription_payment', {
+    p_payment_id: paymentId,
+    p_reason: 'Cancelled by the buyer before sending',
+  })
+  if (error) return { ok: false, message: 'Could not cancel this payment.' }
+  revalidatePath('/upgrade')
+  return { ok: true }
 }

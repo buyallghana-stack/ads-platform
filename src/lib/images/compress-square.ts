@@ -173,3 +173,55 @@ async function loadImage(file: File): Promise<Loaded> {
 function toBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob | null> {
   return new Promise((resolve) => canvas.toBlob(resolve, type, quality))
 }
+
+/**
+ * The WHOLE picture, longest edge capped, re-encoded. For a payment screenshot:
+ * nothing may be cropped away (the amount and the sender are the evidence),
+ * and a phone screenshot is tall, so a square would lose most of it.
+ *
+ * Same promise as above: every failure returns the original file.
+ */
+export async function compressFittedImage(
+  file: File,
+  options: { maxEdgePx: number; maxBytes: number; name: string },
+): Promise<File> {
+  let source: Loaded
+  try {
+    source = await loadImage(file)
+  } catch {
+    return file
+  }
+  try {
+    if (!source.width || !source.height) return file
+    const scale = Math.min(1, options.maxEdgePx / Math.max(source.width, source.height))
+    const width = Math.round(source.width * scale)
+    const height = Math.round(source.height * scale)
+
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return file
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'high'
+    ctx.drawImage(source.image, 0, 0, width, height)
+
+    let type = 'image/webp'
+    let blob = await toBlob(canvas, type, QUALITY_STEPS[0])
+    if (!blob || blob.type !== type) {
+      type = 'image/jpeg'
+      blob = await toBlob(canvas, type, QUALITY_STEPS[0])
+    }
+    for (const quality of QUALITY_STEPS.slice(1)) {
+      if (blob && blob.size <= options.maxBytes) break
+      const next = await toBlob(canvas, type, quality)
+      if (next) blob = next
+    }
+    if (!blob || blob.size >= file.size) return file
+    return new File([blob], `${options.name}.${type === 'image/webp' ? 'webp' : 'jpg'}`, { type })
+  } catch {
+    return file
+  } finally {
+    source.release()
+  }
+}

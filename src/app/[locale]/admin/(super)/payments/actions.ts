@@ -50,3 +50,57 @@ export async function recheckWithHub(reference: string): Promise<RecheckResult> 
     }
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Manual mobile money: the operator checked their phone and says yes or no.
+
+   Confirm calls `confirm_subscription_payment`, the function the hub's
+   confirmation calls, so the plan, the referral commission and every side
+   effect are exactly what a Paystack payment produces. Reject closes the row
+   with `fail_subscription_payment`. Both are super admin only, like every
+   other money action.
+--------------------------------------------------------------------------- */
+
+export type ManualDecision = { ok: true } | { ok: false; message: string }
+
+async function superAdmin(): Promise<string | null> {
+  const user = await getSessionUser()
+  if (!user) return null
+  const { error } = await createAdminClient().rpc('assert_admin', { p_admin_id: user.id })
+  return error ? null : user.id
+}
+
+export async function confirmManualPayment(paymentId: string): Promise<ManualDecision> {
+  const adminId = await superAdmin()
+  if (!adminId) return { ok: false, message: 'Not an administrator.' }
+  const admin = createAdminClient()
+
+  const { data: row } = await admin
+    .from('subscription_payments')
+    .select('id, manual_reference')
+    .eq('id', paymentId)
+    .maybeSingle()
+  const reference = (row as unknown as { manual_reference: string | null } | null)?.manual_reference
+  if (!row || !reference) return { ok: false, message: 'That is not a manual payment.' }
+
+  const { error } = await admin.rpc('confirm_subscription_payment', {
+    p_payment_id: paymentId,
+    p_reference: reference,
+    p_payload: { manual: true, confirmed_by: adminId } as never,
+  })
+  if (error) return { ok: false, message: error.message }
+  revalidatePath('/admin/payments')
+  return { ok: true }
+}
+
+export async function rejectManualPayment(paymentId: string): Promise<ManualDecision> {
+  const adminId = await superAdmin()
+  if (!adminId) return { ok: false, message: 'Not an administrator.' }
+  const { error } = await createAdminClient().rpc('fail_subscription_payment', {
+    p_payment_id: paymentId,
+    p_reason: `Manual payment rejected by an administrator (${adminId})`,
+  })
+  if (error) return { ok: false, message: error.message }
+  revalidatePath('/admin/payments')
+  return { ok: true }
+}

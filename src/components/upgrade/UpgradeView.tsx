@@ -9,6 +9,7 @@ import {
   cancelTopupHold,
   previewPlanCoupon,
   purchasePlanWithBalance,
+  startManualCheckout,
   startPaystackCheckout,
   startPlanTopupCheckout,
 } from '@/app/[locale]/(app)/upgrade/actions'
@@ -44,6 +45,7 @@ export function UpgradeView({
   baseAdPoints,
   pointsPerCurrencyUnit,
   checkoutEnabled,
+  manualEnabled,
   checkoutMethods,
   balancePurchaseEnabled,
   balancePoints,
@@ -68,6 +70,8 @@ export function UpgradeView({
    *  this app holds none, and the page asked the wrong one until 17 September
    *  2026. */
   checkoutEnabled: boolean
+  /** Paying by sending mobile money by hand, confirmed by the operator. */
+  manualEnabled: boolean
   /**
    * Which ways to pay the checkout lists, from the admin's payment settings.
    *
@@ -96,7 +100,7 @@ export function UpgradeView({
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   /* Which button started the transition, so only that one says it is busy. */
-  const [paying, setPaying] = useState<'paystack' | 'balance' | 'topup' | null>(null)
+  const [paying, setPaying] = useState<'paystack' | 'manual' | 'balance' | 'topup' | null>(null)
   /* Open when "pay from balance" was pressed with too little balance: the
      sheet then says what is left and offers Paystack for it. */
   const [topupPrompt, setTopupPrompt] = useState(false)
@@ -137,6 +141,24 @@ export function UpgradeView({
         return
       }
       window.location.assign(res.authorizationUrl)
+    })
+  }
+
+  /*
+    Manual mobile money: open the payment, then show the buyer where to send
+    it. Nothing leaves the app; the operator confirms it from the admin.
+  */
+  const payManually = (plan: Plan, amountMinor: number) => {
+    setError(null)
+    setPaying('manual')
+    startTransition(async () => {
+      const res = await startManualCheckout(plan.id, amountMinor, coupon?.code)
+      if (!res.ok) {
+        setError(res.message || t('checkout.failed'))
+        setPaying(null)
+        return
+      }
+      router.push(`/upgrade/manual/${res.paymentId}`)
     })
   }
 
@@ -468,7 +490,7 @@ export function UpgradeView({
               </p>
             )}
 
-            {(checkoutEnabled || balancePurchaseEnabled) && (
+            {(checkoutEnabled || manualEnabled || balancePurchaseEnabled) && (
               <CouponField
                 currency={selected.plan.currencyCode}
                 initialCode={initialCoupon}
@@ -590,7 +612,7 @@ export function UpgradeView({
                         <Button
                           size="lg"
                           fullWidth
-                          variant={checkoutEnabled ? 'secondary' : 'primary'}
+                          variant={checkoutEnabled || manualEnabled ? 'secondary' : 'primary'}
                           className="mt-3"
                           disabled={(!enough && !canTopUp) || pending}
                           loading={pending && paying === 'balance'}
@@ -615,13 +637,13 @@ export function UpgradeView({
                 )
               })()}
 
-            {methods.length > 0 && (
+            {checkoutEnabled && methods.length > 0 && (
               <p className="mt-4 text-[0.75rem] font-semibold tracking-[0.04em] text-ink-500 uppercase">
                 {t('checkout.payWith')}
               </p>
             )}
             <div className="mt-2 flex flex-col gap-2">
-              {methods.map(({ icon: Icon, label }) => (
+              {checkoutEnabled && methods.map(({ icon: Icon, label }) => (
                 <div
                   key={label}
                   className={cn(
@@ -637,7 +659,7 @@ export function UpgradeView({
               ))}
             </div>
 
-            {!checkoutEnabled && !balancePurchaseEnabled && (
+            {!checkoutEnabled && !manualEnabled && !balancePurchaseEnabled && (
               <div
                 className={cn(
                   'mt-4 rounded-(--radius-card) border px-4 py-3',
@@ -666,6 +688,27 @@ export function UpgradeView({
                 onClick={() => pay(selected.plan, selected.amountMinor)}
               >
                 {t('checkout.pay', {
+                  amount: format.number((coupon?.chargedMinor ?? selected.amountMinor) / 100, {
+                    style: 'currency',
+                    currency: selected.plan.currencyCode,
+                    maximumFractionDigits: coupon ? 2 : 0,
+                  }),
+                })}
+              </Button>
+            )}
+
+            {manualEnabled && (
+              <Button
+                size="lg"
+                fullWidth
+                variant={checkoutEnabled ? 'secondary' : 'primary'}
+                className={checkoutEnabled ? 'mt-2.5' : 'mt-4'}
+                loading={pending && paying === 'manual'}
+                disabled={pending}
+                leadingIcon={<Smartphone />}
+                onClick={() => payManually(selected.plan, selected.amountMinor)}
+              >
+                {t('checkout.payManually', {
                   amount: format.number((coupon?.chargedMinor ?? selected.amountMinor) / 100, {
                     style: 'currency',
                     currency: selected.plan.currencyCode,
