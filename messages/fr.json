@@ -436,7 +436,7 @@
       "identityBlocked": "Ce numéro de téléphone ne peut pas servir à ouvrir un compte.",
       "botCheckFailed": "Nous n'avons pas pu confirmer que vous êtes une personne. Actualisez la page et réessayez, si vous utilisez un bloqueur de publicités ou un VPN, désactivez-le pour cette page.",
       "emailSendLimit": "Nous n'avons pas pu envoyer votre e-mail de confirmation pour le moment. Veuillez réessayer dans quelques minutes.",
-      "botCheckRetry": "La vérification de sécurité doit être refaite. Elle vient d'être réinitialisée ci-dessous. Appuyez de nouveau sur Créer un compte.",
+      "botCheckRetry": "La vérification de sécurité doit être refaite. Elle vient d'être réinitialisée ci-dessous. Appuyez de nouveau sur le bouton.",
       "emailSendFailed": "Nous n'avons pas pu envoyer d'e-mail de confirmation à cette adresse pour le moment. Le problème vient de nous. Veuillez réessayer dans quelques minutes.",
       "resetLinkExpired": "Ce lien de réinitialisation a expiré ou a déjà été utilisé. Demandez-en un nouveau et ouvrez-le dans le même navigateur.",
       "passwordSameAsOld": "C'est déjà votre mot de passe. Choisissez-en un autre.",

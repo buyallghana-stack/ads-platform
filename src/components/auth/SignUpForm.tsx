@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft, Lock, Phone, Ticket, UserRound, UserRoundPlus } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Controller, useForm } from 'react-hook-form'
 
 import { FormHeader } from '@/components/auth/FormHeader'
@@ -16,7 +16,7 @@ import { completeSignUpAction, startSignUpAction } from '@/app/[locale]/(auth)/a
 import { SmsCodeStep, useCodeErrorMessage } from '@/components/auth/SmsCodeStep'
 import { TurnstileWidget } from '@/components/auth/TurnstileWidget'
 import { deviceFingerprint, warmFingerprint } from '@/lib/fraud/fingerprint'
-import { Link, useRouter } from '@/i18n/navigation'
+import { getPathname, Link } from '@/i18n/navigation'
 import { useAuthErrorMessage } from '@/lib/useAuthErrorMessage'
 import { signUpSchema, type SignUpInput } from '@/lib/validation/auth'
 
@@ -30,7 +30,7 @@ export function SignUpForm() {
   const t = useTranslations('auth.signUp')
   const tCommon = useTranslations('common')
 
-  const router = useRouter()
+  const locale = useLocale()
   const msg = useAuthErrorMessage()
   const codeMsg = useCodeErrorMessage()
 
@@ -166,9 +166,44 @@ export function SignUpForm() {
     turnstileToken: turnstileToken ?? undefined,
   })
 
+  /*
+    A server action that THROWS (a dropped connection, a crash, or a page left
+    open across a deploy, whose action ids no longer exist on the server) used
+    to vanish: the button stopped spinning and nothing else happened. Reported
+    from production 2026-09-28. A stale page is fixed by loading it again;
+    anything else gets the generic message, at the top of the form, scrolled to.
+  */
+  const actionFailed = (error: unknown) => {
+    if (error instanceof Error && /Server Action/i.test(error.message)) {
+      window.location.reload()
+      return
+    }
+    showFormError(codeMsg({ errorKey: 'generic' }))
+  }
+
+  const bannerRef = useRef<HTMLDivElement>(null)
+  const showFormError = (text: string) => {
+    setFormError(text)
+    // The banner sits above the first field, off screen on a phone by the
+    // time anyone reaches the button.
+    requestAnimationFrame(() => bannerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
+  }
+
+  // One code check at a time: six digits auto-submit, and the button can fire again.
+  const completing_ = useRef(false)
+
   /** Step 1, and also "send another code": the same checks, a fresh bot token. */
   const requestCode = async (values: SignUpInput): Promise<number | null> => {
-    const result = await startSignUpAction(await fields(values))
+    let result: Awaited<ReturnType<typeof startSignUpAction>>
+    try {
+      result = await startSignUpAction(await fields(values))
+    } catch (error) {
+      setTurnstileToken(undefined)
+      setTurnstileReset((n) => n + 1)
+      if (step === 'code') setCodeError(codeMsg({ errorKey: 'generic' }))
+      else actionFailed(error)
+      return null
+    }
     /* The attempt reached the server, so the token it carried is spent
        whatever happened. Ask for a new one now, before the next press. */
     setTurnstileToken(undefined)
@@ -185,20 +220,33 @@ export function SignUpForm() {
     if (result.field) {
       setError(result.field as keyof SignUpInput, { message: result.errorKey || 'generic' })
     } else {
-      setFormError(result.message ?? codeMsg(result))
+      showFormError(result.message ?? codeMsg(result))
     }
     return null
   }
 
   const complete = async (value: string) => {
+    if (completing_.current) return
+    completing_.current = true
     setCompleting(true)
     setCodeError(null)
-    const result = await completeSignUpAction({ ...(await fields(getValues())), code: value })
-    if (result.ok) {
-      router.replace(result.redirectTo ?? '/dashboard')
-      router.refresh()
+    let result: Awaited<ReturnType<typeof completeSignUpAction>>
+    try {
+      result = await completeSignUpAction({ ...(await fields(getValues())), code: value })
+    } catch (error) {
+      completing_.current = false
+      setCompleting(false)
+      if (error instanceof Error && /Server Action/i.test(error.message)) window.location.reload()
+      else setCodeError(codeMsg({ errorKey: 'generic' }))
       return
     }
+    if (result.ok) {
+      // A full page load, as on /verify-phone: the client transition out of
+      // the auth screens stalled on production (2026-09-28).
+      window.location.replace(getPathname({ href: result.redirectTo ?? '/dashboard', locale }))
+      return
+    }
+    completing_.current = false
     setCompleting(false)
     setCode('')
     if (result.field && result.field !== 'code') {
@@ -274,6 +322,7 @@ export function SignUpForm() {
 
       {formError && (
         <div
+          ref={bannerRef}
           role="alert"
           className="mb-5 rounded-(--radius-input) border border-danger-500/25 bg-danger-50 px-3 py-2.5 text-[0.8125rem] text-danger-700"
         >
