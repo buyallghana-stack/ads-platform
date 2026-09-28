@@ -1,11 +1,13 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { after } from 'next/server'
 
 import { getSessionUser } from '@/lib/auth/session'
 import { reportUnexpected } from '@/lib/observability/report'
 import { getRequestContext } from '@/lib/request-context'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { alertWithdrawalRequested } from '@/lib/sms/withdrawal-alert'
 
 /**
  * Filing a withdrawal — the first link in the payout chain.
@@ -163,6 +165,9 @@ export async function requestWithdrawal(input: {
   // succeeds, and the notification trigger has just written a row.
   revalidatePath('/dashboard')
   revalidatePath('/notifications')
+
+  // Text the operator after the response, so the member never waits on an SMS.
+  after(() => alertWithdrawalRequested(row.redemption_id))
 
   return {
     ok: true,
