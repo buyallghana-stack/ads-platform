@@ -52,6 +52,7 @@ export default async function VaultPage({
       pointsRate={pointsRate}
       checkoutEnabled={paystackOn}
       manualEnabled={manual.enabled}
+      manualClosedUntil={manual.closedForNight ? manual.openHour : null}
     />
   )
 }

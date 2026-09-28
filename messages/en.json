@@ -1520,6 +1520,7 @@
       "lockedCta": "{plan} opens soon"
     },
     "checkout": {
+      "manualClosed": "Paying by mobile money is closed for the night and opens again at {hour}:00. You can still pay in full from your balance now.",
       "topupPayManual": "Send the other {amount} by mobile money",
       "topupExplainManual": "Your balance is set aside now. Send the rest by mobile money and your plan starts once we confirm it. If we cannot match your payment, your balance comes back.",
       "payManually": "Send {amount} by mobile money",
@@ -3872,6 +3873,7 @@
       "alreadyActiveBtn": "Already Active in Vault"
     },
     "checkout": {
+      "manualClosed": "Paying by mobile money is closed for the night and opens again at {hour}:00. You can still pay in full from your balance now.",
       "splitManual": "Use GHS {balance} from my balance, send GHS {rest}",
       "payManually": "Send GHS {amount} by mobile money",
       "title": "Lock funds in {plan}",

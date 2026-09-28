@@ -1520,6 +1520,7 @@
       "lockedCta": "{plan} arrive bientôt"
     },
     "checkout": {
+      "manualClosed": "Le paiement par mobile money est fermé pour la nuit et rouvre à {hour}h00. Vous pouvez toujours payer en entier avec votre solde.",
       "topupPayManual": "Envoyer les {amount} restants par mobile money",
       "topupExplainManual": "Votre solde est mis de côté. Envoyez le reste par mobile money et votre forfait démarre dès que nous le confirmons. Si nous ne retrouvons pas votre paiement, votre solde vous est rendu.",
       "payManually": "Envoyer {amount} par mobile money",
@@ -3872,6 +3873,7 @@
       "alreadyActiveBtn": "Déjà Actif dans le Coffre"
     },
     "checkout": {
+      "manualClosed": "Le paiement par mobile money est fermé pour la nuit et rouvre à {hour}h00. Vous pouvez toujours payer en entier avec votre solde.",
       "splitManual": "Utiliser GHS {balance} de mon solde, envoyer GHS {rest}",
       "payManually": "Envoyer GHS {amount} par mobile money",
       "title": "Bloquer des fonds dans {plan}",

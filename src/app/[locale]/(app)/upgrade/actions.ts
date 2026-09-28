@@ -323,6 +323,12 @@ export async function previewPlanCoupon(
 export type ManualStartResult = { ok: true; paymentId: string } | { ok: false; message: string }
 export type ManualKind = 'plan' | 'vault'
 
+function manualClosedMessage(c: { closedForNight: boolean; openHour: number }): string {
+  return c.closedForNight
+    ? `Paying by mobile money is closed for the night. It opens again at ${String(c.openHour).padStart(2, '0')}:00. You can still pay in full from your balance.`
+    : 'Paying by mobile money is not available right now.'
+}
+
 const MANUAL_TABLE = { plan: 'subscription_payments', vault: 'vault_payments' } as const
 
 /** The short code a buyer and the operator can both quote. Unique column:
@@ -357,9 +363,8 @@ export async function startManualCheckout(
 ): Promise<ManualStartResult> {
   const user = await getSessionUser()
   if (!user) return { ok: false, message: 'Please sign in again.' }
-  if (!(await getManualPaymentConfig()).enabled) {
-    return { ok: false, message: 'Manual payment is not available right now.' }
-  }
+  const manual = await getManualPaymentConfig()
+  if (!manual.enabled) return { ok: false, message: manualClosedMessage(manual) }
 
   const admin = createAdminClient()
   const args = {
@@ -384,9 +389,8 @@ export async function startManualCheckout(
 export async function startManualVaultCheckout(planId: string, useBalance = false): Promise<ManualStartResult> {
   const user = await getSessionUser()
   if (!user) return { ok: false, message: 'Please sign in again.' }
-  if (!(await getManualPaymentConfig()).enabled) {
-    return { ok: false, message: 'Manual payment is not available right now.' }
-  }
+  const manual = await getManualPaymentConfig()
+  if (!manual.enabled) return { ok: false, message: manualClosedMessage(manual) }
   const admin = createAdminClient()
   const { data: payment, error } = await admin.rpc('start_manual_vault_payment' as never, {
     p_user_id: user.id,

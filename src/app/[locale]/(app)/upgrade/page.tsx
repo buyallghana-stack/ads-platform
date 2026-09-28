@@ -96,6 +96,7 @@ export default async function UpgradePage({
       pointsPerCurrencyUnit={references.pointsPerCurrencyUnit}
       checkoutEnabled={paystackOn}
       manualEnabled={manual.enabled}
+      manualClosedUntil={manual.closedForNight ? manual.openHour : null}
       checkoutMethods={switches.checkout}
       balancePurchaseEnabled={balanceSwitch?.value === 'true'}
       balancePoints={balancePoints}

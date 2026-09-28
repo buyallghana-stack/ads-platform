@@ -40,6 +40,7 @@ export function VaultView({
   pointsRate = 100,
   checkoutEnabled,
   manualEnabled = false,
+  manualClosedUntil = null,
 }: {
   vaultEnabled: boolean
   plans: VaultPlan[]
@@ -49,6 +50,8 @@ export function VaultView({
   checkoutEnabled: boolean
   /** Deposit by sending mobile money by hand; the operator confirms it. */
   manualEnabled?: boolean
+  /** Set to the reopening hour while mobile money is closed for the night. */
+  manualClosedUntil?: number | null
 }) {
   const t = useTranslations('vault')
   const format = useFormatter()
@@ -659,6 +662,12 @@ export function VaultView({
                         amount: format.number(priceGhs, { minimumFractionDigits: 2 }),
                       })}
                 </Button>
+
+                {manualClosedUntil !== null && !hasEnoughBalance && (
+                  <p className="rounded-(--radius-card) border border-amber-500/30 bg-amber-500/[0.06] px-3.5 py-2.5 text-[0.75rem] leading-relaxed text-amber-700 dark:text-amber-300">
+                    {t('checkout.manualClosed', { hour: String(manualClosedUntil).padStart(2, '0') })}
+                  </p>
+                )}
 
                 {/* Part from the balance, the rest sent by hand */}
                 {canSplit && (

@@ -46,6 +46,7 @@ export function UpgradeView({
   pointsPerCurrencyUnit,
   checkoutEnabled,
   manualEnabled,
+  manualClosedUntil = null,
   checkoutMethods,
   balancePurchaseEnabled,
   balancePoints,
@@ -72,6 +73,8 @@ export function UpgradeView({
   checkoutEnabled: boolean
   /** Paying by sending mobile money by hand, confirmed by the operator. */
   manualEnabled: boolean
+  /** Set to the reopening hour while mobile money is closed for the night. */
+  manualClosedUntil?: number | null
   /**
    * Which ways to pay the checkout lists, from the admin's payment settings.
    *
@@ -711,6 +714,12 @@ export function UpgradeView({
                   }),
                 })}
               </Button>
+            )}
+
+            {manualClosedUntil !== null && (
+              <p className="mt-4 rounded-(--radius-card) border border-warning-500/25 bg-warning-50 px-4 py-3 text-[0.8125rem] leading-relaxed text-warning-700">
+                {t('checkout.manualClosed', { hour: String(manualClosedUntil).padStart(2, '0') })}
+              </p>
             )}
 
             {manualEnabled && (
