@@ -443,6 +443,7 @@
       "phoneTaken": "Un compte utilise déjà ce numéro. Connectez-vous plutôt.",
       "codeCooldown": "Patientez {minutes, plural, one {une minute} other {# minutes}} avant de demander un autre code.",
       "codeLimit": "Trop de codes envoyés à ce numéro. Réessayez dans {minutes, plural, one {une minute} other {# minutes}}.",
+      "codeLimitHours": "Trop de codes envoyés à ce numéro. Réessayez dans {hours, plural, one {une heure} other {# heures}}.",
       "smsFailed": "Nous n'avons pas pu envoyer le SMS. Le problème vient de nous. Réessayez dans quelques minutes.",
       "codeInvalidAttempts": "Ce code n'est pas correct. {attempts, plural, one {Encore un essai} other {Encore # essais}}.",
       "codeLocked": "Trop d’essais incorrects. Demandez un nouveau code.",

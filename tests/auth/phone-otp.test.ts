@@ -36,6 +36,18 @@ const check = async (tx: Tx, hash: string, opts: { purpose?: string; phone?: str
 const ageCodes = (tx: Tx, seconds: number) =>
   tx.query(`update public.phone_otps set created_at = created_at - make_interval(secs => $1)`, [seconds])
 
+/** Moves every code AND the lockout clock back, as if time had passed. */
+const ageAll = async (tx: Tx, seconds: number) => {
+  await ageCodes(tx, seconds)
+  await tx.query(
+    `update public.otp_lockouts
+        set window_start   = window_start - make_interval(secs => $1),
+            locked_until   = locked_until - make_interval(secs => $1),
+            last_strike_at = last_strike_at - make_interval(secs => $1)`,
+    [seconds],
+  )
+}
+
 describe.skipIf(!HAS_DB)('issuing a code', () => {
   it('issues, then refuses a second within the cooldown', () =>
     withRollback(async (tx) => {
@@ -44,12 +56,53 @@ describe.skipIf(!HAS_DB)('issuing a code', () => {
       expect(again).toMatchObject({ ok: false, reason: 'cooldown' })
     }))
 
-  it('caps one number at the hourly limit across every purpose', () =>
+  it('locks a number for 5 minutes once its 3rd code goes out, across every purpose', () =>
     withRollback(async (tx) => {
-      await setConfig(tx, 'otp_hourly_limit', '3')
-      const purposes = ['signup', 'verify_phone', 'reset_password']
-      for (const purpose of purposes) expect((await issue(tx, 'x', { purpose })).ok).toBe(true)
-      expect(await issue(tx, 'x', { purpose: 'change_phone' })).toMatchObject({ ok: false, reason: 'limit' })
+      for (const purpose of ['signup', 'verify_phone', 'reset_password']) {
+        expect((await issue(tx, 'x', { purpose })).ok).toBe(true)
+      }
+      const refused = (await issue(tx, 'x', { purpose: 'change_phone' })) as Issued & { retry_after?: string }
+      expect(refused).toMatchObject({ ok: false, reason: 'limit' })
+      const wait = (new Date(refused.retry_after!).getTime() - Date.now()) / 60000
+      expect(wait).toBeGreaterThan(4)
+      expect(wait).toBeLessThanOrEqual(5.1)
+    }))
+
+  it('grows each lockout after the first: 1h, then 2h, capped by config', () =>
+    withRollback(async (tx) => {
+      const lockLengthHours = async () => {
+        for (let i = 0; i < 3; i++) {
+          expect((await issue(tx, 'x')).ok).toBe(true)
+          await ageAll(tx, 120)
+        }
+        const { rows } = await tx.query<{ h: number }>(
+          `select extract(epoch from locked_until - last_strike_at) / 3600 as h from public.otp_lockouts where phone = $1`,
+          [PHONE],
+        )
+        // Wait the lockout out.
+        await ageAll(tx, Math.ceil(Number(rows[0]!.h) * 3600) + 1)
+        return Math.round(Number(rows[0]!.h) * 60) / 60
+      }
+      expect(await lockLengthHours()).toBeCloseTo(5 / 60)
+      expect(await lockLengthHours()).toBe(1)
+      expect(await lockLengthHours()).toBe(2)
+      await setConfig(tx, 'otp_lock_max_hours', '3')
+      expect(await lockLengthHours()).toBe(3)
+    }))
+
+  it('clears the count when a code is entered correctly', () =>
+    withRollback(async (tx) => {
+      await issue(tx, 'a')
+      await ageAll(tx, 120)
+      await issue(tx, 'b')
+      expect(await check(tx, 'b')).toMatchObject({ ok: true })
+      await ageAll(tx, 120)
+      // Two more would have been the 3rd and 4th; after a proof they are the 1st and 2nd.
+      expect((await issue(tx, 'c', { purpose: 'reset_password' })).ok).toBe(true)
+      await ageAll(tx, 120)
+      expect((await issue(tx, 'd', { purpose: 'change_password' })).ok).toBe(true)
+      await ageAll(tx, 120)
+      expect((await issue(tx, 'e', { purpose: 'change_phone' })).ok).toBe(true)
     }))
 
   it('retires the previous code when a new one is sent', () =>

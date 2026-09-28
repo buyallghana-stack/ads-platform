@@ -111,8 +111,10 @@ export function useCodeErrorMessage() {
       ? Math.max(1, Math.ceil((new Date(r.retryAfter).getTime() - Date.now()) / 60000))
       : 1
     switch (r.errorKey) {
-      case 'codeCooldown':
       case 'codeLimit':
+        // Lockouts grow into hours; "240 minutes" is not how anyone says it.
+        return minutes > 60 ? t('codeLimitHours', { hours: Math.ceil(minutes / 60) }) : t('codeLimit', { minutes })
+      case 'codeCooldown':
         return t(r.errorKey, { minutes })
       case 'codeInvalid':
         return typeof r.attemptsLeft === 'number' ? t('codeInvalidAttempts', { attempts: r.attemptsLeft }) : t('codeInvalid')

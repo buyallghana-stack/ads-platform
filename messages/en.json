@@ -443,6 +443,7 @@
       "phoneTaken": "An account already uses this phone number. Log in instead.",
       "codeCooldown": "Please wait {minutes, plural, one {a minute} other {# minutes}} before asking for another code.",
       "codeLimit": "Too many codes sent to this number. Try again in {minutes, plural, one {a minute} other {# minutes}}.",
+      "codeLimitHours": "Too many codes sent to this number. Try again in {hours, plural, one {an hour} other {# hours}}.",
       "smsFailed": "We could not send the text just now. This is on our side. Please try again in a few minutes.",
       "codeInvalidAttempts": "That code is not correct. {attempts, plural, one {One try left} other {# tries left}}.",
       "codeLocked": "Too many wrong tries. Ask for a new code.",
