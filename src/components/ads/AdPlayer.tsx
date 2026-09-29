@@ -6,6 +6,7 @@ import { Check, Clock, Loader2, Play, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import {
+  reportAdPlaybackFailure,
   startAd,
   submitAd,
   type AdQuestion,
@@ -654,7 +655,10 @@ export function AdPlayer({
               }}
               // Nothing has been consumed at this point — the attempt is only
               // spent on submission — so the ad simply stays in the feed.
-              onError={() => setPhaseNow('unavailable')}
+              onError={(reason) => {
+                void reportAdPlaybackFailure(ad.id, reason)
+                setPhaseNow('unavailable')
+              }}
             />
 
             {phase === 'intro' && (

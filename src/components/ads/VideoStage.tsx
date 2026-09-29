@@ -104,8 +104,9 @@ export function VideoStage({
   onEnded: () => void
   onReady: (durationSeconds: number) => void
   /** The video cannot be played at all — removed, embed-blocked, or the file
-   *  will not load. The user must be told, not left on a black rectangle. */
-  onError: () => void
+   *  will not load. The user must be told, not left on a black rectangle.
+   *  `reason` names which failure it was, for the server log only. */
+  onError: (reason: string) => void
 }) {
   const mountRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -182,7 +183,7 @@ export function VideoStage({
     */
     let stalled: ReturnType<typeof setTimeout> | null = setTimeout(() => {
       stalled = null
-      if (!cancelled && !playerRef.current) onErrorRef.current()
+      if (!cancelled && !playerRef.current) onErrorRef.current('youtube_stalled')
     }, 20_000)
     const cancelStallTimer = () => {
       if (stalled) clearTimeout(stalled)
@@ -276,7 +277,7 @@ export function VideoStage({
           // Embedding disabled, video removed, region-blocked. Without this the
           // user sits on a black rectangle until they give up; the parent turns
           // it into an honest "this ad is not available".
-          onError: () => onErrorRef.current(),
+          onError: (e) => onErrorRef.current(`youtube_error_${e.data}`),
         },
       })
     })
@@ -406,7 +407,7 @@ export function VideoStage({
         onLoadedMetadata={(e) => onReadyRef.current(e.currentTarget.duration)}
         onTimeUpdate={(e) => onTimeRef.current(e.currentTarget.currentTime)}
         onEnded={() => onEndedRef.current()}
-        onError={() => onErrorRef.current()}
+        onError={() => onErrorRef.current('video_file_error')}
         className="size-full bg-black object-contain"
       />
     )

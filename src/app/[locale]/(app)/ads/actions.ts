@@ -60,8 +60,12 @@ export async function startAd(adId: string): Promise<StartAdResult> {
     p_ad_id: adId,
   })
   // register_ad_view raises check_violation for every "you cannot watch this"
-  // case and says which; the user only needs to know it is gone.
-  if (error) return { ok: false, reason: 'unavailable' }
+  // case and says which; the user only needs to know it is gone. The log keeps
+  // which one, because the player shows them all as the same sentence.
+  if (error) {
+    console.warn('[ads] start refused', { userId: user.id, adId, reason: error.message })
+    return { ok: false, reason: 'unavailable' }
+  }
 
   const { data: rows, error: qError } = await admin.rpc('get_ad_questions_for_user', {
     p_ad_id: adId,
@@ -83,6 +87,24 @@ export async function startAd(adId: string): Promise<StartAdResult> {
   }))
 
   return { ok: true, questions, startedAt: startedAt as string }
+}
+
+/**
+ * The player also shows "no longer available" when the VIDEO fails after the
+ * server said yes: YouTube reports the video removed, private or not
+ * embeddable (its error code: 100/101/150 = gone or blocked, 5 = HTML5
+ * player, 2 = bad id), or the YouTube script never loads (`youtube_stalled`).
+ * None of that reaches the server by itself, so a viewer's report of a stuck
+ * ad had nothing to be diagnosed from. Log only; nothing is stored or changed.
+ */
+export async function reportAdPlaybackFailure(adId: string, reason: string): Promise<void> {
+  const user = await getSessionUser()
+  if (!user) return
+  console.warn('[ads] playback failed', {
+    userId: user.id,
+    adId: String(adId).slice(0, 64),
+    reason: String(reason).slice(0, 64),
+  })
 }
 
 /** Mirrors public.ad_answer_outcome. */
