@@ -107,6 +107,20 @@ const serverSchema = z.object({
    */
   MNOTIFY_API_KEY: z.string().optional(),
   MNOTIFY_SENDER_ID: z.string().max(11).optional(),
+
+  /**
+   * PayLink, the operator's USDC-on-Base gateway: crypto checkout and crypto
+   * payouts. See docs/paylink.md.
+   *
+   * The key is `gw_test_…` or `gw_live_…`, and which one it is decides the
+   * mode this app expects every PayLink event to be in. The IPN secrets are a
+   * comma separated list, newest first, for rotation: any of them verifies.
+   * All three are server only and optional, so the app boots without crypto
+   * configured; `requirePaylinkConfig` asserts them at point of use.
+   */
+  PAYLINK_API_URL: z.string().optional(),
+  PAYLINK_API_KEY: z.string().optional(),
+  PAYLINK_IPN_SECRETS: z.string().optional(),
 })
 
 /**
@@ -166,6 +180,9 @@ export function serverEnv(): z.infer<typeof serverSchema> {
     HUB_INBOUND_SECRETS: process.env.HUB_INBOUND_SECRETS || undefined,
     MNOTIFY_API_KEY: process.env.MNOTIFY_API_KEY || undefined,
     MNOTIFY_SENDER_ID: process.env.MNOTIFY_SENDER_ID || undefined,
+    PAYLINK_API_URL: process.env.PAYLINK_API_URL || undefined,
+    PAYLINK_API_KEY: process.env.PAYLINK_API_KEY || undefined,
+    PAYLINK_IPN_SECRETS: process.env.PAYLINK_IPN_SECRETS || undefined,
   })
 
   if (!parsed.success) {
@@ -298,4 +315,47 @@ export function requireHubConfig(): { url: string; secrets: string[] } {
     )
   }
   return { url: url.replace(/\/+$/, ''), secrets }
+}
+
+/**
+ * The PayLink IPN secrets, newest first. Empty entries are dropped for the
+ * same reason `hubSecrets` drops them: an empty secret would verify anything.
+ */
+export function paylinkIpnSecrets(): string[] {
+  return (serverEnv().PAYLINK_IPN_SECRETS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+}
+
+/** Can this app talk to PayLink at all, asked without throwing. */
+export function paylinkConfigured(): boolean {
+  const env = serverEnv()
+  return Boolean(env.PAYLINK_API_URL && env.PAYLINK_API_KEY?.match(/^gw_(test|live)_/))
+}
+
+/**
+ * Asserts PayLink is configured, and says which mode the key is for.
+ *
+ * `livemode` is read off the key rather than set separately, so the key and
+ * the mode can never disagree: a `gw_test_` key can only ever see test
+ * payments, and every event is checked against this.
+ */
+export function requirePaylinkConfig(): { url: string; key: string; livemode: boolean } {
+  const { PAYLINK_API_URL: url, PAYLINK_API_KEY: key } = serverEnv()
+  if (!url) {
+    throw new Error(
+      'PAYLINK_API_URL is not set. It is the PayLink API base, e.g. ' +
+        'https://crypto-gateway-beta.vercel.app/api/v1.',
+    )
+  }
+  if (!key) throw new Error('PAYLINK_API_KEY is not set. It is issued by the PayLink admin.')
+  const mode = /^gw_(test|live)_/.exec(key)?.[1]
+  if (!mode) {
+    throw new Error(
+      'PAYLINK_API_KEY looks wrong: it must start with "gw_test_" or "gw_live_". ' +
+        'An "ipn_" value is the IPN secret, which goes in PAYLINK_IPN_SECRETS.',
+    )
+  }
+  return { url: url.replace(/\/+$/, ''), key, livemode: mode === 'live' }
 }

@@ -184,7 +184,82 @@ export async function getPayoutQueue(): Promise<PayoutRequest[]> {
   }
 
   const now = Date.now()
-  return ((data ?? []) as unknown as QueueRow[]).map((row) => toRequest(row, now))
+  const requests = ((data ?? []) as unknown as QueueRow[]).map((row) => toRequest(row, now))
+  return withPaylink(supabase, requests)
+}
+
+type PaylinkRow = {
+  id: string
+  paylink_status: string | null
+  paylink_failed_rules: string[] | null
+  paylink_amount_usdc: number | string | null
+  paylink_rate: string | null
+  paylink_tx_hash: string | null
+  paylink_error: string | null
+  auto_decision: 'auto_approved' | 'needs_review' | null
+}
+
+/**
+ * The PayLink side of each crypto request: what the automatic rules decided
+ * and why, and what PayLink did with the payout.
+ *
+ * Read beside `admin_list_redemptions` rather than added to it, so that
+ * function's signature, and everything that depends on its return type, is
+ * left alone. Two indexed reads over the crypto requests only.
+ */
+async function withPaylink(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  requests: PayoutRequest[],
+): Promise<PayoutRequest[]> {
+  const ids = requests.filter((r) => r.method === 'crypto').map((r) => r.id)
+  if (ids.length === 0) return requests
+
+  const [paylink, rules] = await Promise.all([
+    supabase
+      .from('redemptions')
+      .select(
+        'id, paylink_status, paylink_failed_rules, paylink_amount_usdc, paylink_rate, paylink_tx_hash, paylink_error, auto_decision' as never,
+      )
+      .in('id', ids),
+    supabase
+      .from('redemption_rule_results' as never)
+      .select('redemption_id, rule, detail')
+      .in('redemption_id' as never, ids as never)
+      .eq('passed' as never, false as never)
+      .order('rule' as never),
+  ])
+
+  /* The queue is still right without these, just less informative. Failing
+     the whole screen over them would hide every payout to explain a few. */
+  if (paylink.error || rules.error) return requests
+
+  const byId = new Map(((paylink.data ?? []) as unknown as PaylinkRow[]).map((row) => [row.id, row]))
+  const failures = new Map<string, { rule: string; detail: string }[]>()
+  for (const row of (rules.data ?? []) as unknown as { redemption_id: string; rule: string; detail: string | null }[]) {
+    const list = failures.get(row.redemption_id) ?? []
+    list.push({ rule: row.rule.replace(/^\d+_/, ''), detail: row.detail ?? '' })
+    failures.set(row.redemption_id, list)
+  }
+
+  return requests.map((r) => {
+    const row = byId.get(r.id)
+    if (!row) return r
+    return {
+      ...r,
+      autoDecision: row.auto_decision ?? undefined,
+      ruleFailures: failures.get(r.id),
+      paylink: row.paylink_status
+        ? {
+            status: row.paylink_status,
+            failedRules: row.paylink_failed_rules ?? [],
+            amountUsdc: row.paylink_amount_usdc === null ? undefined : Number(row.paylink_amount_usdc),
+            rate: row.paylink_rate ?? undefined,
+            txHash: row.paylink_tx_hash ?? undefined,
+            error: row.paylink_error ?? undefined,
+          }
+        : undefined,
+    }
+  })
 }
 
 /**

@@ -8,6 +8,7 @@ import { reportUnexpected } from '@/lib/observability/report'
 import { hubInitialise } from '@/lib/payments/hub/client'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { paystackCheckoutEnabled } from '@/lib/payments/manual'
+import { handToPaylink, paylinkCheckoutEnabled, type PaylinkCheckoutResult } from '@/lib/payments/paylink/checkout'
 
 /**
  * Starting a Vault deposit.
@@ -105,6 +106,32 @@ export async function startVaultPaystackCheckout(
   }
 
   return { ok: true, authorizationUrl: initialised.authorizationUrl }
+}
+
+/**
+ * A Vault deposit paid with USDC through PayLink. Priced by the same
+ * `start_vault_payment`, confirmed by the same `confirm_vault_payment`.
+ */
+export async function startVaultCryptoCheckout(planId: string): Promise<PaylinkCheckoutResult> {
+  if (!(await paylinkCheckoutEnabled())) return { ok: false, errorKey: 'cryptoUnavailable' }
+  const user = await getSessionUser()
+  if (!user) return { ok: false, errorKey: 'failed' }
+
+  const admin = createAdminClient()
+  const { data: payment, error } = await admin.rpc('start_vault_payment', {
+    p_user_id: user.id,
+    p_plan_id: planId,
+  })
+  if (error || !payment) {
+    return { ok: false, errorKey: 'failed', message: error?.message }
+  }
+
+  return handToPaylink({
+    kind: 'vault',
+    row: payment as unknown as { id: string; amount_minor: number; currency_code: string },
+    userId: user.id,
+    description: 'SidePerks Vault deposit',
+  })
 }
 
 export type VaultBalancePurchaseResult =

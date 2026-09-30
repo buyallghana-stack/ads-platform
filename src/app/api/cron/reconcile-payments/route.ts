@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server'
 
-import { serverEnv } from '@/lib/env'
+import { paylinkConfigured, serverEnv } from '@/lib/env'
 import { reportUnexpected } from '@/lib/observability/report'
 import { applyHubEvent } from '@/lib/payments/hub/fulfil'
 import { settleFromHub } from '@/lib/payments/hub/resolve'
+import { getPaylinkPayment } from '@/lib/payments/paylink/client'
+import { applyPaylinkPayment } from '@/lib/payments/paylink/fulfil'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
@@ -77,7 +79,7 @@ export async function GET(request: Request) {
   const stranded = async (table: 'subscription_payments' | 'vault_payments') =>
     admin
       .from(table)
-      .select('id, external_reference, created_at')
+      .select('id, external_reference, created_at, method')
       .eq('status', 'pending')
       .not('external_reference', 'is', null)
       .lt('created_at', settleBefore)
@@ -115,6 +117,8 @@ export async function GET(request: Request) {
     /* Broken out because for the next while the only question anybody has
        about this sweep is whether it has ever seen a deposit at all. */
     vaultChecked: 0,
+    /* Crypto rows, settled from PayLink rather than the hub. */
+    crypto: 0,
   }
 
   for (const row of rows) {
@@ -122,6 +126,35 @@ export async function GET(request: Request) {
     const reference = row.external_reference
     if (!reference) continue
     counts.checked += 1
+
+    /*
+      ⚠️ A CRYPTO ROW'S REFERENCE IS PAYLINK'S, NOT THE HUB'S. Asked about it,
+      the hub answers 404, and the 48 hour branch below would then close a
+      payment PayLink may have been paid for. PayLink is asked instead, and
+      its own expiry (15 minutes, extended for a part payment) is the verdict:
+      this sweep never closes a crypto row on its own clock.
+    */
+    if (row.method === 'crypto') {
+      counts.crypto += 1
+      if (!paylinkConfigured()) {
+        counts.unreachable += 1
+        continue
+      }
+      const current = await getPaylinkPayment(reference)
+      if (!current.ok) {
+        counts.unreachable += 1
+        continue
+      }
+      const outcome = await applyPaylinkPayment(current.data, 'reconciliation')
+      if (!outcome.ok) {
+        if (outcome.reason === 'error') reportUnexpected(new Error(outcome.message), 'cron.reconcile-payments.paylink')
+        continue
+      }
+      if (outcome.state === 'confirmed') counts.confirmed += 1
+      else if (outcome.state === 'failed') counts.failed += 1
+      else if (outcome.state === 'reversed') counts.reversed += 1
+      continue
+    }
 
     if (row.created_at < abandonBefore) {
       /* Well past the hub's own window. Ask once more anyway, because "old" is

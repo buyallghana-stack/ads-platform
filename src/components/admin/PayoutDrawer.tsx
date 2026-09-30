@@ -436,6 +436,45 @@ function Panel({
         </p>
       )}
 
+      {/* ---- Automatic payout rules (USDC on Base) ----------------- */}
+      {r.autoDecision === 'needs_review' && r.ruleFailures && r.ruleFailures.length > 0 && (
+        <Section label={t('drawer.autoRules')}>
+          <p className="text-[0.75rem] leading-relaxed text-ink-500">{t('drawer.autoRulesIntro')}</p>
+          <ul className="mt-2 space-y-1">
+            {r.ruleFailures.map((f) => (
+              <li key={f.rule} className="text-[0.75rem] leading-relaxed text-ink-700">
+                <span className="font-medium">{f.rule.replace(/_/g, ' ')}</span>
+                {f.detail && <span className="text-ink-500">: {f.detail}</span>}
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
+      {/* ---- PayLink -------------------------------------------------- */}
+      {r.paylink && (
+        <Section label={t('drawer.paylink')}>
+          <PanelFacts>
+            <Fact label={t('drawer.paylinkStatus')} value={r.paylink.status.replace(/_/g, ' ')} />
+            {r.paylink.amountUsdc !== undefined && (
+              <Fact
+                label={t('drawer.paylinkSent')}
+                value={`${r.paylink.amountUsdc} USDC${r.paylink.rate ? ` @ ${r.paylink.rate}` : ''}`}
+              />
+            )}
+            {r.paylink.txHash && <Fact label={t('drawer.paylinkTx')} value={r.paylink.txHash} />}
+          </PanelFacts>
+          {r.paylink.failedRules.length > 0 && r.paylink.status === 'held_for_review' && (
+            <p className="mt-2 text-[0.75rem] leading-relaxed text-warning-600">
+              {t('drawer.paylinkHeld', { rules: r.paylink.failedRules.join(', ') })}
+            </p>
+          )}
+          {r.paylink.error && (
+            <p className="mt-2 text-[0.75rem] leading-relaxed text-danger-600">{r.paylink.error}</p>
+          )}
+        </Section>
+      )}
+
       {/* What the last operator told the user. Shown here so a second
               operator picking up a held payout does not repeat the question
               the user has already been asked. */}

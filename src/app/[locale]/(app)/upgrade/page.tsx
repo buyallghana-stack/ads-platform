@@ -6,6 +6,7 @@ import { UpgradeView } from '@/components/upgrade/UpgradeView'
 import { redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
 import { getManualPaymentConfig, paystackCheckoutEnabled } from '@/lib/payments/manual'
+import { paylinkCheckoutEnabled } from '@/lib/payments/paylink/checkout'
 import { getPaymentMethodSwitches } from '@/lib/payments/methods'
 import { createAdminClient } from '@/lib/supabase/admin'
 import {
@@ -59,6 +60,7 @@ export default async function UpgradePage({
     heldTopups,
     paystackOn,
     manual,
+    cryptoOn,
   ] = await Promise.all([
     getPlans(),
     getHeldPlans(user!.id),
@@ -82,6 +84,7 @@ export default async function UpgradePage({
     getHeldTopups(user!.id),
     paystackCheckoutEnabled(),
     getManualPaymentConfig(),
+    paylinkCheckoutEnabled(),
   ])
 
   return (
@@ -96,6 +99,7 @@ export default async function UpgradePage({
       pointsPerCurrencyUnit={references.pointsPerCurrencyUnit}
       checkoutEnabled={paystackOn}
       manualEnabled={manual.enabled}
+      cryptoEnabled={cryptoOn}
       manualClosedUntil={manual.closedForNight ? manual.openHour : null}
       checkoutMethods={switches.checkout}
       balancePurchaseEnabled={balanceSwitch?.value === 'true'}

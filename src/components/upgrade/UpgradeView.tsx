@@ -2,13 +2,14 @@
 
 import { useEffect, useState, useTransition } from 'react'
 
-import { AlertCircle, CheckCircle2, Gem, Layers, Smartphone, Wallet, X } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Coins, Gem, Layers, Smartphone, Wallet, X } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 
 import {
   cancelTopupHold,
   previewPlanCoupon,
   purchasePlanWithBalance,
+  startCryptoCheckout,
   startManualCheckout,
   startPaystackCheckout,
   startPlanTopupCheckout,
@@ -46,6 +47,7 @@ export function UpgradeView({
   pointsPerCurrencyUnit,
   checkoutEnabled,
   manualEnabled,
+  cryptoEnabled = false,
   manualClosedUntil = null,
   checkoutMethods,
   balancePurchaseEnabled,
@@ -73,6 +75,8 @@ export function UpgradeView({
   checkoutEnabled: boolean
   /** Paying by sending mobile money by hand, confirmed by the operator. */
   manualEnabled: boolean
+  /** Paying with USDC on Base through PayLink (`paylink_checkout_enabled`). */
+  cryptoEnabled?: boolean
   /** Set to the reopening hour while mobile money is closed for the night. */
   manualClosedUntil?: number | null
   /**
@@ -103,7 +107,7 @@ export function UpgradeView({
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   /* Which button started the transition, so only that one says it is busy. */
-  const [paying, setPaying] = useState<'paystack' | 'manual' | 'balance' | 'topup' | null>(null)
+  const [paying, setPaying] = useState<'paystack' | 'manual' | 'crypto' | 'balance' | 'topup' | null>(null)
   /* Open when "pay from balance" was pressed with too little balance: the
      sheet then says what is left and offers Paystack for it. */
   const [topupPrompt, setTopupPrompt] = useState(false)
@@ -162,6 +166,30 @@ export function UpgradeView({
         return
       }
       router.push(`/upgrade/manual/${res.paymentId}`)
+    })
+  }
+
+  /*
+    USDC through PayLink's hosted checkout. Like Paystack, a full navigation
+    to another origin; the plan is granted when PayLink says it is paid.
+  */
+  const payWithCrypto = (plan: Plan, amountMinor: number) => {
+    setError(null)
+    setPaying('crypto')
+    startTransition(async () => {
+      const res = await startCryptoCheckout(plan.id, amountMinor, coupon?.code)
+      if (!res.ok) {
+        setError(
+          res.errorKey === 'cryptoUnavailable'
+            ? t('checkout.cryptoUnavailable')
+            : res.errorKey === 'cryptoOpenElsewhere'
+              ? t('checkout.cryptoOpenElsewhere')
+              : res.message || t('checkout.failed'),
+        )
+        setPaying(null)
+        return
+      }
+      window.location.assign(res.checkoutUrl)
     })
   }
 
@@ -507,7 +535,7 @@ export function UpgradeView({
               </p>
             )}
 
-            {(checkoutEnabled || manualEnabled || balancePurchaseEnabled) && (
+            {(checkoutEnabled || manualEnabled || cryptoEnabled || balancePurchaseEnabled) && (
               <CouponField
                 currency={selected.plan.currencyCode}
                 initialCode={initialCoupon}
@@ -678,7 +706,7 @@ export function UpgradeView({
               ))}
             </div>
 
-            {!checkoutEnabled && !manualEnabled && !balancePurchaseEnabled && (
+            {!checkoutEnabled && !manualEnabled && !cryptoEnabled && !balancePurchaseEnabled && (
               <div
                 className={cn(
                   'mt-4 rounded-(--radius-card) border px-4 py-3',
@@ -741,6 +769,32 @@ export function UpgradeView({
                   }),
                 })}
               </Button>
+            )}
+
+            {cryptoEnabled && (
+              <>
+                <Button
+                  size="lg"
+                  fullWidth
+                  variant={checkoutEnabled || manualEnabled ? 'secondary' : 'primary'}
+                  className={checkoutEnabled || manualEnabled ? 'mt-2.5' : 'mt-4'}
+                  loading={pending && paying === 'crypto'}
+                  disabled={pending}
+                  leadingIcon={<Coins />}
+                  onClick={() => payWithCrypto(selected.plan, selected.amountMinor)}
+                >
+                  {t('checkout.payWithCrypto', {
+                    amount: format.number((coupon?.chargedMinor ?? selected.amountMinor) / 100, {
+                      style: 'currency',
+                      currency: selected.plan.currencyCode,
+                      maximumFractionDigits: coupon ? 2 : 0,
+                    }),
+                  })}
+                </Button>
+                <p className="mt-1.5 text-[0.75rem] leading-relaxed text-ink-500">
+                  {t('checkout.cryptoNote')}
+                </p>
+              </>
             )}
 
             <Button

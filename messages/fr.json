@@ -1555,7 +1555,11 @@
       "holdNotice": "{amount} de votre solde est mis de côté pour un paiement que vous n’avez pas terminé. Si vous l’avez annulé sur Paystack, vous pouvez récupérer votre solde maintenant.",
       "holdCancel": "L’annuler et me rendre mon solde",
       "holdReleased": "Votre solde vous a été rendu. Le paiement inachevé a été annulé.",
-      "holdWasPaid": "Ce paiement avait abouti, votre forfait est donc actif."
+      "holdWasPaid": "Ce paiement avait abouti, votre forfait est donc actif.",
+      "payWithCrypto": "Payer {amount} en USDC",
+      "cryptoNote": "Prix en cedis, payé en USDC sur le réseau Base via PayLink. Envoyez uniquement de l’USDC sur Base : toute autre crypto ou tout autre réseau est perdu.",
+      "cryptoUnavailable": "Le paiement en crypto n’est pas disponible pour le moment. Essayez un autre moyen ou revenez plus tard.",
+      "cryptoOpenElsewhere": "Vous avez déjà un paiement crypto en attente. Terminez-le ou laissez-le expirer (environ 15 minutes), puis réessayez."
     },
     "result": {
       "help": "Un problème ? Obtenir de l'aide",
@@ -1761,7 +1765,14 @@
         "cryptoSub": "{ghs} · {points} pts",
         "quoteLive": "Estimé au taux du jour. Aucun taux n'était disponible lors de la demande.",
         "quoteMissing": "Aucun taux de change disponible : la valeur est affichée en cedis. À convertir avant l'envoi.",
-        "feeBreakdown": "{gross} moins {fee} de frais ({percent} %)"
+        "feeBreakdown": "{gross} moins {fee} de frais ({percent} %)",
+        "autoRules": "Pourquoi il n’a pas été payé automatiquement",
+        "autoRulesIntro": "Ces règles de retrait n’ont pas passé. L’approuver l’envoie via PayLink.",
+        "paylink": "PayLink",
+        "paylinkStatus": "Statut",
+        "paylinkSent": "Envoyé",
+        "paylinkTx": "Transaction",
+        "paylinkHeld": "Retenu par PayLink pour son admin : {rules}. Approuvez ou rejetez-le dans PayLink."
       },
       "confirm": {
         "approve": "Approuver {amount} pour {name} ?",
@@ -2666,7 +2677,9 @@
         "perHour": "par heure",
         "days": "jours",
         "pesewas": "pesewas",
-        "perWeek": "par semaine"
+        "perWeek": "par semaine",
+        "ghs": "GHS",
+        "withdrawals": "retraits"
       },
       "groups": {
         "earning": {
@@ -2680,6 +2693,10 @@
         "payouts": {
           "title": "Règles de retrait",
           "description": "Quand l'argent peut sortir, et combien de temps il attend d'abord."
+        },
+        "autoPayouts": {
+          "title": "Retraits crypto automatiques",
+          "description": "Les retraits en USDC sur Base sont payés via PayLink sans admin quand toutes les règles ci-dessous passent. Si une règle échoue, le retrait attend un admin, avec la raison affichée. Pour chaque nombre, 0 désactive la règle."
         },
         "methods": {
           "title": "Moyens de paiement",
@@ -2914,6 +2931,72 @@
           "label": "Fermer l'application des membres",
           "description": "Les membres voient un écran de maintenance à la place de l'application. Le personnel passe toujours, ainsi que les adresses autorisées.",
           "warning": "Cela empêche tous les membres de gagner, de regarder et de retirer. L'administration reste ouverte pour pouvoir désactiver."
+        },
+        "autoPayoutsOn": {
+          "label": "Payer automatiquement",
+          "description": "Interrupteur principal. Désactivé, chaque retrait crypto attend un admin. Rien n’est envoyé tant que les retraits sont fermés.",
+          "warning": "Activé, de vrais USDC partent sans que personne ne regarde les retraits qui passent toutes les règles."
+        },
+        "autoMaxAmount": {
+          "label": "Plus gros retrait automatique",
+          "description": "Au dessus, un retrait a besoin d’un admin."
+        },
+        "autoFirstWithdrawals": {
+          "label": "Premiers retraits vérifiés",
+          "description": "Les premiers retraits d’un membre, jusqu’à ce nombre, ont besoin d’un admin."
+        },
+        "autoMaxPerWindow": {
+          "label": "Maximum de retraits sur la période",
+          "description": "Au delà de ce nombre de demandes sur la période ci-dessous, un admin est nécessaire."
+        },
+        "autoWindowDays": {
+          "label": "Période de comptage des retraits",
+          "description": "Sur combien de jours le nombre ci-dessus est compté."
+        },
+        "autoMemberDaily": {
+          "label": "Maximum par membre sur 24 heures",
+          "description": "Quand les retraits approuvés d’un membre sur 24 heures, celui-ci compris, dépassent ce montant, un admin est nécessaire."
+        },
+        "autoPlatformDaily": {
+          "label": "Maximum payé automatiquement par jour",
+          "description": "Quand les retraits automatiques de toute la plateforme atteignent ce montant aujourd’hui, le reste de la journée passe par un admin."
+        },
+        "autoAccountAge": {
+          "label": "Âge minimum du compte",
+          "description": "Les comptes plus récents que cela ont besoin d’un admin."
+        },
+        "autoElevatedRisk": {
+          "label": "Vérifier les membres à risque",
+          "description": "Activé, un membre dont le risque de fraude est moyen ou plus a besoin d’un admin."
+        },
+        "autoFraudDays": {
+          "label": "Vérifier après un signal de fraude",
+          "description": "Un membre avec un signal de fraude sur ce nombre de jours a besoin d’un admin."
+        },
+        "autoSharedWallet": {
+          "label": "Vérifier les portefeuilles partagés",
+          "description": "Activé, une adresse utilisée par un autre compte a besoin d’un admin."
+        },
+        "autoNewWallet": {
+          "label": "Vérifier les nouveaux portefeuilles",
+          "description": "Activé, le premier paiement vers une adresse jamais payée pour ce membre a besoin d’un admin."
+        },
+        "autoEarnedFast": {
+          "label": "Maximum de points gagnés en 24 heures",
+          "description": "Un membre qui a gagné plus que cela en 24 heures a besoin d’un admin."
+        },
+        "autoReversalDays": {
+          "label": "Vérifier après un paiement annulé",
+          "description": "Un membre avec un paiement annulé ou remboursé sur ce nombre de jours a besoin d’un admin."
+        },
+        "cryptoCheckout": {
+          "label": "Proposer le paiement en USDC",
+          "description": "Affiche une option USDC via PayLink pour acheter un plan ou un dépôt Vault."
+        },
+        "acceptPaylinkTest": {
+          "label": "Accepter les paiements test PayLink",
+          "description": "Permet aux USDC de test d’accorder des plans et des dépôts Vault en production. Uniquement pour une répétition.",
+          "warning": "Activé, n’importe qui avec des USDC de test gratuits obtient des plans pour rien."
         }
       }
     },
@@ -3888,7 +3971,11 @@
       "orDivider": "OU PAYER PAR MOBILE MONEY / CARTE",
       "payWithPaystack": "Payer par Mobile Money / Carte",
       "cancel": "Annuler",
-      "refused": "Nous n'avons pas pu démarrer ce dépôt. Vérifiez que l'adresse e-mail de votre profil est correcte, puis réessayez."
+      "refused": "Nous n'avons pas pu démarrer ce dépôt. Vérifiez que l'adresse e-mail de votre profil est correcte, puis réessayez.",
+      "payWithCrypto": "Payer GHS {amount} en USDC",
+      "cryptoNote": "Prix en cedis, payé en USDC sur le réseau Base via PayLink. Envoyez uniquement de l’USDC sur Base : toute autre crypto ou tout autre réseau est perdu.",
+      "cryptoUnavailable": "Le paiement en crypto n’est pas disponible pour le moment. Essayez un autre moyen ou revenez plus tard.",
+      "cryptoOpenElsewhere": "Vous avez déjà un paiement crypto en attente. Terminez-le ou laissez-le expirer (environ 15 minutes), puis réessayez."
     },
     "paymentResult": {
       "help": "Un problème ? Obtenir de l'aide",

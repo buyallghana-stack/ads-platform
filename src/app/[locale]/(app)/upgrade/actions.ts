@@ -8,6 +8,7 @@ import { clientEnv } from '@/lib/env'
 import { reportUnexpected } from '@/lib/observability/report'
 import { alertManualPaymentClaimed } from '@/lib/sms/payment-alert'
 import { hubInitialise } from '@/lib/payments/hub/client'
+import { handToPaylink, paylinkCheckoutEnabled, type PaylinkCheckoutResult } from '@/lib/payments/paylink/checkout'
 import { getManualPaymentConfig, newManualReference, paystackCheckoutEnabled } from '@/lib/payments/manual'
 import { releaseAllTopupHolds, releaseTopupHold } from '@/lib/payments/topup-hold'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -69,6 +70,44 @@ export async function startPaystackCheckout(
   }
 
   return handToHub(admin, user.email, payment as unknown as PaymentRow)
+}
+
+/**
+ * Paying for a plan with USDC through PayLink (operator, 30 September 2026).
+ *
+ * Priced exactly as the Paystack checkout is: `start_subscription_payment`
+ * decides the amount inside the band and applies the coupon, and PayLink is
+ * handed that figure in cedis. The plan is granted by the same
+ * `confirm_subscription_payment`, when PayLink says the payment is finished.
+ */
+export async function startCryptoCheckout(
+  tierId: string,
+  amountMinor?: number,
+  couponCode?: string,
+): Promise<PaylinkCheckoutResult> {
+  if (!(await paylinkCheckoutEnabled())) return { ok: false, errorKey: 'cryptoUnavailable' }
+  const user = await getSessionUser()
+  if (!user) return { ok: false, errorKey: 'failed' }
+
+  const admin = createAdminClient()
+  const { data: payment, error } = await admin.rpc('start_subscription_payment', {
+    p_user_id: user.id,
+    p_tier_id: tierId,
+    p_method: 'crypto',
+    p_amount_minor: Number.isFinite(amountMinor) ? amountMinor : undefined,
+    p_coupon_code: couponCode?.trim() || undefined,
+  })
+  if (error || !payment) {
+    // The raises here are sentences for the buyer, as on the Paystack path.
+    return { ok: false, errorKey: 'failed', message: error?.message }
+  }
+
+  return handToPaylink({
+    kind: 'subscription',
+    row: payment as unknown as PaymentRow,
+    userId: user.id,
+    description: 'SidePerks plan',
+  })
 }
 
 /**
