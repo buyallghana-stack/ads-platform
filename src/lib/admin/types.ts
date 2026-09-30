@@ -154,6 +154,22 @@ export type PayoutRequest = {
   adminHeld?: boolean
   /** True when this was approved before its window elapsed, under override. */
   approvedEarly?: boolean
+  /**
+   * USDC on Base only: the automatic decision, and the payout rules that
+   * held it back. Empty `ruleFailures` on an `auto_approved` request.
+   */
+  autoDecision?: 'auto_approved' | 'needs_review'
+  ruleFailures?: { rule: string; detail: string }[]
+  /** USDC on Base only, once this app has asked PayLink to send it. */
+  paylink?: {
+    status: string
+    /** PayLink's own rules that held it for PayLink's admin. */
+    failedRules: string[]
+    amountUsdc?: number
+    rate?: string
+    txHash?: string
+    error?: string
+  }
 }
 
 /**

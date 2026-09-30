@@ -1,6 +1,7 @@
 'use server'
 
 import { getSessionUser } from '@/lib/auth/session'
+import { evmChecksumOk } from '@/lib/crypto/evm-address'
 import { getRequestContext } from '@/lib/request-context'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { payoutSchema, type PayoutInput } from '@/lib/validation/payout'
@@ -27,6 +28,12 @@ export async function savePayoutDetails(input: PayoutInput): Promise<PayoutResul
     return { ok: false, errorKey: parsed.error.issues[0].message }
   }
   const data = parsed.data
+
+  /* A mixed-case 0x address whose checksum is wrong has a typo in it. Saying
+     so now beats an approved withdrawal that PayLink refuses later. */
+  if (data.method === 'crypto' && !evmChecksumOk(data.walletAddress)) {
+    return { ok: false, errorKey: 'walletChecksum' }
+  }
 
   const user = await getSessionUser()
   if (!user) return { ok: false, errorKey: 'notSignedIn' }

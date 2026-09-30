@@ -66,6 +66,7 @@ export function PayoutDrawer({
   onClose,
   onDecide,
   busy,
+  error = null,
 }: {
   request: PayoutRequest | null
   now: number
@@ -74,6 +75,9 @@ export function PayoutDrawer({
   /** A decision is in flight. Every control that could start a second one
    *  goes inert — double-approving a payout is not a harmless duplicate. */
   busy: boolean
+  /** Why the last decision was refused. Shown inside the panel, because the
+   *  table's banner sits behind it, where an operator never sees it. */
+  error?: string | null
 }) {
   if (!request) return null
   /* Keyed on the request, so opening a different payout mounts a fresh panel
@@ -89,6 +93,7 @@ export function PayoutDrawer({
       onClose={onClose}
       onDecide={onDecide}
       busy={busy}
+      error={error}
     />
   )
 }
@@ -99,6 +104,7 @@ function Panel({
   onClose,
   onDecide,
   busy,
+  error,
 }: {
   request: PayoutRequest
   now: number
@@ -107,6 +113,7 @@ function Panel({
   /** A decision is in flight. Every control that could start a second one
    *  goes inert — double-approving a payout is not a harmless duplicate. */
   busy: boolean
+  error?: string | null
 }) {
   const t = useTranslations('admin.payouts')
   const ts = useTranslations('admin.overview.status')
@@ -222,6 +229,14 @@ function Panel({
       footer={
         actions.length > 0 && (
           <PanelFooter raised={Boolean(pending)}>
+            {error && (
+              <p
+                role="alert"
+                className="mb-3 rounded-(--radius-input) border border-danger-500/30 bg-danger-50 px-3 py-2.5 text-[0.8125rem] leading-relaxed text-danger-700"
+              >
+                {error}
+              </p>
+            )}
             {pending ? (
               <ConfirmStep
                 action={pending}
@@ -434,6 +449,49 @@ function Panel({
           <Users aria-hidden className="mt-px size-3.5 shrink-0 text-ink-400" />
           {t('drawer.reuse', { count: r.reuse })}
         </p>
+      )}
+
+      {/* ---- Automatic payout rules (USDC on Base) ----------------- */}
+      {r.autoDecision === 'needs_review' && r.ruleFailures && r.ruleFailures.length > 0 && (
+        <Section label={t('drawer.autoRules')}>
+          <p className="text-[0.75rem] leading-relaxed text-ink-500">{t('drawer.autoRulesIntro')}</p>
+          <ul className="mt-2 space-y-1">
+            {r.ruleFailures.map((f) => (
+              <li key={f.rule} className="text-[0.75rem] leading-relaxed text-ink-700">
+                <span className="font-medium">{f.rule.replace(/_/g, ' ')}</span>
+                {f.detail && <span className="text-ink-500">: {f.detail}</span>}
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
+      {/* ---- PayLink -------------------------------------------------- */}
+      {r.paylink && (
+        <Section label={t('drawer.paylink')}>
+          <PanelFacts>
+            <Fact label={t('drawer.paylinkStatus')} value={r.paylink.status.replace(/_/g, ' ')} />
+            {r.paylink.amountUsdc !== undefined && (
+              <Fact
+                label={
+                  ['completed', 'sending', 'queued'].includes(r.paylink.status)
+                    ? t('drawer.paylinkSent')
+                    : t('drawer.paylinkAmount')
+                }
+                value={`${r.paylink.amountUsdc} USDC${r.paylink.rate ? ` @ ${r.paylink.rate}` : ''}`}
+              />
+            )}
+            {r.paylink.txHash && <Fact label={t('drawer.paylinkTx')} value={r.paylink.txHash} />}
+          </PanelFacts>
+          {r.paylink.failedRules.length > 0 && r.paylink.status === 'held_for_review' && (
+            <p className="mt-2 text-[0.75rem] leading-relaxed text-warning-600">
+              {t('drawer.paylinkHeld', { rules: r.paylink.failedRules.join(', ') })}
+            </p>
+          )}
+          {r.paylink.error && (
+            <p className="mt-2 text-[0.75rem] leading-relaxed text-danger-600">{r.paylink.error}</p>
+          )}
+        </Section>
       )}
 
       {/* What the last operator told the user. Shown here so a second

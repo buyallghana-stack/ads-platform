@@ -6,6 +6,7 @@ import { VaultView } from '@/components/vault/VaultView'
 import { redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
 import { getManualPaymentConfig, paystackCheckoutEnabled } from '@/lib/payments/manual'
+import { paylinkCheckoutEnabled } from '@/lib/payments/paylink/checkout'
 import {
   getVaultEnabled,
   getVaultPlans,
@@ -33,7 +34,7 @@ export default async function VaultPage({
     return null
   }
 
-  const [vaultEnabled, plans, investments, userBalancePoints, pointsRate, paystackOn, manual] = await Promise.all([
+  const [vaultEnabled, plans, investments, userBalancePoints, pointsRate, paystackOn, manual, cryptoOn] = await Promise.all([
     getVaultEnabled(),
     getVaultPlans(),
     getUserVaultInvestments(user.id),
@@ -41,6 +42,7 @@ export default async function VaultPage({
     getPointsPerCurrencyUnit(),
     paystackCheckoutEnabled(),
     getManualPaymentConfig(),
+    paylinkCheckoutEnabled(),
   ])
 
   return (
@@ -52,6 +54,7 @@ export default async function VaultPage({
       pointsRate={pointsRate}
       checkoutEnabled={paystackOn}
       manualEnabled={manual.enabled}
+      cryptoEnabled={cryptoOn}
       manualClosedUntil={manual.closedForNight ? manual.openHour : null}
     />
   )

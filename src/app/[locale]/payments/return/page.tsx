@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Link, redirect } from '@/i18n/navigation'
 import { getViewerUser } from '@/lib/auth/session'
 import { settleFromHub } from '@/lib/payments/hub/resolve'
+import { settleFromPaylink } from '@/lib/payments/paylink/checkout'
 
 export const metadata: Metadata = {
   title: 'Payment',
@@ -45,17 +46,23 @@ export default async function HubPaymentReturnPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>
-  searchParams: Promise<{ reference?: string; trxref?: string }>
+  /* `paylink` is our own payment row id, which is what PayLink's success_url
+     carries. The Paystack names come from the hub. */
+  searchParams: Promise<{ reference?: string; trxref?: string; paylink?: string }>
 }) {
   const { locale } = await params
-  const { reference, trxref } = await searchParams
+  const { reference, trxref, paylink } = await searchParams
   setRequestLocale(locale)
 
   const user = await getViewerUser()
   if (!user) redirect({ href: '/login', locale })
 
   const ref = reference ?? trxref ?? null
-  const settled = ref ? await settleFromHub(ref) : null
+  const settled = paylink
+    ? await settleFromPaylink(paylink, user!.id)
+    : ref
+      ? await settleFromHub(ref)
+      : null
 
   /* An unknown reference has no kind, and the plan wording is the fallback
      because a plan is what almost every payment through here is. */

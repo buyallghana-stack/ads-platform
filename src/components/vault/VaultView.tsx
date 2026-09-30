@@ -24,6 +24,7 @@ import { useFormatter, useTranslations } from 'next-intl'
 import {
   claimVaultInvestmentAction,
   purchaseVaultWithBalanceAction,
+  startVaultCryptoCheckout,
   startVaultPaystackCheckout,
 } from '@/app/[locale]/(app)/vault/actions'
 import { startManualVaultCheckout } from '@/app/[locale]/(app)/upgrade/actions'
@@ -40,6 +41,7 @@ export function VaultView({
   pointsRate = 100,
   checkoutEnabled,
   manualEnabled = false,
+  cryptoEnabled = false,
   manualClosedUntil = null,
 }: {
   vaultEnabled: boolean
@@ -50,6 +52,8 @@ export function VaultView({
   checkoutEnabled: boolean
   /** Deposit by sending mobile money by hand; the operator confirms it. */
   manualEnabled?: boolean
+  /** Paying with USDC on Base through PayLink (`paylink_checkout_enabled`). */
+  cryptoEnabled?: boolean
   /** Set to the reopening hour while mobile money is closed for the night. */
   manualClosedUntil?: number | null
 }) {
@@ -59,7 +63,7 @@ export function VaultView({
 
   const [selectedPlan, setSelectedPlan] = useState<VaultPlan | null>(null)
   const [claimingId, setClaimingId] = useState<string | null>(null)
-  const [checkoutMode, setCheckoutMode] = useState<'paystack' | 'balance' | 'manual' | 'split' | null>(null)
+  const [checkoutMode, setCheckoutMode] = useState<'paystack' | 'crypto' | 'balance' | 'manual' | 'split' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -99,6 +103,30 @@ export function VaultView({
         return
       }
       window.location.assign(res.authorizationUrl)
+    })
+  }
+
+  /* USDC through PayLink's hosted checkout: a full navigation to another
+     origin, and the deposit is confirmed when PayLink says it is paid. */
+  const handleConfirmCrypto = () => {
+    if (!selectedPlan) return
+    setError(null)
+    setCheckoutMode('crypto')
+
+    startTransition(async () => {
+      const res = await startVaultCryptoCheckout(selectedPlan.id)
+      if (!res.ok) {
+        setError(
+          res.errorKey === 'cryptoUnavailable'
+            ? t('checkout.cryptoUnavailable')
+            : res.errorKey === 'cryptoOpenElsewhere'
+              ? t('checkout.cryptoOpenElsewhere')
+              : (res.message ?? t('depositFailed')),
+        )
+        setCheckoutMode(null)
+        return
+      }
+      window.location.assign(res.checkoutUrl)
     })
   }
 
@@ -716,6 +744,26 @@ export function VaultView({
                       ? t('initiatingPayment')
                       : t('checkout.payWithPaystack')}
                   </Button>
+                )}
+
+                {/* USDC on Base through PayLink */}
+                {cryptoEnabled && (
+                  <>
+                    <Button
+                      size="lg"
+                      variant="secondary"
+                      fullWidth
+                      disabled={isPending}
+                      loading={isPending && checkoutMode === 'crypto'}
+                      onClick={handleConfirmCrypto}
+                      leadingIcon={<Coins className="size-4" />}
+                    >
+                      {t('checkout.payWithCrypto', {
+                        amount: format.number(priceGhs, { minimumFractionDigits: 2 }),
+                      })}
+                    </Button>
+                    <p className="text-[0.75rem] leading-relaxed text-ink-500">{t('checkout.cryptoNote')}</p>
+                  </>
                 )}
 
                 <Button

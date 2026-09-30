@@ -97,7 +97,9 @@ export function NotificationCard({
           </time>
         </div>
 
-        <p className="mt-1 text-[0.8125rem] leading-relaxed text-ink-500">{notification.body}</p>
+        {/* `break-words` so a 66-character transaction hash wraps instead of
+            running off the card. */}
+        <p className="mt-1 break-words text-[0.8125rem] leading-relaxed text-ink-500">{notification.body}</p>
 
         {/* `about` travels with the first message, so support opens the
             conversation already knowing which notification brought them —

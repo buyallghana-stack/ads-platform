@@ -41,6 +41,9 @@ Set for **Production, Preview and Development** unless noted.
 | `NEXT_PUBLIC_SITE_URL` | the deployed URL | Update once a custom domain exists |
 | `PAYOUTS_ENABLED` | `false` | Must stay false until the licence is confirmed |
 | `GEO_RESTRICTION_ENABLED` | `false` for now | Set `true` before launch (§6.9) |
+| `PAYLINK_API_URL` | `https://crypto-gateway-beta.vercel.app/api/v1` | PayLink API base |
+| `PAYLINK_API_KEY` | `gw_test_…` (Preview), `gw_live_…` (Production) | **Secret.** The prefix sets the mode every PayLink event is checked against |
+| `PAYLINK_IPN_SECRETS` | `ipn_…` | **Secret.** One per mode; comma separated, newest first, to rotate |
 
 To read the local values without echoing the secret into a shell history:
 

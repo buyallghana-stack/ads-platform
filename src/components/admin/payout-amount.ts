@@ -27,7 +27,7 @@ export type PayoutHeadline = {
   /** The amount, formatted, in the unit it will be sent in. */
   primary: string
   /** A translation key to show beneath it, when the figure needs qualifying. */
-  caveat?: 'drawer.quoteLive' | 'drawer.quoteMissing'
+  caveat?: 'drawer.quoteLive' | 'drawer.quoteMissing' | 'drawer.quotePaylink'
 }
 
 /* Derived from next-intl's own formatter rather than hand-written. A
@@ -61,6 +61,19 @@ export function payoutHeadline(request: PayoutRequest, format: Formatter): Payou
   */
   const asCoin = (n: number) =>
     `${format.number(n, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${coin}`.trim()
+
+  /*
+    PAYLINK PAYOUTS (USDC on Base) are sent in cedis and converted by PayLink
+    at its own rate. What PayLink actually converted it to beats any estimate,
+    and before that the cedi figure IS what is sent, so "convert before
+    sending" would be telling an operator to do PayLink's job.
+  */
+  if (request.paylink?.amountUsdc !== undefined) {
+    return { primary: asCoin(request.paylink.amountUsdc) }
+  }
+  if (coin.toUpperCase() === 'USDC' && /\bBASE\b/i.test(request.provider)) {
+    return { primary: cedis, caveat: 'drawer.quotePaylink' }
+  }
 
   if (request.coinAmount !== undefined) {
     return { primary: asCoin(request.coinAmount) }

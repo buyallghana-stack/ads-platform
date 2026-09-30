@@ -923,7 +923,7 @@
       "estimateUnavailable": "We cannot show a crypto estimate right now, today's exchange rate has not come through. Your withdrawal is recorded in cedis and the coin amount is worked out when it is sent.",
       "afterFee": "You'll receive GHS {net} after the {percent}% fee."
     },
-    "usdtNotice": "USDT amounts are estimates. Your points convert to cedis at the fixed rate; the cedi to dollar rate updates daily, and the final USDT amount is calculated when your payout is sent. It may differ slightly from this estimate.",
+    "usdtNotice": "{coin} amounts are estimates. Your points convert to cedis at the fixed rate; the cedi to dollar rate updates daily, and the final {coin} amount is calculated when your payout is sent. It may differ slightly from this estimate.",
     "errors": {
       "belowMin": "The minimum withdrawal is {min} pts (GHS {ghs}).",
       "aboveBalance": "That is more than your balance."
@@ -1082,7 +1082,8 @@
       "coinRequired": "Choose a coin.",
       "walletRequired": "Enter your wallet address.",
       "notSignedIn": "Please sign in again.",
-      "generic": "Could not save. Please try again."
+      "generic": "Could not save. Please try again.",
+      "walletChecksum": "That address has a typo in it: its capital letters do not match its checksum. Copy it again from your wallet rather than typing it."
     },
     "backToWithdrawal": "Back to your withdrawal",
     "paused": "This method is paused. You cannot withdraw to it at the moment, and what is saved here stays on your profile.",
@@ -1555,7 +1556,11 @@
       "holdNotice": "{amount} of your balance is set aside for a payment you have not finished. If you cancelled it on Paystack, you can get your balance back now.",
       "holdCancel": "Cancel it and return my balance",
       "holdReleased": "Your balance is back. The unfinished payment was cancelled.",
-      "holdWasPaid": "That payment had gone through, so your plan is now active."
+      "holdWasPaid": "That payment had gone through, so your plan is now active.",
+      "payWithCrypto": "Pay {amount} with USDC",
+      "cryptoNote": "Priced in cedis and paid in USDC on the Base network through PayLink. Send USDC on Base only: other coins or networks are lost.",
+      "cryptoUnavailable": "Paying with crypto is not available right now. Please try another way or come back later.",
+      "cryptoOpenElsewhere": "You already have a crypto payment waiting. Finish it or let it expire (about 15 minutes), then try again."
     },
     "result": {
       "help": "Something wrong? Get help",
@@ -1761,7 +1766,16 @@
         "cryptoSub": "{ghs} · {points} pts",
         "quoteLive": "Quoted at today's rate. No rate was available when this request was made.",
         "quoteMissing": "No exchange rate available, so this shows the cedi value. Convert before sending.",
-        "feeBreakdown": "{gross} less {fee} fee ({percent}%)"
+        "feeBreakdown": "{gross} less {fee} fee ({percent}%)",
+        "autoRules": "Why it was not paid automatically",
+        "autoRulesIntro": "These payout rules did not pass. Approving sends it through PayLink.",
+        "paylink": "PayLink",
+        "paylinkStatus": "Status",
+        "paylinkSent": "Sent",
+        "paylinkTx": "Transaction",
+        "paylinkHeld": "Held by PayLink for its admin: {rules}. Approve or reject it in PayLink.",
+        "quotePaylink": "PayLink converts this to USDC at its own rate when it sends it.",
+        "paylinkAmount": "Amount"
       },
       "confirm": {
         "approve": "Approve {amount} for {name}?",
@@ -2666,7 +2680,9 @@
         "perHour": "per hour",
         "days": "days",
         "pesewas": "pesewas",
-        "perWeek": "per week"
+        "perWeek": "per week",
+        "ghs": "GHS",
+        "withdrawals": "withdrawals"
       },
       "groups": {
         "earning": {
@@ -2680,6 +2696,10 @@
         "payouts": {
           "title": "Payout rules",
           "description": "When money is allowed to leave, and how long it waits first."
+        },
+        "autoPayouts": {
+          "title": "Automatic crypto payouts",
+          "description": "Withdrawals in USDC on Base are paid through PayLink without an admin when every rule below passes. When any rule fails, the withdrawal waits for an admin, with the reason shown. For each number, 0 switches that rule off."
         },
         "methods": {
           "title": "Payment methods",
@@ -2914,6 +2934,72 @@
           "label": "Close the member app",
           "description": "Members see a maintenance screen instead of the app. Staff always pass, and so do the addresses on the allow list.",
           "warning": "This shuts every member out of earning, watching and withdrawing. The admin stays open so you can switch it back off."
+        },
+        "autoPayoutsOn": {
+          "label": "Pay automatically",
+          "description": "Master switch. Off, every crypto withdrawal waits for an admin. Nothing is sent while payouts are closed.",
+          "warning": "On, real USDC leaves without anyone looking at the withdrawals that pass every rule."
+        },
+        "autoMaxAmount": {
+          "label": "Largest automatic withdrawal",
+          "description": "Above this, a withdrawal needs an admin."
+        },
+        "autoFirstWithdrawals": {
+          "label": "First withdrawals reviewed",
+          "description": "A member’s first this-many withdrawals need an admin."
+        },
+        "autoMaxPerWindow": {
+          "label": "Most withdrawals in the window",
+          "description": "More requests than this in the window below need an admin."
+        },
+        "autoWindowDays": {
+          "label": "Window for counting withdrawals",
+          "description": "How far back the count above looks."
+        },
+        "autoMemberDaily": {
+          "label": "Most per member in 24 hours",
+          "description": "When a member’s approved withdrawals in 24 hours, including this one, pass this, it needs an admin."
+        },
+        "autoPlatformDaily": {
+          "label": "Most paid automatically per day",
+          "description": "Once automatic payouts across the platform reach this today, the rest of the day needs an admin."
+        },
+        "autoAccountAge": {
+          "label": "Youngest account paid automatically",
+          "description": "Accounts younger than this need an admin."
+        },
+        "autoElevatedRisk": {
+          "label": "Review members above low risk",
+          "description": "On, a member whose fraud risk is medium or higher needs an admin."
+        },
+        "autoFraudDays": {
+          "label": "Review after a fraud signal",
+          "description": "A member with any fraud signal in this many days needs an admin."
+        },
+        "autoSharedWallet": {
+          "label": "Review shared wallets",
+          "description": "On, a wallet address another account has used needs an admin."
+        },
+        "autoNewWallet": {
+          "label": "Review new wallets",
+          "description": "On, the first payout to a wallet this member was never paid to needs an admin."
+        },
+        "autoEarnedFast": {
+          "label": "Most points earned in 24 hours",
+          "description": "A member who earned more than this in 24 hours needs an admin."
+        },
+        "autoReversalDays": {
+          "label": "Review after a reversed payment",
+          "description": "A member with a reversed or refunded payment in this many days needs an admin."
+        },
+        "cryptoCheckout": {
+          "label": "Offer paying with USDC",
+          "description": "Shows a USDC option through PayLink when buying a plan or a Vault deposit."
+        },
+        "acceptPaylinkTest": {
+          "label": "Accept PayLink test payments",
+          "description": "Lets testnet USDC grant plans and Vault deposits in production. Only for a rehearsal.",
+          "warning": "On, anyone holding free testnet USDC gets plans for nothing."
         }
       }
     },
@@ -3888,7 +3974,11 @@
       "orDivider": "OR PAY WITH MOBILE MONEY / CARD",
       "payWithPaystack": "Pay with Mobile Money / Card",
       "cancel": "Cancel",
-      "refused": "We could not start this deposit. Check that the email address on your profile looks right, then try again."
+      "refused": "We could not start this deposit. Check that the email address on your profile looks right, then try again.",
+      "payWithCrypto": "Pay GHS {amount} with USDC",
+      "cryptoNote": "Priced in cedis and paid in USDC on the Base network through PayLink. Send USDC on Base only: other coins or networks are lost.",
+      "cryptoUnavailable": "Paying with crypto is not available right now. Please try another way or come back later.",
+      "cryptoOpenElsewhere": "You already have a crypto payment waiting. Finish it or let it expire (about 15 minutes), then try again."
     },
     "paymentResult": {
       "help": "Something wrong? Get help",

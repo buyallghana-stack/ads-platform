@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { after } from 'next/server'
 
 import { z } from 'zod'
 
@@ -9,6 +10,7 @@ import { getPayoutQueue } from '@/lib/admin/data/payouts'
 import { ACTION_RULES, type PayoutAction } from '@/components/admin/payout-actions'
 import type { PayoutRequest } from '@/lib/admin/types'
 import { getSessionUser } from '@/lib/auth/session'
+import { sendPaylinkPayout } from '@/lib/payments/paylink/payouts'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
@@ -129,6 +131,12 @@ export async function decidePayout(input: DecisionInput): Promise<DecisionResult
     return { ok: false, message: humanise(error.message), requests: await safeQueue() }
   }
 
+  /* A USDC-on-Base withdrawal leaves through PayLink as soon as it is
+     approved, after the response so the admin does not wait on PayLink. For
+     anything else `sendPaylinkPayout` is a no-op: the claim refuses it. The
+     five-minute sweep sends whatever this misses. */
+  if (action === 'approve') after(() => sendPaylinkPayout(id).then(() => undefined))
+
   revalidatePath('/admin/payouts')
   revalidatePath('/admin')
 
@@ -173,6 +181,11 @@ export async function approvePayouts(
     if (error) failures.push(humanise(error.message))
     else approved += 1
   }
+
+  /* Sent one after another, after the response. See decidePayout. */
+  after(async () => {
+    for (const id of parsed.data) await sendPaylinkPayout(id)
+  })
 
   revalidatePath('/admin/payouts')
   revalidatePath('/admin')
