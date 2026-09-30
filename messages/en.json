@@ -923,7 +923,7 @@
       "estimateUnavailable": "We cannot show a crypto estimate right now, today's exchange rate has not come through. Your withdrawal is recorded in cedis and the coin amount is worked out when it is sent.",
       "afterFee": "You'll receive GHS {net} after the {percent}% fee."
     },
-    "usdtNotice": "USDT amounts are estimates. Your points convert to cedis at the fixed rate; the cedi to dollar rate updates daily, and the final USDT amount is calculated when your payout is sent. It may differ slightly from this estimate.",
+    "usdtNotice": "{coin} amounts are estimates. Your points convert to cedis at the fixed rate; the cedi to dollar rate updates daily, and the final {coin} amount is calculated when your payout is sent. It may differ slightly from this estimate.",
     "errors": {
       "belowMin": "The minimum withdrawal is {min} pts (GHS {ghs}).",
       "aboveBalance": "That is more than your balance."
@@ -1082,7 +1082,8 @@
       "coinRequired": "Choose a coin.",
       "walletRequired": "Enter your wallet address.",
       "notSignedIn": "Please sign in again.",
-      "generic": "Could not save. Please try again."
+      "generic": "Could not save. Please try again.",
+      "walletChecksum": "That address has a typo in it: its capital letters do not match its checksum. Copy it again from your wallet rather than typing it."
     },
     "backToWithdrawal": "Back to your withdrawal",
     "paused": "This method is paused. You cannot withdraw to it at the moment, and what is saved here stays on your profile.",
@@ -1772,7 +1773,9 @@
         "paylinkStatus": "Status",
         "paylinkSent": "Sent",
         "paylinkTx": "Transaction",
-        "paylinkHeld": "Held by PayLink for its admin: {rules}. Approve or reject it in PayLink."
+        "paylinkHeld": "Held by PayLink for its admin: {rules}. Approve or reject it in PayLink.",
+        "quotePaylink": "PayLink converts this to USDC at its own rate when it sends it.",
+        "paylinkAmount": "Amount"
       },
       "confirm": {
         "approve": "Approve {amount} for {name}?",

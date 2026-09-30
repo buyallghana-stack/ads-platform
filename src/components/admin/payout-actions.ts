@@ -90,6 +90,15 @@ export function availableActions(request: PayoutRequest): PayoutAction[] {
       // Already held; offering "hold" again would do nothing.
       return ['approve', 'decline']
     case 'approved':
+      /* A USDC-on-Base payout PayLink is settling is not the operator's to
+         settle: it becomes paid, or refunded, when PayLink reports it. The
+         database refuses both actions anyway (`paylink_is_settling`); this
+         only stops the panel offering buttons that can only fail. Once
+         PayLink has refused it outright (`not_sent`) it is the operator's
+         again. */
+      if (request.paylink && !['not_sent', 'rejected', 'failed'].includes(request.paylink.status)) {
+        return []
+      }
       return ['markPaid', 'decline']
     case 'paid':
       // Nothing to do to a payout that has been sent. It is the end of the

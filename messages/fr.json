@@ -923,7 +923,7 @@
       "estimateUnavailable": "Nous ne pouvons pas afficher d'estimation en crypto pour le moment. Le taux du jour n'est pas disponible. Votre retrait est enregistré en cedis et le montant en crypto est calculé au moment de l'envoi.",
       "afterFee": "Vous recevrez GHS {net} après les frais de {percent} %."
     },
-    "usdtNotice": "Les montants en USDT sont des estimations. Vos points se convertissent en cédis au taux fixe ; le taux cédi (dollar est mis à jour quotidiennement, et le montant final en USDT est calculé à l'envoi du paiement) il peut différer légèrement de cette estimation.",
+    "usdtNotice": "Les montants en {coin} sont des estimations. Vos points se convertissent en cédis au taux fixe ; le taux cédi/dollar est mis à jour chaque jour, et le montant final en {coin} est calculé à l'envoi du paiement. Il peut différer légèrement de cette estimation.",
     "errors": {
       "belowMin": "Le retrait minimum est de {min} pts (GHS {ghs}).",
       "aboveBalance": "C'est plus que votre solde."
@@ -1082,7 +1082,8 @@
       "coinRequired": "Choisissez une pièce.",
       "walletRequired": "Saisissez votre adresse de portefeuille.",
       "notSignedIn": "Veuillez vous reconnecter.",
-      "generic": "Enregistrement impossible. Veuillez réessayer."
+      "generic": "Enregistrement impossible. Veuillez réessayer.",
+      "walletChecksum": "Cette adresse contient une faute de frappe : ses majuscules ne correspondent pas à sa somme de contrôle. Copiez-la à nouveau depuis votre portefeuille au lieu de la taper."
     },
     "backToWithdrawal": "Retour à votre retrait",
     "paused": "Ce moyen est en pause. Vous ne pouvez pas y retirer pour le moment, et ce qui est enregistré ici reste sur votre profil.",
@@ -1772,7 +1773,9 @@
         "paylinkStatus": "Statut",
         "paylinkSent": "Envoyé",
         "paylinkTx": "Transaction",
-        "paylinkHeld": "Retenu par PayLink pour son admin : {rules}. Approuvez ou rejetez-le dans PayLink."
+        "paylinkHeld": "Retenu par PayLink pour son admin : {rules}. Approuvez ou rejetez-le dans PayLink.",
+        "quotePaylink": "PayLink convertit ce montant en USDC à son propre taux au moment de l’envoi.",
+        "paylinkAmount": "Montant"
       },
       "confirm": {
         "approve": "Approuver {amount} pour {name} ?",

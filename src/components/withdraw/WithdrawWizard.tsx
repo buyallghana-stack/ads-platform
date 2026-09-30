@@ -258,7 +258,11 @@ export function WithdrawWizard({
       )}
     >
       <TriangleAlert aria-hidden className={cn('shrink-0', compact ? 'mt-0.5 size-3.5' : 'mt-0.5 size-4')} />
-      <span className="leading-relaxed">{t('usdtNotice')}</span>
+      <span className="leading-relaxed">
+        {/* The coin the member chose, never a fixed one: this said USDT on a
+            USDC withdrawal until the PayLink test run caught it. */}
+        {t('usdtNotice', { coin: quote?.coin ?? account?.title.split(' ')[0] ?? 'crypto' })}
+      </span>
     </div>
   )
 

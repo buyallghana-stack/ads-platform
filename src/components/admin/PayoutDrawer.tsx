@@ -66,6 +66,7 @@ export function PayoutDrawer({
   onClose,
   onDecide,
   busy,
+  error = null,
 }: {
   request: PayoutRequest | null
   now: number
@@ -74,6 +75,9 @@ export function PayoutDrawer({
   /** A decision is in flight. Every control that could start a second one
    *  goes inert — double-approving a payout is not a harmless duplicate. */
   busy: boolean
+  /** Why the last decision was refused. Shown inside the panel, because the
+   *  table's banner sits behind it, where an operator never sees it. */
+  error?: string | null
 }) {
   if (!request) return null
   /* Keyed on the request, so opening a different payout mounts a fresh panel
@@ -89,6 +93,7 @@ export function PayoutDrawer({
       onClose={onClose}
       onDecide={onDecide}
       busy={busy}
+      error={error}
     />
   )
 }
@@ -99,6 +104,7 @@ function Panel({
   onClose,
   onDecide,
   busy,
+  error,
 }: {
   request: PayoutRequest
   now: number
@@ -107,6 +113,7 @@ function Panel({
   /** A decision is in flight. Every control that could start a second one
    *  goes inert — double-approving a payout is not a harmless duplicate. */
   busy: boolean
+  error?: string | null
 }) {
   const t = useTranslations('admin.payouts')
   const ts = useTranslations('admin.overview.status')
@@ -222,6 +229,14 @@ function Panel({
       footer={
         actions.length > 0 && (
           <PanelFooter raised={Boolean(pending)}>
+            {error && (
+              <p
+                role="alert"
+                className="mb-3 rounded-(--radius-input) border border-danger-500/30 bg-danger-50 px-3 py-2.5 text-[0.8125rem] leading-relaxed text-danger-700"
+              >
+                {error}
+              </p>
+            )}
             {pending ? (
               <ConfirmStep
                 action={pending}
@@ -458,7 +473,11 @@ function Panel({
             <Fact label={t('drawer.paylinkStatus')} value={r.paylink.status.replace(/_/g, ' ')} />
             {r.paylink.amountUsdc !== undefined && (
               <Fact
-                label={t('drawer.paylinkSent')}
+                label={
+                  ['completed', 'sending', 'queued'].includes(r.paylink.status)
+                    ? t('drawer.paylinkSent')
+                    : t('drawer.paylinkAmount')
+                }
                 value={`${r.paylink.amountUsdc} USDC${r.paylink.rate ? ` @ ${r.paylink.rate}` : ''}`}
               />
             )}

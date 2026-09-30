@@ -579,7 +579,11 @@ export function PayoutsTable({
         request={open}
         now={now}
         busy={busy}
-        onClose={() => setOpenId(null)}
+        error={error}
+        onClose={() => {
+          setOpenId(null)
+          setError(null)
+        }}
         onDecide={decide}
       />
     </div>
